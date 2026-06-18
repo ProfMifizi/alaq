@@ -1505,8 +1505,9 @@ function isHarakat(ch){
 }
 function tileLabel(ch){
   const HARAKAT='\u064B\u064C\u064D\u064E\u064F\u0650\u0651\u0652';
-  // harakat seule : cercle pointillé discret + la marque, espacés pour ne pas se toucher
-  if(HARAKAT.includes(ch))return '<span class="dc">\u25CC'+ch+'</span>';
+  // harakat seule : portée sur un tatweel (ـ), qui appartient à la police arabe et
+  // accroche le signe de façon fiable partout (le cercle pointillé ◌ manque sur desktop).
+  if(HARAKAT.includes(ch))return '<span class="dc">\u0640'+ch+'</span>';
   return ch;
 }
 function renderSlots(){
