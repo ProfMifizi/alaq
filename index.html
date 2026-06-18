@@ -298,6 +298,8 @@
     <div class="stat">🔥 <span id="st-streak">0</span></div>
     <div class="stat">⭐ <span id="st-xp">0</span></div>
     <div class="stat">❤️ <span id="st-hearts">5</span></div>
+    <button class="stat" id="gear" onclick="resetProgress()" title="Réinitialiser la progression"
+      style="background:none;border:none;color:var(--gold);font-size:16px;cursor:pointer;padding:0 2px">⚙</button>
   </div>
 </div>
 
@@ -326,6 +328,14 @@
     <div class="reward"><div class="lab">PRÉCISION</div><div class="val" id="fin-acc">100%</div></div>
   </div>
   <button class="cta" style="max-width:300px" onclick="closeFinish()">CONTINUER</button>
+</div>
+
+<div class="finish" id="confirmReset">
+  <div class="big">⚠️</div>
+  <h2>Réinitialiser la progression ?</h2>
+  <p style="max-width:320px;color:var(--cream);opacity:.8;margin:-14px 0 26px">Tout repart à zéro (étoiles, disques terminés). Cette action est irréversible.</p>
+  <button class="cta" style="max-width:300px;background:var(--coral);color:#1a1410" onclick="doReset()">RÉINITIALISER</button>
+  <button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="cancelReset()">ANNULER</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -387,21 +397,21 @@ const UNITS=[
    },
    words:[
  {w:'نَمْلٌ',b:'نمل',fr:'la fourmi',e:'🐜',say:'naml',confus:['نَامِل','نَمالٌ','مَنْلٌ']},
- {w:'لَيْلٌ',b:'ليل',fr:'la nuit',e:'🌙',say:'layl',confus:['لِيلٌ','لَالٌ','لَيَّلٌ']},
- {w:'لَوْنٌ',b:'لون',fr:'la couleur',e:'🎨',say:'lawn',confus:['لُونٌ','لَوانٌ','نَوْلٌ']},
+ {w:'مَنٌّ',b:'من',fr:'la manne',e:'🍯',say:'mann',confus:['مَنْ','نَمٌّ','مَانٌ']},
+ {w:'مَنَالٌ',b:'منال',fr:'Manal (un prénom)',e:'🎯',say:'manāl',confus:['مِنَالٌ','نَمَالٌ','مَنَّالٌ']},
  {w:'مَالٌ',b:'مال',fr:'les biens',e:'💰',say:'mal',confus:['مالَ','مَلٌّ','مِيلٌ']},
- {w:'نَوْمٌ',b:'نوم',fr:'le sommeil',e:'😴',say:'nawm',confus:['نُومٌ','نَوامٌ','مَوْنٌ']},
+ {w:'مَنَامٌ',b:'منام',fr:'le sommeil, le songe',e:'😴',say:'manām',confus:['مِنَامٌ','نَمَامٌ','مَنَّامٌ']},
  {w:'نِيلٌ',b:'نيل',fr:'le Nil',e:'🌊',say:'nil',confus:['نَيْلٌ','نِلٌّ','لِينٌ']},
  {w:'نُونٌ',b:'نون',fr:'le poisson',e:'🐟',say:'noun',confus:['نَوْنٌ','نُنٌّ','نَانٌ']},
  {w:'لِينٌ',b:'لين',fr:'la douceur',e:'🌿',say:'lin',confus:['لَيْنٌ','لِنٌّ','نِيلٌ']},
  {w:'لَمَّا',b:'لما',fr:'lorsque',e:'⏳',say:'lammā',confus:['مالَ','لَما','لَامّا']},
    ] },
- { no:2, letters:['ب','ر','ع'], ready:false },
- { no:3, letters:['س','د','ك'], ready:false },
- { no:4, letters:['ح','ط','و'], ready:false },
- { no:5, letters:['ي','ق','ه'], ready:false },
+ { no:2, letters:['ي','أ','و'], ready:false, kind:'weak' },
+ { no:3, letters:['ب','ر','ع'], ready:false },
+ { no:4, letters:['س','د','ك'], ready:false },
+ { no:5, letters:['ح','ط','ق'], ready:false },
  { no:6, letters:['ت','ص','غ'], ready:false },
- { no:7, letters:['ا','ض','ذ'], ready:false },
+ { no:7, letters:['ه','ذ','ض'], ready:false },
 ];
 
 /* ================= GÉNÉRATEURS ================= */
@@ -424,6 +434,23 @@ function balancePos(opts,ansKey){
   const[a]=arr.splice(ai,1);
   arr.splice(target,0,a);
   return arr;
+}
+
+// Pour « touche le bon son », les 3 options doivent sonner DIFFÉREMMENT.
+// La voix de synthèse ne rend ni la chedda ni les nuances de longueur, donc on
+// n'utilise pas les quasi-homographes (confus) : on prend d'autres mots de l'unité,
+// en garantissant des sons mutuellement distincts (clés audio différentes).
+function audioKey(s){ return (s||'').normalize('NFC').replace(/\u0651/g,''); }
+function wordSoundOptions(U,w){
+  const used=new Set([audioKey(w.w)]);
+  const others=[];
+  for(const x of shuffle(U.words||[])){
+    const xk=audioKey(x.w);
+    if(x.w===w.w||used.has(xk))continue;
+    used.add(xk); others.push(x.w);
+    if(others.length>=2)break;
+  }
+  return balancePos(shuffle([{snd:w.w,key:w.w},...others.map(p=>({snd:p,key:p}))]),w.w);
 }
 
 const NONATTACH=['ا','د','ذ','ر','ز','و'];
@@ -620,15 +647,9 @@ function buildWords(U){
      'C\u2019est du tachkīl, comme le soukoun et la chedda.</p>'},
   ];
   shuffle(U.words).forEach(w=>{
-    // distracteurs : on privilégie des prononciations PROCHES (prolongations/voyelles)
-    let pool=(w.confus||[]).slice();
-    pool=shuffle(pool).slice(0,2);
-    while(pool.length<2){ // complète avec d'autres mots si besoin
-      const o=rnd(U.words.filter(x=>x.w!==w.w&&!pool.includes(x.w)));pool.push(o.w);
-    }
-    const opts=balancePos(shuffle([{snd:w.w,key:w.w},...pool.map(p=>({snd:p,key:p}))]),w.w);
     q.push(mcq({prompt:'Lis le mot, puis touche le bon son',
-      glyph:w.w,glyphLinear:true,emo:w.e,fr:w.fr,graded:true,grid:'grid3',answer:w.w,options:opts}));
+      glyph:w.w,glyphLinear:true,emo:w.e,fr:w.fr,graded:true,grid:'grid3',answer:w.w,
+      options:wordSoundOptions(U,w)}));
   });
   return q;
 }
@@ -660,6 +681,37 @@ function buildBilan(U){
   return q;
 }
 
+// Révision cumulative : remplace le tour d'alphabet à partir de l'unité 2.
+// Révise les lettres des unités PRÉCÉDENTES (reconnaissance début/milieu/fin,
+// + avec un tachkīl) et fait réécrire des mots déjà vus.
+function buildReview(U){
+  const ui=UNITS.indexOf(U);
+  const letters=[],words=[];
+  for(let k=0;k<ui;k++){
+    const P=UNITS[k];
+    if(P.alpha)(P.letters||[]).forEach(L=>{ if(P.alpha[L])letters.push(L); });
+    if(P.words)words.push(...P.words);
+  }
+  const q=[{type:'info',title:'Révision',html:
+    '<p>Avant d\u2019apprendre de nouvelles lettres, on révise ce que tu connais déjà. C\u2019est parti !</p>'}];
+  const pick3=(pool,L,glyph)=>{
+    const others=shuffle(pool.filter(x=>x!==L)).slice(0,2);
+    return balancePos(shuffle([L,...others]).map(x=>({ar:glyph(x),key:x})),L);
+  };
+  // A — reconnaissance par position : début (1), milieu (2), fin (3)
+  if(letters.length)[1,2,3].forEach(p=>shuffle(letters).forEach(L=>q.push(mcq({
+    prompt:'Touche la bonne lettre, même déguisée 🎭',audio:L,graded:true,grid:'grid3',answer:L,
+    options:pick3(letters,L,x=>formGlyph(x,p))}))));
+  // B — reconnaissance avec un tachkīl (lettre + harakat) par le son
+  const SYL=[];letters.forEach(L=>HK.forEach(h=>SYL.push(L+h[0])));
+  for(let r=0;r<3&&SYL.length;r++){const a=rnd(SYL);
+    q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a,graded:true,grid:'grid3',answer:a,
+      options:shuffle([a,...shuffle(SYL.filter(x=>x!==a)).slice(0,2)]).map(s=>({ar:s,key:s}))}));}
+  // C — réécrire des mots déjà vus
+  shuffle(words).slice(0,Math.min(5,words.length)).forEach(w=>q.push({type:'assemble',w,graded:true}));
+  return q;
+}
+
 const DISQUES=[
  {icon:'💡',label:'L\u2019alphabet',build:buildAlphabet},
  {icon:'📌',label:'Mémoriser {L}',build:buildMemo},
@@ -671,6 +723,24 @@ const DISQUES=[
  {icon:'✏️',label:'Écrire des mots',build:buildWrite},
  {icon:'🏆',label:'Bilan',build:buildBilan},
 ];
+
+// Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
+const REVISION_DISC={icon:'🔄',label:'Révision',build:buildReview};
+// Disque propre à l'unité « lettres faibles » — contenu (support/prolongation + hamza
+// et son siège) à construire avec le reste de l'unité 2.
+function buildLettreVsProlong(U){
+  return [{type:'slide',title:'Lettres vs prolongations',html:
+    '<p>Ce disque (lettre support / prolongation, et la hamza et son siège) sera construit avec le contenu de l\u2019unité 2.</p>'}];
+}
+const LETTREVSPRO_DISC={icon:'💡',label:'Lettres vs prolongations',build:buildLettreVsProlong};
+function discsFor(u){
+  if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
+  if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
+    // Révision · Mémoriser · Lettres vs prolongations · Fātiḥa · Formes · Harakats · Lire · Écrire · Bilan
+    // (pas de disque « Les prolongations » : redondant ici, et aucun mot propre en ū)
+    return [REVISION_DISC, DISQUES[1], LETTREVSPRO_DISC, DISQUES[2], DISQUES[3], DISQUES[4], DISQUES[6], DISQUES[7], DISQUES[8]];
+  return [REVISION_DISC, ...DISQUES.slice(1)];               // unités-consonnes : révision en tête
+}
 
 /* ================= ÉTAT ================= */
 const DEF={xp:0,done:{},hearts:5,streak:0,lastDay:null,heartDay:null};
@@ -690,6 +760,15 @@ function toggleNarr(){
   const b=document.getElementById('narrtog');if(b)b.textContent=NARR?'🗣️':'🚫';
   syncNarrLink();
   if(!NARR&&'speechSynthesis'in window)speechSynthesis.cancel();
+}
+function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
+function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
+function doReset(){
+  try{localStorage.removeItem('alaq2');}catch(e){}
+  S=Object.assign({},DEF,{done:{}});
+  save();
+  document.getElementById('confirmReset').classList.remove('on');
+  renderHome();
 }
 function syncNarrLink(){
   const l=document.getElementById('narrLink');
@@ -741,17 +820,19 @@ function renderHome(){
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
    '<h1>Apprendre \u00e0 lire avec le Qor\u2019an</h1></div>';
   UNITS.forEach((U,u)=>{
-    const prevComplete = U.no===1 || !!S.done[dkey(u-1,DISQUES.length-1)];
+    const prevComplete = U.no===1 || !!S.done[dkey(u-1,discsFor(u-1).length-1)];
     const playable = !!U.ready && prevComplete;
-    const sub = U.sub || (U.ready ? 'Les 9 disques'
-        : 'Les 9 disques \u00b7 se d\u00e9bloque apr\u00e8s l\u2019unit\u00e9 '+toAr(U.no-1));
+    const nDisc = discsFor(u).length;
+    const sub = U.sub || (U.ready ? 'Les '+nDisc+' disques'
+        : prevComplete ? 'Les '+nDisc+' disques \u00b7 bient\u00f4t disponible'
+        : 'Les '+nDisc+' disques \u00b7 se d\u00e9bloque apr\u00e8s l\u2019unit\u00e9 '+toAr(U.no-1));
     h.insertAdjacentHTML('beforeend',
       '<div class="unit-head"><div class="u-no">'+toAr(U.no)+'</div><div>'+
       '<h2>Unit\u00e9 '+toAr(U.no)+' \u00b7 '+U.letters.join(' ')+'</h2>'+
       '<p>'+sub+'</p></div></div>');
     const path=document.createElement('div');path.className='path';
     if(u>0)path.style.marginTop='24px';
-    DISQUES.forEach((d,i)=>{
+    discsFor(u).forEach((d,i)=>{
       const node=document.createElement('div');
       node.style.transform='translateX('+OFFS[i%OFFS.length]+'px)';
       if(playable){
@@ -776,14 +857,21 @@ function renderHome(){
       path.appendChild(node);
     });
     h.appendChild(path);
+    if(playable){
+      const allDone=discsFor(u).every((d,i)=>!!S.done[dkey(u,i)]);
+      if(!allDone)h.insertAdjacentHTML('beforeend',
+        '<div style="text-align:center;margin:10px 0 2px">'+
+        '<button onclick="startExam('+u+')" style="background:var(--gold);color:#1a1410;border:none;'+
+        'padding:11px 22px;border-radius:16px;font-weight:800;font-size:15px;cursor:pointer">\u26a1 Avancer ici\u00a0?</button></div>');
+    }
   });
 }
 
 /* ================= JOUEUR ================= */
-let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,MISSED=[],inRetry=false;
+let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,MISSED=[],inRetry=false,EXAM=false;
 
 function startDisque(u,i){
-  curU=u;curD=i;QUEUE=DISQUES[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
+  EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
   S.hearts=5;S.heartDay=today();save();
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
@@ -1126,6 +1214,7 @@ function ctaClick(){
 }
 
 function finishDisque(){
+  if(EXAM)return finishExam();
   // S'il reste des questions ratées, on les rejoue (modèle Duolingo) avant de terminer
   if(MISSED.length){
     inRetry=true;
@@ -1150,7 +1239,7 @@ function finishDisque(){
   const id=dkey(curU,curD);
   const wasDone=!!S.done[id];
   S.done[id]=true;
-  const gain=(curD===DISQUES.length-1?20:10)*(wasDone?0.5:1);
+  const gain=(curD===discsFor(curU).length-1?20:10)*(wasDone?0.5:1);
   S.xp+=gain;
   const t=today();
   if(S.lastDay!==t){
@@ -1160,12 +1249,62 @@ function finishDisque(){
   save();
   document.getElementById('player').classList.remove('on');
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
-  document.getElementById('fin-title').textContent=discLabel(DISQUES[curD],UNITS[curU])+' — terminé !';
+  document.getElementById('fin-title').textContent=discLabel(discsFor(curU)[curD],UNITS[curU])+' — terminé !';
   document.getElementById('fin-xp').textContent='+'+gain;
   document.getElementById('fin-acc').textContent=acc+'%';
   document.getElementById('finish').classList.add('on');
 }
 function closeFinish(){document.getElementById('finish').classList.remove('on');renderHome();}
+
+/* ===== Test-out « Avancer ici ? » : 20 questions, 2 erreurs max ===== */
+function buildExam(U){
+  const W=U.words||[], L3=U.letters||[];
+  // LECTURE — lire le mot, toucher le bon son (options audibles et distinctes)
+  const reading=shuffle(W).map(w=>mcq({prompt:'Lis le mot, puis touche le bon son',
+    glyph:w.w,glyphLinear:true,emo:w.e,fr:w.fr,graded:true,grid:'grid3',answer:w.w,options:wordSoundOptions(U,w)}));
+  // ÉCRITURE — composer le mot avec les lettres
+  const writing=shuffle(W).map(w=>({type:'assemble',w,graded:true}));
+  // POSITIONS — forme déguisée (début/milieu/fin) → quelle lettre ? (visuel, jamais isolée)
+  const pos=[];
+  [1,2,3].forEach(p=>shuffle(L3).forEach(Lt=>pos.push(mcq({
+    prompt:'Quelle lettre est-ce, même déguisée 🎭 ?',glyph:formGlyph(Lt,p),graded:true,grid:'grid3',answer:Lt,
+    options:balancePos(shuffle(L3).map(x=>({ar:x,key:x})),Lt)}))));
+  const take=(a,n)=>shuffle(a).slice(0,n);
+  const q=shuffle([...take(reading,7),...take(writing,6),...take(pos,7)]).slice(0,20);
+  return [{type:'slide',title:'Avancer ici ?',html:
+    '<p>Un test de <b>'+q.length+' questions</b> \u2014 lecture, écriture et reconnaissance des lettres en position. '+
+    'Avec <b>2 erreurs maximum</b>, tu valides toute l\u2019unité et tu passes à la suite. Prêt ?</p>'},...q];
+}
+function startExam(u){
+  EXAM=true;curU=u;curD=-1;
+  QUEUE=buildExam(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
+  S.hearts=5;S.heartDay=today();save();
+  document.getElementById('player').classList.add('on');
+  document.getElementById('finish').classList.remove('on');
+  document.getElementById('p-hearts').textContent=S.hearts;
+  document.getElementById('st-hearts').textContent=S.hearts;
+  total=QUEUE.filter(s=>s.graded).length;
+  renderStep();
+}
+function finishExam(){
+  EXAM=false;
+  const u=curU, pass=wrongCount<=2;
+  const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
+  if(pass){
+    discsFor(u).forEach((d,i)=>{ S.done[dkey(u,i)]=true; });
+    S.xp+=30;
+    const t=today();
+    if(S.lastDay!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
+    save();
+  }
+  document.getElementById('player').classList.remove('on');
+  document.getElementById('fin-title').textContent=pass
+    ?('Unité '+toAr(UNITS[u].no)+' validée ! 🎉')
+    :('Presque ! '+wrongCount+' erreurs (2 max)');
+  document.getElementById('fin-xp').textContent=pass?'+30':'+0';
+  document.getElementById('fin-acc').textContent=acc+'%';
+  document.getElementById('finish').classList.add('on');
+}
 
 /* ================= INTERACTIONS ================= */
 function popIt(el){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
@@ -1490,8 +1629,20 @@ function expandShadda(t){
   // consonne+chedda -> consonne+soukoun+consonne : double le son à l'oral
   return t.replace(/([^\u064B-\u0652\u0670\s])([\u064B-\u0650\u0652\u0670]*)\u0651([\u064B-\u0652\u0670]*)/g,(_,b,pre,post)=>b+'\u0652'+b+pre+post);
 }
+// Audios enregistrés (à remplir plus tard, voix type al-ʿAfāsī).
+// Clé = token EXACT passé à speak() (lettre, syllabe, ou mot vocalisé).
+// Tant qu'une clé est absente/vide, speak() retombe sur la voix de synthèse.
+// Priorité d'enregistrement (sons mal rendus par l'IA) :
+//   hamza (coup de glotte) · chedda · diphtongue vs prolongation.
+const AUDIO={
+  // 'ي':'audio/ya.mp3', 'أ':'audio/hamza.mp3', 'و':'audio/waw.mp3',
+  // 'يَوْمٌ':'audio/yawm.mp3', 'أُمٌّ':'audio/umm.mp3', ...
+};
+
 function speak(t){
   try{
+    const url=AUDIO[t];
+    if(url){ if(!SND)return; const a=new Audio(url); a.play().catch(()=>{}); return; }
     if(!SND||!('speechSynthesis'in window))return;
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(expandShadda(t));u.lang='ar-SA';u.rate=.75;
