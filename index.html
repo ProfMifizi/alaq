@@ -150,11 +150,11 @@
 
   .frow{display:flex;gap:10px;direction:rtl;justify-content:center;margin:10px 0 6px}
   .fcell{flex:1;max-width:86px;background:var(--panel);border:2px solid var(--line);border-radius:14px;
-    padding:12px 4px;text-align:center}
+    padding:20px 4px 16px;min-height:108px;text-align:center}
   .fcell:active{border-color:var(--gold)}
   .fcell.done{border-color:var(--gold);background:#3a312b}
   .fcell.done .fl{color:var(--gold2)}
-  .fcell .ar{font-family:var(--ar);font-size:40px;color:var(--gold);line-height:1.2;display:block}
+  .fcell .ar{font-family:var(--ar);font-size:40px;color:var(--gold);line-height:1.2;display:block;margin-bottom:16px}
   .fcell .fl{font-size:10px;font-weight:900;color:var(--muted);letter-spacing:.04em}
 
   .wordcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;text-align:center}
@@ -288,6 +288,98 @@
   .fourc.lit{border-style:solid;border-color:var(--gold);background:#3a312b}
   .fourc .ar{font-family:var(--ar);font-size:38px;line-height:1.4;min-height:46px;direction:rtl}
   .fourc .fl{font-size:12px;font-weight:900;color:var(--muted)}
+  /* Lettres vs prolongations — slides interactives */
+  .lvp{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .lvp-cards{display:flex;gap:10px;justify-content:center;align-items:stretch}
+  .lvp-flip{flex:1;cursor:pointer;user-select:none;position:relative}
+  .lvp-flip.seen::after{content:'✓';position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;
+    background:var(--green);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:5}
+  .lvp-flip-in{border-radius:16px;border:2px solid #3c4a41;background:var(--panel);min-height:158px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center;
+    transition:transform .24s ease,border-color .2s}
+  .lvp-flip.flipping .lvp-flip-in{transform:scaleX(.04)}
+  .lvp-flip.flipped .lvp-flip-in{border-color:#4a3f2b}
+  .lvp-flip .face-cons{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .lvp-flip .face-pro{display:none;flex-direction:column;align-items:center;gap:4px}
+  .lvp-flip.flipped .face-cons{display:none}
+  .lvp-flip.flipped .face-pro{display:flex}
+  .lvp-flip .ff-ar{font-family:var(--ar);font-size:44px;line-height:1}
+  .lvp-flip .ff-role{font-size:10.5px;font-weight:800;line-height:1.3;color:var(--muted)}
+  .lvp-flip .ff-son{font-size:14px;font-weight:900}
+  .lvp-flip .ff-spk{font-size:13px;opacity:.85;margin-top:2px}
+  .lvp-flip:not(.flipped) .ff-ar,.lvp-flip:not(.flipped) .ff-son{color:var(--green)}
+  .lvp-flip.flipped .ff-ar,.lvp-flip.flipped .ff-son{color:var(--gold2)}
+  .lvp-flip-hint{font-size:11px;color:var(--muted);font-weight:800;text-align:center;margin-top:8px}
+  .lvp-exrow{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px 12px}
+  .lvp-exrow .ex-tag{font-weight:900;color:var(--gold2);min-width:22px;text-align:center;font-size:15px}
+  .lvp-exrow .ex-chip{font-family:var(--ar);font-size:26px;color:var(--gold);background:var(--panel2);border:2px solid var(--line);
+    border-radius:12px;padding:3px 14px;cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px;
+    transition:transform .12s,border-color .2s,background .2s}
+  .lvp-exrow .ex-chip:active{transform:scale(.94)}
+  .lvp-exrow .ex-chip.lit{border-color:var(--gold);background:#3a312b}
+  .lvp-exrow .ex-chip small{font-family:var(--ui);font-size:12px;color:var(--muted)}
+  .lvp-exrow .ex-spk{margin-left:auto;font-size:16px;opacity:.55}
+  /* Glisser-déposer la prolongation */
+  .dm-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:4px}
+  .dm-target{min-width:150px;min-height:96px;border:3px dashed var(--line);border-radius:20px;
+    display:flex;align-items:center;justify-content:center;gap:4px;font-family:var(--ar);font-size:46px;color:var(--cream);
+    padding:6px 20px;direction:rtl;transition:border-color .15s,background .15s}
+  .dm-target.over{border-color:var(--gold2);background:#3a312b}
+  .dm-target.done{border-style:solid;border-color:var(--green);background:var(--green-bg)}
+  .dm-target .dm-res{color:var(--green)}
+  .dm-hint{font-size:12px;color:var(--muted);font-weight:800;text-align:center;margin-top:-4px}
+  .dm-tray{display:flex;gap:14px;justify-content:center;min-height:78px}
+  .dm-tile{width:74px;height:74px;border-radius:16px;background:var(--panel2);border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-family:var(--ar);font-size:40px;color:var(--gold);
+    touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform;
+    transition:border-color .2s,background .2s,box-shadow .2s}
+  .dm-tile.drag{cursor:grabbing;z-index:50;border-color:var(--gold);box-shadow:0 10px 22px rgba(0,0,0,.55)}
+  .dm-tile.placed{opacity:.22;pointer-events:none}
+  .dm-fb{min-height:22px;font-weight:800;font-size:15px;text-align:center}
+  .dm-fb.ok{color:var(--green)} .dm-fb.bad{color:var(--coral)}
+  .dm-exp{max-width:340px;margin:0 auto;line-height:1.5;font-size:15px}
+  .dm-ok{margin-top:10px;background:var(--gold);color:#241c10;border:none;border-radius:12px;
+    padding:8px 20px;font-family:var(--ui);font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 3px 0 var(--gold-d)}
+  .dm-ok:active{transform:translateY(2px);box-shadow:0 1px 0 var(--gold-d)}
+  /* Association multi-cibles (prolongation) */
+  .da-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:2px}
+  .da-tops{display:flex;gap:10px;justify-content:center}
+  .da-cell{width:92px;min-height:90px;border:3px dashed var(--line);border-radius:18px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--ar);font-size:40px;color:var(--cream);direction:rtl;padding:4px;transition:border-color .15s,background .15s}
+  .da-cell.over{border-color:var(--gold2);background:#3a312b}
+  .da-cell.done{border-style:solid;border-color:var(--green);background:var(--green-bg)}
+  .da-cell .da-long{color:var(--green);font-size:38px}
+  .da-arrowrow{font-size:12px;color:var(--muted);font-weight:800;text-align:center}
+  .da-bottoms{display:flex;gap:12px;justify-content:center;min-height:72px}
+  .da-tile{width:68px;height:68px;border-radius:16px;background:var(--panel2);border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-family:var(--ar);font-size:38px;color:var(--gold);
+    touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform;transition:border-color .2s,box-shadow .2s}
+  .da-tile.drag{cursor:grabbing;z-index:50;border-color:var(--gold);box-shadow:0 10px 22px rgba(0,0,0,.55)}
+  .da-tile.placed{opacity:.18;pointer-events:none}
+  .lvp-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--line);
+    border-radius:14px;padding:12px 14px;cursor:pointer;user-select:none;transition:transform .12s,border-color .2s,background .2s}
+  .lvp-row:active{transform:scale(.98)}
+  .lvp-row.lit{border-color:var(--gold);background:#3a312b}
+  .lvp-row .lr-eq{font-family:var(--ar);font-size:24px;color:var(--cream);direction:rtl}
+  .lvp-row .lr-c{font-family:var(--ar);font-size:30px;color:var(--gold)}
+  .lvp-row .lr-arrow{color:var(--muted);font-weight:900}
+  .lvp-row .lr-long{font-family:var(--ar);font-size:30px;color:var(--gold);display:inline-block;transform-origin:right center}
+  .lvp-row.lit .lr-long{animation:lvpStretch 1s ease}
+  .lvp-row .lr-tag{font-weight:800;color:var(--gold2)}
+  .lvp-row .lr-spk{margin-left:auto;font-size:20px;opacity:.85}
+  @keyframes lvpStretch{0%{transform:scaleX(1)}40%{transform:scaleX(1.75)}100%{transform:scaleX(1)}}
+  .lvp-glotte{display:flex;justify-content:center;gap:16px;font-size:30px;font-weight:900;margin:10px 0}
+  .lvp-glotte span{display:inline-block;animation:lvpBeat 1.6s ease-in-out infinite}
+  .lvp-glotte span:nth-child(2){animation-delay:.18s;color:var(--gold);font-family:var(--ar)}
+  @keyframes lvpBeat{0%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+  .lvp-seat{display:flex;gap:10px;justify-content:center;margin-top:8px}
+  .lvp-seat .ls{flex:1;max-width:150px;background:var(--panel);border:2px solid var(--line);border-radius:16px;
+    padding:12px;text-align:center;cursor:pointer;user-select:none;transition:transform .12s,border-color .2s,background .2s}
+  .lvp-seat .ls:active{transform:scale(.96)}
+  .lvp-seat .ls.lit{border-color:var(--gold);background:#3a312b}
+  .lvp-seat .ls-ar{font-family:var(--ar);font-size:50px;color:var(--gold);line-height:1.1}
+  .lvp-seat .ls-lab{font-size:12px;font-weight:800;color:var(--muted);margin-top:4px}
+  .lvp-seat .ls.lit .ls-lab{color:var(--gold2)}
 </style>
 </head>
 <body>
@@ -356,6 +448,11 @@ function formGlyph(L,pos){ // 0 isolée 1 début 2 milieu 3 fin
   if(pos===3)return TAT+L;              // fin    : liaison à droite
   return L;                             // isolée
 }
+// Famille du alif : le alif nu (ا) et le alif portant la hamza (أ dessus, إ dessous,
+// آ madda, ٱ wasla) sont la MÊME lettre. On les traite comme équivalents pour le repérage.
+const ALIF_FAM='اأإآٱ';
+function letterKey(ch){ return ALIF_FAM.includes(ch)?'ا':ch; }
+function sameLetter(a,b){ return letterKey(a)===letterKey(b); }
 
 /* ================= DONNÉES ================= */
 const ALPHABET=[['ا','alif'],['ب','bā’'],['ت','tā’'],['ث','thā’'],['ج','jīm'],['ح','ḥā’'],['خ','khā’'],
@@ -406,7 +503,37 @@ const UNITS=[
  {w:'لِينٌ',b:'لين',fr:'la douceur',e:'🌿',say:'lin',confus:['لَيْنٌ','لِنٌّ','نِيلٌ']},
  {w:'لَمَّا',b:'لما',fr:'lorsque',e:'⏳',say:'lammā',confus:['مالَ','لَما','لَامّا']},
    ] },
- { no:2, letters:['ي','أ','و'], ready:false, kind:'weak' },
+ { no:2, ready:true, kind:'weak', sub:'Lettres faibles · prolongation et hamza — 9 disques',
+   letters:['ي','أ','و'],
+   lat:{'ي':'y','أ':'ʾ','و':'w'},
+   alpha:{
+ 'ي':{n:'yāʾ',son:'consonne « y » (yaourt) ; après une kasra, elle allonge le son « ī » (ami)',mn:'une grande coupe profonde sous la ligne, avec deux points en dessous'},
+ 'أ':{n:'alif',son:'le alif seul (ا) n\u2019a pas de son : c\u2019est un support qui allonge « ā » après une fatḥa. Avec la hamza il porte un coup de glotte : أ (au-dessus) ou إ (en dessous)',mn:'un grand trait vertical droit ; la hamza ء se pose au-dessus (أ) ou en dessous (إ)'},
+ 'و':{n:'wāw',son:'consonne « w » (oui) ; après une ḍamma, elle allonge le son « ū » (fou)',mn:'une petite boucle ronde en haut, avec une queue qui plonge sous la ligne, comme le chiffre 9'},
+   },
+   strokes:{
+ 'ي':[{pts:[[206,158],[174,164],[150,176],[140,196],[151,214],[177,219],[200,209],[206,189]]},{dot:[132,284]},{dot:[158,284]}],
+ 'أ':[{pts:[[150,86],[150,210]]},{pts:[[160,32],[142,32],[139,44],[151,48],[156,37]]}],
+ 'و':[{pts:[[176,189],[160,177],[145,173],[136,182],[139,195],[153,198],[167,191],[172,179],[173,196],[170,216],[156,234],[140,247]]}],
+   },
+   starts:{
+ 'ي':[{x:206,y:158,ang:170},{dots:[[132,284],[158,284]]}],
+ 'أ':[{x:150,y:86,ang:90},{x:160,y:32,ang:180}],
+ 'و':[{x:176,y:189,ang:170}]
+   },
+   words:[
+ {w:'يَوْمٌ',b:'يوم',fr:'le jour',e:'☀️',say:'yawm',confus:['يُومٌ','يَوْنٌ','يَوْلٌ']},
+ {w:'لَيْلٌ',b:'ليل',fr:'la nuit',e:'🌙',say:'layl',confus:['لِيلٌ','لَيْنٌ','أَيْلٌ']},
+ {w:'لَوْنٌ',b:'لون',fr:'la couleur',e:'🎨',say:'lawn',confus:['لُونٌ','لَوْلٌ','نَوْنٌ']},
+ {w:'لَوْمٌ',b:'لوم',fr:'le blâme',e:'😣',say:'lawm',confus:['لُومٌ','لَوْنٌ','أَوْمٌ']},
+ {w:'أَلِيمٌ',b:'أليم',fr:'douloureux',e:'💔',say:'alīm',confus:['إِلِيمٌ','أَلِمٌ','أَنِيمٌ']},
+ {w:'إِيمَانٌ',b:'إيمان',fr:'la foi',e:'🤲',say:'īmān',confus:['أَيْمَانٌ','إِيمَالٌ','إِمَانٌ']},
+ {w:'أُمٌّ',b:'أم',fr:'la mère',e:'👩',say:'umm',confus:['أُمْ','أُنٌّ','أَمٌّ']},
+ {w:'أَمِينٌ',b:'أمين',fr:'digne de confiance',e:'🤝',say:'amīn',confus:['أَمِنٌ','أَمِيلٌ','نَمِينٌ']},
+ {w:'يَمِينٌ',b:'يمين',fr:'la main droite',e:'✋',say:'yamīn',confus:['يَمِنٌ','يَمِيلٌ','لَمِينٌ']},
+ {w:'أَمَانٌ',b:'أمان',fr:'la sécurité',e:'🛡️',say:'amān',confus:['أَمَالٌ','أَمَنٌ','أَنَامٌ']},
+ {w:'مَمْنُونٌ',b:'ممنون',fr:'interrompu, diminué',e:'➖',say:'mamnūn',confus:['مَمْنُنٌ','مَنْمُونٌ','مَمْنُومٌ']},
+   ] },
  { no:3, letters:['ب','ر','ع'], ready:false },
  { no:4, letters:['س','د','ك'], ready:false },
  { no:5, letters:['ح','ط','ق'], ready:false },
@@ -533,7 +660,7 @@ function buildMemo(U){
 function buildSpot(U){
   const q=[];
   FATIHA.forEach((v,vi)=>{
-    U.letters.forEach(L=>{ if(strip(v).includes(L)) q.push({type:'spot',vi,L}); });
+    U.letters.forEach(L=>{ if([...strip(v)].some(ch=>sameLetter(ch,L))) q.push({type:'spot',vi,L}); });
   });
   return q;
 }
@@ -729,8 +856,62 @@ const REVISION_DISC={icon:'🔄',label:'Révision',build:buildReview};
 // Disque propre à l'unité « lettres faibles » — contenu (support/prolongation + hamza
 // et son siège) à construire avec le reste de l'unité 2.
 function buildLettreVsProlong(U){
-  return [{type:'slide',title:'Lettres vs prolongations',html:
-    '<p>Ce disque (lettre support / prolongation, et la hamza et son siège) sera construit avec le contenu de l\u2019unité 2.</p>'}];
+  const S=(title,html,note)=>({type:'slide',title,html,note});
+  const DM=(base,hk,answer,result,tag,read)=>({type:'dragmad',base,hk,answer,result,tag,read,say:result,note:'Glisse la bonne lettre de prolongation sur la lettre'});
+  const DA=(carrier,cells)=>({type:'dragassoc',carrier,cells,note:'Glisse chaque prolongation sur la lettre qui lui correspond'});
+  return [
+    {type:'slide',gate:true,title:'Trois lettres à double visage',
+      html:`<p>Les lettres <b>ي · و · ا</b> ont deux visages.</p>
+       <p style="color:var(--gold2);font-weight:800">👉 Clique deux fois sur chaque carte pour écouter les deux sons.</p>
+       <div class="lvp"><div class="lvp-cards" data-gate="1">
+         <div class="lvp-flip" onclick="lvpFlip(this,'يَ','إِي')"><div class="lvp-flip-in">
+           <div class="face-cons"><div class="ff-ar">ي</div><div class="ff-role">je suis une consonne</div><div class="ff-son">« y »</div><div class="ff-spk">🔊 tape</div></div>
+           <div class="face-pro"><div class="ff-ar">ي</div><div class="ff-role">lettre de prolongation</div><div class="ff-son">« ī »</div><div class="ff-spk">🔊</div></div>
+         </div></div>
+         <div class="lvp-flip" onclick="lvpFlip(this,'وَ','أُو')"><div class="lvp-flip-in">
+           <div class="face-cons"><div class="ff-ar">و</div><div class="ff-role">je suis une consonne</div><div class="ff-son">« w »</div><div class="ff-spk">🔊 tape</div></div>
+           <div class="face-pro"><div class="ff-ar">و</div><div class="ff-role">lettre de prolongation</div><div class="ff-son">« ū »</div><div class="ff-spk">🔊</div></div>
+         </div></div>
+         <div class="lvp-flip" onclick="lvpFlip(this,'','أَا')"><div class="lvp-flip-in">
+           <div class="face-cons"><div class="ff-ar">ا</div><div class="ff-role">support (muet)</div><div class="ff-son">pas de son</div><div class="ff-spk">↻ tape</div></div>
+           <div class="face-pro"><div class="ff-ar">ا</div><div class="ff-role">lettre de prolongation</div><div class="ff-son">« ā »</div><div class="ff-spk">🔊</div></div>
+         </div></div>
+       </div><div class="lvp-flip-hint">↻ Tape pour retourner · 🔊 écoute le son de chaque face</div></div>`,
+      note:'Clique deux fois sur chaque carte pour écouter les deux sons'},
+    DM('ن','\u0650','ي','نِي','ī','ni'),
+    DM('م','\u064E','ا','مَا','ā','ma'),
+    DM('ل','\u064F','و','لُو','ū','lou'),
+    DA('ي',[{short:'يَ',madd:'ا',long:'يَا',say:'يَا'},{short:'يِ',madd:'ي',long:'يِي',say:'يِي'},{short:'يُ',madd:'و',long:'يُو',say:'يُو'}]),
+    DA('و',[{short:'وَ',madd:'ا',long:'وَا',say:'وَا'},{short:'وِ',madd:'ي',long:'وِي',say:'وِي'},{short:'وُ',madd:'و',long:'وُو',say:'وُو'}]),
+    DA('ء',[{short:'أَ',madd:'ا',long:'آ',say:'أَا'},{short:'إِ',madd:'ي',long:'إِي',say:'إِي'},{short:'أُ',madd:'و',long:'أُو',say:'أُو'}]),
+    S('La hamza',
+      `<p>En arabe, une voyelle (<b>a · i · ou</b>) ne peut pas s\u2019écrire toute seule : il lui faut un <b>support muet</b>.</p>
+       <p>La <b>hamza</b> (ء) posée sur le alif joue ce rôle — elle permet de dire la voyelle seule. Tape pour écouter.</p>
+       <div class="lvp">
+         <div class="lvp-row" onclick="lvpHit(this,'أَ')"><span class="lr-c">أَ</span><span class="lr-arrow">→</span><span class="lr-tag">« a »</span><span class="lr-spk">🔊</span></div>
+         <div class="lvp-row" onclick="lvpHit(this,'إِ')"><span class="lr-c">إِ</span><span class="lr-arrow">→</span><span class="lr-tag">« i »</span><span class="lr-spk">🔊</span></div>
+         <div class="lvp-row" onclick="lvpHit(this,'أُ')"><span class="lr-c">أُ</span><span class="lr-arrow">→</span><span class="lr-tag">« ou »</span><span class="lr-spk">🔊</span></div>
+       </div>`,
+      'La hamza permet de dire une voyelle seule : a, i, ou ; tape pour écouter'),
+    S('Le siège du alif',
+      `<p>Posée sur le alif, la hamza se place au-dessus ou en dessous. Tape pour comparer.</p>
+       <div class="lvp-seat">
+         <div class="ls" onclick="lvpHit(this,'أَمَانٌ')"><div class="ls-ar">أ</div><div class="ls-lab">au-dessus · أَمَانٌ</div></div>
+         <div class="ls" onclick="lvpHit(this,'إِيمَانٌ')"><div class="ls-ar">إ</div><div class="ls-lab">en dessous · إِيمَانٌ</div></div>
+       </div>
+       <p style="margin-top:8px;font-size:13px;color:var(--muted)">Les autres sièges (sur le و, le ي, sur la ligne) viendront plus tard, in shā\u2019 Allah.</p>`,
+      'Tape les deux cartes pour comparer la hamza au-dessus et en dessous'),
+    mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,graded:true,answer:'p',
+      options:shuffle([{txt:'Il allonge le son « ā »',key:'p'},{txt:'Il fait le son « l »',key:'l'},{txt:'Il ne sert à rien',key:'x'}])}),
+    mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,graded:true,answer:'c',
+      options:shuffle([{txt:'une consonne « y »',key:'c'},{txt:'une prolongation « ī »',key:'i'},{txt:'une harakat',key:'h'}])}),
+    mcq({prompt:'Le و allonge le son « ū »…',graded:true,answer:'d',
+      options:shuffle([{txt:'après une ḍamma <span style="font-family:var(--ar);font-size:1.7em">ـُ</span>',key:'d'},{txt:'après une fatḥa <span style="font-family:var(--ar);font-size:1.7em">ـَ</span>',key:'f'},{txt:'après une kasra <span style="font-family:var(--ar);font-size:1.7em">ـِ</span>',key:'k'}])}),
+    mcq({prompt:'À quoi sert la hamza <span style="font-family:var(--ar)">(ء)</span> posée sur le alif ?',graded:true,answer:'v',
+      options:shuffle([{txt:'à dire une voyelle seule : a, i, ou',key:'v'},{txt:'à allonger le son',key:'l'},{txt:'à séparer deux mots',key:'s'}])}),
+    mcq({prompt:'Lorsqu\u2019on veut faire le son « i » tout seul, quel support utilise-t-on ?',graded:true,grid:'grid3',answer:'i',
+      options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
+  ];
 }
 const LETTREVSPRO_DISC={icon:'💡',label:'Lettres vs prolongations',build:buildLettreVsProlong};
 function discsFor(u){
@@ -814,11 +995,13 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
+const BUILD='maj 18/06 · costumes : cartes plus hautes';
 function renderHome(){
   refreshStats();
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
-   '<h1>Apprendre \u00e0 lire avec le Qor\u2019an</h1></div>';
+   '<h1>Apprendre \u00e0 lire avec le Qor\u2019an</h1>'+
+   '<div style="font-size:11px;color:var(--muted);opacity:.5;margin-top:4px">'+BUILD+'</div></div>';
   UNITS.forEach((U,u)=>{
     const prevComplete = U.no===1 || !!S.done[dkey(u-1,discsFor(u-1).length-1)];
     const playable = !!U.ready && prevComplete;
@@ -906,7 +1089,7 @@ function renderStep(){
       '<div class="nm">'+st.title+'</div>'+
       (st.big?'<div class="demo" style="font-family:var(--ar);font-size:64px">'+st.big+'</div>':'')+
       '<div class="mn" style="font-size:16px">'+st.html+'</div></div>';
-    cta.disabled=false;return;
+    cta.disabled=st.gate?true:false;return;
   }
 
   if(st.type==='info'){
@@ -1081,11 +1264,12 @@ function renderStep(){
       const jp=i>0&&joinsL(cl[i-1].b);
       const jn=i<cl.length-1&&joinsL(c.b);
       const disp=(jp?ZWJ:'')+c.b+c.m+(jn?ZWJ:'');
-      const ok=c.b===st.L?1:0; if(ok)need++;
+      const ok=sameLetter(c.b,st.L)?1:0; if(ok)need++;
       return '<span class="vl" onclick="spotTap(this,'+ok+')">'+disp+'</span>';
     }).join('')+'</span>').join(' ');
     window._spot={need,found:0};
-    body.innerHTML='<div class="q-title">Verset '+(st.vi+1)+' — touche tous les <span class="gold" style="font-size:30px">'+st.L+'</span></div>'+
+    const tgt=ALIF_FAM.includes(st.L)?'ا · أ · إ':st.L;
+    body.innerHTML='<div class="q-title">Verset '+(st.vi+1)+' — touche tous les <span class="gold" style="font-size:30px">'+tgt+'</span></div>'+
       '<button class="speak" onclick="playVerse('+st.vi+')">🔊 Écouter le verset (al-ʿAfāsī)</button>'+
       '<button class="zoom-btn" onclick="zoomVerse(this)">🔍 Agrandir</button>'+
       '<div class="verse" id="verseBox">'+html+'</div>'+
@@ -1135,6 +1319,36 @@ function renderStep(){
     return;
   }
 
+  if(st.type==='dragassoc'){
+    const tilesArr=shuffle(st.cells.map(c=>c.madd));
+    const tops=st.cells.map(c=>'<div class="da-cell" data-madd="'+c.madd+'" data-long="'+c.long+'" data-say="'+c.say+'">'+c.short+'</div>').join('');
+    const tiles=tilesArr.map(ch=>'<div class="da-tile" data-ch="'+ch+'">'+ch+'</div>').join('');
+    body.innerHTML='<div class="q-title">Forme la prolongation</div>'+
+      '<div class="hint" style="margin:-8px 0 14px">Glisse chaque lettre de prolongation (en bas) sur la lettre du haut qui lui correspond. La voyelle s\u2019allonge !</div>'+
+      '<div class="da-wrap" id="da-wrap">'+
+        '<div class="da-tops">'+tops+'</div>'+
+        '<div class="da-arrowrow">↑ dépose la prolongation sur sa lettre ↑</div>'+
+        '<div class="da-bottoms">'+tiles+'</div>'+
+        '<div class="dm-fb" id="da-fb"></div>'+
+      '</div>';
+    setTimeout(()=>setupDragAssoc(st),50);
+    return;
+  }
+
+  if(st.type==='dragmad'){
+    const tiles=shuffle(['ا','و','ي']).map(ch=>'<div class="dm-tile" data-ch="'+ch+'">'+ch+'</div>').join('');
+    body.innerHTML='<div class="q-title">Fais glisser la bonne prolongation</div>'+
+      '<div class="hint" style="margin:-8px 0 16px">La voyelle est déjà sur la lettre. Glisse dessus la lettre de prolongation qui l\u2019allonge.</div>'+
+      '<div class="dm-wrap" id="dm-wrap">'+
+        '<div class="dm-target" id="dm-target">'+st.base+st.hk+'</div>'+
+        '<div class="dm-hint">↑ glisse la prolongation ici</div>'+
+        '<div class="dm-tray">'+tiles+'</div>'+
+        '<div class="dm-fb" id="dm-fb"></div>'+
+      '</div>';
+    setTimeout(()=>setupDragMad(st),50);
+    return;
+  }
+
   /* mcq */
   cta.textContent='VÉRIFIER';cta.onclick=ctaClick;
   let html='<div class="q-title">'+st.prompt+'</div>';
@@ -1176,7 +1390,12 @@ function ctaClick(){
     ok=window._asm.ch.join('').normalize('NFC')===window._asm.t.join('').normalize('NFC');
     answered=true;
     if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله — <span class="ar" style="font-size:24px">'+st.w.w+'</span>';}
-    else{fb.className='fb bad';fb.innerHTML='<span>✕</span> Le mot était : <span class="ar" style="font-size:26px">'+st.w.w+'</span>';}
+    else{
+      const mine=window._asm.ch.join('');
+      fb.className='fb bad';
+      fb.innerHTML='<span>✕</span> Le mot était : <span class="ar" style="font-size:26px">'+st.w.w+'</span>'+
+        '<div style="opacity:.85;font-size:14px;margin-top:6px">Toi : <span class="ar" style="font-size:24px">'+mine+'</span></div>';
+    }
   } else {
     if(picked===null)return;
     answered=true;
@@ -1536,6 +1755,116 @@ function asmUndo(){
 }
 
 /* tracé */
+const MADD_SOUND={'ا':'le son « a »','و':'le son « ou »','ي':'le son « i »'};
+function errorBeep(){
+  if(!SND)return;
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
+    const ac=window._ac||(window._ac=new Ctx());
+    if(ac.state==='suspended')ac.resume();
+    const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+    o.type='square'; o.frequency.setValueAtTime(200,t);
+    o.frequency.exponentialRampToValueAtTime(110,t+0.18);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.13,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.24);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+0.26);
+  }catch(e){}
+}
+function setupDragAssoc(st){
+  const wrap=document.getElementById('da-wrap'); if(!wrap)return;
+  const cells=[...wrap.querySelectorAll('.da-cell')];
+  const fb=document.getElementById('da-fb');
+  const cta=document.getElementById('cta');
+  const tiles=[...wrap.querySelectorAll('.da-tile')];
+  let done=0;
+  const cellUnder=(tile)=>{
+    const tb=tile.getBoundingClientRect(), cx=tb.left+tb.width/2, cy=tb.top+tb.height/2;
+    return cells.find(c=>{const r=c.getBoundingClientRect();return cx>r.left&&cx<r.right&&cy>r.top&&cy<r.bottom;});
+  };
+  tiles.forEach(tile=>{
+    let dragging=false,sx=0,sy=0;
+    const down=e=>{ if(tile.classList.contains('placed'))return; dragging=true; tile.classList.add('drag');
+      const p=e.touches?e.touches[0]:e; sx=p.clientX; sy=p.clientY;
+      try{ if(e.pointerId!=null)tile.setPointerCapture(e.pointerId);}catch(_){}
+      e.preventDefault(); };
+    const move=e=>{ if(!dragging)return; const p=e.touches?e.touches[0]:e;
+      tile.style.transform='translate('+(p.clientX-sx)+'px,'+(p.clientY-sy)+'px) scale(1.1)';
+      const c=cellUnder(tile); cells.forEach(cc=>cc.classList.toggle('over',cc===c&&!cc.classList.contains('done')));
+      e.preventDefault(); };
+    const up=e=>{ if(!dragging)return; dragging=false; tile.classList.remove('drag');
+      const c=cellUnder(tile); cells.forEach(cc=>cc.classList.remove('over'));
+      if(c && !c.classList.contains('done') && c.dataset.madd===tile.dataset.ch){
+        tile.style.transform=''; tile.classList.add('placed');
+        c.innerHTML='<span class="da-long">'+c.dataset.long+'</span>'; c.classList.add('done');
+        warmVoices(); speak(c.dataset.say); done++;
+        if(fb){ fb.className='dm-fb ok'; fb.textContent='ماشاء الله — '+c.dataset.long; }
+        if(done>=cells.length){ if(cta)cta.disabled=false; if(fb){fb.className='dm-fb ok';fb.textContent='Bravo ! Tu peux continuer ✓';} }
+      } else {
+        tile.style.transition='transform .25s ease'; tile.style.transform='';
+        setTimeout(()=>{tile.style.transition='';},260);
+        if(c && !c.classList.contains('done')){ errorBeep();
+          if(fb){ fb.className='dm-fb bad'; fb.textContent='Pas la bonne lettre 🙅';
+            setTimeout(()=>{ if(done<cells.length){fb.className='dm-fb';fb.textContent='';} },1400); } }
+      } };
+    tile.addEventListener('pointerdown',down);
+    tile.addEventListener('pointermove',move);
+    tile.addEventListener('pointerup',up);
+    tile.addEventListener('pointercancel',up);
+  });
+}
+function setupDragMad(st){
+  const wrap=document.getElementById('dm-wrap'); if(!wrap)return;
+  const target=document.getElementById('dm-target');
+  const fb=document.getElementById('dm-fb');
+  const cta=document.getElementById('cta');
+  let solved=false;
+  const tiles=[...wrap.querySelectorAll('.dm-tile')];
+  const overTarget=(tile)=>{
+    const tr=target.getBoundingClientRect(), tb=tile.getBoundingClientRect();
+    const cx=tb.left+tb.width/2, cy=tb.top+tb.height/2;
+    return cx>tr.left&&cx<tr.right&&cy>tr.top&&cy<tr.bottom;
+  };
+  tiles.forEach(tile=>{
+    let dragging=false,sx=0,sy=0;
+    const down=e=>{ if(solved||tile.classList.contains('placed'))return;
+      dragging=true; tile.classList.add('drag');
+      const p=e.touches?e.touches[0]:e; sx=p.clientX; sy=p.clientY;
+      try{ if(e.pointerId!=null)tile.setPointerCapture(e.pointerId); }catch(_){}
+      e.preventDefault(); };
+    const move=e=>{ if(!dragging)return;
+      const p=e.touches?e.touches[0]:e;
+      tile.style.transform='translate('+(p.clientX-sx)+'px,'+(p.clientY-sy)+'px) scale(1.12)';
+      target.classList.toggle('over',overTarget(tile));
+      e.preventDefault(); };
+    const up=e=>{ if(!dragging)return; dragging=false; tile.classList.remove('drag');
+      const ok=overTarget(tile); target.classList.remove('over');
+      if(ok && tile.dataset.ch===st.answer){
+        solved=true; tile.style.transform='';
+        tile.classList.add('placed');
+        target.innerHTML='<span class="dm-res">'+st.result+'</span>';
+        target.classList.add('done');
+        fb.className='dm-fb ok'; fb.textContent='ماشاء الله — '+st.result+' « '+st.tag+' »';
+        warmVoices(); speak(st.say);
+        cta.disabled=false;
+      } else {
+        tile.style.transition='transform .25s ease'; tile.style.transform='';
+        setTimeout(()=>{tile.style.transition='';},260);
+        if(ok){ // déposée sur la cible, mais mauvaise prolongation
+          errorBeep();
+          const wrong=tile.dataset.ch;
+          fb.className='dm-fb bad';
+          fb.innerHTML='<div class="dm-exp"><span style="font-family:var(--ar);font-size:24px">'+wrong+'</span> prolonge '+MADD_SOUND[wrong]+'.<br>'+
+            'Mais ici c\u2019est écrit « '+st.read+' » : on ne peut l\u2019allonger que par la prolongation « '+st.tag+' » (<span style="font-family:var(--ar);font-size:22px">'+st.answer+'</span>).'+
+            '<br><button class="dm-ok" onclick="this.closest(\'.dm-fb\').className=\'dm-fb\';this.closest(\'.dm-fb\').innerHTML=\'\'">J\u2019ai compris</button></div>';
+        }
+      } };
+    tile.addEventListener('pointerdown',down);
+    tile.addEventListener('pointermove',move);
+    tile.addEventListener('pointerup',up);
+    tile.addEventListener('pointercancel',up);
+  });
+}
 function setupTrace(L){
   const c=document.getElementById('trace');if(!c)return;
   const x=c.getContext('2d');
@@ -1555,6 +1884,9 @@ function setupTrace(L){
       x.fillStyle='#08231a';x.font='bold 12px sans-serif';x.textAlign='center';x.textBaseline='middle';
       x.fillText(String(n),px,py);x.fillStyle=G;x.textBaseline='alphabetic'; }
     ST.forEach((s,i)=>{
+      if(s.dots){ x.strokeStyle=G;x.lineWidth=3;
+        s.dots.forEach(d=>{x.beginPath();x.arc(d[0],d[1],9,0,7);x.stroke();});
+        label(s.dots[0][0],s.dots[0][1],i+1); return; }
       if(s.dot){ x.strokeStyle=G;x.lineWidth=3;x.beginPath();x.arc(s.dot[0],s.dot[1],9,0,7);x.stroke();
         label(s.dot[0],s.dot[1],i+1); return; }
       const ang=s.ang*Math.PI/180, len=30, ah=10;
@@ -1640,6 +1972,29 @@ const AUDIO={
   // 'يَوْمٌ':'audio/yawm.mp3', 'أُمٌّ':'audio/umm.mp3', ...
 };
 
+function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) : écrase, bascule, joue le son visible
+  try{
+    const showProAfter=!card.classList.contains('flipped');
+    card.classList.add('flipping');
+    setTimeout(()=>{card.classList.toggle('flipped');card.classList.remove('flipping');},230);
+    warmVoices();
+    const w=showProAfter?proWord:consWord;
+    if(w)speak(w);
+    const n=(parseInt(card.dataset.taps||'0',10))+1; card.dataset.taps=n;
+    if(n>=2)card.classList.add('seen');
+    const wrap=card.closest&&card.closest('.lvp-cards');
+    if(wrap&&wrap.dataset.gate==='1'){
+      const all=[...wrap.querySelectorAll('.lvp-flip')];
+      if(all.every(c=>parseInt(c.dataset.taps||'0',10)>=2)){
+        const cta=document.getElementById('cta'); if(cta)cta.disabled=false;
+      }
+    }
+  }catch(e){ try{card.classList.toggle('flipped');}catch(_){ } }
+}
+function lvpHit(el,word){ // slides Lettres vs prolongations : rejoue l'anim + audio au tap
+  try{ el.classList.remove('lit'); void el.offsetWidth; el.classList.add('lit'); }catch(e){}
+  warmVoices(); if(word) speak(word);
+}
 function speak(t){
   try{
     const url=AUDIO[t];
