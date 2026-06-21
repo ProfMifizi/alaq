@@ -995,7 +995,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 18/06 · costumes : cartes plus hautes';
+const BUILD='maj 21/06 · audio enregistré câblé (repli synthèse si fichier absent)';
 function renderHome(){
   refreshStats();
   const h=document.getElementById('home');
@@ -1968,8 +1968,50 @@ function expandShadda(t){
 // Priorité d'enregistrement (sons mal rendus par l'IA) :
 //   hamza (coup de glotte) · chedda · diphtongue vs prolongation.
 const AUDIO={
-  // 'ي':'audio/ya.mp3', 'أ':'audio/hamza.mp3', 'و':'audio/waw.mp3',
-  // 'يَوْمٌ':'audio/yawm.mp3', 'أُمٌّ':'audio/umm.mp3', ...
+  'نَمْلٌ':'audios-app-alaq/mot-naml.mp3',
+  'مَنٌّ':'audios-app-alaq/mot-mann.mp3',
+  'مَنَالٌ':'audios-app-alaq/mot-manal.mp3',
+  'مَالٌ':'audios-app-alaq/mot-mal.mp3',
+  'مَنَامٌ':'audios-app-alaq/mot-manam.mp3',
+  'نِيلٌ':'audios-app-alaq/mot-nil.mp3',
+  'نُونٌ':'audios-app-alaq/mot-noun.mp3',
+  'لِينٌ':'audios-app-alaq/mot-lin.mp3',
+  'لَمَّا':'audios-app-alaq/mot-lamma.mp3',
+  'يَوْمٌ':'audios-app-alaq/mot-yawm.mp3',
+  'لَيْلٌ':'audios-app-alaq/mot-layl.mp3',
+  'لَوْنٌ':'audios-app-alaq/mot-lawn.mp3',
+  'لَوْمٌ':'audios-app-alaq/mot-lawm.mp3',
+  'أَلِيمٌ':'audios-app-alaq/mot-alim.mp3',
+  'إِيمَانٌ':'audios-app-alaq/mot-iman.mp3',
+  'أُمٌّ':'audios-app-alaq/mot-umm.mp3',
+  'أَمِينٌ':'audios-app-alaq/mot-amin.mp3',
+  'يَمِينٌ':'audios-app-alaq/mot-yamin.mp3',
+  'أَمَانٌ':'audios-app-alaq/mot-aman.mp3',
+  'مَمْنُونٌ':'audios-app-alaq/mot-mamnoun.mp3',
+  'يَ':'audios-app-alaq/prolong-ya.mp3',
+  'إِي':'audios-app-alaq/prolong-i.mp3',
+  'وَ':'audios-app-alaq/prolong-wa.mp3',
+  'أُو':'audios-app-alaq/prolong-ou.mp3',
+  'أَا':'audios-app-alaq/prolong-a.mp3',
+  'نِي':'audios-app-alaq/prolong-ni.mp3',
+  'مَا':'audios-app-alaq/prolong-ma.mp3',
+  'لُو':'audios-app-alaq/prolong-lou.mp3',
+  'يَا':'audios-app-alaq/prolong-yaa.mp3',
+  'يِي':'audios-app-alaq/prolong-yii.mp3',
+  'يُو':'audios-app-alaq/prolong-you.mp3',
+  'وَا':'audios-app-alaq/prolong-waa.mp3',
+  'وِي':'audios-app-alaq/prolong-wii.mp3',
+  'وُو':'audios-app-alaq/prolong-wou.mp3',
+  'أَ':'audios-app-alaq/hamza-a.mp3',
+  'إِ':'audios-app-alaq/hamza-i.mp3',
+  'أُ':'audios-app-alaq/hamza-ou.mp3',
+  'م':'audios-app-alaq/lettre-mim.mp3',
+  'ل':'audios-app-alaq/lettre-lam.mp3',
+  'ن':'audios-app-alaq/lettre-noun.mp3',
+  'ي':'audios-app-alaq/lettre-ya.mp3',
+  'أ':'audios-app-alaq/lettre-hamza.mp3',
+  'و':'audios-app-alaq/lettre-waw.mp3',
+  'ء':'audios-app-alaq/lettre-hamza.mp3'
 };
 
 function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) : écrase, bascule, joue le son visible
@@ -1995,15 +2037,28 @@ function lvpHit(el,word){ // slides Lettres vs prolongations : rejoue l'anim + a
   try{ el.classList.remove('lit'); void el.offsetWidth; el.classList.add('lit'); }catch(e){}
   warmVoices(); if(word) speak(word);
 }
+function _speakSynth(t){ // voix de synthèse (repli) : ar-SA via expandShadda
+  if(!SND||!('speechSynthesis'in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(expandShadda(t));u.lang='ar-SA';u.rate=.75;
+  const v=bestVoice('ar');if(v)u.voice=v;
+  setTimeout(()=>speechSynthesis.speak(u),60);
+}
 function speak(t){
   try{
+    if(!SND)return;
     const url=AUDIO[t];
-    if(url){ if(!SND)return; const a=new Audio(url); a.play().catch(()=>{}); return; }
-    if(!SND||!('speechSynthesis'in window))return;
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(expandShadda(t));u.lang='ar-SA';u.rate=.75;
-    const v=bestVoice('ar');if(v)u.voice=v;
-    setTimeout(()=>speechSynthesis.speak(u),60);
+    if(url){
+      const a=new Audio(url);
+      let fellBack=false;
+      const toSynth=()=>{ if(fellBack)return; fellBack=true; _speakSynth(t); };
+      a.addEventListener('playing',()=>{ fellBack=true; }); // le fichier joue : on neutralise le repli
+      a.addEventListener('error',toSynth);                  // fichier 404 / illisible -> synthèse
+      const p=a.play();
+      if(p&&p.catch)p.catch(()=>toSynth());                 // lecture refusée -> synthèse
+      return;
+    }
+    _speakSynth(t);                                         // aucun audio enregistré -> synthèse
   }catch(e){}
 }
 // Réveille le moteur vocal dès la 1re interaction (sinon le 1er son est muet sur iOS)
