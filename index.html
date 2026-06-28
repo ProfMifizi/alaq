@@ -1104,6 +1104,7 @@ const INSTR_LIST=[
   ['associe','Associe chaque mot arabe à sa traduction'],
   ['trace','Repasse sur le modèle avec ton doigt'],
   ['explore-3','Touche au moins 3 lettres pour les entendre.'],
+  ['explore-cases','Touche chaque case au moins 3 fois — et continue autant que tu veux.'],
   ['combine','Pour former un son, on associe souvent une consonne et une voyelle. Touche pour assembler.'],
   ['haraka-intro','À la place, un petit signe habille la lettre : le <b>haraka</b>. Il en existe trois. Touche chaque signe pour entendre son son.'],
   ['assoc-haraka','Associe la lettre à chaque haraka et écoute la syllabe obtenue.'],
@@ -1158,6 +1159,7 @@ function spokenInstr(st){
       if(st.audio)return 'Écoute, puis touche la bonne réponse';
       if(st.options&&st.options.some&&st.options.some(o=>o.snd))return 'Touche les haut-parleurs, écoute, puis choisis';
       return 'Choisis la bonne réponse';
+    case 'explore': return 'Touche chaque case au moins 3 fois — et continue autant que tu veux.';
     default: return ''; // jamais de titre
   }
 }
@@ -1174,7 +1176,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 28/06h · le son joue à chaque tap (enregistrement prioritaire, sinon IA)';
+const BUILD='maj 28/06j · sons des unités 1 et 2 complétés dans la table audio';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
@@ -2263,6 +2265,28 @@ const AUDIO={
   'عَا':'audios-app-alaq/ain-alif-son-prolonge.mp3',
   'عِي':'audios-app-alaq/ain-ya-son-prolonge.mp3',
   'عُو':'audios-app-alaq/ain-waw-son-prolonge.mp3',
+  'مَ':'audios-app-alaq/mim-fatha-son-court.mp3',
+  'مِ':'audios-app-alaq/mim-kasra-son-court.mp3',
+  'مُ':'audios-app-alaq/mim-damma-son-court.mp3',
+  'لَ':'audios-app-alaq/lam-fatha-son-court.mp3',
+  'لِ':'audios-app-alaq/lam-kasra-son-court.mp3',
+  'لُ':'audios-app-alaq/lam-damma-son-court.mp3',
+  'نَ':'audios-app-alaq/noun-fatha-son-court.mp3',
+  'نِ':'audios-app-alaq/noun-kasra-son-court.mp3',
+  'نُ':'audios-app-alaq/noun-damma-son-court.mp3',
+  'مِي':'audios-app-alaq/mim-ya-son-prolonge.mp3',
+  'مُو':'audios-app-alaq/mim-waw-son-prolonge.mp3',
+  'لَا':'audios-app-alaq/lam-alif-son-prolonge.mp3',
+  'لِي':'audios-app-alaq/lam-ya-son-prolonge.mp3',
+  'نَا':'audios-app-alaq/noun-alif-son-prolonge.mp3',
+  'نُو':'audios-app-alaq/noun-waw-son-prolonge.mp3',
+  'ا':'audios-app-alaq/alif-isolee-nom-de-la-lettre.mp3',
+  'يِ':'audios-app-alaq/ya-kasra-son-court.mp3',
+  'يُ':'audios-app-alaq/ya-damma-son-court.mp3',
+  'وِ':'audios-app-alaq/waw-kasra-son-court.mp3',
+  'وُ':'audios-app-alaq/waw-damma-son-court.mp3',
+  'أِ':'audios-app-alaq/alif-kasra-son-court.mp3',
+  'أِي':'audios-app-alaq/alif-ya-son-prolonge.mp3',
 };
 
 function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) : écrase, bascule, joue le son visible
