@@ -1305,6 +1305,8 @@ function spokenInstr(st){
 }
 function today(){return new Date().toISOString().slice(0,10)}
 (function(){if(S.heartDay!==today()){S.hearts=HEARTS_MAX;S.heartDay=today();save();}})();
+// Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
+(function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();save();} })();
 
 /* ================= ACCUEIL ================= */
 const OFFS=[0,46,64,46,0,-46,-64,-46,0];
@@ -1316,7 +1318,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 02/07i · le verset entier se réécrit sur UN SEUL écran (construction sur place)';
+const BUILD='maj 02/07j · migration des anciennes sauvegardes vers les 7 vies';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
