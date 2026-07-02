@@ -661,6 +661,17 @@ const UNITS=[
  'ن':[{pts:[[187,174],[189,206],[182,233],[164,252],[140,254],[121,238],[111,211]]},
       {dot:[146,157]}],
    },
+   strokesPos:{ // formes liées (début=1, milieu=2, fin=3) — Naskh, base y=215
+ 'م':{1:[{pts:[[180,151],[192,162],[196,178],[189,192],[173,198],[157,191],[151,177],[157,163],[171,152],[179,151],[153,183],[147,200],[125,206],[90,206]]}],
+      2:[{pts:[[224,207],[190,205],[164,196],[165,172],[152,153],[131,163],[122,180],[131,193],[148,198],[128,204],[95,206],[67,206]]}],
+      3:[{pts:[[214,207],[178,204],[152,196],[158,174],[148,154],[124,153],[107,167],[102,184],[112,198],[130,203],[108,204],[95,225],[96,250],[100,270]]}]},
+ 'ل':{1:[{pts:[[172,89],[171,140],[171,190],[163,205],[135,207],[110,207]]}],
+      2:[{pts:[[208,207],[170,206],[148,200],[145,150],[144,90],[145,150],[146,198],[120,206],[83,206]]}],
+      3:[{pts:[[220,207],[186,205],[166,197],[160,140],[157,90],[161,150],[165,200],[167,222],[160,243],[137,256],[110,257],[92,247],[84,230]]}]},
+ 'ن':{1:[{pts:[[184,158],[180,178],[172,195],[158,205],[128,208],[104,208]]},{dot:[169,118]}],
+      2:[{pts:[[212,207],[178,206],[158,196],[150,182],[142,196],[122,206],[80,206]]},{dot:[147,140]}],
+      3:[{pts:[[219,207],[186,205],[166,196],[161,178],[164,200],[163,220],[152,242],[128,252],[102,247],[87,232],[84,218]]},{dot:[122,157]}]},
+   },
    words:[
  {w:'نَمْلٌ',b:'نمل',fr:'une fourmi',e:'🐜',say:'naml',confus:['نَامِل','نَمالٌ','مَنْلٌ']},
  {w:'مَنٌّ',b:'من',fr:'de la manne',e:'🍯',say:'mann',confus:['مَنْ','نَمٌّ','مَانٌ']},
@@ -684,6 +695,13 @@ const UNITS=[
  'ي':[{pts:[[191,152],[178,157],[167,168],[161,182],[164,196],[175,206],[186,215],[190,227],[186,240],[173,251],[153,257],[132,255],[116,243],[110,225],[109,207]]},{dot:[129,284]},{dot:[158,282]}],
  'أ':[{pts:[[151,95],[152,201]]},{pts:[[153,43],[146,46],[141,53],[140,61],[146,67],[157,67]]}],
  'و':[{pts:[[172,163],[157,158],[138,160],[125,169],[127,181],[137,193],[153,197],[171,191],[179,185],[180,193],[175,210],[162,228],[143,240],[122,245]]}],
+   },
+   strokesPos:{
+ 'ي':{1:[{pts:[[186,145],[183,170],[176,192],[160,204],[130,208],[98,208]]},{dot:[184,237]},{dot:[155,239]}],
+      2:[{pts:[[219,207],[184,206],[166,196],[158,178],[148,196],[128,206],[73,206]]},{dot:[163,237]},{dot:[134,239]}],
+      3:[{pts:[[229,207],[152,208],[170,220],[176,232],[166,246],[140,252],[105,248],[80,232],[76,212]]},{dot:[131,282]},{dot:[103,284]}]},
+ 'أ':{3:[{pts:[[188,207],[160,207],[138,205]]},{pts:[[125,89],[126,150],[128,200]]},{pts:[[126,41],[113,45],[110,55],[114,64],[124,68],[135,66]]}]},
+ 'و':{3:[{pts:[[208,207],[175,205],[145,201],[118,192],[107,178],[112,162],[128,149],[146,158],[152,174],[147,188],[132,196],[150,203],[143,222],[128,240],[108,250],[92,241]]}]},
    },
    words:[
  {w:'يَوْمٌ',b:'يوم',fr:'un jour',e:'☀️',say:'yawm',confus:['يُومٌ','يَوْنٌ','يَوْلٌ']},
@@ -710,6 +728,15 @@ const UNITS=[
  'ب':[{pts:[[205,140],[207,158],[199,177],[177,194],[145,200],[116,192],[94,172]]},{dot:[151,248]}],
  'ر':[{pts:[[161,154],[165,169],[168,189],[161,215],[142,235],[117,245]]}],
  'ع':[{pts:[[158,142],[143,129],[126,131],[113,142],[108,157],[112,168],[124,174],[143,175],[160,172],[173,176],[160,183],[139,187],[124,196],[115,213],[113,232],[122,249],[140,260],[163,263],[186,259],[203,251]]}],
+   },
+   strokesPos:{
+ 'ب':{1:[{pts:[[184,158],[180,178],[172,195],[158,205],[128,208],[104,208]]},{dot:[170,241]}],
+      2:[{pts:[[212,207],[178,206],[158,196],[150,180],[142,196],[122,206],[80,206]]},{dot:[148,241]}],
+      3:[{pts:[[241,207],[200,205],[185,180],[175,194],[155,210],[115,211],[85,204],[67,188],[64,167]]},{dot:[125,241]}]},
+ 'ر':{3:[{pts:[[202,207],[172,205],[150,201],[136,175],[132,152],[138,178],[145,205],[142,222],[130,238],[105,246],[88,242]]}]},
+ 'ع':{1:[{pts:[[164,144],[146,149],[136,166],[139,184],[155,193],[174,191],[196,193],[204,203],[175,208],[130,208],[84,207]]}],
+      2:[{pts:[[224,207],[185,206],[150,200],[128,186],[118,172],[126,156],[146,145],[162,158],[168,175],[160,190],[143,196],[120,204],[90,206],[67,206]]}],
+      3:[{pts:[[210,207],[175,205],[145,199],[118,185],[99,168],[110,150],[130,144],[148,158],[155,175],[147,190],[130,195],[113,203],[103,225],[102,242],[115,257],[140,264],[162,260],[175,250]]}]},
    },
    words:[
  {w:'رَبٌّ',b:'رب',fr:'un maître, un seigneur',e:'🤲',say:'rabb',confus:['بَرٌّ','رَبْ','رَنٌّ']},
@@ -740,6 +767,15 @@ const UNITS=[
  'د':[{pts:[[160,141],[168,153],[172,167],[169,183],[157,197],[139,206],[121,210]]}],
  'ك':[{pts:[[181,91],[184,133],[186,170],[185,194],[177,206],[161,210],[141,210],[123,207],[110,200],[104,193]]},
       {pts:[[145,140],[134,149],[131,155],[141,159],[149,164],[144,171],[131,177]]}],
+   },
+   strokesPos:{
+ 'س':{1:[{pts:[[220,195],[214,155],[213,150],[207,178],[199,201],[190,202],[181,177],[178,171],[172,192],[164,202],[152,201],[136,186],[131,196],[112,206],[70,207]]}],
+      2:[{pts:[[248,207],[210,205],[196,190],[192,167],[186,188],[178,201],[168,201],[155,182],[150,192],[140,202],[128,202],[110,192],[104,200],[80,206],[44,207]]}],
+      3:[{pts:[[260,207],[225,205],[208,192],[206,167],[199,188],[190,201],[180,201],[168,181],[163,192],[152,202],[142,202],[122,193],[118,202],[124,215],[124,232],[114,248],[90,257],[62,250],[47,235],[44,220]]}]},
+ 'د':{3:[{pts:[[209,207],[175,205],[152,201],[138,172],[133,142],[142,165],[150,190],[135,203],[110,206],[90,203]]}]},
+ 'ك':{1:[{pts:[[203,92],[178,105],[152,118],[135,132],[138,148],[158,160],[177,170],[189,183],[181,198],[150,207],[92,207]]}],
+      2:[{pts:[[228,207],[195,206],[168,204]]},{pts:[[181,91],[155,110],[125,128],[108,140],[118,152],[140,160],[156,170],[163,182],[157,196],[130,206],[64,206]]}],
+      3:[{pts:[[234,207],[200,205],[176,196],[171,140],[174,89],[171,150],[173,196],[160,205],[120,209],[95,207],[78,196],[71,183]]},{pts:[[128,140],[116,150],[114,158],[131,165],[127,175]]}]},
    },
    words:[
  {w:'دَرْسٌ',b:'درس',fr:'une leçon',e:'📖',say:'dars',confus:['دَرَسٌ','دَرْنٌ','رَرْسٌ']},
@@ -1319,7 +1355,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 02/07l · topbar à jour au démarrage (7 cœurs) · barre du bas stabilisée sur iPhone';
+const BUILD='maj 02/07m2 · correctif : paramètre de position masqué par la fonction pos(e)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
@@ -1655,14 +1691,16 @@ function renderStep(){
   if(st.type==='trace'){
     const uu=(typeof st.u==='number')?st.u:curU;
     const d=UNITS[uu].alpha[st.L];
-    body.innerHTML='<div class="q-title">À toi d\u2019écrire : '+st.L+' ('+d.n+')</div>'+
+    const posName={1:'au début',2:'au milieu',3:'à la fin'}[st.pos]||'isolée';
+    const posGlyph=st.pos?formGlyph(st.L,st.pos):st.L;
+    body.innerHTML='<div class="q-title">À toi d\u2019écrire : '+posGlyph+' ('+d.n+' · '+posName+')</div>'+
       '<div class="hint" style="margin:-8px 0 14px">Pose ton doigt sur le point vert et suis le chemin de la lettre jusqu\u2019au bout. Astuce : '+d.mn+'.</div>'+
       '<canvas id="trace" class="trace"></canvas>'+
       '<div class="hint" id="traceMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
       '<div class="trow">'+
       '<button class="speak" onclick="window._traceDemo&&window._traceDemo()">▶️ Regarder la démo</button>'+
       '<button class="speak" onclick="window._traceClear&&window._traceClear()">🧽 Recommencer</button></div>';
-    setTimeout(()=>setupTrace(st.L,uu),50);
+    setTimeout(()=>setupTrace(st.L,uu,st.pos),50);
     return;
   }
 
@@ -2358,7 +2396,7 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
    Arabic = écriture linéaire d'apprentissage). Le trait se dore au fur et à mesure ;
    point vert + flèche de départ AUTO-DÉRIVÉS du premier segment (plus de données
    starts à calibrer). Les points (nuqat) se posent en touchant leur cercle. */
-function setupTrace(L,u){
+function setupTrace(L,u,posN){
   /* ===== TRACÉ GUIDÉ — rendu « Style A : la lettre s'illumine » (validé par Myriam 02/07)
      Chemin densifié (spline Catmull-Rom, un point tous les ~3 px) et accroché au centre
      du trait du glyphe Noto. L'or est découpé par le glyphe lui-même (masque) : rien ne
@@ -2371,11 +2409,13 @@ function setupTrace(L,u){
   const AR_FONT='190px "Noto Naskh Arabic",serif';
   function letterStyle(g){g.font=AR_FONT;g.textAlign='center';g.textBaseline='alphabetic';}
   const UU=UNITS[(typeof u==='number')?u:curU]||UNITS[curU];
-  const STK=(UU.strokes&&UU.strokes[L])||[];
+  const GL=posN?formGlyph(L,posN):L; // glyphe de la forme (avec traits de liaison)
+  const STK=posN?((UU.strokesPos&&UU.strokesPos[L]&&UU.strokesPos[L][posN])||[])
+              :((UU.strokes&&UU.strokes[L])||[]);
   // — encre du glyphe : sert à accrocher le chemin et à masquer le remplissage —
   const inkC=document.createElement('canvas');inkC.width=W;inkC.height=W;
   const inkX=inkC.getContext('2d',{willReadFrequently:true});
-  letterStyle(inkX);inkX.fillStyle='#fff';inkX.fillText(L,W/2,215);
+  letterStyle(inkX);inkX.fillStyle='#fff';inkX.fillText(GL,W/2,215);
   const inkD=inkX.getImageData(0,0,W,W).data;
   const ink=i=>inkD[i*4+3]>140;
   function snapPt(p,R){
@@ -2431,7 +2471,7 @@ function setupTrace(L,u){
         for(let k=1;k<=upTo;k++)o.lineTo(p.pts[k][0],p.pts[k][1]);o.stroke();}
     });
     o.globalCompositeOperation='destination-in';
-    letterStyle(o);o.fillStyle='#fff';o.fillText(L,W/2,215);
+    letterStyle(o);o.fillStyle='#fff';o.fillText(GL,W/2,215);
     o.globalCompositeOperation='source-over';
   }
   function arrowAt(pts,i0){
@@ -2454,7 +2494,7 @@ function setupTrace(L,u){
     });
     x.strokeStyle='rgba(220,144,46,.45)';x.lineWidth=1.6;
     x.beginPath();x.moveTo(14,215);x.lineTo(W-14,215);x.stroke();
-    letterStyle(x);x.fillStyle='rgba(220,144,46,.16)';x.fillText(L,W/2,215);
+    letterStyle(x);x.fillStyle='rgba(220,144,46,.16)';x.fillText(GL,W/2,215);
     goldLayer(st8);
     x.drawImage(off,0,0,W,W);
     if(!showGuides)return;
@@ -3231,16 +3271,32 @@ function learnedLettersList(){ // lettres des unités dont « Mémoriser » est 
   });
   return out;
 }
+function formsOf(L,u){ // formes disponibles d'une lettre : isolée puis début/milieu/fin
+  const out=[{type:'trace',L:L,u:u}];
+  const sp=UNITS[u].strokesPos&&UNITS[u].strokesPos[L];
+  if(sp)[1,2,3].forEach(function(p){ if(sp[p])out.push({type:'trace',L:L,u:u,pos:p}); });
+  return out;
+}
 function startLettersReview(oneL,oneU){
   QCTX=null;
   let steps;
-  if(oneL){ steps=[{type:'trace',L:oneL,u:oneU}]; }
+  if(oneL){ steps=formsOf(oneL,oneU); } // la lettre sous TOUTES ses formes
   else{
     const ls=shuffle(learnedLettersList());
     if(!ls.length){toast('Termine d\u2019abord « Mémoriser » de l\u2019unité 1 🌱');return;}
     steps=ls.map(function(x){return {type:'trace',L:x.L,u:x.u};});
   }
   launchQuranReview(steps);
+}
+function startFormsReview(){ // 🎭 toutes les formes liées, mélangées
+  QCTX=null;
+  const steps=[];
+  learnedLettersList().forEach(function(x){
+    const sp=UNITS[x.u].strokesPos&&UNITS[x.u].strokesPos[x.L];
+    if(sp)[1,2,3].forEach(function(p){ if(sp[p])steps.push({type:'trace',L:x.L,u:x.u,pos:p}); });
+  });
+  if(!steps.length){toast('Termine d\u2019abord « Mémoriser » de l\u2019unité 1 🌱');return;}
+  launchQuranReview(shuffle(steps));
 }
 function qNextVi(){
   if(!QCTX)return -1;
@@ -3323,10 +3379,13 @@ function renderReviser(sub){
     h+='<div class="ccard">'+
       '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0 0 12px">Repasse chaque lettre au doigt — elle s\u2019illumine sous ton tracé. <b style="color:var(--cream)">'+ls.length+' lettres</b> apprises.</p>'+
       (ls.length
-        ?'<button class="ritem all" onclick="startLettersReview()">⚡ Toutes les lettres ('+ls.length+'), mélangées</button>'+
-         ls.map(function(x){return '<button class="ritem" onclick="startLettersReview(\''+x.L+'\','+x.u+')">'+x.n+
-           ' <span style="color:var(--muted);font-weight:700">· unité '+(x.u+1)+'</span>'+
-           '<span class="var" style="font-size:24px">'+x.L+'</span></button>';}).join('')
+        ?'<button class="ritem all" onclick="startLettersReview()">⚡ Toutes les lettres isolées ('+ls.length+'), mélangées</button>'+
+         '<button class="ritem all" onclick="startFormsReview()">🎭 Toutes les formes liées (début·milieu·fin), mélangées</button>'+
+         ls.map(function(x){
+           const nf=formsOf(x.L,x.u).length;
+           return '<button class="ritem" onclick="startLettersReview(\''+x.L+'\','+x.u+')">'+x.n+
+           ' <span style="color:var(--muted);font-weight:700">· '+nf+' forme'+(nf>1?'s':'')+'</span>'+
+           '<span class="var" style="font-size:22px">'+(UNITS[x.u].strokesPos&&UNITS[x.u].strokesPos[x.L]?[x.L].concat([1,2,3].filter(p=>UNITS[x.u].strokesPos[x.L][p]).map(p=>formGlyph(x.L,p))).join(' '):x.L)+'</span></button>';}).join('')
         :'<div class="cempty"><div class="ce-ic">🌱</div>Termine d\u2019abord « Mémoriser » de l\u2019unité 1.</div>')+
       '</div>';
   }
