@@ -27,7 +27,7 @@
     --quran:'Amiri',serif;                /* UNIQUEMENT le texte du Qorān */
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{touch-action:manipulation} /* iOS : pas de zoom au double-tap */
+  html,body{touch-action:manipulation;overscroll-behavior:none} /* iOS : pas de zoom au double-tap ni de rebond élastique */
   html,body{height:100%}
   body{background:var(--bg);color:var(--cream);font-family:var(--ui);line-height:1.4;overflow-x:hidden;
     background-image:radial-gradient(circle at 50% 0%, #3a302b 0, #2c2624 38%, var(--bg) 75%);
@@ -52,7 +52,7 @@
   .narr-link:active{color:var(--gold2)}
 
   /* ====== Parcours ====== */
-  .wrap{max-width:520px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top,0px)) 16px 120px}
+  .wrap{max-width:520px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top,0px)) 16px 120px;min-height:100vh;min-height:100dvh}
   .hero{text-align:center;padding:26px 14px 8px}
   .hero img{width:120px;height:auto;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.45);border:1px solid var(--line)}
   .hero h1{font-size:15px;color:var(--muted);font-weight:700;margin-top:12px}
@@ -457,7 +457,7 @@
 .botnav .bn .bi{font-size:22px;line-height:1;opacity:.8}
 .botnav .bn.active{color:var(--gold)}
 .botnav .bn.active .bi{opacity:1}
-.view{max-width:520px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top,0px)) 16px 120px}
+.view{max-width:520px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top,0px)) 16px 120px;min-height:100vh;min-height:100dvh}
 .view h1.vh{font-family:var(--ui);font-size:22px;font-weight:900;color:var(--cream);margin:6px 0 4px}
 .view .vsub{color:var(--muted);font-size:13px;font-family:var(--ui);margin:0 0 18px}
 .subnav{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 18px;padding:0 16px;scrollbar-width:none}
@@ -544,7 +544,7 @@
   <div class="stats">
     <div class="stat">🔥 <span id="st-streak">0</span></div>
     <div class="stat">⭐ <span id="st-xp">0</span></div>
-    <div class="stat">❤️ <span id="st-hearts">5</span></div>
+    <div class="stat">❤️ <span id="st-hearts">7</span></div>
   </div>
 </div>
 
@@ -1319,7 +1319,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 02/07k · Réviser ✏️ Les lettres (tracé) · iPhone : safe areas + anti-zoom';
+const BUILD='maj 02/07l · topbar à jour au démarrage (7 cœurs) · barre du bas stabilisée sur iPhone';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
@@ -3011,6 +3011,7 @@ function lastUnlockedIndex(){ let last=0; UNITS.forEach((U,i)=>{ if(unitUnlocked
 function unitVocabCount(){ let n=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))n+=(U.words||[]).length; }); return n; }
 
 function showTab(name,sub){
+  refreshStats(); // la barre du haut reflète toujours l'état réel (cœurs, étoiles, série)
   const map={home:'home',cours:'view-cours',reviser:'view-reviser',prog:'view-prog'};
   Object.keys(map).forEach(t=>{ const el=document.getElementById(map[t]); if(el)el.style.display=(t===name)?'':'none';
     const b=document.getElementById('bn-'+t); if(b)b.classList.toggle('active',t===name); });
@@ -3588,6 +3589,7 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
 }
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
   const n=document.getElementById('narrtog');if(n)n.textContent=NARR?'🗣️':'🚫';})();
+refreshStats();
 showTab('home');
 </script>
 </body>
