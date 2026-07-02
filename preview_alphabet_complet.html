@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALAQ — L'alphabet complet : les 16 lettres restantes</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#252120;--panel:#322B28;--line:#4A403A;--gold:#DC902E;--gold2:#E8A94F;
+    --cream:#F2E9DA;--muted:#B9A99A;--green:#6FB08A}
+  body{background:#252120;color:var(--cream);font-family:'Nunito',sans-serif;padding:18px;
+    background-image:radial-gradient(circle at 50% 0%, #3a302b 0, #2c2624 38%, #252120 75%)}
+  h1{font-size:20px;font-weight:900;color:var(--gold)}
+  h2{font-size:16px;font-weight:900;margin:26px 0 4px}
+  p{font-size:13.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5;max-width:640px}
+  .row{display:flex;flex-wrap:wrap;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}
+  .card .nm{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px}
+  canvas{display:block;border-radius:10px;background:#2a2422;touch-action:none}
+  .tag{display:inline-block;background:var(--gold);color:#1a1410;font-weight:900;font-size:12px;
+    border-radius:8px;padding:4px 10px;margin:2px 0 8px}
+  .note{background:#22332B;border-left:3px solid var(--green);border-radius:10px;padding:10px 14px;
+    font-size:13px;color:var(--cream);max-width:640px;margin:10px 0}
+  button{background:var(--panel);border:2px solid var(--line);color:var(--gold2);border-radius:12px;
+    padding:9px 16px;font-family:'Nunito';font-weight:800;font-size:13px;cursor:pointer;margin:4px 4px 0 0}
+</style>
+</head>
+<body>
+<h1>L'alphabet se complète : les 16 lettres restantes ✍️</h1>
+<p><b>60 formes calibrées</b> pour les 16 lettres des futures unités : ح ط ق ت ص غ ه ض ث ج خ ش ظ ف
+(4 formes chacune) et ذ ز (isolée + finale). Les lettres sœurs héritent du geste de leur base
+(ت ث ← ب · ش ← س · غ ← ع · ج خ ← ح · ظ ← ط · ض ← ص · ذ ← د · ز ← ر), points placés automatiquement.
+<b>Ta règle du « versant opposé »</b> (ع/و) est appliquée aux boucles liées. Vérifie les sens d'écriture !</p>
+
+<h2>Les 60 formes, animées en boucle</h2>
+<p>Rangée par lettre : isolée → début → milieu → fin. Le point vert = départ du tracé.</p>
+<div class="row" id="rowA"></div>
+
+<h2>Essaie avec ton doigt 👆 (style A)</h2>
+<p>Essaie le ه médian (le fameux « papillon ») et le ق final :</p>
+<div class="row" id="rowTry"></div>
+<div class="note"><b>Points à vérifier par toi 🎓 :</b><br>
+· <b>ح ج خ</b> : la tête (petit toit) puis la grande mâchoire — sens du toit : de droite vers le nez, puis retour.<br>
+· <b>ط ظ</b> : la boucle d'abord (versant opposé, fermée à droite), la hampe ensuite (2e trait, de haut en bas).<br>
+· <b>ص ض</b> : l'ovale pointu (par le versant opposé), puis la petite dent, puis le bol ou la sortie.<br>
+· <b>ه</b> : quatre visages très différents — surtout le médian « papillon » (boucle haute puis boucle basse).<br>
+· <b>ف ق</b> : la tête bouclée puis le corps ; في le ق final, le grand bol profond.<br>
+· <b>Dérivées</b> : ت ث ش غ ج خ ظ ض ذ ز héritent du geste de leur lettre sœur, points auto-placés.</div>
+<button onclick="location.reload()">↻ Rejouer les animations</button>
+
+<script>
+/* ============ données : ancres calibrées Noto Sans Arabic 190px, base y=215 ============ */
+const TAT='ـ';
+const JOINL=['ح','ط','ق','ت','ص','غ','ه','ض','ث','ج','خ','ش','ظ','ف'];
+const NONJ=['ذ','ز'];
+const FORMS=[];
+JOINL.forEach(L=>{ FORMS.push({k:L+'-0',L:L,pos:'isolée',txt:L});
+  [['1','début'],['2','milieu'],['3','fin']].forEach(([p,nom])=>FORMS.push({k:L+'-'+p,L:L,pos:nom,
+    txt:(p==='1'?L+TAT:p==='2'?TAT+L+TAT:TAT+L)})); });
+NONJ.forEach(L=>{ FORMS.push({k:L+'-0',L:L,pos:'isolée',txt:L});
+  FORMS.push({k:L+'-3',L:L,pos:'fin',txt:TAT+L}); });
+const SP={"ح-0":[{"pts":[[195,158],[160,149],[125,143],[119,152],[148,162],[182,166],[193,172],[152,180],[122,193],[111,212],[110,232],[122,249],[150,260],[178,262],[197,254]]}],"ح-1":[{"pts":[[144,152],[126,161],[147,164],[170,175],[192,182],[212,190],[196,203],[150,207],[74,207]]}],"ح-2":[{"pts":[[248,207],[210,205],[185,193],[152,172],[122,153],[105,160],[125,168],[152,178],[178,190],[160,201],[110,205],[44,206]]}],"ح-3":[{"pts":[[228,207],[192,205],[168,192],[140,172],[108,155],[86,152],[100,163],[128,172],[150,184],[158,196],[120,199],[95,205],[85,222],[83,238],[93,252],[118,262],[143,263],[164,254]]}],"ط-0":[{"pts":[[204,184],[193,160],[163,152],[136,161],[115,180],[97,200],[125,206],[165,205],[192,198],[204,187]]},{"pts":[[124,89],[123,140],[122,188]]}],"ط-1":[{"pts":[[213,186],[202,162],[172,152],[144,160],[120,180],[103,200],[140,205],[180,203],[205,196],[213,188],[160,206],[110,207],[68,207]]},{"pts":[[133,89],[132,140],[131,190]]}],"ط-2":[{"pts":[[244,207],[210,205],[196,185],[186,160],[155,152],[128,164],[108,183],[92,200],[130,206],[165,204],[188,196],[196,186],[150,206],[100,207],[48,207]]},{"pts":[[113,89],[112,140],[111,190]]}],"ط-3":[{"pts":[[238,207],[202,204],[186,190],[180,162],[150,152],[121,165],[100,185],[80,203],[115,206],[150,205],[173,198],[184,186]]},{"pts":[[101,89],[100,140],[99,190]]}],"ق-0":[{"pts":[[186,170],[170,155],[152,162],[147,178],[155,191],[172,196],[186,188],[190,175],[196,196],[196,220],[189,240],[160,255],[125,252],[106,236],[102,215]]},{"dot":[179,127]},{"dot":[150,130]}],"ق-1":[{"pts":[[186,150],[176,133],[157,130],[146,143],[146,160],[155,175],[172,181],[186,174],[190,160],[192,185],[184,198],[150,207],[92,208]]},{"dot":[179,103]},{"dot":[150,106]}],"ق-2":[{"pts":[[221,209],[186,207],[167,192],[163,172],[148,150],[128,162],[121,180],[128,193],[148,199],[163,190],[110,210],[70,210]]},{"dot":[132,123]},{"dot":[161,120]}],"ق-3":[{"pts":[[226,207],[192,205],[170,193],[166,172],[148,152],[128,163],[121,180],[128,194],[148,199],[164,190],[170,205],[172,222],[168,238],[150,252],[115,257],[90,247],[81,228],[80,212]]},{"dot":[155,125]},{"dot":[127,128]}],"ص-0":[{"pts":[[172,180],[195,160],[222,157],[238,168],[240,182],[222,196],[196,201],[175,190],[160,182],[150,190],[140,200],[136,212],[135,230],[120,248],[92,262],[70,251],[59,232],[60,220]]}],"ص-1":[{"pts":[[158,171],[188,157],[215,159],[229,172],[224,188],[200,199],[172,193],[155,177],[143,196],[124,187],[108,204],[75,208],[56,208]]}],"ص-2":[{"pts":[[258,208],[226,206],[204,199],[176,190],[148,177],[162,160],[190,156],[215,162],[228,175],[221,190],[200,200],[176,192],[150,179],[138,190],[126,186],[112,197],[99,189],[86,202],[60,207],[34,207]]}],"ص-3":[{"pts":[[268,208],[235,206],[212,199],[184,190],[155,177],[170,161],[196,156],[218,163],[231,177],[222,192],[200,201],[178,193],[152,180],[138,188],[126,184],[115,196],[117,212],[112,232],[95,250],[65,258],[42,246],[36,228],[37,216]]}],"ف-0":[{"pts":[[213,165],[208,140],[188,126],[170,136],[166,155],[172,172],[188,180],[205,175],[213,163],[215,182],[212,195],[190,202],[140,205],[105,200],[87,188],[84,176]]},{"dot":[186,99]}],"ف-1":[{"pts":[[190,168],[186,143],[168,129],[150,140],[146,158],[153,174],[170,181],[186,174],[191,160],[194,182],[186,197],[150,206],[92,207]]},{"dot":[165,102]}],"ف-2":[{"pts":[[221,209],[186,207],[167,193],[163,172],[147,146],[128,160],[122,178],[130,192],[148,198],[162,190],[110,209],[70,209]]},{"dot":[147,119]}],"ف-3":[{"pts":[[242,209],[208,206],[186,193],[183,168],[168,146],[148,158],[142,178],[150,193],[170,197],[182,186],[155,207],[110,209],[80,201],[63,183]]},{"dot":[168,118]}],"ه-0":[{"pts":[[147,134],[130,150],[123,172],[126,190],[110,206],[130,212],[152,209],[175,206],[192,196],[196,178],[186,166],[168,163],[157,173],[160,187],[173,194]]}],"ه-1":[{"pts":[[155,134],[138,150],[131,172],[136,192],[150,204],[168,210],[188,205],[202,192],[203,176],[192,166],[176,163],[166,172],[168,186],[180,193],[130,210],[84,210]]}],"ه-2":[{"pts":[[221,209],[184,207],[155,198],[136,184],[130,165],[140,147],[158,139],[166,158],[158,182],[142,198],[126,212],[124,228],[135,243],[152,250],[168,242],[171,226],[155,213],[120,210],[70,210]]}],"ه-3":[{"pts":[[208,210],[175,208],[152,200],[146,178],[143,148],[128,146],[110,162],[100,180],[104,196],[122,205],[142,203]]}],"ت-0":[{"pts":[[205,140],[208,156],[206,178],[186,200],[154,210],[122,205],[96,183]]},{"dot":[159,139]},{"dot":[130,142]}],"ت-1":[{"pts":[[184,147],[186,166],[184,189],[166,206],[133,211],[103,211]]},{"dot":[187,119]},{"dot":[158,122]}],"ت-2":[{"pts":[[218,212],[188,211],[165,200],[156,179],[145,196],[123,209],[81,210]]},{"dot":[162,141]},{"dot":[134,144]}],"ت-3":[{"pts":[[241,209],[209,207],[184,180],[178,191],[158,204],[123,210],[91,207],[70,190],[66,167]]},{"dot":[133,139]},{"dot":[104,142]}],"غ-0":[{"pts":[[158,140],[147,131],[130,131],[118,139],[110,153],[111,164],[121,172],[140,177],[158,174],[173,175],[164,179],[145,185],[129,196],[119,211],[117,230],[122,247],[138,260],[161,265],[186,262],[205,254]]},{"dot":[135,99]}],"غ-1":[{"pts":[[168,146],[153,150],[141,165],[141,183],[155,194],[174,198],[197,197],[207,199],[185,204],[142,210],[92,211]]},{"dot":[162,118]}],"غ-2":[{"pts":[[223,212],[193,211],[159,206],[137,190],[125,173],[125,159],[142,147],[158,156],[167,173],[161,190],[146,199],[124,208],[95,211],[71,211]]},{"dot":[146,118]}],"غ-3":[{"pts":[[209,209],[181,207],[150,202],[121,189],[100,169],[105,154],[122,147],[140,156],[150,171],[145,187],[130,194],[116,206],[105,223],[105,241],[112,254],[132,264],[154,263],[170,255]]},{"dot":[127,118]}],"ض-0":[{"pts":[[174,172],[194,155],[218,151],[233,161],[240,171],[230,189],[208,199],[175,176],[167,176],[159,185],[143,193],[138,205],[141,223],[125,244],[99,259],[75,253],[63,235],[62,221]]},{"dot":[183,116]}],"ض-1":[{"pts":[[162,168],[185,152],[209,152],[224,165],[226,183],[206,198],[180,202],[159,178],[145,194],[126,188],[111,205],[81,211],[59,211]]},{"dot":[169,116]}],"ض-2":[{"pts":[[257,212],[232,210],[210,204],[184,195],[150,168],[159,155],[182,151],[200,164],[228,171],[222,203],[204,204],[183,196],[150,168],[134,180],[127,184],[113,197],[100,191],[87,203],[63,210],[37,211]]},{"dot":[146,116]}],"ض-3":[{"pts":[[268,206],[242,205],[218,200],[195,194],[160,169],[169,156],[191,150],[208,159],[216,171],[215,184],[204,195],[187,198],[156,172],[142,181],[135,185],[117,192],[116,207],[115,230],[98,250],[71,260],[46,252],[38,234],[38,219]]},{"dot":[159,116]}],"ث-0":[{"pts":[[205,140],[208,156],[206,178],[186,200],[154,210],[122,205],[96,183]]},{"dot":[159,141]},{"dot":[132,143]},{"dot":[146,127]}],"ث-1":[{"pts":[[184,147],[186,166],[184,189],[166,206],[133,211],[103,211]]},{"dot":[161,123]},{"dot":[188,121]},{"dot":[174,107]}],"ث-2":[{"pts":[[218,212],[188,211],[165,200],[156,179],[145,196],[123,209],[81,210]]},{"dot":[136,145]},{"dot":[163,143]},{"dot":[149,129]}],"ث-3":[{"pts":[[241,209],[209,207],[184,180],[178,191],[158,204],[123,210],[91,207],[70,190],[66,167]]},{"dot":[106,143]},{"dot":[133,141]},{"dot":[119,127]}],"ج-0":[{"pts":[[199,158],[169,154],[130,146],[116,151],[142,158],[180,165],[195,167],[160,174],[125,191],[112,212],[111,232],[117,249],[143,263],[175,264],[199,256]]},{"dot":[160,215]}],"ج-1":[{"pts":[[147,153],[130,159],[146,162],[171,173],[195,183],[215,189],[205,209],[159,204],[81,211]]},{"dot":[176,237]}],"ج-2":[{"pts":[[247,212],[217,211],[191,202],[159,179],[129,156],[108,158],[121,164],[146,175],[172,190],[170,199],[120,208],[54,211]]},{"dot":[149,237]}],"ج-3":[{"pts":[[227,206],[198,205],[172,201],[143,175],[110,154],[86,151],[92,157],[118,164],[141,178],[151,192],[118,187],[95,201],[85,219],[85,237],[90,250],[108,263],[133,265],[154,258]]},{"dot":[126,221]}],"خ-0":[{"pts":[[199,158],[169,154],[130,146],[116,151],[142,158],[180,165],[195,167],[160,174],[125,191],[112,212],[111,232],[117,249],[143,263],[175,264],[199,256]]},{"dot":[153,117]}],"خ-1":[{"pts":[[147,153],[130,159],[146,162],[171,173],[195,183],[215,189],[205,209],[159,204],[81,211]]},{"dot":[165,122]}],"خ-2":[{"pts":[[247,212],[217,211],[191,202],[159,179],[129,156],[108,158],[121,164],[146,175],[172,190],[170,199],[120,208],[54,211]]},{"dot":[138,122]}],"خ-3":[{"pts":[[227,206],[198,205],[172,201],[143,175],[110,154],[86,151],[92,157],[118,164],[141,178],[151,192],[118,187],[95,201],[85,219],[85,237],[90,250],[108,263],[133,265],[154,258]]},{"dot":[127,123]}],"ش-0":[{"pts":[[233,192],[231,176],[227,156],[225,170],[227,194],[216,205],[206,203],[193,184],[195,171],[193,181],[188,197],[182,206],[173,206],[160,202],[147,184],[145,178],[143,190],[144,206],[148,220],[136,242],[122,256],[103,260],[84,256],[73,242],[69,221],[71,210]]},{"dot":[177,144]},{"dot":[204,142]},{"dot":[190,128]}],"ش-1":[{"pts":[[218,200],[215,165],[213,155],[210,176],[202,202],[193,207],[180,184],[179,176],[173,193],[166,205],[154,207],[136,191],[130,200],[114,209],[76,211]]},{"dot":[189,142]},{"dot":[162,144]},{"dot":[175,127]}],"ش-2":[{"pts":[[246,211],[217,211],[200,201],[192,171],[186,187],[180,203],[170,206],[154,187],[150,194],[141,205],[130,207],[111,199],[104,204],[83,210],[49,211]]},{"dot":[138,144]},{"dot":[165,142]},{"dot":[151,128]}],"ش-3":[{"pts":[[260,209],[233,207],[213,201],[206,171],[200,185],[193,199],[183,202],[169,184],[164,191],[154,202],[144,204],[125,196],[119,202],[123,215],[123,233],[114,247],[93,259],[67,257],[49,243],[45,227]]},{"dot":[153,144]},{"dot":[180,142]},{"dot":[166,128]}],"ظ-0":[{"pts":[[208,187],[202,169],[172,158],[143,169],[122,192],[93,201],[113,209],[155,211],[189,204],[205,192]]},{"pts":[[121,91],[120,132],[124,189]]},{"dot":[174,116]}],"ظ-1":[{"pts":[[216,186],[211,170],[185,157],[157,164],[137,179],[110,203],[136,209],[175,206],[203,197],[212,189],[174,206],[123,211],[77,211]]},{"pts":[[133,90],[134,132],[137,183]]},{"dot":[185,114]}],"ظ-2":[{"pts":[[243,212],[217,211],[200,202],[190,170],[161,157],[135,167],[115,186],[95,204],[122,209],[154,206],[182,202],[191,191],[157,206],[110,210],[58,211]]},{"pts":[[111,91],[110,132],[114,187]]},{"dot":[166,114]}],"ظ-3":[{"pts":[[237,212],[206,210],[184,200],[176,172],[146,158],[118,170],[98,192],[71,202],[94,209],[130,210],[158,205],[174,194]]},{"pts":[[95,93],[96,132],[82,198]]},{"dot":[150,116]}],"ذ-0":[{"pts":[[161,142],[166,153],[172,166],[175,181],[167,199],[145,208],[125,209]]},{"dot":[151,114]}],"ذ-3":[{"pts":[[208,211],[182,211],[159,207],[141,181],[134,147],[139,162],[148,188],[137,205],[114,210],[93,207]]},{"dot":[123,114]}],"ز-0":[{"pts":[[161,154],[165,167],[172,186],[170,213],[149,237],[119,246]]},{"dot":[151,126]}],"ز-3":[{"pts":[[202,210],[178,208],[155,205],[139,181],[133,157],[136,174],[144,200],[142,222],[131,240],[108,249],[92,245]]},{"dot":[125,126]}]};
+const W=300, FONT='190px "Noto Naskh Arabic"', BASE=215;
+
+/* ============ encre du glyphe + accrochage précis ============ */
+const INKS={};
+function inkMap(L){ // L = texte du glyphe (forme liée)
+  if(INKS[L])return INKS[L];
+  const c=document.createElement('canvas');c.width=W;c.height=W;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.font=FONT;x.textAlign='center';x.textBaseline='alphabetic';
+  x.fillStyle='#fff';x.fillText(L,W/2,BASE);
+  const d=x.getImageData(0,0,W,W).data, ink=new Uint8Array(W*W);
+  for(let i=0;i<W*W;i++)ink[i]=d[i*4+3]>140?1:0;
+  return INKS[L]=ink;
+}
+function snapPt(ink,p,R){
+  let best=null,bd=1e9;
+  for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){
+    const x=Math.round(p[0]+dx),y=Math.round(p[1]+dy);
+    if(x<0||y<0||x>=W||y>=W||!ink[y*W+x])continue;
+    const d=dx*dx+dy*dy; if(d<bd){bd=d;best=[x,y];}
+  }
+  if(!best)return p;
+  let sx=0,sy=0,n=0;
+  for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){
+    const x=best[0]+dx,y=best[1]+dy;
+    if(x<0||y<0||x>=W||y>=W||!ink[y*W+x])continue;
+    sx+=x;sy+=y;n++;
+  }
+  return n?[sx/n,sy/n]:best;
+}
+/* Catmull-Rom → points denses tous les ~3 px, accrochés au centre du trait */
+function densify(L,anchors){
+  const ink=inkMap(L);
+  const P=[anchors[0]].concat(anchors).concat([anchors[anchors.length-1]]);
+  const out=[];
+  for(let i=1;i<P.length-2;i++){
+    const p0=P[i-1],p1=P[i],p2=P[i+1],p3=P[i+2];
+    const seg=Math.max(2,Math.round(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/3));
+    for(let k=(i===1?0:1);k<=seg;k++){
+      const t=k/seg,t2=t*t,t3=t2*t;
+      out.push([
+        .5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
+        .5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)
+      ]);
+    }
+  }
+  return out.map(p=>snapPt(ink,p,8));
+}
+function buildPaths(key){
+  const F=FORMS.find(f=>f.k===key);const L=F.txt;
+  return SP[key].map(st=>{
+    if(st.dot)return {dot:snapPt(inkMap(L),st.dot,10)};
+    return {pts:densify(L,st.pts)};
+  });
+}
+function pathLen(pts){let l=0;for(let i=1;i<pts.length;i++)l+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);return l;}
+
+/* ============ rendus ============ */
+function ghost(x,L,alpha){
+  x.font=FONT;x.textAlign='center';x.textBaseline='alphabetic';
+  x.fillStyle='rgba(220,144,46,'+(alpha||.16)+')';x.fillText(L,W/2,BASE);
+}
+function baseline(x){
+  // Réglure de cahier : la lettre repose sur la LIGNE DE BASE (y=215).
+  // Interlignes légères tous les 65 px : hampes (85) · corps (150) · descentes (280).
+  [85,150,280].forEach(y=>{
+    x.strokeStyle='rgba(185,169,154,.16)';x.lineWidth=1;
+    x.beginPath();x.moveTo(14,y);x.lineTo(W-14,y);x.stroke();
+  });
+  x.strokeStyle='rgba(220,144,46,.45)';x.lineWidth=1.6;
+  x.beginPath();x.moveTo(14,215);x.lineTo(W-14,215);x.stroke();
+}
+function arrowAt(x,pts,i0){
+  const a=pts[Math.min(i0,pts.length-2)],b=pts[Math.min(i0+10,pts.length-1)];
+  const ang=Math.atan2(b[1]-a[1],b[0]-a[0]),len=24,ah=8;
+  const ex=a[0]+Math.cos(ang)*len,ey=a[1]+Math.sin(ang)*len;
+  x.strokeStyle='#6FB08A';x.fillStyle='#6FB08A';x.lineWidth=4.5;x.lineCap='round';
+  x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(ex,ey);x.stroke();
+  x.beginPath();x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang-.5),ey-ah*Math.sin(ang-.5));
+  x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang+.5),ey-ah*Math.sin(ang+.5));x.stroke();
+  x.beginPath();x.arc(a[0],a[1],8,0,7);x.fill();
+}
+/* Style A : la lettre se remplit d'or (masque = le glyphe lui-même) */
+function makeOff(){const c=document.createElement('canvas');c.width=W;c.height=W;return c;}
+function renderA(x,L,paths,state,off){
+  const o=off.getContext('2d');
+  o.clearRect(0,0,W,W);
+  o.lineCap='round';o.lineJoin='round';o.strokeStyle='#E8A94F';o.fillStyle='#E8A94F';
+  if(state.done){ o.fillRect(0,0,W,W); } // lettre finie : glyphe ENTIÈREMENT doré
+  else paths.forEach((p,i)=>{
+    if(p.dot){ if(state.dotsDone[i]){o.beginPath();o.arc(p.dot[0],p.dot[1],16,0,7);o.fill();} return; }
+    const upTo=(i<state.cur)?p.pts.length-1:(i===state.cur?state.prog:0);
+    if(upTo>0){o.lineWidth=(i<state.cur)?40:34;
+      o.beginPath();o.moveTo(p.pts[0][0],p.pts[0][1]);
+      for(let k=1;k<=upTo;k++)o.lineTo(p.pts[k][0],p.pts[k][1]);o.stroke();}
+  });
+  o.globalCompositeOperation='destination-in';
+  o.font=FONT;o.textAlign='center';o.textBaseline='alphabetic';
+  o.fillStyle='#fff';o.fillText(L,W/2,BASE);
+  o.globalCompositeOperation='source-over';
+  x.clearRect(0,0,W,W);baseline(x);ghost(x,L,.16);
+  x.drawImage(off,0,0,W,W);
+  // plume
+  const p=paths[state.cur];
+  if(p&&p.pts&&state.prog>0&&state.prog<p.pts.length-1){
+    const t=p.pts[state.prog];
+    x.fillStyle='#F2E9DA';x.beginPath();x.arc(t[0],t[1],5.5,0,7);x.fill();
+  }
+  if(!state.done&&p&&p.pts)arrowAt(x,p.pts,state.prog||0);
+  if(!state.done&&p&&p.dot){x.strokeStyle='#6FB08A';x.lineWidth=3;
+    x.beginPath();x.arc(p.dot[0],p.dot[1],13,0,7);x.stroke();}
+}
+/* Style B : ruban lumineux lissé */
+function renderB(x,L,paths,state){
+  x.clearRect(0,0,W,W);baseline(x);ghost(x,L,.2);
+  x.save();
+  x.shadowColor='rgba(220,144,46,.8)';x.shadowBlur=12;
+  x.lineWidth=11;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#E8A94F';
+  paths.forEach((p,i)=>{
+    if(p.dot){ if(state.dotsDone[i]){x.fillStyle='#E8A94F';x.beginPath();x.arc(p.dot[0],p.dot[1],9,0,7);x.fill();} return; }
+    const upTo=(i<state.cur)?p.pts.length-1:(i===state.cur?state.prog:0);
+    if(upTo>0){x.beginPath();x.moveTo(p.pts[0][0],p.pts[0][1]);
+      for(let k=1;k<=upTo;k++)x.lineTo(p.pts[k][0],p.pts[k][1]);x.stroke();}
+  });
+  x.restore();
+  const p=paths[state.cur];
+  if(p&&p.pts&&state.prog>0&&state.prog<p.pts.length-1){
+    const t=p.pts[state.prog];
+    x.fillStyle='#F2E9DA';x.beginPath();x.arc(t[0],t[1],5.5,0,7);x.fill();
+  }
+  if(!state.done&&p&&p.pts)arrowAt(x,p.pts,state.prog||0);
+  if(!state.done&&p&&p.dot){x.strokeStyle='#6FB08A';x.lineWidth=3;
+    x.beginPath();x.arc(p.dot[0],p.dot[1],13,0,7);x.stroke();}
+}
+
+/* ============ animation en boucle ============ */
+function animate(canvas,key,style,scale){
+  const F=FORMS.find(f=>f.k===key);const L=F.txt;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=W*scale*dpr;canvas.height=W*scale*dpr;
+  canvas.style.width=(W*scale)+'px';canvas.style.height=(W*scale)+'px';
+  const x=canvas.getContext('2d');x.scale(scale*dpr,scale*dpr);
+  const paths=buildPaths(key), off=makeOff();
+  const state={cur:0,prog:0,done:false,dotsDone:paths.map(()=>false)};
+  const SPEED=.14; let last=null;
+  function step(ts){
+    if(last===null)last=ts;
+    const dt=ts-last;last=ts;
+    if(!state.done){
+      const p=paths[state.cur];
+      if(!p){state.done=true;}
+      else if(p.dot){ state.dotWait=(state.dotWait||0)+dt;
+        if(state.dotWait>420){state.dotsDone[state.cur]=true;state.cur++;state.dotWait=0;} }
+      else{
+        state.prog=Math.min(p.pts.length-1,state.prog+Math.max(1,Math.round(dt*SPEED)));
+        if(state.prog>=p.pts.length-1){state.cur++;state.prog=0;}
+      }
+      if(state.cur>=paths.length)state.done=true;
+    } else {
+      state.wait=(state.wait||0)+dt;
+      if(state.wait>1400){state.cur=0;state.prog=0;state.done=false;state.wait=0;
+        state.dotsDone=paths.map(()=>false);}
+    }
+    (style==='A'?renderA:renderB)(x,L,paths,state,off);
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ============ tracé interactif (mécanique de l'app, rendu au choix) ============ */
+function interactive(canvas,key,style){
+  const F=FORMS.find(f=>f.k===key);const L=F.txt;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=W*dpr;canvas.height=W*dpr;
+  canvas.style.width=W+'px';canvas.style.height=W+'px';
+  const x=canvas.getContext('2d');x.scale(dpr,dpr);
+  const paths=buildPaths(key), off=makeOff();
+  const state={cur:0,prog:0,done:false,dotsDone:paths.map(()=>false)};
+  const TOL=26,START_R=34;
+  const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+  let tracking=false;
+  const draw=()=>(style==='A'?renderA:renderB)(x,L,paths,state,off);
+  function pos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;
+    return [(t.clientX-r.left)*W/r.width,(t.clientY-r.top)*W/r.height];}
+  function advance(pt){
+    const p=paths[state.cur];if(!p||!p.pts)return;
+    let guard=0;
+    while(state.prog<p.pts.length-1&&guard++<60){
+      let best=-1,bd=TOL;
+      for(let k=1;k<=6&&state.prog+k<p.pts.length;k++){
+        const d=dist(pt,p.pts[state.prog+k]);
+        if(d<bd){bd=d;best=state.prog+k;}
+      }
+      if(best<0)break;
+      state.prog=best;
+      if(dist(pt,p.pts[state.prog])<6)break;
+    }
+    draw();
+    if(state.prog>=p.pts.length-1){tracking=false;state.cur++;state.prog=0;
+      if(state.cur>=paths.length)state.done=true;draw();}
+  }
+  function down(e){
+    if(state.done)return;e.preventDefault();
+    const pt=pos(e),p=paths[state.cur];if(!p)return;
+    if(p.dot){ if(dist(pt,p.dot)<24){state.dotsDone[state.cur]=true;state.cur++;
+      if(state.cur>=paths.length)state.done=true;draw();} return; }
+    if(dist(pt,p.pts[state.prog])<START_R){tracking=true;advance(pt);}
+  }
+  function move(e){if(!tracking||state.done)return;e.preventDefault();advance(pos(e));}
+  canvas.onmousedown=down;canvas.onmousemove=move;
+  canvas.onmouseup=()=>tracking=false;canvas.onmouseleave=()=>tracking=false;
+  canvas.ontouchstart=down;canvas.ontouchmove=move;canvas.ontouchend=()=>tracking=false;
+  draw();
+}
+
+/* ============ montage de la page ============ */
+async function main(){
+  await document.fonts.load(FONT,'مـس');
+  await document.fonts.ready;
+  const rowA=document.getElementById('rowA');
+  FORMS.forEach(F=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML='<div class="nm">'+F.L+' · '+F.pos+'</div>';
+    const c=document.createElement('canvas');card.appendChild(c);
+    rowA.appendChild(card);
+    animate(c,F.k,'A',0.55);
+  });
+  const rowT=document.getElementById('rowTry');
+  [['ه-2','ه au milieu — à toi !'],['ق-3','ق final — à toi !']].forEach(([k,label])=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML='<div class="nm">'+label+'</div>';
+    const c=document.createElement('canvas');card.appendChild(c);
+    rowT.appendChild(card);
+    interactive(c,k,'A');
+  });
+}
+main();
+</script>
+</body>
+</html>
