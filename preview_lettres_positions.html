@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALAQ — Les lettres dans toutes leurs positions</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#252120;--panel:#322B28;--line:#4A403A;--gold:#DC902E;--gold2:#E8A94F;
+    --cream:#F2E9DA;--muted:#B9A99A;--green:#6FB08A}
+  body{background:#252120;color:var(--cream);font-family:'Nunito',sans-serif;padding:18px;
+    background-image:radial-gradient(circle at 50% 0%, #3a302b 0, #2c2624 38%, #252120 75%)}
+  h1{font-size:20px;font-weight:900;color:var(--gold)}
+  h2{font-size:16px;font-weight:900;margin:26px 0 4px}
+  p{font-size:13.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5;max-width:640px}
+  .row{display:flex;flex-wrap:wrap;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}
+  .card .nm{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px}
+  canvas{display:block;border-radius:10px;background:#2a2422;touch-action:none}
+  .tag{display:inline-block;background:var(--gold);color:#1a1410;font-weight:900;font-size:12px;
+    border-radius:8px;padding:4px 10px;margin:2px 0 8px}
+  .note{background:#22332B;border-left:3px solid var(--green);border-radius:10px;padding:10px 14px;
+    font-size:13px;color:var(--cream);max-width:640px;margin:10px 0}
+  button{background:var(--panel);border:2px solid var(--line);color:var(--gold2);border-radius:12px;
+    padding:9px 16px;font-family:'Nunito';font-weight:800;font-size:13px;cursor:pointer;margin:4px 4px 0 0}
+</style>
+</head>
+<body>
+<h1>Les lettres dans toutes leurs positions ✍️</h1>
+<p><b>28 nouvelles formes calibrées</b> : chaque lettre apprise en position <b>début · milieu · fin</b>
+(les 4 lettres qui ne s'attachent qu'à droite — أ د ر و — n'ont que la forme finale).
+Le <b>trait de liaison fait partie du tracé</b> : l'élève apprend aussi comment sa lettre s'accroche.
+Vérifie surtout les <b>sens d'écriture</b> (voir mes notes en bas) avant que j'intègre.</p>
+
+<h2>Les 28 formes, animées en boucle</h2>
+<p>Rangée par lettre : début → milieu → fin. Le point vert = départ du tracé.</p>
+<div class="row" id="rowA"></div>
+
+<h2>Essaie avec ton doigt 👆 (style A)</h2>
+<p>Essaie la forme médiane du م et la finale du س :</p>
+<div class="row" id="rowTry"></div>
+<div class="note"><b>Mes choix de ductus à vérifier (toi seule trancheras 🎓) :</b><br>
+· <b>م lié</b> : boucle pleine puis sortie (début), entrée par la liaison puis boucle (milieu/fin) — vérifie le sens de rotation.<br>
+· <b>ل et ك médians/finaux</b> : depuis la liaison, la plume MONTE la hampe puis REDESCEND (repassage), comme à l'école.<br>
+· <b>أ final</b> : 3 traits avec levée de plume — liaison, puis la barre du HAUT vers le bas, puis la hamza.<br>
+· <b>ك début/milieu</b> : le grand geste en S depuis la pointe haute ; au milieu, la liaison d'abord, puis le S.<br>
+· <b>د ر finaux</b> : depuis la liaison, la plume monte au sommet puis redescend le long du dos.</div>
+<button onclick="location.reload()">↻ Rejouer les animations</button>
+
+<script>
+/* ============ données : ancres calibrées Noto Sans Arabic 190px, base y=215 ============ */
+const TAT='ـ';
+const FORMS=[
+ {k:'م-1',L:'م',pos:'début',txt:'م'+TAT},{k:'م-2',L:'م',pos:'milieu',txt:TAT+'م'+TAT},{k:'م-3',L:'م',pos:'fin',txt:TAT+'م'},
+ {k:'ل-1',L:'ل',pos:'début',txt:'ل'+TAT},{k:'ل-2',L:'ل',pos:'milieu',txt:TAT+'ل'+TAT},{k:'ل-3',L:'ل',pos:'fin',txt:TAT+'ل'},
+ {k:'ن-1',L:'ن',pos:'début',txt:'ن'+TAT},{k:'ن-2',L:'ن',pos:'milieu',txt:TAT+'ن'+TAT},{k:'ن-3',L:'ن',pos:'fin',txt:TAT+'ن'},
+ {k:'ي-1',L:'ي',pos:'début',txt:'ي'+TAT},{k:'ي-2',L:'ي',pos:'milieu',txt:TAT+'ي'+TAT},{k:'ي-3',L:'ي',pos:'fin',txt:TAT+'ي'},
+ {k:'ب-1',L:'ب',pos:'début',txt:'ب'+TAT},{k:'ب-2',L:'ب',pos:'milieu',txt:TAT+'ب'+TAT},{k:'ب-3',L:'ب',pos:'fin',txt:TAT+'ب'},
+ {k:'ع-1',L:'ع',pos:'début',txt:'ع'+TAT},{k:'ع-2',L:'ع',pos:'milieu',txt:TAT+'ع'+TAT},{k:'ع-3',L:'ع',pos:'fin',txt:TAT+'ع'},
+ {k:'س-1',L:'س',pos:'début',txt:'س'+TAT},{k:'س-2',L:'س',pos:'milieu',txt:TAT+'س'+TAT},{k:'س-3',L:'س',pos:'fin',txt:TAT+'س'},
+ {k:'ك-1',L:'ك',pos:'début',txt:'ك'+TAT},{k:'ك-2',L:'ك',pos:'milieu',txt:TAT+'ك'+TAT},{k:'ك-3',L:'ك',pos:'fin',txt:TAT+'ك'},
+ {k:'أ-3',L:'أ',pos:'fin',txt:TAT+'أ'},{k:'و-3',L:'و',pos:'fin',txt:TAT+'و'},
+ {k:'ر-3',L:'ر',pos:'fin',txt:TAT+'ر'},{k:'د-3',L:'د',pos:'fin',txt:TAT+'د'},
+];
+const SP={
+ 'م-1':[{pts:[[180,151],[192,162],[196,178],[189,192],[173,198],[157,191],[151,177],[157,163],[171,152],[179,151],[153,183],[147,200],[125,206],[90,206]]}],
+ 'م-2':[{pts:[[224,207],[190,205],[164,196],[165,172],[152,153],[131,163],[122,180],[131,193],[148,198],[128,204],[95,206],[67,206]]}],
+ 'م-3':[{pts:[[214,207],[178,204],[152,196],[158,174],[148,154],[124,153],[107,167],[102,184],[112,198],[130,203],[108,204],[95,225],[96,250],[100,270]]}],
+ 'ل-1':[{pts:[[172,89],[171,140],[171,190],[163,205],[135,207],[110,207]]}],
+ 'ل-2':[{pts:[[208,207],[170,206],[148,200],[145,150],[144,90],[145,150],[146,198],[120,206],[83,206]]}],
+ 'ل-3':[{pts:[[220,207],[186,205],[166,197],[160,140],[157,90],[161,150],[165,200],[167,222],[160,243],[137,256],[110,257],[92,247],[84,230]]}],
+ 'ن-1':[{pts:[[184,158],[180,178],[172,195],[158,205],[128,208],[104,208]]},{dot:[169,118]}],
+ 'ن-2':[{pts:[[212,207],[178,206],[158,196],[150,182],[142,196],[122,206],[80,206]]},{dot:[147,140]}],
+ 'ن-3':[{pts:[[219,207],[186,205],[166,196],[161,178],[164,200],[163,220],[152,242],[128,252],[102,247],[87,232],[84,218]]},{dot:[122,157]}],
+ 'ي-1':[{pts:[[186,145],[183,170],[176,192],[160,204],[130,208],[98,208]]},{dot:[184,237]},{dot:[155,239]}],
+ 'ي-2':[{pts:[[219,207],[184,206],[166,196],[158,178],[148,196],[128,206],[73,206]]},{dot:[163,237]},{dot:[134,239]}],
+ 'ي-3':[{pts:[[229,207],[152,208],[170,220],[176,232],[166,246],[140,252],[105,248],[80,232],[76,212]]},{dot:[131,282]},{dot:[103,284]}],
+ 'ب-1':[{pts:[[184,158],[180,178],[172,195],[158,205],[128,208],[104,208]]},{dot:[170,241]}],
+ 'ب-2':[{pts:[[212,207],[178,206],[158,196],[150,180],[142,196],[122,206],[80,206]]},{dot:[148,241]}],
+ 'ب-3':[{pts:[[241,207],[200,205],[185,180],[175,194],[155,210],[115,211],[85,204],[67,188],[64,167]]},{dot:[125,241]}],
+ 'ع-1':[{pts:[[164,144],[146,149],[136,166],[139,184],[155,193],[174,191],[196,193],[204,203],[175,208],[130,208],[84,207]]}],
+ 'ع-2':[{pts:[[224,207],[186,205],[164,192],[168,168],[149,146],[124,157],[115,172],[128,182],[146,180],[150,195],[128,205],[68,206]]}],
+ 'ع-3':[{pts:[[210,207],[172,205],[152,193],[155,170],[131,145],[107,158],[98,172],[112,182],[130,180],[133,196],[113,205],[103,225],[102,240],[112,255],[135,263],[158,262],[173,252]]}],
+ 'س-1':[{pts:[[220,195],[214,155],[213,150],[207,178],[199,201],[190,202],[181,177],[178,171],[172,192],[164,202],[152,201],[136,186],[131,196],[112,206],[70,207]]}],
+ 'س-2':[{pts:[[248,207],[210,205],[196,190],[192,167],[186,188],[178,201],[168,201],[155,182],[150,192],[140,202],[128,202],[110,192],[104,200],[80,206],[44,207]]}],
+ 'س-3':[{pts:[[260,207],[225,205],[208,192],[206,167],[199,188],[190,201],[180,201],[168,181],[163,192],[152,202],[142,202],[122,193],[118,202],[124,215],[124,232],[114,248],[90,257],[62,250],[47,235],[44,220]]}],
+ 'ك-1':[{pts:[[203,92],[178,105],[152,118],[135,132],[138,148],[158,160],[177,170],[189,183],[181,198],[150,207],[92,207]]}],
+ 'ك-2':[{pts:[[228,207],[195,206],[168,204]]},{pts:[[181,91],[155,110],[125,128],[108,140],[118,152],[140,160],[156,170],[163,182],[157,196],[130,206],[64,206]]}],
+ 'ك-3':[{pts:[[234,207],[200,205],[176,196],[171,140],[174,89],[171,150],[173,196],[160,205],[120,209],[95,207],[78,196],[71,183]]},{pts:[[128,140],[116,150],[114,158],[131,165],[127,175]]}],
+ 'أ-3':[{pts:[[188,207],[160,207],[138,205]]},{pts:[[125,89],[126,150],[128,200]]},{pts:[[126,41],[113,45],[110,55],[114,64],[124,68],[135,66]]}],
+ 'و-3':[{pts:[[208,207],[172,204],[152,188],[149,166],[131,149],[112,160],[105,178],[113,192],[133,197],[148,188],[152,205],[143,225],[125,243],[105,250],[91,241]]}],
+ 'ر-3':[{pts:[[202,207],[172,205],[150,201],[136,175],[132,152],[138,178],[145,205],[142,222],[130,238],[105,246],[88,242]]}],
+ 'د-3':[{pts:[[209,207],[175,205],[152,201],[138,172],[133,142],[142,165],[150,190],[135,203],[110,206],[90,203]]}]
+};
+const W=300, FONT='190px "Noto Naskh Arabic"', BASE=215;
+
+/* ============ encre du glyphe + accrochage précis ============ */
+const INKS={};
+function inkMap(L){ // L = texte du glyphe (forme liée)
+  if(INKS[L])return INKS[L];
+  const c=document.createElement('canvas');c.width=W;c.height=W;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.font=FONT;x.textAlign='center';x.textBaseline='alphabetic';
+  x.fillStyle='#fff';x.fillText(L,W/2,BASE);
+  const d=x.getImageData(0,0,W,W).data, ink=new Uint8Array(W*W);
+  for(let i=0;i<W*W;i++)ink[i]=d[i*4+3]>140?1:0;
+  return INKS[L]=ink;
+}
+function snapPt(ink,p,R){
+  let best=null,bd=1e9;
+  for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){
+    const x=Math.round(p[0]+dx),y=Math.round(p[1]+dy);
+    if(x<0||y<0||x>=W||y>=W||!ink[y*W+x])continue;
+    const d=dx*dx+dy*dy; if(d<bd){bd=d;best=[x,y];}
+  }
+  if(!best)return p;
+  let sx=0,sy=0,n=0;
+  for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){
+    const x=best[0]+dx,y=best[1]+dy;
+    if(x<0||y<0||x>=W||y>=W||!ink[y*W+x])continue;
+    sx+=x;sy+=y;n++;
+  }
+  return n?[sx/n,sy/n]:best;
+}
+/* Catmull-Rom → points denses tous les ~3 px, accrochés au centre du trait */
+function densify(L,anchors){
+  const ink=inkMap(L);
+  const P=[anchors[0]].concat(anchors).concat([anchors[anchors.length-1]]);
+  const out=[];
+  for(let i=1;i<P.length-2;i++){
+    const p0=P[i-1],p1=P[i],p2=P[i+1],p3=P[i+2];
+    const seg=Math.max(2,Math.round(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/3));
+    for(let k=(i===1?0:1);k<=seg;k++){
+      const t=k/seg,t2=t*t,t3=t2*t;
+      out.push([
+        .5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
+        .5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)
+      ]);
+    }
+  }
+  return out.map(p=>snapPt(ink,p,8));
+}
+function buildPaths(key){
+  const F=FORMS.find(f=>f.k===key);const L=F.txt;
+  return SP[key].map(st=>{
+    if(st.dot)return {dot:snapPt(inkMap(L),st.dot,10)};
+    return {pts:densify(L,st.pts)};
+  });
+}
+function pathLen(pts){let l=0;for(let i=1;i<pts.length;i++)l+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);return l;}
+
+/* ============ rendus ============ */
+function ghost(x,L,alpha){
+  x.font=FONT;x.textAlign='center';x.textBaseline='alphabetic';
+  x.fillStyle='rgba(220,144,46,'+(alpha||.16)+')';x.fillText(L,W/2,BASE);
+}
+function baseline(x){
+  // Réglure de cahier : la lettre repose sur la LIGNE DE BASE (y=215).
+  // Interlignes légères tous les 65 px : hampes (85) · corps (150) · descentes (280).
+  [85,150,280].forEach(y=>{
+    x.strokeStyle='rgba(185,169,154,.16)';x.lineWidth=1;
+    x.beginPath();x.moveTo(14,y);x.lineTo(W-14,y);x.stroke();
+  });
+  x.strokeStyle='rgba(220,144,46,.45)';x.lineWidth=1.6;
+  x.beginPath();x.moveTo(14,215);x.lineTo(W-14,215);x.stroke();
+}
+function arrowAt(x,pts,i0){
+  const a=pts[Math.min(i0,pts.length-2)],b=pts[Math.min(i0+10,pts.length-1)];
+  const ang=Math.atan2(b[1]-a[1],b[0]-a[0]),len=24,ah=8;
+  const ex=a[0]+Math.cos(ang)*len,ey=a[1]+Math.sin(ang)*len;
+  x.strokeStyle='#6FB08A';x.fillStyle='#6FB08A';x.lineWidth=4.5;x.lineCap='round';
+  x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(ex,ey);x.stroke();
+  x.beginPath();x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang-.5),ey-ah*Math.sin(ang-.5));
+  x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang+.5),ey-ah*Math.sin(ang+.5));x.stroke();
+  x.beginPath();x.arc(a[0],a[1],8,0,7);x.fill();
+}
+/* Style A : la lettre se remplit d'or (masque = le glyphe lui-même) */
+function makeOff(){const c=document.createElement('canvas');c.width=W;c.height=W;return c;}
+function renderA(x,L,paths,state,off){
+  const o=off.getContext('2d');
+  o.clearRect(0,0,W,W);
+  o.lineCap='round';o.lineJoin='round';o.strokeStyle='#E8A94F';o.fillStyle='#E8A94F';
+  if(state.done){ o.fillRect(0,0,W,W); } // lettre finie : glyphe ENTIÈREMENT doré
+  else paths.forEach((p,i)=>{
+    if(p.dot){ if(state.dotsDone[i]){o.beginPath();o.arc(p.dot[0],p.dot[1],16,0,7);o.fill();} return; }
+    const upTo=(i<state.cur)?p.pts.length-1:(i===state.cur?state.prog:0);
+    if(upTo>0){o.lineWidth=(i<state.cur)?40:34;
+      o.beginPath();o.moveTo(p.pts[0][0],p.pts[0][1]);
+      for(let k=1;k<=upTo;k++)o.lineTo(p.pts[k][0],p.pts[k][1]);o.stroke();}
+  });
+  o.globalCompositeOperation='destination-in';
+  o.font=FONT;o.textAlign='center';o.textBaseline='alphabetic';
+  o.fillStyle='#fff';o.fillText(L,W/2,BASE);
+  o.globalCompositeOperation='source-over';
+  x.clearRect(0,0,W,W);baseline(x);ghost(x,L,.16);
+  x.drawImage(off,0,0,W,W);
+  // plume
+  const p=paths[state.cur];
+  if(p&&p.pts&&state.prog>0&&state.prog<p.pts.length-1){
+    const t=p.pts[state.prog];
+    x.fillStyle='#F2E9DA';x.beginPath();x.arc(t[0],t[1],5.5,0,7);x.fill();
+  }
+  if(!state.done&&p&&p.pts)arrowAt(x,p.pts,state.prog||0);
+  if(!state.done&&p&&p.dot){x.strokeStyle='#6FB08A';x.lineWidth=3;
+    x.beginPath();x.arc(p.dot[0],p.dot[1],13,0,7);x.stroke();}
+}
+/* Style B : ruban lumineux lissé */
+function renderB(x,L,paths,state){
+  x.clearRect(0,0,W,W);baseline(x);ghost(x,L,.2);
+  x.save();
+  x.shadowColor='rgba(220,144,46,.8)';x.shadowBlur=12;
+  x.lineWidth=11;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#E8A94F';
+  paths.forEach((p,i)=>{
+    if(p.dot){ if(state.dotsDone[i]){x.fillStyle='#E8A94F';x.beginPath();x.arc(p.dot[0],p.dot[1],9,0,7);x.fill();} return; }
+    const upTo=(i<state.cur)?p.pts.length-1:(i===state.cur?state.prog:0);
+    if(upTo>0){x.beginPath();x.moveTo(p.pts[0][0],p.pts[0][1]);
+      for(let k=1;k<=upTo;k++)x.lineTo(p.pts[k][0],p.pts[k][1]);x.stroke();}
+  });
+  x.restore();
+  const p=paths[state.cur];
+  if(p&&p.pts&&state.prog>0&&state.prog<p.pts.length-1){
+    const t=p.pts[state.prog];
+    x.fillStyle='#F2E9DA';x.beginPath();x.arc(t[0],t[1],5.5,0,7);x.fill();
+  }
+  if(!state.done&&p&&p.pts)arrowAt(x,p.pts,state.prog||0);
+  if(!state.done&&p&&p.dot){x.strokeStyle='#6FB08A';x.lineWidth=3;
+    x.beginPath();x.arc(p.dot[0],p.dot[1],13,0,7);x.stroke();}
+}
+
+/* ============ animation en boucle ============ */
+function animate(canvas,key,style,scale){
+  const F=FORMS.find(f=>f.k===key);const L=F.txt;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=W*scale*dpr;canvas.height=W*scale*dpr;
+  canvas.style.width=(W*scale)+'px';canvas.style.height=(W*scale)+'px';
+  const x=canvas.getContext('2d');x.scale(scale*dpr,scale*dpr);
+  const paths=buildPaths(key), off=makeOff();
+  const state={cur:0,prog:0,done:false,dotsDone:paths.map(()=>false)};
+  const SPEED=.14; let last=null;
+  function step(ts){
+    if(last===null)last=ts;
+    const dt=ts-last;last=ts;
+    if(!state.done){
+      const p=paths[state.cur];
+      if(!p){state.done=true;}
+      else if(p.dot){ state.dotWait=(state.dotWait||0)+dt;
+        if(state.dotWait>420){state.dotsDone[state.cur]=true;state.cur++;state.dotWait=0;} }
+      else{
+        state.prog=Math.min(p.pts.length-1,state.prog+Math.max(1,Math.round(dt*SPEED)));
+        if(state.prog>=p.pts.length-1){state.cur++;state.prog=0;}
+      }
+      if(state.cur>=paths.length)state.done=true;
+    } else {
+      state.wait=(state.wait||0)+dt;
+      if(state.wait>1400){state.cur=0;state.prog=0;state.done=false;state.wait=0;
+        state.dotsDone=paths.map(()=>false);}
+    }
+    (style==='A'?renderA:renderB)(x,L,paths,state,off);
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ============ tracé interactif (mécanique de l'app, rendu au choix) ============ */
+function interactive(canvas,key,style){
+  const F=FORMS.find(f=>f.k===key);const L=F.txt;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=W*dpr;canvas.height=W*dpr;
+  canvas.style.width=W+'px';canvas.style.height=W+'px';
+  const x=canvas.getContext('2d');x.scale(dpr,dpr);
+  const paths=buildPaths(key), off=makeOff();
+  const state={cur:0,prog:0,done:false,dotsDone:paths.map(()=>false)};
+  const TOL=26,START_R=34;
+  const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+  let tracking=false;
+  const draw=()=>(style==='A'?renderA:renderB)(x,L,paths,state,off);
+  function pos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;
+    return [(t.clientX-r.left)*W/r.width,(t.clientY-r.top)*W/r.height];}
+  function advance(pt){
+    const p=paths[state.cur];if(!p||!p.pts)return;
+    let guard=0;
+    while(state.prog<p.pts.length-1&&guard++<60){
+      let best=-1,bd=TOL;
+      for(let k=1;k<=6&&state.prog+k<p.pts.length;k++){
+        const d=dist(pt,p.pts[state.prog+k]);
+        if(d<bd){bd=d;best=state.prog+k;}
+      }
+      if(best<0)break;
+      state.prog=best;
+      if(dist(pt,p.pts[state.prog])<6)break;
+    }
+    draw();
+    if(state.prog>=p.pts.length-1){tracking=false;state.cur++;state.prog=0;
+      if(state.cur>=paths.length)state.done=true;draw();}
+  }
+  function down(e){
+    if(state.done)return;e.preventDefault();
+    const pt=pos(e),p=paths[state.cur];if(!p)return;
+    if(p.dot){ if(dist(pt,p.dot)<24){state.dotsDone[state.cur]=true;state.cur++;
+      if(state.cur>=paths.length)state.done=true;draw();} return; }
+    if(dist(pt,p.pts[state.prog])<START_R){tracking=true;advance(pt);}
+  }
+  function move(e){if(!tracking||state.done)return;e.preventDefault();advance(pos(e));}
+  canvas.onmousedown=down;canvas.onmousemove=move;
+  canvas.onmouseup=()=>tracking=false;canvas.onmouseleave=()=>tracking=false;
+  canvas.ontouchstart=down;canvas.ontouchmove=move;canvas.ontouchend=()=>tracking=false;
+  draw();
+}
+
+/* ============ montage de la page ============ */
+async function main(){
+  await document.fonts.load(FONT,'مـس');
+  await document.fonts.ready;
+  const rowA=document.getElementById('rowA');
+  FORMS.forEach(F=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML='<div class="nm">'+F.L+' · '+F.pos+'</div>';
+    const c=document.createElement('canvas');card.appendChild(c);
+    rowA.appendChild(card);
+    animate(c,F.k,'A',0.55);
+  });
+  const rowT=document.getElementById('rowTry');
+  [['م-2','م au milieu — à toi !'],['س-3','س final — à toi !']].forEach(([k,label])=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML='<div class="nm">'+label+'</div>';
+    const c=document.createElement('canvas');card.appendChild(c);
+    rowT.appendChild(card);
+    interactive(c,k,'A');
+  });
+}
+main();
+</script>
+</body>
+</html>
