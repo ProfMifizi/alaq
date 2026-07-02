@@ -1,0 +1,16 @@
+{
+  "name": "ALAQ — Apprendre à lire avec le Qor'an",
+  "short_name": "ALAQ",
+  "description": "Apprendre à lire l'arabe pas à pas, autour de la sourate Al-Fātiḥa.",
+  "lang": "fr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#252120",
+  "theme_color": "#252120",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

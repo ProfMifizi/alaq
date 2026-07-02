@@ -4,9 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ALAQ — Apprendre à lire avec le Qor'an</title>
+<meta name="theme-color" content="#252120">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ALAQ">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans+Arabic:wght@400;500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#252120; --panel:#322B28; --panel2:#3C342F; --line:#4A403A;
@@ -16,7 +23,8 @@
     --coral:#E07A5F; --coral-d:#BC5B43; --coral-bg:#3A2723;
     --lock:#5A504A;
     --ui:'Nunito',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    --ar:'Amiri',serif;
+    --ar:'Noto Naskh Arabic',serif;       /* vocabulaire, exercices, lecture, tracé */
+    --quran:'Amiri',serif;                /* UNIQUEMENT le texte du Qorān */
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -138,7 +146,7 @@
   .ag.seen{border-color:var(--gold);color:var(--gold2)}
   .ag:active{background:#3a312b}
 
-  .verse{direction:rtl;font-family:var(--ar);font-size:36px;line-height:2.1;text-align:center;
+  .verse{direction:rtl;font-family:var(--quran);font-size:36px;line-height:2.1;text-align:center;
     background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 12px;margin-bottom:6px}
   .vl{border-radius:6px;padding:0}
   .vl.hit{color:var(--gold);text-shadow:0 0 14px rgba(220,144,46,.45)}
@@ -161,7 +169,7 @@
   .wordcard .emo{font-size:56px}
   .wordcard .fr{color:var(--muted);font-weight:800;margin-top:8px}
   /* écriture "en ligne" : on désactive les ligatures verticales coraniques */
-  .linear-ar{font-family:'Noto Sans Arabic',sans-serif;font-feature-settings:"calt" 0,"liga" 0,"dlig" 0,"rlig" 0;
+  .linear-ar{font-family:'Noto Naskh Arabic',serif;font-feature-settings:"calt" 0,"liga" 0,"dlig" 0,"rlig" 0;
     font-variant-ligatures:none;letter-spacing:0}
   .mic-btn{display:block;margin:6px auto 0;background:var(--gold);color:var(--bg);font-weight:900;
     border:none;border-radius:14px;padding:14px 26px;font-size:17px;box-shadow:0 4px 0 var(--gold-d)}
@@ -178,7 +186,7 @@
   .tile{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
     width:64px;height:64px;font-family:var(--ar);font-size:36px;color:var(--gold);display:grid;place-items:center}
   .tile[disabled]{opacity:.25}
-  .tile.htile{font-family:'Noto Sans Arabic',sans-serif;font-size:24px}
+  .tile.htile{font-family:'Noto Naskh Arabic',serif;font-size:24px}
   .tile.htile .dc{font-size:30px;opacity:.55}
   .undo{display:block;margin:14px auto 0;background:none;border:none;color:var(--muted);font-weight:800;font-size:14px}
 
@@ -193,6 +201,9 @@
   .fb{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-weight:900;font-size:16px}
   .fb.ok{color:var(--green)} .fb.bad{color:var(--coral)}
   .fb .ar{font-family:var(--ar)}
+  .why{display:none;font-size:13.5px;line-height:1.55;color:var(--cream);background:var(--coral-bg);border-left:3px solid var(--coral);border-radius:10px;padding:9px 12px;margin:2px 0 12px;font-weight:600}
+  .why:not(:empty){display:block}
+  .why .ar{font-family:var(--ar);font-size:19px;color:var(--gold)}
   .cta{width:100%;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:900;letter-spacing:.04em;
     color:var(--bg);background:var(--gold);box-shadow:0 5px 0 var(--gold-d)}
   .cta:active{transform:translateY(3px);box-shadow:0 2px 0 var(--gold-d)}
@@ -380,6 +391,63 @@
   .lvp-seat .ls-ar{font-family:var(--ar);font-size:50px;color:var(--gold);line-height:1.1}
   .lvp-seat .ls-lab{font-size:12px;font-weight:800;color:var(--muted);margin-top:4px}
   .lvp-seat .ls.lit .ls-lab{color:var(--gold2)}
+/* ===== Hub Réviser + onglets icônes (validés 02/07) ===== */
+.heartline{background:var(--green-bg);border:1px solid var(--green);border-radius:12px;padding:9px 12px;
+  font-size:12.5px;font-weight:800;color:var(--green);margin:0 0 14px;text-align:center;font-family:var(--ui)}
+.icontabs{display:flex;gap:6px;margin:0 0 6px}
+.itab{flex:1;position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:10px 0;text-align:center;cursor:pointer;font-size:21px;line-height:1}
+.itab.active{background:var(--gold);border-color:var(--gold)}
+.itab .tip{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  background:#181310;color:var(--cream);font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:9px;
+  border:1px solid var(--line);white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;z-index:20;font-family:var(--ui)}
+.itab:hover .tip{opacity:1}
+.tablabel{text-align:center;font-family:var(--ui);font-size:12px;font-weight:800;color:var(--gold2);margin:0 0 14px}
+.spick{position:relative;margin:8px 0 10px}
+.spick .sbtn{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--gold);
+  border-radius:12px;padding:9px 12px;font-weight:800;font-size:13px;cursor:pointer;color:var(--cream);font-family:var(--ui)}
+.spick .pct{margin-left:auto;color:var(--gold2);font-size:12px}
+.smenu{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#2b2420;border:1px solid var(--gold-d);
+  border-radius:14px;padding:7px;z-index:30;box-shadow:0 14px 34px rgba(0,0,0,.55);display:none}
+.smenu.open{display:block}
+.smenu .srow{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;
+  font-weight:800;font-size:13px;font-family:var(--ui)}
+.smenu .srow .sar{font-family:var(--quran);font-size:17px;color:var(--gold)}
+.smenu .srow.cur{background:rgba(220,144,46,.16);color:var(--gold2)}
+.smenu .srow.lock{color:var(--muted);opacity:.5}
+.smenu .srow.lock .sar{color:var(--muted)}
+.smenu .shint{font-size:10.5px;color:var(--muted);text-align:center;padding:5px 0 2px;font-family:var(--ui)}
+.rex{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.rex .re{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px 12px;
+  font-size:13px;font-weight:800;color:var(--cream);text-align:left;cursor:pointer;font-family:var(--ui)}
+.rex .re:active{border-color:var(--gold)}
+
+/* ===== Réviser>Qorān : accordéons + ordre des versets ===== */
+.racc{background:var(--panel);border:1px solid var(--line);border-radius:16px;margin:0 0 10px;overflow:hidden}
+.racc-h{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--cream);
+  padding:14px;font-family:var(--ui);font-weight:900;font-size:14.5px;cursor:pointer;text-align:left}
+.racc-h .aic{font-size:22px;line-height:1}
+.racc-h .chev{margin-left:auto;color:var(--gold2);font-weight:900;transition:.2s}
+.racc.open .racc-h .chev{transform:rotate(180deg)}
+.racc-b{display:none;padding:0 12px 12px}
+.racc.open .racc-b{display:block}
+.ritem{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:11px;padding:10px 12px;margin:0 0 7px;font-size:13px;font-weight:800;cursor:pointer;
+  width:100%;color:var(--cream);font-family:var(--ui);text-align:left}
+.ritem:active{border-color:var(--gold)}
+.ritem .var{font-family:var(--quran);font-size:16px;color:var(--gold);direction:rtl;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:150px;margin-left:auto}
+.ritem.all{border-color:var(--gold-d);color:var(--gold2)}
+.stslot{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px dashed var(--line);
+  border-radius:12px;padding:8px 12px;margin:0 0 7px;min-height:46px}
+.stslot.full{border-style:solid;border-color:var(--gold-d)}
+.stslot .no{font-family:var(--ui);font-weight:900;color:var(--gold2);width:20px;flex:0 0 auto}
+.stslot .txt{font-family:var(--quran);font-size:17px;color:var(--gold);direction:rtl;flex:1;text-align:right;line-height:1.7}
+.sttile{display:block;width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
+  padding:9px 12px;margin:0 0 7px;font-family:var(--quran);font-size:17px;color:var(--cream);direction:rtl;
+  text-align:right;cursor:pointer;line-height:1.7}
+.sttile[disabled]{opacity:.25}
+
 /* ===== Barre de navigation du bas + onglets ===== */
 .botnav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;background:var(--panel);
   border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
@@ -471,18 +539,17 @@
 <body>
 
 <div class="topbar">
-  <div class="brand"><img class="blogo" id="blogo" alt=""> ALAQ</div>
+  <div class="brand" id="brand"><img class="blogo" id="blogo" alt=""> ALAQ</div>
   <div class="stats">
     <div class="stat">🔥 <span id="st-streak">0</span></div>
     <div class="stat">⭐ <span id="st-xp">0</span></div>
     <div class="stat">❤️ <span id="st-hearts">5</span></div>
-    <button class="stat" id="gear" onclick="resetProgress()" title="Réinitialiser la progression"
-      style="background:none;border:none;color:var(--gold);font-size:16px;cursor:pointer;padding:0 2px">⚙</button>
   </div>
 </div>
 
 <div class="wrap" id="home"></div>
 <div class="view" id="view-cours" style="display:none"></div>
+<div class="view" id="view-reviser" style="display:none"></div>
 <div class="view" id="view-prog" style="display:none"></div>
 
 <div class="player" id="player">
@@ -496,6 +563,7 @@
     <button class="back-link" id="backLink" onclick="prevStep()">← Précédent</button>
     <button class="narr-link" id="narrLink" onclick="toggleNarr()"></button>
     <div id="fb"></div>
+    <div id="why" class="why"></div>
     <button class="cta" id="cta" disabled>VÉRIFIER</button>
   </div>
 </div>
@@ -519,11 +587,22 @@
   <button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="cancelReset()">ANNULER</button>
 </div>
 
+<div class="finish" id="noHearts">
+  <div class="big">💔</div>
+  <h2>Plus de cœurs !</h2>
+  <p style="max-width:330px;color:var(--cream);opacity:.85;margin:-14px 0 8px">Sept erreurs — comme les sept versets de la Fātiḥa qui se répètent :
+  c'est le signe qu'une petite révision fera du bien, in shā' Allah.</p>
+  <p style="max-width:330px;color:var(--muted);font-size:14px;margin:0 0 26px">Termine une révision de vocabulaire pour recharger tes 7 cœurs — ou reviens demain, ils seront remplis.</p>
+  <button class="cta" style="max-width:300px" onclick="noHeartsReview()">🔄 RÉVISER ET RECHARGER MES CŒURS</button>
+  <button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="closeNoHearts()">PLUS TARD</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi">🏠</span><span>Apprendre</span></button>
-  <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi">📚</span><span>Cours</span></button>
+  <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi">📕</span><span>Cours</span></button>
+  <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi">🕋</span><span>Réviser</span></button>
   <button class="bn" id="bn-prog" onclick="showTab('prog')"><span class="bi">📊</span><span>Progrès</span></button>
 </nav>
 
@@ -575,17 +654,11 @@ const UNITS=[
  'ل':{n:'lām',son:'son « l »',mn:'une grande canne : haute, puis un crochet vers la gauche'},
  'ن':{n:'nūn',son:'son « n »',mn:'une coupe ouverte vers le ciel, un point au-dessus'},
    },
-   strokes:{
- 'م':[{pts:[[216,184],[202,172],[184,176],[176,192],[184,207],[202,210],[214,200],[216,186]]},
-      {pts:[[207,209],[206,270]]}],
- 'ل':[{pts:[[218,92],[218,200],[214,226],[196,239],[170,238],[152,226],[147,206]]}],
- 'ن':[{pts:[[211,168],[216,194],[207,218],[182,229],[156,223],[144,201],[142,176]]},
-      {dot:[179,148]}],
-   },
-   starts:{
- 'م':[{x:134,y:190,ang:-90}],
- 'ل':[{x:181,y:80,ang:90}],
- 'ن':[{x:184,y:140,ang:90},{dot:[147,107]}]
+   strokes:{ // calibrés sur Noto Naskh Arabic 190px, base y=215
+ 'م':[{pts:[[127,177],[128,163],[136,153],[150,150],[163,156],[173,166],[178,180],[176,190],[163,194],[147,195],[133,196],[124,201],[119,215],[118,235],[121,255],[124,269]]}], // un seul trait : pointe gauche → tête → queue, sans lever le stylo
+ 'ل':[{pts:[[181,91],[186,167],[184,221],[170,248],[149,257],[128,253],[112,241],[107,226],[107,212]]}],
+ 'ن':[{pts:[[187,174],[189,206],[182,233],[164,252],[140,254],[121,238],[111,211]]},
+      {dot:[146,157]}],
    },
    words:[
  {w:'نَمْلٌ',b:'نمل',fr:'une fourmi',e:'🐜',say:'naml',confus:['نَامِل','نَمالٌ','مَنْلٌ']},
@@ -606,15 +679,10 @@ const UNITS=[
  'أ':{n:'alif',son:'le alif seul (ا) n\u2019a pas de son : c\u2019est un support qui allonge « ā » après une fatḥa. Avec la hamza il porte un coup de glotte : أ (au-dessus) ou إ (en dessous)',mn:'un grand trait vertical droit ; la hamza ء se pose au-dessus (أ) ou en dessous (إ)'},
  'و':{n:'wāw',son:'consonne « w » (oui) ; après une ḍamma, elle allonge le son « ū » (fou)',mn:'une petite boucle ronde en haut, avec une queue qui plonge sous la ligne, comme le chiffre 9'},
    },
-   strokes:{
- 'ي':[{pts:[[206,158],[174,164],[150,176],[140,196],[151,214],[177,219],[200,209],[206,189]]},{dot:[132,284]},{dot:[158,284]}],
- 'أ':[{pts:[[150,86],[150,210]]},{pts:[[160,32],[142,32],[139,44],[151,48],[156,37]]}],
- 'و':[{pts:[[176,189],[160,177],[145,173],[136,182],[139,195],[153,198],[167,191],[172,179],[173,196],[170,216],[156,234],[140,247]]}],
-   },
-   starts:{
- 'ي':[{x:206,y:158,ang:170},{dots:[[132,284],[158,284]]}],
- 'أ':[{x:150,y:86,ang:90},{x:160,y:32,ang:180}],
- 'و':[{x:176,y:189,ang:170}]
+   strokes:{ // calibrés sur Noto Naskh Arabic 190px, base y=215
+ 'ي':[{pts:[[191,152],[178,157],[167,168],[161,182],[164,196],[175,206],[186,215],[190,227],[186,240],[173,251],[153,257],[132,255],[116,243],[110,225],[109,207]]},{dot:[129,284]},{dot:[158,282]}],
+ 'أ':[{pts:[[151,95],[152,201]]},{pts:[[153,43],[146,46],[141,53],[140,61],[146,67],[157,67]]}],
+ 'و':[{pts:[[172,163],[157,158],[138,160],[125,169],[127,181],[137,193],[153,197],[171,191],[179,185],[180,193],[175,210],[162,228],[143,240],[122,245]]}],
    },
    words:[
  {w:'يَوْمٌ',b:'يوم',fr:'un jour',e:'☀️',say:'yawm',confus:['يُومٌ','يَوْنٌ','يَوْلٌ']},
@@ -637,15 +705,10 @@ const UNITS=[
  'ر':{n:'rāʾ',son:'un « r » roulé, vibré du bout de la langue (comme le « r » espagnol de « perro »)',mn:'un petit crochet qui descend sous la ligne, sans point ; il ne s\u2019attache qu\u2019à droite'},
  'ع':{n:'ʿayn',son:'un son guttural qui vient du fond de la gorge : c\u2019est le bruit que font les enfants quand ils font rouler une petite voiture (« ʿaaan »). La gorge se serre un peu.',mn:'une tête ouverte en haut comme une petite bouche, prolongée par un grand ventre qui plonge sous la ligne'},
    },
-   strokes:{
- 'ب':[{pts:[[219,161],[213,184],[197,200],[160,207],[120,206],[94,197],[81,180]]},{dot:[150,250]}],
- 'ر':[{pts:[[173,161],[169,178],[162,198],[150,217],[132,232],[112,240]]}],
- 'ع':[{pts:[[178,138],[165,132],[147,131],[135,146],[141,165],[158,169],[151,185],[131,205],[120,230],[125,254],[143,270],[167,270],[186,256],[190,242]]}],
-   },
-   starts:{
- 'ب':[{x:219,y:161,ang:105},{dot:[150,250]}],
- 'ر':[{x:173,y:161,ang:90}],
- 'ع':[{x:178,y:138,ang:-155}]
+   strokes:{ // calibrés sur Noto Naskh Arabic 190px, base y=215
+ 'ب':[{pts:[[205,140],[207,158],[199,177],[177,194],[145,200],[116,192],[94,172]]},{dot:[151,248]}],
+ 'ر':[{pts:[[161,154],[165,169],[168,189],[161,215],[142,235],[117,245]]}],
+ 'ع':[{pts:[[158,142],[143,129],[126,131],[113,142],[108,157],[112,168],[124,174],[143,175],[160,172],[173,176],[160,183],[139,187],[124,196],[115,213],[113,232],[122,249],[140,260],[163,263],[186,259],[203,251]]}],
    },
    words:[
  {w:'رَبٌّ',b:'رب',fr:'un maître, un seigneur',e:'🤲',say:'rabb',confus:['بَرٌّ','رَبْ','رَنٌّ']},
@@ -663,15 +726,64 @@ const UNITS=[
  {w:'رَبِيعٌ',b:'ربيع',fr:'un printemps',e:'🌸',say:'rabīʿ',confus:['رَبِيعْ','رَنِيعٌ','رَبِيعٍ']},
  {w:'عُمْرٌ',b:'عمر',fr:'une durée de vie, un âge',e:'⏳',say:'ʿumr',confus:['عُمْرْ','عَمْرٌ','عُمْنٌ']},
    ] },
- { no:4, letters:['س','د','ك'], ready:false },
+ { no:4, ready:true, sub:'س د ك · du son à la lecture de mots — 9 disques',
+   letters:['س','د','ك'],
+   lat:{'س':'s','د':'d','ك':'k'},
+   alpha:{
+ 'س':{n:'sīn',son:'son « s » (comme dans « soleil »)',mn:'trois petites dents alignées sur la ligne, suivies d\u2019un ventre qui plonge sous la ligne'},
+ 'د':{n:'dāl',son:'son « d » (comme dans « date »)',mn:'un petit crochet qui descend puis tourne sec vers la gauche ; elle ne s\u2019attache qu\u2019à droite'},
+ 'ك':{n:'kāf',son:'son « k » (comme dans « koala »)',mn:'une grande canne verticale, avec un petit trait oblique posé à l\u2019intérieur comme une vaguelette'},
+   },
+   strokes:{ // calibrés sur Noto Naskh Arabic 190px, base y=215
+ 'س':[{pts:[[235,191],[231,172],[227,152],[223,174],[218,198],[212,205],[204,201],[199,183],[196,169],[192,182],[187,199],[180,205],[171,204],[158,194],[147,180],[144,175],[143,192],[144,207],[142,222],[134,241],[119,254],[99,257],[81,249],[71,233],[68,213],[69,204]]}],
+ 'د':[{pts:[[160,141],[168,153],[172,167],[169,183],[157,197],[139,206],[121,210]]}],
+ 'ك':[{pts:[[181,91],[184,133],[186,170],[185,194],[177,206],[161,210],[141,210],[123,207],[110,200],[104,193]]},
+      {pts:[[145,140],[134,149],[131,155],[141,159],[149,164],[144,171],[131,177]]}],
+   },
+   words:[
+ {w:'دَرْسٌ',b:'درس',fr:'une leçon',e:'📖',say:'dars',confus:['دَرَسٌ','دَرْنٌ','رَرْسٌ']},
+ {w:'كَلْبٌ',b:'كلب',fr:'un chien',e:'🐕',say:'kalb',confus:['كَلْمٌ','كَبْلٌ','نَلْبٌ']},
+ {w:'سَمَكٌ',b:'سمك',fr:'un poisson',e:'🐟',say:'samak',confus:['سَمَنٌ','سَمَرٌ','سَكَمٌ']},
+ {w:'كَرِيمٌ',b:'كريم',fr:'généreux, noble',e:'🌟',say:'karīm',confus:['كَبِيرٌ','رَكِيمٌ','كَرِيبٌ']},
+ {w:'سَلَامٌ',b:'سلام',fr:'la paix',e:'🕊️',say:'salām',confus:['كَلَامٌ','سَنَامٌ','سَالِمٌ']},
+ {w:'كَأْسٌ',b:'كأس',fr:'une coupe, un verre',e:'🥃',say:'ka’s',confus:['كَاسٌ','كَأْنٌ','كَيْسٌ']},
+ {w:'رَأْسٌ',b:'رأس',fr:'une tête',e:'🗣️',say:'ra’s',confus:['رَاسٌ','رَأْنٌ','رَيْسٌ']},
+ {w:'دِينٌ',b:'دين',fr:'une religion, une rétribution',e:'🕋',say:'dīn',confus:['دَينٌ','رِينٌ','دِيمٌ']},
+ {w:'إِيَّاكَ',b:'إياك',fr:'c\u2019est Toi (que)',e:'🤲',say:'iyyāka',confus:['إِيَّاكِ','إِيَّانَ','إِنَّاكَ']},
+ {w:'نَعْبُدُ',b:'نعبد',fr:'nous adorons',e:'🙏',say:'naʿbudu',confus:['نَعْبُدٌ','يَعْبُدُ','نَعْبُرُ']},
+   ],
+   vtiles:{vi:4} },
  { no:5, letters:['ح','ط','ق'], ready:false },
  { no:6, letters:['ت','ص','غ'], ready:false },
  { no:7, letters:['ه','ذ','ض'], ready:false },
 ];
 
+/* ===== ARCHITECTURE : Sourate → Unités → Disques =====
+   Statique aujourd'hui (une seule sourate) ; miroir des futures tables
+   units/lessons du backend Supabase. Ajouter une sourate = ajouter une entrée. */
+const SOURATES=[
+ { no:1, nom:'Al-Fātiḥa', ar:'الفاتحة', sub:'L\u2019Ouverture · 7 versets · 7 unités',
+   verses:FATIHA, units:UNITS,
+   tr:[ // traduction mot à mot (alignée sur les mots de chaque verset)
+    ['Au nom','d\u2019Allah','le Tout-Miséricordieux','le Très-Miséricordieux'],
+    ['la louange','est à Allah','Seigneur','des mondes'],
+    ['le Tout-Miséricordieux','le Très-Miséricordieux'],
+    ['Souverain','du Jour','de la Rétribution'],
+    ['c\u2019est Toi que','nous adorons','et c\u2019est Toi que','nous implorons l\u2019aide'],
+    ['guide-nous','sur le chemin','droit'],
+    ['le chemin','de ceux que','Tu as comblés de bienfaits','envers eux','non pas','ceux qui ont encouru la colère','envers eux','ni','les égarés'],
+   ] },
+];
+
 /* ================= GÉNÉRATEURS ================= */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+// Répétition espacée légère : plus un item a été raté, plus il ressort en révision.
+function errWeight(k){ return 1+3*Math.min(4,(S.err&&S.err[k])||0); }
+function weightedShuffle(arr,keyf){
+  return arr.map(a=>({a,r:-Math.log(Math.random())/errWeight(keyf(a))}))
+            .sort((u,v)=>u.r-v.r).map(o=>o.a);
+}
 
 function mcq(o){o.type='mcq';return o;}
 
@@ -752,19 +864,19 @@ function buildAlphabet(U){
    {type:'findword',word:'مَدْرَسَةٌ',targets:NONATTACH,title:'Dans le mot « madrasatoun »',
      note:'Touche les lettres qui ne s\u2019attachent qu\u2019à droite.'},
    {type:'slide',title:'Petit quiz 🎯',html:'<p>On vérifie ce qu\u2019on a retenu. Quelques questions, et le disque est gagné !</p>'},
-   mcq({prompt:'Combien de lettres dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'28',
+   mcq({prompt:'Combien de lettres dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'28',explain:'L’alphabet arabe compte 28 lettres, soit deux de plus que les 26 lettres françaises.',
      options:shuffle([{txt:'28',key:'28'},{txt:'26',key:'26'},{txt:'30',key:'30'}])}),
-   mcq({prompt:'Combien de voyelles dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'0',
+   mcq({prompt:'Combien de voyelles dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'0',explain:'En arabe, aucune lettre n’est une voyelle. Le son des voyelles vient de petits signes posés sur la lettre : les harakāt.',
      options:shuffle([{txt:'Aucune',key:'0'},{txt:'3',key:'3'},{txt:'6',key:'6'}])}),
-   mcq({prompt:'Grâce à quoi forme-t-on les voyelles ?',graded:true,answer:'h',
+   mcq({prompt:'Grâce à quoi forme-t-on les voyelles ?',graded:true,answer:'h',explain:'Les harakāt sont les petits signes au-dessus ou en dessous de la lettre : fatḥa « a », kasra « i », ḍamma « ou ».',
      options:shuffle([{txt:'Les harakats',key:'h'},{txt:'Des lettres spéciales',key:'l'},{txt:'Des accents',key:'a'}])}),
-   mcq({prompt:'Combien de lettres de prolongation ?',graded:true,grid:'grid3',answer:'3',
+   mcq({prompt:'Combien de lettres de prolongation ?',graded:true,grid:'grid3',answer:'3',explain:'Il y a 3 lettres de prolongation, qui allongent le son : <span class="ar">ا</span>, <span class="ar">و</span>, <span class="ar">ي</span>.',
      options:shuffle([{txt:'3',key:'3'},{txt:'2',key:'2'},{txt:'4',key:'4'}])}),
-   mcq({prompt:'Quelles sont les lettres de prolongation ?',graded:true,answer:'awy',
+   mcq({prompt:'Quelles sont les lettres de prolongation ?',graded:true,answer:'awy',explain:'Ce sont l’alif <span class="ar">ا</span>, le wāw <span class="ar">و</span> et le yā’ <span class="ar">ي</span> : elles étirent la voyelle qui précède.',
      options:shuffle([{ar:'ا و ي',key:'awy'},{ar:'م ل ن',key:'mln'},{ar:'ب ت ث',key:'btt'}])}),
-   mcq({prompt:'Combien de lettres ne s\u2019attachent qu\u2019à droite ?',graded:true,grid:'grid3',answer:'6',
+   mcq({prompt:'Combien de lettres ne s\u2019attachent qu\u2019à droite ?',graded:true,grid:'grid3',answer:'6',explain:'Six lettres ne s’accrochent qu’à la lettre de droite : <span class="ar">ا</span>, <span class="ar">د</span>, <span class="ar">ذ</span>, <span class="ar">ر</span>, <span class="ar">ز</span>, <span class="ar">و</span>.',
      options:shuffle([{txt:'6',key:'6'},{txt:'4',key:'4'},{txt:'8',key:'8'}])}),
-   mcq({prompt:'Comment lit-on l\u2019arabe ?',graded:true,answer:'rtl',
+   mcq({prompt:'Comment lit-on l\u2019arabe ?',graded:true,answer:'rtl',explain:'L’arabe se lit et s’écrit de droite à gauche, à l’inverse du français.',
      options:shuffle([{txt:'De droite à gauche',key:'rtl'},{txt:'De gauche à droite',key:'ltr'}])}),
   ];
   return q;
@@ -906,6 +1018,9 @@ function buildWords(U){
       glyph:w.w,glyphLinear:true,emo:w.e,fr:w.fr,graded:true,grid:'grid3',answer:w.w,
       options:wordSoundOptions(U,w)}));
   });
+  // « Appuie sur ce que tu entends » : reconstruire la partie du verset dont
+  // toutes les lettres sont connues (le reste, gris, est posé à sa place)
+  if(U.vtiles){ const st=buildVerseTiles(U.vtiles.vi); if(st)q.push(st); }
   return q;
 }
 
@@ -959,11 +1074,12 @@ function buildReview(U){
     options:pick3(letters,L,x=>formGlyph(x,p))}))));
   // B — reconnaissance avec un tachkīl (lettre + harakat) par le son
   const SYL=[];letters.forEach(L=>HK.forEach(h=>SYL.push(L+h[0])));
-  for(let r=0;r<3&&SYL.length;r++){const a=rnd(SYL);
+  const SYLW=weightedShuffle(SYL,x=>x);
+  for(let r=0;r<3&&SYLW.length;r++){const a=SYLW[r%SYLW.length];
     q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a,graded:true,grid:'grid3',answer:a,
       options:shuffle([a,...shuffle(SYL.filter(x=>x!==a)).slice(0,2)]).map(s=>({ar:s,key:s}))}));}
   // C — réécrire des mots déjà vus
-  shuffle(words).slice(0,Math.min(5,words.length)).forEach(w=>q.push({type:'assemble',w,graded:true}));
+  weightedShuffle(words,w=>w.w).slice(0,Math.min(5,words.length)).forEach(w=>q.push({type:'assemble',w,graded:true}));
   return q;
 }
 
@@ -1029,15 +1145,15 @@ function buildLettreVsProlong(U){
        </div>
        <p style="margin-top:8px;font-size:13px;color:var(--muted)">Les autres sièges (sur le و, le ي, sur la ligne) viendront plus tard, in shā\u2019 Allah.</p>`,
       'Tape les deux cartes pour comparer la hamza au-dessus et en dessous'),
-    mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,graded:true,answer:'p',
+    mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,graded:true,answer:'p',explain:'Dans <span class="ar">مَالٌ</span>, le <span class="ar">ا</span> suit une fatḥa et allonge le son : on dit « māl ». C’est son rôle de prolongation, pas de consonne.',
       options:shuffle([{txt:'Il allonge le son « ā »',key:'p'},{txt:'Il fait le son « l »',key:'l'},{txt:'Il ne sert à rien',key:'x'}])}),
-    mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,graded:true,answer:'c',
+    mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,graded:true,answer:'c',explain:'Au début de <span class="ar">يَوْمٌ</span> (« yawm »), le <span class="ar">ي</span> porte une fatḥa et se prononce « y » : ici c’est une consonne, pas une prolongation.',
       options:shuffle([{txt:'une consonne « y »',key:'c'},{txt:'une prolongation « ī »',key:'i'},{txt:'une harakat',key:'h'}])}),
-    mcq({prompt:'Le و allonge le son « ū »…',graded:true,answer:'d',
+    mcq({prompt:'Le و allonge le son « ū »…',graded:true,answer:'d',explain:'Le <span class="ar">و</span> allonge en « ū » seulement après une ḍamma. Chaque prolongation suit sa voyelle : <span class="ar">ا</span> après fatḥa, <span class="ar">ي</span> après kasra, <span class="ar">و</span> après ḍamma.',
       options:shuffle([{txt:'après une ḍamma <span style="font-family:var(--ar);font-size:1.7em">ـُ</span>',key:'d'},{txt:'après une fatḥa <span style="font-family:var(--ar);font-size:1.7em">ـَ</span>',key:'f'},{txt:'après une kasra <span style="font-family:var(--ar);font-size:1.7em">ـِ</span>',key:'k'}])}),
-    mcq({prompt:'À quoi sert la hamza <span style="font-family:var(--ar)">(ء)</span> posée sur le alif ?',graded:true,answer:'v',
+    mcq({prompt:'À quoi sert la hamza <span style="font-family:var(--ar)">(ء)</span> posée sur le alif ?',graded:true,answer:'v',explain:'La hamza <span class="ar">ء</span> est une vraie lettre (un petit coup de glotte). Posée sur le alif, elle permet de prononcer une voyelle seule — a, i ou ou — au début d’un mot.',
       options:shuffle([{txt:'à dire une voyelle seule : a, i, ou',key:'v'},{txt:'à allonger le son',key:'l'},{txt:'à séparer deux mots',key:'s'}])}),
-    mcq({prompt:'Lorsqu\u2019on veut faire le son « i » tout seul, quel support utilise-t-on ?',graded:true,grid:'grid3',answer:'i',
+    mcq({prompt:'Lorsqu\u2019on veut faire le son « i » tout seul, quel support utilise-t-on ?',graded:true,grid:'grid3',answer:'i',explain:'Pour le son « i », la hamza se place sous le alif : <span class="ar">إ</span>. Au-dessus (<span class="ar">أ</span>) on dit « a » ou « ou » ; le alif nu <span class="ar">ا</span> sert seulement à allonger.',
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
@@ -1052,11 +1168,16 @@ function discsFor(u){
 }
 
 /* ================= ÉTAT ================= */
-const DEF={xp:0,done:{},tests:{},hearts:5,streak:0,lastDay:null,heartDay:null};
+const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
+const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null};
 function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
 function save(){try{localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){}}
 let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
+if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
+if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
+if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
+if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
 (function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)save();})();
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
 let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(e){return true}})();
@@ -1071,6 +1192,9 @@ function toggleNarr(){
   syncNarrLink();
   if(!NARR&&'speechSynthesis'in window)speechSynthesis.cancel();
 }
+function showNoHearts(){ document.getElementById('noHearts').classList.add('on'); }
+function closeNoHearts(){ document.getElementById('noHearts').classList.remove('on'); }
+function noHeartsReview(){ closeNoHearts(); startReview(); }
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
 function doReset(){
@@ -1102,7 +1226,11 @@ const INSTR_LIST=[
   ['ecris-ecoute','Écoute, puis écris le mot avec les lettres'],
   ['ecris-arabe','Écris ce mot en arabe avec les lettres'],
   ['associe','Associe chaque mot arabe à sa traduction'],
-  ['trace','Repasse sur le modèle avec ton doigt'],
+  ['trace','Pose ton doigt sur le point vert et suis le chemin de la lettre'],
+  ['vtiles','Écoute le verset, puis touche les mots dans l\u2019ordre'],
+  ['recite','Écoute le modèle, enregistre-toi, ré-écoute-toi et compare, puis valide'],
+  ['stiles','Touche les versets dans l\u2019ordre de la sourate'],
+  ['vwrite','Le verset se construit sous tes yeux : écris chaque mot avec ses harakats'],
   ['explore-3','Touche au moins 3 lettres pour les entendre.'],
   ['explore-cases','Touche chaque case au moins 3 fois — et continue autant que tu veux.'],
   ['combine','Pour former un son, on associe souvent une consonne et une voyelle. Touche pour assembler.'],
@@ -1120,7 +1248,15 @@ const INSTR_LIST=[
   ['touche-droite','Touche les lettres qui ne s\u2019attachent qu\u2019à droite.'],
   ['dragmad','Glisse la bonne lettre de prolongation sur la lettre'],
   ['dragassoc','Glisse chaque prolongation sur la lettre qui lui correspond'],
-  ['deux-fois-cartes','Clique deux fois sur chaque carte pour écouter les deux sons']
+  ['deux-fois-cartes','Clique deux fois sur chaque carte pour écouter les deux sons'],
+  ['intro-bienvenue','<p>Avant d’apprendre les lettres, faisons le tour de l’écriture arabe. Ici, rien à mémoriser : on observe, on touche, on écoute.</p>'],
+  ['intro-28-lettres','<p>L’alphabet arabe comporte <b>28 lettres</b>.</p>'],
+  ['intro-26-lettres','<p>L’alphabet français comporte <b>26 lettres</b>, dont <b>6 voyelles</b> : <span class="vw-fr">a e i o u y</span>.</p>'],
+  ['intro-quiz','<p>On vérifie ce qu’on a retenu. Quelques questions, et le disque est gagné !</p>'],
+  ['info-soukoun','<div class="demo linear-ar">نَمْلٌ</div><p>Le petit rond <span class="gold">ـْ</span> est le <b>soukoun</b> : la lettre se prononce <b>sans voyelle</b>, elle s’arrête net. نَمْلٌ se lit « naml » — le م s’arrête : fourmi 🐜.</p>'],
+  ['info-lettres-empilees','<div class="demo">نَمْلٌ</div><p>Très souvent, l’écriture arabe <b>superpose</b> certaines lettres au début d’un mot — ici le <span class="gold">ن</span> et le <span class="gold">م</span> s’empilent. C’est le <b>même mot</b> que نَمْلٌ écrit en ligne : on apprend à reconnaître les deux.</p>'],
+  ['info-chedda','<div class="demo linear-ar">لَمَّا</div><p>Le signe <span class="gold">ـّ</span> est la <b>chedda</b> : la lettre est <b>doublée</b>, on appuie dessus. لَمَّا se lit « lam-mā » — comme dans le Qor’an.</p>'],
+  ['info-tanwin','<div class="demo linear-ar">نَمْلٌ</div><p>Les deux petits signes <span class="gold">ـٌ</span> à la fin sont un <b>tanwīn</b> (ici la <b>dammatayn</b>). On ajoute le son <b>« oun »</b> : نَمْلٌ se lit « naml-oun ». C’est du tachkīl, comme le soukoun et la chedda.</p>'],
 ];
 const INSTR_AUDIO={};
 INSTR_LIST.forEach(function(e){ INSTR_AUDIO[_normInstr(e[1])]='audios-app-alaq/instr-'+e[0]+'.mp3'; });
@@ -1154,7 +1290,11 @@ function spokenInstr(st){
     case 'wordcard': return 'Touche le mot et écoute-le au moins une fois';
     case 'assemble': return st.fromFr?'Écris ce mot en arabe avec les lettres':'Écoute, puis écris le mot avec les lettres';
     case 'match': return 'Associe chaque mot arabe à sa traduction';
-    case 'trace': return 'Repasse sur le modèle avec ton doigt';
+    case 'trace': return 'Pose ton doigt sur le point vert et suis le chemin de la lettre';
+    case 'vtiles': return 'Écoute le verset, puis touche les mots dans l\u2019ordre';
+    case 'recite': return 'Écoute le modèle, enregistre-toi, ré-écoute-toi et compare, puis valide';
+    case 'stiles': return 'Touche les versets dans l\u2019ordre de la sourate';
+    case 'vwrite': return 'Le verset se construit sous tes yeux : écris chaque mot avec ses harakats';
     case 'mcq':
       if(st.audio)return 'Écoute, puis touche la bonne réponse';
       if(st.options&&st.options.some&&st.options.some(o=>o.snd))return 'Touche les haut-parleurs, écoute, puis choisis';
@@ -1164,7 +1304,7 @@ function spokenInstr(st){
   }
 }
 function today(){return new Date().toISOString().slice(0,10)}
-(function(){if(S.heartDay!==today()){S.hearts=5;S.heartDay=today();save();}})();
+(function(){if(S.heartDay!==today()){S.hearts=HEARTS_MAX;S.heartDay=today();save();}})();
 
 /* ================= ACCUEIL ================= */
 const OFFS=[0,46,64,46,0,-46,-64,-46,0];
@@ -1176,12 +1316,18 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 28/06j · sons des unités 1 et 2 complétés dans la table audio';
+const BUILD='maj 02/07i · le verset entier se réécrit sur UN SEUL écran (construction sur place)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
    '<h1>Apprendre \u00e0 lire avec le Qor\u2019an</h1>'+
    '<div style="font-size:11px;color:var(--muted);opacity:.5;margin-top:4px">'+BUILD+'</div></div>';
+  const SR=SOURATES[0];
+  h.insertAdjacentHTML('beforeend',
+    '<div class="unit-head" style="background:linear-gradient(135deg,#3b2f20,var(--panel));border-color:var(--gold-d);margin-top:18px">'+
+    '<div class="u-no">🕋</div><div>'+
+    '<h2>Sourate '+SR.nom+' <span style="font-family:var(--quran);color:var(--gold);font-size:22px">'+SR.ar+'</span></h2>'+
+    '<p>'+SR.sub+'</p></div></div>');
   UNITS.forEach((U,u)=>{
     // VALIDATION d'une unité = terminer son DERNIER disque, le « Bilan ».
     // L'unité suivante se débloque dès que le « Bilan » de la précédente est terminé.
@@ -1230,8 +1376,7 @@ function renderHome(){
       h.insertAdjacentHTML('beforeend',
         '<div style="text-align:center;margin:14px 0 2px">'+
         '<button onclick="startExam('+u+')" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);'+
-        'padding:9px 18px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer">\u26a1 Avancer ici\u00a0?</button>'+
-        '<div style="color:var(--muted);font-size:12px;margin-top:6px;font-family:var(--ui)">D\u00e9j\u00e0 ce niveau\u00a0? R\u00e9ussis ce test (2 fautes max) pour tout valider jusqu\u2019ici.</div></div>');
+        'padding:9px 18px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer">\u26a1 Avancer ici\u00a0?</button></div>');
     }
   });
 }
@@ -1240,8 +1385,8 @@ function renderHome(){
 let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,MISSED=[],inRetry=false,EXAM=false;
 
 function startDisque(u,i){
+  if(S.hearts<=0){showNoHearts();return;}
   EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
-  S.hearts=5;S.heartDay=today();save();
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
@@ -1260,7 +1405,7 @@ function renderStep(){
   const body=document.getElementById('p-body');
   const foot=document.getElementById('p-foot');
   const cta=document.getElementById('cta');
-  foot.className='p-foot';document.getElementById('fb').innerHTML='';
+  foot.className='p-foot';document.getElementById('fb').innerHTML='';document.getElementById('why').innerHTML='';
   cta.className='cta';cta.disabled=true;cta.textContent='CONTINUER';cta.onclick=advance;
   syncNarrLink();
   const st=QUEUE[qi];
@@ -1507,10 +1652,12 @@ function renderStep(){
   if(st.type==='trace'){
     const d=UNITS[curU].alpha[st.L];
     body.innerHTML='<div class="q-title">À toi d\u2019écrire : '+st.L+' ('+d.n+')</div>'+
-      '<div class="hint" style="margin:-8px 0 14px">Commence au point vert, dans le sens de la flèche (les numéros donnent l\u2019ordre des traits). Astuce : '+d.mn+'.</div>'+
+      '<div class="hint" style="margin:-8px 0 14px">Pose ton doigt sur le point vert et suis le chemin de la lettre jusqu\u2019au bout. Astuce : '+d.mn+'.</div>'+
       '<canvas id="trace" class="trace"></canvas>'+
+      '<div class="hint" id="traceMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
       '<div class="trow">'+
-      '<button class="speak" onclick="window._traceClear&&window._traceClear()">🧽 Effacer</button></div>';
+      '<button class="speak" onclick="window._traceDemo&&window._traceDemo()">▶️ Regarder la démo</button>'+
+      '<button class="speak" onclick="window._traceClear&&window._traceClear()">🧽 Recommencer</button></div>';
     setTimeout(()=>setupTrace(st.L),50);
     return;
   }
@@ -1542,6 +1689,76 @@ function renderStep(){
         '<div class="dm-fb" id="dm-fb"></div>'+
       '</div>';
     setTimeout(()=>setupDragMad(st),50);
+    return;
+  }
+
+  if(st.type==='vwrite'){
+    const SR=SOURATES[curSourate]||SOURATES[0];
+    const words=SR.verses[st.vi].split(' ');
+    window._vw={vi:st.vi,words:words,wi:0,units:splitUnits(words[0]),ch:[],err:false};
+    body.innerHTML='<div class="q-title">Réécris le verset '+(st.vi+1)+' ✨</div>'+
+      '<div class="hint" style="margin:-8px 0 12px">Le verset se construit sous tes yeux, mot après mot — avec les harakats.</div>'+
+      '<button class="speak" style="margin:0 auto 12px" onclick="playVerse('+st.vi+')">🔊 Écouter le verset (al-ʿAfāsī)</button>'+
+      '<div class="slots linear-ar" id="vwVerse" style="font-size:34px;line-height:2"></div>'+
+      '<div class="hint" id="vwMsg" style="text-align:center;margin:6px 0;min-height:18px"></div>'+
+      '<div class="tiles" id="vwTiles"></div>'+
+      '<button class="undo" onclick="vwUndo()">↩️ Retirer la dernière lettre</button>';
+    cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=true;
+    renderVw();
+    return;
+  }
+
+  if(st.type==='stiles'){
+    const SR=SOURATES[curSourate]||SOURATES[0];
+    window._st={n:SR.verses.length,ch:[]};
+    const order=shuffle(SR.verses.map(function(v,i){return i;}));
+    body.innerHTML='<div class="q-title">Remets les versets dans l\u2019ordre 📜</div>'+
+      '<div class="hint" style="margin:-8px 0 14px">Touche les versets (en bas) dans l\u2019ordre de la sourate. Le petit 🔊 te fait écouter un verset sans le placer.</div>'+
+      '<div id="stSlots"></div>'+
+      '<div style="height:8px"></div>'+
+      order.map(function(vi,k){
+        return '<button class="sttile" id="stile'+k+'" data-vi="'+vi+'" onclick="stTap('+k+')">'+SR.verses[vi]+
+          ' <span onclick="event.stopPropagation();playVerse('+vi+')" style="font-family:var(--ui);font-size:14px;opacity:.75"> 🔊</span></button>';
+      }).join('')+
+      '<button class="undo" onclick="stUndo()">↩️ Retirer le dernier verset</button>';
+    cta.textContent='VÉRIFIER';cta.onclick=ctaClick;
+    renderSt();
+    return;
+  }
+
+  if(st.type==='recite'){
+    const SR=SOURATES[curSourate]||SOURATES[0];
+    const kset=knownLetterSet();
+    const words=SR.verses[st.vi].split(' ').map(function(w){
+      return '<span class="vw" style="color:'+(wordReadable(w,kset)?'var(--gold)':'var(--cream)')+'">'+w+'</span>';
+    }).join(' ');
+    body.innerHTML='<div class="q-title">Récite le verset '+(st.vi+1)+' 🎙️</div>'+
+      '<div class="hint" style="margin:-8px 0 14px">Écoute le modèle, enregistre-toi, ré-écoute-toi et compare. Puis valide ta récitation.</div>'+
+      '<div class="verse" style="font-size:30px;line-height:2">'+words+'</div>'+
+      '<div class="trow" style="flex-wrap:wrap;gap:8px">'+
+        '<button class="speak" onclick="playVerse('+st.vi+')">🔊 Modèle</button>'+
+        '<button class="speak" id="recBtn" onclick="recToggle()">🎙️ M\u2019enregistrer</button>'+
+        '<button class="speak" id="recPlay" onclick="recPlay()" disabled style="opacity:.4">▶️ Ma récitation</button>'+
+      '</div>'+
+      '<div class="hint" id="recMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
+      '<button class="mic-btn" style="margin-top:14px" onclick="recValidate(this)">✅ Je valide ma récitation</button>';
+    return;
+  }
+
+  if(st.type==='vtiles'){
+    const vt=st.vt;
+    window._vt={seq:vt.seq,ch:[],tpl:vt.tpl,vi:vt.vi};
+    const tiles=shuffle(vt.seq.concat(vt.distract||[]));
+    body.innerHTML='<div class="q-title">Appuie sur ce que tu entends 🕋</div>'+
+      '<div class="hint" style="margin:-8px 0 14px">Écoute le verset, puis reconstruis-le en touchant les mots dans l\u2019ordre. Les mots gris sont posés pour toi : leurs lettres viendront plus tard.</div>'+
+      '<button class="bigspeak" onclick="playVerse('+vt.vi+')">🔊</button>'+
+      '<div class="hint" style="text-align:center;margin:-10px 0 16px">Touche le haut-parleur pour réécouter (al-ʿAfāsī)</div>'+
+      '<div class="verse" id="vtSlots" style="font-size:30px;line-height:2"></div>'+
+      '<div class="tiles" id="vtTiles" style="margin-top:14px;flex-wrap:wrap">'+tiles.map((w,k)=>
+        '<button class="tile" id="vtile'+k+'" style="width:auto;min-width:64px;padding:0 14px;font-size:26px;font-family:var(--quran)" onclick="vtTap('+k+',this)" data-w="'+w+'">'+w+'</button>').join('')+'</div>'+
+      '<button class="undo" onclick="vtUndo()">↩️ Retirer le dernier mot</button>';
+    cta.textContent='VÉRIFIER';cta.onclick=ctaClick;
+    renderVt();
     return;
   }
 
@@ -1592,6 +1809,26 @@ function ctaClick(){
       fb.innerHTML='<span>✕</span> Le mot était : <span class="ar" style="font-size:26px">'+st.w.w+'</span>'+
         '<div style="opacity:.85;font-size:14px;margin-top:6px">Toi : <span class="ar" style="font-size:24px">'+mine+'</span></div>';
     }
+  } else if(st.type==='stiles'){
+    const M=window._st;
+    if(M.ch.length!==M.n)return;
+    ok=M.ch.every(function(v,i){return v===i;});
+    answered=true;
+    if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> ماشاء الله — la sourate dans l\u2019ordre du mushaf !';if(SND)playVerse(0);}
+    else{fb.className='fb bad';fb.innerHTML='<span>✕</span> Pas tout à fait l\u2019ordre du mushaf — on la rejoue à la fin.';}
+  } else if(st.type==='vtiles'){
+    const M=window._vt;
+    if(M.ch.length!==M.seq.length)return;
+    ok=M.ch.every((w,i)=>w===M.seq[i]);
+    answered=true;
+    if(ok){
+      fb.className='fb ok';
+      fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله — <span style="font-family:var(--quran);font-size:22px">'+FATIHA[st.vt.vi]+'</span>';
+      if(SND)playVerse(st.vt.vi);
+    }else{
+      fb.className='fb bad';
+      fb.innerHTML='<span>✕</span> L\u2019ordre était : <span style="font-family:var(--quran);font-size:22px">'+M.seq.join(' ')+'</span> …';
+    }
   } else {
     if(picked===null)return;
     answered=true;
@@ -1612,6 +1849,12 @@ function ctaClick(){
     // jamais avant — sinon la réponse serait donnée. Renforce l’association forme ↔ son après coup.
     if(SND&&st.glyph!==undefined)speak(st.answer);
   }
+  // mémoire des erreurs (répétition espacée) : +1 si raté, -1 si su
+  if(st.graded){
+    const ek=st.type==='assemble'?st.w.w:(typeof st.answer==='string'?st.answer:null);
+    if(ek){ if(!ok)S.err[ek]=(S.err[ek]||0)+1; else if(S.err[ek]){S.err[ek]=Math.max(0,S.err[ek]-1);} save(); }
+  }
+  if(!ok&&st.explain){var w=document.getElementById('why');if(w)w.innerHTML='💡 '+st.explain;}
   if(ok){
     foot.classList.add('ok');cta.className='cta ok';
     // si on est en mode rattrapage et qu'on réussit, on retire la question de la liste
@@ -1621,9 +1864,11 @@ function ctaClick(){
     foot.classList.add('bad');cta.className='cta bad';
     if(st.graded){
       wrongCount++;
+      if(!EXAM&&!REVIEW)S.uerr[curU]=1; // l'unité n'est plus « sans erreur »
       // on mémorise la question ratée pour la rejouer en fin de leçon
       if(MISSED.indexOf(st)<0)MISSED.push(st);
-      S.hearts=Math.max(0,S.hearts-1);save();
+      if(!REVIEW)S.hearts=Math.max(0,S.hearts-1); // la révision ne coûte aucun cœur
+      save();
       document.getElementById('p-hearts').textContent=S.hearts;
       document.getElementById('st-hearts').textContent=S.hearts;
     }
@@ -1641,7 +1886,7 @@ function finishDisque(){
     // petit écran de transition
     const body=document.getElementById('p-body');
     const foot=document.getElementById('p-foot');
-    foot.className='p-foot';document.getElementById('fb').innerHTML='';
+    foot.className='p-foot';document.getElementById('fb').innerHTML='';document.getElementById('why').innerHTML='';
     {const bl=document.getElementById('backLink');if(bl)bl.style.display='none';}
     body.innerHTML='<div class="learn" style="margin-top:24px">'+
       '<div style="font-size:60px">🔁</div>'+
@@ -1670,11 +1915,15 @@ function finishDisque(){
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
   const isBilan=(curD===discsFor(curU).length-1);
   document.getElementById('fin-icon').textContent=isBilan?'🏆':'✓';
-  document.getElementById('fin-extra').innerHTML='';
+  document.getElementById('fin-extra').innerHTML=isBilan
+    ?('<p style="color:var(--gold2);font-weight:800;margin:-8px 0 18px">🕋 Tu peux maintenant lire <b>'+fatihaPct()+' %</b> de la Fātiḥa !</p>')
+    :'';
   document.getElementById('fin-title').textContent=isBilan?('Unité '+toAr(UNITS[curU].no)+' validée ! 🎉'):(discLabel(discsFor(curU)[curD],UNITS[curU])+' — terminé !');
   document.getElementById('fin-xp').textContent='+'+gain;
   document.getElementById('fin-acc').textContent=acc+'%';
   document.getElementById('finish').classList.add('on');
+  if(isBilan)confettiBurst();
+  checkBadges({noMistake:wrongCount===0&&total>0,unitPerfect:isBilan&&!S.uerr[curU]});
 }
 function closeFinish(){document.getElementById('finish').classList.remove('on');returnFromPlayer();}
 
@@ -1698,9 +1947,9 @@ function buildExam(U){
     'Avec <b>2 erreurs maximum</b>, tu valides toute l\u2019unité et tu passes à la suite. Prêt ?</p>'},...q];
 }
 function startExam(u){
+  if(S.hearts<=0){showNoHearts();return;}
   EXAM=true;curU=u;curD=-1;
   QUEUE=buildExam(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
-  S.hearts=5;S.heartDay=today();save();
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
@@ -1734,7 +1983,9 @@ function finishExam(){
   document.getElementById('fin-acc').textContent=acc+'%';
   const extra=document.getElementById('fin-extra');
   if(pass){
-    extra.innerHTML='';
+    extra.innerHTML='<p style="color:var(--gold2);font-weight:800;margin:-6px 0 18px">🕋 Tu peux maintenant lire <b>'+fatihaPct()+' %</b> de la Fātiḥa !</p>';
+    confettiBurst();
+    checkBadges({noMistake:wrongCount===0});
   }else{
     extra.innerHTML='<p style="max-width:320px;color:var(--cream);opacity:.85;margin:-6px auto 18px;font-size:14px">'+
       'Le test n\u2019est pas validé : l\u2019unité suivante reste verrouillée. Réessaie quand tu veux 💪</p>'+
@@ -1770,18 +2021,17 @@ function doCombine(res){
   setTimeout(()=>{r.textContent=res;r.classList.add('pop');speakFr(res);ctaOn();},250);
 }
 function hkTap(i,el){
-  speakFr(['a','i','ou'][i]); // la voyelle seule, prononcée proprement
+  speak(['a','i','ou'][i]); // voyelle seule : enregistrement (repli synthèse française si absent)
   el.classList.add('lit');popIt(el);
   window._hk.add(i);if(window._hk.size>=3)ctaOn();
 }
 function assocTap(i,el){
   const a=window._as;
   let syl;
-  if(a.set===MD){ // prolongation : son bien étiré, en français
+  if(a.set===MD){ // prolongation : son étiré (enregistrement مَا/مِي/مُو, repli synthèse)
     const m=a.set[i][0];
     syl=a.L+m;
-    const say=['mâââ','mîîî','mououou'][i]||'';
-    speakFr(say);
+    speak(maddSyl(a.L,m));
   } else {
     syl=a.L+a.set[i][0];
     speak(syl);
@@ -1845,11 +2095,9 @@ function updFs(){
   if(window._fs.found>=window._fs.need){c.textContent='✓ Tous trouvés ! ماشاء الله';ctaOn();}
 }
 function cmpTap(i,el,short,long){
-  // son court (voyelle brève) puis son long bien étiré — en français pour être net
-  const shortSay=['ma','mi','mou'][i];
-  const longSay=['mâââ','mîîî','mououou'][i];
-  speakFr(shortSay);
-  setTimeout(()=>speakFr(longSay),900);
+  // son court puis son long étiré : enregistrements de la voix (repli synthèse si fichier absent)
+  speak(short);
+  setTimeout(()=>speak(long),900);
   el.classList.add('lit');
   window._cmp.add(i);if(window._cmp.size>=window._cmpN)ctaOn();
 }
@@ -2083,96 +2331,227 @@ function setupDragMad(st){
     tile.addEventListener('pointercancel',up);
   });
 }
+function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire)
+  if(!SND)return;
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
+    const ac=window._ac||(window._ac=new Ctx());
+    if(ac.state==='suspended')ac.resume();
+    const t=ac.currentTime;
+    const notes=kind==='final'?[[523,0],[659,.09],[784,.18]]:kind==='dot'?[[880,0]]:[[587,0],[880,.08]];
+    notes.forEach(n=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type='sine';o.frequency.setValueAtTime(n[0],t+n[1]);
+      g.gain.setValueAtTime(0.0001,t+n[1]);
+      g.gain.exponentialRampToValueAtTime(0.13,t+n[1]+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+n[1]+0.22);
+      o.connect(g);g.connect(ac.destination);o.start(t+n[1]);o.stop(t+n[1]+0.24);
+    });
+  }catch(e){}
+}
+/* ===== TRACÉ GUIDÉ =====
+   Le doigt doit suivre le chemin de la lettre (données strokes, police Noto Sans
+   Arabic = écriture linéaire d'apprentissage). Le trait se dore au fur et à mesure ;
+   point vert + flèche de départ AUTO-DÉRIVÉS du premier segment (plus de données
+   starts à calibrer). Les points (nuqat) se posent en touchant leur cercle. */
 function setupTrace(L){
+  /* ===== TRACÉ GUIDÉ — rendu « Style A : la lettre s'illumine » (validé par Myriam 02/07)
+     Chemin densifié (spline Catmull-Rom, un point tous les ~3 px) et accroché au centre
+     du trait du glyphe Noto. L'or est découpé par le glyphe lui-même (masque) : rien ne
+     dépasse, et à la fin la lettre est INTÉGRALEMENT coloriée (remplissage complet). */
   const c=document.getElementById('trace');if(!c)return;
   const x=c.getContext('2d');
   const dpr=window.devicePixelRatio||1, W=300;
   c.width=W*dpr;c.height=W*dpr;x.scale(dpr,dpr);
-  function letterStyle(){x.font='190px Amiri, serif';x.textAlign='center';x.textBaseline='alphabetic';}
-  function guide(skip){
-    x.clearRect(0,0,W,W);
-    x.strokeStyle='#4A403A';x.lineWidth=1;
-    x.beginPath();x.moveTo(20,190);x.lineTo(W-20,190);x.stroke();
-    if(skip)return;
-    letterStyle();x.fillStyle='rgba(220,144,46,.20)';x.fillText(L,W/2,215);
-    // flèches de départ : données dédiées starts[L] = [{x,y,ang} | {dot:[x,y]}]
-    const ST=(UNITS[curU].starts&&UNITS[curU].starts[L])||[];
-    const G='#6FB08A';
-    function label(px,py,n){ if(ST.length<2)return;
-      x.fillStyle='#08231a';x.font='bold 12px sans-serif';x.textAlign='center';x.textBaseline='middle';
-      x.fillText(String(n),px,py);x.fillStyle=G;x.textBaseline='alphabetic'; }
-    ST.forEach((s,i)=>{
-      if(s.dots){ x.strokeStyle=G;x.lineWidth=3;
-        s.dots.forEach(d=>{x.beginPath();x.arc(d[0],d[1],9,0,7);x.stroke();});
-        label(s.dots[0][0],s.dots[0][1],i+1); return; }
-      if(s.dot){ x.strokeStyle=G;x.lineWidth=3;x.beginPath();x.arc(s.dot[0],s.dot[1],9,0,7);x.stroke();
-        label(s.dot[0],s.dot[1],i+1); return; }
-      const ang=s.ang*Math.PI/180, len=30, ah=10;
-      const ex=s.x+Math.cos(ang)*len, ey=s.y+Math.sin(ang)*len;
-      x.strokeStyle=G;x.fillStyle=G;x.lineWidth=5;x.lineCap='round';x.lineJoin='round';
-      x.beginPath();x.moveTo(s.x,s.y);x.lineTo(ex,ey);x.stroke();
-      x.beginPath();x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang-0.5),ey-ah*Math.sin(ang-0.5));
-      x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang+0.5),ey-ah*Math.sin(ang+0.5));x.stroke();
-      x.beginPath();x.arc(s.x,s.y,8,0,7);x.fill();
-      label(s.x,s.y,i+1);
-    });
+  const msg=document.getElementById('traceMsg');
+  const AR_FONT='190px "Noto Naskh Arabic",serif';
+  function letterStyle(g){g.font=AR_FONT;g.textAlign='center';g.textBaseline='alphabetic';}
+  const STK=(UNITS[curU].strokes&&UNITS[curU].strokes[L])||[];
+  // — encre du glyphe : sert à accrocher le chemin et à masquer le remplissage —
+  const inkC=document.createElement('canvas');inkC.width=W;inkC.height=W;
+  const inkX=inkC.getContext('2d',{willReadFrequently:true});
+  letterStyle(inkX);inkX.fillStyle='#fff';inkX.fillText(L,W/2,215);
+  const inkD=inkX.getImageData(0,0,W,W).data;
+  const ink=i=>inkD[i*4+3]>140;
+  function snapPt(p,R){
+    let best=null,bd=1e9;
+    for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){
+      const px=Math.round(p[0]+dx),py=Math.round(p[1]+dy);
+      if(px<0||py<0||px>=W||py>=W||!ink(py*W+px))continue;
+      const d=dx*dx+dy*dy;if(d<bd){bd=d;best=[px,py];}
+    }
+    if(!best)return p;
+    let sx=0,sy=0,n=0;
+    for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){
+      const px=best[0]+dx,py=best[1]+dy;
+      if(px<0||py<0||px>=W||py>=W||!ink(py*W+px))continue;
+      sx+=px;sy+=py;n++;
+    }
+    return n?[sx/n,sy/n]:best;
   }
-  guide();
-  let drawing=false,drew=false;
+  function densify(anchors){
+    const P=[anchors[0]].concat(anchors).concat([anchors[anchors.length-1]]);
+    const out=[];
+    for(let i=1;i<P.length-2;i++){
+      const p0=P[i-1],p1=P[i],p2=P[i+1],p3=P[i+2];
+      const seg=Math.max(2,Math.round(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/3));
+      for(let k=(i===1?0:1);k<=seg;k++){
+        const t=k/seg,t2=t*t,t3=t2*t;
+        out.push([
+          .5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
+          .5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)]);
+      }
+    }
+    return out.map(p=>snapPt(p,8));
+  }
+  const paths=STK.map(st=>{
+    if(st.dot)return {dots:[snapPt(st.dot,10)],hit:[false]};
+    if(st.dots)return {dots:st.dots.map(d=>snapPt(d,10)),hit:st.dots.map(()=>false)};
+    return {pts:densify(st.pts),prog:0};
+  });
+  const off=document.createElement('canvas');off.width=W;off.height=W;
+  let cur=0,doneAll=false,tracking=false,demoOn=false;
+  const TOL=26,START_R=34;
+  const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+  function goldLayer(st8){ // l'or, découpé par le glyphe
+    const o=off.getContext('2d');
+    o.clearRect(0,0,W,W);
+    o.lineCap='round';o.lineJoin='round';o.strokeStyle='#E8A94F';o.fillStyle='#E8A94F';
+    if(st8.full){ o.fillRect(0,0,W,W); }  // lettre terminée : glyphe ENTIÈREMENT doré
+    else paths.forEach((p,i)=>{
+      if(p.dots){p.dots.forEach((d,k)=>{if(p.hit[k]){o.beginPath();o.arc(d[0],d[1],16,0,7);o.fill();}});return;}
+      const upTo=(i<st8.cur)?p.pts.length-1:(i===st8.cur?st8.prog:0);
+      if(upTo>0){o.lineWidth=(i<st8.cur)?40:34;
+        o.beginPath();o.moveTo(p.pts[0][0],p.pts[0][1]);
+        for(let k=1;k<=upTo;k++)o.lineTo(p.pts[k][0],p.pts[k][1]);o.stroke();}
+    });
+    o.globalCompositeOperation='destination-in';
+    letterStyle(o);o.fillStyle='#fff';o.fillText(L,W/2,215);
+    o.globalCompositeOperation='source-over';
+  }
+  function arrowAt(pts,i0){
+    const a=pts[Math.min(i0,pts.length-2)],b=pts[Math.min(i0+10,pts.length-1)];
+    const ang=Math.atan2(b[1]-a[1],b[0]-a[0]),len=24,ah=8;
+    const ex=a[0]+Math.cos(ang)*len,ey=a[1]+Math.sin(ang)*len;
+    x.strokeStyle='#6FB08A';x.fillStyle='#6FB08A';x.lineWidth=4.5;x.lineCap='round';
+    x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(ex,ey);x.stroke();
+    x.beginPath();x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang-.5),ey-ah*Math.sin(ang-.5));
+    x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang+.5),ey-ah*Math.sin(ang+.5));x.stroke();
+    x.beginPath();x.arc(a[0],a[1],8,0,7);x.fill();
+  }
+  function paint(st8,showGuides){
+    x.clearRect(0,0,W,W);
+    // Réglure de cahier : la lettre repose sur la ligne de base (y=215) ;
+    // interlignes légères : hampes (85) · corps (150) · descentes (280).
+    [85,150,280].forEach(gy=>{
+      x.strokeStyle='rgba(185,169,154,.16)';x.lineWidth=1;
+      x.beginPath();x.moveTo(14,gy);x.lineTo(W-14,gy);x.stroke();
+    });
+    x.strokeStyle='rgba(220,144,46,.45)';x.lineWidth=1.6;
+    x.beginPath();x.moveTo(14,215);x.lineTo(W-14,215);x.stroke();
+    letterStyle(x);x.fillStyle='rgba(220,144,46,.16)';x.fillText(L,W/2,215);
+    goldLayer(st8);
+    x.drawImage(off,0,0,W,W);
+    if(!showGuides)return;
+    const p=paths[st8.cur];
+    if(p&&p.pts){
+      arrowAt(p.pts,st8.prog||0);
+      if(st8.prog>0&&st8.prog<p.pts.length-1){const t=p.pts[st8.prog];
+        x.fillStyle='#F2E9DA';x.beginPath();x.arc(t[0],t[1],5.5,0,7);x.fill();}
+    }
+    if(p&&p.dots)p.dots.forEach((d,k)=>{if(!p.hit[k]){x.strokeStyle='#6FB08A';x.lineWidth=3;
+      x.beginPath();x.arc(d[0],d[1],13,0,7);x.stroke();}});
+  }
+  function draw(){
+    paint({cur,prog:(paths[cur]&&paths[cur].pts)?paths[cur].prog:0,full:doneAll},!doneAll);
+    if(doneAll){ if(msg)msg.textContent='✓ ماشاء الله — magnifique !'; return; }
+    const p=paths[cur];
+    if(p&&p.dots&&msg)msg.textContent='Ajoute '+(p.dots.length>1?'les points':'le point')+' 👆';
+  }
+  function finishAll(){ doneAll=true;draw();okBeep('final');speak(L);ctaOn(); }
+  function nextStroke(){
+    cur++;
+    if(cur>=paths.length)finishAll();
+    else{okBeep();if(msg)msg.textContent='';draw();}
+  }
   function pos(e){const r=c.getBoundingClientRect();const t=e.touches?e.touches[0]:e;
     return [(t.clientX-r.left)*W/r.width,(t.clientY-r.top)*W/r.height];}
-  function down(e){e.preventDefault();drawing=true;const[a,b]=pos(e);x.beginPath();x.moveTo(a,b);}
-  function move(e){if(!drawing)return;e.preventDefault();const[a,b]=pos(e);
-    x.strokeStyle='#F2E9DA';x.lineWidth=8;x.lineCap='round';x.lineJoin='round';x.lineTo(a,b);x.stroke();
-    if(!drew){drew=true;ctaOn();}}
-  function up(){drawing=false;}
+  function advance(pt){
+    const p=paths[cur];if(!p||!p.pts)return;
+    let moved=false,guard=0;
+    while(p.prog<p.pts.length-1&&guard++<60){
+      let best=-1,bd=TOL;
+      for(let k=1;k<=6&&p.prog+k<p.pts.length;k++){
+        const d=dist(pt,p.pts[p.prog+k]);
+        if(d<bd){bd=d;best=p.prog+k;}
+      }
+      if(best<0)break;
+      p.prog=best;moved=true;
+      if(dist(pt,p.pts[p.prog])<6)break;
+    }
+    if(moved){
+      draw();
+      if(p.prog>=p.pts.length-1){tracking=false;nextStroke();}
+    }
+  }
+  function down(e){
+    if(doneAll||demoOn)return;e.preventDefault();
+    const pt=pos(e),p=paths[cur];if(!p)return;
+    if(p.dots){
+      let got=false;
+      p.dots.forEach((d,k)=>{ if(!p.hit[k]&&dist(pt,d)<24){p.hit[k]=true;got=true;} });
+      if(got){okBeep('dot');draw();if(p.hit.every(h=>h))nextStroke();}
+      return;
+    }
+    if(dist(pt,p.pts[p.prog])<START_R){tracking=true;advance(pt);}
+    else if(msg)msg.textContent='Pose ton doigt sur le point vert 🟢';
+  }
+  function move(e){if(!tracking||doneAll||demoOn)return;e.preventDefault();advance(pos(e));}
+  function up(){tracking=false;}
   c.onmousedown=down;c.onmousemove=move;c.onmouseup=up;c.onmouseleave=up;
   c.ontouchstart=down;c.ontouchmove=move;c.ontouchend=up;
-  window._traceClear=()=>{guide();drew=false;document.getElementById('cta').disabled=true;};
-  let demoOn=false;
-  const STK=UNITS[curU].strokes[L]||[];
-  window._traceDemo=()=>{
+  window._traceState=()=>({cur,prog:(paths[cur]&&paths[cur].pts)?paths[cur].prog:-1,
+    total:(paths[cur]&&paths[cur].pts)?paths[cur].pts.length:0,doneAll});
+  window._traceClear=()=>{
     if(demoOn)return;
-    if(!STK.length){toast('Démo bientôt disponible pour cette lettre');return;}
-    demoOn=true;
-    const segs=[];let totLen=0;
-    STK.forEach(st=>{
-      if(st.dot){segs.push({dot:st.dot,len:120});totLen+=120;return;}
-      for(let i=1;i<st.pts.length;i++){
-        const l=Math.hypot(st.pts[i][0]-st.pts[i-1][0],st.pts[i][1]-st.pts[i-1][1]);
-        segs.push({a:st.pts[i-1],b:st.pts[i],len:l});totLen+=l;
-      }
-      segs.push({pause:1,len:70});totLen+=70; // la plume se lève
-    });
-    const speed=totLen/2400; // px par ms
-    let t0=null;
+    paths.forEach(p=>{if(p.pts)p.prog=0;if(p.hit)p.hit=p.hit.map(()=>false);});
+    cur=0;doneAll=false;tracking=false;
+    document.getElementById('cta').disabled=true;
+    if(msg)msg.textContent='';
+    draw();
+  };
+  // démo animée : la plume dorée écrit la lettre dans le bon sens (même rendu)
+  window._traceDemo=()=>{
+    if(demoOn)return;demoOn=true;
+    const st8={cur:0,prog:0,full:false,waitDot:0,waitEnd:0};
+    const hits=paths.map(p=>p.dots?p.dots.map(()=>false):null);
+    const saveHits=paths.map(p=>p.hit?p.hit.slice():null);
+    paths.forEach((p,i)=>{if(p.hit)p.hit=p.hit.map(()=>false);});
+    let last=null;
     function frame(ts){
-      if(t0===null)t0=ts;
-      let dist=(ts-t0)*speed;
-      const fini=dist>=totLen;
-      guide(true);
-      x.strokeStyle='#DC902E';x.lineWidth=10;x.lineCap='round';x.lineJoin='round';
-      let pen=null;
-      for(const s of segs){
-        if(dist<=0)break;
-        if(s.pause){dist-=s.len;continue;}
-        if(s.dot){
-          if(dist>=s.len){x.fillStyle='#DC902E';x.beginPath();x.arc(s.dot[0],s.dot[1],8,0,7);x.fill();}
-          else pen=s.dot;
-          dist-=s.len;continue;
+      if(last===null)last=ts;
+      const dt=ts-last;last=ts;
+      const p=paths[st8.cur];
+      if(st8.full){
+        st8.waitEnd+=dt;
+        if(st8.waitEnd>900){ // fin : on rend la main, progrès de l'élève restauré
+          paths.forEach((p2,i)=>{if(p2.hit)p2.hit=saveHits[i];});
+          demoOn=false;draw();return;
         }
-        const d=Math.min(1,dist/s.len);
-        const bx=s.a[0]+(s.b[0]-s.a[0])*d, by=s.a[1]+(s.b[1]-s.a[1])*d;
-        x.beginPath();x.moveTo(s.a[0],s.a[1]);x.lineTo(bx,by);x.stroke();
-        if(d<1)pen=[bx,by];
-        dist-=s.len;
+      } else if(!p){ st8.full=true; }
+      else if(p.dots){
+        st8.waitDot+=dt;
+        if(st8.waitDot>420){p.hit=p.hit.map(()=>true);st8.cur++;st8.waitDot=0;}
+      } else {
+        st8.prog=Math.min(p.pts.length-1,st8.prog+Math.max(1,Math.round(dt*.12)));
+        if(st8.prog>=p.pts.length-1){st8.cur++;st8.prog=0;}
       }
-      if(pen){x.fillStyle='#F2E9DA';x.beginPath();x.arc(pen[0],pen[1],6,0,7);x.fill();}
-      if(!fini)requestAnimationFrame(frame);
-      else setTimeout(()=>{guide();drew=false;document.getElementById('cta').disabled=true;demoOn=false;},900);
+      paint(st8,false);
+      requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   };
+  draw();
 }
 
 /* audio */
@@ -2281,12 +2660,47 @@ const AUDIO={
   'نَا':'audios-app-alaq/noun-alif-son-prolonge.mp3',
   'نُو':'audios-app-alaq/noun-waw-son-prolonge.mp3',
   'ا':'audios-app-alaq/alif-isolee-nom-de-la-lettre.mp3',
+  'a':'audios-app-alaq/voyelle-a.mp3',
+  'i':'audios-app-alaq/voyelle-i.mp3',
+  'ou':'audios-app-alaq/voyelle-ou.mp3',
+  'مَدْرَسَةٌ':'audios-app-alaq/mot-madrasatoun.mp3',
   'يِ':'audios-app-alaq/ya-kasra-son-court.mp3',
   'يُ':'audios-app-alaq/ya-damma-son-court.mp3',
   'وِ':'audios-app-alaq/waw-kasra-son-court.mp3',
   'وُ':'audios-app-alaq/waw-damma-son-court.mp3',
   'أِ':'audios-app-alaq/alif-kasra-son-court.mp3',
   'أِي':'audios-app-alaq/alif-ya-son-prolonge.mp3',
+  'س':'audios-app-alaq/sin-isolee-nom-de-la-lettre.mp3',
+  'د':'audios-app-alaq/dal-isolee-nom-de-la-lettre.mp3',
+  'ك':'audios-app-alaq/kaf-isolee-nom-de-la-lettre.mp3',
+  'سَ':'audios-app-alaq/sin-fatha-son-court.mp3',
+  'سِ':'audios-app-alaq/sin-kasra-son-court.mp3',
+  'سُ':'audios-app-alaq/sin-damma-son-court.mp3',
+  'دَ':'audios-app-alaq/dal-fatha-son-court.mp3',
+  'دِ':'audios-app-alaq/dal-kasra-son-court.mp3',
+  'دُ':'audios-app-alaq/dal-damma-son-court.mp3',
+  'كَ':'audios-app-alaq/kaf-fatha-son-court.mp3',
+  'كِ':'audios-app-alaq/kaf-kasra-son-court.mp3',
+  'كُ':'audios-app-alaq/kaf-damma-son-court.mp3',
+  'سَا':'audios-app-alaq/sin-alif-son-prolonge.mp3',
+  'سِي':'audios-app-alaq/sin-ya-son-prolonge.mp3',
+  'سُو':'audios-app-alaq/sin-waw-son-prolonge.mp3',
+  'دَا':'audios-app-alaq/dal-alif-son-prolonge.mp3',
+  'دِي':'audios-app-alaq/dal-ya-son-prolonge.mp3',
+  'دُو':'audios-app-alaq/dal-waw-son-prolonge.mp3',
+  'كَا':'audios-app-alaq/kaf-alif-son-prolonge.mp3',
+  'كِي':'audios-app-alaq/kaf-ya-son-prolonge.mp3',
+  'كُو':'audios-app-alaq/kaf-waw-son-prolonge.mp3',
+  'دَرْسٌ':'audios-app-alaq/mot-dars.mp3',
+  'كَلْبٌ':'audios-app-alaq/mot-kalb.mp3',
+  'سَمَكٌ':'audios-app-alaq/mot-samak.mp3',
+  'كَرِيمٌ':'audios-app-alaq/mot-karim.mp3',
+  'سَلَامٌ':'audios-app-alaq/mot-salam.mp3',
+  'كَأْسٌ':'audios-app-alaq/mot-kas.mp3',
+  'رَأْسٌ':'audios-app-alaq/mot-ras.mp3',
+  'دِينٌ':'audios-app-alaq/mot-din.mp3',
+  'إِيَّاكَ':'audios-app-alaq/mot-iyyaka.mp3',
+  'نَعْبُدُ':'audios-app-alaq/mot-naabudu.mp3',
 };
 
 function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) : écrase, bascule, joue le son visible
@@ -2387,11 +2801,19 @@ if(typeof document!=='undefined'&&document.addEventListener){
   document.addEventListener('pointerdown',warmVoices,{once:true});
   document.addEventListener('touchstart',warmVoices,{once:true});
 }
-function playVerse(i){
+function playVerse(i){ // récitation al-ʿAfāsī : fichier auto-hébergé d'abord, everyayah en secours
   try{
-    const n='00100'+(i+1);
-    const a=new Audio('https://everyayah.com/data/Alafasy_128kbps/'+n+'.mp3');
-    a.play().catch(()=>toast('Audio indisponible hors connexion'));
+    const a=new Audio('audios-app-alaq/fatiha-'+(i+1)+'.mp3');
+    let settled=false;
+    const fallback=()=>{ if(settled)return; settled=true;
+      try{a.pause();}catch(_){ }
+      const b=new Audio('https://everyayah.com/data/Alafasy_128kbps/00100'+(i+1)+'.mp3');
+      b.play().catch(()=>toast('Audio indisponible hors connexion'));
+    };
+    a.addEventListener('playing',()=>{settled=true;},{once:true});
+    a.addEventListener('error',fallback,{once:true});
+    const pr=a.play(); if(pr&&pr.catch)pr.catch(fallback);
+    setTimeout(()=>{ if(!settled&&a.paused)fallback(); },1200);
   }catch(e){}
 }
 // ===== Reconnaissance vocale (lecture à voix haute, modèle Duolingo) =====
@@ -2455,6 +2877,125 @@ function zoomVerse(btn){
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');
   setTimeout(()=>t.classList.remove('on'),2600);}
 
+/* ===== Badges & confettis ===== */
+const BADGES=[
+ ['disque1','🌱','Premier disque terminé'],
+ ['sansfaute','💎','Un disque sans aucune erreur'],
+ ['unite-sansfaute','💠','Une unité entière sans erreur'],
+ ['unite1','🎖️','Première unité validée'],
+ ['unites2','🥈','2 unités validées'],
+ ['unites4','🥇','4 unités validées'],
+ ['unites7','👑','Les 7 unités de la Fātiḥa'],
+ ['serie3','🔥','3 jours d\u2019affilée'],
+ ['serie7','⚡','7 jours d\u2019affilée'],
+ ['serie30','☀️','30 jours d\u2019affilée'],
+ ['revision','🔄','Première révision'],
+ ['revision3','📚','3 révisions'],
+ ['revision7','🧠','7 révisions'],
+ ['revision30','🦉','30 révisions'],
+ ['fatiha50','🕋','La moitié de la Fātiḥa lisible'],
+ ['fatiha100','🏆','Toute la Fātiḥa lisible'],
+];
+function confettiBurst(){
+  try{
+    const cv=document.createElement('canvas');
+    cv.style.cssText='position:fixed;inset:0;z-index:95;pointer-events:none';
+    const dpr=window.devicePixelRatio||1;
+    cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;
+    document.body.appendChild(cv);
+    const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+    const cols=['#DC902E','#E8A94F','#F2E9DA','#6FB08A'];
+    const P=[];for(let i=0;i<110;i++)P.push({
+      x:innerWidth/2+(Math.random()-.5)*150, y:innerHeight*0.35,
+      vx:(Math.random()-.5)*9, vy:-4-Math.random()*7,
+      sz:4+Math.random()*5, c:cols[i%cols.length], r:Math.random()*Math.PI, vr:(Math.random()-.5)*.3});
+    let t0=null;
+    function fr(ts){
+      if(t0===null)t0=ts;const el=(ts-t0)/1000;
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      P.forEach(q=>{
+        q.x+=q.vx;q.y+=q.vy;q.vy+=0.22;q.r+=q.vr;
+        ctx.save();ctx.translate(q.x,q.y);ctx.rotate(q.r);
+        ctx.globalAlpha=Math.max(0,1-el/1.9);
+        ctx.fillStyle=q.c;ctx.fillRect(-q.sz/2,-q.sz/2,q.sz,q.sz*0.6);ctx.restore();
+      });
+      if(el<1.9)requestAnimationFrame(fr);else cv.remove();
+    }
+    requestAnimationFrame(fr);
+  }catch(e){}
+}
+function award(id){
+  if(S.badges[id])return false;
+  S.badges[id]=true;save();
+  const b=BADGES.find(x=>x[0]===id);
+  if(b){toast('🏅 Nouveau badge : '+b[1]+' '+b[2]);confettiBurst();}
+  return true;
+}
+function checkBadges(ctx){
+  ctx=ctx||{};
+  if(Object.keys(S.done||{}).length>=1)award('disque1');
+  if(UNITS.some((U,i)=>unitValidated(i)))award('unite1');
+  if(S.streak>=3)award('serie3');
+  if(S.streak>=7)award('serie7');
+  if(ctx.noMistake)award('sansfaute');
+  if(ctx.unitPerfect)award('unite-sansfaute');
+  if(ctx.review)award('revision');
+  const nv=UNITS.filter((U,i)=>unitValidated(i)).length;
+  if(nv>=2)award('unites2');
+  if(nv>=4)award('unites4');
+  if(nv>=7)award('unites7');
+  if(S.streak>=30)award('serie30');
+  if(S.nrev>=1)award('revision');
+  if(S.nrev>=3)award('revision3');
+  if(S.nrev>=7)award('revision7');
+  if(S.nrev>=30)award('revision30');
+  const pc=fatihaPct();
+  if(pc>=50)award('fatiha50');
+  if(pc>=100)award('fatiha100');
+}
+/* ===== Carte de la Fātiḥa : les mots lisibles s'illuminent ===== */
+function knownLetterSet(){ // lettres des unités dont le disque « Mémoriser » est terminé
+  const set=new Set();
+  UNITS.forEach((U,i)=>{
+    if(!U.alpha)return;
+    if(S.done[dkey(i,1)]||unitValidated(i))U.letters.forEach(L=>set.add(letterKey(L)));
+  });
+  if(set.has('ا'))set.add('ء'); // la hamza s'apprend avec le alif
+  return set;
+}
+function wordReadable(w,set){
+  for(const ch of strip(w)){ if(!set.has(letterKey(ch)))return false; }
+  return true;
+}
+function fatihaPct(){
+  const set=knownLetterSet();let tot=0,ok=0;
+  FATIHA.forEach(v=>v.split(' ').forEach(w=>{tot++;if(wordReadable(w,set))ok++;}));
+  return tot?Math.round(ok/tot*100):0;
+}
+/* ===== Sauvegarde / restauration de la progression ===== */
+function exportSave(btn){
+  try{
+    const code='ALAQ1.'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+    const done=()=>{ if(btn)btn.textContent='✅ Code copié !'; setTimeout(()=>{if(btn)btn.textContent='📋 Copier mon code de sauvegarde';},2200); toast('Code copié — garde-le dans tes notes 📝'); };
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(code).then(done,()=>{prompt('Copie ce code :',code);});
+    else prompt('Copie ce code :',code);
+  }catch(e){toast('Impossible de créer le code');}
+}
+function toggleRestore(){const b=document.getElementById('restoreBox');if(b)b.style.display=b.style.display==='none'?'block':'none';}
+function importSave(){
+  try{
+    const el=document.getElementById('restoreIn');
+    let code=(el&&el.value||'').trim();
+    if(code.indexOf('ALAQ1.')!==0){toast('Ce code ne ressemble pas à un code ALAQ 🤔');return;}
+    const obj=JSON.parse(decodeURIComponent(escape(atob(code.slice(6)))));
+    if(!obj||typeof obj.done!=='object'){toast('Code incomplet');return;}
+    S=Object.assign({},DEF,obj);
+    if(!S.err)S.err={};if(!S.badges)S.badges={};if(!S.tests)S.tests={};
+    save();refreshStats();renderProg();
+    toast('✅ Progression restaurée, ماشاء الله !');
+  }catch(e){toast('Code invalide — vérifie la copie');}
+}
+
 /* ================= MENU DU BAS · ONGLETS ================= */
 const UNIT_VIDEOS={1:'',2:'',3:''}; // ← colle ici l'ID ou le lien YouTube de chaque unité (clé = numéro d'unité)
 let REVIEW=false, backTo=null;
@@ -2465,12 +3006,13 @@ function lastUnlockedIndex(){ let last=0; UNITS.forEach((U,i)=>{ if(unitUnlocked
 function unitVocabCount(){ let n=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))n+=(U.words||[]).length; }); return n; }
 
 function showTab(name,sub){
-  const map={home:'home',cours:'view-cours',prog:'view-prog'};
+  const map={home:'home',cours:'view-cours',reviser:'view-reviser',prog:'view-prog'};
   Object.keys(map).forEach(t=>{ const el=document.getElementById(map[t]); if(el)el.style.display=(t===name)?'':'none';
     const b=document.getElementById('bn-'+t); if(b)b.classList.toggle('active',t===name); });
   try{window.scrollTo(0,0);}catch(e){}
   if(name==='home')renderHome();
   else if(name==='cours')renderCours(sub||'video');
+  else if(name==='reviser')renderReviser(sub);
   else if(name==='prog')renderProg();
 }
 
@@ -2490,10 +3032,11 @@ function accToggle(sub,no){ coursOpen[sub][no]=!coursOpen[sub][no]; renderCours(
 function accAll(sub){ const nos=unlockedNos(); const allOpen=nos.length>0&&nos.every(n=>coursOpen[sub][n]); nos.forEach(n=>coursOpen[sub][n]=!allOpen); renderCours(sub); }
 function renderCours(sub){
   sub=sub||'video';
-  const tabs=[['video','Vidéos'],['resume','Résumé'],['vocab','Vocabulaire'],['revision','Révision']];
+  const tabs=[['video','🎬','Vidéos'],['resume','📖','Résumé'],['vocab','📚','Vocabulaire']];
   const unlocked=UNITS.map((U,i)=>i).filter(i=>unitUnlocked(i));
   let h='<h1 class="vh">Cours</h1><p class="vsub">Le contenu s\u2019ajoute à mesure que tu débloques les unités.</p>';
-  h+='<div class="subnav">'+tabs.map(t=>'<button class="pill'+(t[0]===sub?' active':'')+'" onclick="renderCours(\''+t[0]+'\')">'+t[1]+'</button>').join('')+'</div>';
+  h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderCours(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
+  h+='<div class="tablabel">'+(tabs.find(t=>t[0]===sub)||tabs[0])[2]+'</div>';
   if(!unlocked.length){ h+='<div class="cempty"><div class="ce-ic">🔒</div>Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
   const head=U=>'<div class="ctt"><div class="cno">'+toAr(U.no)+'</div><h3>Unité</h3><div class="clet">'+U.letters.join(' ')+'</div></div>';
 
@@ -2513,12 +3056,7 @@ function renderCours(sub){
       const rows=(U.words||[]).map(w=>'<div class="grow"><div class="gemo">'+w.e+'</div><div class="gar">'+w.w+'</div><div class="gtx"><span class="gfr">'+w.fr+'</span></div><button class="gspk" onclick="speak(\''+w.w+'\')">🔊</button></div>').join('');
       return accCard('vocab',U,'<div class="gloss">'+rows+'</div>'); }).join('');
   }
-  else if(sub==='revision'){
-    const n=unitVocabCount();
-    h+='<div class="ccard"><div class="ctt"><h3>Révision du vocabulaire</h3></div>'+
-       '<p style="color:var(--muted);font-family:var(--ui);font-size:14px;margin:0 0 6px">Révise les <b style="color:var(--cream)">'+n+' mots</b> débloqués, toutes unités confondues : écoute le son, écris les mots.</p>'+
-       '<button class="cbtn" onclick="startReview()">▶︎ Lancer la révision</button></div>';
-  }
+
   document.getElementById('view-cours').innerHTML=h;
 }
 
@@ -2528,6 +3066,13 @@ function renderProg(){
      '<div class="pstat"><div class="pv">'+(S.xp||0)+'</div><div class="pl">étoiles</div></div>'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
      '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div></div>';
+  h+='<div class="ccard"><div class="ctt"><h3>🏅 Badges</h3></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
+     BADGES.map(function(b){var got=!!(S.badges&&S.badges[b[0]]);
+       return '<div style="text-align:center;opacity:'+(got?'1':'.32')+'">'+
+              '<div style="font-size:30px;min-height:38px"><img src="badges/'+b[0]+'.png" style="width:36px;height:36px;object-fit:contain" '+
+              'onerror="this.parentNode.textContent=\''+b[1]+'\'"></div>'+
+              '<div style="font-family:var(--ui);font-size:10px;font-weight:800;color:var(--muted);line-height:1.25;margin-top:3px">'+b[2]+'</div></div>';}).join('')+
+     '</div></div>';
   h+=UNITS.map((U,i)=>({U,i})).filter(o=>o.U.ready).map(({U,i})=>{
     const isValid=unitValidated(i); const unlocked=unitUnlocked(i);
     const n=discsFor(i).length; let d=0; for(let k=0;k<n;k++) if(S.done[dkey(i,k)])d++;
@@ -2535,6 +3080,14 @@ function renderProg(){
     const badge=isValid?'✓':(unlocked?toAr(U.no):'🔒');
     const stt=isValid?'Validée':(unlocked?(d+' / '+n+' disques'):'Verrouillée — réussis le test de l\u2019unité '+toAr(U.no-1));
     return '<div class="ucard '+cls+'"><div class="uno">'+badge+'</div><div class="ub"><div class="utt">Unité <span class="uar">'+U.letters.join(' ')+'</span></div><div class="ust">'+stt+'</div><div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>'; }).join('');
+  h+='<div class="ccard"><div class="ctt"><h3>💾 Sauvegarde</h3></div>'+
+     '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Ta progression vit sur cet appareil. Copie ton code pour la mettre à l\u2019abri ou la transférer sur un autre téléphone.</p>'+
+     '<button class="cbtn" style="margin:0 0 8px" onclick="exportSave(this)">📋 Copier mon code de sauvegarde</button>'+
+     '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line)" onclick="toggleRestore()">↘️ J\u2019ai un code à restaurer</button>'+
+     '<div id="restoreBox" style="display:none;margin-top:10px">'+
+       '<input id="restoreIn" placeholder="Colle ton code ALAQ1… ici" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:monospace;font-size:12px">'+
+       '<button class="cbtn" style="margin-top:8px" onclick="importSave()">✅ Restaurer ma progression</button>'+
+     '</div></div>';
   document.getElementById('view-prog').innerHTML=h;
 }
 
@@ -2546,7 +3099,7 @@ function frOptions(pool,w){
 function startReview(){
   const pool=[]; UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx))(U.words||[]).forEach(w=>pool.push(w)); });
   if(!pool.length)return;
-  let bag=shuffle(pool.slice());
+  let bag=weightedShuffle(pool.slice(),w=>w.w);
   const qs=[]; let turn=0;
   while(bag.length && qs.length<13){
     const mod=turn%3;
@@ -2563,8 +3116,7 @@ function startReview(){
     turn++;
   }
   QUEUE=[{type:'slide',title:'Révision du vocabulaire',html:'<p>On révise les mots appris : associe, traduis, écris. C\u2019est parti !</p>'},...qs];
-  REVIEW=true;EXAM=false;backTo='cours';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
-  S.hearts=5;S.heartDay=today();save();
+  REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
@@ -2611,22 +3163,393 @@ function matchTap(side,pi,el){
     setTimeout(renderMatch,420);
   }
 }
+/* ===== HUB « RÉVISER » : Qorān · vocabulaire · grammaire ===== */
+let curSourate=0;
+let curReviserTab='quran';
+let accQ={ill:false,ordre:false,ecrire:false,reciter:false}; // rétractés par défaut (choix Myriam)
+function accQTog(k){
+  const was=accQ[k];
+  accQ={ill:false,ordre:false,ecrire:false,reciter:false};
+  accQ[k]=!was; // une seule section ouverte à la fois
+  renderReviser('quran');
+}
+let QCTX=null; // exercice mono-verset en cours : {kind:'ordre'|'ecrire'|'reciter', vi}
+function glossOf(SR,vi,k){ return (SR.tr&&SR.tr[vi]&&SR.tr[vi][k])?SR.tr[vi][k]:''; }
+function writableWordsOf(vi){
+  const set=knownLetterSet(), SR=SOURATES[curSourate]||SOURATES[0];
+  const seen=new Set(), out=[];
+  SR.verses[vi].split(' ').forEach(function(w,k){
+    if(wordReadable(w,set)&&!seen.has(w)){seen.add(w);
+      const g=glossOf(SR,vi,k);
+      out.push({w:w,fr:(g?'« '+g+' » — ':'')+SR.nom+', verset '+(vi+1),e:'🕋'});}
+  });
+  return out;
+}
+function verseFullyReadable(vi){
+  const set=knownLetterSet(), SR=SOURATES[curSourate]||SOURATES[0];
+  return SR.verses[vi].split(' ').every(function(w){return wordReadable(w,set);});
+}
+function verseWordsInOrder(vi){ // TOUS les mots du verset, dans l'ordre (doublons inclus)
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  const ws=SR.verses[vi].split(' ');
+  return ws.map(function(w,k){
+    const g=glossOf(SR,vi,k);
+    return {w:w,fr:(g?'« '+g+' » — ':'')+'mot '+(k+1)+'/'+ws.length+' · verset '+(vi+1),e:'🕋'};
+  });
+}
+function startQuranOrderV(vi){ const st=buildVerseTiles(vi); if(!st)return;
+  QCTX={kind:'ordre',vi:vi}; launchQuranReview([st]); }
+function startQuranWriteV(vi){
+  QCTX={kind:'ecrire',vi:vi};
+  if(verseFullyReadable(vi)){ // ✨ le verset en entier : UN SEUL écran, il se construit sur place
+    launchQuranReview([{type:'vwrite',vi:vi,graded:true}]);
+    return;
+  }
+  const ws=writableWordsOf(vi); if(!ws.length)return;
+  launchQuranReview(ws.map(function(w){return {type:'assemble',w:w,graded:true};}));
+}
+function startSourateWrite(){ // 🏆 la sourate entière : un écran par verset
+  QCTX=null;
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  const steps=SR.verses.map(function(v,vi){return {type:'vwrite',vi:vi,graded:true};});
+  launchQuranReview([{type:'slide',title:'Réécris toute la sourate 🏆',
+    html:'<p>Verset après verset — chaque verset se construit en entier sous tes yeux. ماشاء الله !</p>'},...steps]);
+}
+function startQuranReciteV(vi){ QCTX={kind:'reciter',vi:vi}; launchQuranReview([{type:'recite',vi:vi}]); }
+function startSourateOrder(){ QCTX=null; launchQuranReview([{type:'stiles',graded:true}]); }
+function qNextVi(){
+  if(!QCTX)return -1;
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  for(let v=QCTX.vi+1;v<SR.verses.length;v++){
+    if(QCTX.kind==='reciter')return v;
+    if(QCTX.kind==='ordre'&&buildVerseTiles(v))return v;
+    if(QCTX.kind==='ecrire'&&writableWordsOf(v).length)return v;
+  }
+  return -1;
+}
+function qNext(){
+  const c=QCTX, v=qNextVi(); if(!c||v<0)return;
+  document.getElementById('finish').classList.remove('on');
+  if(c.kind==='ordre')startQuranOrderV(v);
+  else if(c.kind==='ecrire')startQuranWriteV(v);
+  else startQuranReciteV(v);
+}
+function renderReviser(sub){
+  sub=sub||curReviserTab||'quran';curReviserTab=sub;
+  const tabs=[['quran','🕌','Le Qorān'],['vocab','📚','Le vocabulaire'],['grammaire','✍️','La grammaire']];
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  const set=knownLetterSet(), pc=fatihaPct();
+  let h='<h1 class="vh">Réviser</h1><p class="vsub">La répétition fait la maîtrise — et recharge tes cœurs.</p>';
+  h+='<div class="heartline">❤️ Terminer une révision recharge tes 7 cœurs</div>';
+  h+='<div class="icontabs">'+tabs.map(function(t){
+    return '<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderReviser(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>';
+  }).join('')+'</div>';
+  h+='<div class="tablabel">'+(tabs.find(function(t){return t[0]===sub;})||tabs[0])[2]+'</div>';
+
+  if(sub==='quran'){
+    const ord2=SR.verses.map(function(v,i){return {i:i,n:v.split(' ').filter(function(w){return wordReadable(w,set);}).length};}).filter(function(x){return x.n>=2;});
+    const ord1=SR.verses.map(function(v,i){return {i:i,n:v.split(' ').filter(function(w){return wordReadable(w,set);}).length};}).filter(function(x){return x.n>=1;});
+    const versesHtml=SR.verses.map(function(v,vi){
+      const words=v.split(' ').map(function(w){
+        return '<span class="vw" style="color:'+(wordReadable(w,set)?'var(--gold)':'var(--lock)')+'">'+w+'</span>';
+      }).join(' ');
+      return '<div class="verse" style="font-size:25px;line-height:1.95;cursor:pointer;margin:0 0 8px" onclick="playVerse('+vi+')">'+words+
+        '<div style="font-family:var(--ui);font-size:10.5px;color:var(--muted);direction:ltr;margin-top:2px">Verset '+(vi+1)+' · 🔊</div></div>';
+    }).join('');
+    function accSec(key,ic,titre,inner){
+      return '<div class="racc'+(accQ[key]?' open':'')+'">'+
+        '<button class="racc-h" onclick="accQTog(\''+key+'\')"><span class="aic">'+ic+'</span> '+titre+' <span class="chev">▾</span></button>'+
+        '<div class="racc-b">'+inner+'</div></div>';
+    }
+    const ordre='<button class="ritem all" onclick="startSourateOrder()">📜 La sourate entière : remets les versets dans l\u2019ordre</button>'+
+      '<button class="ritem all" onclick="startQuranOrder()">⚡ Tous les versets disponibles ('+ord2.length+')</button>'+
+      ord2.map(function(x){return '<button class="ritem" onclick="startQuranOrderV('+x.i+')">Verset '+(x.i+1)+
+        ' <span style="color:var(--muted);font-weight:700">· '+x.n+' mots</span><span class="var">'+SR.verses[x.i]+'</span></button>';}).join('');
+    const ecrire='<button class="ritem all" onclick="startQuranWrite()">⚡ Tous les mots lisibles</button>'+
+      (pc>=100?'<button class="ritem all" onclick="startSourateWrite()">🏆 La sourate entière, mot après mot</button>':'')+
+      ord1.map(function(x){
+        const full=verseFullyReadable(x.i);
+        return '<button class="ritem'+(full?' all':'')+'" onclick="startQuranWriteV('+x.i+')">'+
+          (full?'✨ Verset '+(x.i+1)+' en entier':'Verset '+(x.i+1))+
+          '<span class="var">'+(full?SR.verses[x.i]:SR.verses[x.i].split(' ').filter(function(w){return wordReadable(w,set);}).join(' · '))+'</span></button>';
+      }).join('');
+    const reciter='<button class="ritem all" onclick="startQuranRecite()">⚡ Toute la sourate</button>'+
+      SR.verses.map(function(v,i){return '<button class="ritem" onclick="startQuranReciteV('+i+')">Verset '+(i+1)+
+        '<span class="var">'+v+'</span></button>';}).join('');
+    h+='<div class="spick">'+
+      '<div class="sbtn" onclick="event.stopPropagation();var m=document.getElementById(\'smenu\');if(m)m.classList.toggle(\'open\')">'+
+        '<span style="font-family:var(--quran);font-size:19px;color:var(--gold)">'+SR.ar+'</span> '+SR.nom+
+        '<span class="pct">lisible à '+pc+' %</span><span style="color:var(--gold2);font-weight:900">▾</span></div>'+
+      '<div class="smenu" id="smenu">'+
+        '<div class="srow cur"><span class="sar">'+SR.ar+'</span> '+SR.nom+' <span class="pct">'+pc+' %</span></div>'+
+        [['الإخلاص','Al-Ikhlāṣ'],['الفلق','Al-Falaq'],['الناس','An-Nās']].map(function(x){
+          return '<div class="srow lock"><span class="sar">'+x[0]+'</span> '+x[1]+' <span class="pct">🔒 0 %</span></div>';}).join('')+
+        '<div class="shint">Une sourate se déverrouille dès que tu peux lire ses premiers mots 🌙</div>'+
+      '</div></div>'+
+      '<div style="display:flex;align-items:center;gap:10px;margin:0 0 12px"><div class="ubar" style="flex:1;margin:0"><i style="width:'+pc+'%"></i></div>'+
+      '<b style="color:var(--gold2);font-family:var(--ui)">'+pc+' %</b></div>'+
+      accSec('ill','📖','La sourate illuminée',versesHtml)+
+      accSec('ordre','🧩','Remettre les mots dans l\u2019ordre',ordre)+
+      accSec('ecrire','✍️','Réécrire les mots',ecrire)+
+      accSec('reciter','🎙️','Réciter',reciter);
+  }
+  else if(sub==='vocab'){
+    h+='<div class="ccard">'+
+      '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0 0 12px">Associer, traduire, écrire — tes mots ratés reviennent en priorité. <b style="color:var(--cream)">'+unitVocabCount()+' mots</b> débloqués, toutes unités confondues.</p>'+
+      '<button class="cbtn" onclick="startReview()">▶︎ Lancer la révision du vocabulaire</button></div>';
+  }
+  else{
+    h+='<div class="ccard" style="opacity:.7;text-align:center">'+
+      '<div style="font-size:40px;margin:6px 0 10px">✍️</div>'+
+      '<h3 style="font-family:var(--ui);font-size:17px;margin:0 0 8px">La grammaire — bientôt ✨</h3>'+
+      '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0">S\u2019entraîner au-delà du Qorān : former des phrases, conjuguer les verbes, maîtriser la langue du Qorān, in shā\u2019 Allah.</p></div>';
+  }
+  document.getElementById('view-reviser').innerHTML=h;
+}
+// Générateur commun : reconstruire un verset (mots lisibles = tuiles, le reste posé en gris)
+function buildVerseTiles(vi){
+  const set=knownLetterSet();
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  const words=SR.verses[vi].split(' ');
+  const tpl=words.map(w=>({w,slot:wordReadable(w,set)}));
+  const seq=tpl.filter(t=>t.slot).map(t=>t.w);
+  if(seq.length<2)return null;
+  const pool=[];
+  SR.verses.forEach(function(v,i){ if(i!==vi)v.split(' ').forEach(function(w){
+    if(wordReadable(w,set)&&seq.indexOf(w)<0&&pool.indexOf(w)<0)pool.push(w); }); });
+  const distract=shuffle(pool).slice(0,2);
+  return {type:'vtiles', vt:{vi:vi, tpl:tpl, seq:seq, distract:distract}, graded:true};
+}
+function launchQuranReview(queue){
+  QUEUE=queue;
+  REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
+  document.getElementById('player').classList.add('on');
+  document.getElementById('finish').classList.remove('on');
+  document.getElementById('p-hearts').textContent=S.hearts;
+  document.getElementById('st-hearts').textContent=S.hearts;
+  total=QUEUE.filter(s=>s.graded).length;
+  renderStep();
+}
+function startQuranOrder(){
+  QCTX=null;
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  const qs=[];
+  SR.verses.forEach(function(v,vi){ const st=buildVerseTiles(vi); if(st)qs.push(st); });
+  if(!qs.length){toast('Apprends encore quelques lettres pour débloquer cet exercice 🌱');return;}
+  launchQuranReview([{type:'slide',title:'Remets les mots dans l\u2019ordre 🧩',
+    html:'<p>Écoute chaque verset, puis replace les mots que tu sais lire. C\u2019est parti !</p>'},...shuffle(qs)]);
+}
+function startQuranWrite(){
+  QCTX=null;
+  const set=knownLetterSet(), SR=SOURATES[curSourate]||SOURATES[0];
+  const seen=new Set(), words=[];
+  SR.verses.forEach(function(v,vi){ v.split(' ').forEach(function(w,k){
+    if(wordReadable(w,set)&&!seen.has(w)){seen.add(w);
+      const g=glossOf(SR,vi,k);
+      words.push({w:w,fr:(g?'« '+g+' » — ':'')+SR.nom+', verset '+(vi+1),e:'🕋',b:strip(w)});}
+  }); });
+  if(!words.length){toast('Apprends encore quelques lettres pour débloquer cet exercice 🌱');return;}
+  const picks=weightedShuffle(words,x=>x.w).slice(0,6).map(w=>({type:'assemble',w:w,graded:true}));
+  launchQuranReview([{type:'slide',title:'Réécris les mots du Qorān ✍️',
+    html:'<p>Écoute chaque mot de la sourate, puis écris-le avec ses harakats.</p>'},...picks]);
+}
+function startQuranRecite(){
+  QCTX=null;
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  const qs=SR.verses.map(function(v,vi){return {type:'recite',vi:vi};});
+  launchQuranReview([{type:'slide',title:'Récite la sourate 🎙️',
+    html:'<p>Verset par verset : écoute al-ʿAfāsī, enregistre-toi, ré-écoute-toi et compare. Prends ton temps, تَرْتِيلًا.</p>'},...qs]);
+}
+/* — enregistrement de la récitation (marche aussi sur iPhone) — */
+let _rec={mr:null,chunks:[],url:null,on:false};
+function recToggle(){
+  const btn=document.getElementById('recBtn'), msg=document.getElementById('recMsg');
+  if(_rec.on){ try{_rec.mr.stop();}catch(e){} return; }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){
+    if(msg)msg.textContent='🎤 Enregistrement indisponible ici — récite à voix haute, puis valide.';
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    _rec.chunks=[];_rec.on=true;
+    const mr=new MediaRecorder(stream);_rec.mr=mr;
+    mr.ondataavailable=function(e){ if(e.data&&e.data.size)_rec.chunks.push(e.data); };
+    mr.onstop=function(){
+      _rec.on=false;
+      stream.getTracks().forEach(function(t){t.stop();});
+      try{
+        if(_rec.url)URL.revokeObjectURL(_rec.url);
+        _rec.url=URL.createObjectURL(new Blob(_rec.chunks,{type:mr.mimeType||'audio/mp4'}));
+      }catch(e){}
+      if(btn)btn.textContent='🎙️ Me réenregistrer';
+      const pb=document.getElementById('recPlay'); if(pb){pb.disabled=false;pb.style.opacity=1;}
+      if(msg)msg.textContent='✅ Enregistré ! Ré-écoute-toi et compare au modèle.';
+    };
+    mr.start();
+    if(btn)btn.textContent='⏹ Terminer';
+    if(msg)msg.textContent='🔴 Enregistrement… récite le verset.';
+  }).catch(function(){
+    if(msg)msg.textContent='🎤 Micro refusé — récite à voix haute, puis valide.';
+  });
+}
+function recPlay(){ if(_rec.url){ try{new Audio(_rec.url).play();}catch(e){} } }
+function recValidate(btn){ if(btn){btn.disabled=true;btn.style.opacity=.5;} okBeep('final'); ctaOn(); }
+
+/* ----- « Appuie sur ce que tu entends » (tuiles de mots du verset) ----- */
+function renderVt(){
+  const box=document.getElementById('vtSlots');if(!box)return;
+  const M=window._vt;
+  let k=0;
+  box.innerHTML=M.tpl.map(function(t){
+    if(!t.slot)return '<span class="vw" style="color:var(--lock)">'+t.w+'</span>';
+    const html=(M.ch[k]!==undefined)
+      ?'<span class="vw" style="color:var(--gold)">'+M.ch[k]+'</span>'
+      :'<span class="vw" style="color:var(--lock);opacity:.65">···</span>';
+    k++;return html;
+  }).join(' ');
+}
+function renderVw(){
+  const M=window._vw;if(!M)return;
+  const box=document.getElementById('vwVerse');if(!box)return;
+  // le verset : mots écrits en doré · mot en cours (progression + points) · mots à venir estompés
+  box.innerHTML=M.words.map(function(w,i){
+    if(i<M.wi)return '<span style="color:var(--gold)">'+w+'</span>';
+    if(i===M.wi){
+      const done=M.ch.join(''), rest='·'.repeat(Math.max(0,M.units.length-M.ch.length));
+      return '<span style="border-bottom:2px solid var(--gold-d);padding-bottom:2px">'+
+        '<span style="color:var(--cream)">'+done+'</span><span class="ph">'+rest+'</span></span>';
+    }
+    return '<span style="color:var(--lock);opacity:.45">'+w+'</span>';
+  }).join(' ');
+  const tiles=document.getElementById('vwTiles');if(!tiles)return;
+  if(!M.tilesFor||M.tilesFor!==M.wi){ // renouvelle les tuiles pour le mot en cours
+    M.tilesFor=M.wi;M.shuffled=shuffle(M.units.slice());
+    tiles.innerHTML=M.shuffled.map(function(ch,k){
+      return '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="vwt'+k+'" onclick="vwTap('+k+')">'+tileLabel(ch)+'</button>';
+    }).join('');
+  }
+}
+function vwTap(k){
+  const M=window._vw;if(!M||M.wi>=M.words.length)return;
+  const t=document.getElementById('vwt'+k);if(!t||t.disabled)return;
+  M.ch.push(M.shuffled[k]);t.disabled=true;t.dataset.used=M.ch.length;
+  renderVw();
+  if(M.ch.length===M.units.length){ // mot complet : vérification immédiate
+    const ok=M.ch.join('').normalize('NFC')===M.units.join('').normalize('NFC');
+    const msg=document.getElementById('vwMsg');
+    if(ok){
+      okBeep();M.wi++;M.ch=[];
+      if(M.wi>=M.words.length){ // verset terminé !
+        renderVw();
+        if(msg)msg.textContent='✓ ماشاء الله — le verset entier, de ta main !';
+        okBeep('final');if(SND)playVerse(M.vi);
+        document.getElementById('vwTiles').innerHTML='';
+        ctaOn();
+      } else {
+        M.units=splitUnits(M.words[M.wi]);
+        if(msg)msg.textContent='';
+        renderVw();
+      }
+    } else {
+      errorBeep();
+      wrongCount++;
+      if(msg)msg.textContent='Pas tout à fait — réessaie ce mot 💪';
+      M.ch=[];M.tilesFor=null; // on remélange le mot
+      renderVw();
+    }
+  }
+}
+function vwUndo(){
+  const M=window._vw;if(!M||!M.ch.length)return;
+  const n=M.ch.length;M.ch.pop();
+  [...document.querySelectorAll('#vwTiles .tile')].forEach(function(t){
+    if(t.dataset.used==n){t.disabled=false;delete t.dataset.used;}});
+  renderVw();
+}
+function renderSt(){
+  const box=document.getElementById('stSlots');if(!box)return;
+  const M=window._st;const SR=SOURATES[curSourate]||SOURATES[0];
+  let html='';
+  for(let i=0;i<M.n;i++){
+    const vi=M.ch[i];
+    html+='<div class="stslot'+(vi!==undefined?' full':'')+'"><span class="no">'+(i+1)+'</span>'+
+      '<span class="txt">'+(vi!==undefined?SR.verses[vi]:'')+'</span></div>';
+  }
+  box.innerHTML=html;
+}
+function stTap(k){
+  const M=window._st;if(!M||answered)return;
+  if(M.ch.length>=M.n)return;
+  const t=document.getElementById('stile'+k);if(!t||t.disabled)return;
+  M.ch.push(parseInt(t.dataset.vi,10));t.disabled=true;t.dataset.used=M.ch.length;
+  renderSt();
+  if(M.ch.length===M.n)ctaOn();
+}
+function stUndo(){
+  const M=window._st;if(!M||!M.ch.length||answered)return;
+  const n=M.ch.length;M.ch.pop();
+  [...document.querySelectorAll('.sttile')].forEach(function(t){
+    if(t.dataset.used==n){t.disabled=false;delete t.dataset.used;}});
+  renderSt();document.getElementById('cta').disabled=true;
+}
+function vtTap(k,el){
+  const M=window._vt;if(!M||answered)return;
+  if(M.ch.length>=M.seq.length)return;
+  M.ch.push(el.dataset.w);el.disabled=true;el.dataset.used=M.ch.length;
+  renderVt();
+  if(M.ch.length===M.seq.length)ctaOn();
+}
+function vtUndo(){
+  const M=window._vt;if(!M||!M.ch.length||answered)return;
+  const n=M.ch.length;M.ch.pop();
+  [...document.querySelectorAll('#vtTiles .tile')].forEach(t=>{if(t.dataset.used==n){t.disabled=false;delete t.dataset.used;}});
+  renderVt();document.getElementById('cta').disabled=true;
+}
 function finishReview(){
-  REVIEW=false; S.xp+=10;
+  REVIEW=false; S.xp+=10; S.nrev=(S.nrev||0)+1;
+  const before=S.hearts;
+  S.hearts=HEARTS_MAX;S.heartDay=today(); // révision terminée : les 7 cœurs sont rechargés
+  if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ Tes 7 cœurs sont rechargés, ماشاء الله !'),600);
+  checkBadges({review:true});
   const t=today(); if(S.lastDay!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
   save();
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
   document.getElementById('player').classList.remove('on');
   document.getElementById('fin-icon').textContent='🎉';
-  document.getElementById('fin-extra').innerHTML='';
+  document.getElementById('fin-extra').innerHTML=(qNextVi()>=0)
+    ?'<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="qNext()">▶ Verset suivant</button>'
+    :'';
   document.getElementById('fin-title').textContent='Révision terminée ! 🎉';
   document.getElementById('fin-xp').textContent='+10';
   document.getElementById('fin-acc').textContent=acc+'%';
   document.getElementById('finish').classList.add('on');
 }
-function returnFromPlayer(){ if(backTo==='cours'){ backTo=null; showTab('cours','revision'); } else { renderHome(); } }
+function returnFromPlayer(){
+  if(backTo==='reviser'){ backTo=null; showTab('reviser'); }
+  else if(backTo==='cours'){ backTo=null; showTab('cours'); }
+  else { renderHome(); }
+}
 
 document.getElementById('blogo').src=LOGO;
+/* Reset réservé enseignant : appui long (2 s) sur le logo ALAQ en haut à gauche */
+(function(){
+  const b=document.getElementById('brand');if(!b)return;
+  let t=null;
+  const startp=()=>{ clearTimeout(t); t=setTimeout(()=>{t=null;resetProgress();},2000); };
+  const stop=()=>{ if(t){clearTimeout(t);t=null;} };
+  b.addEventListener('touchstart',startp,{passive:true});
+  b.addEventListener('touchend',stop);b.addEventListener('touchmove',stop);
+  b.addEventListener('mousedown',startp);
+  b.addEventListener('mouseup',stop);b.addEventListener('mouseleave',stop);
+})();
+/* fermer le menu des sourates au clic ailleurs */
+document.addEventListener('click',function(e){
+  const m=document.getElementById('smenu');
+  if(m&&!e.target.closest('.spick'))m.classList.remove('open');
+});
+/* PWA : service worker (fonctionnement hors ligne, audios en cache) */
+if('serviceWorker'in navigator&&location.protocol!=='file:'){
+  try{navigator.serviceWorker.register('sw.js');}catch(e){}
+}
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
   const n=document.getElementById('narrtog');if(n)n.textContent=NARR?'🗣️':'🚫';})();
 showTab('home');
