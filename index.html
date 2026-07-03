@@ -304,6 +304,18 @@
   .lg-cell .ck{position:absolute;top:4px;left:7px;font-size:11px;font-family:var(--ui);font-weight:900;color:var(--gold2)}
   .lg-rev{width:100%;margin-top:16px;padding:14px;border-radius:14px;border:none;cursor:pointer;font-family:var(--ui);font-weight:900;font-size:16px;background:var(--gold);color:#1a1410}
   .lg-rev:disabled{background:#3a332e;color:#6f665f;cursor:not-allowed}
+  .lg-help{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);background:#2a2422;color:var(--gold2);font-weight:900;cursor:pointer;font-size:13px;line-height:1}
+  #letterTut{position:fixed;inset:0;z-index:1200;display:none}
+  #ltHole{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(12,9,8,.74);border:2px solid var(--gold2);transition:top .4s cubic-bezier(.5,0,.2,1),left .4s,width .4s,height .4s;pointer-events:none}
+  #ltBubble{position:fixed;max-width:290px;background:#3a322c;border:1.5px solid var(--gold2);border-radius:16px;padding:14px 16px;box-shadow:0 12px 34px rgba(0,0,0,.5);transition:top .35s,left .35s}
+  #ltBubble .lt-t{font-size:15px;font-weight:900;color:var(--gold2);margin:0 0 5px}
+  #ltBubble .lt-x{font-size:13.5px;line-height:1.5;color:var(--cream)}
+  #ltBubble .lt-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  #ltBubble .lt-step{font-size:12px;font-weight:800;color:var(--muted)}
+  #ltBubble .lt-btns{display:flex;gap:8px}
+  #ltBubble .lt-skip{background:transparent;border:none;color:var(--muted);font-weight:800;font-size:12.5px;cursor:pointer}
+  #ltBubble .lt-next{background:var(--gold);border:none;color:#1a1410;font-weight:900;font-size:13px;border-radius:10px;padding:7px 14px;cursor:pointer}
+  #ltBubble .lt-arrow{position:absolute;width:16px;height:16px;background:#3a322c;border-left:1.5px solid var(--gold2);border-top:1.5px solid var(--gold2)}
   .ag.hl{background:#4a3a22;border-color:var(--gold-d)}
   .ag.hl.hit{background:var(--gold);color:var(--bg)}
   .source{text-align:center;margin-bottom:18px}
@@ -1242,6 +1254,7 @@ let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
 if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revues (halo « nouveau »)
+if(typeof S.tutLetters==='undefined')S.tutLetters=0;    // tuto grille des lettres déjà vu ?
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
@@ -1385,7 +1398,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 03/07b · Réviser>Lettres : grille sélectionnable des 28, son de la lettre, ه rond';
+const BUILD='maj 03/07c · tuto d’accueil de la grille des lettres (bulles guidées)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
@@ -2454,6 +2467,51 @@ function startSelectedLetters(){
   if(!steps.length){ toast('Choisis au moins une lettre débloquée 🌱'); return; }
   save(); QCTX=null; launchQuranReview(steps);
 }
+function letterTut(){
+  var steps=[
+    {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
+    {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées ✨',tx:'Celles-ci sont prêtes ! Touche-les pour les choisir.<br>✨ tout juste débloquée<br>🔸 à revoir'},
+    {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Une lettre choisie devient doré foncé, avec un ✓. Tu peux en prendre plusieurs d’un coup.'},
+    {t:function(){return document.querySelector('.lg-rev');},ti:'On révise ! 🌙',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
+  ].filter(function(x){return x.t();});
+  if(!steps.length)return;
+  var ov=document.getElementById('letterTut');
+  if(!ov){ ov=document.createElement('div');ov.id='letterTut';
+    ov.innerHTML='<div id="ltHole"></div><div id="ltBubble"><div class="lt-arrow" id="ltArrow"></div><div class="lt-t" id="ltTitle"></div><div class="lt-x" id="ltText"></div><div class="lt-row"><span class="lt-step" id="ltStep"></span><span class="lt-btns"><button class="lt-skip" id="ltSkip">Passer</button><button class="lt-next" id="ltNext"></button></span></div></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#ltSkip').onclick=function(){ov.style.display='none';};
+    ov.querySelector('#ltNext').onclick=function(){ if(ov._si>=ov._steps.length-1){ov.style.display='none';return;} ov._si++; ov._place(); };
+  }
+  ov._steps=steps;ov._si=0;
+  ov._place=function(){
+    var st=ov._steps[ov._si], el=st.t(); if(!el){ov.style.display='none';return;}
+    try{el.scrollIntoView({block:'center'});}catch(e){}
+    requestAnimationFrame(function(){
+      var r=el.getBoundingClientRect(),pad=6;
+      var hole=ov.querySelector('#ltHole');
+      hole.style.top=(r.top-pad)+'px';hole.style.left=(r.left-pad)+'px';hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
+      ov.querySelector('#ltTitle').textContent=st.ti;
+      ov.querySelector('#ltText').innerHTML=st.tx;
+      ov.querySelector('#ltStep').textContent=(ov._si+1)+' / '+ov._steps.length;
+      ov.querySelector('#ltNext').textContent=(ov._si===ov._steps.length-1)?'C’est parti !':'Suivant →';
+      var bub=ov.querySelector('#ltBubble'),arrow=ov.querySelector('#ltArrow');
+      var bw=Math.min(290,window.innerWidth-24);bub.style.width=bw+'px';
+      var below=r.bottom+170<window.innerHeight,bh=bub.offsetHeight||160;
+      var top=below?(r.bottom+pad+12):(r.top-pad-12-bh);
+      var left=Math.max(12,Math.min(window.innerWidth-bw-12,r.left+r.width/2-bw/2));
+      bub.style.top=top+'px';bub.style.left=left+'px';
+      var ax=Math.max(16,Math.min(bw-28,r.left+r.width/2-left-8));arrow.style.left=ax+'px';
+      if(below){arrow.style.top='-9px';arrow.style.transform='rotate(45deg)';}else{arrow.style.top=(bh-8)+'px';arrow.style.transform='rotate(225deg)';}
+    });
+  };
+  ov.style.display='block';setTimeout(ov._place,40);
+}
+function maybeShowLetterTut(){
+  if(S.tutLetters)return;
+  if(!document.querySelector('.lg-cell.avail'))return; // rien de débloqué : pas de tuto
+  S.tutLetters=1;save();
+  letterTut();
+}
 function letterGridHTML(){
   var order=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
   var unlocked=knownLetterSet(), seen=S.letSeen||{};
@@ -2463,7 +2521,8 @@ function letterGridHTML(){
   var latestU=-1; UNITS.forEach(function(U,i){ if(U.alpha && (S.done[dkey(i,1)]||unitValidated(i))) latestU=i; });
   var nouv=new Set(); if(latestU>=0) UNITS[latestU].letters.forEach(function(L){ if(!seen[letterKey(L)]) nouv.add(letterKey(L)); });
   var any=uCount>0;
-  var h='<div class="lg-prompt'+(any?'':' empty')+'">'+(any?'choisis les lettres que tu veux réviser':'débloque une leçon pour pouvoir sélectionner des lettres')+'</div>';
+  var h=(any?'<div style="display:flex;justify-content:flex-end;margin:-2px 0 2px"><button class="lg-help" onclick="letterTut()" title="Revoir le guide">?</button></div>':'');
+  h+='<div class="lg-prompt'+(any?'':' empty')+'">'+(any?'choisis les lettres que tu veux réviser':'débloque une leçon pour pouvoir sélectionner des lettres')+'</div>';
   h+='<div class="lg-prog"><div class="lg-plab">🔓 '+uCount+' / 28 lettres débloquées</div><div class="lg-pbar"><span style="width:'+Math.round(uCount/28*100)+'%"></span></div></div>';
   if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
   h+='<div class="lg-grid">'+order.map(function(L){
@@ -3471,6 +3530,7 @@ function renderReviser(sub){
       '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0">S\u2019entraîner au-delà du Qorān : former des phrases, conjuguer les verbes, maîtriser la langue du Qorān, in shā\u2019 Allah.</p></div>';
   }
   document.getElementById('view-reviser').innerHTML=h;
+  if(sub==='lettres')setTimeout(maybeShowLetterTut,80);
 }
 // Générateur commun : reconstruire un verset (mots lisibles = tuiles, le reste posé en gris)
 function buildVerseTiles(vi){

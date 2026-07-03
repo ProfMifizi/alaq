@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALAQ — Tuto d'accueil : la grille des lettres</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+ :root{--bg:#252120;--panel:#322B28;--line:#4A403A;--gold:#DC902E;--gold2:#E8A94F;--cream:#F2E9DA;--muted:#B9A99A;--green:#6FB08A}
+ *{box-sizing:border-box}
+ body{background:#252120;color:var(--cream);font-family:'Nunito',sans-serif;padding:16px;margin:0;background-image:radial-gradient(circle at 50% 0%, #3a302b 0, #2c2624 38%, #252120 75%)}
+ h1{font-size:19px;font-weight:900;color:var(--gold)}
+ .wrap{max-width:520px;margin:0 auto}
+ .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}
+ .prompt{font-size:15px;font-weight:800;text-align:center;margin:0 0 10px}
+ .prog{margin:0 0 12px}.plab{font-size:12px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:5px}
+ .pbar{height:8px;background:#241f1c;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+ .pbar span{display:block;height:100%;background:linear-gradient(90deg,#B9770E,#E8A94F);border-radius:6px}
+ .qa{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+ .qa button{background:#2a2422;border:1.5px solid var(--line);color:var(--gold2);border-radius:10px;padding:6px 11px;font-weight:800;font-size:12px;cursor:pointer}
+ .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+ .cell{position:relative;border-radius:12px;padding:13px 0;text-align:center;border:1.5px solid var(--line);font-family:'Noto Naskh Arabic',serif;font-size:28px;line-height:1;background:#2a2422}
+ .cell.locked{color:#5b524c;background:#2a2624;border-color:#332e2a;opacity:.55}
+ .cell.avail{color:#a9843c;background:#2b2622}
+ .cell.sel{color:var(--gold2);background:rgba(232,169,79,.14);border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2);font-weight:700}
+ .cell.nouv{animation:glow 1.6s ease-in-out infinite}
+ @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 2px rgba(232,169,79,.45)}}
+ .cell .lk{position:absolute;top:5px;left:6px;font-size:9px;opacity:.6}.cell .bd{position:absolute;top:3px;right:5px;font-size:11px}
+ .cell .rv{position:absolute;bottom:3px;right:6px;font-size:9px}.cell .ck{position:absolute;top:3px;left:6px;font-size:11px;color:var(--gold2);font-weight:900}
+ .rev{width:100%;margin-top:14px;padding:13px;border-radius:14px;border:none;font-weight:900;font-size:16px;background:var(--gold);color:#1a1410}
+ .replay{margin-top:12px;text-align:center}.replay button{background:transparent;border:1.5px solid var(--line);color:var(--muted);border-radius:10px;padding:7px 12px;font-weight:800;font-size:12px;cursor:pointer}
+ /* ==== tuto ==== */
+ #tut{position:fixed;inset:0;z-index:900;display:none}
+ #hole{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(12,9,8,.74);border:2px solid var(--gold2);
+   transition:top .4s cubic-bezier(.5,0,.2,1),left .4s,width .4s,height .4s;pointer-events:none}
+ #bubble{position:fixed;max-width:290px;background:#3a322c;border:1.5px solid var(--gold2);border-radius:16px;
+   padding:14px 16px;box-shadow:0 12px 34px rgba(0,0,0,.5);transition:top .4s,left .4s;pointer-events:auto}
+ #bubble .bt{font-size:15px;font-weight:900;color:var(--gold2);margin:0 0 5px}
+ #bubble .bx{font-size:13.5px;line-height:1.5;color:var(--cream)}
+ #bubble .brow{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+ #bubble .step{font-size:12px;font-weight:800;color:var(--muted)}
+ #bubble .btns{display:flex;gap:8px}
+ #bubble .skip{background:transparent;border:none;color:var(--muted);font-weight:800;font-size:12.5px;cursor:pointer}
+ #bubble .next{background:var(--gold);border:none;color:#1a1410;font-weight:900;font-size:13px;border-radius:10px;padding:7px 14px;cursor:pointer}
+ #bubble .arrow{position:absolute;width:16px;height:16px;background:#3a322c;border-left:1.5px solid var(--gold2);border-top:1.5px solid var(--gold2);transform:rotate(45deg)}
+</style></head><body>
+<div class="wrap">
+<h1>✏️ Tuto d'accueil — première visite</h1>
+<p style="font-size:13px;color:var(--muted)">Voici à quoi ressemblerait le petit guide. Clique « Suivant » pour voir les bulles se déplacer. Le bouton en bas rejoue le tuto.</p>
+
+<div class="card" id="card">
+ <div class="prompt" id="t-prompt">choisis les lettres que tu veux réviser</div>
+ <div class="prog"><div class="plab">🔓 12 / 28 lettres débloquées</div><div class="pbar"><span style="width:43%"></span></div></div>
+ <div class="qa"><button>⚡ Tout sélectionner</button><button>Effacer</button></div>
+ <div class="grid" id="grid"></div>
+ <button class="rev" id="t-rev">Réviser 1 lettre</button>
+</div>
+<div class="replay"><button onclick="startTut()">↻ Revoir le tuto</button></div>
+</div>
+
+<div id="tut"><div id="hole"></div>
+ <div id="bubble"><div class="arrow" id="arrow"></div>
+  <div class="bt" id="b-title"></div><div class="bx" id="b-text"></div>
+  <div class="brow"><span class="step" id="b-step"></span>
+   <div class="btns"><button class="skip" onclick="endTut()">Passer</button><button class="next" id="b-next" onclick="tutNext()"></button></div></div>
+ </div></div>
+
+<script>
+const ORDER=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+const UNLK=new Set(['ا','ب','ر','ع','س','د','ك','ل','م','ن','و','ي']);
+const NOUV=new Set(['د','س','ك']), REVOIR=new Set(['ب','ع']), SEL=new Set(['م']);
+function buildGrid(){
+ const g=document.getElementById('grid');g.innerHTML='';
+ ORDER.forEach(L=>{const d=document.createElement('div');const gl=(L==='ه')?'ﻩ':L;
+  if(!UNLK.has(L)){d.className='cell locked';d.innerHTML='<span class="lk">🔒</span>'+gl;}
+  else{const sel=SEL.has(L);d.className='cell '+(sel?'sel':'avail')+(NOUV.has(L)?' nouv':'');
+   d.innerHTML=(sel?'<span class="ck">✓</span>':'')+(NOUV.has(L)?'<span class="bd">✨</span>':'')+(REVOIR.has(L)?'<span class="rv">🔸</span>':'')+gl;
+   d.dataset.L=L;}
+  g.appendChild(d);});
+}
+buildGrid();
+function cellOf(L){return [...document.querySelectorAll('.cell')].find(c=>c.dataset.L===L);}
+const STEPS=[
+ {t:()=>cellOf('م')&&document.querySelector('.cell.locked'),ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
+ {t:()=>cellOf('ب'),ti:'Les lettres dorées ✨',tx:'Celles-ci sont prêtes ! Touche-les pour les choisir.<br>✨ tout juste débloquée<br>🔸 à revoir'},
+ {t:()=>cellOf('م'),ti:'Ton choix ✓',tx:'Une lettre choisie devient doré foncé, avec un ✓. Tu peux en prendre plusieurs d’un coup.'},
+ {t:()=>document.getElementById('t-rev'),ti:'On révise ! 🌙',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
+];
+let si=0;
+function place(){
+ const st=STEPS[si];const el=st.t();const r=el.getBoundingClientRect();
+ const pad=6, hole=document.getElementById('hole');
+ hole.style.top=(r.top-pad)+'px';hole.style.left=(r.left-pad)+'px';hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';
+ document.getElementById('b-title').textContent=st.ti;
+ document.getElementById('b-text').innerHTML=st.tx;
+ document.getElementById('b-step').textContent=(si+1)+' / '+STEPS.length;
+ document.getElementById('b-next').textContent=(si===STEPS.length-1)?'C’est parti !':'Suivant →';
+ const bub=document.getElementById('bubble');const arrow=document.getElementById('arrow');
+ const bw=Math.min(290,window.innerWidth-24);bub.style.width=bw+'px';
+ const below=r.bottom+150<window.innerHeight;
+ const bh=bub.offsetHeight||150;
+ let top=below?(r.bottom+pad+12):(r.top-pad-12-bh);
+ let left=Math.max(12,Math.min(window.innerWidth-bw-12, r.left+r.width/2-bw/2));
+ bub.style.top=top+'px';bub.style.left=left+'px';
+ const ax=Math.max(16,Math.min(bw-28, r.left+r.width/2-left-8));
+ arrow.style.left=ax+'px';
+ if(below){arrow.style.top='-9px';arrow.style.transform='rotate(45deg)';}
+ else{arrow.style.top=(bh-8)+'px';arrow.style.transform='rotate(225deg)';}
+}
+function startTut(){si=0;document.getElementById('tut').style.display='block';setTimeout(place,30);}
+function tutNext(){if(si>=STEPS.length-1){endTut();return;}si++;place();}
+function endTut(){document.getElementById('tut').style.display='none';}
+window.startTut=startTut;window.tutNext=tutNext;window.endTut=endTut;
+// démarrage auto (comme à la 1re visite)
+setTimeout(startTut,400);
+window.addEventListener('resize',()=>{if(document.getElementById('tut').style.display==='block')place();});
+</script>
+</body></html>
