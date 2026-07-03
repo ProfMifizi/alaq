@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALAQ — Repères cliquables</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+ :root{--bg:#252120;--panel:#322B28;--line:#4A403A;--gold:#DC902E;--cream:#F2E9DA;--muted:#B9A99A;--green:#6FB08A}
+ body{background:#252120;color:var(--cream);font-family:'Nunito',sans-serif;padding:18px}
+ h1{font-size:20px;font-weight:900;color:var(--gold)}
+ h1.grp{margin:30px 0 4px;font-size:18px;color:var(--green)}
+ h2{font-size:16px;font-weight:900;margin:20px 0 8px;color:var(--cream)}
+ h2 .tag{font-size:12px;font-weight:800;color:var(--muted);margin-left:6px}
+ .legend{background:#22332B;border-left:3px solid var(--green);border-radius:10px;padding:12px 16px;font-size:13.5px;color:var(--cream);max-width:840px;margin:12px 0;line-height:1.6}
+ .row{display:flex;flex-wrap:wrap;gap:16px}
+ .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px}
+ .card.deriv{border-color:#7a5a1e}
+ .nm{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:6px}
+ canvas{display:block;border-radius:8px;background:#211d1b;cursor:crosshair;touch-action:none}
+ .need{font-size:12px;color:var(--muted);margin-top:8px;max-width:520px;line-height:1.5;border-top:1px dashed var(--line);padding-top:6px}
+ .readout{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#8fd0a8;margin-top:8px;min-height:20px;
+   background:#1c1917;border:1px solid var(--line);border-radius:8px;padding:7px 9px;word-break:break-word;max-width:520px}
+ .bar{margin-top:6px;display:flex;gap:6px}
+ button{background:#2a2422;border:1.5px solid var(--line);color:var(--gold);border-radius:8px;padding:5px 10px;
+   font-family:'Nunito';font-weight:800;font-size:12px;cursor:pointer}
+ button:hover{border-color:var(--gold)}
+</style></head><body>
+<h1>📐 Repères CLIQUABLES — bouge la souris, clique tes points</h1>
+<div class="legend">
+· <b>Bouge la souris</b> sur une grille : une <b>croix</b> suit ton curseur et affiche <b>(x ; y)</b> en direct.<br>
+· <b>Clique</b> pour poser un point — il devient <b>A</b>, puis <b>B</b>, <b>C</b>… dans l'ordre. La liste se construit <b>sous la grille</b>.<br>
+· Boutons : <b>⌫ annuler</b> le dernier point · <b>↺ effacer</b> tout · <b>⧉ copier</b> la liste (colle-la-moi ou dans l'Excel).<br>
+· <b>x</b> : 0 (gauche)→300 (droite) · <b>y</b> monte : 0 (bas)→300 (haut) · ligne d'écriture <b>y = 85</b> (or).<br>
+· 🟨 Lettres sœurs : le corps est déjà fait, clique juste <b>les points</b> (dessus/dessous).
+</div>
+<h1 class="grp">🟩 Les 6 lettres à tracer entièrement — CLIQUE tes points A, B, C…</h1>
+<h2>ه <span class="tag">hā’ — le petit rond</span></h2>
+<div class="row">
+<div class="card base"><div class="nm">ه · isolée</div><canvas data-key="ه-0"></canvas><div class="need">≈ 10 points · 1 SEUL trait, aucun levé (le tour de la boucle + le petit crochet intérieur).</div></div>
+<div class="card base"><div class="nm">ه · début</div><canvas data-key="ه-1"></canvas><div class="need">≈ 11 points · 1 SEUL trait (boucle puis petite queue à gauche).</div></div>
+<div class="card base"><div class="nm">ه · milieu</div><canvas data-key="ه-2"></canvas><div class="need">≈ 12 points · 1 SEUL trait, le « papillon » (les deux boucles).</div></div>
+<div class="card base"><div class="nm">ه · fin</div><canvas data-key="ه-3"></canvas><div class="need">≈ 9 points · 1 SEUL trait (boucle suspendue à la liaison).</div></div>
+</div>
+<h2>ح <span class="tag">ḥā’ — un seul trait</span></h2>
+<div class="row">
+<div class="card base"><div class="nm">ح · isolée</div><canvas data-key="ح-0"></canvas><div class="need">≈ 12 points · 1 SEUL trait continu (tête + grande mâchoire).</div></div>
+<div class="card base"><div class="nm">ح · début</div><canvas data-key="ح-1"></canvas><div class="need">≈ 12 points · 1 SEUL trait continu (liaison + tête + mâchoire).</div></div>
+<div class="card base"><div class="nm">ح · milieu</div><canvas data-key="ح-2"></canvas><div class="need">≈ 13 points · 1 SEUL trait continu.</div></div>
+<div class="card base"><div class="nm">ح · fin</div><canvas data-key="ح-3"></canvas><div class="need">≈ 13 points · 1 SEUL trait continu.</div></div>
+</div>
+<h2>ط <span class="tag">ṭā’ — boucle + hampe</span></h2>
+<div class="row">
+<div class="card base"><div class="nm">ط · isolée</div><canvas data-key="ط-0"></canvas><div class="need">≈ 12 points · 2 traits : la BOUCLE (~9) — LEVÉ — la HAMPE (3 derniers, haut→bas).</div></div>
+<div class="card base"><div class="nm">ط · début</div><canvas data-key="ط-1"></canvas><div class="need">≈ 13 points · 2 traits : boucle+queue (~10) — LEVÉ — hampe (3, haut→bas).</div></div>
+<div class="card base"><div class="nm">ط · milieu</div><canvas data-key="ط-2"></canvas><div class="need">≈ 14 points · 3 traits : attache (2) — LEVÉ — boucle (~9) — LEVÉ — hampe (3).</div></div>
+<div class="card base"><div class="nm">ط · fin</div><canvas data-key="ط-3"></canvas><div class="need">≈ 13 points · 3 traits : attache (2) — LEVÉ — boucle (~8) — LEVÉ — hampe (3).</div></div>
+</div>
+<h2>ق <span class="tag">qāf — tête horaire + bol</span></h2>
+<div class="row">
+<div class="card base"><div class="nm">ق · isolée</div><canvas data-key="ق-0"></canvas><div class="need">≈ 14 points · 1 trait (tête horaire + grand bol) + 2 points au-dessus.</div></div>
+<div class="card base"><div class="nm">ق · début</div><canvas data-key="ق-1"></canvas><div class="need">≈ 11 points · 1 trait (tête + petite queue) + 2 points.</div></div>
+<div class="card base"><div class="nm">ق · milieu</div><canvas data-key="ق-2"></canvas><div class="need">≈ 11 points · 1 trait (attache + tête) + 2 points.</div></div>
+<div class="card base"><div class="nm">ق · fin</div><canvas data-key="ق-3"></canvas><div class="need">≈ 15 points · 1 trait (attache + tête + grand bol) + 2 points.</div></div>
+</div>
+<h2>ف <span class="tag">fā’ — même tête que qāf</span></h2>
+<div class="row">
+<div class="card base"><div class="nm">ف · isolée</div><canvas data-key="ف-0"></canvas><div class="need">≈ 12 points · 1 trait (tête horaire + queue) + 1 point au-dessus.</div></div>
+<div class="card base"><div class="nm">ف · début</div><canvas data-key="ف-1"></canvas><div class="need">≈ 10 points · 1 trait (tête + queue) + 1 point.</div></div>
+<div class="card base"><div class="nm">ف · milieu</div><canvas data-key="ف-2"></canvas><div class="need">≈ 10 points · 1 trait (attache + tête) + 1 point.</div></div>
+<div class="card base"><div class="nm">ف · fin</div><canvas data-key="ف-3"></canvas><div class="need">≈ 13 points · 1 trait (attache + tête + queue) + 1 point.</div></div>
+</div>
+<h2>ص <span class="tag">ṣād — ovale + attache</span></h2>
+<div class="row">
+<div class="card base"><div class="nm">ص · isolée</div><canvas data-key="ص-0"></canvas><div class="need">≈ 10 points · 1 trait (ovale « par le versant opposé » + queue).</div></div>
+<div class="card base"><div class="nm">ص · début</div><canvas data-key="ص-1"></canvas><div class="need">≈ 9 points · 1 trait.</div></div>
+<div class="card base"><div class="nm">ص · milieu</div><canvas data-key="ص-2"></canvas><div class="need">≈ 12 points · 2 traits : petit trait d’attache (2) — LEVÉ — la lettre ص (~10).</div></div>
+<div class="card base"><div class="nm">ص · fin</div><canvas data-key="ص-3"></canvas><div class="need">≈ 13 points · 2 traits : petit trait d’attache (2) — LEVÉ — la lettre ص (~11).</div></div>
+</div>
+<h1 class="grp" style="color:#E8A94F">🟨 Les lettres sœurs — clique SEULEMENT les points</h1>
+<h2>ج <span class="tag">← ح</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ج · isolée</div><canvas data-key="ج-0"></canvas><div class="need">Hérite du « ح · isolée » — place SEULEMENT le(s) point(s) : 1 point DESSOUS.</div></div>
+<div class="card deriv"><div class="nm">ج · début</div><canvas data-key="ج-1"></canvas><div class="need">Hérite du « ح · début » — place SEULEMENT le(s) point(s) : 1 point DESSOUS.</div></div>
+<div class="card deriv"><div class="nm">ج · milieu</div><canvas data-key="ج-2"></canvas><div class="need">Hérite du « ح · milieu » — place SEULEMENT le(s) point(s) : 1 point DESSOUS.</div></div>
+<div class="card deriv"><div class="nm">ج · fin</div><canvas data-key="ج-3"></canvas><div class="need">Hérite du « ح · fin » — place SEULEMENT le(s) point(s) : 1 point DESSOUS.</div></div>
+</div>
+<h2>خ <span class="tag">← ح</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">خ · isolée</div><canvas data-key="خ-0"></canvas><div class="need">Hérite du « ح · isolée » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">خ · début</div><canvas data-key="خ-1"></canvas><div class="need">Hérite du « ح · début » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">خ · milieu</div><canvas data-key="خ-2"></canvas><div class="need">Hérite du « ح · milieu » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">خ · fin</div><canvas data-key="خ-3"></canvas><div class="need">Hérite du « ح · fin » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+</div>
+<h2>ظ <span class="tag">← ط</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ظ · isolée</div><canvas data-key="ظ-0"></canvas><div class="need">Hérite du « ط · isolée » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ظ · début</div><canvas data-key="ظ-1"></canvas><div class="need">Hérite du « ط · début » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ظ · milieu</div><canvas data-key="ظ-2"></canvas><div class="need">Hérite du « ط · milieu » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ظ · fin</div><canvas data-key="ظ-3"></canvas><div class="need">Hérite du « ط · fin » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+</div>
+<h2>ض <span class="tag">← ص</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ض · isolée</div><canvas data-key="ض-0"></canvas><div class="need">Hérite du « ص · isolée » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ض · début</div><canvas data-key="ض-1"></canvas><div class="need">Hérite du « ص · début » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ض · milieu</div><canvas data-key="ض-2"></canvas><div class="need">Hérite du « ص · milieu » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ض · fin</div><canvas data-key="ض-3"></canvas><div class="need">Hérite du « ص · fin » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+</div>
+<h2>ت <span class="tag">← ب</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ت · isolée</div><canvas data-key="ت-0"></canvas><div class="need">Hérite du « ب · isolée » — place SEULEMENT le(s) point(s) : 2 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ت · début</div><canvas data-key="ت-1"></canvas><div class="need">Hérite du « ب · début » — place SEULEMENT le(s) point(s) : 2 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ت · milieu</div><canvas data-key="ت-2"></canvas><div class="need">Hérite du « ب · milieu » — place SEULEMENT le(s) point(s) : 2 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ت · fin</div><canvas data-key="ت-3"></canvas><div class="need">Hérite du « ب · fin » — place SEULEMENT le(s) point(s) : 2 points DESSUS.</div></div>
+</div>
+<h2>ث <span class="tag">← ب</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ث · isolée</div><canvas data-key="ث-0"></canvas><div class="need">Hérite du « ب · isolée » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ث · début</div><canvas data-key="ث-1"></canvas><div class="need">Hérite du « ب · début » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ث · milieu</div><canvas data-key="ث-2"></canvas><div class="need">Hérite du « ب · milieu » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ث · fin</div><canvas data-key="ث-3"></canvas><div class="need">Hérite du « ب · fin » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+</div>
+<h2>ش <span class="tag">← س</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ش · isolée</div><canvas data-key="ش-0"></canvas><div class="need">Hérite du « س · isolée » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ش · début</div><canvas data-key="ش-1"></canvas><div class="need">Hérite du « س · début » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ش · milieu</div><canvas data-key="ش-2"></canvas><div class="need">Hérite du « س · milieu » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ش · fin</div><canvas data-key="ش-3"></canvas><div class="need">Hérite du « س · fin » — place SEULEMENT le(s) point(s) : 3 points DESSUS.</div></div>
+</div>
+<h2>غ <span class="tag">← ع</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">غ · isolée</div><canvas data-key="غ-0"></canvas><div class="need">Hérite du « ع · isolée » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">غ · début</div><canvas data-key="غ-1"></canvas><div class="need">Hérite du « ع · début » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">غ · milieu</div><canvas data-key="غ-2"></canvas><div class="need">Hérite du « ع · milieu » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">غ · fin</div><canvas data-key="غ-3"></canvas><div class="need">Hérite du « ع · fin » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+</div>
+<h2>ذ <span class="tag">← د</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ذ · isolée</div><canvas data-key="ذ-0"></canvas><div class="need">Hérite du « د · isolée » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ذ · fin</div><canvas data-key="ذ-3"></canvas><div class="need">Hérite du « د · fin » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+</div>
+<h2>ز <span class="tag">← ر</span></h2>
+<div class="row">
+<div class="card deriv"><div class="nm">ز · isolée</div><canvas data-key="ز-0"></canvas><div class="need">Hérite du « ر · isolée » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+<div class="card deriv"><div class="nm">ز · fin</div><canvas data-key="ز-3"></canvas><div class="need">Hérite du « ر · fin » — place SEULEMENT le(s) point(s) : 1 point DESSUS.</div></div>
+</div>
+<script>
+const W=300,S=1.7,FONT='190px "Noto Naskh Arabic"',AL='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function glyph(k){const [L,p]=k.split('-');const T='ـ';return p==='0'?L:p==='1'?L+T:p==='2'?T+L+T:T+L;}
+function makeBase(key){
+ const b=document.createElement('canvas');b.width=W*S;b.height=W*S;
+ const x=b.getContext('2d');x.setTransform(S,0,0,S,0,0);
+ x.fillStyle='#211d1b';x.fillRect(0,0,W,W);
+ x.font=FONT;x.textAlign='center';x.textBaseline='alphabetic';x.fillStyle='rgba(242,233,218,.24)';x.fillText(glyph(key),150,215);
+ for(let g=0;g<=300;g+=10){const M=(g%50===0);x.strokeStyle=M?'rgba(120,180,150,.32)':'rgba(255,255,255,.06)';x.lineWidth=M?1.1:1;
+  x.beginPath();x.moveTo(g,0);x.lineTo(g,300);x.stroke();x.beginPath();x.moveTo(0,g);x.lineTo(300,g);x.stroke();}
+ x.fillStyle='rgba(255,255,255,.6)';x.font='9px sans-serif';x.textAlign='left';x.textBaseline='alphabetic';
+ for(let g=0;g<=300;g+=50){x.fillText(g,g+2,297);if(g<300)x.fillText((300-g),3,g+10);}
+ x.strokeStyle='rgba(232,169,79,.7)';x.lineWidth=1.6;x.beginPath();x.moveTo(0,215);x.lineTo(300,215);x.stroke();
+ x.fillStyle='rgba(232,169,79,.85)';x.font='9px sans-serif';x.fillText('y = 85',252,212);
+ return b;
+}
+function setup(cv){
+ const key=cv.dataset.key;
+ cv.width=W*S;cv.height=W*S;cv.style.width=(W*S)+'px';cv.style.height=(W*S)+'px';
+ const ctx=cv.getContext('2d');const base=makeBase(key);const pts=[];
+ const card=cv.parentNode;
+ const out=document.createElement('div');out.className='readout';out.textContent='(clique pour poser A, B, C…)';
+ const bar=document.createElement('div');bar.className='bar';
+ const bU=document.createElement('button');bU.textContent='⌫ annuler';
+ const bC=document.createElement('button');bC.textContent='↺ effacer';
+ const bK=document.createElement('button');bK.textContent='⧉ copier';
+ bar.append(bU,bC,bK);card.append(out,bar);
+ const toPx=(x,yup)=>[x*S,(300-yup)*S];
+ const list=()=>pts.map((p,i)=>AL[i%26]+'('+p.x+';'+p.yup+')').join('  ');
+ function redraw(cur){
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(base,0,0);
+  if(pts.length>1){ctx.strokeStyle='rgba(232,169,79,.45)';ctx.lineWidth=2;ctx.beginPath();
+   pts.forEach((p,i)=>{const [X,Y]=toPx(p.x,p.yup);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});ctx.stroke();}
+  pts.forEach((p,i)=>{const [X,Y]=toPx(p.x,p.yup);
+   ctx.fillStyle=i===0?'#ff8a5a':'#5fe08a';ctx.beginPath();ctx.arc(X,Y,9,0,7);ctx.fill();
+   ctx.fillStyle='#0d1a12';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(AL[i%26],X,Y);});
+  if(cur){const [cx,cy]=cur;
+   ctx.strokeStyle='rgba(111,176,138,.85)';ctx.lineWidth=1;
+   ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,cv.height);ctx.moveTo(0,cy);ctx.lineTo(cv.width,cy);ctx.stroke();
+   const dx=Math.round(cx/S),dyup=Math.round(300-cy/S),lab='('+dx+' ; '+dyup+')';
+   ctx.font='bold 13px sans-serif';const w=ctx.measureText(lab).width+12;
+   let bx=cx+12,by=cy-12;if(bx+w>cv.width)bx=cx-12-w;if(by<18)by=cy+26;
+   ctx.fillStyle='rgba(20,16,14,.92)';ctx.fillRect(bx,by-15,w,21);
+   ctx.fillStyle='#F2E9DA';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lab,bx+6,by-4);
+  }
+ }
+ const pos=e=>{const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;
+   return [(t.clientX-r.left)*cv.width/r.width,(t.clientY-r.top)*cv.height/r.height];};
+ cv.addEventListener('mousemove',e=>redraw(pos(e)));
+ cv.addEventListener('mouseleave',()=>redraw(null));
+ cv.addEventListener('click',e=>{const [cx,cy]=pos(e);pts.push({x:Math.round(cx/S),yup:Math.round(300-cy/S)});out.textContent=list();redraw([cx,cy]);});
+ bU.onclick=()=>{pts.pop();out.textContent=pts.length?list():'(clique pour poser A, B, C…)';redraw(null);};
+ bC.onclick=()=>{pts.length=0;out.textContent='(clique pour poser A, B, C…)';redraw(null);};
+ bK.onclick=()=>{const t=list();if(navigator.clipboard)navigator.clipboard.writeText(t);bK.textContent='✓ copié';setTimeout(()=>bK.textContent='⧉ copier',1200);};
+ redraw(null);
+}
+async function main(){await document.fonts.load(FONT,'أبتثجحخدذرزسشصضطظعغفقكلمنهوي');await document.fonts.ready;
+ document.querySelectorAll('canvas[data-key]').forEach(setup);}
+main();
+</script></body></html>
