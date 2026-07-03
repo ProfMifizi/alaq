@@ -284,6 +284,26 @@
   .tapset.c4{grid-template-columns:repeat(4,1fr);gap:8px}
   .tapset.c4 .ts-card{padding:12px 2px}
   .tapset.c4 .ts-card .ar{font-size:32px}
+  .lg-prompt{font-size:15px;font-weight:800;color:var(--cream);text-align:center;margin:0 0 10px}
+  .lg-prompt.empty{color:var(--muted);font-weight:700}
+  .lg-prog{margin:0 0 12px} .lg-plab{font-size:12.5px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:5px}
+  .lg-pbar{height:8px;background:#241f1c;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+  .lg-pbar span{display:block;height:100%;background:linear-gradient(90deg,#B9770E,#E8A94F);border-radius:6px}
+  .lg-qa{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+  .lg-qa button{background:#2a2422;border:1.5px solid var(--line);color:var(--gold2);border-radius:10px;padding:7px 12px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
+  .lg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .lg-cell{position:relative;border-radius:12px;padding:14px 0;text-align:center;border:1.5px solid var(--line);font-family:"Noto Naskh Arabic",serif;font-size:30px;line-height:1;background:#2a2422}
+  .lg-cell.locked{color:#5b524c;background:#2a2624;border-color:#332e2a;opacity:.55}
+  .lg-cell.avail{color:#a9843c;background:#2b2622;cursor:pointer}
+  .lg-cell.sel{color:var(--gold2);background:rgba(232,169,79,.14);border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2);cursor:pointer;font-weight:700}
+  .lg-cell.nouv{animation:lgglow 1.6s ease-in-out infinite}
+  @keyframes lgglow{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 2px rgba(232,169,79,.45)}}
+  .lg-cell .lk{position:absolute;top:5px;left:7px;font-size:10px;opacity:.6}
+  .lg-cell .bd{position:absolute;top:3px;right:5px;font-size:11px}
+  .lg-cell .rv{position:absolute;bottom:4px;right:6px;font-size:9px}
+  .lg-cell .ck{position:absolute;top:4px;left:7px;font-size:11px;font-family:var(--ui);font-weight:900;color:var(--gold2)}
+  .lg-rev{width:100%;margin-top:16px;padding:14px;border-radius:14px;border:none;cursor:pointer;font-family:var(--ui);font-weight:900;font-size:16px;background:var(--gold);color:#1a1410}
+  .lg-rev:disabled{background:#3a332e;color:#6f665f;cursor:not-allowed}
   .ag.hl{background:#4a3a22;border-color:var(--gold-d)}
   .ag.hl.hit{background:var(--gold);color:var(--bg)}
   .source{text-align:center;margin-bottom:18px}
@@ -1221,6 +1241,7 @@ function save(){try{localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){}}
 let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
+if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revues (halo « nouveau »)
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
@@ -1364,7 +1385,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 03/07 · alphabet retracé avec les coordonnées de Myriam (28 lettres, ه rond, levés)';
+const BUILD='maj 03/07b · Réviser>Lettres : grille sélectionnable des 28, son de la lettre, ه rond';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
@@ -1522,7 +1543,7 @@ function renderStep(){
     body.innerHTML='<div class="q-title">'+st.title+'</div>'+
       '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
       '<div class="tapset'+(st.cols===4?' c4':st.cols===3?' c3':'')+'">'+items.map(it=>
-        '<button class="ts-card" onclick="tsTap(\''+it[0]+'\',this)"><span class="ar">'+it[0]+'</span>'+
+        '<button class="ts-card" onclick="tsTap(\''+it[0]+'\',this)"><span class="ar">'+(it[0]==='ه'?'ﻩ':it[0])+'</span>'+
         (st.alphabet?'':'<span class="enm">'+it[1]+'</span>')+'</button>').join('')+'</div>';
     return;
   }
@@ -1701,7 +1722,7 @@ function renderStep(){
     const uu=(typeof st.u==='number')?st.u:curU;
     const d=UNITS[uu].alpha[st.L];
     const posName={1:'au début',2:'au milieu',3:'à la fin'}[st.pos]||'isolée';
-    const posGlyph=st.pos?formGlyph(st.L,st.pos):st.L;
+    const posGlyph=(!st.pos&&st.L==='ه')?'ﻩ':(st.pos?formGlyph(st.L,st.pos):st.L);
     body.innerHTML='<div class="q-title">À toi d\u2019écrire : '+posGlyph+' ('+d.n+' · '+posName+')</div>'+
       '<div class="hint" style="margin:-8px 0 14px">Pose ton doigt sur le point vert et suis le chemin de la lettre jusqu\u2019au bout. Astuce : '+d.mn+'.</div>'+
       '<canvas id="trace" class="trace"></canvas>'+
@@ -2405,6 +2426,57 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
    Arabic = écriture linéaire d'apprentissage). Le trait se dore au fur et à mesure ;
    point vert + flèche de départ AUTO-DÉRIVÉS du premier segment (plus de données
    starts à calibrer). Les points (nuqat) se posent en touchant leur cercle. */
+/* ===== SON de la lettre (et non son nom) : joué en fin de tracé/démo. Prêt pour tes
+   enregistrements lettre-<translit>-son.mp3 ; repli synthèse tant qu'ils n'existent pas. ===== */
+const LTRANS={'ا':'alif','ب':'ba','ت':'ta','ث':'tha','ج':'jim','ح':'hha','خ':'kha','د':'dal','ذ':'dhal','ر':'ra','ز':'zay','س':'sin','ش':'shin','ص':'sad','ض':'dad','ط':'tta','ظ':'dha','ع':'ayn','غ':'ghayn','ف':'fa','ق':'qaf','ك':'kaf','ل':'lam','م':'mim','ن':'nun','ه':'ha','و':'waw','ي':'ya'};
+function sayLetterSound(L){
+  var tr=LTRANS[letterKey(L)];
+  if(!tr){ speak(L); return; }
+  try{
+    var a=new Audio('audios-app-alaq/lettre-'+tr+'-son.mp3'), settled=false;
+    var fb=function(){ if(settled)return; settled=true; try{_speakSynth(L);}catch(_){ } };
+    a.addEventListener('playing',function(){settled=true;},{once:true});
+    a.addEventListener('error',fb,{once:true});
+    var p=a.play(); if(p&&p.catch)p.catch(fb);
+    setTimeout(function(){ if(!settled&&a.paused) fb(); },1100);
+  }catch(e){ try{_speakSynth(L);}catch(_){ } }
+}
+/* ===== Réviser « Les lettres » : la grille des 28, sélectionnable ===== */
+var LETSEL=new Set();
+function letToggle(k){ if(LETSEL.has(k))LETSEL.delete(k); else{ LETSEL.add(k); sayLetterSound(k); } renderReviser('lettres'); }
+function letSelAll(){ knownLetterSet().forEach(function(k){LETSEL.add(k);}); renderReviser('lettres'); }
+function letSelClear(){ LETSEL.clear(); renderReviser('lettres'); }
+function startSelectedLetters(){
+  if(!LETSEL.size)return;
+  var byKey={}; learnedLettersList().forEach(function(x){byKey[letterKey(x.L)]=x;});
+  var seen=S.letSeen||(S.letSeen={}); var steps=[];
+  LETSEL.forEach(function(k){ var x=byKey[k]; if(x){ formsOf(x.L,x.u).forEach(function(st){steps.push(st);}); seen[k]=1; } });
+  if(!steps.length){ toast('Choisis au moins une lettre débloquée 🌱'); return; }
+  save(); QCTX=null; launchQuranReview(steps);
+}
+function letterGridHTML(){
+  var order=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+  var unlocked=knownLetterSet(), seen=S.letSeen||{};
+  var order0=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+  var uCount=order0.filter(function(L){return unlocked.has(letterKey(L));}).length;
+  var revoir=new Set(); Object.keys(S.err||{}).forEach(function(kk){ if((S.err[kk]||0)>0){ for(var i=0;i<kk.length;i++){ var lk=letterKey(kk[i]); if(unlocked.has(lk))revoir.add(lk); } } });
+  var latestU=-1; UNITS.forEach(function(U,i){ if(U.alpha && (S.done[dkey(i,1)]||unitValidated(i))) latestU=i; });
+  var nouv=new Set(); if(latestU>=0) UNITS[latestU].letters.forEach(function(L){ if(!seen[letterKey(L)]) nouv.add(letterKey(L)); });
+  var any=uCount>0;
+  var h='<div class="lg-prompt'+(any?'':' empty')+'">'+(any?'choisis les lettres que tu veux réviser':'débloque une leçon pour pouvoir sélectionner des lettres')+'</div>';
+  h+='<div class="lg-prog"><div class="lg-plab">🔓 '+uCount+' / 28 lettres débloquées</div><div class="lg-pbar"><span style="width:'+Math.round(uCount/28*100)+'%"></span></div></div>';
+  if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
+  h+='<div class="lg-grid">'+order.map(function(L){
+    var k=letterKey(L), g=(L==='ه')?'ﻩ':L;
+    if(!unlocked.has(k)) return '<div class="lg-cell locked"><span class="lk">🔒</span>'+g+'</div>';
+    var sel=LETSEL.has(k);
+    var cls='lg-cell '+(sel?'sel':'avail')+(nouv.has(k)?' nouv':'');
+    var mk=(sel?'<span class="ck">✓</span>':'')+(nouv.has(k)?'<span class="bd">✨</span>':'')+(revoir.has(k)?'<span class="rv">🔸</span>':'');
+    return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
+  }).join('')+'</div>';
+  h+='<button class="lg-rev" '+(LETSEL.size?'':'disabled')+' onclick="startSelectedLetters()">'+(LETSEL.size?('Réviser '+LETSEL.size+' lettre'+(LETSEL.size>1?'s':'')):'Réviser')+'</button>';
+  return h;
+}
 function setupTrace(L,u,posN){
   /* ===== TRACÉ GUIDÉ — rendu « Style A : la lettre s'illumine » (validé par Myriam 02/07)
      Chemin densifié (spline Catmull-Rom, un point tous les ~3 px) et accroché au centre
@@ -2522,7 +2594,7 @@ function setupTrace(L,u,posN){
     const p=paths[cur];
     if(p&&p.dots&&msg)msg.textContent='Ajoute '+(p.dots.length>1?'les points':'le point')+' 👆';
   }
-  function finishAll(){ doneAll=true;draw();speak(L);ctaOn(); } // fin de tracé : seule la lettre se fait entendre
+  function finishAll(){ doneAll=true;draw();sayLetterSound(L);ctaOn(); } // fin de tracé : le SON de la lettre
   function nextStroke(){
     cur++;
     if(cur>=paths.length)finishAll();
@@ -2590,7 +2662,7 @@ function setupTrace(L,u,posN){
         st8.waitEnd+=dt;
         if(st8.waitEnd>900){ // fin : on rend la main, progrès de l'élève restauré
           paths.forEach((p2,i)=>{if(p2.hit)p2.hit=saveHits[i];});
-          demoOn=false;draw();return;
+          demoOn=false;draw();sayLetterSound(L);return;
         }
       } else if(st8.hold>0){ st8.hold-=dt; } // pause nette : un trait après l'autre
       else if(!p){ st8.full=true; }
@@ -3045,7 +3117,7 @@ function importSave(){
     const obj=JSON.parse(decodeURIComponent(escape(atob(code.slice(6)))));
     if(!obj||typeof obj.done!=='object'){toast('Code incomplet');return;}
     S=Object.assign({},DEF,obj);
-    if(!S.err)S.err={};if(!S.badges)S.badges={};if(!S.tests)S.tests={};
+    if(!S.err)S.err={};if(!S.badges)S.badges={};if(!S.tests)S.tests={};if(!S.letSeen)S.letSeen={};
     save();refreshStats();renderProg();
     toast('✅ Progression restaurée, ماشاء الله !');
   }catch(e){toast('Code invalide — vérifie la copie');}
@@ -3385,19 +3457,7 @@ function renderReviser(sub){
       accSec('reciter','🎙️','Réciter',reciter);
   }
   else if(sub==='lettres'){
-    const ls=learnedLettersList();
-    h+='<div class="ccard">'+
-      '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0 0 12px">Repasse chaque lettre au doigt — elle s\u2019illumine sous ton tracé. <b style="color:var(--cream)">'+ls.length+' lettres</b> apprises.</p>'+
-      (ls.length
-        ?'<button class="ritem all" onclick="startLettersReview()">⚡ Toutes les lettres isolées ('+ls.length+'), mélangées</button>'+
-         '<button class="ritem all" onclick="startFormsReview()">🎭 Toutes les formes liées (début·milieu·fin), mélangées</button>'+
-         ls.map(function(x){
-           const nf=formsOf(x.L,x.u).length;
-           return '<button class="ritem" onclick="startLettersReview(\''+x.L+'\','+x.u+')">'+x.n+
-           ' <span style="color:var(--muted);font-weight:700">· '+nf+' forme'+(nf>1?'s':'')+'</span>'+
-           '<span class="var" style="font-size:22px">'+(UNITS[x.u].strokesPos&&UNITS[x.u].strokesPos[x.L]?[x.L].concat([1,2,3].filter(p=>UNITS[x.u].strokesPos[x.L][p]).map(p=>formGlyph(x.L,p))).join(' '):x.L)+'</span></button>';}).join('')
-        :'<div class="cempty"><div class="ce-ic">🌱</div>Termine d\u2019abord « Mémoriser » de l\u2019unité 1.</div>')+
-      '</div>';
+    h+='<div class="ccard">'+letterGridHTML()+'</div>';
   }
   else if(sub==='vocab'){
     h+='<div class="ccard">'+
