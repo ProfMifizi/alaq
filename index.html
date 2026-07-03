@@ -1258,6 +1258,7 @@ let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
 if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revues (halo « nouveau »)
+if(typeof S.bigNext==='undefined')S.bigNext=0;          // prochaine révision = +3 (déblocage) ?
 if(typeof S.tutLetters==='undefined')S.tutLetters=0;    // tuto grille des lettres déjà vu ?
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
@@ -1276,7 +1277,7 @@ function toggleNarr(){
   syncNarrLink();
   if(!NARR&&'speechSynthesis'in window)speechSynthesis.cancel();
 }
-function showNoHearts(){ document.getElementById('noHearts').classList.add('on'); }
+function showNoHearts(){ document.getElementById('noHearts').classList.add('on'); S.bigNext=1; save(); } // la révision de secours donnera +3
 function closeNoHearts(){ document.getElementById('noHearts').classList.remove('on'); }
 function noHeartsReview(){ closeNoHearts(); startReview(); }
 function goNoHearts(){ document.getElementById('player').classList.remove('on'); showNoHearts(); }
@@ -1389,7 +1390,7 @@ function spokenInstr(st){
   }
 }
 function today(){return new Date().toISOString().slice(0,10)}
-(function(){if(S.heartDay!==today()){S.hearts=HEARTS_MAX;S.heartDay=today();save();}})();
+(function(){if(S.heartDay!==today()){S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;save();}})();
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
 (function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();save();} })();
 
@@ -1403,7 +1404,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 03/07d · 0 cœur bloque et invite à réviser · favicon logo · « revoir le guide » en bas';
+const BUILD='maj 03/07e · cœurs +3/+1 · repli audio via romanisation propre (fini le charabia)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
@@ -2925,10 +2926,14 @@ const AR2LAT={
  'ب':'b','ت':'t','ث':'s','ج':'dj','ح':'h','خ':'r','د':'d','ذ':'z','ر':'r','ز':'z',
  'س':'s','ش':'ch','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'r','ف':'f','ق':'k',
  'ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w','ي':'y','ﺀ':'',
- '\u064E':'a','\u0650':'i','\u064F':'ou','\u064B':'ane','\u064D':'ine','\u064C':'oune',
+ '\u064E':'a','\u0650':'i','\u064F':'ou','\u064B':'a','\u064D':'','\u064C':'',   // tanwin en pause : ً->a, ٍ/ٌ->rien (fini « samakoune »)
  '\u0652':'','\u0651':'','\u0670':'a','\u0640':''
 };
 function translit(t){ let o=''; for(const ch of (t||'')) o += (ch in AR2LAT)?AR2LAT[ch]:ch; return o.trim(); }
+/* Repli audio SANS voix arabe : on lit la romanisation PROPRE du mot (w.say) au lieu de
+   translittérer l'arabe vocalisé (qui donnait « samakoune »). Voix latine -> son compréhensible. */
+const WSAY={}; try{UNITS.forEach(function(U){(U.words||[]).forEach(function(w){if(w&&w.w&&w.say)WSAY[w.w]=w.say;});});}catch(e){}
+function ttsRom(x){ return (x||'').replace(/ā/g,'a').replace(/ī/g,'i').replace(/ū/g,'ou').replace(/[ʿʾ’\'`]/g,'').replace(/ḥ/g,'h').replace(/ṣ/g,'s').replace(/ṭ/g,'t').replace(/ḍ/g,'d').replace(/ẓ/g,'z').replace(/ā/g,'a').trim(); }
 
 function _speakSynth(t){ // repli synthèse : voix arabe si dispo, sinon translittération sur voix par défaut
   if(!('speechSynthesis'in window))return;
@@ -2941,7 +2946,7 @@ function _speakSynth(t){ // repli synthèse : voix arabe si dispo, sinon transli
         u=new SpeechSynthesisUtterance(expandShadda(t));
         u.voice=arV; u.lang=arV.lang||'ar-SA';
       }else{                                     // pas de voix arabe : translittération audible
-        u=new SpeechSynthesisUtterance(translit(expandShadda(t)));
+        u=new SpeechSynthesisUtterance(WSAY[t]?ttsRom(WSAY[t]):translit(expandShadda(t)));
         const frV=bestVoice('fr')||bestVoice('en');
         if(frV){ u.voice=frV; u.lang=frV.lang; } else { u.lang='fr-FR'; }
       }
@@ -3739,8 +3744,9 @@ function vtUndo(){
 function finishReview(){
   REVIEW=false; S.xp+=10; S.nrev=(S.nrev||0)+1;
   const before=S.hearts;
-  S.hearts=HEARTS_MAX;S.heartDay=today(); // révision terminée : les 7 cœurs sont rechargés
-  if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ Tes 7 cœurs sont rechargés, ماشاء الله !'),600);
+  const gain=S.bigNext?3:1;               // 1re révision après blocage = +3 ; les suivantes = +1
+  S.hearts=Math.min(HEARTS_MAX,S.hearts+gain);S.bigNext=0;S.heartDay=today();
+  if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ +'+gain+' cœur'+(gain>1?'s':'')+', ماشاء الله !'),600);
   checkBadges({review:true});
   const t=today(); if(S.lastDay!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
   save();
