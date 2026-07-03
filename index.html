@@ -7,6 +7,9 @@
 <meta name="theme-color" content="#252120">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="shortcut icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -304,7 +307,8 @@
   .lg-cell .ck{position:absolute;top:4px;left:7px;font-size:11px;font-family:var(--ui);font-weight:900;color:var(--gold2)}
   .lg-rev{width:100%;margin-top:16px;padding:14px;border-radius:14px;border:none;cursor:pointer;font-family:var(--ui);font-weight:900;font-size:16px;background:var(--gold);color:#1a1410}
   .lg-rev:disabled{background:#3a332e;color:#6f665f;cursor:not-allowed}
-  .lg-help{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);background:#2a2422;color:var(--gold2);font-weight:900;cursor:pointer;font-size:13px;line-height:1}
+  .lg-replay{background:transparent;border:1.5px solid var(--line);color:var(--muted);border-radius:10px;padding:8px 14px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
+  .lg-replay:hover{border-color:var(--gold);color:var(--gold2)}
   #letterTut{position:fixed;inset:0;z-index:1200;display:none}
   #ltHole{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(12,9,8,.74);border:2px solid var(--gold2);transition:top .4s cubic-bezier(.5,0,.2,1),left .4s,width .4s,height .4s;pointer-events:none}
   #ltBubble{position:fixed;max-width:290px;background:#3a322c;border:1.5px solid var(--gold2);border-radius:16px;padding:14px 16px;box-shadow:0 12px 34px rgba(0,0,0,.5);transition:top .35s,left .35s}
@@ -1275,6 +1279,7 @@ function toggleNarr(){
 function showNoHearts(){ document.getElementById('noHearts').classList.add('on'); }
 function closeNoHearts(){ document.getElementById('noHearts').classList.remove('on'); }
 function noHeartsReview(){ closeNoHearts(); startReview(); }
+function goNoHearts(){ document.getElementById('player').classList.remove('on'); showNoHearts(); }
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
 function doReset(){
@@ -1398,7 +1403,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 03/07c · tuto d’accueil de la grille des lettres (bulles guidées)';
+const BUILD='maj 03/07d · 0 cœur bloque et invite à réviser · favicon logo · « revoir le guide » en bas';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
@@ -1958,7 +1963,8 @@ function ctaClick(){
       document.getElementById('st-hearts').textContent=S.hearts;
     }
   }
-  cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=false;
+  cta.textContent='CONTINUER';cta.disabled=false;
+  cta.onclick=(!REVIEW&&S.hearts<=0)?goNoHearts:advance; // à 0 cœur (hors révision) : blocage + invitation à réviser
 }
 
 function finishDisque(){
@@ -2521,8 +2527,7 @@ function letterGridHTML(){
   var latestU=-1; UNITS.forEach(function(U,i){ if(U.alpha && (S.done[dkey(i,1)]||unitValidated(i))) latestU=i; });
   var nouv=new Set(); if(latestU>=0) UNITS[latestU].letters.forEach(function(L){ if(!seen[letterKey(L)]) nouv.add(letterKey(L)); });
   var any=uCount>0;
-  var h=(any?'<div style="display:flex;justify-content:flex-end;margin:-2px 0 2px"><button class="lg-help" onclick="letterTut()" title="Revoir le guide">?</button></div>':'');
-  h+='<div class="lg-prompt'+(any?'':' empty')+'">'+(any?'choisis les lettres que tu veux réviser':'débloque une leçon pour pouvoir sélectionner des lettres')+'</div>';
+  var h='<div class="lg-prompt'+(any?'':' empty')+'">'+(any?'choisis les lettres que tu veux réviser':'débloque une leçon pour pouvoir sélectionner des lettres')+'</div>';
   h+='<div class="lg-prog"><div class="lg-plab">🔓 '+uCount+' / 28 lettres débloquées</div><div class="lg-pbar"><span style="width:'+Math.round(uCount/28*100)+'%"></span></div></div>';
   if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
   h+='<div class="lg-grid">'+order.map(function(L){
@@ -2534,6 +2539,7 @@ function letterGridHTML(){
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
   h+='<button class="lg-rev" '+(LETSEL.size?'':'disabled')+' onclick="startSelectedLetters()">'+(LETSEL.size?('Réviser '+LETSEL.size+' lettre'+(LETSEL.size>1?'s':'')):'Réviser')+'</button>';
+  if(any)h+='<div style="text-align:center;margin-top:12px"><button class="lg-replay" onclick="letterTut()">↻ Revoir le guide</button></div>';
   return h;
 }
 function setupTrace(L,u,posN){
