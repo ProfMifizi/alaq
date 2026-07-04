@@ -3594,19 +3594,19 @@ function renderProg(){
   h+=(function(){
     const ready=UNITS.map((U,i)=>({U,i})).filter(o=>o.U.ready);
     const nTot=UNITS.length, nVal=ready.filter(o=>unitValidated(o.i)).length;
-    const cur=ready.find(o=>unitUnlocked(o.i)&&!unitValidated(o.i));
+    // unité en cours, sinon la dernière unité atteinte (on montre toujours où elle en est)
+    const cur=ready.find(o=>unitUnlocked(o.i)&&!unitValidated(o.i)) || ready.slice().reverse().find(o=>unitUnlocked(o.i));
     let inner='<div class="pcs-top"><b>Al-Fātiḥa</b><span>'+nVal+' / '+nTot+' unités validées</span></div>'+
       '<div class="ubar"><i style="width:'+Math.round(nVal/Math.max(1,nTot)*100)+'%"></i></div>';
-    if(cur){
+    if(nVal>=nTot && nTot>0){
+      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--gold2)">🏆 Fātiḥa complétée, ma shā’ Allāh !</div>';
+    } else if(cur){
       const i=cur.i,U=cur.U,n=discsFor(i).length; let d=0; for(let k=0;k<n;k++) if(S.done[dkey(i,k)])d++;
+      const lbl=(d>=n)?'Terminée':'En cours';
       inner+='<div class="ucard cur" style="margin-top:12px"><div class="uno">'+toAr(U.no)+'</div>'+
-        '<div class="ub"><div class="utt">En cours · <span class="uar">'+U.letters.join(' ')+'</span></div>'+
+        '<div class="ub"><div class="utt">'+lbl+' · <span class="uar">'+U.letters.join(' ')+'</span></div>'+
         '<div class="ust">'+d+' / '+n+' leçons</div>'+
         '<div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>';
-    } else if(nVal>=nTot && nTot>0){
-      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--gold2)">🏆 Fātiḥa complétée, ma shā’ Allāh !</div>';
-    } else {
-      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--muted)">🌱 Nouvelle unité bientôt</div>';
     }
     return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
   })();
