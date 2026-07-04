@@ -3603,8 +3603,10 @@ function renderProg(){
         '<div class="ub"><div class="utt">En cours · <span class="uar">'+U.letters.join(' ')+'</span></div>'+
         '<div class="ust">'+d+' / '+n+' leçons</div>'+
         '<div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>';
-    } else if(nTot>0){
+    } else if(nVal>=nTot && nTot>0){
       inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--gold2)">🏆 Fātiḥa complétée, ma shā’ Allāh !</div>';
+    } else {
+      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--muted)">🌱 Nouvelle unité bientôt</div>';
     }
     return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
   })();
