@@ -532,7 +532,7 @@
 .botnav .bn .bi{font-size:30px;opacity:.5;padding:6px 16px;border-radius:14px;transition:opacity .15s,background .15s}
 .botnav .bn.active .bi{opacity:1;background:rgba(220,144,46,.18)}
 /* menu des sourates (burger) */
-#surahMenu .sm-box{width:min(420px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}
+.sm-box{width:min(420px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}
 .sm-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#2a2422;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px;cursor:pointer;color:var(--cream)}
 .sm-item.active{border-color:var(--gold2);background:rgba(232,169,79,.12)}
 .sm-item:disabled{opacity:.5;cursor:not-allowed}
@@ -540,7 +540,7 @@
 .sm-item .sm-tx{flex:1;display:flex;flex-direction:column;min-width:0}
 .sm-item .sm-tx b{font-weight:900}.sm-item .sm-tx small{color:var(--muted);font-size:12px}
 .sm-item .sm-badge{font-size:16px}
-#surahMenu .sm-box{position:relative}
+.sm-box{position:relative}
 .sm-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:10px;background:#2a2422;border:1px solid var(--line);color:var(--cream);font-size:16px;font-weight:900;cursor:pointer;z-index:2}
 .sm-close:active{transform:scale(.94)}
 .sm-list{max-height:66vh;overflow-y:auto;margin-top:26px;padding-right:2px}
@@ -584,6 +584,32 @@
 .revbtn{display:flex;align-items:center;justify-content:center;gap:10px}
 .revcount{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:#d8463a;color:#fff;font-family:var(--ui);font-size:13px;font-weight:900;line-height:1}
 .revhint{text-align:center;font-family:var(--ui);font-size:12px;color:var(--muted);margin:8px 0 0}
+/* Succès : grille d'images seules (clic → popup détail) */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.scell{background:var(--panel2);border:1px solid var(--line);border-radius:14px;aspect-ratio:1;display:grid;place-items:center;cursor:pointer;padding:10px;font-size:34px;color:var(--cream);transition:transform .1s}
+.scell:active{transform:scale(.93)}
+.scell img{width:46px;height:46px;object-fit:contain}
+.scell.locked{opacity:.34}
+.scell.locked img{filter:grayscale(1)}
+.succ-big{width:112px;height:112px;margin:2px auto 0;display:grid;place-items:center;font-size:66px}
+.succ-big img{width:100px;height:100px;object-fit:contain}
+.succ-big.locked{opacity:.4;filter:grayscale(1)}
+.succ-stat{font-family:var(--ui);font-weight:800;font-size:13px}
+.succ-desc{font-family:var(--ui);font-size:13.5px;color:var(--muted);line-height:1.5;margin:10px 4px 0}
+.pcs-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--ui);margin-bottom:8px}
+.pcs-top b{color:var(--cream);font-size:15px}
+.pcs-top span{color:var(--gold2);font-weight:800;font-size:12.5px}
+.rankcard{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:linear-gradient(135deg,#6f4b0f,#9a6813 60%,#b8770f);border:1px solid var(--gold2);border-radius:16px;padding:12px 14px;cursor:pointer;color:#241a06;margin:0 0 12px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.rankcard:active{transform:scale(.99)}
+.rankcard .rk-ar{font-family:var(--quran);font-size:30px;color:#241a06;flex:0 0 auto}
+.rankcard .rk-mid{flex:1;min-width:0}
+.rankcard .rk-tr{font-family:var(--ui);font-weight:900;font-size:14px;color:#241a06}
+.rankcard .rk-next{font-family:var(--ui);font-size:11px;color:#3a2a08;opacity:.9;margin-top:3px}
+.rankcard .rk-chev{font-size:24px;color:#241a06;font-weight:900;flex:0 0 auto}
+.rankcard .ubar{margin-top:5px;background:rgba(0,0,0,.22)}
+.rankcard .ubar i{background:#241a06}
+.rk-big{font-family:var(--quran);font-size:64px;color:var(--gold);line-height:1.15;margin-top:6px}
+.rk-stats{font-family:var(--ui);font-size:12.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:10px;line-height:1.6}
 .lrow{display:flex;align-items:flex-start;gap:14px;padding:12px 2px;border-top:1px dashed var(--line)}
 .lrow:first-child{border-top:none}
 .lrow .lbig{font-family:var(--ar);font-size:46px;color:var(--gold);line-height:1;min-width:52px;text-align:center;flex:0 0 auto}
@@ -647,7 +673,7 @@
   <div class="brand" id="brand"><img class="blogo" id="blogo" alt=""> ALAQ</div>
   <div class="stats">
     <div class="stat">🔥 <span id="st-streak">0</span></div>
-    <div class="stat">⭐ <span id="st-xp">0</span></div>
+    <div class="stat" onclick="showRank()" style="cursor:pointer">🎓 <span id="st-rank" style="font-family:var(--quran);color:var(--gold)">·</span></div>
     <div class="stat">❤️ <span id="st-hearts">7</span></div>
   </div>
 </div>
@@ -1380,6 +1406,8 @@ if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revue
 if(typeof S.bigNext==='undefined')S.bigNext=0;          // prochaine révision = +3 (déblocage) ?
 if(typeof S.tutLetters==='undefined')S.tutLetters=0;    // tuto grille des lettres déjà vu ?
 if(typeof S.tutHome==='undefined')S.tutHome=0;          // tuto page d’accueil déjà vu ?
+if(typeof S.consScore!=='number')S.consScore=0;        // score de constance (rang)
+if(typeof S.ghufLeft!=='number')S.ghufLeft=2;          // Ghufrān restants ce mois (max 2, jamais à vendre)
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
@@ -1510,7 +1538,96 @@ function spokenInstr(st){
   }
 }
 function today(){return new Date().toISOString().slice(0,10)}
+
+/* ===== Rang de constance : 50% constance · 30% révision · 20% apprentissage ===== */
+const RANKS=[
+ {ar:'النية',    tr:'An-Niyya',    fr:'l’intention', min:0,   desc:'Tout commence par l’intention. Tu t’es lancée sur le chemin — bismillah.'},
+ {ar:'الهمّة',   tr:'Al-Himma',    fr:'l’élan',      min:10,  desc:'L’élan du cœur : l’envie sincère qui te met en mouvement.'},
+ {ar:'الاجتهاد', tr:'Al-Ijtihād',  fr:'l’effort',    min:25,  desc:'L’effort régulier. Tu t’exerces, jour après jour.'},
+ {ar:'المثابرة', tr:'Al-Muthābara',fr:'l’assiduité', min:50,  desc:'L’assiduité : tu reviens fidèlement, même un peu chaque jour.'},
+ {ar:'الصبر',    tr:'Aṣ-Ṣabr',     fr:'la patience', min:100, desc:'La patience dans la durée, malgré la fatigue. On tient bon.'},
+ {ar:'الاستقامة',tr:'Al-Istiqāma', fr:'la constance',min:200, desc:'La constance ancrée : la régularité est devenue une habitude.'},
+ {ar:'النور',    tr:'An-Nūr',      fr:'la lumière',  min:300, desc:'La lumière : la lecture du Livre t’illumine. Garde cette station en restant constante — entretiens par la révision.'},
+];
+function rankFor(score){
+  score=Math.max(0,score||0); var idx=0;
+  for(var i=0;i<RANKS.length;i++){ if(score>=RANKS[i].min)idx=i; }
+  var nx=RANKS[idx+1];
+  var prog=nx?Math.max(0,Math.min(100,Math.round((score-RANKS[idx].min)/(nx.min-RANKS[idx].min)*100))):100;
+  return {idx:idx, rank:RANKS[idx], next:nx, prog:prog};
+}
+function _dayNum(x){ if(!x)return 0; var p=x.split('-'); return Math.round(Date.UTC(+p[0],(+p[1])-1,+p[2])/864e5); }
+function daysGap(a,b){ return _dayNum(b)-_dayNum(a); }
+function rollConstance(){
+  var t=today(), mk=t.slice(0,7);
+  if(typeof S.consScore!=='number')S.consScore=0;
+  if(typeof S.ghufLeft!=='number')S.ghufLeft=2;
+  if(S.ghufMonth!==mk){ S.ghufMonth=mk; S.ghufLeft=2; }              // recharge mensuelle
+  if(!S.consDay){ S.consDay=t; S.consFlags={}; save(); return; }
+  if(S.consDay!==t){
+    var missed=daysGap(S.consDay,t)-1;                               // jours pleins sautés
+    if(missed>0)S.pendingMiss=(S.pendingMiss||0)+missed;
+    S.consDay=t; S.consFlags={};
+  }
+  save();
+}
+function bumpConstance(kind){
+  rollConstance();
+  var f=S.consFlags||(S.consFlags={});
+  if(!f.came){ S.consScore=(S.consScore||0)+3; f.came=1; }           // venir = constance (50%)
+  if(kind==='revise'&&!f.revised){ S.consScore+=2; f.revised=1; }    // révision (30%)
+  if(kind==='learn'&&!f.learned){ S.consScore+=1; f.learned=1; }     // apprentissage (20%)
+  save();
+}
+/* Ghufrān غفران : gel de série activé par l’élève (2/mois, jamais à vendre) */
+function maybeGhufranPrompt(){
+  if(!(S.pendingMiss>0)) return;
+  if(document.getElementById('ghufModal')) return;
+  var m=document.createElement('div'); m.className='finish on'; m.id='ghufModal';
+  var can=Math.min(S.pendingMiss,S.ghufLeft||0);
+  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
+    '<div style="font-size:52px">🕊️</div>'+
+    '<h2 style="margin:6px 0 6px">Tu as manqué '+S.pendingMiss+' jour'+(S.pendingMiss>1?'s':'')+'</h2>'+
+    '<p class="succ-desc" style="margin-top:0">Un <b style="color:var(--gold2)">Ghufrān</b> غفران préserve ta série. Il t’en reste <b style="color:var(--gold2)">'+(S.ghufLeft||0)+'</b> ce mois.</p>'+
+    (can>0?'<button class="cbtn" onclick="useGhufran()">🕊️ Utiliser '+can+' Ghufrān</button>':'')+
+    '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line);margin-top:8px" onclick="acceptMiss()">Non, j’assume</button>'+
+    '</div>';
+  document.body.appendChild(m);
+}
+function closeGhufran(){ var m=document.getElementById('ghufModal'); if(m)m.remove(); }
+function _progVisible(){ var v=document.getElementById('view-prog'); return v && v.offsetParent!==null; }
+function useGhufran(){
+  var m=S.pendingMiss||0; if(m<=0){ closeGhufran(); return; }
+  var use=Math.min(m,S.ghufLeft||0);
+  if(use>0){ S.ghufLeft-=use; S.pendingMiss-=use;
+    S.lastDay=new Date(Date.now()-864e5).toISOString().slice(0,10); }   // pont : série préservée
+  if(S.pendingMiss>0){ S.consScore=Math.max(0,(S.consScore||0)-3*S.pendingMiss); S.streak=0; S.pendingMiss=0; }
+  save(); closeGhufran();
+  toast('🕊️ Ghufrān utilisé — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
+  if(_progVisible())renderProg();
+}
+function acceptMiss(){
+  var m=S.pendingMiss||0;
+  S.consScore=Math.max(0,(S.consScore||0)-3*m); S.streak=0; S.pendingMiss=0; save();
+  closeGhufran(); if(_progVisible())renderProg();
+}
+/* Carte détail du rang (clic sur le rang) */
+function showRank(){
+  var R=rankFor(S.consScore); var m=document.getElementById('rankModal');
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='rankModal'; document.body.appendChild(m); }
+  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
+    '<button class="sm-close" onclick="closeRank()" aria-label="Fermer">✕</button>'+
+    '<div class="rk-big">'+R.rank.ar+'</div>'+
+    '<h2 style="margin:8px 0 2px">'+R.rank.tr+'</h2>'+
+    '<div class="succ-stat" style="color:var(--gold2)">'+R.rank.fr+'</div>'+
+    '<p class="succ-desc">'+R.rank.desc+'</p>'+
+    '<div class="rk-stats">🔥 Série '+(S.streak||0)+' j · 🔁 '+(S.nrev||0)+' révisions · 🕊️ '+(S.ghufLeft||0)+' Ghufrān</div>'+
+    '</div>';
+  m.classList.add('on');
+}
+function closeRank(){ var m=document.getElementById('rankModal'); if(m)m.classList.remove('on'); }
 (function(){if(S.heartDay!==today()){S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;save();}})();
+try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
 (function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();save();} })();
 
@@ -1518,19 +1635,20 @@ function today(){return new Date().toISOString().slice(0,10)}
 const OFFS=[0,46,64,46,0,-46,-64,-46,0];
 function refreshStats(){
   document.getElementById('st-streak').textContent=S.streak;
-  document.getElementById('st-xp').textContent=S.xp;
+  try{var _re=document.getElementById('st-rank');if(_re)_re.textContent=rankFor(S.consScore).rank.ar;}catch(e){}
   document.getElementById('st-hearts').textContent=S.hearts;
 }
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 04/07 · Réviser>vocabulaire façon Duolingo : liste mots (emoji · mot · traduction · 🔊) + répétition espacée (disque = mots de la session, plafond 15), titres d’onglets retirés';
+const BUILD='maj 04/07 · Progrès : Succès en images + popup, parcours compact (X/7 unités · leçons), rang de constance en 7 stations arabes (50/30/20) + Ghufrān غفران (gel de série activé, 2/mois), page épurée';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
   const SR=SOURATES[(typeof curSourate!=='undefined'?curSourate:0)]||SOURATES[0];
   const vN=(SR.verses?SR.verses.length:7);
   setTimeout(maybeShowHomeTut,300);
+  setTimeout(function(){try{maybeGhufranPrompt();}catch(e){}},500);
   // ---- Bandeau UNIQUE façon Duolingo : un seul encadré collé en haut,
   //      dont le contenu change au défilement quand un séparateur d'unité passe dessous.
   h.insertAdjacentHTML('beforeend',
@@ -2156,6 +2274,7 @@ function finishDisque(){
     const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
     S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;
   }
+  bumpConstance('learn');
   save();
   document.getElementById('player').classList.remove('on');
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
@@ -3270,6 +3389,25 @@ const BADGES=[
  ['fatiha50','🕋','La moitié de la Fātiḥa lisible'],
  ['fatiha100','🏆','Toute la Fātiḥa lisible'],
 ];
+// Descriptions des succès (affichées dans le popup détail)
+const SUCCES_DESC={
+ disque1:'Tu as terminé ta toute première leçon. Le début du chemin, bismillah !',
+ sansfaute:'Une leçon entière réussie sans la moindre faute.',
+ 'unite-sansfaute':'Toute une unité validée sans commettre d’erreur.',
+ unite1:'Tu as validé ta première unité de la Fātiḥa.',
+ unites2:'Deux unités de la Fātiḥa validées.',
+ unites4:'Quatre unités validées — belle avancée !',
+ unites7:'Les 7 unités de la Fātiḥa validées, ma shā’ Allāh !',
+ serie3:'Tu t’es entraînée 3 jours de suite.',
+ serie7:'Une semaine complète sans manquer un jour.',
+ serie30:'Un mois entier de régularité. Bravo !',
+ revision:'Tu as terminé ta première révision.',
+ revision3:'Trois révisions terminées.',
+ revision7:'Sept révisions — ta mémoire se renforce.',
+ revision30:'Trente révisions. La sagesse de la constance.',
+ fatiha50:'Tu peux déjà lire la moitié de la Fātiḥa.',
+ fatiha100:'Tu peux lire toute la Fātiḥa ! Allāhumma bārik.',
+};
 function confettiBurst(){
   try{
     const cv=document.createElement('canvas');
@@ -3436,35 +3574,66 @@ function renderCours(sub){
 }
 
 function renderProg(){
-  let h='<h1 class="vh">Ta progression</h1><p class="vsub">Continue comme ça, ماشاء الله !</p>';
+  let h='<h1 class="vh">Ta progression</h1>';
+  var _R=rankFor(S.consScore);
+  h+='<button class="rankcard" onclick="showRank()">'+
+       '<div class="rk-ar">'+_R.rank.ar+'</div>'+
+       '<div class="rk-mid"><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div>'+
+         '<div class="ubar"><i style="width:'+_R.prog+'%"></i></div>'+
+       '</div><div class="rk-chev">›</div></button>';
   h+='<div class="pgrid">'+
-     '<div class="pstat"><div class="pv">'+(S.xp||0)+'</div><div class="pl">étoiles</div></div>'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
-     '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div></div>';
-  h+='<div class="ccard"><div class="ctt"><h3>🏅 Badges</h3></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
+     '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
+     '<div class="pstat"><div class="pv">'+(S.ghufLeft||0)+'</div><div class="pl">🕊️ ghufrān</div></div></div>';
+  h+='<div class="ccard"><div class="ctt"><h3>🏆 Succès</h3></div><div class="sgrid">'+
      BADGES.map(function(b){var got=!!(S.badges&&S.badges[b[0]]);
-       return '<div style="text-align:center;opacity:'+(got?'1':'.32')+'">'+
-              '<div style="font-size:30px;min-height:38px"><img src="badges/'+b[0]+'.png" style="width:36px;height:36px;object-fit:contain" '+
-              'onerror="this.parentNode.textContent=\''+b[1]+'\'"></div>'+
-              '<div style="font-family:var(--ui);font-size:10px;font-weight:800;color:var(--muted);line-height:1.25;margin-top:3px">'+b[2]+'</div></div>';}).join('')+
+       return '<button class="scell'+(got?'':' locked')+'" onclick="showSucces(\''+b[0]+'\')" aria-label="'+b[2].replace(/"/g,'')+'">'+
+              '<img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'">'+
+              '</button>';}).join('')+
      '</div></div>';
-  h+=UNITS.map((U,i)=>({U,i})).filter(o=>o.U.ready).map(({U,i})=>{
-    const isValid=unitValidated(i); const unlocked=unitUnlocked(i);
-    const n=discsFor(i).length; let d=0; for(let k=0;k<n;k++) if(S.done[dkey(i,k)])d++;
-    const cls=isValid?'ok':(unlocked?'cur':'lock');
-    const badge=isValid?'✓':(unlocked?toAr(U.no):'🔒');
-    const stt=isValid?'Validée':(unlocked?(d+' / '+n+' disques'):'Verrouillée — réussis le test de l\u2019unité '+toAr(U.no-1));
-    return '<div class="ucard '+cls+'"><div class="uno">'+badge+'</div><div class="ub"><div class="utt">Unité <span class="uar">'+U.letters.join(' ')+'</span></div><div class="ust">'+stt+'</div><div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>'; }).join('');
+  h+=(function(){
+    const ready=UNITS.map((U,i)=>({U,i})).filter(o=>o.U.ready);
+    const nTot=UNITS.length, nVal=ready.filter(o=>unitValidated(o.i)).length;
+    const cur=ready.find(o=>unitUnlocked(o.i)&&!unitValidated(o.i));
+    let inner='<div class="pcs-top"><b>Al-Fātiḥa</b><span>'+nVal+' / '+nTot+' unités validées</span></div>'+
+      '<div class="ubar"><i style="width:'+Math.round(nVal/Math.max(1,nTot)*100)+'%"></i></div>';
+    if(cur){
+      const i=cur.i,U=cur.U,n=discsFor(i).length; let d=0; for(let k=0;k<n;k++) if(S.done[dkey(i,k)])d++;
+      inner+='<div class="ucard cur" style="margin-top:12px"><div class="uno">'+toAr(U.no)+'</div>'+
+        '<div class="ub"><div class="utt">En cours · <span class="uar">'+U.letters.join(' ')+'</span></div>'+
+        '<div class="ust">'+d+' / '+n+' leçons</div>'+
+        '<div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>';
+    } else if(nTot>0){
+      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--gold2)">🏆 Fātiḥa complétée, ma shā’ Allāh !</div>';
+    }
+    return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
+  })();
   h+='<div class="ccard"><div class="ctt"><h3>💾 Sauvegarde</h3></div>'+
-     '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Ta progression vit sur cet appareil. Copie ton code pour la mettre à l\u2019abri ou la transférer sur un autre téléphone.</p>'+
+     '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Copie ton code pour retrouver ta progression sur un autre appareil.</p>'+
      '<button class="cbtn" style="margin:0 0 8px" onclick="exportSave(this)">📋 Copier mon code de sauvegarde</button>'+
      '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line)" onclick="toggleRestore()">↘️ J\u2019ai un code à restaurer</button>'+
      '<div id="restoreBox" style="display:none;margin-top:10px">'+
        '<input id="restoreIn" placeholder="Colle ton code ALAQ1… ici" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:monospace;font-size:12px">'+
        '<button class="cbtn" style="margin-top:8px" onclick="importSave()">✅ Restaurer ma progression</button>'+
      '</div></div>';
-  document.getElementById('view-prog').innerHTML=h;
+  document.getElementById('view-prog').innerHTML=h; try{maybeGhufranPrompt();}catch(e){}
 }
+// Popup détail d'un succès (clic sur une image de la grille)
+function showSucces(id){
+  var b=BADGES.find(function(x){return x[0]===id;}); if(!b)return;
+  var got=!!(S.badges&&S.badges[b[0]]);
+  var m=document.getElementById('succesModal');
+  if(!m){m=document.createElement('div');m.className='finish';m.id='succesModal';document.body.appendChild(m);}
+  m.innerHTML='<div class="sm-box" style="max-width:320px;text-align:center">'+
+    '<button class="sm-close" onclick="closeSucces()" aria-label="Fermer">✕</button>'+
+    '<div class="succ-big'+(got?'':' locked')+'"><img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'"></div>'+
+    '<h2 style="margin:14px 0 4px;font-size:19px">'+b[2]+'</h2>'+
+    '<div class="succ-stat" style="color:'+(got?'var(--gold2)':'var(--muted)')+'">'+(got?'✓ Débloqué':'🔒 À débloquer')+'</div>'+
+    '<p class="succ-desc">'+(SUCCES_DESC[id]||'')+'</p>'+
+    '</div>';
+  m.classList.add('on');
+}
+function closeSucces(){var m=document.getElementById('succesModal');if(m)m.classList.remove('on');}
 
 /* ===== Révision globale (réutilise le lecteur, ne marque aucun disque) ===== */
 function frOptions(pool,w){
@@ -3945,6 +4114,7 @@ function finishReview(){
   if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ +'+gain+' cœur'+(gain>1?'s':'')+', ماشاء الله !'),600);
   checkBadges({review:true});
   const t=today(); if(S.lastDay!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
+  bumpConstance('revise');
   save();
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
   document.getElementById('player').classList.remove('on');
