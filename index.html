@@ -585,6 +585,35 @@
 .wtx .ww{font-family:var(--ar);font-size:24px;color:var(--gold);line-height:1.25}
 .wtx .wfr{font-family:var(--ui);font-size:13px;color:var(--muted);margin-top:1px}
 .wdot{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:#d8463a}
+.lspk{background:none;border:none;cursor:pointer;font-size:14px;opacity:.85;padding:0 2px;vertical-align:middle;line-height:1}
+.lspk:active{transform:scale(.9)}
+.sgn-card{background:#2a2422;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:8px}
+.sgn-head{font-family:var(--ui);font-weight:800;color:var(--cream);margin-bottom:10px}
+.sgn-chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.chip{display:flex;flex-direction:column;align-items:center;gap:2px;background:#332c28;border:1.5px solid var(--gold-d);border-radius:12px;padding:8px 15px;cursor:pointer;min-width:54px}
+.chip:active{background:rgba(220,144,46,.2);border-color:var(--gold2)}
+.chip-ar{font-family:var(--ar);font-size:29px;color:var(--gold);line-height:1.1;direction:rtl}
+.chip-ro{font-family:var(--ui);font-size:12px;font-weight:800;color:var(--muted)}
+.chip.pulse{animation:chippulse .46s ease}
+@keyframes chippulse{0%{transform:scale(1)}40%{transform:scale(1.14);background:rgba(220,144,46,.28);border-color:var(--gold2)}100%{transform:scale(1)}}
+.sgn-desc{font-family:var(--ui);font-size:13px;color:var(--muted);line-height:1.45}
+.lanim{margin-top:8px}
+.la-btn{background:rgba(220,144,46,.12);border:1px solid var(--gold-d);color:var(--gold2);border-radius:9px;padding:5px 12px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
+.la-btn:active{transform:scale(.96)}
+.la-stage{display:flex;align-items:center;gap:12px;margin-top:8px}
+.la-word{font-family:var(--ar);font-size:40px;color:var(--gold);min-width:74px;text-align:center;direction:rtl;line-height:1}
+.la-word.pop{animation:lapop .4s ease}
+@keyframes lapop{0%{transform:scale(1)}45%{transform:scale(1.15)}100%{transform:scale(1)}}
+.la-l2{display:inline-block;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s ease}
+.la-l2.away{transform:translateX(-24px);opacity:.2}
+.la-track{flex:1;max-width:120px;height:5px;background:#3a332e;border-radius:3px;overflow:hidden}
+.la-bar{height:100%;width:0;background:var(--gold);border-radius:3px;transition:width .5s ease}
+.la-ro{font-family:var(--ui);font-weight:800;font-size:15px;color:var(--gold2);min-width:38px}
+.lex{font-family:var(--ui);font-size:13px;color:var(--muted);margin-top:5px}
+.lex-w{font-family:var(--ar);font-size:20px;color:var(--gold2);cursor:pointer}
+.lact{margin-top:7px}
+.lact-b{background:rgba(220,144,46,.14);border:1px solid var(--gold-d);color:var(--gold2);border-radius:9px;padding:5px 12px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
+.lact-b:active{transform:scale(.95)}
 .revbtn{display:flex;align-items:center;justify-content:center;gap:10px}
 .revcount{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:#d8463a;color:#fff;font-family:var(--ui);font-size:13px;font-weight:900;line-height:1}
 .revhint{text-align:center;font-family:var(--ui);font-size:12px;color:var(--muted);margin:8px 0 0}
@@ -1104,7 +1133,7 @@ function buildAlphabet(U){
      options:shuffle([{txt:'28',key:'28'},{txt:'26',key:'26'},{txt:'30',key:'30'}])}),
    mcq({prompt:'Combien de voyelles dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'0',explain:'En arabe, aucune lettre n’est une voyelle. Le son des voyelles vient de petits signes posés sur la lettre : les harakāt.',
      options:shuffle([{txt:'Aucune',key:'0'},{txt:'3',key:'3'},{txt:'6',key:'6'}])}),
-   mcq({prompt:'Grâce à quoi forme-t-on les voyelles ?',graded:true,answer:'h',explain:'Les harakāt sont les petits signes au-dessus ou en dessous de la lettre : fatḥa « a », kasra « i », ḍamma « ou ».',
+   mcq({prompt:'Grâce à quoi forme-t-on les voyelles ?',graded:true,answer:'h',explain:'Les harakāt sont les petits signes au-dessus ou en dessous de la lettre : fatha « a », kasra « i », dhamma « ou ».',
      options:shuffle([{txt:'Les harakats',key:'h'},{txt:'Des lettres spéciales',key:'l'},{txt:'Des accents',key:'a'}])}),
    mcq({prompt:'Combien de lettres de prolongation ?',graded:true,grid:'grid3',answer:'3',explain:'Il y a 3 lettres de prolongation, qui allongent le son : <span class="ar">ا</span>, <span class="ar">و</span>, <span class="ar">ي</span>.',
      options:shuffle([{txt:'3',key:'3'},{txt:'2',key:'2'},{txt:'4',key:'4'}])}),
@@ -1650,7 +1679,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 04/07 · Progrès : Succès en images + popup, parcours compact (X/7 unités · leçons), rang de constance en 7 stations arabes (50/30/20) + Ghufrān غفران (gel de série activé, 2/mois), page épurée';
+const BUILD='maj 04/07 · Cours revu : titres retirés, signes de lecture interactifs (pastilles), audio nom+son, exemple Fātiḥa par lettre, animation harakāt+prolongation par lettre, tachkīl + révélation arabe des termes ; grille des lettres sans défilement ; « disque »→« leçon »';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -2731,6 +2760,17 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
 /* ===== SON de la lettre (et non son nom) : joué en fin de tracé/démo. Prêt pour tes
    enregistrements lettre-<translit>-son.mp3 ; repli synthèse tant qu'ils n'existent pas. ===== */
 const LTRANS={'ا':'alif','ب':'ba','ت':'ta','ث':'tha','ج':'jim','ح':'hha','خ':'kha','د':'dal','ذ':'dhal','ر':'ra','ز':'zay','س':'sin','ش':'shin','ص':'sad','ض':'dad','ط':'tta','ظ':'dha','ع':'ayn','غ':'ghayn','ف':'fa','ق':'qaf','ك':'kaf','ل':'lam','م':'mim','ن':'nun','ه':'ha','و':'waw','ي':'ya'};
+function sayLetterName(L){
+  var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); return; }
+  try{
+    var a=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'), settled=false;
+    var fb=function(){ if(settled)return; settled=true; try{_speakSynth(tr);}catch(_){ } };
+    a.addEventListener('playing',function(){settled=true;},{once:true});
+    a.addEventListener('error',fb,{once:true});
+    var p=a.play(); if(p&&p.catch)p.catch(fb);
+    setTimeout(function(){ if(!settled&&a.paused) fb(); },1100);
+  }catch(e){ try{_speakSynth(tr);}catch(_){ } }
+}
 function sayLetterSound(L){
   var tr=LTRANS[letterKey(L)];
   if(!tr){ speak(L); return; }
@@ -3563,13 +3603,61 @@ function accCard(sub,U,inner){ const open=!!coursOpen[sub][U.no];
     '<div class="acc-b">'+inner+'</div></div>'; }
 function accToggle(sub,no){ coursOpen[sub][no]=!coursOpen[sub][no]; renderCours(sub); }
 function accAll(sub){ const nos=unlockedNos(); const allOpen=nos.length>0&&nos.every(n=>coursOpen[sub][n]); nos.forEach(n=>coursOpen[sub][n]=!allOpen); renderCours(sub); }
+// Cours : signes de lecture cliquables (touche → on entend) + révélation
+function playSyl(ar,el){
+  try{ if(el){ el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); setTimeout(function(){el.classList.remove('pulse');},460); } }catch(e){}
+  try{ speak(ar); }catch(e){}
+}
+function playLetterAnim(btn,L,c){
+  var st=btn.parentNode.querySelector('.la-stage'); if(!st)return; st.style.display='flex';
+  var W=st.querySelector('.la-word'),Bar=st.querySelector('.la-bar'),Ro=st.querySelector('.la-ro');
+  var V=[{h:'\u064E',m:'ا',vs:'a',vl:'â'},{h:'\u0650',m:'ي',vs:'i',vl:'î'},{h:'\u064F',m:'و',vs:'ou',vl:'û'}];
+  if(W._t)W._t.forEach(clearTimeout); W._t=[];
+  function T(fn,ms){W._t.push(setTimeout(fn,ms));}
+  function pop(){W.classList.remove('pop');void W.offsetWidth;W.classList.add('pop');}
+  function say(t){try{speak(t);}catch(e){}}
+  var t=0;
+  V.forEach(function(v){
+    var sh=L+v.h, lg=L+v.h+v.m;
+    T(function(){W.innerHTML=L;Bar.style.width='0';Ro.textContent='';},t);
+    T(function(){W.innerHTML=sh;pop();Bar.style.width='30px';Ro.textContent=c+v.vs;say(sh);},t+320);      // le signe se pose (bref)
+    T(function(){W.innerHTML='<span>'+sh+'</span><span class="la-l2 away">'+v.m+'</span>';setTimeout(function(){var e=W.querySelector('.la-l2');if(e)e.classList.remove('away');},60);},t+1150); // la madd glisse
+    T(function(){W.innerHTML=lg;pop();Bar.style.width='92px';Ro.textContent=c+v.vl;say(lg);},t+1800);      // soudure (long)
+    t+=2600;
+  });
+  T(function(){W.innerHTML=L;Bar.style.width='0';Ro.textContent='';},t);
+}
+function coursSignsHTML(){
+  var SIGNS=[
+    {t:'Les voyelles courtes ('+arReveal('ḥarakāt','حَرَكَات')+')', d:'Un petit signe donne un son bref.', c:[['مَ','a'],['مِ','i'],['مُ','ou']]},
+    {t:'Les prolongations ('+arReveal('madd','مَدّ')+')', d:'Une lettre (ا ي و) étire la voyelle, deux fois plus longue.', c:[['مَا','â'],['مِي','î'],['مُو','û']]},
+    {t:'Le '+arReveal('soukoun','سُكُون'), d:'La lettre sans voyelle : consonne seule.', c:[['مْ','m']]},
+    {t:'La '+arReveal('chedda','شَدَّة'), d:'La lettre est doublée : on insiste.', c:[['مّ','m·m']]},
+    {t:'Le '+arReveal('tanwīn','تَنْوِين'), d:'Un « n » à la fin (indéfini) : dhammatayn, kasratayn, fathatayn.', c:[['مٌ','oun'],['مٍ','in'],['مً','an']]},
+  ];
+  return '<div class="ccard"><div class="ctt"><h3>📖 '+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</h3></div>'+
+    SIGNS.map(function(g){
+      return '<div class="sgn-card"><div class="sgn-head">'+g.t+'</div>'+
+        '<div class="sgn-chips">'+g.c.map(function(x){
+          return '<button class="chip" onclick="playSyl(\''+x[0]+'\',this)"><span class="chip-ar">'+x[0]+'</span><span class="chip-ro">'+x[1]+'</span></button>';
+        }).join('')+'</div>'+
+        '<div class="sgn-desc">'+g.d+'</div></div>';
+    }).join('')+'</div>';
+}
+// A : un mot de la Fātiḥa contenant la lettre
+function fatihaWordFor(L){
+  var k=letterKey(L), FA=(SOURATES[0]&&SOURATES[0].verses)||[];
+  for(var v=0;v<FA.length;v++){ var ws=FA[v].split(' ');
+    for(var w=0;w<ws.length;w++){ var word=ws[w];
+      for(var c=0;c<word.length;c++){ if(letterKey(word[c])===k) return word; } } }
+  return '';
+}
 function renderCours(sub){
   sub=sub||'video';
   const tabs=[['video','🎬','Vidéos'],['resume','📖','Résumé'],['vocab','📚','Vocabulaire']];
   const unlocked=UNITS.map((U,i)=>i).filter(i=>unitUnlocked(i));
   let h='<h1 class="vh">Cours</h1><p class="vsub">Le contenu s\u2019ajoute à mesure que tu débloques les unités.</p>';
   h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderCours(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
-  h+='<div class="tablabel">'+(tabs.find(t=>t[0]===sub)||tabs[0])[2]+'</div>';
   if(!unlocked.length){ h+='<div class="cempty"><div class="ce-ic">🔒</div>Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
   const head=U=>'<div class="ctt"><div class="cno">'+toAr(U.no)+'</div><h3>Unité</h3><div class="clet">'+U.letters.join(' ')+'</div></div>';
 
@@ -3580,9 +3668,18 @@ function renderCours(sub){
         :'<div class="vsoon"><div class="vic">🎬</div>Vidéo bientôt disponible</div>')+'</div>'; }).join('');
   }
   else if(sub==='resume'){
-    h+=accAllBtn('resume')+'<div class="ccard"><div class="ctt"><h3>📖 Les signes de lecture</h3></div><div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;font-family:var(--ui)"><div style="display:flex;gap:14px;align-items:center;padding:2px 0"><div style="font-family:var(--ar);font-size:23px;color:var(--gold);min-width:104px;text-align:center;line-height:1.5;direction:rtl">مَ مِ مُ</div><div><div style="font-weight:800;color:var(--cream);margin-bottom:2px">Les voyelles courtes (ḥarakāt)</div><div style="color:var(--muted);font-size:13px;line-height:1.45">Un petit signe donne un son bref : fatḥa « a », kasra « i », ḍamma « ou ».</div></div></div><div style="display:flex;gap:14px;align-items:center;padding:2px 0"><div style="font-family:var(--ar);font-size:23px;color:var(--gold);min-width:104px;text-align:center;line-height:1.5;direction:rtl">مَا مِي مُو</div><div><div style="font-weight:800;color:var(--cream);margin-bottom:2px">Les prolongations</div><div style="color:var(--muted);font-size:13px;line-height:1.45">Une lettre (ا ي و) étire la voyelle : « â », « î », « û » — deux fois plus longue.</div></div></div><div style="display:flex;gap:14px;align-items:center;padding:2px 0"><div style="font-family:var(--ar);font-size:23px;color:var(--gold);min-width:104px;text-align:center;line-height:1.5;direction:rtl">مْ</div><div><div style="font-weight:800;color:var(--cream);margin-bottom:2px">Le soukoun</div><div style="color:var(--muted);font-size:13px;line-height:1.45">La lettre n’a pas de voyelle : on prononce la consonne seule, « m ».</div></div></div><div style="display:flex;gap:14px;align-items:center;padding:2px 0"><div style="font-family:var(--ar);font-size:23px;color:var(--gold);min-width:104px;text-align:center;line-height:1.5;direction:rtl">مّ</div><div><div style="font-weight:800;color:var(--cream);margin-bottom:2px">La chedda (shadda)</div><div style="color:var(--muted);font-size:13px;line-height:1.45">La lettre est doublée : on insiste sur le son, « m·m ».</div></div></div><div style="display:flex;gap:14px;align-items:center;padding:2px 0"><div style="font-family:var(--ar);font-size:23px;color:var(--gold);min-width:104px;text-align:center;line-height:1.5;direction:rtl">مٌ مٍ مً</div><div><div style="font-weight:800;color:var(--cream);margin-bottom:2px">Le tanwīn (nounation)</div><div style="color:var(--muted);font-size:13px;line-height:1.45">Un « n » s’ajoute à la fin (indéfini) : ḍammatān « oun » مٌ, kasratān « in » مٍ, fatḥatān « an » مً.</div></div></div></div></div>'+unlocked.map(i=>{ const U=UNITS[i];
-      const rows=U.letters.map(L=>{ const d=U.alpha[L]; return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx"><div class="ln">'+d.n+'</div><div class="ls">Son : '+d.son+'</div><div class="lm">'+d.mn+'</div></div></div>'; }).join('');
-      return accCard('resume',U,rows); }).join('');
+    h+=accAllBtn('resume')+coursSignsHTML();
+    h+=unlocked.map(function(i){ const U=UNITS[i];
+      const rows=U.letters.map(function(L){ const d=U.alpha[L]; var ex=fatihaWordFor(L);
+        return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
+          '<div class="ln">'+d.n+' <button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">🔊</button></div>'+
+          '<div class="ls">'+d.son+' <button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button></div>'+
+          (ex?'<div class="lex">📖 <span class="lex-w" onclick="speak(\''+ex+'\')">'+ex+'</span> <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button></div>':'')+
+          '<div class="lanim"><button class="la-btn" onclick="playLetterAnim(this,\''+L+'\',\''+(U.lat[L]||'')+'\')">▶ voir la prolongation</button><div class="la-stage" style="display:none"><div class="la-word">'+L+'</div><div class="la-track"><div class="la-bar"></div></div><div class="la-ro"></div></div></div>'+
+          '</div></div>';
+      }).join('');
+      return accCard('resume',U,rows);
+    }).join('');
   }
   else if(sub==='vocab'){
     h+=accAllBtn('vocab')+unlocked.map(i=>{ const U=UNITS[i];
