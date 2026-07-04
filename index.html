@@ -571,6 +571,19 @@
 .grow .gtx .gtr{font-family:var(--ui);font-weight:800;color:var(--cream);font-size:14px}
 .grow .gtx .gfr{font-family:var(--ui);color:var(--muted);font-size:12px}
 .grow .gspk{margin-left:auto;background:none;border:none;cursor:pointer;font-size:20px;opacity:.85;flex:0 0 auto}
+/* Liste de vocabulaire façon Duolingo : 🔊 · mot + traduction · point « à réviser » */
+.wlist{display:flex;flex-direction:column;margin-top:16px}
+.wrow{display:flex;align-items:center;gap:14px;padding:11px 2px;border-top:1px solid var(--line)}
+.wrow:first-child{border-top:none}
+.wspk{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:rgba(220,144,46,.13);color:var(--gold);font-size:19px;cursor:pointer;display:grid;place-items:center}
+.wspk:active{transform:scale(.92)}
+.wtx{flex:1;min-width:0}
+.wtx .ww{font-family:var(--ar);font-size:24px;color:var(--gold);line-height:1.25}
+.wtx .wfr{font-family:var(--ui);font-size:13px;color:var(--muted);margin-top:1px}
+.wdot{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:#d8463a}
+.revbtn{display:flex;align-items:center;justify-content:center;gap:10px}
+.revcount{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:#d8463a;color:#fff;font-family:var(--ui);font-size:13px;font-weight:900;line-height:1}
+.revhint{text-align:center;font-family:var(--ui);font-size:12px;color:var(--muted);margin:8px 0 0}
 .lrow{display:flex;align-items:flex-start;gap:14px;padding:12px 2px;border-top:1px dashed var(--line)}
 .lrow:first-child{border-top:none}
 .lrow .lbig{font-family:var(--ar);font-size:46px;color:var(--gold);line-height:1;min-width:52px;text-align:center;flex:0 0 auto}
@@ -1511,7 +1524,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 04/07 · accueil Duolingo : bandeau flottant unique + enluminure arc-en-ciel (7 unités), disque courant doré, menu sourates (42, « à venir »), nav icônes centrées, tuto accueil, SEO';
+const BUILD='maj 04/07 · Réviser>vocabulaire façon Duolingo : liste mots (emoji · mot · traduction · 🔊) + répétition espacée (disque = mots de la session, plafond 15), titres d’onglets retirés';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -3458,12 +3471,20 @@ function frOptions(pool,w){
   const others=shuffle(pool.filter(x=>x.fr!==w.fr)).slice(0,2);
   return shuffle([{txt:w.fr,key:w.fr},...others.map(x=>({txt:x.fr,key:x.fr}))]);
 }
+// ===== Répétition espacée : sélection des mots à réviser =====
+const REVIEW_CAP=15; // plafond de mots par session (choix Myriam) ; au-delà, sessions successives
+function allReviewWords(){ const p=[]; UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx))(U.words||[]).forEach(w=>p.push(w)); }); return p; }
+function dueReviewWords(){ return allReviewWords().filter(w=>S.err&&S.err[w.w]>0).sort((a,b)=>(S.err[b.w]||0)-(S.err[a.w]||0)); }
+// mots présentés dans la PROCHAINE session (= le chiffre du disque) : les mots dus (les plus ratés d'abord), plafonnés ;
+// si aucun mot n'est dû, entraînement général sur un lot au hasard.
+function reviewSessionWords(){ const due=dueReviewWords(); return (due.length?due:shuffle(allReviewWords())).slice(0,REVIEW_CAP); }
 function startReview(){
-  const pool=[]; UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx))(U.words||[]).forEach(w=>pool.push(w)); });
+  const pool=allReviewWords();
   if(!pool.length)return;
-  let bag=weightedShuffle(pool.slice(),w=>w.w);
+  let bag=shuffle(reviewSessionWords());     // exactement les mots comptés sur le disque
+  if(!bag.length)return;
   const qs=[]; let turn=0;
-  while(bag.length && qs.length<13){
+  while(bag.length){
     const mod=turn%3;
     if(mod===0 && bag.length>=3){            // 1) association de mots
       const n=Math.min(6,bag.length);
@@ -3636,12 +3657,10 @@ function renderReviser(sub){
   const tabs=[['quran','🕌','Le Qorān'],['lettres','✏️','Les lettres'],['vocab','📚','Le vocabulaire'],['grammaire','✍️','La grammaire']];
   const SR=SOURATES[curSourate]||SOURATES[0];
   const set=knownLetterSet(), pc=fatihaPct();
-  let h='<h1 class="vh">Réviser</h1><p class="vsub">La répétition fait la maîtrise — et recharge tes cœurs.</p>';
-  h+='<div class="heartline">❤️ Terminer une révision recharge tes 7 cœurs</div>';
+  let h='<h1 class="vh">Réviser</h1>';
   h+='<div class="icontabs">'+tabs.map(function(t){
     return '<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderReviser(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>';
   }).join('')+'</div>';
-  h+='<div class="tablabel">'+(tabs.find(function(t){return t[0]===sub;})||tabs[0])[2]+'</div>';
 
   if(sub==='quran'){
     const ord2=SR.verses.map(function(v,i){return {i:i,n:v.split(' ').filter(function(w){return wordReadable(w,set);}).length};}).filter(function(x){return x.n>=2;});
@@ -3694,9 +3713,22 @@ function renderReviser(sub){
     h+='<div class="ccard">'+letterGridHTML()+'</div>';
   }
   else if(sub==='vocab'){
+    const vwords=allReviewWords();
+    // répétition espacée : un mot est « à réviser » s'il a déjà été raté (S.err > 0)
+    const due=function(w){return !!(S.err&&S.err[w.w]>0);};
+    const nDue=vwords.filter(due).length;
+    const nSession=reviewSessionWords().length;   // = mots réellement présentés dans la prochaine session (= le disque)
+    const ordered=vwords.slice().sort(function(a,b){return (due(b)?1:0)-(due(a)?1:0);});
+    const vlist=ordered.map(function(w){
+      return '<div class="wrow">'+
+        '<button class="wspk" onclick="speak(\''+w.w+'\')" aria-label="Écouter">'+(w.e||'🔊')+'</button>'+
+        '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
+        (due(w)?'<span class="wdot" title="à réviser"></span>':'')+
+      '</div>';
+    }).join('');
     h+='<div class="ccard">'+
-      '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0 0 12px">Associer, traduire, écrire — tes mots ratés reviennent en priorité. <b style="color:var(--cream)">'+unitVocabCount()+' mots</b> débloqués, toutes unités confondues.</p>'+
-      '<button class="cbtn" onclick="startReview()">▶︎ Lancer la révision du vocabulaire</button></div>';
+      '<button class="cbtn revbtn" onclick="startReview()">Réviser<span class="revcount">'+nSession+'</span></button>'+
+      '<div class="wlist">'+vlist+'</div></div>';
   }
   else{
     h+='<div class="ccard" style="opacity:.7;text-align:center">'+
