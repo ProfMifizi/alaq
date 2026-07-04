@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ALAQ — Apprendre à lire avec le Qor'an</title>
+<title>ALAQ · Apprendre à lire le Coran (arabe) — méthode gratuite, du son à la lecture du Qorān</title>
+<meta name="description" content="Apprends à lire l’arabe et le Coran gratuitement, lettre par lettre. ALAQ : une méthode douce et progressive (alphabet, harakāt, lecture de la Fātiḥa) inspirée du Qorān, à ton rythme.">
+<meta property="og:title" content="ALAQ — Apprendre à lire le Coran">
+<meta property="og:description" content="Une méthode gratuite et progressive pour lire l’arabe et le Qorān, du son à la lecture, à ton rythme.">
+<meta property="og:type" content="website">
 <meta name="theme-color" content="#252120">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -59,22 +63,53 @@
   .hero{text-align:center;padding:26px 14px 8px}
   .hero img{width:120px;height:auto;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.45);border:1px solid var(--line)}
   .hero h1{font-size:15px;color:var(--muted);font-weight:700;margin-top:12px}
-  .unit-head{display:flex;align-items:center;gap:12px;margin:26px 4px 6px;background:var(--panel);
-    border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-  .unit-head .u-no{font-family:var(--ar);font-size:26px;color:var(--gold);line-height:1}
-  .unit-head h2{font-size:17px;font-weight:900}
-  .unit-head p{font-size:13px;color:var(--muted);font-weight:600}
-  .path{display:flex;flex-direction:column;align-items:center;gap:26px;margin-top:52px;position:relative}
+  .unit-head{position:sticky;top:calc(54px + env(safe-area-inset-top,0px));z-index:20;--accent:var(--gold2);display:flex;align-items:center;gap:10px;
+    margin:12px 0 12px;background:linear-gradient(135deg,#6f4b0f,#9a6813 55%,#c07e12);border:1px solid var(--gold2);
+    border-radius:16px;padding:11px 14px;overflow:hidden;
+    box-shadow:0 7px 20px rgba(0,0,0,.42),0 0 0 2px var(--accent),0 3px 10px -7px var(--accent)}
+  .unit-head::after{content:'';position:absolute;top:0;left:-70%;width:45%;height:100%;pointer-events:none;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-18deg);animation:uhshine 5s ease-in-out infinite}
+  @keyframes uhshine{0%,55%{left:-70%}100%{left:140%}}
+  .unit-head .uh-main{min-width:0;flex:1}
+  .unit-head .uh-top{font-size:10.5px;font-weight:900;letter-spacing:.09em;color:#2a1e06;opacity:.85}
+  .unit-head h2{font-size:14px;font-weight:900;color:#241a06;line-height:1.28;margin:1px 0 0}
+  .unit-head .uh-let{font-family:var(--ar);font-size:18px}
+  .unit-head .uh-ar{font-family:var(--quran);font-size:16px}
+  .unit-head .uh-sub{font-size:11px;color:#3a2a08;opacity:.82;margin-top:2px}
+  .unit-head .uh-burger{margin-left:6px;flex:0 0 auto;background:rgba(0,0,0,.2);border:none;color:#241a06;width:40px;height:40px;border-radius:12px;font-size:19px;font-weight:900;cursor:pointer}
+  .unit-head .uh-burger:active{transform:scale(.94)}
+  /* Séparateur fin et grisé entre chaque unité (façon Duolingo) */
+  .unit-sec{position:relative;--accent:var(--gold2)}
+  .unit-sep{display:flex;align-items:center;gap:12px;margin:30px 2px 4px;color:var(--muted);
+    font-size:10.5px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+  .unit-sep::before,.unit-sep::after{content:'';flex:1;height:1px;background:var(--accent,var(--line));opacity:.6}
+  .unit-sep .us-t{white-space:nowrap;opacity:.8}
+  .unit-sep .us-let{font-family:var(--ar);font-size:15px;text-transform:none;color:var(--gold2);letter-spacing:0}
+  .path{display:flex;flex-direction:column;align-items:center;gap:26px;margin-top:14px;position:relative}
+  .unit-sec[data-u="0"] .path{margin-top:36px}
   .node{position:relative;transition:transform .12s}
   .node:active{transform:translateY(2px)}
   .bwrap{position:relative;width:74px;height:74px;margin:0 auto}
   .bubble{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;border:none;font-weight:900}
   .bubble .bi{font-size:30px;line-height:1;font-family:var(--ar),'Nunito',sans-serif}
   .done .bubble{background:var(--gold);color:var(--bg);box-shadow:0 6px 0 var(--gold-d)}
-  .current .bubble{background:var(--gold);color:var(--bg);box-shadow:0 6px 0 var(--gold-d),0 0 0 6px rgba(220,144,46,.22)}
+  /* Disque « courant » : pièce d'or calligraphique — dégradé bombé + reflet balayé + léger flottement */
+  .current .bubble{color:var(--bg);position:relative;overflow:hidden;
+    background:radial-gradient(circle at 34% 26%,#f7cd74,var(--gold) 50%,#a86a12);
+    box-shadow:0 6px 0 var(--gold-d),0 0 0 5px color-mix(in srgb,var(--accent,var(--gold2)) 42%,transparent)}
+  .current .bubble::after{content:'';position:absolute;top:-40%;left:-60%;width:46%;height:180%;pointer-events:none;
+    background:linear-gradient(100deg,transparent,rgba(255,248,232,.62),transparent);transform:skewX(-18deg);
+    animation:coinShine 4.8s ease-in-out infinite}
+  @keyframes coinShine{0%,62%{left:-60%}100%{left:165%}}
   .locked .bubble{background:var(--panel2);color:var(--lock);box-shadow:0 6px 0 #2c2521;cursor:not-allowed}
-  .node .ring{position:absolute;inset:-8px;border-radius:50%;border:3px dashed transparent;pointer-events:none}
-  .current .ring{border-color:var(--gold2);animation:spin 9s linear infinite}
+  .node .ring{position:absolute;inset:-8px;border-radius:50%;pointer-events:none}
+  .current .ring{inset:-9px;
+    background:conic-gradient(from 0deg,transparent 0deg,var(--accent,#f4d089) 55deg,transparent 120deg,transparent 200deg,#f4d089 250deg,transparent 320deg);
+    -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 4px));
+            mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 4px));
+    animation:spin 6s linear infinite}
+  .current .bwrap{animation:bob 2.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
   @keyframes spin{to{transform:rotate(360deg)}}
   .start-flag{position:absolute;top:-40px;left:50%;transform:translateX(-50%);background:#fff;color:#3b342f;
     font-weight:900;font-size:12px;padding:5px 11px;border-radius:10px;box-shadow:0 4px 0 #d8ccb8;
@@ -493,6 +528,26 @@
 .botnav .bn .bi{font-size:22px;line-height:1;opacity:.8}
 .botnav .bn.active{color:var(--gold)}
 .botnav .bn.active .bi{opacity:1}
+.botnav .bn{flex-direction:row;justify-content:center;gap:0;font-size:0;padding:8px 2px}
+.botnav .bn .bi{font-size:30px;opacity:.5;padding:6px 16px;border-radius:14px;transition:opacity .15s,background .15s}
+.botnav .bn.active .bi{opacity:1;background:rgba(220,144,46,.18)}
+/* menu des sourates (burger) */
+#surahMenu .sm-box{width:min(420px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}
+.sm-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#2a2422;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px;cursor:pointer;color:var(--cream)}
+.sm-item.active{border-color:var(--gold2);background:rgba(232,169,79,.12)}
+.sm-item:disabled{opacity:.5;cursor:not-allowed}
+.sm-item .sm-ar{font-family:var(--quran);font-size:24px;color:var(--gold)}
+.sm-item .sm-tx{flex:1;display:flex;flex-direction:column;min-width:0}
+.sm-item .sm-tx b{font-weight:900}.sm-item .sm-tx small{color:var(--muted);font-size:12px}
+.sm-item .sm-badge{font-size:16px}
+#surahMenu .sm-box{position:relative}
+.sm-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:10px;background:#2a2422;border:1px solid var(--line);color:var(--cream);font-size:16px;font-weight:900;cursor:pointer;z-index:2}
+.sm-close:active{transform:scale(.94)}
+.sm-list{max-height:66vh;overflow-y:auto;margin-top:26px;padding-right:2px}
+.sm-list::-webkit-scrollbar{width:6px}
+.sm-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+.sm-soon{font-size:11px;font-weight:800;color:var(--muted);background:#231e1c;border:1px solid var(--line);border-radius:8px;padding:3px 9px;white-space:nowrap}
+.sm-item .sm-no{font-size:11px;font-weight:800;color:var(--muted);min-width:26px}
 .view{max-width:520px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top,0px)) 16px 120px;min-height:100vh;min-height:100dvh}
 .view h1.vh{font-family:var(--ui);font-size:22px;font-weight:900;color:var(--cream);margin:6px 0 4px}
 .view .vsub{color:var(--muted);font-size:13px;font-family:var(--ui);margin:0 0 18px}
@@ -637,10 +692,10 @@
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
-  <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi">🏠</span><span>Apprendre</span></button>
-  <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi">📕</span><span>Cours</span></button>
-  <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi">🕋</span><span>Réviser</span></button>
-  <button class="bn" id="bn-prog" onclick="showTab('prog')"><span class="bi">📊</span><span>Progrès</span></button>
+  <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi">🏠</span></button>
+  <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi">📕</span></button>
+  <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi">🕋</span></button>
+  <button class="bn" id="bn-prog" onclick="showTab('prog')"><span class="bi">📊</span></button>
 </nav>
 
 <script>
@@ -855,6 +910,57 @@ const SOURATES=[
     ['guide-nous','sur le chemin','droit'],
     ['le chemin','de ceux que','Tu as comblés de bienfaits','envers eux','non pas','ceux qui ont encouru la colère','envers eux','ni','les égarés'],
    ] },
+];
+
+// Enluminure arc-en-ciel : 7 unites = 7 versets d'Al-Fatiha = les 7 couleurs de la lumiere blanche.
+// Chaque unite recoit une couleur (contour du bandeau + halo du disque courant + trait du separateur).
+const UNIT_ACCENTS=['#d8463a','#e07a1e','#ecc531','#35a468','#2f74d0','#5350c8','#8a4fc4'];
+function unitAccent(u){return UNIT_ACCENTS[((u%UNIT_ACCENTS.length)+UNIT_ACCENTS.length)%UNIT_ACCENTS.length];}
+
+// Programme des sourates (ordre pedagogique, cf. CLAUDE.md) : seules celles construites ont un "idx".
+const SOURATE_PLAN=[
+ {no:1,  nom:'Al-Fatiha',    ar:'الفاتحة', idx:0},
+ {no:112,nom:'Al-Ikhlas',    ar:'الإخلاص'},
+ {no:113,nom:'Al-Falaq',     ar:'الفلق'},
+ {no:114,nom:'An-Nas',       ar:'الناس'},
+ {no:111,nom:'Al-Masad',     ar:'المسد'},
+ {no:110,nom:'An-Nasr',      ar:'النصر'},
+ {no:109,nom:'Al-Kafirun',   ar:'الكافرون'},
+ {no:108,nom:'Al-Kawthar',   ar:'الكوثر'},
+ {no:107,nom:'Al-Maʻun', ar:'الماعون'},
+ {no:106,nom:'Quraysh',      ar:'قريش'},
+ {no:105,nom:'Al-Fil',       ar:'الفيل'},
+ {no:104,nom:'Al-Humaza',    ar:'الهمزة'},
+ {no:103,nom:'Al-ʻAsr',  ar:'العصر'},
+ {no:102,nom:'At-Takathur',  ar:'التكاثر'},
+ {no:101,nom:'Al-Qariʻa', ar:'القارعة'},
+ {no:100,nom:'Al-ʻAdiyat', ar:'العاديات'},
+ {no:99, nom:'Az-Zalzala',   ar:'الزلزلة'},
+ {no:98, nom:'Al-Bayyina',   ar:'البينة'},
+ {no:97, nom:'Al-Qadr',      ar:'القدر'},
+ {no:96, nom:'Al-ʻAlaq',  ar:'العلق'},
+ {no:95, nom:'At-Tin',       ar:'التين'},
+ {no:94, nom:'Ash-Sharh',    ar:'الشرح'},
+ {no:93, nom:'Ad-Duha',      ar:'الضحى'},
+ {no:92, nom:'Al-Layl',      ar:'الليل'},
+ {no:91, nom:'Ash-Shams',    ar:'الشمس'},
+ {no:90, nom:'Al-Balad',     ar:'البلد'},
+ {no:89, nom:'Al-Fajr',      ar:'الفجر'},
+ {no:88, nom:'Al-Ghashiya',  ar:'الغاشية'},
+ {no:87, nom:'Al-Aʻla',   ar:'الأعلى'},
+ {no:86, nom:'At-Tariq',     ar:'الطارق'},
+ {no:85, nom:'Al-Buruj',     ar:'البروج'},
+ {no:84, nom:'Al-Inshiqaq',  ar:'الانشقاق'},
+ {no:83, nom:'Al-Mutaffifin', ar:'المطففين'},
+ {no:82, nom:'Al-Infitar',   ar:'الانفطار'},
+ {no:81, nom:'At-Takwir',    ar:'التكوير'},
+ {no:80, nom:'ʻAbasa',    ar:'عبس'},
+ {no:79, nom:'An-Naziʻat', ar:'النازعات'},
+ {no:78, nom:'An-Nabaʾ',  ar:'النبأ'},
+ {no:67, nom:'Al-Mulk',      ar:'الملك'},
+ {no:55, nom:'Ar-Rahman',    ar:'الرحمن'},
+ {no:18, nom:'Al-Kahf',      ar:'الكهف'},
+ {no:36, nom:'Ya-Sin',       ar:'يس'},
 ];
 
 /* ================= GÉNÉRATEURS ================= */
@@ -1260,6 +1366,7 @@ if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répé
 if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revues (halo « nouveau »)
 if(typeof S.bigNext==='undefined')S.bigNext=0;          // prochaine révision = +3 (déblocage) ?
 if(typeof S.tutLetters==='undefined')S.tutLetters=0;    // tuto grille des lettres déjà vu ?
+if(typeof S.tutHome==='undefined')S.tutHome=0;          // tuto page d’accueil déjà vu ?
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
@@ -1404,69 +1511,103 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 03/07e · cœurs +3/+1 · repli audio via romanisation propre (fini le charabia)';
+const BUILD='maj 04/07 · accueil Duolingo : bandeau flottant unique + enluminure arc-en-ciel (7 unités), disque courant doré, menu sourates (42, « à venir »), nav icônes centrées, tuto accueil, SEO';
 function renderHome(){
   const h=document.getElementById('home');
-  h.innerHTML='<div class="hero"><img src="'+LOGO+'" alt="Alaq">'+
-   '<h1>Apprendre \u00e0 lire avec le Qor\u2019an</h1>'+
-   '<div style="font-size:11px;color:var(--muted);opacity:.5;margin-top:4px">'+BUILD+'</div></div>';
-  const SR=SOURATES[0];
+  h.innerHTML='';
+  const SR=SOURATES[(typeof curSourate!=='undefined'?curSourate:0)]||SOURATES[0];
+  const vN=(SR.verses?SR.verses.length:7);
+  setTimeout(maybeShowHomeTut,300);
+  // ---- Bandeau UNIQUE façon Duolingo : un seul encadré collé en haut,
+  //      dont le contenu change au défilement quand un séparateur d'unité passe dessous.
   h.insertAdjacentHTML('beforeend',
-    '<div class="unit-head" style="background:linear-gradient(135deg,#3b2f20,var(--panel));border-color:var(--gold-d);margin-top:18px">'+
-    '<div class="u-no">🕋</div><div>'+
-    '<h2>Sourate '+SR.nom+' <span style="font-family:var(--quran);color:var(--gold);font-size:22px">'+SR.ar+'</span></h2>'+
-    '<p>'+SR.sub+'</p></div></div>');
+    '<div class="unit-head" id="unitBanner" data-u="0">'+
+      '<div class="uh-main">'+
+        '<div class="uh-top" id="uhTop"></div>'+
+        '<h2 id="uhTitle"></h2>'+
+      '</div>'+
+      '<button class="uh-burger" onclick="openSurahMenu()" aria-label="Changer de sourate">☰</button>'+
+    '</div>');
+  const BANNERS=[]; window._homeBanners=BANNERS;
   UNITS.forEach((U,u)=>{
     // VALIDATION d'une unité = terminer son DERNIER disque, le « Bilan ».
     // L'unité suivante se débloque dès que le « Bilan » de la précédente est terminé.
     // « Avancer ici » (à la fin de CHAQUE unité) = RACCOURCI test-out : réussir ce test (≤ 2 erreurs) valide tout jusqu'à cette unité INCLUSE.
     const prevValidated = U.no===1 || unitValidated(u-1);
     const playable = !!U.ready && prevValidated;
-    const nDisc = discsFor(u).length;
-    let sub;
-    if(!U.ready)           sub = 'Les '+nDisc+' disques \u00b7 bient\u00f4t disponible';
-    else if(prevValidated) sub = U.sub || ('Les '+nDisc+' disques');
-    else                   sub = (U.sub || ('Les '+nDisc+' disques'))+' \u00b7 \uD83D\uDD12 r\u00e9ussis le test de l\u2019unit\u00e9 '+toAr(U.no-1)+' pour d\u00e9bloquer';
-    h.insertAdjacentHTML('beforeend',
-      '<div class="unit-head"><div class="u-no">'+toAr(U.no)+'</div><div>'+
-      '<h2>Unit\u00e9 '+U.letters.join(' ')+'</h2>'+
-      '<p>'+sub+'</p></div></div>');
+    const lettersAr=U.letters.join(' ');
+    BANNERS.push({
+      top:'CHAPITRE '+toAr(SR.no||1)+' \u00b7 UNIT\u00c9 '+toAr(U.no),
+      title:'Les lettres <span class="uh-let">'+lettersAr+'</span> \u2014 sourate '+SR.nom+' <span class="uh-ar">'+SR.ar+'</span> \u00b7 '+vN+' versets'
+    });
+    const sec=document.createElement('div');sec.className='unit-sec';sec.dataset.u=u;sec.style.setProperty('--accent',unitAccent(u));
+    // S\u00e9parateur fin et gris\u00e9 avant chaque unit\u00e9 (sauf la 1re, remplac\u00e9e par le bandeau).
+    if(u>0){
+      sec.insertAdjacentHTML('beforeend',
+        '<div class="unit-sep"><span class="us-t">UNIT\u00c9 '+toAr(U.no)+' \u00b7 Les lettres <span class="us-let">'+lettersAr+'</span></span></div>');
+    }
     const path=document.createElement('div');path.className='path';
-    if(u>0)path.style.marginTop='24px';
-    discsFor(u).forEach((d,i)=>{
+    const discs=discsFor(u);
+    // Un seul disque « courant » par unité : le premier débloqué non terminé (porte l'anneau doré).
+    let frontier=-1;
+    for(let k=0;k<discs.length;k++){ if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)]){frontier=k;break;} }
+    discs.forEach((d,i)=>{
       const node=document.createElement('div');
       node.style.transform='translateX('+OFFS[i%OFFS.length]+'px)';
       if(playable){
         const done=!!S.done[dkey(u,i)];
         const unlocked=i===0||!!S.done[dkey(u,i-1)];
-        const current=unlocked&&!done;
+        const current=(i===frontier);
         node.className='node '+(done?'done':current?'current':'locked');
         node.innerHTML='<div class="bwrap"><div class="ring"></div>'+
-          ''+
-          '<button class="bubble" '+(unlocked?'':'disabled')+'>'+
-            '<span class="bi">'+(unlocked?d.icon:'🔒')+'</span>'+
+          '<button class="bubble" '+(unlocked?'':'disabled')+' aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
+            '<span class="bi"'+(unlocked?'':' style="opacity:.4;filter:grayscale(1)"')+'>'+d.icon+'</span>'+
             (done?'<span class="check">\u2713</span>':'')+
-          '</button></div>'+
-          '<div class="cap">'+discLabel(d,U)+'</div>';
+          '</button></div>';
         if(unlocked)node.querySelector('.bubble').onclick=()=>startDisque(u,i);
       } else {
         node.className='node locked';
-        node.innerHTML='<div class="bwrap"><button class="bubble" disabled>'+
-          '<span class="bi" style="opacity:.45">'+d.icon+'</span></button></div>'+
-          '<div class="cap">'+discLabel(d,U)+'</div>';
+        node.innerHTML='<div class="bwrap"><button class="bubble" disabled aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
+          '<span class="bi" style="opacity:.4;filter:grayscale(1)">'+d.icon+'</span></button></div>';
       }
       path.appendChild(node);
     });
-    h.appendChild(path);
+    sec.appendChild(path);
     // « Avancer ici » est proposé en fin de CHAQUE unité prête (toujours visible).
-    // Le réussir (≤ 2 erreurs) valide tout JUSQU'À cette unité incluse → on passe à la suite. (Le « Bilan » reste la validation normale.)
     if(U.ready){
-      h.insertAdjacentHTML('beforeend',
+      sec.insertAdjacentHTML('beforeend',
         '<div style="text-align:center;margin:14px 0 2px">'+
         '<button onclick="startExam('+u+')" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);'+
         'padding:9px 18px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer">\u26a1 Avancer ici\u00a0?</button></div>');
     }
+    h.appendChild(sec);
   });
+  setBanner(0);
+  if(window._homeScroll)window.removeEventListener('scroll',window._homeScroll);
+  window._homeScroll=onHomeScroll;
+  window.addEventListener('scroll',onHomeScroll,{passive:true});
+  requestAnimationFrame(onHomeScroll);
+}
+// Remplit le bandeau du haut avec le titre de l'unite u (sans re-render inutile).
+function setBanner(u){
+  const B=window._homeBanners&&window._homeBanners[u];if(!B)return;
+  const bn=document.getElementById('unitBanner');if(!bn)return;
+  if(bn.dataset.u===String(u)&&bn._filled)return;
+  bn.dataset.u=u;bn._filled=1;bn.style.setProperty('--accent',unitAccent(u));
+  document.getElementById('uhTop').innerHTML=B.top;
+  document.getElementById('uhTitle').innerHTML=B.title;
+}
+// Au defilement : le bandeau affiche la derniere unite dont le separateur est passe sous lui.
+function onHomeScroll(){
+  const home=document.getElementById('home');
+  if(!home||home.style.display==='none')return;
+  const bn=document.getElementById('unitBanner');if(!bn)return;
+  const bBottom=bn.getBoundingClientRect().bottom;
+  let active=0;
+  home.querySelectorAll('.unit-sec').forEach(sec=>{
+    if(sec.getBoundingClientRect().top<=bBottom+6)active=+sec.dataset.u;
+  });
+  setBanner(active);
 }
 
 /* ================= JOUEUR ================= */
@@ -2474,22 +2615,22 @@ function startSelectedLetters(){
   if(!steps.length){ toast('Choisis au moins une lettre débloquée 🌱'); return; }
   save(); QCTX=null; launchQuranReview(steps);
 }
-function letterTut(){
-  var steps=[
+function letterTut(customSteps){
+  var steps=(customSteps||[
     {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
     {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées ✨',tx:'Celles-ci sont prêtes ! Touche-les pour les choisir.<br>✨ tout juste débloquée<br>🔸 à revoir'},
-    {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Une lettre choisie devient doré foncé, avec un ✓. Tu peux en prendre plusieurs d’un coup.'},
+    {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Touche une lettre dorée : elle passe en JAUNE FONCÉ, avec un ✓. Tu peux en prendre plusieurs.',enter:function(){var a=document.querySelectorAll('.lg-cell.avail');var c=a[Math.min(3,a.length-1)]||a[0];if(c&&!c.querySelector('.ck')){c.classList.remove('avail');c.classList.add('sel','coachdemo');c.insertAdjacentHTML('afterbegin','<span class="ck">✓</span>');}},leave:function(){var c=document.querySelector('.lg-cell.coachdemo');if(c){c.classList.remove('sel','coachdemo');c.classList.add('avail');var k=c.querySelector('.ck');if(k)k.remove();}}},
     {t:function(){return document.querySelector('.lg-rev');},ti:'On révise ! 🌙',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
-  ].filter(function(x){return x.t();});
+  ]).filter(function(x){return x.t();});
   if(!steps.length)return;
   var ov=document.getElementById('letterTut');
   if(!ov){ ov=document.createElement('div');ov.id='letterTut';
     ov.innerHTML='<div id="ltHole"></div><div id="ltBubble"><div class="lt-arrow" id="ltArrow"></div><div class="lt-t" id="ltTitle"></div><div class="lt-x" id="ltText"></div><div class="lt-row"><span class="lt-step" id="ltStep"></span><span class="lt-btns"><button class="lt-skip" id="ltSkip">Passer</button><button class="lt-next" id="ltNext"></button></span></div></div>';
     document.body.appendChild(ov);
-    ov.querySelector('#ltSkip').onclick=function(){ov.style.display='none';};
-    ov.querySelector('#ltNext').onclick=function(){ if(ov._si>=ov._steps.length-1){ov.style.display='none';return;} ov._si++; ov._place(); };
+    ov.querySelector('#ltSkip').onclick=function(){var c=ov._steps&&ov._steps[ov._si];if(c&&c.leave)try{c.leave();}catch(e){}ov.style.display='none';};
+    ov.querySelector('#ltNext').onclick=function(){var c=ov._steps[ov._si];if(c&&c.leave)try{c.leave();}catch(e){}if(ov._si>=ov._steps.length-1){ov.style.display='none';return;}ov._si++;var n=ov._steps[ov._si];if(n&&n.enter)try{n.enter();}catch(e){}ov._place();};
   }
-  ov._steps=steps;ov._si=0;
+  ov._steps=steps;ov._si=0;if(steps[0]&&steps[0].enter)try{steps[0].enter();}catch(e){}
   ov._place=function(){
     var st=ov._steps[ov._si], el=st.t(); if(!el){ov.style.display='none';return;}
     try{el.scrollIntoView({block:'center'});}catch(e){}
@@ -2519,6 +2660,29 @@ function maybeShowLetterTut(){
   S.tutLetters=1;save();
   letterTut();
 }
+function homeTut(){ letterTut([
+  {t:function(){return document.querySelector('.unit-head');},ti:'Ton parcours 👋',tx:'Voici ta sourate et ton unité. Le bandeau reste en haut quand tu descends. Touche le ☰ pour changer de sourate.'},
+  {t:function(){return document.querySelector('.node .bubble')||document.querySelector('.bubble');},ti:'Les leçons ✍️',tx:'Chaque bulle est une leçon. Touche la première pour commencer, bismillah !'},
+  {t:function(){return document.getElementById('botnav');},ti:'Le menu 🧭',tx:'En bas : 🏠 Apprendre · 📕 Cours · 🕋 Réviser · 📊 Progrès.'}
+]); }
+function maybeShowHomeTut(){ if(S.tutHome)return; if(!document.querySelector('.unit-head'))return; S.tutHome=1;save(); homeTut(); }
+function openSurahMenu(){
+  var m=document.getElementById('surahMenu');
+  if(!m){m=document.createElement('div');m.className='finish';m.id='surahMenu';document.body.appendChild(m);}
+  var cur=(typeof curSourate!=='undefined')?curSourate:0;
+  var items=SOURATE_PLAN.map(function(P){
+    var built=(typeof P.idx!=='undefined'), active=built&&P.idx===cur;
+    return '<button class="sm-item'+(active?' active':'')+'" '+(built?'onclick="pickSurah('+P.idx+')"':'disabled')+'>'+
+      '<span class="sm-no">'+P.no+'</span>'+
+      '<span class="sm-ar">'+P.ar+'</span>'+
+      '<span class="sm-tx"><b>'+P.nom+'</b></span>'+
+      (active?'<span class="sm-badge">✓</span>':(built?'':'<span class="sm-soon">à venir</span>'))+
+      '</button>';}).join('');
+  m.innerHTML='<div class="sm-box"><button class="sm-close" onclick="closeSurahMenu()" aria-label="Fermer">✕</button><div class="sm-list">'+items+'</div></div>';
+  m.classList.add('on');
+}
+function closeSurahMenu(){var m=document.getElementById('surahMenu');if(m)m.classList.remove('on');}
+function pickSurah(i){if(typeof curSourate!=='undefined')curSourate=i;closeSurahMenu();renderHome();}
 function letterGridHTML(){
   var order=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
   var unlocked=knownLetterSet(), seen=S.letSeen||{};
