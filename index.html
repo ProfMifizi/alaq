@@ -327,10 +327,14 @@
   .lg-prog{margin:0 0 12px} .lg-plab{font-size:12.5px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:5px}
   .lg-pbar{height:8px;background:#241f1c;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
   .lg-pbar span{display:block;height:100%;background:linear-gradient(90deg,#B9770E,#E8A94F);border-radius:6px}
-  .lg-qa{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+  .lg-qa{display:flex;gap:8px;justify-content:center;margin:12px 0 0}
   .lg-qa button{background:#2a2422;border:1.5px solid var(--line);color:var(--gold2);border-radius:10px;padding:7px 12px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
-  .lg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-  .lg-cell{position:relative;border-radius:12px;padding:14px 0;text-align:center;border:1.5px solid var(--line);font-family:"Noto Naskh Arabic",serif;font-size:30px;line-height:1;background:#2a2422}
+  .lg-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .lg-top .lg-rev{flex:1;width:auto;margin-top:0}
+  .lg-help{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--line);color:var(--gold2);font-family:var(--ui);font-weight:900;font-size:19px;cursor:pointer}
+  .lg-help:active{transform:scale(.94)}
+  .lg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .lg-cell{position:relative;border-radius:12px;padding:8px 0;text-align:center;border:1.5px solid var(--line);font-family:"Noto Naskh Arabic",serif;font-size:27px;line-height:1;background:#2a2422}
   .lg-cell.locked{color:#5b524c;background:#2a2624;border-color:#332e2a;opacity:.55}
   .lg-cell.avail{color:#a9843c;background:#2b2622;cursor:pointer}
   .lg-cell.sel{color:var(--gold2);background:rgba(232,169,79,.14);border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2);cursor:pointer;font-weight:700}
@@ -2829,9 +2833,13 @@ function letterGridHTML(){
   var latestU=-1; UNITS.forEach(function(U,i){ if(U.alpha && (S.done[dkey(i,1)]||unitValidated(i))) latestU=i; });
   var nouv=new Set(); if(latestU>=0) UNITS[latestU].letters.forEach(function(L){ if(!seen[letterKey(L)]) nouv.add(letterKey(L)); });
   var any=uCount>0;
-  var h='<div class="lg-prompt'+(any?'':' empty')+'">'+(any?'choisis les lettres que tu veux réviser':'débloque une leçon pour pouvoir sélectionner des lettres')+'</div>';
-  h+='<div class="lg-prog"><div class="lg-plab">🔓 '+uCount+' / 28 lettres débloquées</div><div class="lg-pbar"><span style="width:'+Math.round(uCount/28*100)+'%"></span></div></div>';
-  if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
+  // Haut : bouton Réviser + aide « ? » (ou message si rien de débloqué)
+  var h=any
+    ? '<div class="lg-top">'+
+        '<button class="lg-rev" '+(LETSEL.size?'':'disabled')+' onclick="startSelectedLetters()">'+(LETSEL.size?('Réviser '+LETSEL.size+' lettre'+(LETSEL.size>1?'s':'')):'Réviser')+'</button>'+
+        '<button class="lg-help" onclick="letterTut()" aria-label="Revoir le guide" title="Revoir le guide">?</button>'+
+      '</div>'
+    : '<div class="lg-prompt empty">débloque une leçon pour pouvoir sélectionner des lettres</div>';
   h+='<div class="lg-grid">'+order.map(function(L){
     var k=letterKey(L), g=(L==='ه')?'ﻩ':L;
     if(!unlocked.has(k)) return '<div class="lg-cell locked"><span class="lk">🔒</span>'+g+'</div>';
@@ -2840,8 +2848,7 @@ function letterGridHTML(){
     var mk=(sel?'<span class="ck">✓</span>':'')+(nouv.has(k)?'<span class="bd">✨</span>':'')+(revoir.has(k)?'<span class="rv">🔸</span>':'');
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
-  h+='<button class="lg-rev" '+(LETSEL.size?'':'disabled')+' onclick="startSelectedLetters()">'+(LETSEL.size?('Réviser '+LETSEL.size+' lettre'+(LETSEL.size>1?'s':'')):'Réviser')+'</button>';
-  if(any)h+='<div style="text-align:center;margin-top:12px"><button class="lg-replay" onclick="letterTut()">↻ Revoir le guide</button></div>';
+  if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
   return h;
 }
 function setupTrace(L,u,posN){
