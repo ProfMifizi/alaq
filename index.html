@@ -732,8 +732,8 @@
   <div class="brand" id="brand"><img class="blogo" id="blogo" alt=""> ALAQ</div>
   <div class="stats">
     <div class="stat">🔥 <span id="st-streak">0</span></div>
-    <div class="stat" onclick="showRank()" style="cursor:pointer;display:flex;align-items:center"><span id="st-lamp" style="display:flex"></span></div>
     <div class="stat">❤️ <span id="st-hearts">7</span></div>
+    <div class="stat" onclick="showRank()" style="cursor:pointer;display:flex;align-items:center"><span id="st-lamp" style="display:flex"></span></div>
   </div>
 </div>
 
@@ -1610,8 +1610,8 @@ function rankFor(score){
 }
 /* La lampe (mishkât, Āyat an-Nūr 24:35) : l'icône du rang. Sa couleur suit les 7 stations,
    du gris de la pierre à la lumière — au 7e rang (النور) la lampe rayonne. Choix Myriam 05/07. */
-const RANK_COLORS=['#98a0a8','#c0673a','#c9973f','#c6d0da','#e5c25e','#f39b26','#fff0c2'];
-/* 1 pierre grise · 2 cuivre · 3 laiton · 4 argent · 5 or pâle · 6 or vif · 7 lumière (halo) */
+const RANK_COLORS=['#ab9d8a','#c0673a','#c9973f','#c6d0da','#e5c25e','#f39b26','#fff0c2'];
+/* 1 pierre chaude · 2 cuivre · 3 laiton · 4 argent · 5 or pâle · 6 or vif · 7 lumière (halo) */
 function lampSVG(color,size){
   size=size||20;
   return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 32 32">'+
@@ -1712,7 +1712,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 05/07h · LAMPE seule dans la barre (le nom du rang reste dans le profil), une couleur par rang + halo au 7e ; plus aucun écran d’annonce — tous les exercices démarrent directement';
+const BUILD='maj 05/07i · barre du haut : ordre 🔥 ❤️ lampe ; rang 1 en pierre chaude (le gris faisait éteint)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
