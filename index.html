@@ -377,7 +377,10 @@
   #ltBubble .lt-next{background:var(--gold);border:none;color:#1a1410;font-weight:900;font-size:13px;border-radius:10px;padding:7px 14px;cursor:pointer}
   #ltBubble .lt-arrow{position:absolute;width:16px;height:16px;background:#3a322c;border-left:1.5px solid var(--gold2);border-top:1.5px solid var(--gold2)}
   .ag.hl{background:#4a3a22;border-color:var(--gold-d)}
-  .ag.hl.hit{background:var(--gold);color:var(--bg)}
+  .ag.hit{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+  .ag.miss{animation:agmiss .35s;border-color:var(--coral);color:var(--coral)}
+  @keyframes agmiss{20%{transform:translateX(-5px)}60%{transform:translateX(5px)}}
+  .skiprd{display:block;margin:14px auto 0;background:none;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:8px 18px;font-family:var(--ui);font-size:14px;font-weight:700}
   .source{text-align:center;margin-bottom:18px}
   .srcL{background:var(--panel);border:2px solid var(--gold);border-radius:18px;width:90px;height:90px;
     font-family:var(--ar);font-size:54px;color:var(--gold);line-height:90px;text-align:center;margin:0 auto;
@@ -1690,7 +1693,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 05/07d · Leçon 1 complète : slide 4 = alphabet français interactif (toucher les 6 voyelles) · slide 5 = glisser m + a dans la case commune → « ma » seul centré';
+const BUILD='maj 05/07e · Leçon 1 : lettres trouvées en DORÉ + secousse si erreur ; lecture au doigt fiabilisée (zones réelles, fin jamais bloquée) + bouton Passer (−1 ❤️) ; Révision = 7 mots : 1 association (arabe prononcé au toucher) + 7 écritures (🔊) + 7 QCM (🔊 arabe)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -1960,7 +1963,8 @@ function renderStep(){
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
       '<div class="readbox '+(st.lang==='ar'?'ar':'')+'" id="readbox" dir="'+st.dir+'">'+inner+'</div>'+
-      '<div class="readarrow '+(st.dir==='rtl'?'rtl':'ltr')+'" id="readArrow"><span>→</span></div>';
+      '<div class="readarrow '+(st.dir==='rtl'?'rtl':'ltr')+'" id="readArrow"><span>→</span></div>'+
+      '<button class="skiprd" onclick="skipRead()">Passer (−1 ❤️)</button>';
     setTimeout(()=>setupRead(st),40);
     return;
   }
@@ -2060,7 +2064,7 @@ function renderStep(){
       '<div style="text-align:center;font-size:46px">'+st.w.e+'</div>'+
       '<div class="fr" style="text-align:center;margin:2px 0 8px'+(st.fromFr?';font-size:22px;color:var(--cream)':'')+'">'+st.w.fr+'</div>'+
       '<div class="hint" style="text-align:center;margin:0 0 10px">N\u2019oublie pas les harakats !</div>'+
-      (st.fromFr?'':'<button class="bigspeak" onclick="speak(\''+st.w.w+'\')">🔊</button>')+
+      '<button class="bigspeak" onclick="speak(\''+st.w.w+'\')">🔊</button>'+
       '<div class="slots linear-ar" id="slots"></div>'+
       '<div class="tiles" id="tiles">'+shuffle(units.slice()).map((ch,k)=>
         '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="tile'+k+'" onclick="tileTap('+k+',\''+ch+'\')">'+tileLabel(ch)+'</button>').join('')+'</div>'+
@@ -2591,6 +2595,12 @@ function cmpTap(i,el,short,long){
   el.classList.add('lit');
   window._cmp.add(i);if(window._cmp.size>=window._cmpN)ctaOn();
 }
+function skipRead(){ // dépanne si le doigt n'arrive pas au bout : coûte un cœur (hors révision)
+  if(!REVIEW){ S.hearts=Math.max(0,S.hearts-1); save();
+    const a=document.getElementById('p-hearts'); if(a)a.textContent=S.hearts;
+    const b=document.getElementById('st-hearts'); if(b)b.textContent=S.hearts; }
+  advance();
+}
 function setupRead(st){
   const box=document.getElementById('readbox');if(!box)return;
   const cells=[...box.querySelectorAll('.rc')];
@@ -2602,29 +2612,33 @@ function setupRead(st){
   if(N<=1){window._rd.done=true;ctaOn();}
   let painting=false;
   function zoneIndex(x){
-    const r=box.getBoundingClientRect();
-    let frac=Math.max(0,Math.min(0.999,(x-r.left)/r.width));
-    let idx=Math.floor(frac*N);
-    if(st.dir==='rtl')idx=N-1-idx;
-    return idx;
+    // position RÉELLE de chaque lettre (les glyphes n'ont pas la même largeur) + tolérance de 6 px
+    for(let i=0;i<N;i++){ const r=cells[i].getBoundingClientRect(); if(x>=r.left-6&&x<=r.right+6)return i; }
+    // doigt au-delà de la dernière lettre dans le sens de lecture -> dernière (la fin ne bloque plus)
+    const last=cells[N-1].getBoundingClientRect();
+    if(st.dir==='rtl' ? x<last.left : x>last.right) return N-1;
+    return -1;
+  }
+  function finish(){
+    if(window._rd.done)return;
+    window._rd.done=true;
+    if(st.lang==='ar')speak(st.word);else speakFr('école');
+    const ar=document.getElementById('readArrow');if(ar)ar.style.display='none';
+    ctaOn();
   }
   function markAt(x){
     const idx=zoneIndex(x);
-    // on ne colore QUE la prochaine lettre attendue (sens de lecture)
-    if(idx===next){
-      cells[next].classList.add('on');next++;
-      if(next>=N&&!window._rd.done){
-        window._rd.done=true;
-        if(st.lang==='ar')speak(st.word);else speakFr('école');
-        const ar=document.getElementById('readArrow');if(ar)ar.style.display='none';
-        ctaOn();
-      }
+    // le doigt peut sauter des zones entre deux événements : on colore TOUT jusqu'à lui (sens de lecture)
+    if(idx>=next){
+      for(let k=next;k<=idx;k++)cells[k].classList.add('on');
+      next=idx+1;
+      if(next>=N)finish();
     }
   }
   function px(e){const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;return t.clientX;}
   function down(e){e.preventDefault();painting=true;markAt(px(e));}
   function move(e){if(!painting)return;e.preventDefault();markAt(px(e));}
-  function up(){painting=false;}
+  function up(e){ if(painting&&e){try{markAt(px(e));}catch(_){}} painting=false; }
   box.addEventListener('touchstart',down,{passive:false});
   box.addEventListener('touchmove',move,{passive:false});
   box.addEventListener('touchend',up);
@@ -3889,7 +3903,7 @@ function frOptions(pool,w){
   return shuffle([{txt:w.fr,key:w.fr},...others.map(x=>({txt:x.fr,key:x.fr}))]);
 }
 // ===== Répétition espacée : sélection des mots à réviser =====
-const REVIEW_CAP=15; // plafond de mots par session (choix Myriam) ; au-delà, sessions successives
+const REVIEW_CAP=7; // 7 mots par session (choix Myriam 05/07) ; au-delà, sessions successives
 const REV_INT=[1,3,7,14,30]; // paliers de répétition espacée (jours) : 1 succès -> +1j, 2 -> +3j, 3 -> +7j, 4 -> +14j, 5+ -> +30j
 function _addDays(d,n){ return new Date((_dayNum(d)+n)*864e5).toISOString().slice(0,10); }
 // Un mot n'entre en révision QUE lorsqu'il a été APPRIS : leçon « 🔗 Lire des mots » de son unité terminée.
@@ -3909,24 +3923,14 @@ function startReview(){
   if(!pool.length){ toast('Termine d\u2019abord la leçon « 🔗 Lire des mots » pour débloquer la révision 🌱'); return; }
   const due=reviewSessionWords();
   // session = les mots dus ; s'il n'y en a aucun, entraînement libre sur des mots appris au hasard
-  let bag=shuffle(due.length?due:shuffle(pool).slice(0,REVIEW_CAP));
+  const bag=shuffle(due.length?due:shuffle(pool).slice(0,REVIEW_CAP));
   if(!bag.length)return;
   REVSES={}; bag.forEach(w=>{REVSES[w.w]=true;});   // vrai par défaut ; la moindre erreur le passe à false
-  const qs=[]; let turn=0;
-  while(bag.length){
-    const mod=turn%3;
-    if(mod===0 && bag.length>=3){            // 1) association de mots
-      const n=Math.min(6,bag.length);
-      qs.push({type:'match', graded:false, pairs:bag.splice(0,n).map(w=>({ar:w.w,fr:w.fr,w:w.w}))});
-    } else if(mod===1 || (mod===0 && bag.length<3)){ // 2) mot arabe → choisir la traduction (exercice SANS audio)
-      const w=bag.shift();
-      qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,graded:true,grid:'grid3',answer:w.fr,revWord:w.w,options:frOptions(pool,w)}));
-    } else {                                 // 3) mot français → l'écrire en arabe
-      const w=bag.shift();
-      qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w});
-    }
-    turn++;
-  }
+  // Déroulé voulu par Myriam (05/07) : 1 association des 7 mots, puis 7 écritures, puis 7 QCM = 15 écrans
+  const qs=[];
+  if(bag.length>=2)qs.push({type:'match', graded:false, pairs:bag.map(w=>({ar:w.w,fr:w.fr,w:w.w}))}); // 1) associer (le mot arabe se prononce au toucher)
+  shuffle(bag).forEach(w=>qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w}));       // 2) écrire chaque mot depuis le français (🔊 arabe dispo)
+  shuffle(bag).forEach(w=>qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,audio:w.w,graded:true,grid:'grid3',answer:w.fr,revWord:w.w,options:frOptions(pool,w)}))); // 3) traduire (🔊 arabe dispo, jamais de français)
   QUEUE=[{type:'slide',title:'Révision du vocabulaire',html:'<p>On révise les mots appris : associe, traduis, écris. C\u2019est parti !</p>'},...qs];
   REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
@@ -3960,6 +3964,7 @@ function renderMatch(){
 }
 function matchTap(side,pi,el){
   const M=window._mt; if(!M)return;
+  if(side==='L'&&M.pairs[pi]&&M.pairs[pi].ar)speak(M.pairs[pi].ar); // le mot arabe se prononce au toucher (demande Myriam)
   if(M.sel===null){ M.sel={side,pi}; renderMatch(); return; }
   if(M.sel.side===side){ M.sel=(M.sel.pi===pi)?null:{side,pi}; renderMatch(); return; }
   if(M.sel.pi===pi){           // bonne association (même paire des deux côtés)
