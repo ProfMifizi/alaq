@@ -278,6 +278,21 @@
   .cmb-plus,.cmb-eq{font-size:32px;color:var(--muted);font-weight:800}
   .cmb-res{color:var(--gold);min-width:60px}
   .hk3{display:flex;gap:10px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+  /* Leçon 1 : alphabet français (voyelles) + glisser consonne/voyelle */
+  .frv-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;max-width:330px;margin:0 auto}
+  .frv-l{aspect-ratio:1;border-radius:14px;background:#332e2b;border:2px solid #443d38;color:#f2e9da;font-family:var(--ui);font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+  .frv-l.on{background:linear-gradient(180deg,#4a3a1e,#3a2e17);border-color:var(--gold);color:var(--gold2);box-shadow:0 0 0 2px #dc902e55}
+  .frv-l.buzz{animation:frvbuzz .25s}
+  @keyframes frvbuzz{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  .frd-stage{position:relative;height:300px;margin-top:6px}
+  .frd-tok{position:absolute;width:74px;height:74px;border-radius:16px;background:linear-gradient(180deg,#3b332c,#2c2621);border:2px solid #55493f;display:flex;align-items:center;justify-content:center;font-family:var(--ui);font-size:32px;font-weight:800;touch-action:none;cursor:grab;box-shadow:0 6px 14px #0006;user-select:none}
+  .frd-c{color:#cfe3ff;left:10%;top:10px}
+  .frd-v{color:#ffe6b0;right:10%;top:10px}
+  .frd-drop{position:absolute;left:50%;top:120px;transform:translateX(-50%);width:190px;height:110px;border-radius:18px;border:3px dashed #6a5c4e;display:flex;align-items:center;justify-content:center;color:#7d6e5f;font-weight:700;font-family:var(--ui)}
+  .frd-drop.armed{border-color:var(--gold);color:var(--gold2)}
+  .frd-drop.full{border-style:solid;background:#33291680}
+  .frd-res{position:absolute;left:50%;top:175px;transform:translate(-50%,-50%) scale(.4);opacity:0;font-family:var(--ui);font-size:56px;font-weight:800;color:var(--gold2);transition:.35s;pointer-events:none}
+  .frd-res.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
   .hkcirc{position:relative;background:none;border:none;width:108px;height:150px;
     display:flex;flex-direction:column;align-items:center;justify-content:center}
   .hkcirc .circ{position:absolute;top:32px;left:50%;transform:translateX(-50%);
@@ -1093,12 +1108,10 @@ function buildAlphabet(U){
   const q=[
    {type:'tapset',title:'',items:[],alphabet:true,cols:4,
      note:'L\u2019alphabet arabe comporte <b>28 lettres</b>. Touche au moins 3 lettres.'},
-   {type:'slide',title:'L\u2019alphabet français',big:'26',html:
-     '<p>L\u2019alphabet français comporte <b>26 lettres</b>, dont <b>6 voyelles</b> : '+
-     '<span class="vw-fr">a e i o u y</span>.</p>'},
-   {type:'combine',a:'m',b:'a',res:'ma',lang:'fr',
-     title:'En français : consonne + voyelle',
-     note:'Pour former un son, on associe souvent une consonne et une voyelle. Touche pour assembler.'},
+   {type:'frvowels',title:'',
+     note:'L\u2019alphabet français comporte <b>26 lettres</b>, dont <b>6 voyelles</b>. Touche les 6 voyelles.'},
+   {type:'frdrag',title:'',
+     note:'En français, pour former un son, on associe souvent une <b>consonne</b> et une <b>voyelle</b>. Associe la consonne avec la voyelle.'},
    {type:'harakat3',title:'',
      note:'En arabe, il n’y a pas de voyelles dans l’alphabet mais des petits signes qui <b>habillent la lettre</b> en se plaçant au-dessus ou en dessous et qui s’appellent des <b>harakat</b>.'},
    {type:'assoc',L:'م',title:'',
@@ -1677,7 +1690,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 05/07c · SON : jeton de génération (plus aucun chevauchement, replis annulés) ; RÉVISION vocabulaire refondue (mots appris uniquement, paliers 1/3/7/14/30 j, badge = mots dus qui décrémente, « Que veut dire » muet, voix FR pour le français)';
+const BUILD='maj 05/07d · Leçon 1 complète : slide 4 = alphabet français interactif (toucher les 6 voyelles) · slide 5 = glisser m + a dans la case commune → « ma » seul centré';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -1833,6 +1846,28 @@ function renderStep(){
         '<span class="cmb-plus">+</span><span class="cmb" id="cmbB">'+st.b+'</span>'+
         '<span class="cmb-eq">=</span><span class="cmb cmb-res" id="cmbR">?</span></div>'+
       '<button class="speak" id="cmbBtn" onclick="doCombine(\''+st.res+'\')">👉 Assembler et écouter</button>';
+    return;
+  }
+
+  if(st.type==='frvowels'){ // alphabet français : toucher les 6 voyelles pour continuer
+    window._frv=new Set();
+    body.innerHTML='<div class="hint" style="margin:0 0 14px">'+st.note+'</div>'+
+      '<div class="frv-grid">'+'abcdefghijklmnopqrstuvwxyz'.split('').map(ch=>
+        '<button class="frv-l" onclick="frvTap(this,\''+ch+'\')">'+ch+'</button>').join('')+'</div>'+
+      '<div class="hint" id="frvC" style="text-align:center;margin-top:12px">0 / 6</div>';
+    return;
+  }
+
+  if(st.type==='frdrag'){ // glisser m et a dans la case commune -> « ma » seul, centré
+    window._frd={m:false,a:false};
+    body.innerHTML='<div class="hint" style="margin:0 0 8px">'+st.note+'</div>'+
+      '<div class="frd-stage" id="frdStage">'+
+        '<div class="frd-tok frd-c" id="frdM">m</div>'+
+        '<div class="frd-tok frd-v" id="frdA">a</div>'+
+        '<div class="frd-drop" id="frdDrop">glisse ici</div>'+
+        '<div class="frd-res" id="frdRes">ma</div>'+
+      '</div>';
+    setTimeout(setupFrDrag,40);
     return;
   }
 
@@ -2421,6 +2456,59 @@ function doCombine(res){
   document.getElementById('cmbA').classList.add('merge');
   document.getElementById('cmbB').classList.add('merge');
   setTimeout(()=>{r.textContent=res;r.classList.add('pop');speakFr(res);ctaOn();},250);
+}
+function frvTap(el,ch){ // voyelle : s'illumine + s'énonce ; consonne : petit tremblement
+  if('aeiouy'.indexOf(ch)>=0){
+    if(!el.classList.contains('on')){
+      el.classList.add('on'); window._frv.add(ch);
+      const c=document.getElementById('frvC'); if(c)c.textContent=window._frv.size+' / 6';
+      if(window._frv.size>=6)ctaOn();
+    }
+    speakFr(ch);
+  } else { el.classList.remove('buzz'); void el.offsetWidth; el.classList.add('buzz'); }
+}
+function _frdOver(a,b){
+  const r=a.getBoundingClientRect(), d=b.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  return cx>d.left&&cx<d.right&&cy>d.top&&cy<d.bottom;
+}
+function setupFrDrag(){
+  const stage=document.getElementById('frdStage'), drop=document.getElementById('frdDrop');
+  if(!stage||!drop)return;
+  [['frdM','m'],['frdA','a']].forEach(function(cfg){
+    const el=document.getElementById(cfg[0]), key=cfg[1];
+    let dragging=false,ox=0,oy=0;
+    el.addEventListener('pointerdown',function(e){
+      if(window._frd[key])return;
+      dragging=true; try{el.setPointerCapture(e.pointerId);}catch(_){ }
+      const r=el.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top;
+      el.style.right='auto'; e.preventDefault();
+    });
+    el.addEventListener('pointermove',function(e){
+      if(!dragging)return;
+      const sr=stage.getBoundingClientRect();
+      el.style.left=(e.clientX-sr.left-ox)+'px'; el.style.top=(e.clientY-sr.top-oy)+'px';
+      drop.classList.toggle('armed',_frdOver(el,drop));
+    });
+    el.addEventListener('pointerup',function(e){
+      if(!dragging)return; dragging=false; drop.classList.remove('armed');
+      if(!_frdOver(el,drop))return;
+      window._frd[key]=true;
+      const dr=drop.getBoundingClientRect(), sr=stage.getBoundingClientRect();
+      el.style.left=(dr.left-sr.left+(key==='m'?16:dr.width-16-el.offsetWidth))+'px';
+      el.style.top=(dr.top-sr.top+(dr.height-el.offsetHeight)/2)+'px';
+      drop.classList.add('full'); drop.textContent='';
+      if(window._frd.m&&window._frd.a){ // les deux déposés : m et a disparaissent, « ma » seul centré (retour Myriam)
+        setTimeout(function(){
+          ['frdM','frdA'].forEach(function(id){ const t=document.getElementById(id);
+            t.style.transition='opacity .2s'; t.style.opacity='0';
+            setTimeout(function(){ t.style.display='none'; },200); });
+          const res=document.getElementById('frdRes'); if(res)res.classList.add('show');
+          speakFr('ma'); ctaOn();
+        },250);
+      }
+    });
+  });
 }
 function hkTap(i,el){
   speak(['أَ','إِ','أُ'][i]); // alif + haraka : son court (alif-fatha/kasra/damma-son-court.mp3)
