@@ -1436,6 +1436,7 @@ function save(){try{localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){}}
 let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
+if(!S.rev||typeof S.rev!=='object')S.rev={};         // répétition espacée du vocabulaire : { mot:{n,next} }
 if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revues (halo « nouveau »)
 if(typeof S.bigNext==='undefined')S.bigNext=0;          // prochaine révision = +3 (déblocage) ?
 if(typeof S.tutLetters==='undefined')S.tutLetters=0;    // tuto grille des lettres déjà vu ?
@@ -1676,7 +1677,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 05/07b · audio un seul son + écrans silencieux ; Leçon 1 refondue (slides Bienvenue/quiz retirées, titres retirés, consignes réécrites, harakat→alif+haraka, recherche sans dorures, mot madrasa agrandi) — slides 4-5 (voyelles FR + glisser) en attente de validation';
+const BUILD='maj 05/07c · SON : jeton de génération (plus aucun chevauchement, replis annulés) ; RÉVISION vocabulaire refondue (mots appris uniquement, paliers 1/3/7/14/30 j, badge = mots dus qui décrémente, « Que veut dire » muet, voix FR pour le français)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -1789,7 +1790,7 @@ function startDisque(u,i){
   total=QUEUE.filter(s=>s.graded).length;
   renderStep();
 }
-function quitDisque(){document.getElementById('player').classList.remove('on');speechSynthesis&&speechSynthesis.cancel();REVIEW=false;returnFromPlayer();}
+function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();REVIEW=false;REVSES=null;returnFromPlayer();}
 function progress(){document.getElementById('pbar-i').style.width=
   (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
 function advance(){qi++;renderStep();}
@@ -2245,12 +2246,13 @@ function ctaClick(){
     }
     // Reconnaissance visuelle (forme déguisée, lecture de mot) : on rejoue le son de la lettre/mot À LA RÉVÉLATION,
     // jamais avant — sinon la réponse serait donnée. Renforce l’association forme ↔ son après coup.
-    if(SND&&st.glyph!==undefined)speak(st.answer);
+    if(SND&&st.glyph!==undefined&&/[\u0600-\u06FF]/.test(String(st.answer)))speak(st.answer);
   }
   // mémoire des erreurs (répétition espacée) : +1 si raté, -1 si su
   if(st.graded){
     const ek=st.type==='assemble'?st.w.w:(typeof st.answer==='string'?st.answer:null);
     if(ek){ if(!ok)S.err[ek]=(S.err[ek]||0)+1; else if(S.err[ek]){S.err[ek]=Math.max(0,S.err[ek]-1);} save(); }
+    if(REVIEW&&REVSES&&st.revWord&&!ok)REVSES[st.revWord]=false;   // le mot devra être revu
   }
   if(!ok&&st.explain){var w=document.getElementById('why');if(w)w.innerHTML='💡 '+st.explain;}
   if(ok){
@@ -2556,10 +2558,10 @@ function speakFr(t,isNarr){
     const allowed=isNarr?NARR:SND;
     if(!allowed||!('speechSynthesis'in window))return;
     stopAudio();
-    speechSynthesis.cancel();
+    const gen=_sndGen;
     const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=.95;u.pitch=1.05;
     const v=bestVoice('fr');if(v)u.voice=v;
-    setTimeout(()=>speechSynthesis.speak(u),60);}catch(e){}
+    setTimeout(()=>{ if(gen===_sndGen)speechSynthesis.speak(u); },60);}catch(e){}
 }
 function fiTap(el,L){
   speak(L);popIt(el);
@@ -2760,27 +2762,29 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
 const LTRANS={'ا':'alif','ب':'ba','ت':'ta','ث':'tha','ج':'jim','ح':'hha','خ':'kha','د':'dal','ذ':'dhal','ر':'ra','ز':'zay','س':'sin','ش':'shin','ص':'sad','ض':'dad','ط':'tta','ظ':'dha','ع':'ayn','غ':'ghayn','ف':'fa','ق':'qaf','ك':'kaf','ل':'lam','م':'mim','ن':'nun','ه':'ha','و':'waw','ي':'ya'};
 function sayLetterName(L){
   stopAudio();
+  var gen=_sndGen;
   var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); return; }
   try{
     var a=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'); _curAudio=a; var settled=false;
-    var fb=function(){ if(settled)return; settled=true; try{_speakSynth(tr);}catch(_){ } };
+    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(tr);}catch(_){ } };
     a.addEventListener('playing',function(){settled=true;},{once:true});
     a.addEventListener('error',fb,{once:true});
     var p=a.play(); if(p&&p.catch)p.catch(fb);
-    setTimeout(function(){ if(!settled&&a.paused) fb(); },1100);
+    setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
   }catch(e){ try{_speakSynth(tr);}catch(_){ } }
 }
 function sayLetterSound(L){
   stopAudio();
+  var gen=_sndGen;
   var tr=LTRANS[letterKey(L)];
   if(!tr){ speak(L); return; }
   try{
     var a=new Audio('audios-app-alaq/lettre-'+tr+'-son.mp3'); _curAudio=a; var settled=false;
-    var fb=function(){ if(settled)return; settled=true; try{_speakSynth(L);}catch(_){ } };
+    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(L);}catch(_){ } };
     a.addEventListener('playing',function(){settled=true;},{once:true});
     a.addEventListener('error',fb,{once:true});
     var p=a.play(); if(p&&p.catch)p.catch(fb);
-    setTimeout(function(){ if(!settled&&a.paused) fb(); },1100);
+    setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
   }catch(e){ try{_speakSynth(L);}catch(_){ } }
 }
 /* ===== Réviser « Les lettres » : la grille des 28, sélectionnable ===== */
@@ -3285,22 +3289,31 @@ function translit(t){ let o=''; for(const ch of (t||'')) o += (ch in AR2LAT)?AR2
 const WSAY={}; try{UNITS.forEach(function(U){(U.words||[]).forEach(function(w){if(w&&w.w&&w.say)WSAY[w.w]=w.say;});});}catch(e){}
 function ttsRom(x){ return (x||'').replace(/ā/g,'a').replace(/ī/g,'i').replace(/ū/g,'ou').replace(/[ʿʾ’\'`]/g,'').replace(/ḥ/g,'h').replace(/ṣ/g,'s').replace(/ṭ/g,'t').replace(/ḍ/g,'d').replace(/ẓ/g,'z').replace(/ā/g,'a').trim(); }
 
-function _speakSynth(t){ // repli synthèse : voix arabe si dispo, sinon translittération sur voix par défaut
+function _speakSynth(t){ // repli synthèse : voix arabe pour l'arabe, voix française pour le reste
   if(!('speechSynthesis'in window))return;
   try{
+    const gen=_sndGen;                            // annulé si un nouveau son démarre entre-temps
     speechSynthesis.cancel();
+    const hasAr=/[\u0600-\u06FF]/.test(String(t)); // du texte SANS arabe ne doit JAMAIS passer par la voix arabe
     const go=()=>{
+      if(gen!==_sndGen)return;
       let u;
-      const arV=bestVoice('ar');
-      if(arV){                                   // voix arabe dispo : prononciation correcte
+      const arV=hasAr?bestVoice('ar'):null;
+      if(arV){                                   // texte arabe + voix arabe dispo : prononciation correcte
         u=new SpeechSynthesisUtterance(expandShadda(t));
         u.voice=arV; u.lang=arV.lang||'ar-SA';
-      }else{                                     // pas de voix arabe : translittération audible
+        u.rate=.75;
+      }else if(hasAr){                           // texte arabe sans voix arabe : translittération audible
         u=new SpeechSynthesisUtterance(WSAY[t]?ttsRom(WSAY[t]):translit(expandShadda(t)));
         const frV=bestVoice('fr')||bestVoice('en');
         if(frV){ u.voice=frV; u.lang=frV.lang; } else { u.lang='fr-FR'; }
+        u.rate=.75;
+      }else{                                     // texte français : voix française, débit naturel
+        u=new SpeechSynthesisUtterance(String(t));
+        const frV=bestVoice('fr');
+        if(frV){ u.voice=frV; u.lang=frV.lang; } else { u.lang='fr-FR'; }
+        u.rate=.95;
       }
-      u.rate=.75;
       try{speechSynthesis.speak(u);}catch(e){}
     };
     if(!speechSynthesis.getVoices().length){     // voix pas encore chargées : on attend l'événement
@@ -3312,28 +3325,30 @@ function _speakSynth(t){ // repli synthèse : voix arabe si dispo, sinon transli
     }
   }catch(e){}
 }
-let _curAudio=null;
-function stopAudio(){ // un seul son à la fois : coupe le fichier ET la synthèse en cours
+let _curAudio=null,_sndGen=0; // _sndGen = jeton de génération : tout repli/minuterie d'un ancien son est annulé
+function stopAudio(){ // un seul son à la fois : coupe le fichier ET la synthèse, et invalide les replis en attente
+  _sndGen++;
   try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
   try{ if('speechSynthesis'in window)speechSynthesis.cancel(); }catch(e){}
 }
 function speak(t){
   try{
     stopAudio();                                    // coupe le son précédent avant d'en jouer un nouveau
+    const gen=_sndGen;                              // ce son est valable tant qu'aucun nouveau son n'a démarré
     warmVoices();                                   // amorce le moteur vocal (repli IA fiable sur iOS)
     const url=AUDIO[t];
     if(!url){ _speakSynth(t); return; }            // aucun mapping -> synthèse directe
     const a=new Audio(url); _curAudio=a;
     let settled=false;
-    const toSynth=()=>{ if(settled)return; settled=true; try{a.pause();}catch(_){ } _speakSynth(t); };
+    const toSynth=()=>{ if(settled||gen!==_sndGen)return; settled=true; try{a.pause();}catch(_){ } _speakSynth(t); };
     a.addEventListener('playing',()=>{ settled=true; },{once:true}); // le fichier joue : on neutralise tout repli
     a.addEventListener('error',toSynth,{once:true});   // fichier 404 / illisible -> synthèse
     a.addEventListener('stalled',toSynth,{once:true}); // chargement bloqué -> synthèse
     a.addEventListener('abort',toSynth,{once:true});
     const p=a.play();
-    if(p&&p.catch)p.catch(toSynth);                    // lecture refusée -> synthèse
+    if(p&&p.catch)p.catch(toSynth);                    // lecture refusée -> synthèse (sauf si un nouveau son a coupé)
     // filet de sécurité : si rien n'a démarré (fichier absent/lent), on bascule en voix de synthèse
-    setTimeout(()=>{ if(!settled && a.paused) toSynth(); },1100);
+    setTimeout(()=>{ if(!settled && gen===_sndGen && a.paused) toSynth(); },1100);
   }catch(e){ try{_speakSynth(t);}catch(_){ } }
 }
 // Réveille le moteur vocal dès la 1re interaction (sinon le 1er son est muet sur iOS)
@@ -3357,9 +3372,10 @@ if(typeof document!=='undefined'&&document.addEventListener){
 function playVerse(i){ // récitation al-ʿAfāsī : fichier auto-hébergé d'abord, everyayah en secours
   try{
     stopAudio();
+    const gen=_sndGen;
     const a=new Audio('audios-app-alaq/fatiha-'+(i+1)+'.mp3'); _curAudio=a;
     let settled=false;
-    const fallback=()=>{ if(settled)return; settled=true;
+    const fallback=()=>{ if(settled||gen!==_sndGen)return; settled=true;
       try{a.pause();}catch(_){ }
       const b=new Audio('https://everyayah.com/data/Alafasy_128kbps/00100'+(i+1)+'.mp3'); _curAudio=b;
       b.play().catch(()=>toast('Audio indisponible hors connexion'));
@@ -3579,7 +3595,7 @@ function importSave(){
 
 /* ================= MENU DU BAS · ONGLETS ================= */
 const UNIT_VIDEOS={1:'',2:'',3:''}; // ← colle ici l'ID ou le lien YouTube de chaque unité (clé = numéro d'unité)
-let REVIEW=false, backTo=null;
+let REVIEW=false, backTo=null, REVSES=null; // REVSES = résultats de la session de révision en cours { mot: true|false }
 
 function unitValidated(idx){ if(idx<0||idx>=UNITS.length)return false; const ds=discsFor(idx); return !!(S.done&&S.done[dkey(idx,ds.length-1)]); }
 function unitUnlocked(idx){ const U=UNITS[idx]; if(!U||!U.ready)return false; if(U.no===1)return true; return unitValidated(idx-1); }
@@ -3786,28 +3802,40 @@ function frOptions(pool,w){
 }
 // ===== Répétition espacée : sélection des mots à réviser =====
 const REVIEW_CAP=15; // plafond de mots par session (choix Myriam) ; au-delà, sessions successives
-function allReviewWords(){ const p=[]; UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx))(U.words||[]).forEach(w=>p.push(w)); }); return p; }
-function dueReviewWords(){ return allReviewWords().filter(w=>S.err&&S.err[w.w]>0).sort((a,b)=>(S.err[b.w]||0)-(S.err[a.w]||0)); }
-// mots présentés dans la PROCHAINE session (= le chiffre du disque) : les mots dus (les plus ratés d'abord), plafonnés ;
-// si aucun mot n'est dû, entraînement général sur un lot au hasard.
-function reviewSessionWords(){ const due=dueReviewWords(); return (due.length?due:shuffle(allReviewWords())).slice(0,REVIEW_CAP); }
+const REV_INT=[1,3,7,14,30]; // paliers de répétition espacée (jours) : 1 succès -> +1j, 2 -> +3j, 3 -> +7j, 4 -> +14j, 5+ -> +30j
+function _addDays(d,n){ return new Date((_dayNum(d)+n)*864e5).toISOString().slice(0,10); }
+// Un mot n'entre en révision QUE lorsqu'il a été APPRIS : leçon « 🔗 Lire des mots » de son unité terminée.
+function _lireDone(idx){ const ds=discsFor(idx); for(let i=0;i<ds.length;i++){ if(ds[i].build===buildWords)return !!S.done[dkey(idx,i)]; } return false; }
+function allReviewWords(){ const p=[]; UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx)&&(_lireDone(idx)||unitValidated(idx)))(U.words||[]).forEach(w=>p.push(w)); }); return p; }
+// Un mot est « dû » s'il n'a jamais été révisé, ou si sa date de prochaine révision est atteinte.
+function wordDue(w){ const r=S.rev[w.w]; return !r || r.next<=today(); }
+function dueReviewWords(){
+  return allReviewWords().filter(wordDue).sort((a,b)=>{
+    const ra=S.rev[a.w]||{n:0,next:''}, rb=S.rev[b.w]||{n:0,next:''};
+    return ra.next<rb.next?-1:ra.next>rb.next?1:(ra.n-rb.n);   // les plus anciens / les plus fragiles d'abord
+  });
+}
+function reviewSessionWords(){ return dueReviewWords().slice(0,REVIEW_CAP); }
 function startReview(){
   const pool=allReviewWords();
-  if(!pool.length)return;
-  let bag=shuffle(reviewSessionWords());     // exactement les mots comptés sur le disque
+  if(!pool.length){ toast('Termine d\u2019abord la leçon « 🔗 Lire des mots » pour débloquer la révision 🌱'); return; }
+  const due=reviewSessionWords();
+  // session = les mots dus ; s'il n'y en a aucun, entraînement libre sur des mots appris au hasard
+  let bag=shuffle(due.length?due:shuffle(pool).slice(0,REVIEW_CAP));
   if(!bag.length)return;
+  REVSES={}; bag.forEach(w=>{REVSES[w.w]=true;});   // vrai par défaut ; la moindre erreur le passe à false
   const qs=[]; let turn=0;
   while(bag.length){
     const mod=turn%3;
     if(mod===0 && bag.length>=3){            // 1) association de mots
       const n=Math.min(6,bag.length);
-      qs.push({type:'match', graded:false, pairs:bag.splice(0,n).map(w=>({ar:w.w,fr:w.fr}))});
-    } else if(mod===1 || (mod===0 && bag.length<3)){ // 2) mot arabe → choisir la traduction
+      qs.push({type:'match', graded:false, pairs:bag.splice(0,n).map(w=>({ar:w.w,fr:w.fr,w:w.w}))});
+    } else if(mod===1 || (mod===0 && bag.length<3)){ // 2) mot arabe → choisir la traduction (exercice SANS audio)
       const w=bag.shift();
-      qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,graded:true,grid:'grid3',answer:w.fr,options:frOptions(pool,w)}));
+      qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,graded:true,grid:'grid3',answer:w.fr,revWord:w.w,options:frOptions(pool,w)}));
     } else {                                 // 3) mot français → l'écrire en arabe
       const w=bag.shift();
-      qs.push({type:'assemble', w, graded:true, fromFr:true});
+      qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w});
     }
     turn++;
   }
@@ -3855,6 +3883,11 @@ function matchTap(side,pi,el){
   } else {                     // mauvaise association : flash rouge bref
     const selBtn=document.querySelector('.m-cell.sel'); if(selBtn)selBtn.classList.add('bad');
     if(el)el.classList.add('bad');
+    if(REVIEW&&REVSES){          // les deux mots confondus devront être revus
+      const w1=M.pairs[pi]&&M.pairs[pi].w, w2=M.sel&&M.pairs[M.sel.pi]&&M.pairs[M.sel.pi].w;
+      if(w1&&REVSES[w1]!==undefined)REVSES[w1]=false;
+      if(w2&&REVSES[w2]!==undefined)REVSES[w2]=false;
+    }
     M.sel=null;
     setTimeout(renderMatch,420);
   }
@@ -4026,21 +4059,19 @@ function renderReviser(sub){
     h+='<div class="ccard">'+letterGridHTML()+'</div>';
   }
   else if(sub==='vocab'){
-    const vwords=allReviewWords();
-    // répétition espacée : un mot est « à réviser » s'il a déjà été raté (S.err > 0)
-    const due=function(w){return !!(S.err&&S.err[w.w]>0);};
-    const nDue=vwords.filter(due).length;
-    const nSession=reviewSessionWords().length;   // = mots réellement présentés dans la prochaine session (= le disque)
-    const ordered=vwords.slice().sort(function(a,b){return (due(b)?1:0)-(due(a)?1:0);});
+    const vwords=allReviewWords();               // uniquement les mots APPRIS (leçon « Lire des mots » terminée)
+    const nDue=dueReviewWords().length;          // mots dus aujourd'hui — le chiffre DÉCRÉMENTE après chaque série
+    const ordered=vwords.slice().sort(function(a,b){return (wordDue(b)?1:0)-(wordDue(a)?1:0);});
     const vlist=ordered.map(function(w){
       return '<div class="wrow">'+
         '<button class="wspk" onclick="speak(\''+w.w+'\')" aria-label="Écouter">'+(w.e||'🔊')+'</button>'+
         '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
-        (due(w)?'<span class="wdot" title="à réviser"></span>':'')+
+        (wordDue(w)?'<span class="wdot" title="à réviser"></span>':'')+
       '</div>';
     }).join('');
     h+='<div class="ccard">'+
-      '<button class="cbtn revbtn" onclick="startReview()">Réviser<span class="revcount">'+nSession+'</span></button>'+
+      '<button class="cbtn revbtn" onclick="startReview()">'+(nDue?'Réviser<span class="revcount">'+nDue+'</span>':'S\u2019entraîner')+'</button>'+
+      (vwords.length?'':'<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;text-align:center;margin:10px 0 0">Les mots apparaîtront ici après la leçon « 🔗 Lire des mots ».</p>')+
       '<div class="wlist">'+vlist+'</div></div>';
   }
   else{
@@ -4251,6 +4282,18 @@ function vtUndo(){
   renderVt();document.getElementById('cta').disabled=true;
 }
 function finishReview(){
+  if(REVSES){ // répétition espacée : chaque mot de la session reçoit sa prochaine date
+    const t=today();
+    Object.keys(REVSES).forEach(function(w){
+      if(REVSES[w]!==false){ // su : palier suivant, revu dans 1/3/7/14/30 jours
+        const n=((S.rev[w]&&S.rev[w].n)||0)+1;
+        S.rev[w]={n:n, next:_addDays(t,REV_INT[Math.min(n-1,REV_INT.length-1)])};
+      } else {               // raté : retour au palier 0, à revoir dès aujourd'hui
+        S.rev[w]={n:0, next:t};
+      }
+    });
+    REVSES=null;
+  }
   REVIEW=false; S.xp+=10; S.nrev=(S.nrev||0)+1;
   const before=S.hearts;
   const gain=S.bigNext?3:1;               // 1re révision après blocage = +3 ; les suivantes = +1
