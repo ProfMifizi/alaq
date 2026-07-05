@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Preview · Leçon 1 — slides 4 & 5</title>
+<style>
+  :root{ --bg:#252120; --gold:#DC902E; --gold2:#E8A94F; --muted:#B9A99A; --ink:#F2E9DA; }
+  *{box-sizing:border-box}
+  body{margin:0;background:#1b1817;color:var(--ink);font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+       display:flex;gap:26px;flex-wrap:wrap;justify-content:center;padding:26px 12px 60px}
+  .phone{width:390px;min-height:760px;background:var(--bg);border-radius:26px;box-shadow:0 10px 40px #000a;
+         display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .bar{display:flex;align-items:center;gap:12px;padding:16px 18px 6px}
+  .x{font-size:26px;color:var(--muted)}
+  .prog{flex:1;height:14px;border-radius:8px;background:#3a3430;overflow:hidden}
+  .prog>i{display:block;height:100%;width:38%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+  .hearts{color:#e5533b;font-weight:800}
+  .lbl{font-size:12px;letter-spacing:.12em;color:var(--gold2);text-transform:uppercase;text-align:center;margin:4px 0 2px}
+  .body{flex:1;padding:8px 20px 10px}
+  .hint{font-size:17px;line-height:1.5;margin:6px 0 20px}
+  .hint b{color:var(--gold2)}
+  .foot{padding:14px 18px 20px}
+  .cta{width:100%;border:0;border-radius:16px;padding:18px;font-size:18px;font-weight:800;letter-spacing:.06em;
+       color:#2a2320;background:linear-gradient(180deg,var(--gold2),var(--gold));box-shadow:0 6px 0 #9c6417;cursor:pointer}
+  .cta:disabled{filter:grayscale(.7) brightness(.7);box-shadow:0 6px 0 #0004;cursor:not-allowed;color:#00000066}
+  .count{text-align:center;color:var(--muted);margin-top:6px;font-weight:700}
+
+  /* --- slide 4 : grille alphabet français --- */
+  .fgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:6px}
+  .fl{aspect-ratio:1;border-radius:14px;background:#332e2b;border:2px solid #443d38;color:var(--ink);
+      font-size:24px;font-weight:800;text-transform:lowercase;display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:transform .12s,background .15s,border-color .15s;user-select:none}
+  .fl.on{background:linear-gradient(180deg,#4a3a1e,#3a2e17);border-color:var(--gold);color:var(--gold2);
+         box-shadow:0 0 0 2px #dc902e55}
+  .fl.on::after{content:"✓";position:absolute;margin:-30px 0 0 26px;font-size:13px;color:var(--gold2)}
+  .fl.buzz{animation:buzz .25s}
+  @keyframes buzz{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+  /* --- slide 5 : glisser-associer --- */
+  .stage{position:relative;height:330px;margin-top:8px}
+  .drop{position:absolute;left:50%;top:150px;transform:translateX(-50%);width:190px;height:110px;border-radius:18px;
+        border:3px dashed #6a5c4e;display:flex;align-items:center;justify-content:center;color:#7d6e5f;font-weight:700}
+  .drop.armed{border-color:var(--gold);color:var(--gold2)}
+  .drop.full{border-style:solid;background:#33291680}
+  .tok{position:absolute;width:78px;height:78px;border-radius:16px;background:linear-gradient(180deg,#3b332c,#2c2621);
+       border:2px solid #55493f;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;
+       color:var(--ink);touch-action:none;cursor:grab;box-shadow:0 6px 14px #0006}
+  .tok.consonne{color:#cfe3ff}.tok.voyelle{color:#ffe6b0}
+  .tok.placed{cursor:default}
+  .res{position:absolute;left:50%;top:205px;transform:translate(-50%,-50%) scale(.4);opacity:0;
+       font-size:60px;font-weight:800;color:var(--gold2);transition:.35s}
+  .res.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .cap{font-size:12px;color:var(--muted);text-align:center;margin-top:2px}
+  h4{margin:26px 8px 0;color:var(--gold2);font-weight:800;text-align:center;width:100%}
+</style>
+</head>
+<body>
+
+<h4>Leçon 1 · Slide 4 — Alphabet français : toucher les 6 voyelles</h4>
+<div class="phone" id="p4">
+  <div class="bar"><span class="x">✕</span><div class="prog"><i></i></div><span class="hearts">❤️ 7</span></div>
+  <div class="body">
+    <div class="hint">L’alphabet français comporte <b>26 lettres</b>, dont <b>6 voyelles</b>. Touche les 6 voyelles.</div>
+    <div class="fgrid" id="fgrid"></div>
+    <div class="count" id="count4">0 / 6</div>
+  </div>
+  <div class="foot"><button class="cta" id="cta4" disabled>CONTINUER</button></div>
+</div>
+
+<h4>Leçon 1 · Slide 5 — Associer une consonne et une voyelle (glisser)</h4>
+<div class="phone" id="p5">
+  <div class="bar"><span class="x">✕</span><div class="prog"><i></i></div><span class="hearts">❤️ 7</span></div>
+  <div class="body">
+    <div class="hint">En français, pour former un son, on associe souvent une <b>consonne</b> et une <b>voyelle</b>. Associe la consonne avec la voyelle.</div>
+    <div class="stage" id="stage">
+      <div class="drop" id="drop">glisse ici</div>
+      <div class="res" id="res">ma</div>
+      <div class="tok consonne" id="tokM" style="left:40px;top:20px">m</div>
+      <div class="tok voyelle" id="tokA" style="left:270px;top:20px">a</div>
+    </div>
+    <div class="cap">Glisse le <b style="color:#cfe3ff">m</b> puis le <b style="color:#ffe6b0">a</b> dans la case — ils s’associent et tu entends « ma ».</div>
+  </div>
+  <div class="foot"><button class="cta" id="cta5" disabled>CONTINUER</button></div>
+</div>
+
+<script>
+/* ---------- Slide 4 : voyelles ---------- */
+var LETTERS="abcdefghijklmnopqrstuvwxyz".split("");
+var VOWELS=new Set(["a","e","i","o","u","y"]);
+var got=new Set();
+var grid=document.getElementById("fgrid");
+LETTERS.forEach(function(ch){
+  var b=document.createElement("div"); b.className="fl"; b.textContent=ch; b.style.position="relative";
+  b.onclick=function(){
+    if(VOWELS.has(ch)){
+      if(!got.has(ch)){ got.add(ch); b.classList.add("on"); say(ch);
+        document.getElementById("count4").textContent=got.size+" / 6";
+        if(got.size===6) document.getElementById("cta4").disabled=false; }
+    } else { b.classList.remove("buzz"); void b.offsetWidth; b.classList.add("buzz"); }
+  };
+  grid.appendChild(b);
+});
+
+/* ---------- Slide 5 : glisser-associer ---------- */
+var placed={m:false,a:false};
+function setupDrag(id,key){
+  var el=document.getElementById(id), drop=document.getElementById("drop"), stage=document.getElementById("stage");
+  var dragging=false,ox=0,oy=0,sx=0,sy=0;
+  el.addEventListener("pointerdown",function(e){ if(placed[key])return; dragging=true; el.setPointerCapture(e.pointerId);
+    el.style.cursor="grabbing"; var r=el.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top;
+    sx=stage.getBoundingClientRect().left; sy=stage.getBoundingClientRect().top; });
+  el.addEventListener("pointermove",function(e){ if(!dragging)return;
+    el.style.left=(e.clientX-sx-ox)+"px"; el.style.top=(e.clientY-sy-oy)+"px";
+    drop.classList.toggle("armed",over(el,drop)); });
+  el.addEventListener("pointerup",function(e){ if(!dragging)return; dragging=false; el.style.cursor="grab";
+    drop.classList.remove("armed");
+    if(over(el,drop)){ placeIn(el,key,drop); } });
+  function over(a,b){ var r=a.getBoundingClientRect(),d=b.getBoundingClientRect();
+    var cx=r.left+r.width/2, cy=r.top+r.height/2;
+    return cx>d.left&&cx<d.right&&cy>d.top&&cy<d.bottom; }
+}
+function placeIn(el,key,drop){
+  placed[key]=true; el.classList.add("placed");
+  var d=drop.getBoundingClientRect(), s=document.getElementById("stage").getBoundingClientRect();
+  el.style.left=(d.left-s.left+(key==="m"?18:d.width-96))+"px"; el.style.top=(d.top-s.top+16)+"px";
+  drop.classList.add("full"); drop.textContent="";
+  if(placed.m&&placed.a){
+    setTimeout(function(){
+      ["tokM","tokA"].forEach(function(id){ var el=document.getElementById(id);
+        el.style.transition="opacity .2s"; el.style.opacity="0";
+        setTimeout(function(){ el.style.display="none"; },200); });
+      drop.textContent="";
+      var res=document.getElementById("res"); res.classList.add("show"); say("ma");
+      document.getElementById("cta5").disabled=false;
+    },250);
+  }
+}
+setupDrag("tokM","m"); setupDrag("tokA","a");
+
+/* ---------- son de secours (synthèse fr) pour la preview ---------- */
+function say(t){ try{ if(!("speechSynthesis"in window))return; speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(t); u.lang="fr-FR"; u.rate=.9; speechSynthesis.speak(u);}catch(e){} }
+</script>
+</body>
+</html>

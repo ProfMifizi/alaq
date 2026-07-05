@@ -1091,52 +1091,46 @@ const NONATTACH=['ا','د','ذ','ر','ز','و'];
 
 function buildAlphabet(U){
   const q=[
-   {type:'slide',title:'Bienvenue 👋',html:
-     '<p>Avant d\u2019apprendre les lettres, faisons le tour de l\u2019écriture arabe. '+
-     'Ici, rien à mémoriser : on observe, on touche, on écoute.</p>'},
-   {type:'slide',title:'L\u2019alphabet arabe',big:'28',html:
-     '<p>L\u2019alphabet arabe comporte <b>28 lettres</b>.</p>'},
-   {type:'tapset',title:'Voici les 28 lettres',items:[],alphabet:true,cols:4,
-     note:'Touche au moins 3 lettres pour les entendre.'},
+   {type:'tapset',title:'',items:[],alphabet:true,cols:4,
+     note:'L\u2019alphabet arabe comporte <b>28 lettres</b>. Touche au moins 3 lettres.'},
    {type:'slide',title:'L\u2019alphabet français',big:'26',html:
      '<p>L\u2019alphabet français comporte <b>26 lettres</b>, dont <b>6 voyelles</b> : '+
      '<span class="vw-fr">a e i o u y</span>.</p>'},
    {type:'combine',a:'m',b:'a',res:'ma',lang:'fr',
      title:'En français : consonne + voyelle',
      note:'Pour former un son, on associe souvent une consonne et une voyelle. Touche pour assembler.'},
-   {type:'harakat3',title:'En arabe : pas de voyelles',
-     note:'À la place, un petit signe habille la lettre : le <b>haraka</b>. Il en existe trois. Touche chaque signe pour entendre son son.'},
-   {type:'assoc',L:'م',title:'On habille la lettre mim',
-     note:'Associe la lettre à chaque haraka et écoute la syllabe obtenue.'},
-   {type:'tapset',title:'Les lettres de prolongation',items:[['ا','alif'],['و','wāw'],['ي','yā’']],
-     note:'Trois lettres servent à <b>allonger</b> le son. Touche-les pour les entendre.'},
-   {type:'findset',title:'Clique sur les 3 lettres de prolongation',targets:['ا','و','ي'],highlight:true,
-     note:'Les trois lettres de prolongation sont légèrement dorées. Touche-les.'},
-   {type:'assoc',L:'م',madd:true,title:'mim + prolongation',
+   {type:'harakat3',title:'',
+     note:'En arabe, il n’y a pas de voyelles dans l’alphabet mais des petits signes qui <b>habillent la lettre</b> en se plaçant au-dessus ou en dessous et qui s’appellent des <b>harakat</b>.'},
+   {type:'assoc',L:'م',title:'',
+     note:'Habille la lettre <span class="ar">م</span> mim avec les harakats et écoute le son obtenu.'},
+   {type:'tapset',title:'',items:[['ا','alif'],['و','wāw'],['ي','yā’']],
+     note:'Trois lettres servent à <b>allonger</b> le son. Touche-les pour découvrir leur nom.'},
+   {type:'findset',title:'',targets:['ا','و','ي'],highlight:false,
+     note:'Retrouve les 3 lettres de prolongation dans l’alphabet arabe et touche-les pour entendre leur nom.'},
+   {type:'assoc',L:'م',madd:true,title:'',
      note:'Lorsqu\u2019on associe une lettre avec une lettre de prolongation, on étire le son deux fois plus. Touche pour entendre « mâââ », « mîîî », « mûûû ».'},
-   {type:'compare',title:'Voyelle courte / longue',
+   {type:'compare',title:'',
      pairs:[['مَ','مَا','« ma » / « mâââ »'],['مِ','مِي','« mi » / « mîîî »'],['مُ','مُو','« mou » / « mûûû »']],
      note:'Écoute bien : le son long est étiré. Touche chaque case.'},
-   {type:'formslide',L:'م',title:'Les lettres changent de forme',
-     note:'Selon sa place dans le mot, la lettre change de costume. Fais glisser mim dans chaque case.'},
-   {type:'tapset',title:'Elles s\u2019attachent… sauf 6',items:NONATTACH.map(L=>[L,ALPHABET.find(a=>a[0]===L)[1]]),
+   {type:'formslide',L:'م',title:'',
+     note:'Selon sa place dans le mot, la lettre change de forme. Fais glisser mim dans chaque case.'},
+   {type:'tapset',title:'',items:NONATTACH.map(L=>[L,ALPHABET.find(a=>a[0]===L)[1]]),
      cols:3,
-     note:'Les lettres s\u2019attachent à gauche et à droite, <b>sauf 6</b> qui <b>ne s\u2019attachent qu\u2019à droite</b>. Touche-les.'},
-   {type:'findset',title:'Clique sur les 6 lettres spéciales',targets:NONATTACH,highlight:true,
-     note:'Les 6 lettres qui ne s\u2019attachent qu\u2019à droite sont légèrement dorées. Touche-les.'},
-   {type:'read',word:'école',lang:'fr',dir:'ltr',title:'En français : on lit de gauche à droite',
-     note:'Glisse ton doigt sur le mot, de gauche → droite.'},
-   {type:'read',word:'مَدْرَسَةٌ',lang:'ar',dir:'rtl',title:'En arabe : on lit de droite à gauche',
-     note:'« madrasatoun » (l\u2019école). Glisse ton doigt sur le mot, de droite ← gauche.'},
-   {type:'findword',word:'مَدْرَسَةٌ',targets:NONATTACH,title:'Dans le mot « madrasatoun »',
-     note:'Touche les lettres qui ne s\u2019attachent qu\u2019à droite.'},
-   {type:'slide',title:'Petit quiz 🎯',html:'<p>On vérifie ce qu\u2019on a retenu. Quelques questions, et la leçon est gagnée !</p>'},
+     note:'Les lettres arabes s\u2019attachent à gauche et à droite, <b>sauf 6</b> qui <b>ne s\u2019attachent qu\u2019à droite</b>. Touche-les pour entendre leur nom.'},
+   {type:'findset',title:'',targets:NONATTACH,highlight:false,
+     note:'Retrouve les 6 lettres qui ne s\u2019attachent qu\u2019à droite dans l\u2019alphabet arabe et touche-les pour entendre leur nom.'},
+   {type:'read',word:'école',lang:'fr',dir:'ltr',title:'',
+     note:'En français on lit de gauche à droite. Fais glisser ton doigt sur le mot école dans le sens de l’écriture française.'},
+   {type:'read',word:'مَدْرَسَةٌ',lang:'ar',dir:'rtl',title:'',
+     note:'En arabe on lit de droite à gauche. Fais glisser ton doigt sur le mot madrassa, qui signifie école, dans le sens de l\u2019écriture arabe.'},
+   {type:'findword',word:'مَدْرَسَةٌ',targets:NONATTACH,title:'',
+     note:'Repère les lettres qui ne s\u2019attachent qu\u2019à droite et touche-les.'},
    mcq({prompt:'Combien de lettres dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'28',explain:'L’alphabet arabe compte 28 lettres, soit deux de plus que les 26 lettres françaises.',
      options:shuffle([{txt:'28',key:'28'},{txt:'26',key:'26'},{txt:'30',key:'30'}])}),
    mcq({prompt:'Combien de voyelles dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'0',explain:'En arabe, aucune lettre n’est une voyelle. Le son des voyelles vient de petits signes posés sur la lettre : les harakāt.',
      options:shuffle([{txt:'Aucune',key:'0'},{txt:'3',key:'3'},{txt:'6',key:'6'}])}),
    mcq({prompt:'Grâce à quoi forme-t-on les voyelles ?',graded:true,answer:'h',explain:'Les harakāt sont les petits signes au-dessus ou en dessous de la lettre : fatha « a », kasra « i », dhamma « ou ».',
-     options:shuffle([{txt:'Les harakats',key:'h'},{txt:'Des lettres spéciales',key:'l'},{txt:'Des accents',key:'a'}])}),
+     options:shuffle([{txt:'Les harakat',key:'h'},{txt:'Des lettres spéciales',key:'l'},{txt:'Des accents',key:'a'}])}),
    mcq({prompt:'Combien de lettres de prolongation ?',graded:true,grid:'grid3',answer:'3',explain:'Il y a 3 lettres de prolongation, qui allongent le son : <span class="ar">ا</span>, <span class="ar">و</span>, <span class="ar">ي</span>.',
      options:shuffle([{txt:'3',key:'3'},{txt:'2',key:'2'},{txt:'4',key:'4'}])}),
    mcq({prompt:'Quelles sont les lettres de prolongation ?',graded:true,answer:'awy',explain:'Ce sont l’alif <span class="ar">ا</span>, le wāw <span class="ar">و</span> et le yā’ <span class="ar">ي</span> : elles étirent la voyelle qui précède.',
@@ -1542,7 +1536,8 @@ function readInstr(t){ // narration de l'instruction — coupée par NARR unique
   const url=INSTR_AUDIO[plain];
   if(!url){ speakFr(plain,true); return; }       // pas d'enregistrement -> voix de synthèse
   try{
-    const a=new Audio(url); let settled=false;
+    stopAudio();
+    const a=new Audio(url); _curAudio=a; let settled=false;
     const toTTS=()=>{ if(settled)return; settled=true; try{a.pause();}catch(_){ } speakFr(plain,true); };
     a.addEventListener('playing',()=>{ settled=true; },{once:true});
     a.addEventListener('error',toTTS,{once:true});
@@ -1681,7 +1676,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 04/07 · Cours revu : titres retirés, signes de lecture interactifs (pastilles), audio nom+son, exemple Fātiḥa par lettre, animation harakāt+prolongation par lettre, tachkīl + révélation arabe des termes ; grille des lettres sans défilement ; « disque »→« leçon »';
+const BUILD='maj 05/07b · audio un seul son + écrans silencieux ; Leçon 1 refondue (slides Bienvenue/quiz retirées, titres retirés, consignes réécrites, harakat→alif+haraka, recherche sans dorures, mot madrasa agrandi) — slides 4-5 (voyelles FR + glisser) en attente de validation';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -1812,8 +1807,8 @@ function renderStep(){
   if(!st)return finishDisque();
   {const bl=document.getElementById('backLink');if(bl)bl.style.display=(!st.graded&&qi>0&&!inRetry)?'block':'none';}
   body.scrollTop=0;
-  // lecture à voix haute de l'instruction du dessous (pas le titre)
-  setTimeout(()=>readInstr(spokenInstr(st)),300);
+  // Lecture auto de la consigne RETIRÉE (remarque Myriam 05/07) : « Continuer » et tout
+  // changement d'écran sont silencieux ; le son ne se joue qu'au toucher d'une lettre / mot / 🔊.
 
   if(st.type==='slide'){
     body.innerHTML='<div class="learn"><div class="badge-new">À DÉCOUVRIR</div>'+
@@ -1831,7 +1826,7 @@ function renderStep(){
   }
 
   if(st.type==='combine'){
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 20px">'+st.note+'</div>'+
       '<div class="combine"><span class="cmb" id="cmbA">'+st.a+'</span>'+
         '<span class="cmb-plus">+</span><span class="cmb" id="cmbB">'+st.b+'</span>'+
@@ -1843,7 +1838,7 @@ function renderStep(){
   if(st.type==='harakat3'){
     window._hk=new Set();
     const H=[['\u064E','fatḥa','a','top'],['\u0650','kasra','i','bot'],['\u064F','ḍamma','ou','top']];
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 24px">'+st.note+'</div>'+
       '<div class="hk3">'+H.map((h,i)=>
         '<button class="hkcirc" onclick="hkTap('+i+',this)">'+
@@ -1858,7 +1853,7 @@ function renderStep(){
   if(st.type==='assoc'){
     const set=st.madd?MD:HK;
     window._as={L:st.L,set};
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
       '<div class="assoc-l gold">'+st.L+'</div>'+
       '<div class="assoc-row">'+set.map((s,i)=>
@@ -1871,7 +1866,7 @@ function renderStep(){
   if(st.type==='tapset'){
     const items=st.alphabet?ALPHABET:st.items;
     window._ts=new Set();window._tsN=st.alphabet?3:items.length;
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
       '<div class="tapset'+(st.cols===4?' c4':st.cols===3?' c3':'')+'">'+items.map(it=>
         '<button class="ts-card" onclick="tsTap(\''+it[0]+'\',this)"><span class="ar">'+(it[0]==='ه'?'ﻩ':it[0])+'</span>'+
@@ -1890,13 +1885,13 @@ function renderStep(){
     } else {
       const cl=splitWord(st.word);
       window._fs.need=cl.filter(c=>st.targets.includes(c.b)).length;
-      grid='<div class="verse" style="font-size:44px">'+cl.map((c,i)=>{
+      grid='<div class="verse" style="font-size:88px;line-height:1.5">'+cl.map((c,i)=>{
         const jp=i>0&&joinsL(cl[i-1].b),jn=i<cl.length-1&&joinsL(c.b);
         const disp=(jp?ZWJ:'')+c.b+c.m+(jn?ZWJ:'');
         return '<span class="vl" onclick="fwTap(this,'+(st.targets.includes(c.b)?1:0)+')">'+disp+'</span>';
       }).join('')+'</div>';
     }
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 16px">'+st.note+'</div>'+grid+
       '<div class="hint" id="fs-c" style="text-align:center">0 / '+window._fs.need+'</div>';
     return;
@@ -1904,7 +1899,7 @@ function renderStep(){
 
   if(st.type==='compare'){
     window._cmp=new Set();window._cmpN=st.pairs.length;
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
       st.pairs.map((p,i)=>
         '<div class="cmp-row" onclick="cmpTap('+i+',this,\''+p[0]+'\',\''+p[1]+'\')">'+
@@ -1926,7 +1921,7 @@ function renderStep(){
     } else {
       inner=[...st.word].map((ch,i)=>'<span class="rc" data-i="'+i+'">'+ch+'</span>').join('');
     }
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
       '<div class="readbox '+(st.lang==='ar'?'ar':'')+'" id="readbox" dir="'+st.dir+'">'+inner+'</div>'+
       '<div class="readarrow '+(st.dir==='rtl'?'rtl':'ltr')+'" id="readArrow"><span>→</span></div>';
@@ -1945,7 +1940,7 @@ function renderStep(){
 
   if(st.type==='explore'){
     window._req={};st.items.forEach(it=>window._req[it.say]=0);window._reqMin=st.min;
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 18px">Touche chaque case au moins '+st.min+' fois — et continue autant que tu veux.</div>'+
       '<div class="explore">'+st.items.map(it=>
         '<button class="exp-card" onclick="reqTap(\''+it.say+'\',this)">'+
@@ -1957,7 +1952,7 @@ function renderStep(){
   if(st.type==='formslide'){
     window._fsl=new Set();
     const cells=[[0,'isolée'],[1,'début'],[2,'milieu'],[3,'fin']];
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 16px">'+st.note+'</div>'+
       '<div class="source"><div class="srcL" id="dragSrc">'+st.L+'</div>'+
         '<div class="hint" style="margin-top:6px">Fais glisser la lettre dans chaque case</div></div>'+
@@ -2426,7 +2421,7 @@ function doCombine(res){
   setTimeout(()=>{r.textContent=res;r.classList.add('pop');speakFr(res);ctaOn();},250);
 }
 function hkTap(i,el){
-  speak(['a','i','ou'][i]); // voyelle seule : enregistrement (repli synthèse française si absent)
+  speak(['أَ','إِ','أُ'][i]); // alif + haraka : son court (alif-fatha/kasra/damma-son-court.mp3)
   el.classList.add('lit');popIt(el);
   window._hk.add(i);if(window._hk.size>=3)ctaOn();
 }
@@ -2560,6 +2555,7 @@ function speakFr(t,isNarr){
   try{
     const allowed=isNarr?NARR:SND;
     if(!allowed||!('speechSynthesis'in window))return;
+    stopAudio();
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=.95;u.pitch=1.05;
     const v=bestVoice('fr');if(v)u.voice=v;
@@ -2763,9 +2759,10 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
    enregistrements lettre-<translit>-son.mp3 ; repli synthèse tant qu'ils n'existent pas. ===== */
 const LTRANS={'ا':'alif','ب':'ba','ت':'ta','ث':'tha','ج':'jim','ح':'hha','خ':'kha','د':'dal','ذ':'dhal','ر':'ra','ز':'zay','س':'sin','ش':'shin','ص':'sad','ض':'dad','ط':'tta','ظ':'dha','ع':'ayn','غ':'ghayn','ف':'fa','ق':'qaf','ك':'kaf','ل':'lam','م':'mim','ن':'nun','ه':'ha','و':'waw','ي':'ya'};
 function sayLetterName(L){
+  stopAudio();
   var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); return; }
   try{
-    var a=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'), settled=false;
+    var a=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'); _curAudio=a; var settled=false;
     var fb=function(){ if(settled)return; settled=true; try{_speakSynth(tr);}catch(_){ } };
     a.addEventListener('playing',function(){settled=true;},{once:true});
     a.addEventListener('error',fb,{once:true});
@@ -2774,10 +2771,11 @@ function sayLetterName(L){
   }catch(e){ try{_speakSynth(tr);}catch(_){ } }
 }
 function sayLetterSound(L){
+  stopAudio();
   var tr=LTRANS[letterKey(L)];
   if(!tr){ speak(L); return; }
   try{
-    var a=new Audio('audios-app-alaq/lettre-'+tr+'-son.mp3'), settled=false;
+    var a=new Audio('audios-app-alaq/lettre-'+tr+'-son.mp3'); _curAudio=a; var settled=false;
     var fb=function(){ if(settled)return; settled=true; try{_speakSynth(L);}catch(_){ } };
     a.addEventListener('playing',function(){settled=true;},{once:true});
     a.addEventListener('error',fb,{once:true});
@@ -3216,6 +3214,8 @@ const AUDIO={
   'س':'audios-app-alaq/sin-isolee-nom-de-la-lettre.mp3',
   'د':'audios-app-alaq/dal-isolee-nom-de-la-lettre.mp3',
   'ك':'audios-app-alaq/kaf-isolee-nom-de-la-lettre.mp3',
+  'ذ':'audios-app-alaq/dhal-isolee-nom-de-la-lettre.mp3',
+  'ز':'audios-app-alaq/zay-isolee-nom-de-la-lettre.mp3',
   'سَ':'audios-app-alaq/sin-fatha-son-court.mp3',
   'سِ':'audios-app-alaq/sin-kasra-son-court.mp3',
   'سُ':'audios-app-alaq/sin-damma-son-court.mp3',
@@ -3312,12 +3312,18 @@ function _speakSynth(t){ // repli synthèse : voix arabe si dispo, sinon transli
     }
   }catch(e){}
 }
+let _curAudio=null;
+function stopAudio(){ // un seul son à la fois : coupe le fichier ET la synthèse en cours
+  try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
+  try{ if('speechSynthesis'in window)speechSynthesis.cancel(); }catch(e){}
+}
 function speak(t){
   try{
+    stopAudio();                                    // coupe le son précédent avant d'en jouer un nouveau
     warmVoices();                                   // amorce le moteur vocal (repli IA fiable sur iOS)
     const url=AUDIO[t];
     if(!url){ _speakSynth(t); return; }            // aucun mapping -> synthèse directe
-    const a=new Audio(url);
+    const a=new Audio(url); _curAudio=a;
     let settled=false;
     const toSynth=()=>{ if(settled)return; settled=true; try{a.pause();}catch(_){ } _speakSynth(t); };
     a.addEventListener('playing',()=>{ settled=true; },{once:true}); // le fichier joue : on neutralise tout repli
@@ -3350,11 +3356,12 @@ if(typeof document!=='undefined'&&document.addEventListener){
 }
 function playVerse(i){ // récitation al-ʿAfāsī : fichier auto-hébergé d'abord, everyayah en secours
   try{
-    const a=new Audio('audios-app-alaq/fatiha-'+(i+1)+'.mp3');
+    stopAudio();
+    const a=new Audio('audios-app-alaq/fatiha-'+(i+1)+'.mp3'); _curAudio=a;
     let settled=false;
     const fallback=()=>{ if(settled)return; settled=true;
       try{a.pause();}catch(_){ }
-      const b=new Audio('https://everyayah.com/data/Alafasy_128kbps/00100'+(i+1)+'.mp3');
+      const b=new Audio('https://everyayah.com/data/Alafasy_128kbps/00100'+(i+1)+'.mp3'); _curAudio=b;
       b.play().catch(()=>toast('Audio indisponible hors connexion'));
     };
     a.addEventListener('playing',()=>{settled=true;},{once:true});
@@ -4130,7 +4137,7 @@ function recToggle(){
     if(msg)msg.textContent='🎤 Micro refusé — récite à voix haute, puis valide.';
   });
 }
-function recPlay(){ if(_rec.url){ try{new Audio(_rec.url).play();}catch(e){} } }
+function recPlay(){ if(_rec.url){ try{ stopAudio(); _curAudio=new Audio(_rec.url); _curAudio.play(); }catch(e){} } }
 function recValidate(btn){ if(btn){btn.disabled=true;btn.style.opacity=.5;} okBeep('final'); ctaOn(); }
 
 /* ----- « Appuie sur ce que tu entends » (tuiles de mots du verset) ----- */
