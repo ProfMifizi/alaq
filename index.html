@@ -1694,7 +1694,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 05/07f · sélection en grille = cellule entièrement dorée (tapsets arabes + voyelles françaises) ; bouton « Passer » retiré (bug de lecture résolu)';
+const BUILD='maj 05/07g · révision : consigne « Touche un mot arabe, puis sa traduction » retirée de l’exercice d’association';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -2078,8 +2078,7 @@ function renderStep(){
     const _lp=shuffle(st.pairs.map((_,i)=>i));
     window._mt={pairs:st.pairs, leftPool:_lp, rightPool:derangedOrder(_lp), done:[], sel:null};
     body.innerHTML='<div class="q-title">Associe chaque mot à sa traduction</div>'+
-      '<div class="hint" style="margin:-8px 0 16px;text-align:center">Touche un mot arabe, puis sa traduction.</div>'+
-      '<div id="matchBox"></div>';
+      '<div id="matchBox" style="margin-top:14px"></div>';
     renderMatch();
     return;
   }
