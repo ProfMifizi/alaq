@@ -72,9 +72,11 @@
   @keyframes uhshine{0%,55%{left:-70%}100%{left:140%}}
   .unit-head .uh-main{min-width:0;flex:1}
   .unit-head .uh-top{font-size:10.5px;font-weight:900;letter-spacing:.09em;color:#fff;opacity:.85}
-  .unit-head h2{font-size:14px;font-weight:900;color:#fff;line-height:1.28;margin:1px 0 0}
-  .unit-head .uh-let{font-family:var(--ar);font-size:18px}
+  .unit-head h2{font-size:13px;font-weight:900;color:#fff;line-height:1.3;margin:1px 0 0}
+  .unit-head .uh-l1{display:block;white-space:nowrap}
+  .unit-head .uh-let{font-family:var(--ar);font-size:17px}
   .unit-head .uh-ar{font-family:var(--quran);font-size:16px}
+  .unit-head .uh-sub2{display:block;font-weight:400;font-size:12px;margin-top:3px;opacity:.92}
   .unit-head .uh-sub{font-size:11px;color:#3a2a08;opacity:.82;margin-top:2px}
   .unit-head .uh-burger{margin-left:6px;flex:0 0 auto;background:rgba(0,0,0,.2);border:none;color:#fff;width:40px;height:40px;border-radius:12px;font-size:19px;font-weight:900;cursor:pointer}
   .unit-head .uh-burger:active{transform:scale(.94)}
@@ -1707,7 +1709,7 @@ function renderHome(){
     const lettersAr=U.letters.join(' ');
     BANNERS.push({
       top:'CHAPITRE '+toAr(SR.no||1)+' \u00b7 UNIT\u00c9 '+toAr(U.no),
-      title:'Les lettres <span class="uh-let">'+lettersAr+'</span> \u2014 sourate '+SR.nom+' <span class="uh-ar">'+SR.ar+'</span> \u00b7 '+vN+' versets'
+      title:'<span class="uh-l1">Lettres <span class="uh-let">'+lettersAr+'</span> \u2014 '+arReveal('sourate','\u0633\u0648\u0631\u0629')+' '+arReveal(SR.nom,SR.ar)+'</span><span class="uh-sub2"><span class="uh-ar">'+SR.ar+'</span> \u00b7 '+vN+' versets</span>'
     });
     const sec=document.createElement('div');sec.className='unit-sec';sec.dataset.u=u;sec.style.setProperty('--accent',unitAccent(u));
     // S\u00e9parateur fin et gris\u00e9 avant chaque unit\u00e9 (sauf la 1re, remplac\u00e9e par le bandeau).
