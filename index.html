@@ -94,6 +94,11 @@
   .bwrap{position:relative;width:74px;height:74px;margin:0 auto}
   .bubble{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;border:none;font-weight:900}
   .bubble .bi{font-size:30px;line-height:1;font-family:var(--ar),'Nunito',sans-serif}
+  .bimg{width:42px;height:42px;object-fit:contain;display:block;margin:auto}
+  /* Haut-parleurs : pulsation douce qui invite à toucher (règle Myriam, tous les 🔊) */
+  @keyframes spkpulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(220,144,46,0)}50%{transform:scale(1.07);box-shadow:0 0 0 9px rgba(220,144,46,.14)}}
+  .bigspeak{animation:spkpulse 1.7s ease-in-out infinite}
+  .sopt{display:inline-block;animation:spkpulse 1.7s ease-in-out infinite}
   .done .bubble{background:var(--gold);color:var(--bg);box-shadow:0 6px 0 var(--gold-d)}
   /* Disque « courant » : pièce d'or calligraphique — dégradé bombé + reflet balayé + léger flottement */
   .current .bubble{color:var(--bg);position:relative;overflow:hidden;
@@ -1164,7 +1169,7 @@ function buildMemo(U){
   const q=[];
   U.letters.forEach(L=>q.push({type:'learn',L}));
   q.push({type:'explore',items:U.letters.map(L=>({ar:L,lab:U.alpha[L].n,say:L})),min:3,
-    title:'Mémorise les trois lettres 🎵'});
+    title:''});
   for(let r=0;r<3;r++)shuffle(U.letters).forEach(L=>q.push(mcq({
     prompt:'Écoute… puis touche la bonne lettre',audio:L,graded:true,grid:'grid3',answer:L,
     options:balancePos(shuffle(U.letters).map(x=>({ar:x,key:x})),L)})));
@@ -1361,19 +1366,19 @@ function buildReview(U){
 }
 
 const DISQUES=[
- {icon:'💡',label:'L\u2019alphabet',build:buildAlphabet},
- {icon:'📌',label:'Mémoriser {L}',build:buildMemo},
- {icon:'🕋',label:'Dans la Fātiḥa',build:buildSpot},
- {icon:'📌',label:'Les formes',build:buildForms},
- {icon:'📌',label:'Les harakats',build:buildHarakat},
- {icon:'📌',label:'Les prolongations',build:buildMadd},
- {icon:'🔗',label:'Lire des mots',build:buildWords},
- {icon:'✏️',label:'Écrire des mots',build:buildWrite},
- {icon:'🏆',label:'Bilan',build:buildBilan},
+ {icon:'💡',img:'images-app-alaq/icone-alaq-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
+ {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
+ {icon:'🕋',img:'images-app-alaq/icone-alaq-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
+ {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les formes',build:buildForms},
+ {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les harakats',build:buildHarakat},
+ {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les prolongations',build:buildMadd},
+ {icon:'🔗',img:'images-app-alaq/icone-alaq-lire.png',label:'Lire des mots',build:buildWords},
+ {icon:'✏️',img:'images-app-alaq/icone-alaq-ecrire.png',label:'Écrire des mots',build:buildWrite},
+ {icon:'🏆',img:'images-app-alaq/icone-alaq-bilan.png',label:'Bilan',build:buildBilan},
 ];
 
 // Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
-const REVISION_DISC={icon:'🔄',label:'Révision',build:buildReview};
+const REVISION_DISC={icon:'🔄',img:'images-app-alaq/icone-alaq-reviser.png',label:'Révision',build:buildReview};
 // Disque propre à l'unité « lettres faibles » — contenu (support/prolongation + hamza
 // et son siège) à construire avec le reste de l'unité 2.
 function buildLettreVsProlong(U){
@@ -1434,7 +1439,7 @@ function buildLettreVsProlong(U){
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
-const LETTREVSPRO_DISC={icon:'💡',label:'Lettres vs prolongations',build:buildLettreVsProlong};
+const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
 function discsFor(u){
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
@@ -1712,7 +1717,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 05/07i · barre du haut : ordre 🔥 ❤️ lampe ; rang 1 en pierre chaude (le gris faisait éteint)';
+const BUILD='maj 05/07j · icônes maison sur les disques de l’accueil ; Leçon 2 : repères retirés, consignes raccourcies, haut-parleurs pulsants (règle générale), consignes 🔊 retirées, tracé épuré';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -1763,14 +1768,14 @@ function renderHome(){
         node.className='node '+(done?'done':current?'current':'locked');
         node.innerHTML='<div class="bwrap"><div class="ring"></div>'+
           '<button class="bubble" '+(unlocked?'':'disabled')+' aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-            '<span class="bi"'+(unlocked?'':' style="opacity:.4;filter:grayscale(1)"')+'>'+d.icon+'</span>'+
+            '<span class="bi"'+(unlocked?'':' style="opacity:.4;filter:grayscale(1)"')+'>'+(d.img?'<img class="bimg" src="'+d.img+'" alt="">':d.icon)+'</span>'+
             (done?'<span class="check">\u2713</span>':'')+
           '</button></div>';
         if(unlocked)node.querySelector('.bubble').onclick=()=>startDisque(u,i);
       } else {
         node.className='node locked';
         node.innerHTML='<div class="bwrap"><button class="bubble" disabled aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-          '<span class="bi" style="opacity:.4;filter:grayscale(1)">'+d.icon+'</span></button></div>';
+          '<span class="bi" style="opacity:.4;filter:grayscale(1)">'+(d.img?'<img class="bimg" src="'+d.img+'" alt="">':d.icon)+'</span></button></div>';
       }
       path.appendChild(node);
     });
@@ -1991,15 +1996,15 @@ function renderStep(){
     const d=UNITS[curU].alpha[st.L];
     body.innerHTML='<div class="learn"><div class="badge-new">NOUVELLE LETTRE</div>'+
       '<button class="ar-tap" onclick="speak(\''+st.L+'\');popIt(this);ctaOn()">'+st.L+'</button>'+
-      '<div class="nm">'+d.n+'</div><div class="son">'+d.son+'</div><div class="mn">'+d.mn+'</div>'+
-      '<div class="hint">👆 Touche la lettre et écoute son nom au moins une fois</div></div>';
+      '<div class="nm">'+d.n+'</div><div class="son">'+d.son+'</div>'+
+      '<div class="hint">Touche la lettre pour écouter son nom</div></div>';
     return;
   }
 
   if(st.type==='explore'){
     window._req={};st.items.forEach(it=>window._req[it.say]=0);window._reqMin=st.min;
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 18px">Touche chaque case au moins '+st.min+' fois — et continue autant que tu veux.</div>'+
+      '<div class="hint" style="margin:-8px 0 18px">Touche chaque lettre au moins trois fois.</div>'+
       '<div class="explore">'+st.items.map(it=>
         '<button class="exp-card" onclick="reqTap(\''+it.say+'\',this)">'+
           '<span class="ar">'+it.ar+'</span><span class="enm">'+it.lab+'</span>'+
@@ -2107,7 +2112,7 @@ function renderStep(){
     const posName={1:'au début',2:'au milieu',3:'à la fin'}[st.pos]||'isolée';
     const posGlyph=(!st.pos&&st.L==='ه')?'ﻩ':(st.pos?formGlyph(st.L,st.pos):st.L);
     body.innerHTML='<div class="q-title">À toi d\u2019écrire : '+posGlyph+' ('+d.n+' · '+posName+')</div>'+
-      '<div class="hint" style="margin:-8px 0 14px">Pose ton doigt sur le point vert et suis le chemin de la lettre jusqu\u2019au bout. Astuce : '+d.mn+'.</div>'+
+
       '<canvas id="trace" class="trace"></canvas>'+
       '<div class="hint" id="traceMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
       '<div class="trow">'+
@@ -2207,7 +2212,6 @@ function renderStep(){
     body.innerHTML='<div class="q-title">Appuie sur ce que tu entends 🕋</div>'+
       '<div class="hint" style="margin:-8px 0 14px">Écoute le verset, puis reconstruis-le en touchant les mots dans l\u2019ordre. Les mots gris sont posés pour toi : leurs lettres viendront plus tard.</div>'+
       '<button class="bigspeak" onclick="playVerse('+vt.vi+')">🔊</button>'+
-      '<div class="hint" style="text-align:center;margin:-10px 0 16px">Touche le haut-parleur pour réécouter (al-ʿAfāsī)</div>'+
       '<div class="verse" id="vtSlots" style="font-size:30px;line-height:2"></div>'+
       '<div class="tiles" id="vtTiles" style="margin-top:14px;flex-wrap:wrap">'+tiles.map((w,k)=>
         '<button class="tile" id="vtile'+k+'" style="width:auto;min-width:64px;padding:0 14px;font-size:26px;font-family:var(--quran)" onclick="vtTap('+k+',this)" data-w="'+w+'">'+w+'</button>').join('')+'</div>'+
@@ -2220,12 +2224,10 @@ function renderStep(){
   /* mcq */
   cta.textContent='VÉRIFIER';cta.onclick=ctaClick;
   let html='<div class="q-title">'+st.prompt+'</div>';
-  if(st.audio)html+='<button class="bigspeak" onclick="speak(\''+st.audio+'\')">🔊</button>'+
-    '<div class="hint" style="text-align:center;margin:-10px 0 18px">Touche le haut-parleur pour réécouter</div>';
+  if(st.audio)html+='<button class="bigspeak" onclick="speak(\''+st.audio+'\')">🔊</button>';
   if(st.glyph){html+='<div class="glyph-big'+(st.glyphLinear?' linear-ar':'')+'">'+st.glyph+'</div>';}
   if(st.emo)html+='<div style="text-align:center;font-size:40px;margin:-6px 0 0">'+st.emo+'</div>';
   if(st.fr)html+='<div class="fr" style="text-align:center;margin:2px 0 10px">'+st.fr+'</div>';
-  if(st.options.some(o=>o.snd))html+='<div class="hint" style="text-align:center;margin:-6px 0 16px">👇 Touche les haut-parleurs pour écouter les sons, choisis, puis valide</div>';
   html+='<div class="opts'+(st.grid?' '+st.grid:'')+'" id="opts"></div>';
   st.options=balancePos(st.options,st.answer);
   body.innerHTML=html;
