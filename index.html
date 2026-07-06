@@ -54,8 +54,9 @@
   .stat{display:flex;align-items:center;gap:5px}
   .sndtog{background:none;border:none;font-size:18px;line-height:1;padding:0 2px;cursor:pointer}
   .back-link{display:none;background:none;border:none;color:var(--muted);font-weight:800;font-size:14px;margin:0 0 10px;cursor:pointer}
-  .narr-link{display:block;width:100%;background:none;border:none;color:var(--muted);
-    font-weight:800;font-size:13px;padding:2px 0 12px;text-align:center;cursor:pointer;letter-spacing:.02em}
+  .p-foot{position:relative}
+  .narr-link{position:absolute;right:14px;top:8px;width:auto;background:none;border:none;color:var(--muted);
+    font-size:24px;padding:6px 8px;cursor:pointer;line-height:1;z-index:2}
   .narr-link:active{color:var(--gold2)}
 
   /* ====== Parcours ====== */
@@ -95,10 +96,6 @@
   .bubble{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;border:none;font-weight:900}
   .bubble .bi{font-size:30px;line-height:1;font-family:var(--ar),'Nunito',sans-serif}
   .bimg{width:42px;height:42px;object-fit:contain;display:block;margin:auto}
-  /* Haut-parleurs : pulsation douce qui invite à toucher (règle Myriam, tous les 🔊) */
-  @keyframes spkpulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(220,144,46,0)}50%{transform:scale(1.07);box-shadow:0 0 0 9px rgba(220,144,46,.14)}}
-  .bigspeak{animation:spkpulse 1.7s ease-in-out infinite}
-  .sopt{display:inline-block;animation:spkpulse 1.7s ease-in-out infinite}
   .done .bubble{background:var(--gold);color:var(--bg);box-shadow:0 6px 0 var(--gold-d)}
   /* Disque « courant » : pièce d'or calligraphique — dégradé bombé + reflet balayé + léger flottement */
   .current .bubble{color:var(--bg);position:relative;overflow:hidden;
@@ -1215,7 +1212,7 @@ function buildHarakat(U){
   U.letters.forEach(L=>{
     const syls=HK.map(h=>L+h[0]);
     q.push({type:'explore',items:HK.map(h=>({ar:L+h[0],lab:U.lat[L]+h[1],say:L+h[0]})),min:3,
-      title:'Écoute et mémorise : '+U.alpha[L].n+' habillée 🎵'});
+      title:''});
     // 3 tours : écoute → bonne syllabe
     for(let r=0;r<3;r++){
       const a1=syls[r%syls.length];
@@ -1249,7 +1246,7 @@ function buildMadd(U){
   U.letters.forEach(L=>{
     const syls=MD.map(m=>maddSyl(L,m[0]));
     q.push({type:'explore',items:MD.map(m=>({ar:maddSyl(L,m[0]),lab:U.lat[L]+m[1],say:maddSyl(L,m[0])})),min:3,
-      title:'Le son qui s\u2019étire : '+U.alpha[L].n+' 〰️'});
+      title:''});
     for(let r=0;r<3;r++){
       const a1=syls[r%syls.length];
       q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a1,graded:true,grid:'grid3',answer:a1,
@@ -1496,7 +1493,7 @@ function doReset(){
 }
 function syncNarrLink(){
   const l=document.getElementById('narrLink');
-  if(l)l.textContent=NARR?'🔇 Désactiver la lecture des instructions':'🗣️ Activer la lecture des instructions';
+  if(l){ l.textContent=NARR?'🗣️':'🔇'; l.title=NARR?'Désactiver la lecture des instructions':'Activer la lecture des instructions'; }
 }
 function _normInstr(t){ return String(t)
   .replace(/<[^>]+>/g,' ')
@@ -1509,7 +1506,7 @@ const INSTR_LIST=[
   ['ecoute-reponse','Écoute, puis touche la bonne réponse'],
   ['hp-choisis','Touche les haut-parleurs, écoute, puis choisis'],
   ['choisis','Choisis la bonne réponse'],
-  ['lettre-nom','Touche la lettre et écoute son nom au moins une fois'],
+  ['lettre-nom','Touche la lettre pour écouter son nom'],
   ['costumes','Touche les quatre costumes de la lettre'],
   ['spot-verset','Touche toutes les lettres demandées dans le verset'],
   ['mot-ecoute','Touche le mot et écoute-le au moins une fois'],
@@ -1522,7 +1519,7 @@ const INSTR_LIST=[
   ['stiles','Touche les versets dans l\u2019ordre de la sourate'],
   ['vwrite','Le verset se construit sous tes yeux : écris chaque mot avec ses harakats'],
   ['explore-3','Touche au moins 3 lettres pour les entendre.'],
-  ['explore-cases','Touche chaque case au moins 3 fois — et continue autant que tu veux.'],
+  ['explore-cases','Touche chaque lettre au moins trois fois.'],
   ['combine','Pour former un son, on associe souvent une consonne et une voyelle. Touche pour assembler.'],
   ['haraka-intro','À la place, un petit signe habille la lettre : le <b>haraka</b>. Il en existe trois. Touche chaque signe pour entendre son son.'],
   ['assoc-haraka','Associe la lettre à chaque haraka et écoute la syllabe obtenue.'],
@@ -1559,14 +1556,15 @@ function readInstr(t){ // narration de l'instruction — coupée par NARR unique
   if(!url){ speakFr(plain,true); return; }       // pas d'enregistrement -> voix de synthèse
   try{
     stopAudio();
+    const gen=_sndGen;
     const a=new Audio(url); _curAudio=a; let settled=false;
-    const toTTS=()=>{ if(settled)return; settled=true; try{a.pause();}catch(_){ } speakFr(plain,true); };
+    const toTTS=()=>{ if(settled||gen!==_sndGen)return; settled=true; try{a.pause();}catch(_){ } speakFr(plain,true); };
     a.addEventListener('playing',()=>{ settled=true; },{once:true});
     a.addEventListener('error',toTTS,{once:true});
     a.addEventListener('stalled',toTTS,{once:true});
     a.addEventListener('abort',toTTS,{once:true});
     const p=a.play(); if(p&&p.catch)p.catch(toTTS);
-    setTimeout(()=>{ if(!settled&&a.paused)toTTS(); },1100);
+    setTimeout(()=>{ if(!settled&&gen===_sndGen&&a.paused)toTTS(); },1100);
   }catch(e){ speakFr(plain,true); }
 }
 function spokenInstr(st){
@@ -1575,14 +1573,14 @@ function spokenInstr(st){
   switch(st.type){
     case 'slide': return st.html;
     case 'info': return st.html;
-    case 'learn': return 'Touche la lettre et écoute son nom au moins une fois';
-    case 'formsintro': return 'Touche les quatre costumes de la lettre';
+    case 'learn': return 'Touche la lettre pour écouter son nom';
+    case 'formsintro': return 'Selon sa place dans le mot, la lettre change de forme : touche ses 4 formes.';
     case 'spot': return 'Touche toutes les lettres demandées dans le verset';
     case 'wordcard': return 'Touche le mot et écoute-le au moins une fois';
     case 'assemble': return st.fromFr?'Écris ce mot en arabe avec les lettres':'Écoute, puis écris le mot avec les lettres';
-    case 'match': return 'Associe chaque mot arabe à sa traduction';
-    case 'trace': return 'Pose ton doigt sur le point vert et suis le chemin de la lettre';
-    case 'vtiles': return 'Écoute le verset, puis touche les mots dans l\u2019ordre';
+    case 'match': return 'Associe chaque mot à sa traduction';
+    case 'trace': return '';
+    case 'vtiles': return 'Appuie sur ce que tu entends';
     case 'recite': return 'Écoute le modèle, enregistre-toi, ré-écoute-toi et compare, puis valide';
     case 'stiles': return 'Touche les versets dans l\u2019ordre de la sourate';
     case 'vwrite': return 'Le verset se construit sous tes yeux : écris chaque mot avec ses harakats';
@@ -1590,7 +1588,7 @@ function spokenInstr(st){
       if(st.audio)return 'Écoute, puis touche la bonne réponse';
       if(st.options&&st.options.some&&st.options.some(o=>o.snd))return 'Touche les haut-parleurs, écoute, puis choisis';
       return 'Choisis la bonne réponse';
-    case 'explore': return 'Touche chaque case au moins 3 fois — et continue autant que tu veux.';
+    case 'explore': return 'Touche chaque lettre au moins trois fois.';
     default: return ''; // jamais de titre
   }
 }
@@ -1717,7 +1715,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 05/07j · icônes maison sur les disques de l’accueil ; Leçon 2 : repères retirés, consignes raccourcies, haut-parleurs pulsants (règle générale), consignes 🔊 retirées, tracé épuré';
+const BUILD='maj 06/07 · pulsation 🔊 retirée ; Continuer 100% muet (stopAudio + fin du rejeu à la révélation) ; crochet son de récompense (sfx-bonne-reponse.mp3) ; toggle 🗣️/🔇 icône seule à droite ; une consigne par écran, LUE automatiquement (dédupliquée)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -1833,7 +1831,7 @@ function startDisque(u,i){
 function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();REVIEW=false;REVSES=null;returnFromPlayer();}
 function progress(){document.getElementById('pbar-i').style.width=
   (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
-function advance(){qi++;renderStep();}
+function advance(){stopAudio();qi++;renderStep();}
 function prevStep(){if(inRetry||qi<=0)return;speechSynthesis&&speechSynthesis.cancel();qi--;renderStep();}
 
 function renderStep(){
@@ -1848,8 +1846,12 @@ function renderStep(){
   if(!st)return finishDisque();
   {const bl=document.getElementById('backLink');if(bl)bl.style.display=(!st.graded&&qi>0&&!inRetry)?'block':'none';}
   body.scrollTop=0;
-  // Lecture auto de la consigne RETIRÉE (remarque Myriam 05/07) : « Continuer » et tout
-  // changement d'écran sont silencieux ; le son ne se joue qu'au toucher d'une lettre / mot / 🔊.
+  // Lecture auto de la CONSIGNE (une ligne par écran, demande Myriam 06/07) — jamais relue
+  // si c'est la même que l'écran précédent (séries de quiz), coupée par le toggle 🗣️/🔇.
+  if(qi===0)window._lastInstr='';
+  {const _ins=spokenInstr(st);
+   if(_ins&&_ins!==window._lastInstr)setTimeout(()=>readInstr(_ins),250);
+   window._lastInstr=_ins;}
 
   if(st.type==='slide'){
     body.innerHTML='<div class="learn"><div class="badge-new">À DÉCOUVRIR</div>'+
@@ -2029,8 +2031,7 @@ function renderStep(){
   if(st.type==='formsintro'){
     const d=UNITS[curU].alpha[st.L];window._fi=0;
     const cells=[[0,'isolée'],[1,'au début'],[2,'au milieu'],[3,'à la fin']];
-    body.innerHTML='<div class="q-title">Les 4 costumes de '+d.n+' 🎭</div>'+
-      '<div class="hint" style="margin:-8px 0 16px">Selon sa place dans le mot, la lettre change de forme. Touche les 4 costumes.</div>'+
+    body.innerHTML='<div class="hint" style="margin:0 0 16px">Selon sa place dans le mot, la lettre change de forme : touche ses 4 formes.</div>'+
       '<div class="frow">'+cells.map(c=>
         '<button class="fcell" onclick="fiTap(this,\''+st.L+'\')"><span class="ar">'+formGlyph(st.L,c[0])+'</span>'+
         '<span class="fl">'+c[1]+'</span></button>').join('')+'</div>';
@@ -2210,7 +2211,7 @@ function renderStep(){
     window._vt={seq:vt.seq,ch:[],tpl:vt.tpl,vi:vt.vi};
     const tiles=shuffle(vt.seq.concat(vt.distract||[]));
     body.innerHTML='<div class="q-title">Appuie sur ce que tu entends 🕋</div>'+
-      '<div class="hint" style="margin:-8px 0 14px">Écoute le verset, puis reconstruis-le en touchant les mots dans l\u2019ordre. Les mots gris sont posés pour toi : leurs lettres viendront plus tard.</div>'+
+
       '<button class="bigspeak" onclick="playVerse('+vt.vi+')">🔊</button>'+
       '<div class="verse" id="vtSlots" style="font-size:30px;line-height:2"></div>'+
       '<div class="tiles" id="vtTiles" style="margin-top:14px;flex-wrap:wrap">'+tiles.map((w,k)=>
@@ -2294,7 +2295,7 @@ function ctaClick(){
     opts.forEach((o,k)=>{o.disabled=true;
       if(st.options[k].key===st.answer)o.classList.add('ok');
       else if(k===picked)o.classList.add('bad');});
-    if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله';}
+    if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله';playSfx('bonne-reponse');}
     else{
       const good=st.options.find(o=>o.key===st.answer);
       fb.className='fb bad';
@@ -2302,9 +2303,6 @@ function ctaClick(){
       fb.innerHTML='<span>✕</span> Réponse : '+(show!==null?'<span class="ar" style="font-size:26px">'+show+'</span>':good.txt);
       if(SND&&good.snd!==undefined)speak(st.answer);
     }
-    // Reconnaissance visuelle (forme déguisée, lecture de mot) : on rejoue le son de la lettre/mot À LA RÉVÉLATION,
-    // jamais avant — sinon la réponse serait donnée. Renforce l’association forme ↔ son après coup.
-    if(SND&&st.glyph!==undefined&&/[\u0600-\u06FF]/.test(String(st.answer)))speak(st.answer);
   }
   // mémoire des erreurs (répétition espacée) : +1 si raté, -1 si su
   if(st.graded){
@@ -3441,6 +3439,9 @@ function _speakSynth(t){ // repli synthèse : voix arabe pour l'arabe, voix fran
   }catch(e){}
 }
 let _curAudio=null,_sndGen=0; // _sndGen = jeton de génération : tout repli/minuterie d'un ancien son est annulé
+function playSfx(name){ // son de récompense : joue audios-app-alaq/sfx-<name>.mp3 s'il existe, sinon SILENCE (aucun repli)
+  try{ stopAudio(); const a=new Audio('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
+}
 function stopAudio(){ // un seul son à la fois : coupe le fichier ET la synthèse, et invalide les replis en attente
   _sndGen++;
   try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
