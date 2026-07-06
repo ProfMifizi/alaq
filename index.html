@@ -727,6 +727,7 @@
 .acc-all{display:block;margin:0 0 12px auto;background:none;border:1px solid var(--line);color:var(--gold2);border-radius:999px;
   padding:7px 15px;font-family:var(--ui);font-weight:800;font-size:12px;cursor:pointer}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -1450,7 +1451,82 @@ function discsFor(u){
 const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
 const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null};
 function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
-function save(){try{localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){}}
+function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} cloudSaveSoon();}
+
+/* ===== Phase A : compte & progression dans le nuage (Supabase) =====
+   L'app reste 100 % fonctionnelle hors ligne et sans compte : le localStorage
+   est la source immédiate, le nuage est une copie synchronisée en arrière-plan. */
+const SUPA_URL='https://ykggxipgirgjwhhxmhbn.supabase.co';
+const SUPA_ANON='sb_publishable_IpnRJf3j3JfyRhQ0WWSeww_V5ctBrkh'; // clé PUBLIQUE (la RLS protège les données)
+let SB=null; try{ if(window.supabase)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON); }catch(e){}
+const CLOUD={user:null};
+let _syncT=null;
+function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
+async function cloudSaveNow(){
+  try{ if(!SB||!CLOUD.user)return;
+    await SB.from('profiles').upsert({user_id:CLOUD.user.id, state:S, updated_at:new Date().toISOString()});
+  }catch(e){}
+}
+async function cloudPull(){ // fusion : le plus récent gagne ; premier login = on pousse l'état local
+  try{ if(!SB||!CLOUD.user)return;
+    const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
+    const remote=r&&r.data&&r.data.state;
+    if(remote&&(remote._ts||0)>(S._ts||0)){
+      S=Object.assign({},DEF,remote);
+      S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};
+      try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
+      try{refreshStats();renderHome();}catch(e){}
+    } else { cloudSaveNow(); }
+  }catch(e){}
+}
+async function cloudInit(){
+  if(!SB)return;
+  try{
+    const g=await SB.auth.getSession();
+    const sess=g&&g.data&&g.data.session;
+    if(sess&&sess.user){ CLOUD.user=sess.user; cloudPull(); }
+    SB.auth.onAuthStateChange((ev,se)=>{ CLOUD.user=(se&&se.user)||null; if(_progVisible())renderProg(); });
+  }catch(e){}
+}
+async function cloudSendCode(btn){
+  const em=((document.getElementById('cloudEmail')||{}).value||'').trim();
+  if(!SB){toast('Connexion indisponible hors ligne');return;}
+  if(!/^\S+@\S+\.\S+$/.test(em)){toast('E-mail invalide 🤔');return;}
+  if(btn)btn.disabled=true;
+  try{
+    const r=await SB.auth.signInWithOtp({email:em});
+    if(r&&r.error)throw r.error;
+    window._cloudEmail=em;
+    const z=document.getElementById('cloudStep2'); if(z)z.style.display='block';
+    toast('Code envoyé — regarde tes e-mails 📧');
+  }catch(e){ toast('Envoi impossible — réessaie dans une minute'); }
+  if(btn)btn.disabled=false;
+}
+async function cloudVerify(){
+  const code=((document.getElementById('cloudCode')||{}).value||'').trim();
+  if(!SB||!window._cloudEmail||code.length<6){toast('Saisis le code reçu par e-mail');return;}
+  try{
+    const r=await SB.auth.verifyOtp({email:window._cloudEmail, token:code, type:'email'});
+    if(r&&r.error)throw r.error;
+    CLOUD.user=r.data&&r.data.user;
+    toast('Connectée, ماشاء الله ✨');
+    await cloudPull(); renderProg();
+  }catch(e){ toast('Code invalide ou expiré'); }
+}
+async function cloudLogout(){ try{ if(SB)await SB.auth.signOut(); }catch(e){} CLOUD.user=null; renderProg(); }
+function cloudCardHTML(){
+  const inp='width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px';
+  if(!SB)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0">Connexion indisponible hors ligne — ta progression reste enregistrée sur cet appareil.</p>';
+  if(CLOUD.user)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Connectée : <b style="color:var(--cream)">'+(CLOUD.user.email||'')+'</b><br>Ta progression se sauvegarde toute seule sur tous tes appareils.</p>'+
+    '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line)" onclick="cloudLogout()">Se déconnecter</button>';
+  return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Connecte-toi pour retrouver ta progression sur tous tes appareils.</p>'+
+    '<input id="cloudEmail" type="email" autocomplete="email" placeholder="Ton e-mail" style="'+inp+'">'+
+    '<button class="cbtn" style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
+    '<div id="cloudStep2" style="display:none;margin-top:10px">'+
+      '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" style="'+inp+';letter-spacing:.2em;text-align:center">'+
+      '<button class="cbtn" style="margin-top:8px" onclick="cloudVerify()">✅ Me connecter</button>'+
+    '</div>';
+}
 let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
@@ -1715,7 +1791,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 06/07 · pulsation 🔊 retirée ; Continuer 100% muet (stopAudio + fin du rejeu à la révélation) ; crochet son de récompense (sfx-bonne-reponse.mp3) ; toggle 🗣️/🔇 icône seule à droite ; une consigne par écran, LUE automatiquement (dédupliquée)';
+const BUILD='maj 06/07b · Phase A : compte par e-mail (code à 6 chiffres) + progression synchronisée dans le nuage (Supabase), fusion « le plus récent gagne », app 100% fonctionnelle hors ligne';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -3868,6 +3944,7 @@ function renderProg(){
     }
     return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
   })();
+  h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
   h+='<div class="ccard"><div class="ctt"><h3>💾 Sauvegarde</h3></div>'+
      '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Copie ton code pour retrouver ta progression sur un autre appareil.</p>'+
      '<button class="cbtn" style="margin:0 0 8px" onclick="exportSave(this)">📋 Copier mon code de sauvegarde</button>'+
@@ -4446,6 +4523,7 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
 }
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
   const n=document.getElementById('narrtog');if(n)n.textContent=NARR?'🗣️':'🚫';})();
+cloudInit();
 refreshStats();
 showTab('home');
 </script>
