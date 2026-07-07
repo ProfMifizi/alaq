@@ -1471,12 +1471,19 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
   try{ if(!SB||!CLOUD.user)return;
     const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
     const remote=r&&r.data&&r.data.state;
-    if(remote&&(remote._ts||0)>(S._ts||0)){
-      S=Object.assign({},DEF,remote);
+    // Appareil fraîchement déconnecté (_fresh) : le NUAGE fait foi quel que soit son âge —
+    // sinon l'état vide (horodaté « maintenant ») écraserait la progression du compte.
+    const takeRemote=remote&&(S._fresh?true:(remote._ts||0)>(S._ts||0));
+    delete S._fresh;
+    if(takeRemote){
+      S=Object.assign({},DEF,remote); delete S._fresh;
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
       try{refreshStats();renderHome();}catch(e){}
-    } else { cloudSaveNow(); }
+    } else {
+      try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
+      cloudSaveNow();
+    }
   }catch(e){}
 }
 async function cloudInit(){
@@ -1513,14 +1520,23 @@ async function cloudVerify(){
     await cloudPull(); renderProg();
   }catch(e){ toast('Code invalide ou expiré'); }
 }
-async function cloudLogout(){ try{ if(SB)await SB.auth.signOut(); }catch(e){} CLOUD.user=null; renderProg(); }
+async function cloudLogout(){
+  // Sécurité comptes : la progression de CE compte ne doit JAMAIS être héritée
+  // par le prochain compte connecté sur le même appareil. On vide la mémoire
+  // locale puis on RECHARGE l'app : tout repart par le circuit normal de
+  // démarrage (état neuf, structures internes réinitialisées, tutos compris).
+  try{ if(SB)await SB.auth.signOut(); }catch(e){}
+  CLOUD.user=null;
+  try{ clearTimeout(_syncT); }catch(e){}
+  try{ localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){} // appareil marqué « vierge » : au prochain login, le nuage fait foi
+  location.reload();
+}
 function cloudCardHTML(){
   const inp='width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px';
   if(!SB)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0">Connexion indisponible hors ligne — ta progression reste enregistrée sur cet appareil.</p>';
   if(CLOUD.user)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Connectée : <b style="color:var(--cream)">'+(CLOUD.user.email||'')+'</b><br>Ta progression se sauvegarde toute seule sur tous tes appareils.</p>'+
     '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line)" onclick="cloudLogout()">Se déconnecter</button>';
-  return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Connecte-toi pour retrouver ta progression sur tous tes appareils.</p>'+
-    '<input id="cloudEmail" type="email" autocomplete="email" placeholder="Ton e-mail" style="'+inp+'">'+
+  return '<input id="cloudEmail" type="email" autocomplete="email" placeholder="Ton e-mail" style="'+inp+'">'+
     '<button class="cbtn" style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
     '<div id="cloudStep2" style="display:none;margin-top:10px">'+
       '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" style="'+inp+';letter-spacing:.2em;text-align:center">'+
@@ -1791,7 +1807,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 06/07b · Phase A : compte par e-mail (code à 6 chiffres) + progression synchronisée dans le nuage (Supabase), fusion « le plus récent gagne », app 100% fonctionnelle hors ligne';
+const BUILD='maj 07/07 · déconnexion = appareil remis à zéro (rechargement complet, plus aucun héritage de progression entre comptes) ; carte Sauvegarde ALAQ1 masquée quand un compte est connecté';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -3945,7 +3961,9 @@ function renderProg(){
     return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
   })();
   h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
-  h+='<div class="ccard"><div class="ctt"><h3>💾 Sauvegarde</h3></div>'+
+  // Carte masquée quand connectée : le nuage s'en charge, et restaurer un code
+  // ALAQ1 d'une autre personne contaminerait le compte connecté.
+  if(!CLOUD.user)h+='<div class="ccard"><div class="ctt"><h3>💾 Sauvegarde</h3></div>'+
      '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Copie ton code pour retrouver ta progression sur un autre appareil.</p>'+
      '<button class="cbtn" style="margin:0 0 8px" onclick="exportSave(this)">📋 Copier mon code de sauvegarde</button>'+
      '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line)" onclick="toggleRestore()">↘️ J\u2019ai un code à restaurer</button>'+
