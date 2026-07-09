@@ -783,11 +783,9 @@
 <div class="finish" id="noHearts">
   <div class="big">💔</div>
   <h2>Plus de cœurs !</h2>
-  <p style="max-width:330px;color:var(--cream);opacity:.85;margin:-14px 0 8px">Sept erreurs — comme les sept versets de la Fātiḥa qui se répètent :
-  c'est le signe qu'une petite révision fera du bien, in shā' Allah.</p>
-  <p style="max-width:330px;color:var(--muted);font-size:14px;margin:0 0 26px">Termine une révision de vocabulaire pour recharger tes 7 cœurs — ou reviens demain, ils seront remplis.</p>
-  <button class="cta" style="max-width:300px" onclick="noHeartsReview()">🔄 RÉVISER ET RECHARGER MES CŒURS</button>
-  <button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="closeNoHearts()">PLUS TARD</button>
+  <p id="nh-msg1" style="max-width:330px;color:var(--cream);opacity:.85;margin:-14px 0 8px"></p>
+  <p id="nh-msg2" style="max-width:330px;color:var(--muted);font-size:14px;margin:0 0 22px"></p>
+  <div id="nh-actions" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1570,9 +1568,27 @@ function toggleNarr(){
   syncNarrLink();
   if(!NARR&&'speechSynthesis'in window)speechSynthesis.cancel();
 }
-function showNoHearts(){ document.getElementById('noHearts').classList.add('on'); S.bigNext=1; save(); } // la révision de secours donnera +3
+function currentLesson(){ // 1re leçon non terminée d'une unité débloquée = le disque « courant » de l'accueil
+  for(let u=0;u<UNITS.length;u++){ if(!unitUnlocked(u))continue;
+    const ds=discsFor(u);
+    for(let k=0;k<ds.length;k++){ if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)])return {u:u,i:k}; }
+  }
+  return null;
+}
+function showNoHearts(){
+  const hasRev=allReviewWords().length>0, L=currentLesson();
+  document.getElementById('nh-msg1').textContent="Sept erreurs — comme les sept versets de la Fātiḥa. "+(hasRev?"Une petite révision fera du bien, in shā' Allah.":"Pas de panique : on répare tout de suite, in shā' Allah.");
+  document.getElementById('nh-msg2').textContent=hasRev?"Révise ton vocabulaire ou refais ta leçon pour recharger tes 7 cœurs.":"Refais ta leçon en cours pour regagner tes cœurs — ou reviens demain, ils seront remplis.";
+  let h='';
+  if(hasRev)h+='<button class="cta" style="max-width:300px" onclick="noHeartsReview()">🔄 RÉVISER ET RECHARGER</button>';
+  if(L)h+='<button class="cta" style="max-width:300px'+(hasRev?';background:none;color:var(--gold2);border:2px solid var(--gold-d);margin-top:10px':'')+'" onclick="noHeartsRedo()">🔁 REFAIRE MA LEÇON · +3 ❤️</button>';
+  h+='<button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="closeNoHearts()">PLUS TARD</button>';
+  document.getElementById('nh-actions').innerHTML=h;
+  document.getElementById('noHearts').classList.add('on'); S.bigNext=1; save(); // la 1re recharge (révision OU reprise) donnera +3
+}
 function closeNoHearts(){ document.getElementById('noHearts').classList.remove('on'); }
 function noHeartsReview(){ closeNoHearts(); startReview(); }
+function noHeartsRedo(){ const L=currentLesson(); closeNoHearts(); if(L)startDisque(L.u,L.i,true); } // reprise « sans risque » de la leçon en cours
 function goNoHearts(){ document.getElementById('player').classList.remove('on'); showNoHearts(); }
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
@@ -1807,7 +1823,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 07/07b · ancien code de sauvegarde ALAQ1 retiré (le compte e-mail le remplace ; on n’encourage plus une sauvegarde sans compte)';
+const BUILD='maj 09/07 · Plus de cœurs : « Refaire ma leçon » recharge +3 (sans risque) même sans vocabulaire à réviser';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -1910,8 +1926,9 @@ function onHomeScroll(){
 /* ================= JOUEUR ================= */
 let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,MISSED=[],inRetry=false,EXAM=false;
 
-function startDisque(u,i){
-  if(S.hearts<=0){showNoHearts();return;}
+function startDisque(u,i,recharge){
+  if(!recharge&&S.hearts<=0){showNoHearts();return;}
+  RECHARGE=!!recharge; // reprise depuis « Plus de cœurs » : aucune vie perdue, +3 à la fin
   EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
@@ -1920,7 +1937,7 @@ function startDisque(u,i){
   total=QUEUE.filter(s=>s.graded).length;
   renderStep();
 }
-function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();REVIEW=false;REVSES=null;returnFromPlayer();}
+function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();REVIEW=false;REVSES=null;RECHARGE=false;returnFromPlayer();}
 function progress(){document.getElementById('pbar-i').style.width=
   (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
 function advance(){stopAudio();qi++;renderStep();}
@@ -2415,14 +2432,14 @@ function ctaClick(){
       if(!EXAM&&!REVIEW)S.uerr[curU]=1; // l'unité n'est plus « sans erreur »
       // on mémorise la question ratée pour la rejouer en fin de leçon
       if(MISSED.indexOf(st)<0)MISSED.push(st);
-      if(!REVIEW)S.hearts=Math.max(0,S.hearts-1); // la révision ne coûte aucun cœur
+      if(!REVIEW&&!RECHARGE)S.hearts=Math.max(0,S.hearts-1); // ni la révision ni la reprise « recharge » ne coûtent de cœur
       save();
       document.getElementById('p-hearts').textContent=S.hearts;
       document.getElementById('st-hearts').textContent=S.hearts;
     }
   }
   cta.textContent='CONTINUER';cta.disabled=false;
-  cta.onclick=(!REVIEW&&S.hearts<=0)?goNoHearts:advance; // à 0 cœur (hors révision) : blocage + invitation à réviser
+  cta.onclick=(!REVIEW&&!RECHARGE&&S.hearts<=0)?goNoHearts:advance; // à 0 cœur (hors révision/recharge) : blocage + invitation à réviser
 }
 
 function finishDisque(){
@@ -2460,6 +2477,12 @@ function finishDisque(){
     S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;
   }
   bumpConstance('learn');
+  if(RECHARGE){ // reprise depuis « Plus de cœurs » : on recharge comme une révision (1re fois après blocage = +3, ensuite +1)
+    const before=S.hearts, g=S.bigNext?3:1;
+    S.hearts=Math.min(HEARTS_MAX,S.hearts+g); S.bigNext=0; S.heartDay=today(); RECHARGE=false;
+    document.getElementById('st-hearts').textContent=S.hearts;
+    if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ +'+g+' cœur'+(g>1?'s':'')+', ماشاء الله !'),700);
+  }
   save();
   document.getElementById('player').classList.remove('on');
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
@@ -3803,7 +3826,7 @@ function importSave(){
 
 /* ================= MENU DU BAS · ONGLETS ================= */
 const UNIT_VIDEOS={1:'',2:'',3:''}; // ← colle ici l'ID ou le lien YouTube de chaque unité (clé = numéro d'unité)
-let REVIEW=false, backTo=null, REVSES=null; // REVSES = résultats de la session de révision en cours { mot: true|false }
+let REVIEW=false, backTo=null, REVSES=null, RECHARGE=false; // REVSES = résultats de la session de révision en cours { mot: true|false } ; RECHARGE = reprise « recharge cœurs » d'une leçon
 
 function unitValidated(idx){ if(idx<0||idx>=UNITS.length)return false; const ds=discsFor(idx); return !!(S.done&&S.done[dkey(idx,ds.length-1)]); }
 function unitUnlocked(idx){ const U=UNITS[idx]; if(!U||!U.ready)return false; if(U.no===1)return true; return unitValidated(idx-1); }
