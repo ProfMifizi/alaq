@@ -4,7 +4,7 @@
      cache en secours (avion, mosquée sans réseau…)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
    - les audios de la voix de Myriam + la Fātiḥa sont pré-chargés à l'installation */
-const CACHE='alaq-v48-2026-07-09';
+const CACHE='alaq-v49-2026-07-09';
 const CORE=['.','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const AUDIOS=[
 "audios-app-alaq/ain-alif-son-prolonge.mp3",
@@ -179,7 +179,7 @@ self.addEventListener('fetch',e=>{
   const cacheFirst=url.pathname.indexOf('/audios-app-alaq/')>=0
     ||url.hostname==='fonts.googleapis.com'||url.hostname==='fonts.gstatic.com'||url.hostname==='cdn.jsdelivr.net'
     ||url.hostname==='everyayah.com'
-    ||/\.(png|jpe?g|mp3|woff2?)$/.test(url.pathname);
+    ||/\.(png|jpe?g|mp3|mp4|woff2?)$/.test(url.pathname);
   if(cacheFirst){
     e.respondWith((async()=>{
       const hit=await caches.match(e.request);

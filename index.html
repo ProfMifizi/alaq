@@ -261,6 +261,39 @@
   .finish.on{display:flex}
   .finish .big{font-family:var(--ar);font-size:80px;color:var(--gold)}
   .finish h2{font-size:26px;font-weight:900;margin:10px 0 26px}
+  /* ===== Onboarding de bienvenue + série 7 épis ===== */
+  .onb{position:fixed;inset:0;z-index:70;background:var(--bg);
+    background-image:radial-gradient(circle at 50% 0%, #3a302b 0, #2c2624 38%, var(--bg) 75%);
+    display:none;flex-direction:column;padding:calc(14px + env(safe-area-inset-top,0px)) 22px 26px}
+  .onb.on{display:flex}
+  .onb-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;height:28px}
+  .onb-back{background:none;border:none;color:var(--muted);font-size:26px;cursor:pointer;padding:0 4px;line-height:1}
+  .onb-track{flex:1;height:10px;background:#3a322d;border-radius:6px;overflow:hidden}
+  .onb-fill{height:100%;width:0;background:var(--gold);border-radius:6px;transition:width .3s}
+  .onb-body{flex:1;display:flex;flex-direction:column;min-height:0;overflow-y:auto}
+  .obs{display:none;flex:1;flex-direction:column;justify-content:center;text-align:center}
+  .obs.on{display:flex}
+  .obs h1{font-size:20px;font-weight:900;margin:0 0 6px}
+  .ob-lead{max-width:280px;margin:12px auto 20px;color:var(--cream);font-size:16px;font-weight:700;line-height:1.45}
+  .ob-sub{max-width:280px;margin:0 auto 18px;color:var(--muted);font-size:14px;line-height:1.4}
+  .ob-hint{color:var(--muted);font-size:12px;margin-top:3px}
+  .ob-ar{color:var(--gold2);font-size:18px;margin-top:2px}
+  .ob-opts{display:flex;flex-direction:column;gap:9px;text-align:left;margin-top:6px}
+  .ob-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);
+    color:var(--cream);font-weight:700;font-size:15px;cursor:pointer;background:none;font-family:var(--ui);width:100%;text-align:left}
+  .ob-opt .em{font-size:20px;width:24px;text-align:center;flex:0 0 auto}
+  .ob-opt.sel{border-color:var(--gold);background:rgba(220,144,46,.16);font-weight:800}
+  .ob-opt.goal{justify-content:center;gap:8px}
+  .ob-opt.goal .min{color:var(--gold2)}
+  .ob-opt.goal .lbl::before{content:"·";margin-right:8px;color:var(--muted)}
+  .ob-list{display:flex;flex-direction:column;gap:12px;margin:6px auto 4px;width:fit-content;text-align:left}
+  .ob-li{display:flex;align-items:center;gap:11px;color:var(--cream);font-size:16px;font-weight:700}
+  .ob-li .ck{width:24px;height:24px;border-radius:50%;background:rgba(220,144,46,.18);border:1.5px solid var(--gold);
+    color:var(--gold2);display:grid;place-items:center;font-size:13px;flex:0 0 auto}
+  .ob-vid{width:150px;height:150px;object-fit:cover;border-radius:18px;margin:0 auto 4px;border:1px solid var(--line)}
+  .ob-cta{margin-top:18px}
+  .ears{display:flex;gap:9px;justify-content:center;margin:12px 0 8px}
+  .ob-ear{font-size:28px;line-height:1}
   .rewards{display:flex;gap:14px;margin-bottom:30px}
   .reward{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px 22px;min-width:120px}
   .reward .lab{font-size:12px;font-weight:900;letter-spacing:.1em;color:var(--gold2)}
@@ -786,6 +819,122 @@
   <p id="nh-msg1" style="max-width:330px;color:var(--cream);opacity:.85;margin:-14px 0 8px"></p>
   <p id="nh-msg2" style="max-width:330px;color:var(--muted);font-size:14px;margin:0 0 22px"></p>
   <div id="nh-actions" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>
+</div>
+
+<div class="onb" id="onb">
+  <div class="onb-top" id="onbTop"><button class="onb-back" onclick="onbBack()" aria-label="Retour">‹</button><div class="onb-track"><div class="onb-fill" id="onbFill"></div></div></div>
+  <div class="onb-body">
+
+    <section class="obs on" data-obs="0">
+      <div style="flex:1"></div>
+      <div class="brand" style="justify-content:center;margin-bottom:12px"><span class="dot">ع</span> ALAQ</div>
+      <video class="ob-vid" id="obVideo" src="accueil-mushaf.mp4" muted loop playsinline autoplay preload="auto"></video>
+      <p class="ob-lead">Méthode francophone pour apprendre à lire l'arabe, comprendre et mémoriser le Qor'an.</p>
+      <div style="flex:1"></div>
+      <button class="cta" onclick="onbNext()">COMMENCER</button>
+      <button class="cta" style="background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:10px" onclick="onbExistingAccount()">J'AI DÉJÀ UN COMPTE</button>
+    </section>
+
+    <section class="obs" data-obs="1">
+      <div style="flex:1"></div>
+      <h1>Comment as-tu connu ALAQ ?</h1>
+      <div class="ob-opts">
+        <button class="ob-opt" data-obk="source" data-obv="YouTube"><span class="em">▶️</span> YouTube</button>
+        <button class="ob-opt" data-obk="source" data-obv="Bouche à oreille"><span class="em">👥</span> Bouche à oreille</button>
+        <button class="ob-opt" data-obk="source" data-obv="Recommandation IA"><span class="em">🤖</span> Recommandation IA</button>
+        <button class="ob-opt" data-obk="source" data-obv="Recherche Google"><span class="em">🔎</span> Recherche Google</button>
+        <button class="ob-opt" data-obk="source" data-obv="Réseaux sociaux"><span class="em">📱</span> Réseaux sociaux</button>
+        <button class="ob-opt" data-obk="source" data-obv="Autre"><span class="em">✨</span> Autre</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
+    </section>
+
+    <section class="obs" data-obs="2">
+      <div style="flex:1"></div>
+      <h1>Quelle est ton intention ?</h1>
+      <div class="ob-ar">نِيَّتُك</div><div class="ob-hint">Plusieurs choix possibles</div>
+      <div class="ob-opts">
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Apprendre l'arabe"><span class="em">🔤</span> Apprendre l'arabe</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Lire le Qor'an"><span class="em">📖</span> Lire le Qor'an</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Mémoriser le Qor'an"><span class="em">🧠</span> Mémoriser le Qor'an</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Comprendre le Qor'an"><span class="em">💡</span> Comprendre le Qor'an</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Accompagner mes enfants"><span class="em">👨‍👩‍👧</span> Accompagner mes enfants</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Autre"><span class="em">✨</span> Autre</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
+    </section>
+
+    <section class="obs" data-obs="3">
+      <div style="flex:1"></div>
+      <h1>Sais-tu lire l'arabe ?</h1>
+      <div class="ob-opts">
+        <button class="ob-opt" data-obk="niveau" data-obv="Je pars de zéro"><span class="em">🌱</span> Je pars de zéro</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Quelques lettres"><span class="em">🔤</span> Je connais quelques lettres</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Je déchiffre lentement"><span class="em">🐢</span> Je déchiffre lentement</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Je lis sans comprendre"><span class="em">👁️</span> Je lis mais ne comprends pas</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Je lis et comprends un peu"><span class="em">💬</span> Je lis et comprends un peu</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
+    </section>
+
+    <section class="obs" data-obs="4">
+      <div style="flex:1"></div>
+      <h1>Avec ALAQ, tu vas :</h1>
+      <div class="ob-list">
+        <div class="ob-li"><span class="ck">✓</span> Lire le Qor'an en arabe</div>
+        <div class="ob-li"><span class="ck">✓</span> Lire avec le tajwīd</div>
+        <div class="ob-li"><span class="ck">✓</span> Comprendre ce que tu lis</div>
+        <div class="ob-li"><span class="ck">✓</span> Mémoriser le Qor'an</div>
+        <div class="ob-li"><span class="ck">✓</span> Enrichir ton vocabulaire</div>
+        <div class="ob-li"><span class="ck">✓</span> Maîtriser la grammaire</div>
+        <div class="ob-li"><span class="ck">✓</span> Installer une routine</div>
+      </div>
+      <div style="flex:1"></div>
+      <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
+    </section>
+
+    <section class="obs" data-obs="5">
+      <div style="flex:1"></div>
+      <h1>Ton objectif quotidien</h1>
+      <div class="ob-opts">
+        <button class="ob-opt goal" data-obk="objectif" data-obv="5"><span class="min">5 min</span><span class="lbl">Motivé</span></button>
+        <button class="ob-opt goal" data-obk="objectif" data-obv="10"><span class="min">10 min</span><span class="lbl">Investi</span></button>
+        <button class="ob-opt goal" data-obk="objectif" data-obv="15"><span class="min">15 min</span><span class="lbl">Déterminé</span></button>
+        <button class="ob-opt goal" data-obk="objectif" data-obv="20"><span class="min">20 min</span><span class="lbl">Ambitieux</span></button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
+    </section>
+
+    <section class="obs" data-obs="6">
+      <div style="flex:1"></div>
+      <div style="font-size:52px">🕋</div>
+      <p class="ob-lead" style="font-weight:900;font-size:18px;margin-bottom:2px">Bismillah, on commence !</p>
+      <p class="ob-sub">Tes 3 premières lettres : م · ل · ن</p>
+      <div style="flex:1"></div>
+      <button class="cta ob-cta" onclick="onbLaunchLesson()">MA PREMIÈRE LEÇON</button>
+    </section>
+
+  </div>
+</div>
+
+<div class="finish" id="streak">
+  <div style="font-size:46px">🌾</div>
+  <div style="font-weight:900;color:var(--gold2)"><span id="streakNum" style="font-size:44px">1</span> <span id="streakUnit" style="font-size:18px">jour</span></div>
+  <div class="ears" id="streakEars"></div>
+  <p style="max-width:300px;color:var(--muted);font-size:14px;margin:2px 0 24px">7 jours = 7 épis 🌾 · la constance, même petite, est aimée d'Allah.</p>
+  <button class="cta" style="max-width:300px" onclick="streakContinue()">CONTINUER</button>
+</div>
+
+<div class="finish" id="obAccount">
+  <div class="big">📖</div>
+  <h2>Crée ton profil</h2>
+  <p style="max-width:300px;color:var(--muted);font-size:14px;margin:-10px 0 18px">Gratuit — pour garder ta progression.</p>
+  <div id="obAccountCard" style="width:100%;max-width:320px"></div>
+  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obAccountClose()">Plus tard</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1554,6 +1703,8 @@ if(typeof S.ghufLeft!=='number')S.ghufLeft=2;          // Ghufrān restants ce m
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
+if(typeof S.onboarded==='undefined')S.onboarded=0;   // parcours de bienvenue déjà fait ?
+if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {source,intention[],niveau,objectif,ts}
 (function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)save();})();
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
 let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(e){return true}})();
@@ -1590,6 +1741,63 @@ function closeNoHearts(){ document.getElementById('noHearts').classList.remove('
 function noHeartsReview(){ closeNoHearts(); startReview(); }
 function noHeartsRedo(){ const L=currentLesson(); closeNoHearts(); if(L)startDisque(L.u,L.i,true); } // reprise « sans risque » de la leçon en cours
 function goNoHearts(){ document.getElementById('player').classList.remove('on'); showNoHearts(); }
+
+/* ===== Onboarding de bienvenue + écran de série « 7 épis » ===== */
+let ONB={step:0,data:{}}, obAccountPending=false, pendingStreak=false;
+function onbStart(){ ONB={step:0,data:{}}; document.getElementById('onb').classList.add('on'); onbShow(); var v=document.getElementById('obVideo'); if(v){try{v.play();}catch(e){}} }
+function onbShow(){
+  var all=document.querySelectorAll('#onb [data-obs]');
+  for(var i=0;i<all.length;i++)all[i].classList.toggle('on', +all[i].getAttribute('data-obs')===ONB.step);
+  var q=(ONB.step>=1&&ONB.step<=5);
+  document.getElementById('onbTop').style.visibility=q?'visible':'hidden';
+  if(q)document.getElementById('onbFill').style.width=Math.round(ONB.step/5*100)+'%';
+  var b=document.querySelector('#onb .onb-body'); if(b)b.scrollTop=0;
+}
+function onbNext(){ if(ONB.step<6){ONB.step++;onbShow();} }
+function onbBack(){ if(ONB.step>0){ONB.step--;onbShow();} }
+function onbExistingAccount(){ // élève existante sur un appareil neuf : le nuage fait foi (_fresh)
+  S.onboarded=1; S.tutHome=1; S._fresh=1; save();
+  document.getElementById('onb').classList.remove('on');
+  showTab('prog'); setTimeout(function(){try{toast('Connecte-toi ci-dessous ✨');}catch(e){}},300);
+}
+function onbLaunchLesson(){
+  S.onb={source:ONB.data.source||'', intention:ONB.data.intention||[], niveau:ONB.data.niveau||'', objectif:ONB.data.objectif||'', ts:Date.now()};
+  S.onboarded=1; S.tutHome=1; save();
+  document.getElementById('onb').classList.remove('on');
+  obAccountPending=!CLOUD.user;                       // proposer le compte après cette 1re leçon si non connectée
+  var L=(typeof currentLesson==='function'&&currentLesson())||{u:0,i:0};
+  startDisque(L.u,L.i);
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('#onb .ob-opt'); if(!b)return;
+  var k=b.getAttribute('data-obk'), v=b.getAttribute('data-obv');
+  if(b.hasAttribute('data-obmulti')){
+    b.classList.toggle('sel');
+    ONB.data[k]=ONB.data[k]||[];
+    var idx=ONB.data[k].indexOf(v);
+    if(b.classList.contains('sel')){ if(idx<0)ONB.data[k].push(v); } else if(idx>=0)ONB.data[k].splice(idx,1);
+  } else {
+    ONB.data[k]=v;
+    var sib=b.parentElement.querySelectorAll('.ob-opt');
+    for(var i=0;i<sib.length;i++)sib[i].classList.remove('sel');
+    b.classList.add('sel');
+  }
+});
+function showStreak(){ // 7 épis = 7 jours ; une pousse mûrit en épi doré à chaque jour du cycle
+  var n=S.streak||1, inCycle=((n-1)%7)+1, h='';
+  for(var i=1;i<=7;i++)h+='<span class="ob-ear">'+(i<=inCycle?'🌾':'🌱')+'</span>';
+  document.getElementById('streakEars').innerHTML=h;
+  document.getElementById('streakNum').textContent=n;
+  document.getElementById('streakUnit').textContent=(n>1?'jours':'jour');
+  document.getElementById('streak').classList.add('on');
+}
+function streakContinue(){
+  document.getElementById('streak').classList.remove('on');
+  if(obAccountPending){ obAccountPending=false; showObAccount(); return; }
+  returnFromPlayer();
+}
+function showObAccount(){ document.getElementById('obAccountCard').innerHTML=cloudCardHTML(); document.getElementById('obAccount').classList.add('on'); }
+function obAccountClose(){ document.getElementById('obAccount').classList.remove('on'); returnFromPlayer(); }
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
 function doReset(){
@@ -1823,7 +2031,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 09/07 · Plus de cœurs : « Refaire ma leçon » recharge +3 (sans risque) même sans vocabulaire à réviser';
+const BUILD='maj 09/07b · onboarding de bienvenue (branche) + série « 7 épis » après chaque leçon + compte après la 1re leçon';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -2472,10 +2680,12 @@ function finishDisque(){
   const gain=(curD===discsFor(curU).length-1?20:10)*(wasDone?0.5:1);
   S.xp+=gain;
   const t=today();
-  if(S.lastDay!==t){
+  const streakBumped=(S.lastDay!==t);      // 1re leçon du jour → la série avance → écran « 7 épis »
+  if(streakBumped){
     const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
     S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;
   }
+  pendingStreak=streakBumped;
   bumpConstance('learn');
   if(RECHARGE){ // reprise depuis « Plus de cœurs » : on recharge comme une révision (1re fois après blocage = +3, ensuite +1)
     const before=S.hearts, g=S.bigNext?3:1;
@@ -2498,7 +2708,12 @@ function finishDisque(){
   if(isBilan)confettiBurst();
   checkBadges({noMistake:wrongCount===0&&total>0,unitPerfect:isBilan&&!S.uerr[curU]});
 }
-function closeFinish(){document.getElementById('finish').classList.remove('on');returnFromPlayer();}
+function closeFinish(){
+  document.getElementById('finish').classList.remove('on');
+  if(pendingStreak){ pendingStreak=false; showStreak(); return; }        // écran de série (7 épis)
+  if(obAccountPending){ obAccountPending=false; showObAccount(); return; } // 1re leçon d'onboarding → proposer le compte
+  returnFromPlayer();
+}
 
 /* ===== Test-out « Avancer ici ? » : 20 questions, 2 erreurs max ===== */
 function buildExam(U){
@@ -3078,7 +3293,7 @@ function homeTut(){ letterTut([
   {t:function(){return document.querySelector('.node .bubble')||document.querySelector('.bubble');},ti:'Les leçons ✍️',tx:'Chaque bulle est une leçon. Touche la première pour commencer, bismillah !'},
   {t:function(){return document.getElementById('botnav');},ti:'Le menu 🧭',tx:'En bas : 🏠 Apprendre · 📕 Cours · 🕋 Réviser · 📊 Progrès.'}
 ]); }
-function maybeShowHomeTut(){ if(S.tutHome)return; if(!document.querySelector('.unit-head'))return; S.tutHome=1;save(); homeTut(); }
+function maybeShowHomeTut(){ if(!S.onboarded)return; if(S.tutHome)return; if(!document.querySelector('.unit-head'))return; S.tutHome=1;save(); homeTut(); }
 function openSurahMenu(){
   var m=document.getElementById('surahMenu');
   if(!m){m=document.createElement('div');m.className='finish';m.id='surahMenu';document.body.appendChild(m);}
@@ -4559,6 +4774,7 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
 cloudInit();
 refreshStats();
 showTab('home');
+if(!S.onboarded){ setTimeout(function(){try{onbStart();}catch(e){}},120); } // 1er lancement : parcours de bienvenue
 </script>
 </body>
 </html>
