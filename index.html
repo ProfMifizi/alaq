@@ -719,6 +719,10 @@
 .rbar-lbl .ar{font-family:var(--quran);font-size:21px;color:var(--gold2);vertical-align:middle}
 .rbar-lbl .fr{color:var(--cream);font-weight:800;font-size:13px;vertical-align:middle}
 .rbar-lbl .n{color:var(--muted);font-size:12px;vertical-align:middle}
+.fin-score{margin:6px 0 18px}
+.fin-score .fs-v{display:block;font-size:42px;font-weight:900;color:var(--gold2);line-height:1}
+.fin-score .fs-l{color:var(--muted);font-size:13px;font-weight:700}
+.rbar-dots i{cursor:pointer}
 .rk-big{font-family:var(--quran);font-size:64px;color:var(--gold);line-height:1.15;margin-top:6px}
 .rk-stats{font-family:var(--ui);font-size:12.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:10px;line-height:1.6}
 .lrow{display:flex;align-items:flex-start;gap:14px;padding:12px 2px;border-top:1px dashed var(--line)}
@@ -814,12 +818,10 @@
 <div class="finish" id="finish">
   <div class="big" id="fin-icon">✓</div>
   <h2 id="fin-title">Leçon terminée !</h2>
-  <div id="fin-rank"></div>
-  <div id="fin-verse"></div>
+  <div class="fin-score"><span class="fs-v" id="fin-acc">100%</span><span class="fs-l">de réussite</span></div>
   <div id="fin-extra"></div>
   <span id="fin-xp" style="display:none"></span>
-  <span id="fin-acc" style="display:none"></span>
-  <button class="cta" id="fin-cta" style="max-width:300px;margin-top:6px" onclick="closeFinish()">CONTINUER</button>
+  <button class="cta" id="fin-cta" style="max-width:300px;margin-top:14px" onclick="closeFinish()">CONTINUER</button>
 </div>
 
 <div class="finish" id="confirmReset">
@@ -1993,7 +1995,7 @@ function rankBarHTML(){ // le chemin des 7 rangs de constance, النية → ا
     var c=reached?RANK_COLORS[i]:'#4A403A';
     var sz=isCur?24:(last?22:15);
     var sh=isCur?';box-shadow:0 0 0 4px rgba(232,169,79,.28)':(last&&reached?';box-shadow:0 0 8px '+c:'');
-    dots+='<i style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
+    dots+='<i onclick="rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
   }
   var fill=Math.max(4,Math.round(cur/6*100));
   return '<div class="rbar">'+
@@ -2071,11 +2073,26 @@ function showRank(){
     '<h2 style="margin:8px 0 2px">'+R.rank.tr+'</h2>'+
     '<div class="succ-stat" style="color:var(--gold2)">'+R.rank.fr+'</div>'+
     '<p class="succ-desc">'+R.rank.desc+'</p>'+
-    '<div class="rk-stats">🔥 Série '+(S.streak||0)+' j · 🔁 '+(S.nrev||0)+' révisions · 🕊️ '+(S.ghufLeft||0)+' Ghufrān</div>'+
+    '<div class="rk-stats">🌾 Série '+(S.streak||0)+' j · 🔁 '+(S.nrev||0)+' révisions · 🕊️ '+(S.ghufLeft||0)+' Ghufrān</div>'+
     '</div>';
   m.classList.add('on');
 }
 function closeRank(){ var m=document.getElementById('rankModal'); if(m)m.classList.remove('on'); }
+function rankInfo(idx){ // popup d'un rang cliqué depuis la barre du profil (Progrès)
+  var R=RANKS[idx], cur=rankFor(S.consScore).idx;
+  var status = idx<cur?'✓ Atteint' : (idx===cur?'⭐ En cours' : '🔒 À atteindre');
+  var m=document.getElementById('rankModal');
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='rankModal'; document.body.appendChild(m); }
+  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
+    '<button class="sm-close" onclick="closeRank()" aria-label="Fermer">✕</button>'+
+    '<div class="rk-big">'+R.ar+'</div>'+
+    '<h2 style="margin:8px 0 2px">'+R.tr+'</h2>'+
+    '<div class="succ-stat" style="color:var(--gold2)">'+R.fr+' · '+(idx+1)+' / 7</div>'+
+    '<p class="succ-desc">'+R.desc+'</p>'+
+    '<div class="rk-stats">'+status+'</div>'+
+    '</div>';
+  m.classList.add('on');
+}
 (function(){if(S.heartDay!==today()){S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;save();}})();
 try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
@@ -2091,7 +2108,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 09/07c · onboarding (prénom→objectif) + rangs de constance en fin de leçon + série en épi (topbar) + compte perso';
+const BUILD='maj 09/07d · onboarding complet · fin de leçon = taux de réussite · rangs de constance cliquables dans Progrès';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
