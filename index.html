@@ -1703,7 +1703,7 @@ if(typeof S.ghufLeft!=='number')S.ghufLeft=2;          // Ghufrān restants ce m
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
-if(typeof S.onboarded==='undefined')S.onboarded=0;   // parcours de bienvenue déjà fait ?
+if(typeof S.onboarded==='undefined')S.onboarded=((S.done&&Object.keys(S.done).length>0)||S.xp>0||S.streak>0)?1:0; // élèves DÉJÀ existantes (progression présente) → pas d'onboarding
 if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {source,intention[],niveau,objectif,ts}
 (function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)save();})();
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
