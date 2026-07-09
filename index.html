@@ -135,8 +135,11 @@
   .pbar{flex:1;height:16px;background:var(--panel2);border-radius:10px;overflow:hidden}
   .pbar i{display:block;height:100%;width:0;background:var(--gold);border-radius:10px;transition:width .35s}
   .hearts{display:flex;align-items:center;gap:4px;color:var(--coral);font-weight:900;font-size:18px}
+  .narr-tog{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;padding:0 2px;cursor:pointer}
+  .narr-tog:active{color:var(--gold2)}
   .p-body{flex:1;overflow-y:auto;padding:8px 22px 24px;max-width:560px;width:100%;margin:0 auto}
   .q-title{font-size:21px;font-weight:900;margin:14px 0 22px}
+  .q-note{font-size:20px;font-weight:900;color:var(--cream);line-height:1.35;margin:8px 0 22px}
   .glyph-big{font-family:var(--ar);font-size:80px;text-align:center;color:var(--gold);
     margin:4px 0 24px;line-height:1;padding:44px 0 14px}
   .speak{display:block;margin:0 auto 22px;background:var(--panel);border:2px solid var(--line);
@@ -290,8 +293,11 @@
   .ob-li{display:flex;align-items:center;gap:11px;color:var(--cream);font-size:16px;font-weight:700}
   .ob-li .ck{width:24px;height:24px;border-radius:50%;background:rgba(220,144,46,.18);border:1.5px solid var(--gold);
     color:var(--gold2);display:grid;place-items:center;font-size:13px;flex:0 0 auto}
-  .ob-vid{width:150px;height:150px;object-fit:cover;border-radius:18px;margin:0 auto 4px;border:1px solid var(--line)}
+  .ob-logo{width:150px;height:150px;object-fit:contain;border-radius:22px;margin:0 auto 10px;display:block}
+  .ob-vid{width:210px;height:210px;object-fit:contain;margin:2px auto 6px;display:block;background:transparent}
   .ob-cta{margin-top:18px}
+  .ob-in{width:100%;box-sizing:border-box;background:var(--panel2);border:2px solid var(--line);border-radius:14px;padding:14px;color:var(--cream);font-family:var(--ui);font-size:17px;text-align:center;margin-top:10px}
+  .ob-in:focus{border-color:var(--gold);outline:none}
   .ears{display:flex;gap:9px;justify-content:center;margin:12px 0 8px}
   .ob-ear{font-size:28px;line-height:1}
   .rewards{display:flex;gap:14px;margin-bottom:30px}
@@ -702,6 +708,17 @@
 .rankcard .rk-chev{font-size:24px;color:#241a06;font-weight:900;flex:0 0 auto}
 .rankcard .ubar{margin-top:5px;background:rgba(0,0,0,.22)}
 .rankcard .ubar i{background:#241a06}
+.rbar{width:100%;max-width:300px;margin:4px auto 8px}
+.rbar-head{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:8px;letter-spacing:.03em}
+.rbar-track{position:relative;height:28px;margin:0 4px}
+.rbar-line{position:absolute;top:12px;left:3%;right:3%;height:3px;background:var(--line);border-radius:3px}
+.rbar-fill{position:absolute;top:12px;left:3%;height:3px;background:var(--gold);border-radius:3px;transition:width .4s}
+.rbar-dots{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center}
+.rbar-dots i{display:grid;place-items:center;border-radius:50%;font-size:12px}
+.rbar-lbl{text-align:center;margin-top:8px}
+.rbar-lbl .ar{font-family:var(--quran);font-size:21px;color:var(--gold2);vertical-align:middle}
+.rbar-lbl .fr{color:var(--cream);font-weight:800;font-size:13px;vertical-align:middle}
+.rbar-lbl .n{color:var(--muted);font-size:12px;vertical-align:middle}
 .rk-big{font-family:var(--quran);font-size:64px;color:var(--gold);line-height:1.15;margin-top:6px}
 .rk-stats{font-family:var(--ui);font-size:12.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:10px;line-height:1.6}
 .lrow{display:flex;align-items:flex-start;gap:14px;padding:12px 2px;border-top:1px dashed var(--line)}
@@ -767,7 +784,7 @@
 <div class="topbar">
   <div class="brand" id="brand"><img class="blogo" id="blogo" alt=""> ALAQ</div>
   <div class="stats">
-    <div class="stat">🔥 <span id="st-streak">0</span></div>
+    <div class="stat">🌾 <span id="st-streak">0</span></div>
     <div class="stat">❤️ <span id="st-hearts">7</span></div>
     <div class="stat" onclick="showRank()" style="cursor:pointer;display:flex;align-items:center"><span id="st-lamp" style="display:flex"></span></div>
   </div>
@@ -782,12 +799,12 @@
   <div class="p-top">
     <button class="p-close" onclick="quitDisque()">✕</button>
     <div class="pbar"><i id="pbar-i"></i></div>
+    <button class="narr-tog" id="narrLink" onclick="toggleNarr()"></button>
     <div class="hearts">❤️ <span id="p-hearts">5</span></div>
   </div>
   <div class="p-body" id="p-body"></div>
   <div class="p-foot" id="p-foot">
     <button class="back-link" id="backLink" onclick="prevStep()">← Précédent</button>
-    <button class="narr-link" id="narrLink" onclick="toggleNarr()"></button>
     <div id="fb"></div>
     <div id="why" class="why"></div>
     <button class="cta" id="cta" disabled>VÉRIFIER</button>
@@ -796,13 +813,13 @@
 
 <div class="finish" id="finish">
   <div class="big" id="fin-icon">✓</div>
-  <h2 id="fin-title">Disque terminé !</h2>
-  <div class="rewards">
-    <div class="reward"><div class="lab">POINTS</div><div class="val" id="fin-xp">+10</div></div>
-    <div class="reward"><div class="lab">PRÉCISION</div><div class="val" id="fin-acc">100%</div></div>
-  </div>
+  <h2 id="fin-title">Leçon terminée !</h2>
+  <div id="fin-rank"></div>
+  <div id="fin-verse"></div>
   <div id="fin-extra"></div>
-  <button class="cta" id="fin-cta" style="max-width:300px" onclick="closeFinish()">CONTINUER</button>
+  <span id="fin-xp" style="display:none"></span>
+  <span id="fin-acc" style="display:none"></span>
+  <button class="cta" id="fin-cta" style="max-width:300px;margin-top:6px" onclick="closeFinish()">CONTINUER</button>
 </div>
 
 <div class="finish" id="confirmReset">
@@ -827,8 +844,7 @@
 
     <section class="obs on" data-obs="0">
       <div style="flex:1"></div>
-      <div class="brand" style="justify-content:center;margin-bottom:12px"><span class="dot">ع</span> ALAQ</div>
-      <video class="ob-vid" id="obVideo" src="accueil-mushaf.mp4" muted loop playsinline autoplay preload="auto"></video>
+      <img class="ob-logo" src="icon-512.png" alt="ALAQ">
       <p class="ob-lead">Méthode francophone pour apprendre à lire l'arabe, comprendre et mémoriser le Qor'an.</p>
       <div style="flex:1"></div>
       <button class="cta" onclick="onbNext()">COMMENCER</button>
@@ -836,6 +852,14 @@
     </section>
 
     <section class="obs" data-obs="1">
+      <div style="flex:1"></div>
+      <h1>Comment t'appelles-tu ?</h1>
+      <input class="ob-in" id="obPrenomOnb" type="text" autocomplete="given-name" placeholder="Ton prénom" oninput="onbPrenomInput(this.value)">
+      <div style="flex:1"></div>
+      <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
+    </section>
+
+    <section class="obs" data-obs="2">
       <div style="flex:1"></div>
       <h1>Comment as-tu connu ALAQ ?</h1>
       <div class="ob-opts">
@@ -850,7 +874,7 @@
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
     </section>
 
-    <section class="obs" data-obs="2">
+    <section class="obs" data-obs="3">
       <div style="flex:1"></div>
       <h1>Quelle est ton intention ?</h1>
       <div class="ob-ar">نِيَّتُك</div><div class="ob-hint">Plusieurs choix possibles</div>
@@ -866,7 +890,7 @@
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
     </section>
 
-    <section class="obs" data-obs="3">
+    <section class="obs" data-obs="4">
       <div style="flex:1"></div>
       <h1>Sais-tu lire l'arabe ?</h1>
       <div class="ob-opts">
@@ -880,7 +904,7 @@
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
     </section>
 
-    <section class="obs" data-obs="4">
+    <section class="obs" data-obs="5">
       <div style="flex:1"></div>
       <h1>Avec ALAQ, tu vas :</h1>
       <div class="ob-list">
@@ -896,7 +920,7 @@
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
     </section>
 
-    <section class="obs" data-obs="5">
+    <section class="obs" data-obs="6">
       <div style="flex:1"></div>
       <h1>Ton objectif quotidien</h1>
       <div class="ob-opts">
@@ -909,7 +933,7 @@
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
     </section>
 
-    <section class="obs" data-obs="6">
+    <section class="obs" data-obs="7">
       <div style="flex:1"></div>
       <div style="font-size:52px">🕋</div>
       <p class="ob-lead" style="font-weight:900;font-size:18px;margin-bottom:2px">Bismillah, on commence !</p>
@@ -922,17 +946,21 @@
 </div>
 
 <div class="finish" id="streak">
-  <div style="font-size:46px">🌾</div>
-  <div style="font-weight:900;color:var(--gold2)"><span id="streakNum" style="font-size:44px">1</span> <span id="streakUnit" style="font-size:18px">jour</span></div>
+  <div style="font-weight:900;color:var(--gold2);margin-top:6px"><span id="streakNum" style="font-size:46px">1</span> <span id="streakUnit" style="font-size:18px">jour</span></div>
   <div class="ears" id="streakEars"></div>
-  <p style="max-width:300px;color:var(--muted);font-size:14px;margin:2px 0 24px">7 jours = 7 épis 🌾 · la constance, même petite, est aimée d'Allah.</p>
+  <p class="verse" style="max-width:330px;font-size:23px;color:var(--gold2);margin:10px 0 4px;line-height:1.9">كَمَثَلِ حَبَّةٍ أَنۢبَتَتْ سَبْعَ سَنَابِلَ</p>
+  <p style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 22px">« … comme un grain qui fait pousser sept épis » — sourate Al-Baqara, 261</p>
   <button class="cta" style="max-width:300px" onclick="streakContinue()">CONTINUER</button>
 </div>
 
 <div class="finish" id="obAccount">
-  <div class="big">📖</div>
-  <h2>Crée ton profil</h2>
-  <p style="max-width:300px;color:var(--muted);font-size:14px;margin:-10px 0 18px">Gratuit — pour garder ta progression.</p>
+  <div class="big" style="font-family:var(--ui)">👤</div>
+  <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
+  <p id="obAccountSub" style="max-width:300px;color:var(--muted);font-size:14px;margin:-10px 0 10px">Crée ton profil pour t'aider à devenir assidu·e.</p>
+  <p style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
+  <div style="width:100%;max-width:320px">
+    <input id="obPrenom" type="text" autocomplete="given-name" placeholder="Ton prénom" oninput="onbPrenomInput(this.value)" style="width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px;margin-bottom:8px">
+  </div>
   <div id="obAccountCard" style="width:100%;max-width:320px"></div>
   <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obAccountClose()">Plus tard</button>
 </div>
@@ -1611,7 +1639,7 @@ let _syncT=null;
 function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
 async function cloudSaveNow(){
   try{ if(!SB||!CLOUD.user)return;
-    await SB.from('profiles').upsert({user_id:CLOUD.user.id, state:S, updated_at:new Date().toISOString()});
+    await SB.from('profiles').upsert({user_id:CLOUD.user.id, prenom:S.prenom||null, state:S, updated_at:new Date().toISOString()});
   }catch(e){}
 }
 async function cloudPull(){ // fusion : le plus récent gagne ; premier login = on pousse l'état local
@@ -1663,9 +1691,12 @@ async function cloudVerify(){
     const r=await SB.auth.verifyOtp({email:window._cloudEmail, token:code, type:'email'});
     if(r&&r.error)throw r.error;
     CLOUD.user=r.data&&r.data.user;
-    toast('Connectée, ماشاء الله ✨');
-    await cloudPull(); renderProg();
-  }catch(e){ toast('Code invalide ou expiré'); }
+  }catch(e){ toast('Code invalide ou expiré'); return; }
+  toast('Connectée, ماشاء الله ✨');
+  try{ await cloudPull(); }catch(_){}          // une erreur ici ne doit PAS faire croire que le code est faux
+  try{ renderProg(); }catch(_){}
+  const ov=document.getElementById('obAccount');  // dans l'onboarding : fermer l'écran compte et rejoindre l'accueil
+  if(ov&&ov.classList.contains('on')){ ov.classList.remove('on'); try{returnFromPlayer();}catch(_){ try{renderHome();}catch(_){}} }
 }
 async function cloudLogout(){
   // Sécurité comptes : la progression de CE compte ne doit JAMAIS être héritée
@@ -1688,6 +1719,7 @@ function cloudCardHTML(){
     '<div id="cloudStep2" style="display:none;margin-top:10px">'+
       '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" style="'+inp+';letter-spacing:.2em;text-align:center">'+
       '<button class="cbtn" style="margin-top:8px" onclick="cloudVerify()">✅ Me connecter</button>'+
+      '<button onclick="cloudSendCode(this)" style="margin-top:8px;background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:13px;text-decoration:underline;cursor:pointer;width:100%">Renvoyer un code</button>'+
     '</div>';
 }
 let S=load();
@@ -1705,6 +1737,7 @@ if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une err
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
 if(typeof S.onboarded==='undefined')S.onboarded=((S.done&&Object.keys(S.done).length>0)||S.xp>0||S.streak>0)?1:0; // élèves DÉJÀ existantes (progression présente) → pas d'onboarding
 if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {source,intention[],niveau,objectif,ts}
+if(typeof S.prenom!=='string')S.prenom='';           // prénom (personnalisation + colonne Supabase profiles.prenom)
 (function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)save();})();
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
 let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(e){return true}})();
@@ -1748,12 +1781,12 @@ function onbStart(){ ONB={step:0,data:{}}; document.getElementById('onb').classL
 function onbShow(){
   var all=document.querySelectorAll('#onb [data-obs]');
   for(var i=0;i<all.length;i++)all[i].classList.toggle('on', +all[i].getAttribute('data-obs')===ONB.step);
-  var q=(ONB.step>=1&&ONB.step<=5);
+  var q=(ONB.step>=1&&ONB.step<=6);
   document.getElementById('onbTop').style.visibility=q?'visible':'hidden';
-  if(q)document.getElementById('onbFill').style.width=Math.round(ONB.step/5*100)+'%';
+  if(q)document.getElementById('onbFill').style.width=Math.round(ONB.step/6*100)+'%';
   var b=document.querySelector('#onb .onb-body'); if(b)b.scrollTop=0;
 }
-function onbNext(){ if(ONB.step<6){ONB.step++;onbShow();} }
+function onbNext(){ if(ONB.step<7){ONB.step++;onbShow();} }
 function onbBack(){ if(ONB.step>0){ONB.step--;onbShow();} }
 function onbExistingAccount(){ // élève existante sur un appareil neuf : le nuage fait foi (_fresh)
   S.onboarded=1; S.tutHome=1; S._fresh=1; save();
@@ -1796,7 +1829,14 @@ function streakContinue(){
   if(obAccountPending){ obAccountPending=false; showObAccount(); return; }
   returnFromPlayer();
 }
-function showObAccount(){ document.getElementById('obAccountCard').innerHTML=cloudCardHTML(); document.getElementById('obAccount').classList.add('on'); }
+function obAccTitle(){ return S.prenom?S.prenom+', sauvegarde ta progression.':'Sauvegarde ta progression'; }
+function onbPrenomInput(v){ S.prenom=(v||'').trim(); save(); var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle(); }
+function showObAccount(){
+  var card=document.getElementById('obAccountCard'); if(card)card.innerHTML=cloudCardHTML();
+  var pn=document.getElementById('obPrenom'); if(pn)pn.value=S.prenom||'';
+  var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle();
+  document.getElementById('obAccount').classList.add('on');
+}
 function obAccountClose(){ document.getElementById('obAccount').classList.remove('on'); returnFromPlayer(); }
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
@@ -1946,6 +1986,26 @@ function updRankBadge(){
     if(l){ l.innerHTML=lampSVG(c,23); l.style.filter=rf.idx>=6?'drop-shadow(0 0 6px '+c+')':(rf.idx>=5?'drop-shadow(0 0 3px '+c+')':''); }
   }catch(e){}
 }
+function rankBarHTML(){ // le chemin des 7 rangs de constance, النية → النور (le but)
+  var rf=rankFor(S.consScore), cur=rf.idx, dots='';
+  for(var i=0;i<7;i++){
+    var reached=(i<=cur), isCur=(i===cur), last=(i===6);
+    var c=reached?RANK_COLORS[i]:'#4A403A';
+    var sz=isCur?24:(last?22:15);
+    var sh=isCur?';box-shadow:0 0 0 4px rgba(232,169,79,.28)':(last&&reached?';box-shadow:0 0 8px '+c:'');
+    dots+='<i style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
+  }
+  var fill=Math.max(4,Math.round(cur/6*100));
+  return '<div class="rbar">'+
+    '<div class="rbar-head"><span>TA CONSTANCE</span><span>OBJECTIF : النور</span></div>'+
+    '<div class="rbar-track"><div class="rbar-line"></div><div class="rbar-fill" style="width:'+fill+'%"></div><div class="rbar-dots">'+dots+'</div></div>'+
+    '<div class="rbar-lbl"><span class="ar">'+rf.rank.ar+'</span> <span class="fr">'+rf.rank.fr+'</span> <span class="n">('+(cur+1)+'/7)</span></div>'+
+  '</div>';
+}
+function fillFinishConstance(){ // écran de fin fusionné : la barre des 7 rangs de constance
+  var r=document.getElementById('fin-rank'); if(r)r.innerHTML=rankBarHTML();
+  var v=document.getElementById('fin-verse'); if(v)v.innerHTML='';
+}
 function _dayNum(x){ if(!x)return 0; var p=x.split('-'); return Math.round(Date.UTC(+p[0],(+p[1])-1,+p[2])/864e5); }
 function daysGap(a,b){ return _dayNum(b)-_dayNum(a); }
 function rollConstance(){
@@ -2031,7 +2091,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 09/07b · onboarding de bienvenue (branche) + série « 7 épis » après chaque leçon + compte après la 1re leçon';
+const BUILD='maj 09/07c · onboarding (prénom→objectif) + rangs de constance en fin de leçon + série en épi (topbar) + compte perso';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -2187,7 +2247,7 @@ function renderStep(){
 
   if(st.type==='combine'){
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 20px">'+st.note+'</div>'+
+      '<div class="q-note">'+st.note+'</div>'+
       '<div class="combine"><span class="cmb" id="cmbA">'+st.a+'</span>'+
         '<span class="cmb-plus">+</span><span class="cmb" id="cmbB">'+st.b+'</span>'+
         '<span class="cmb-eq">=</span><span class="cmb cmb-res" id="cmbR">?</span></div>'+
@@ -2197,7 +2257,7 @@ function renderStep(){
 
   if(st.type==='frvowels'){ // alphabet français : toucher les 6 voyelles pour continuer
     window._frv=new Set();
-    body.innerHTML='<div class="hint" style="margin:0 0 14px">'+st.note+'</div>'+
+    body.innerHTML='<div class="q-note">'+st.note+'</div>'+
       '<div class="frv-grid">'+'abcdefghijklmnopqrstuvwxyz'.split('').map(ch=>
         '<button class="frv-l" onclick="frvTap(this,\''+ch+'\')">'+ch+'</button>').join('')+'</div>'+
       '<div class="hint" id="frvC" style="text-align:center;margin-top:12px">0 / 6</div>';
@@ -2206,7 +2266,7 @@ function renderStep(){
 
   if(st.type==='frdrag'){ // glisser m et a dans la case commune -> « ma » seul, centré
     window._frd={m:false,a:false};
-    body.innerHTML='<div class="hint" style="margin:0 0 8px">'+st.note+'</div>'+
+    body.innerHTML='<div class="q-note">'+st.note+'</div>'+
       '<div class="frd-stage" id="frdStage">'+
         '<div class="frd-tok frd-c" id="frdM">m</div>'+
         '<div class="frd-tok frd-v" id="frdA">a</div>'+
@@ -2221,7 +2281,7 @@ function renderStep(){
     window._hk=new Set();
     const H=[['\u064E','fatḥa','a','top'],['\u0650','kasra','i','bot'],['\u064F','ḍamma','ou','top']];
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 24px">'+st.note+'</div>'+
+      '<div class="q-note">'+st.note+'</div>'+
       '<div class="hk3">'+H.map((h,i)=>
         '<button class="hkcirc" onclick="hkTap('+i+',this)">'+
           '<span class="sign '+h[3]+'">'+h[0]+'</span>'+
@@ -2236,7 +2296,7 @@ function renderStep(){
     const set=st.madd?MD:HK;
     window._as={L:st.L,set};
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
+      '<div class="q-note">'+st.note+'</div>'+
       '<div class="assoc-l gold">'+st.L+'</div>'+
       '<div class="assoc-row">'+set.map((s,i)=>
         '<button class="assoc-c" onclick="assocTap('+i+',this)">'+
@@ -2249,7 +2309,7 @@ function renderStep(){
     const items=st.alphabet?ALPHABET:st.items;
     window._ts=new Set();window._tsN=st.alphabet?3:items.length;
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
+      '<div class="q-note">'+st.note+'</div>'+
       '<div class="tapset'+(st.cols===4?' c4':st.cols===3?' c3':'')+'">'+items.map(it=>
         '<button class="ts-card" onclick="tsTap(\''+it[0]+'\',this)"><span class="ar">'+(it[0]==='ه'?'ﻩ':it[0])+'</span>'+
         (st.alphabet?'':'<span class="enm">'+it[1]+'</span>')+'</button>').join('')+'</div>';
@@ -2274,7 +2334,7 @@ function renderStep(){
       }).join('')+'</div>';
     }
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 16px">'+st.note+'</div>'+grid+
+      '<div class="q-note">'+st.note+'</div>'+grid+
       '<div class="hint" id="fs-c" style="text-align:center">0 / '+window._fs.need+'</div>';
     return;
   }
@@ -2282,7 +2342,7 @@ function renderStep(){
   if(st.type==='compare'){
     window._cmp=new Set();window._cmpN=st.pairs.length;
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
+      '<div class="q-note">'+st.note+'</div>'+
       st.pairs.map((p,i)=>
         '<div class="cmp-row" onclick="cmpTap('+i+',this,\''+p[0]+'\',\''+p[1]+'\')">'+
           '<span class="gold">'+p[0]+'</span><span class="cmp-vs">↔</span><span class="gold">'+p[1]+'</span>'+
@@ -2304,7 +2364,7 @@ function renderStep(){
       inner=[...st.word].map((ch,i)=>'<span class="rc" data-i="'+i+'">'+ch+'</span>').join('');
     }
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 18px">'+st.note+'</div>'+
+      '<div class="q-note">'+st.note+'</div>'+
       '<div class="readbox '+(st.lang==='ar'?'ar':'')+'" id="readbox" dir="'+st.dir+'">'+inner+'</div>'+
       '<div class="readarrow '+(st.dir==='rtl'?'rtl':'ltr')+'" id="readArrow"><span>→</span></div>';
     setTimeout(()=>setupRead(st),40);
@@ -2335,7 +2395,7 @@ function renderStep(){
     window._fsl=new Set();
     const cells=[[0,'isolée'],[1,'début'],[2,'milieu'],[3,'fin']];
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 16px">'+st.note+'</div>'+
+      '<div class="q-note">'+st.note+'</div>'+
       '<div class="source"><div class="srcL" id="dragSrc">'+st.L+'</div>'+
         '<div class="hint" style="margin-top:6px">Fais glisser la lettre dans chaque case</div></div>'+
       '<div class="fourcells">'+cells.map(c=>
@@ -2704,13 +2764,13 @@ function finishDisque(){
   document.getElementById('fin-title').textContent=isBilan?('Unité '+toAr(UNITS[curU].no)+' validée ! 🎉'):(discLabel(discsFor(curU)[curD],UNITS[curU])+' — terminé !');
   document.getElementById('fin-xp').textContent='+'+gain;
   document.getElementById('fin-acc').textContent=acc+'%';
+  fillFinishConstance();
   document.getElementById('finish').classList.add('on');
   if(isBilan)confettiBurst();
   checkBadges({noMistake:wrongCount===0&&total>0,unitPerfect:isBilan&&!S.uerr[curU]});
 }
 function closeFinish(){
   document.getElementById('finish').classList.remove('on');
-  if(pendingStreak){ pendingStreak=false; showStreak(); return; }        // écran de série (7 épis)
   if(obAccountPending){ obAccountPending=false; showObAccount(); return; } // 1re leçon d'onboarding → proposer le compte
   returnFromPlayer();
 }
@@ -2779,6 +2839,7 @@ function finishExam(){
       'Le test n\u2019est pas validé : l\u2019unité suivante reste verrouillée. Réessaie quand tu veux 💪</p>'+
       '<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="startExam('+u+')">🔁 Refaire le test</button>';
   }
+  fillFinishConstance();
   document.getElementById('finish').classList.add('on');
 }
 
@@ -2883,7 +2944,7 @@ function assocTap(i,el){
   if(!window._asSet)window._asSet=new Set();window._asSet.add(i);
   if(window._asSet.size>=a.set.length){ctaOn();}
 }
-function tsTap(L,el){speak(L);popIt(el);el.classList.add('seen');
+function tsTap(L,el){sayLetterSound(L);popIt(el);el.classList.add('seen');
   window._ts.add(L);if(window._ts.size>=window._tsN)ctaOn();}
 function setupDrag(L){
   const src=document.getElementById('dragSrc');if(!src)return;
@@ -4169,6 +4230,7 @@ function renderProg(){
        '<div class="rk-mid"><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div>'+
          '<div class="ubar"><i style="width:'+_R.prog+'%"></i></div>'+
        '</div><div class="rk-chev">›</div></button>';
+  h+=rankBarHTML();
   h+='<div class="pgrid">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
      '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
@@ -4740,6 +4802,7 @@ function finishReview(){
   document.getElementById('fin-title').textContent='Révision terminée ! 🎉';
   document.getElementById('fin-xp').textContent='+10';
   document.getElementById('fin-acc').textContent=acc+'%';
+  fillFinishConstance();
   document.getElementById('finish').classList.add('on');
 }
 function returnFromPlayer(){
