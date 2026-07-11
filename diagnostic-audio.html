@@ -1,0 +1,165 @@
+<title>Diagnostic audio ALAQ</title>
+<style>
+  :root{
+    --bg:#221c19; --panel:#2c2521; --line:#453931; --cream:#f3e8d8; --gold:#d9a441;
+    --ok:#35a468; --err:#d8463a; --muted:#a08d78;
+  }
+  html{background:var(--bg)}
+  body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;color:var(--cream);
+    max-width:480px;margin:0 auto;padding:20px 16px 60px;line-height:1.45}
+  h1{font-size:22px;margin:0 0 4px;color:var(--gold)}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 14px}
+  .card h2{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+  .num{background:var(--gold);color:var(--bg);font-weight:800;font-size:13px;
+    width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;flex:none}
+  button.go{display:block;width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;
+    background:var(--gold);color:var(--bg);font-size:16px;font-weight:800;margin:4px 0 8px}
+  button.go:active{transform:translateY(1px)}
+  button.go:focus-visible{outline:3px solid var(--cream);outline-offset:2px}
+  .attend{font-size:13px;color:var(--muted);margin:0 0 6px}
+  .log{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#1b1613;
+    border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:20px;
+    white-space:pre-wrap;word-break:break-word}
+  .log:empty::before{content:'— pas encore lancé —';color:#6d5d4c}
+  .ok{color:var(--ok)} .err{color:var(--err)} .info{color:var(--cream)}
+  #voices{font-size:13.5px}
+  .ua{color:#6d5d4c;font-size:11px;margin-top:22px;word-break:break-all}
+  .verdict{font-weight:800}
+</style>
+
+<h1>🔊 Diagnostic audio ALAQ</h1>
+<p class="sub">Lance les tests <b>dans l'ordre</b>, note ce que tu <b>entends</b>, puis envoie une capture d'écran de toute la page à Claude.</p>
+
+<div class="card">
+  <h2><span class="num">1</span> Les voix disponibles sur cet appareil</h2>
+  <div class="log" id="voices">chargement…</div>
+</div>
+
+<div class="card">
+  <h2><span class="num">2</span> Synthèse FRANÇAISE seule</h2>
+  <p class="attend">Tu dois entendre : « Bonjour, ceci est un test »</p>
+  <button class="go" onclick="t2()">▶ Lancer le test 2</button>
+  <div class="log" id="log2"></div>
+</div>
+
+<div class="card">
+  <h2><span class="num">3</span> Synthèse ARABE seule</h2>
+  <p class="attend">Tu dois entendre : « ṣirāṭ » (صِرَاطٌ) en voix arabe</p>
+  <button class="go" onclick="t3()">▶ Lancer le test 3</button>
+  <div class="log" id="log3"></div>
+</div>
+
+<div class="card">
+  <h2><span class="num">4</span> Un mp3 de l'app (fichier existant)</h2>
+  <p class="attend">Tu dois entendre : le début de la récitation de la Fātiḥa (2 secondes)</p>
+  <button class="go" onclick="t4()">▶ Lancer le test 4</button>
+  <div class="log" id="log4"></div>
+</div>
+
+<div class="card">
+  <h2><span class="num">5</span> mp3 PUIS synthèse arabe (l'enchaînement suspect)</h2>
+  <p class="attend">Tu dois entendre : 2 s de récitation, PUIS « ṣirāṭ » en voix arabe</p>
+  <button class="go" onclick="t5()">▶ Lancer le test 5</button>
+  <div class="log" id="log5"></div>
+</div>
+
+<div class="card">
+  <h2><span class="num">6</span> Le chemin EXACT de l'examen (mp3 absent → repli synthèse)</h2>
+  <p class="attend">Tu dois entendre : « ṣirāṭ » en voix arabe (après ~1 seconde de silence)</p>
+  <button class="go" onclick="t6()">▶ Lancer le test 6</button>
+  <div class="log" id="log6"></div>
+</div>
+
+<div class="ua" id="ua"></div>
+
+<script>
+var BASE='https://app.alaq.fr/audios-app-alaq/';
+function el(id){return document.getElementById(id);}
+function log(n,txt,cls){var d=el('log'+n);var s=document.createElement('div');
+  if(cls)s.className=cls;s.textContent=txt;d.appendChild(s);}
+function clr(n){el('log'+n).innerHTML='';}
+function stampFrom(t0){return ' ('+Math.round(performance.now()-t0)+' ms)';}
+
+/* ---- 1 · inventaire des voix (asynchrone sur iOS) ---- */
+function listVoices(){
+  var vs=speechSynthesis.getVoices();
+  var ar=vs.filter(function(v){return /^ar/i.test(v.lang);});
+  var fr=vs.filter(function(v){return /^fr/i.test(v.lang);});
+  var h='Total : '+vs.length+' voix\n';
+  h+='Françaises : '+fr.length+(fr.length?' ('+fr.slice(0,3).map(function(v){return v.name;}).join(', ')+'…)':'')+'\n';
+  h+='ARABES : '+ar.length+(ar.length?' → '+ar.map(function(v){return v.name+' ['+v.lang+']';}).join(', '):' ⚠️ AUCUNE');
+  el('voices').textContent=h;
+  el('voices').className='log '+(ar.length?'':'err');
+}
+listVoices();
+if('speechSynthesis' in window){speechSynthesis.addEventListener('voiceschanged',listVoices);}
+setTimeout(listVoices,800);
+el('ua').textContent=navigator.userAgent+(navigator.standalone?' · PWA installée':' · navigateur');
+
+function arVoice(){var vs=speechSynthesis.getVoices().filter(function(v){return /^ar/i.test(v.lang);});return vs[0]||null;}
+function frVoice(){var vs=speechSynthesis.getVoices().filter(function(v){return /^fr/i.test(v.lang);});return vs[0]||null;}
+
+function speakTest(n,text,voice,langLabel,t0){
+  if(!voice){log(n,'✗ aucune voix '+langLabel+' disponible → silence',            'err');return;}
+  var u=new SpeechSynthesisUtterance(text);
+  u.voice=voice;u.lang=voice.lang;u.rate=.85;
+  var started=false;
+  u.onstart=function(){started=true;log(n,'✓ synthèse DÉMARRÉE ('+voice.name+')'+stampFrom(t0),'ok');};
+  u.onend=function(){log(n,'fin de la synthèse'+stampFrom(t0));
+    log(n,started?'→ Si tu n’as RIEN entendu alors que « démarrée » est affiché : le son est coupé au niveau du système.':'','info');};
+  u.onerror=function(e){log(n,'✗ erreur synthèse : '+(e.error||'inconnue'),'err');};
+  speechSynthesis.speak(u);
+  setTimeout(function(){if(!started&&!speechSynthesis.speaking){log(n,'✗ rien après 2 s : utterance perdue par iOS','err');}},2000);
+}
+
+/* ---- 2 · synthèse française ---- */
+function t2(){clr(2);var t0=performance.now();log(2,'speak(fr) lancé…');speechSynthesis.cancel();
+  speakTest(2,'Bonjour, ceci est un test',frVoice(),'française',t0);}
+
+/* ---- 3 · synthèse arabe ---- */
+function t3(){clr(3);var t0=performance.now();log(3,'speak(ar) lancé…');speechSynthesis.cancel();
+  speakTest(3,'صِرَاطٌ',arVoice(),'arabe',t0);}
+
+/* ---- 4 · mp3 existant ---- */
+function t4(){clr(4);var t0=performance.now();
+  var a=new Audio(BASE+'fatiha-1.mp3');
+  log(4,'chargement fatiha-1.mp3…');
+  a.addEventListener('playing',function(){log(4,'✓ le mp3 JOUE'+stampFrom(t0),'ok');},{once:true});
+  a.addEventListener('error',function(){log(4,'✗ erreur de chargement du mp3','err');},{once:true});
+  var p=a.play();if(p&&p.catch)p.catch(function(e){log(4,'✗ lecture refusée : '+e.name,'err');});
+  setTimeout(function(){a.pause();log(4,'mp3 arrêté après 2 s');},2000);
+}
+
+/* ---- 5 · mp3 puis synthèse arabe ---- */
+function t5(){clr(5);var t0=performance.now();
+  var a=new Audio(BASE+'fatiha-1.mp3');
+  log(5,'phase A : lecture du mp3…');
+  a.addEventListener('playing',function(){log(5,'✓ mp3 en cours'+stampFrom(t0),'ok');},{once:true});
+  var p=a.play();if(p&&p.catch)p.catch(function(e){log(5,'✗ mp3 refusé : '+e.name,'err');});
+  setTimeout(function(){
+    a.pause();
+    log(5,'phase B : synthèse arabe juste après le mp3…');
+    speechSynthesis.cancel();
+    setTimeout(function(){speakTest(5,'صِرَاطٌ',arVoice(),'arabe',t0);},60);
+  },2000);
+}
+
+/* ---- 6 · chemin exact de l'examen : 404 → repli ---- */
+function t6(){clr(6);var t0=performance.now();
+  log(6,'new Audio(mot-sirat.mp3) — fichier ABSENT, un 404 est NORMAL ici');
+  var a=new Audio(BASE+'mot-sirat.mp3');var settled=false;
+  function toSynth(src){if(settled)return;settled=true;
+    log(6,'repli déclenché par « '+src+' »'+stampFrom(t0));
+    speechSynthesis.cancel();
+    setTimeout(function(){speakTest(6,'صِرَاطٌ',arVoice(),'arabe',t0);},60);
+  }
+  a.addEventListener('error',function(){toSynth('événement error');},{once:true});
+  a.addEventListener('stalled',function(){toSynth('événement stalled');},{once:true});
+  a.addEventListener('abort',function(){toSynth('événement abort');},{once:true});
+  a.addEventListener('playing',function(){settled=true;log(6,'⚠️ inattendu : le mp3 a joué ?!','err');},{once:true});
+  var p=a.play();if(p&&p.catch)p.catch(function(e){toSynth('play() rejeté : '+e.name);});
+  setTimeout(function(){if(!settled&&a.paused)toSynth('filet de sécurité 1100 ms');},1100);
+  setTimeout(function(){if(!settled)log(6,'✗ AUCUN repli déclenché après 3 s — le bug est ICI','err');},3000);
+}
+</script>
