@@ -4,7 +4,7 @@
      cache en secours (avion, mosquée sans réseau…)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
    - les audios de la voix de Myriam + la Fātiḥa sont pré-chargés à l'installation */
-const CACHE='alaq-v54-2026-07-10';
+const CACHE='alaq-v55-2026-07-10';
 const CORE=['.','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const AUDIOS=[
 "audios-app-alaq/ain-alif-son-prolonge.mp3",
@@ -65,6 +65,16 @@ const AUDIOS=[
 "audios-app-alaq/instr-spot-verset.mp3",
 "audios-app-alaq/instr-touche-droite.mp3",
 "audios-app-alaq/instr-trace.mp3",
+"audios-app-alaq/lettre-alif-nom.mp3",
+"audios-app-alaq/lettre-ayn-nom.mp3",
+"audios-app-alaq/lettre-ba-nom.mp3",
+"audios-app-alaq/lettre-hamza-nom.mp3",
+"audios-app-alaq/lettre-lam-nom.mp3",
+"audios-app-alaq/lettre-mim-nom.mp3",
+"audios-app-alaq/lettre-nun-nom.mp3",
+"audios-app-alaq/lettre-ra-nom.mp3",
+"audios-app-alaq/lettre-waw-nom.mp3",
+"audios-app-alaq/lettre-ya-nom.mp3",
 "audios-app-alaq/lam-alif-son-prolonge.mp3",
 "audios-app-alaq/lam-damma-son-court.mp3",
 "audios-app-alaq/lam-fatha-son-court.mp3",
