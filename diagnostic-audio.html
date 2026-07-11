@@ -71,6 +71,16 @@
   <div class="log" id="log6"></div>
 </div>
 
+<div class="card">
+  <h2><span class="num">7</span> L'app espionnée — LE test décisif</h2>
+  <p class="attend">Touche le bouton : l'app se charge ci-dessous avec un mouchard sur chaque son.
+  Refais EXACTEMENT ton test (bulle « AVANCER ICI ? » → C'EST PARTI → touche un 🔊),
+  puis envoie une capture du journal.</p>
+  <button class="go" onclick="t7()">▶ Charger l'app espionnée</button>
+  <div class="log" id="log7" style="max-height:150px;overflow-y:auto"></div>
+  <iframe id="appfr" title="ALAQ espionnée" style="display:none;width:100%;height:65vh;border:2px solid var(--line);border-radius:12px;background:#221c19;margin-top:8px"></iframe>
+</div>
+
 <div class="ua" id="ua"></div>
 
 <script>
@@ -161,5 +171,45 @@ function t6(){clr(6);var t0=performance.now();
   var p=a.play();if(p&&p.catch)p.catch(function(e){toSynth('play() rejeté : '+e.name);});
   setTimeout(function(){if(!settled&&a.paused)toSynth('filet de sécurité 1100 ms');},1100);
   setTimeout(function(){if(!settled)log(6,'✗ AUCUN repli déclenché après 3 s — le bug est ICI','err');},3000);
+}
+
+/* ---- 7 · l'app réelle instrumentée dans un cadre ---- */
+function t7(){
+  clr(7);
+  var t0=performance.now();
+  var f=el('appfr'); f.style.display='block';
+  function L(m,cls){
+    log(7,'['+(Math.round((performance.now()-t0)/100)/10).toFixed(1)+'s] '+m,cls);
+    var d=el('log7'); d.scrollTop=d.scrollHeight;
+  }
+  f.onload=function(){
+    try{
+      var w=f.contentWindow;
+      var A0=w.Audio;
+      w.Audio=function(u){
+        var a=new A0(u); var short=(''+u).split('/').pop();
+        L('Audio → '+short);
+        a.addEventListener('playing',function(){L('  ✓ mp3 JOUE : '+short,'ok');});
+        a.addEventListener('error',function(){L('  mp3 absent (repli attendu) : '+short);});
+        return a;
+      };
+      var st0=w.stopAudio; w.stopAudio=function(){L('stopAudio()');return st0();};
+      var sy0=w._speakSynth; w._speakSynth=function(t){L('_speakSynth('+t+')');return sy0(t);};
+      var bv0=w.bestVoice; w.bestVoice=function(l){var v=bv0(l);
+        if(l==='ar')L('  voix arabe choisie : '+(v?v.name:'AUCUNE'),v?'':'err');return v;};
+      var S=w.speechSynthesis; var sp0=S.speak.bind(S); var ca0=S.cancel.bind(S);
+      S.speak=function(u){
+        L('utterance « '+((u.text||'').slice(0,16))+' »'+(u.volume===0?' (réveil silencieux)':''));
+        var os=u.onstart,oe=u.onend,oer=u.onerror;
+        u.onstart=function(e){L('  ✓✓ la synthèse DÉMARRE','ok');if(os)os.call(u,e);};
+        u.onend=function(e){L('  fin de synthèse');if(oe)oe.call(u,e);};
+        u.onerror=function(e){L('  ✗ utterance en ERREUR : '+(e&&e.error||'?'),'err');if(oer)oer.call(u,e);};
+        return sp0(u);
+      };
+      S.cancel=function(){L('cancel() synthèse');return ca0();};
+      L('✓ mouchard actif — refais ton test dans l’app ci-dessous','ok');
+    }catch(e){L('✗ instrumentation impossible : '+e.message,'err');}
+  };
+  f.src='https://app.alaq.fr/?t='+Date.now();
 }
 </script>
