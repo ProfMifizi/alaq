@@ -113,6 +113,19 @@
     animation:coinShine 4.8s ease-in-out infinite}
   @keyframes coinShine{0%,62%{left:-60%}100%{left:165%}}
   .locked .bubble{background:var(--panel2);color:var(--lock);box-shadow:0 6px 0 #2c2521;cursor:not-allowed}
+  /* « AVANCER ICI ? » : 1re leçon d'une unité future — disque coloré + bulle flottante (façon Duolingo) */
+  .node.jump{margin-top:46px}
+  .jump .bubble{color:#fff;cursor:pointer;
+    background:radial-gradient(circle at 34% 26%,color-mix(in srgb,var(--accent,var(--gold)) 60%,#fff),var(--accent,var(--gold)) 55%,color-mix(in srgb,var(--accent,var(--gold)) 58%,#000));
+    box-shadow:0 6px 0 color-mix(in srgb,var(--accent,var(--gold)) 45%,#000)}
+  .jump .bubble .bi{color:#fff;letter-spacing:-3px;font-family:'Nunito',sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+  .jump-tip{position:absolute;bottom:calc(100% + 12px);left:50%;
+    background:var(--panel2);color:var(--accent,var(--gold));border:2px solid var(--accent,var(--gold));
+    font-weight:900;font-size:13px;padding:7px 13px;border-radius:12px;white-space:nowrap;z-index:3;pointer-events:none;
+    animation:jbob 2.2s ease-in-out infinite}
+  .jump-tip::after{content:'';position:absolute;left:50%;top:100%;transform:translateX(-50%);
+    border:6px solid transparent;border-top-color:var(--accent,var(--gold))}
+  @keyframes jbob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}
   .node .ring{position:absolute;inset:-8px;border-radius:50%;pointer-events:none}
   .current .ring{inset:-9px;
     background:conic-gradient(from 0deg,transparent 0deg,var(--accent,#f4d089) 55deg,transparent 120deg,transparent 200deg,#f4d089 250deg,transparent 320deg);
@@ -145,6 +158,7 @@
   .narr-tog{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;padding:0 2px;cursor:pointer}
   .narr-tog:active{color:var(--gold2)}
   .p-body{flex:1;overflow-y:auto;padding:8px 22px 24px;max-width:560px;width:100%;margin:0 auto}
+  .p-body.p-center{display:flex;flex-direction:column;justify-content:center}
   .q-title{font-size:21px;font-weight:900;margin:14px 0 22px}
   .q-note{font-size:20px;font-weight:900;color:var(--cream);line-height:1.35;margin:8px 0 22px}
   .glyph-big{font-family:var(--ar);font-size:80px;text-align:center;color:var(--gold);
@@ -2181,7 +2195,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 10/07 · unités 5-6-7 ouvertes (ح ط ق · ت ص غ · ه ذ ض) : les 21 lettres de la Fātiḥa au complet · unité 4 remaniée : 10 mots coraniques (+بسم الناس مالك ملك كسب · −chien poisson paix verre tête)';
+const BUILD='maj 10/07b · AVANCER ICI ? façon Duolingo : bulle flottante sur la 1re leçon de chaque unité future + écran de test épuré (C’EST PARTI)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -2236,6 +2250,13 @@ function renderHome(){
             (done?'<span class="check">\u2713</span>':'')+
           '</button></div>';
         if(unlocked)node.querySelector('.bubble').onclick=()=>startDisque(u,i);
+      } else if(U.ready && i===0){
+        // 1re leçon d'une unité future : « AVANCER ICI ? » (façon Duolingo) — test-out des unités précédentes
+        node.className='node jump';
+        node.innerHTML='<div class="bwrap"><div class="jump-tip">AVANCER ICI ?</div>'+
+          '<button class="bubble" aria-label="Avancer ici : réussis un test pour passer directement à cette unité">'+
+          '<svg class=\"bi\" width=\"36\" height=\"28\" viewBox=\"0 0 36 28\" aria-hidden=\"true\"><g fill=\"#fff\" stroke=\"#fff\" stroke-width=\"7\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M6.5 6.5 L16 14 L6.5 21.5 Z\"/><path d=\"M19.5 6.5 L29 14 L19.5 21.5 Z\"/></g></svg></button></div>';
+        node.querySelector('.bubble').onclick=()=>startExam(u-1);
       } else {
         node.className='node locked';
         node.innerHTML='<div class="bwrap"><button class="bubble" disabled aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
@@ -2244,13 +2265,6 @@ function renderHome(){
       path.appendChild(node);
     });
     sec.appendChild(path);
-    // « Avancer ici » est proposé en fin de CHAQUE unité prête (toujours visible).
-    if(U.ready){
-      sec.insertAdjacentHTML('beforeend',
-        '<div style="text-align:center;margin:14px 0 2px">'+
-        '<button onclick="startExam('+u+')" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);'+
-        'padding:9px 18px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer">\u26a1 Avancer ici\u00a0?</button></div>');
-    }
     h.appendChild(sec);
   });
   setBanner(0);
@@ -2320,11 +2334,13 @@ function renderStep(){
    if(_ins&&_ins!==window._lastInstr)setTimeout(()=>readInstr(_ins),250);
    window._lastInstr=_ins;}
 
+  body.classList.toggle('p-center',!!st.center);
   if(st.type==='slide'){
-    body.innerHTML='<div class="learn"><div class="badge-new">À DÉCOUVRIR</div>'+
+    body.innerHTML='<div class="learn">'+(st.nobadge?'':'<div class="badge-new">À DÉCOUVRIR</div>')+
       '<div class="nm">'+st.title+'</div>'+
       (st.big?'<div class="demo" style="font-family:var(--ar);font-size:64px">'+st.big+'</div>':'')+
       '<div class="mn" style="font-size:16px">'+st.html+'</div></div>';
+    if(st.cta)cta.textContent=st.cta;
     cta.disabled=st.gate?true:false;return;
   }
 
@@ -2880,9 +2896,8 @@ function buildExam(U){
     options:balancePos(shuffle(L3).map(x=>({ar:x,key:x})),Lt)}))));
   const take=(a,n)=>shuffle(a).slice(0,n);
   const q=shuffle([...take(reading,7),...take(writing,6),...take(pos,7)]).slice(0,20);
-  return [{type:'slide',title:'Avancer ici ?',html:
-    '<p>Un test de <b>'+q.length+' questions</b> \u2014 lecture, écriture et reconnaissance des lettres en position. '+
-    'Avec <b>2 erreurs maximum</b>, tu valides toute l\u2019unité et tu passes à la suite. Prêt ?</p>'},...q];
+  return [{type:'slide',nobadge:true,center:true,cta:'C’EST PARTI',
+    title:'Réussis ce test pour passer directement à cette unité !',html:''},...q];
 }
 function startExam(u){
   if(S.hearts<=0){showNoHearts();return;}
