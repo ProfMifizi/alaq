@@ -2195,7 +2195,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 10/07c · noms de lettres unifiés lettre-X-nom.mp3 (9 enregistrements existants recopiés, fini le double nommage) · fix : la hamza joue enfin hamza-isolee (et plus alif)';
+const BUILD='maj 10/07d · FIX SON iOS : resume() décoince le moteur de synthèse resté en pause après un cancel (utterances avalées sans erreur) — merci au journal-espion de Myriam';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -3170,7 +3170,11 @@ function speakFr(t,isNarr){
     const gen=_sndGen;
     const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=.95;u.pitch=1.05;
     const v=bestVoice('fr');if(v)u.voice=v;
-    setTimeout(()=>{ if(gen===_sndGen)speechSynthesis.speak(u); },60);}catch(e){}
+    setTimeout(()=>{ if(gen!==_sndGen)return;
+      try{speechSynthesis.resume();}catch(e){}   // iOS : décoince le moteur (cf. _speakSynth)
+      speechSynthesis.speak(u);
+      try{speechSynthesis.resume();}catch(e){}
+    },60);}catch(e){}
 }
 function fiTap(el,L){
   speak(L);popIt(el);
@@ -4014,7 +4018,9 @@ function _speakSynth(t){ // repli synthèse : voix arabe pour l'arabe, voix fran
         if(frV){ u.voice=frV; u.lang=frV.lang; } else { u.lang='fr-FR'; }
         u.rate=.95;
       }
+      try{speechSynthesis.resume();}catch(e){}   // iOS : décoince un moteur resté « en pause » après un cancel
       try{speechSynthesis.speak(u);}catch(e){}
+      try{speechSynthesis.resume();}catch(e){}   // iOS : pousse la file si l'utterance a été mise en attente
     };
     if(!speechSynthesis.getVoices().length){     // voix pas encore chargées : on attend l'événement
       let done=false; const once=()=>{ if(done)return; done=true; go(); };
@@ -4033,6 +4039,9 @@ function stopAudio(){ // un seul son à la fois : coupe le fichier ET la synthè
   _sndGen++;
   try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
   try{ if('speechSynthesis'in window)speechSynthesis.cancel(); }catch(e){}
+  // iOS/WebKit : cancel() peut laisser le moteur coincé « en pause » -> les speak() suivants
+  // sont mis en file SANS JAMAIS démarrer (ni onstart ni onerror). resume() le décoince (no-op ailleurs).
+  try{ if('speechSynthesis'in window)speechSynthesis.resume(); }catch(e){}
 }
 function speak(t){
   try{
