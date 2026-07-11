@@ -2195,7 +2195,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 10/07e · FIX SON iOS (2) : référence forte _curUtter — le ramasse-miettes de Safari détruisait l’utterance avant qu’elle parle (silence sans onstart ni onerror)';
+const BUILD='maj 10/07f · FIX SON iOS (3) : réveil vocal à volume PLEIN (le volume 0 du warm-up se collait à toutes les utterances suivantes sur iOS) + volume explicite + 2e tentative auto si la synthèse n’a pas démarré en 700 ms';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -3171,11 +3171,19 @@ function speakFr(t,isNarr){
     const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=.95;u.pitch=1.05;
     const v=bestVoice('fr');if(v)u.voice=v;
     setTimeout(()=>{ if(gen!==_sndGen)return;
+      u.volume=1;                                // explicite (cf. _speakSynth : volume collant iOS)
       _curUtter=u;                               // référence forte anti-GC (cf. _speakSynth)
+      let started=false;
+      u.onstart=()=>{ started=true; };
       u.onend=u.onerror=()=>{ if(_curUtter===u)_curUtter=null; };
       try{speechSynthesis.resume();}catch(e){}   // iOS : décoince le moteur (cf. _speakSynth)
       speechSynthesis.speak(u);
       try{speechSynthesis.resume();}catch(e){}
+      setTimeout(()=>{ if(started||gen!==_sndGen)return;
+        try{speechSynthesis.cancel();}catch(e){}
+        try{speechSynthesis.resume();}catch(e){}
+        try{speechSynthesis.speak(u);}catch(e){}
+      },700);
     },60);}catch(e){}
 }
 function fiTap(el,L){
@@ -4020,11 +4028,20 @@ function _speakSynth(t){ // repli synthèse : voix arabe pour l'arabe, voix fran
         if(frV){ u.voice=frV; u.lang=frV.lang; } else { u.lang='fr-FR'; }
         u.rate=.95;
       }
+      u.volume=1;                                // explicite : iOS peut hériter du volume d'une utterance précédente
       _curUtter=u;                               // référence forte anti-GC (iOS avale les utterances orphelines)
+      let started=false;
+      u.onstart=()=>{ started=true; };
       u.onend=u.onerror=()=>{ if(_curUtter===u)_curUtter=null; };
       try{speechSynthesis.resume();}catch(e){}   // iOS : décoince un moteur resté « en pause » après un cancel
       try{speechSynthesis.speak(u);}catch(e){}
       try{speechSynthesis.resume();}catch(e){}   // iOS : pousse la file si l'utterance a été mise en attente
+      setTimeout(()=>{                           // filet : iOS avale parfois la 1re tentative sans un mot
+        if(started||gen!==_sndGen)return;
+        try{speechSynthesis.cancel();}catch(e){}
+        try{speechSynthesis.resume();}catch(e){}
+        try{speechSynthesis.speak(u);}catch(e){}
+      },700);
     };
     if(!speechSynthesis.getVoices().length){     // voix pas encore chargées : on attend l'événement
       let done=false; const once=()=>{ if(done)return; done=true; go(); };
@@ -4076,8 +4093,10 @@ function warmVoices(){
   _voiceReady=true;
   try{
     speechSynthesis.getVoices();
-    const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.lang='fr-FR';
-    speechSynthesis.speak(u); // énoncé silencieux pour amorcer le moteur
+    // ⚠️ SURTOUT PAS volume=0 : sur iOS, le volume de la 1re utterance peut se COLLER à toutes
+    // les suivantes (tout devient muet). Un espace à volume plein est inaudible de toute façon.
+    const u=new SpeechSynthesisUtterance(' ');u.volume=1;u.lang='fr-FR';
+    speechSynthesis.speak(u); // énoncé inaudible pour amorcer le moteur
   }catch(e){}
 }
 if('speechSynthesis'in window){
