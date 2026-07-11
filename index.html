@@ -2195,7 +2195,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 10/07d · FIX SON iOS : resume() décoince le moteur de synthèse resté en pause après un cancel (utterances avalées sans erreur) — merci au journal-espion de Myriam';
+const BUILD='maj 10/07e · FIX SON iOS (2) : référence forte _curUtter — le ramasse-miettes de Safari détruisait l’utterance avant qu’elle parle (silence sans onstart ni onerror)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -3171,6 +3171,8 @@ function speakFr(t,isNarr){
     const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=.95;u.pitch=1.05;
     const v=bestVoice('fr');if(v)u.voice=v;
     setTimeout(()=>{ if(gen!==_sndGen)return;
+      _curUtter=u;                               // référence forte anti-GC (cf. _speakSynth)
+      u.onend=u.onerror=()=>{ if(_curUtter===u)_curUtter=null; };
       try{speechSynthesis.resume();}catch(e){}   // iOS : décoince le moteur (cf. _speakSynth)
       speechSynthesis.speak(u);
       try{speechSynthesis.resume();}catch(e){}
@@ -4018,6 +4020,8 @@ function _speakSynth(t){ // repli synthèse : voix arabe pour l'arabe, voix fran
         if(frV){ u.voice=frV; u.lang=frV.lang; } else { u.lang='fr-FR'; }
         u.rate=.95;
       }
+      _curUtter=u;                               // référence forte anti-GC (iOS avale les utterances orphelines)
+      u.onend=u.onerror=()=>{ if(_curUtter===u)_curUtter=null; };
       try{speechSynthesis.resume();}catch(e){}   // iOS : décoince un moteur resté « en pause » après un cancel
       try{speechSynthesis.speak(u);}catch(e){}
       try{speechSynthesis.resume();}catch(e){}   // iOS : pousse la file si l'utterance a été mise en attente
@@ -4031,7 +4035,9 @@ function _speakSynth(t){ // repli synthèse : voix arabe pour l'arabe, voix fran
     }
   }catch(e){}
 }
-let _curAudio=null,_sndGen=0; // _sndGen = jeton de génération : tout repli/minuterie d'un ancien son est annulé
+let _curAudio=null,_curUtter=null,_sndGen=0; // _sndGen = jeton de génération : tout repli/minuterie d'un ancien son est annulé
+// _curUtter = référence FORTE sur l'utterance en cours : sans elle, le ramasse-miettes de Safari/iOS
+// peut détruire l'utterance AVANT qu'elle parle (silence total, ni onstart ni onerror). Bug WebKit connu.
 function playSfx(name){ // son de récompense : joue audios-app-alaq/sfx-<name>.mp3 s'il existe, sinon SILENCE (aucun repli)
   try{ stopAudio(); const a=new Audio('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
 }
