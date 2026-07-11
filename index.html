@@ -61,6 +61,13 @@
 
   /* ====== Parcours ====== */
   .wrap{max-width:520px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top,0px)) 16px 120px;min-height:100vh;min-height:100dvh}
+  /* Ordinateur / tablette (≥ 540px) : l'app se centre en colonne « téléphone » — sinon tout s'étire (boutons pleine largeur). Aucun effet sur iPhone (≤ 430px). */
+  @media (min-width:540px){
+    body{background:#161311;background-image:radial-gradient(circle at 50% -10%, #2a2422 0, #1a1614 40%, #141110 80%)}
+    .wrap{max-width:460px}
+    .topbar,.botnav,.player,.finish,.onb{max-width:460px;margin-left:auto;margin-right:auto;
+      box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 24px 60px rgba(0,0,0,.45)}
+  }
   .hero{text-align:center;padding:26px 14px 8px}
   .hero img{width:120px;height:auto;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.45);border:1px solid var(--line)}
   .hero h1{font-size:15px;color:var(--muted);font-weight:700;margin-top:12px}
@@ -1153,20 +1160,82 @@ const UNITS=[
    },
    words:[
  {w:'دَرْسٌ',b:'درس',fr:'une leçon',e:'📖',say:'dars',confus:['دَرَسٌ','دَرْنٌ','رَرْسٌ']},
- {w:'كَلْبٌ',b:'كلب',fr:'un chien',e:'🐕',say:'kalb',confus:['كَلْمٌ','كَبْلٌ','نَلْبٌ']},
- {w:'سَمَكٌ',b:'سمك',fr:'un poisson',e:'🐟',say:'samak',confus:['سَمَنٌ','سَمَرٌ','سَكَمٌ']},
  {w:'كَرِيمٌ',b:'كريم',fr:'généreux, noble',e:'🌟',say:'karīm',confus:['كَبِيرٌ','رَكِيمٌ','كَرِيبٌ']},
- {w:'سَلَامٌ',b:'سلام',fr:'la paix',e:'🕊️',say:'salām',confus:['كَلَامٌ','سَنَامٌ','سَالِمٌ']},
- {w:'كَأْسٌ',b:'كأس',fr:'une coupe, un verre',e:'🥃',say:'ka’s',confus:['كَاسٌ','كَأْنٌ','كَيْسٌ']},
- {w:'رَأْسٌ',b:'رأس',fr:'une tête',e:'🗣️',say:'ra’s',confus:['رَاسٌ','رَأْنٌ','رَيْسٌ']},
  {w:'دِينٌ',b:'دين',fr:'une religion, une rétribution',e:'🕋',say:'dīn',confus:['دَينٌ','رِينٌ','دِيمٌ']},
  {w:'إِيَّاكَ',b:'إياك',fr:'c\u2019est Toi (que)',e:'🤲',say:'iyyāka',confus:['إِيَّاكِ','إِيَّانَ','إِنَّاكَ']},
  {w:'نَعْبُدُ',b:'نعبد',fr:'nous adorons',e:'🙏',say:'naʿbudu',confus:['نَعْبُدٌ','يَعْبُدُ','نَعْبُرُ']},
+ {w:'النَّاسُ',b:'الناس',fr:'les gens, l’humanité',e:'👥',say:'an-nās',confus:['المَّاسُ','النَّابُ','الرَّاسُ']},
+ {w:'مَالِكٌ',b:'مالك',fr:'souverain, maître',e:'👑',say:'mālik',confus:['كَامِلٌ','مَالِنٌ','مَابِكٌ']},
+ {w:'مَلِكٌ',b:'ملك',fr:'un roi',e:'🤴',say:'malik',confus:['مِلْكٌ','كَلِمٌ','مَنِكٌ']},
+ {w:'كَسَبَ',b:'كسب',fr:'il a acquis, il a gagné',e:'🎯',say:'kasaba',confus:['سَكَبَ','كَسَرَ','كَبَسَ']},
+ {w:'بِسْمِ',b:'بسم',fr:'au nom de',e:'🔑',say:'bismi',confus:['بِمْسِ','مِسْبِ','بِسْرِ']},
    ],
    vtiles:{vi:4} },
- { no:5, letters:['ح','ط','ق'], ready:false },
- { no:6, letters:['ت','ص','غ'], ready:false },
- { no:7, letters:['ه','ذ','ض'], ready:false },
+ { no:5, ready:true, sub:'ح ط ق · du son à la lecture de mots — 9 leçons',
+   letters:['ح','ط','ق'],
+   lat:{'ح':'ḥ','ط':'ṭ','ق':'q'},
+   alpha:{
+ 'ح':{n:'ḥāʾ',son:'un souffle chaud qui vient du fond de la gorge, comme quand on souffle sur ses mains pour les réchauffer',mn:'un grand croissant ouvert, sans aucun point'},
+ 'ط':{n:'ṭāʾ',son:'un « t » emphatique, lourd et profond : la langue se plaque au palais et la bouche s’arrondit',mn:'une boucle couchée sur la ligne, surmontée d’une grande hampe verticale'},
+ 'ق':{n:'qāf',son:'un « k » profond, prononcé tout au fond de la gorge, comme un k avalé',mn:'une petite tête ronde avec DEUX points au-dessus et un grand ventre qui plonge sous la ligne'},
+   },
+   words:[
+ {w:'الْحَمْدُ',b:'الحمد',fr:'la louange',e:'✨',say:'al-ḥamdou',confus:['الْحَمَلُ','الْمَحْدُ','الْحَبْدُ']},
+ {w:'الرَّحْمَٰنُ',b:'الرحمن',fr:'le Tout-Miséricordieux',e:'💛',say:'ar-raḥmān',confus:['الرَّمْحَنُ','الرَّحْمَلُ','الرَّحْنَمُ']},
+ {w:'الرَّحِيمُ',b:'الرحيم',fr:'le Très-Miséricordieux',e:'💗',say:'ar-raḥīm',confus:['الرَّحِيبُ','الرَّمِيحُ','الرَّحِينُ']},
+ {w:'قُلْ',b:'قل',fr:'dis !',e:'💬',say:'qoul',confus:['قُمْ','لُقْ','قُبْ']},
+ {w:'أَحَدٌ',b:'أحد',fr:'un, unique',e:'☝️',say:'aḥad',confus:['أَحَرٌ','أَدَحٌ','أَحَمٌ']},
+ {w:'حَاسِدٌ',b:'حاسد',fr:'un envieux',e:'😒',say:'ḥāsid',confus:['حَاسِرٌ','سَاحِدٌ','حَادِسٌ']},
+ {w:'عُقَدٌ',b:'عقد',fr:'des nœuds',e:'🪢',say:'ʿouqad',confus:['عُقَرٌ','قُعَدٌ','عُدَقٌ']},
+ {w:'وَقَبَ',b:'وقب',fr:'elle s’installe (la nuit)',e:'🌒',say:'waqaba',confus:['وَقَدَ','وَبَقَ','قَوَبَ']},
+ {w:'طَرِيقٌ',b:'طريق',fr:'un chemin',e:'🛣️',say:'ṭarīq',confus:['طَرِيدٌ','قَرِيطٌ','طَبِيقٌ']},
+ {w:'حَطَبٌ',b:'حطب',fr:'du bois (de feu)',e:'🪵',say:'ḥaṭab',confus:['حَبَطٌ','طَحَبٌ','حَطَرٌ']},
+   ],
+   vtiles:{vi:0} },
+ { no:6, ready:true, sub:'ت ص غ · du son à la lecture de mots — 9 leçons',
+   letters:['ت','ص','غ'],
+   lat:{'ت':'t','ص':'ṣ','غ':'gh'},
+   alpha:{
+ 'ت':{n:'tāʾ',son:'son « t » léger (comme dans « tapis »), du bout de la langue',mn:'la même barque que le ب, mais avec DEUX points AU-DESSUS'},
+ 'ص':{n:'ṣād',son:'un « s » emphatique, épais et profond : la bouche s’arrondit comme pour dire « o »',mn:'un œuf couché sur la ligne, suivi du ventre du س qui plonge'},
+ 'غ':{n:'ghayn',son:'comme le « r » doux du français (« Paris »), un léger gargarisme du fond de la gorge',mn:'la même forme que le ع, avec UN point au-dessus'},
+   },
+   words:[
+ {w:'صِرَاطٌ',b:'صراط',fr:'un chemin, une voie',e:'🛤️',say:'ṣirāṭ',confus:['صِرَاعٌ','صِرَاقٌ','طِرَاصٌ']},
+ {w:'مُسْتَقِيمٌ',b:'مستقيم',fr:'droit',e:'📏',say:'moustaqīm',confus:['مُسْتَقِينٌ','مُسْتَطِيمٌ','مُتْسَقِيمٌ']},
+ {w:'نَسْتَعِينُ',b:'نستعين',fr:'nous implorons l’aide',e:'🤲',say:'nastaʿīn',confus:['يَسْتَعِينُ','نَسْتَعِيمُ','نَسْتَغِينُ']},
+ {w:'أَنْعَمْتَ',b:'أنعمت',fr:'Tu as comblé de bienfaits',e:'🎁',say:'anʿamta',confus:['أَنْعَمْنَ','أَعْنَمْتَ','أَنْغَمْتَ']},
+ {w:'غَيْر',b:'غير',fr:'autre que, excepté',e:'🚫',say:'ghayr',confus:['عَيْر','غَيْن','غَبْر']},
+ {w:'الصَّمَدُ',b:'الصمد',fr:'l’Absolu, Celui dont tout dépend',e:'🏔️',say:'aṣ-ṣamad',confus:['الصَّمَرُ','الصَّدَمُ','السَّمَدُ']},
+ {w:'صُدُورٌ',b:'صدور',fr:'des poitrines',e:'🫀',say:'ṣoudour',confus:['صُدُودٌ','صُرُودٌ','سُدُورٌ']},
+ {w:'غَاسِقٌ',b:'غاسق',fr:'une nuit noire',e:'🌑',say:'ghāsiq',confus:['غَاسِبٌ','عَاسِقٌ','غَاقِسٌ']},
+ {w:'صَبْرٌ',b:'صبر',fr:'la patience',e:'🌱',say:'ṣabr',confus:['سَبْرٌ','صَرْبٌ','صَبْدٌ']},
+ {w:'غَيْبٌ',b:'غيب',fr:'l’invisible',e:'🌌',say:'ghayb',confus:['عَيْبٌ','غَيْمٌ','غَيْتٌ']},
+ {w:'تَبَّ',b:'تب',fr:'il a péri',e:'🥀',say:'tabba',confus:['تَبَّتْ','بَتَّ','تَنَّ']},
+   ],
+   vtiles:{vi:5} },
+ { no:7, ready:true, sub:'ه ذ ض · du son à la lecture de mots — 9 leçons',
+   letters:['ه','ذ','ض'],
+   lat:{'ه':'h','ذ':'dh','ض':'ḍ'},
+   alpha:{
+ 'ه':{n:'hāʾ',son:'un « h » très doux, à peine soufflé, comme un léger soupir',mn:'un petit rond posé sur la ligne — c’est la lettre qui change le plus de costume selon sa position'},
+ 'ذ':{n:'dhāl',son:'le « th » doux de l’anglais « this » : le bout de la langue vient toucher les dents du haut et vibre',mn:'le même crochet que le د, avec UN point au-dessus'},
+ 'ض':{n:'ḍād',son:'un « d » emphatique, lourd et majestueux — la lettre unique de l’arabe, « la langue du ḍād »',mn:'la même forme que le ص, avec UN point au-dessus'},
+   },
+   words:[
+ {w:'اللَّهُ',b:'الله',fr:'Allah',e:'🕋',say:'allāh',confus:['لِلَّهِ','اللَّهُمَّ','لَهُ']},
+ {w:'اهْدِنَا',b:'اهدنا',fr:'guide-nous',e:'🧭',say:'ihdinā',confus:['اهْدِمَا','هَدَانَا','اهْدِيَا']},
+ {w:'الَّذِينَ',b:'الذين',fr:'ceux que, ceux qui',e:'👥',say:'alladhīna',confus:['الَّذِي','الَّذَيْنِ','الَّدِينَ']},
+ {w:'عَلَيْهِمْ',b:'عليهم',fr:'envers eux, sur eux',e:'👆',say:'ʿalayhim',confus:['عَلَيْكُمْ','إِلَيْهِمْ','عَلَيْهِنَّ']},
+ {w:'الْمَغْضُوبِ',b:'المغضوب',fr:'ceux qui ont encouru la colère',e:'⚡',say:'al-maghḍoub',confus:['الْمَعْضُوبِ','الْمَغْصُوبِ','الْمَضْغُوبِ']},
+ {w:'الضَّالِّينَ',b:'الضالين',fr:'les égarés',e:'🌫️',say:'aḍ-ḍāllīn',confus:['الصَّالِّينَ','الضَّامِّينَ','الضَّالِّيلَ']},
+ {w:'هُوَ',b:'هو',fr:'Lui',e:'👤',say:'houwa',confus:['هِيَ','هُمْ','هُنَّ']},
+ {w:'أَعُوذُ',b:'أعوذ',fr:'je cherche refuge',e:'🛡️',say:'aʿoudhou',confus:['أَعُودُ','نَعُوذُ','يَعُوذُ']},
+ {w:'إِلَٰهٌ',b:'إله',fr:'une divinité',e:'🕌',say:'ilāh',confus:['إِلَيْهِ','إِلَٰهِي','هِلَالٌ']},
+ {w:'إِذَا',b:'إذا',fr:'lorsque, quand',e:'⏱️',say:'idhā',confus:['إِذْ','إِدَا','ذَا']},
+ {w:'ذَهَبَ',b:'ذهب',fr:'il est allé, il est parti',e:'🚶',say:'dhahaba',confus:['دَهَبَ','وَهَبَ','ذَهَلَ']},
+   ],
+   vtiles:{vi:6} },
 ];
 /* les tracés viennent de LT ; chaque unité n’expose QUE ses lettres (débloquées au fil des unités) */
 UNITS.forEach(function(U){U.strokes={};U.strokesPos={};(U.letters||[]).forEach(function(L){
@@ -1698,7 +1767,7 @@ async function cloudVerify(){
   try{ await cloudPull(); }catch(_){}          // une erreur ici ne doit PAS faire croire que le code est faux
   try{ renderProg(); }catch(_){}
   const ov=document.getElementById('obAccount');  // dans l'onboarding : fermer l'écran compte et rejoindre l'accueil
-  if(ov&&ov.classList.contains('on')){ ov.classList.remove('on'); try{returnFromPlayer();}catch(_){ try{renderHome();}catch(_){}} }
+  if(ov&&ov.classList.contains('on')){ ov.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; try{returnFromPlayer();}catch(_){ try{renderHome();}catch(_){}} }
 }
 async function cloudLogout(){
   // Sécurité comptes : la progression de CE compte ne doit JAMAIS être héritée
@@ -1788,7 +1857,11 @@ function onbShow(){
   if(q)document.getElementById('onbFill').style.width=Math.round(ONB.step/6*100)+'%';
   var b=document.querySelector('#onb .onb-body'); if(b)b.scrollTop=0;
 }
-function onbNext(){ if(ONB.step<7){ONB.step++;onbShow();} }
+function onbNext(){
+  var need={2:'source',3:'intention',4:'niveau',6:'objectif'}[ONB.step]; // écrans-questions : réponse obligatoire
+  if(need){ var v=ONB.data[need]; if(!v||(Array.isArray(v)&&!v.length)){ toast('Choisis une réponse 🙂'); return; } }
+  if(ONB.step<7){ONB.step++;onbShow();}
+}
 function onbBack(){ if(ONB.step>0){ONB.step--;onbShow();} }
 function onbExistingAccount(){ // élève existante sur un appareil neuf : le nuage fait foi (_fresh)
   S.onboarded=1; S.tutHome=1; S._fresh=1; save();
@@ -1839,7 +1912,7 @@ function showObAccount(){
   var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle();
   document.getElementById('obAccount').classList.add('on');
 }
-function obAccountClose(){ document.getElementById('obAccount').classList.remove('on'); returnFromPlayer(); }
+function obAccountClose(){ var o=document.getElementById('obAccount'); o.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; returnFromPlayer(); } // vider la carte : pas de #cloudEmail en double avec Progrès
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
 function doReset(){
@@ -2108,7 +2181,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 09/07d · onboarding complet · fin de leçon = taux de réussite · rangs de constance cliquables dans Progrès';
+const BUILD='maj 10/07 · unités 5-6-7 ouvertes (ح ط ق · ت ص غ · ه ذ ض) : les 21 lettres de la Fātiḥa au complet · unité 4 remaniée : 10 mots coraniques (+بسم الناس مالك ملك كسب · −chien poisson paix verre tête)';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -3760,15 +3833,109 @@ const AUDIO={
   'كِي':'audios-app-alaq/kaf-ya-son-prolonge.mp3',
   'كُو':'audios-app-alaq/kaf-waw-son-prolonge.mp3',
   'دَرْسٌ':'audios-app-alaq/mot-dars.mp3',
-  'كَلْبٌ':'audios-app-alaq/mot-kalb.mp3',
-  'سَمَكٌ':'audios-app-alaq/mot-samak.mp3',
   'كَرِيمٌ':'audios-app-alaq/mot-karim.mp3',
-  'سَلَامٌ':'audios-app-alaq/mot-salam.mp3',
-  'كَأْسٌ':'audios-app-alaq/mot-kas.mp3',
-  'رَأْسٌ':'audios-app-alaq/mot-ras.mp3',
   'دِينٌ':'audios-app-alaq/mot-din.mp3',
   'إِيَّاكَ':'audios-app-alaq/mot-iyyaka.mp3',
   'نَعْبُدُ':'audios-app-alaq/mot-naabudu.mp3',
+  'النَّاسُ':'audios-app-alaq/mot-annas.mp3',
+  'مَالِكٌ':'audios-app-alaq/mot-maalik.mp3',
+  'مَلِكٌ':'audios-app-alaq/mot-malik.mp3',
+  'كَسَبَ':'audios-app-alaq/mot-kasaba.mp3',
+  'بِسْمِ':'audios-app-alaq/mot-bismi.mp3',
+  'ح':'audios-app-alaq/hha-isolee-nom-de-la-lettre.mp3',
+  'ط':'audios-app-alaq/tta-isolee-nom-de-la-lettre.mp3',
+  'ق':'audios-app-alaq/qaf-isolee-nom-de-la-lettre.mp3',
+  'ت':'audios-app-alaq/ta-isolee-nom-de-la-lettre.mp3',
+  'ص':'audios-app-alaq/sad-isolee-nom-de-la-lettre.mp3',
+  'غ':'audios-app-alaq/ghayn-isolee-nom-de-la-lettre.mp3',
+  'ه':'audios-app-alaq/ha-isolee-nom-de-la-lettre.mp3',
+  'ض':'audios-app-alaq/dad-isolee-nom-de-la-lettre.mp3',
+  'حَ':'audios-app-alaq/hha-fatha-son-court.mp3',
+  'حِ':'audios-app-alaq/hha-kasra-son-court.mp3',
+  'حُ':'audios-app-alaq/hha-damma-son-court.mp3',
+  'حَا':'audios-app-alaq/hha-alif-son-prolonge.mp3',
+  'حِي':'audios-app-alaq/hha-ya-son-prolonge.mp3',
+  'حُو':'audios-app-alaq/hha-waw-son-prolonge.mp3',
+  'طَ':'audios-app-alaq/tta-fatha-son-court.mp3',
+  'طِ':'audios-app-alaq/tta-kasra-son-court.mp3',
+  'طُ':'audios-app-alaq/tta-damma-son-court.mp3',
+  'طَا':'audios-app-alaq/tta-alif-son-prolonge.mp3',
+  'طِي':'audios-app-alaq/tta-ya-son-prolonge.mp3',
+  'طُو':'audios-app-alaq/tta-waw-son-prolonge.mp3',
+  'قَ':'audios-app-alaq/qaf-fatha-son-court.mp3',
+  'قِ':'audios-app-alaq/qaf-kasra-son-court.mp3',
+  'قُ':'audios-app-alaq/qaf-damma-son-court.mp3',
+  'قَا':'audios-app-alaq/qaf-alif-son-prolonge.mp3',
+  'قِي':'audios-app-alaq/qaf-ya-son-prolonge.mp3',
+  'قُو':'audios-app-alaq/qaf-waw-son-prolonge.mp3',
+  'تَ':'audios-app-alaq/ta-fatha-son-court.mp3',
+  'تِ':'audios-app-alaq/ta-kasra-son-court.mp3',
+  'تُ':'audios-app-alaq/ta-damma-son-court.mp3',
+  'تَا':'audios-app-alaq/ta-alif-son-prolonge.mp3',
+  'تِي':'audios-app-alaq/ta-ya-son-prolonge.mp3',
+  'تُو':'audios-app-alaq/ta-waw-son-prolonge.mp3',
+  'صَ':'audios-app-alaq/sad-fatha-son-court.mp3',
+  'صِ':'audios-app-alaq/sad-kasra-son-court.mp3',
+  'صُ':'audios-app-alaq/sad-damma-son-court.mp3',
+  'صَا':'audios-app-alaq/sad-alif-son-prolonge.mp3',
+  'صِي':'audios-app-alaq/sad-ya-son-prolonge.mp3',
+  'صُو':'audios-app-alaq/sad-waw-son-prolonge.mp3',
+  'غَ':'audios-app-alaq/ghayn-fatha-son-court.mp3',
+  'غِ':'audios-app-alaq/ghayn-kasra-son-court.mp3',
+  'غُ':'audios-app-alaq/ghayn-damma-son-court.mp3',
+  'غَا':'audios-app-alaq/ghayn-alif-son-prolonge.mp3',
+  'غِي':'audios-app-alaq/ghayn-ya-son-prolonge.mp3',
+  'غُو':'audios-app-alaq/ghayn-waw-son-prolonge.mp3',
+  'هَ':'audios-app-alaq/ha-fatha-son-court.mp3',
+  'هِ':'audios-app-alaq/ha-kasra-son-court.mp3',
+  'هُ':'audios-app-alaq/ha-damma-son-court.mp3',
+  'هَا':'audios-app-alaq/ha-alif-son-prolonge.mp3',
+  'هِي':'audios-app-alaq/ha-ya-son-prolonge.mp3',
+  'هُو':'audios-app-alaq/ha-waw-son-prolonge.mp3',
+  'ذَ':'audios-app-alaq/dhal-fatha-son-court.mp3',
+  'ذِ':'audios-app-alaq/dhal-kasra-son-court.mp3',
+  'ذُ':'audios-app-alaq/dhal-damma-son-court.mp3',
+  'ذَا':'audios-app-alaq/dhal-alif-son-prolonge.mp3',
+  'ذِي':'audios-app-alaq/dhal-ya-son-prolonge.mp3',
+  'ذُو':'audios-app-alaq/dhal-waw-son-prolonge.mp3',
+  'ضَ':'audios-app-alaq/dad-fatha-son-court.mp3',
+  'ضِ':'audios-app-alaq/dad-kasra-son-court.mp3',
+  'ضُ':'audios-app-alaq/dad-damma-son-court.mp3',
+  'ضَا':'audios-app-alaq/dad-alif-son-prolonge.mp3',
+  'ضِي':'audios-app-alaq/dad-ya-son-prolonge.mp3',
+  'ضُو':'audios-app-alaq/dad-waw-son-prolonge.mp3',
+  'الْحَمْدُ':'audios-app-alaq/mot-alhamdu.mp3',
+  'الرَّحْمَٰنُ':'audios-app-alaq/mot-arrahman.mp3',
+  'الرَّحِيمُ':'audios-app-alaq/mot-arrahim.mp3',
+  'قُلْ':'audios-app-alaq/mot-qul.mp3',
+  'أَحَدٌ':'audios-app-alaq/mot-ahad.mp3',
+  'حَاسِدٌ':'audios-app-alaq/mot-hasid.mp3',
+  'عُقَدٌ':'audios-app-alaq/mot-uqad.mp3',
+  'وَقَبَ':'audios-app-alaq/mot-waqaba.mp3',
+  'طَرِيقٌ':'audios-app-alaq/mot-tariq.mp3',
+  'حَطَبٌ':'audios-app-alaq/mot-hatab.mp3',
+  'صِرَاطٌ':'audios-app-alaq/mot-sirat.mp3',
+  'مُسْتَقِيمٌ':'audios-app-alaq/mot-mustaqim.mp3',
+  'نَسْتَعِينُ':'audios-app-alaq/mot-nastain.mp3',
+  'أَنْعَمْتَ':'audios-app-alaq/mot-anamta.mp3',
+  'غَيْر':'audios-app-alaq/mot-ghayr.mp3',
+  'الصَّمَدُ':'audios-app-alaq/mot-assamad.mp3',
+  'صُدُورٌ':'audios-app-alaq/mot-sudur.mp3',
+  'غَاسِقٌ':'audios-app-alaq/mot-ghasiq.mp3',
+  'صَبْرٌ':'audios-app-alaq/mot-sabr.mp3',
+  'غَيْبٌ':'audios-app-alaq/mot-ghayb.mp3',
+  'تَبَّ':'audios-app-alaq/mot-tabba.mp3',
+  'اللَّهُ':'audios-app-alaq/mot-allah.mp3',
+  'اهْدِنَا':'audios-app-alaq/mot-ihdina.mp3',
+  'الَّذِينَ':'audios-app-alaq/mot-alladhina.mp3',
+  'عَلَيْهِمْ':'audios-app-alaq/mot-alayhim.mp3',
+  'الْمَغْضُوبِ':'audios-app-alaq/mot-almaghdub.mp3',
+  'الضَّالِّينَ':'audios-app-alaq/mot-addallin.mp3',
+  'هُوَ':'audios-app-alaq/mot-huwa.mp3',
+  'أَعُوذُ':'audios-app-alaq/mot-audhu.mp3',
+  'إِلَٰهٌ':'audios-app-alaq/mot-ilah.mp3',
+  'إِذَا':'audios-app-alaq/mot-idha.mp3',
+  'ذَهَبَ':'audios-app-alaq/mot-dhahaba.mp3',
 };
 
 function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) : écrase, bascule, joue le son visible
@@ -3824,11 +3991,8 @@ function _speakSynth(t){ // repli synthèse : voix arabe pour l'arabe, voix fran
         u=new SpeechSynthesisUtterance(expandShadda(t));
         u.voice=arV; u.lang=arV.lang||'ar-SA';
         u.rate=.75;
-      }else if(hasAr){                           // texte arabe sans voix arabe : translittération audible
-        u=new SpeechSynthesisUtterance(WSAY[t]?ttsRom(WSAY[t]):translit(expandShadda(t)));
-        const frV=bestVoice('fr')||bestVoice('en');
-        if(frV){ u.voice=frV; u.lang=frV.lang; } else { u.lang='fr-FR'; }
-        u.rate=.75;
+      }else if(hasAr){                           // texte arabe SANS voix arabe (ex. Android sans TTS arabe) :
+        return;                                  // on NE lit JAMAIS l'arabe avec la voix française (celle des consignes) — silence plutôt qu'une mauvaise prononciation (règle Myriam)
       }else{                                     // texte français : voix française, débit naturel
         u=new SpeechSynthesisUtterance(String(t));
         const frV=bestVoice('fr');
