@@ -2195,7 +2195,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 12/07b · SON : 4 tentatives (700/1600/3200 ms), les 2 dernières SANS objet voix (contourne Majed listé mais pas chargé) · 12/07 : fin des règles de silence, utterances neuves, cancel() si parle, réveil ar+fr, mot-madrasatoun restauré, icônes secourues (sw v59) · diagnostic v3b (mp3 même origine)';
+const BUILD='maj 12/07c · PATIENCE (la loi de la v1) : Majed met ~2,3 s à démarrer (mesuré au test 9) — les relances 700/1600/3200 ms l’étranglaient en l’annulant avant son départ ; désormais UNE parole + une seule relance à 4 s (sans objet voix) · sw v60';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3188,7 +3188,7 @@ function speakFr(t,isNarr){ // consignes françaises — même mécanique de rel
       try{speechSynthesis.speak(u);}catch(e){}
       try{speechSynthesis.resume();}catch(e){}
     };
-    fire(); setTimeout(fire,700); setTimeout(fire,1600);
+    fire(); setTimeout(fire,4000); // même loi de patience que _speakSynth (12/07c)
   }catch(e){}
 }
 function fiTap(el,L){
@@ -4016,8 +4016,10 @@ function ttsRom(x){ return (x||'').replace(/ā/g,'a').replace(/ī/g,'i').replace
       sinon lang='ar-SA' et le système choisit. (La règle « silence plutôt que mauvaise voix » du
       09/07 est ANNULÉE le 12/07.)
    2. La synthèse part IMMÉDIATEMENT (plus de délai artificiel de 60 ms).
-   3. iOS avale la 1re utterance d'une voix froide : relances à 700 puis 1600 ms, chacune avec une
-      utterance NEUVE (re-parler une utterance déjà annulée ne marche pas sur WebKit).
+   3. PATIENCE (12/07c — la loi de la v1) : Majed met ~2,3 s à DÉMARRER sur iPhone (mesuré au
+      test 9 du diagnostic). Toute relance rapprochée ANNULE la tentative en cours avant ce
+      démarrage : l'app s'étranglait elle-même (relances 700/1600/3200 ms supprimées).
+      → UNE prise de parole, puis UNE SEULE relance à 4 s (utterance neuve, sans objet voix).
    4. cancel() SEULEMENT si le moteur parle : les cancel() à vide décalent WebKit (voir stopAudio). */
 function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon — jamais de silence
   if(!('speechSynthesis'in window))return;
@@ -4028,12 +4030,12 @@ function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon 
       let u;                                      // n>=2 : SANS objet voix (lang seule) — contourne une voix
       if(hasAr){                                  // listée par iOS mais pas réellement installée/chargée (Majed froid)
         u=new SpeechSynthesisUtterance(expandShadda(t));
-        const v=n<2?bestVoice('ar'):null;
+        const v=n<1?bestVoice('ar'):null;
         if(v){ u.voice=v; u.lang=v.lang||'ar-SA'; } else { u.lang='ar-SA'; } // pas de voix arabe : le système route — on ne se tait plus
         u.rate=.75;
       }else{
         u=new SpeechSynthesisUtterance(String(t));
-        const v=n<2?bestVoice('fr'):null;
+        const v=n<1?bestVoice('fr'):null;
         if(v){ u.voice=v; u.lang=v.lang; } else { u.lang='fr-FR'; }
         u.rate=.95;
       }
@@ -4052,7 +4054,7 @@ function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon 
       try{speechSynthesis.speak(u);}catch(e){}
       try{speechSynthesis.resume();}catch(e){}    // iOS : pousse la file si l'utterance a été mise en attente
     };
-    const go=()=>{ fire(); setTimeout(fire,700); setTimeout(fire,1600); setTimeout(fire,3200); };
+    const go=()=>{ fire(); setTimeout(fire,4000); }; // une parole, de la patience — voir loi n°3
     if(!speechSynthesis.getVoices().length){      // voix pas encore chargées : on attend l'événement
       let done=false; const once=()=>{ if(done)return; done=true; go(); };
       try{speechSynthesis.addEventListener('voiceschanged',once,{once:true});}catch(e){}
