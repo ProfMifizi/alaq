@@ -113,7 +113,7 @@
 <div class="ua" id="ua"></div>
 
 <script>
-var BASE='https://app.alaq.fr/audios-app-alaq/';
+var BASE='audios-app-alaq/'; // MÊME ORIGINE que la page (prod OU préversion) — un mp3 d'une autre origine passe mal le service worker sur Safari iOS (NotSupportedError)
 function el(id){return document.getElementById(id);}
 function log(n,txt,cls){var d=el('log'+n);var s=document.createElement('div');
   if(cls)s.className=cls;s.textContent=txt;d.appendChild(s);}

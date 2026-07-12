@@ -2195,7 +2195,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 12/07 · SON réécrit à zéro : fin des règles de silence (Majed lit TOUT l’arabe sans mp3), relances à utterance neuve (700/1600 ms), cancel() seulement si le moteur parle, réveil des voix ar+fr au 1er geste, mot-madrasatoun.mp3 restauré · icônes : secours emoji + pré-cache (sw v59) · diagnostic v3';
+const BUILD='maj 12/07b · SON : 4 tentatives (700/1600/3200 ms), les 2 dernières SANS objet voix (contourne Majed listé mais pas chargé) · 12/07 : fin des règles de silence, utterances neuves, cancel() si parle, réveil ar+fr, mot-madrasatoun restauré, icônes secourues (sw v59) · diagnostic v3b (mp3 même origine)';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4024,16 +4024,16 @@ function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon 
   try{
     const gen=_sndGen;                            // annulé si un nouveau son démarre entre-temps
     const hasAr=/[؀-ۿ]/.test(String(t));
-    const mk=()=>{                                // fabrique une utterance NEUVE à chaque tentative
-      let u;
-      if(hasAr){
+    const mk=(n)=>{                               // fabrique une utterance NEUVE à chaque tentative
+      let u;                                      // n>=2 : SANS objet voix (lang seule) — contourne une voix
+      if(hasAr){                                  // listée par iOS mais pas réellement installée/chargée (Majed froid)
         u=new SpeechSynthesisUtterance(expandShadda(t));
-        const v=bestVoice('ar');
-        if(v){ u.voice=v; u.lang=v.lang||'ar-SA'; } else { u.lang='ar-SA'; } // pas de voix arabe listée : le système choisit — on ne se tait plus
+        const v=n<2?bestVoice('ar'):null;
+        if(v){ u.voice=v; u.lang=v.lang||'ar-SA'; } else { u.lang='ar-SA'; } // pas de voix arabe : le système route — on ne se tait plus
         u.rate=.75;
       }else{
         u=new SpeechSynthesisUtterance(String(t));
-        const v=bestVoice('fr');
+        const v=n<2?bestVoice('fr'):null;
         if(v){ u.voice=v; u.lang=v.lang; } else { u.lang='fr-FR'; }
         u.rate=.95;
       }
@@ -4041,18 +4041,18 @@ function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon 
       u.onend=u.onerror=()=>{ if(_curUtter===u)_curUtter=null; };
       return u;
     };
-    let started=false;
+    let started=false,tries=0;
     const fire=()=>{
       if(started||gen!==_sndGen)return;
       try{ if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel(); }catch(e){}
       try{speechSynthesis.resume();}catch(e){}    // iOS : décoince un moteur resté « en pause »
-      const u=mk();
+      const u=mk(tries++);
       u.onstart=()=>{ started=true; };
       _curUtter=u;                                // référence forte anti-GC (iOS avale les utterances orphelines)
       try{speechSynthesis.speak(u);}catch(e){}
       try{speechSynthesis.resume();}catch(e){}    // iOS : pousse la file si l'utterance a été mise en attente
     };
-    const go=()=>{ fire(); setTimeout(fire,700); setTimeout(fire,1600); };
+    const go=()=>{ fire(); setTimeout(fire,700); setTimeout(fire,1600); setTimeout(fire,3200); };
     if(!speechSynthesis.getVoices().length){      // voix pas encore chargées : on attend l'événement
       let done=false; const once=()=>{ if(done)return; done=true; go(); };
       try{speechSynthesis.addEventListener('voiceschanged',once,{once:true});}catch(e){}
