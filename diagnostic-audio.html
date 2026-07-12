@@ -26,10 +26,18 @@
   #voices{font-size:13.5px}
   .ua{color:#6d5d4c;font-size:11px;margin-top:22px;word-break:break-all}
   .verdict{font-weight:800}
+  .oreilles{display:none;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .oreilles button{flex:1 1 45%;padding:10px 6px;border-radius:10px;border:1.5px solid var(--gold);
+    background:transparent;color:var(--gold);font-weight:800;font-size:13px;cursor:pointer}
 </style>
 
-<h1>🔊 Diagnostic audio ALAQ</h1>
+<h1>🔊 Diagnostic ALAQ · v3</h1>
 <p class="sub">Lance les tests <b>dans l'ordre</b>, note ce que tu <b>entends</b>, puis envoie une capture d'écran de toute la page à Claude.</p>
+
+<div class="card">
+  <h2><span class="num">0</span> L'état de CE téléphone (automatique)</h2>
+  <div class="log" id="log0">analyse…</div>
+</div>
 
 <div class="card">
   <h2><span class="num">1</span> Les voix disponibles sur cet appareil</h2>
@@ -72,13 +80,34 @@
 </div>
 
 <div class="card">
-  <h2><span class="num">7</span> L'app espionnée — LE test décisif</h2>
+  <h2><span class="num">7</span> L'app espionnée — le mouchard sonore</h2>
   <p class="attend">Touche le bouton : l'app se charge ci-dessous avec un mouchard sur chaque son.
-  Refais EXACTEMENT ton test (bulle « AVANCER ICI ? » → C'EST PARTI → touche un 🔊),
+  Refais EXACTEMENT ton test (touche un 🔊 sur un mot d'unité 5-7),
   puis envoie une capture du journal.</p>
   <button class="go" onclick="t7()">▶ Charger l'app espionnée</button>
   <div class="log" id="log7" style="max-height:150px;overflow-y:auto"></div>
   <iframe id="appfr" title="ALAQ espionnée" style="display:none;width:100%;height:65vh;border:2px solid var(--line);border-radius:12px;background:#221c19;margin-top:8px"></iframe>
+</div>
+
+<div class="card">
+  <h2><span class="num">8</span> Les icônes des disques — pourquoi ont-elles disparu ?</h2>
+  <p class="attend">Charge l'app (test 7) si ce n'est pas déjà fait, attends que l'accueil s'affiche, puis lance l'analyse.</p>
+  <button class="go" onclick="t8()">▶ Analyser les icônes</button>
+  <div class="log" id="log8"></div>
+</div>
+
+<div class="card">
+  <h2><span class="num">9</span> Que tes oreilles décident : mp3 contre synthèse</h2>
+  <p class="attend">AVANT de lancer : interrupteur orange sur <b>SONNER</b> + volume monté.
+  Tu vas entendre 2 choses à la suite : ① le mot « bāb » (un mp3) puis ② « ṣirāṭ » (la voix de synthèse).</p>
+  <button class="go" onclick="t9()">▶ Lancer le test 9</button>
+  <div class="log" id="log9"></div>
+  <div class="oreilles" id="q9">
+    <button onclick="v9('deux')">✓ LES DEUX</button>
+    <button onclick="v9('mp3')">① seulement</button>
+    <button onclick="v9('synth')">② seulement</button>
+    <button onclick="v9('rien')">RIEN</button>
+  </div>
 </div>
 
 <div class="ua" id="ua"></div>
@@ -90,6 +119,31 @@ function log(n,txt,cls){var d=el('log'+n);var s=document.createElement('div');
   if(cls)s.className=cls;s.textContent=txt;d.appendChild(s);}
 function clr(n){el('log'+n).innerHTML='';}
 function stampFrom(t0){return ' ('+Math.round(performance.now()-t0)+' ms)';}
+
+/* ---- 0 · l'état de ce téléphone : quel build, quel service worker, quels caches ---- */
+(function t0(){
+  el('log0').textContent='';
+  log(0,(navigator.standalone?'⚠️ ouvert en PWA installée':'ouvert dans le navigateur'));
+  fetch('index.html?diag='+Date.now(),{cache:'reload'})
+    .then(function(r){return r.text();})
+    .then(function(t){var m=t.match(/BUILD='(maj [^·']*)/);
+      log(0,'le SERVEUR livre : '+(m?m[1].trim():'BUILD introuvable ?!'),m?'ok':'err');})
+    .catch(function(e){log(0,'✗ serveur injoignable : '+e.message,'err');});
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(rs){
+      if(!rs.length){log(0,'aucun service worker enregistré');return;}
+      rs.forEach(function(r){
+        var st=r.active?'actif':(r.installing?'en installation':'?');
+        log(0,'service worker '+st+(r.waiting?' + UN AUTRE EN ATTENTE (blocage de mise à jour !)':''),r.waiting?'err':'');
+      });
+    });
+    if(window.caches)caches.keys().then(function(ks){
+      log(0,'cache hors-ligne : '+(ks.length?ks.join(' · '):'aucun'),
+        (ks.length===1&&ks[0].indexOf('alaq-v59')===0)?'ok':'');
+      log(0,'→ la version du cache dit quelle version du sw tourne ICI');
+    });
+  }else log(0,'service worker non géré');
+})();
 
 /* ---- 1 · inventaire des voix (asynchrone sur iOS) ---- */
 function listVoices(){
@@ -113,7 +167,7 @@ function frVoice(){var vs=speechSynthesis.getVoices().filter(function(v){return 
 function speakTest(n,text,voice,langLabel,t0){
   if(!voice){log(n,'✗ aucune voix '+langLabel+' disponible → silence',            'err');return;}
   var u=new SpeechSynthesisUtterance(text);
-  u.voice=voice;u.lang=voice.lang;u.rate=.85;
+  u.voice=voice;u.lang=voice.lang;u.rate=.85;u.volume=1;
   var started=false;
   u.onstart=function(){started=true;log(n,'✓ synthèse DÉMARRÉE ('+voice.name+')'+stampFrom(t0),'ok');};
   u.onend=function(){log(n,'fin de la synthèse'+stampFrom(t0));
@@ -185,6 +239,8 @@ function t7(){
   f.onload=function(){
     try{
       var w=f.contentWindow;
+      // LA ligne la plus importante du journal : quelle version tourne VRAIMENT ici ?
+      L('app chargée — '+((w.BUILD||'build non exposé = version d’AVANT le 12/07 !').split('·')[0].trim()),w.BUILD?'ok':'err');
       var A0=w.Audio;
       w.Audio=function(u){
         var a=new A0(u); var short=(''+u).split('/').pop();
@@ -199,7 +255,8 @@ function t7(){
         if(l==='ar')L('  voix arabe choisie : '+(v?v.name:'AUCUNE'),v?'':'err');return v;};
       var S=w.speechSynthesis; var sp0=S.speak.bind(S); var ca0=S.cancel.bind(S);
       S.speak=function(u){
-        L('utterance « '+((u.text||'').slice(0,16))+' »'+(u.volume===0?' (réveil silencieux)':''));
+        var txt=(u.text||'');
+        L('utterance « '+txt.slice(0,16)+' » — volume '+u.volume+(txt.trim()?'':' (réveil)'),u.volume===0?'err':'');
         var os=u.onstart,oe=u.onend,oer=u.onerror;
         u.onstart=function(e){L('  ✓✓ la synthèse DÉMARRE','ok');if(os)os.call(u,e);};
         u.onend=function(e){L('  fin de synthèse');if(oe)oe.call(u,e);};
@@ -210,6 +267,77 @@ function t7(){
       L('✓ mouchard actif — refais ton test dans l’app ci-dessous','ok');
     }catch(e){L('✗ instrumentation impossible : '+e.message,'err');}
   };
-  f.src='https://app.alaq.fr/?t='+Date.now();
+  f.src='/?t='+Date.now(); // même origine que cette page (prod : app.alaq.fr)
+}
+
+/* ---- 8 · les icônes des disques : que voit VRAIMENT ce téléphone ? ---- */
+function t8(){
+  clr(8);
+  var f=el('appfr');
+  if(f.style.display==='none'){log(8,'l’app n’était pas chargée → je la charge (test 7)…');t7();}
+  log(8,'j’attends l’accueil de l’app…');
+  var tries=0;
+  var timer=setInterval(function(){
+    tries++;
+    var d=null;try{d=f.contentDocument;}catch(e){}
+    var imgs=d?d.querySelectorAll('img.bimg'):[];
+    if(imgs.length||tries>24){clearInterval(timer);analyse8(f,d,imgs);}
+  },500);
+}
+function analyse8(f,d,imgs){
+  try{
+    var w=f.contentWindow;
+    log(8,'app : '+((w&&w.BUILD||'build non exposé = version d’AVANT le 12/07').split('·')[0].trim()));
+    if(!imgs.length){log(8,'✗ AUCUNE image de disque dans la page après 12 s','err');}
+    else{
+      var ok=0,ko=0,koSrc={};
+      for(var i=0;i<imgs.length;i++){
+        var im=imgs[i];
+        if(im.complete&&im.naturalWidth>0)ok++;
+        else{ko++;koSrc[(im.getAttribute('src')||'?').split('/').pop()]=1;}
+      }
+      log(8,ok+' icône(s) AFFICHÉE(S) · '+ko+' CASSÉE(S)',ko?'err':'ok');
+      var list=Object.keys(koSrc);
+      if(list.length)log(8,'cassées : '+list.join(', '),'err');
+    }
+  }catch(e){log(8,'✗ lecture de l’app impossible : '+e.message,'err');}
+  // la même image, demandée directement au réseau (même origine que l'app)
+  fetch('images-app-alaq/icone-alaq-lire.png?diag='+Date.now(),{cache:'reload'})
+    .then(function(r){log(8,'réseau direct : HTTP '+r.status+' · '+(r.headers.get('content-type')||'?'),
+      (r.ok&&/image/.test(r.headers.get('content-type')||''))?'ok':'err');})
+    .catch(function(e){log(8,'✗ réseau direct : '+e.message,'err');});
+  // et ce qu'en dit le cache hors-ligne
+  if(window.caches){
+    caches.match('images-app-alaq/icone-alaq-lire.png').then(function(hit){
+      log(8,'cache hors-ligne : '+(hit?('présent (HTTP '+hit.status+' · '+(hit.headers.get('content-type')||'?')+')'):'absent — l’icône vient donc du réseau'));
+    });
+  }
+}
+
+/* ---- 9 · le verdict des oreilles : mp3 (①) puis synthèse (②) ---- */
+function t9(){
+  clr(9);el('q9').style.display='none';
+  var t0=performance.now();
+  log(9,'① mp3 « bāb »…');
+  var a=new Audio(BASE+'mot-bab.mp3');
+  a.addEventListener('playing',function(){log(9,'  ✓ le mp3 joue'+stampFrom(t0),'ok');},{once:true});
+  a.addEventListener('error',function(){log(9,'  ✗ mp3 non chargé','err');},{once:true});
+  var p=a.play();if(p&&p.catch)p.catch(function(e){log(9,'  ✗ mp3 refusé : '+e.name,'err');});
+  setTimeout(function(){
+    try{a.pause();}catch(e){}
+    log(9,'② synthèse arabe « ṣirāṭ »…');
+    speechSynthesis.cancel();
+    setTimeout(function(){speakTest(9,'صِرَاطٌ',arVoice(),'arabe',t0);},60);
+    setTimeout(function(){el('q9').style.display='flex';log(9,'— Qu’as-tu ENTENDU ? Réponds ci-dessous —','info');},3500);
+  },2200);
+}
+function v9(k){
+  var msg={
+    deux:'✓ TOUT FONCTIONNE ici. Si l’app reste muette : ferme-la complètement et rouvre-la, puis refais le test 7.',
+    mp3:'verdict : la SYNTHÈSE est coupée par le système (interrupteur sonnerie, Ne pas déranger, ou volume resté collé → REDÉMARRE le téléphone et refais ce test). Les mp3 passent toujours → les enregistrements restent le remède définitif.',
+    synth:'étrange : synthèse OK mais mp3 muet → connexion ? Refais le test 4.',
+    rien:'RIEN du tout : monte le volume, enlève les écouteurs Bluetooth éventuels, vérifie l’interrupteur orange, puis relance.'
+  }[k];
+  log(9,msg,k==='deux'?'ok verdict':'err verdict');
 }
 </script>

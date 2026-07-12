@@ -4,8 +4,17 @@
      cache en secours (avion, mosquée sans réseau…)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
    - les audios de la voix de Myriam + la Fātiḥa sont pré-chargés à l'installation */
-const CACHE='alaq-v58-2026-07-10';
+const CACHE='alaq-v59-2026-07-12';
 const CORE=['.','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
+"images-app-alaq/icone-alaq-bilan.png",
+"images-app-alaq/icone-alaq-decouvrir.png",
+"images-app-alaq/icone-alaq-ecrire.png",
+"images-app-alaq/icone-alaq-lire.png",
+"images-app-alaq/icone-alaq-memoriser.png",
+"images-app-alaq/icone-alaq-qoran.png",
+"images-app-alaq/icone-alaq-reviser.png"
+];
 const AUDIOS=[
 "audios-app-alaq/ain-alif-son-prolonge.mp3",
 "audios-app-alaq/ain-damma-son-court.mp3",
@@ -107,6 +116,7 @@ const AUDIOS=[
 "audios-app-alaq/mot-lawn.mp3",
 "audios-app-alaq/mot-layl.mp3",
 "audios-app-alaq/mot-lin.mp3",
+"audios-app-alaq/mot-madrasatoun.mp3",
 "audios-app-alaq/mot-mal.mp3",
 "audios-app-alaq/mot-mamnoun.mp3",
 "audios-app-alaq/mot-manal.mp3",
@@ -158,7 +168,7 @@ self.addEventListener('install',e=>{
     const c=await caches.open(CACHE);
     // le cœur d'abord (obligatoire), puis les audios un par un (tolérant aux absents)
     await c.addAll(CORE);
-    await Promise.allSettled(AUDIOS.map(u=>c.add(u).catch(()=>{})));
+    await Promise.allSettled(IMAGES.concat(AUDIOS).map(u=>c.add(u).catch(()=>{})));
     self.skipWaiting();
   })());
 });
