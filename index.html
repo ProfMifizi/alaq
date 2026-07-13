@@ -764,6 +764,10 @@
 .rankcard .rk-chev{font-size:24px;color:#241a06;font-weight:900;flex:0 0 auto}
 .rankcard .ubar{margin-top:5px;background:rgba(0,0,0,.22)}
 .rankcard .ubar i{background:#241a06}
+.rankcard .rbar-track{margin:7px 2px 0;height:26px}
+.rankcard .rbar-line{background:rgba(36,26,6,.32)}
+.rankcard .rbar-fill{background:#241a06}
+.rankcard .rbar-dots i{border:1.5px solid rgba(36,26,6,.4)}
 .rbar{width:100%;max-width:300px;margin:4px auto 8px}
 .rbar-head{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:8px;letter-spacing:.03em}
 .rbar-track{position:relative;height:28px;margin:0 4px}
@@ -2115,22 +2119,22 @@ function updRankBadge(){
     if(l){ l.innerHTML=lampSVG(c,23); l.style.filter=rf.idx>=6?'drop-shadow(0 0 6px '+c+')':(rf.idx>=5?'drop-shadow(0 0 3px '+c+')':''); }
   }catch(e){}
 }
-function rankBarHTML(){ // le chemin des 7 rangs de constance, النية → النور (le but)
+function rankTrackHTML(){ // le tracé seul (points + remplissage) — réutilisable, imbriqué ou non
   var rf=rankFor(S.consScore), cur=rf.idx, dots='';
   for(var i=0;i<7;i++){
     var reached=(i<=cur), isCur=(i===cur), last=(i===6);
     var c=reached?RANK_COLORS[i]:'#4A403A';
     var sz=isCur?24:(last?22:15);
     var sh=isCur?';box-shadow:0 0 0 4px rgba(232,169,79,.28)':(last&&reached?';box-shadow:0 0 8px '+c:'');
-    dots+='<i onclick="rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
+    dots+='<i onclick="event.stopPropagation();rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
   }
   // La progression FINE (au sein du rang) est fondue dans le chemin des 7 rangs : le remplissage
   // avance en continu vers le prochain point — plus de petite barre ni de légende à part (Myriam 13/07).
   var fill=Math.min(100,Math.max(4,Math.round((cur+(rf.prog||0)/100)/6*100)));
-  return '<div class="rbar">'+
-    '<div class="rbar-head"><span>TA CONSTANCE</span><span>OBJECTIF : النور</span></div>'+
-    '<div class="rbar-track"><div class="rbar-line"></div><div class="rbar-fill" style="width:'+fill+'%"></div><div class="rbar-dots">'+dots+'</div></div>'+
-  '</div>';
+  return '<div class="rbar-track"><div class="rbar-line"></div><div class="rbar-fill" style="width:'+fill+'%"></div><div class="rbar-dots">'+dots+'</div></div>';
+}
+function rankBarHTML(){ // le chemin des 7 rangs, النية → النور — avec son en-tête (écran de fin de leçon, fond sombre)
+  return '<div class="rbar"><div class="rbar-head"><span>TA CONSTANCE</span><span>OBJECTIF : النور</span></div>'+rankTrackHTML()+'</div>';
 }
 function fillFinishConstance(){ // écran de fin fusionné : la barre des 7 rangs de constance
   var r=document.getElementById('fin-rank'); if(r)r.innerHTML=rankBarHTML();
@@ -2236,7 +2240,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 13/07d · chemin des rangs unifié : la légende sous la barre est retirée et la progression fine est fondue dans la ligne des 7 rangs (remplissage continu vers le prochain point) ; l’encadré doré n’a plus de petite barre · + tout le lot 13/07 · sw v62';
+const BUILD='maj 13/07e · le chemin des 7 rangs est IMBRIQUÉ dans l’encadré doré (une seule boîte : TON RANG + nom + tracé, plus de bloc séparé en dessous) — clic sur un point ouvre son détail sans rouvrir la vue d’ensemble · l’écran de fin de leçon garde son en-tête propre · sw v62';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4550,11 +4554,13 @@ function renderProg(){
     h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
   }
   var _R=rankFor(S.consScore);
-  h+='<button class="rankcard" onclick="showRank()">'+
+  // Le tracé des 7 rangs est IMBRIQUÉ dans l'encadré doré (une seule boîte, choix Myriam 13/07) —
+  // div (pas button) car les points du tracé ont leur propre clic (rankInfo, stopPropagation).
+  h+='<div class="rankcard" role="button" tabindex="0" onclick="showRank()">'+
        '<div class="rk-ar">'+_R.rank.ar+'</div>'+
        '<div class="rk-mid"><div class="rk-lbl">TON RANG</div><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div>'+
-       '</div><div class="rk-chev">›</div></button>'; // la progression vit désormais dans le chemin des 7 rangs, juste dessous
-  h+=rankBarHTML();
+       rankTrackHTML()+
+       '</div><div class="rk-chev">›</div></div>';
   h+='<div class="pgrid">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
      '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
