@@ -668,6 +668,31 @@
 .wtx .ww{font-family:var(--ar);font-size:24px;color:var(--gold);line-height:1.25}
 .wtx .wfr{font-family:var(--ui);font-size:13px;color:var(--muted);margin-top:1px}
 .wdot{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:#d8463a}
+/* ===== Les noms d'Allah (13/07) : sélection, nom illuminé, cartes retournées, touche ⌫ ===== */
+.nrow{cursor:pointer;border-radius:12px}
+.nrow.nsel{background:#3d3120}
+.ncoche{flex:0 0 auto;margin-left:auto;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:14px;color:var(--bg)}
+.nrow.nsel .ncoche{background:var(--gold);border-color:var(--gold)}
+.revbtn.noff{background:var(--panel2);color:var(--muted)}
+.lumwrap{display:flex;flex-direction:column;gap:12px;margin-top:10px}
+.lum{border:1px solid #6b5636;border-radius:18px;padding:20px 12px;text-align:center;cursor:pointer;opacity:.42;
+  background:linear-gradient(180deg,#2e2620,#292019);transition:opacity .3s,box-shadow .3s,border-color .3s}
+.lum .lnar{font-size:42px;display:block;line-height:1.6;font-family:var(--ar);color:var(--gold2)}
+.lum .lnfr{font-size:13px;color:var(--muted);font-weight:800}
+.lum.on{opacity:1;border-color:var(--gold);box-shadow:0 0 26px rgba(217,164,65,.28),inset 0 0 18px rgba(217,164,65,.07)}
+.lum.on .lnar{text-shadow:0 0 18px rgba(244,208,137,.55)}
+.opts.flipcol{display:flex;flex-direction:column;gap:11px}
+.opt.fopt{perspective:700px;height:64px;padding:0;background:transparent;border:none;position:relative}
+.opt.fopt .finner{position:absolute;inset:0;transition:transform .45s;transform-style:preserve-3d;display:block}
+.opt.fopt.vu .finner{transform:rotateY(180deg)}
+.opt.fopt .fface{position:absolute;inset:0;backface-visibility:hidden;border:1.5px solid var(--line);border-radius:14px;
+  display:grid;place-items:center;font-weight:800;padding:4px}
+.opt.fopt .fdos{background:var(--panel2);color:var(--gold);font-size:26px;font-family:var(--ar)}
+.opt.fopt .fdevant{background:var(--panel);transform:rotateY(180deg)}
+.opt.fopt.sel .fdevant{border-color:var(--gold);background:#3d3120}
+.opt.fopt.ok .fdevant{border-color:#35a468;background:#26302a}
+.opt.fopt.bad .fdevant{border-color:#d8463a}
+.tile.tdel{color:#e8926d;border-color:#e8926d;background:transparent;font-size:22px;font-family:var(--ui)}
 .lspk{background:none;border:none;cursor:pointer;font-size:14px;opacity:.85;padding:0 2px;vertical-align:middle;line-height:1}
 .lspk:active{transform:scale(.9)}
 .sgn-card{background:#2a2422;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:8px}
@@ -2195,7 +2220,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 12/07c · PATIENCE (la loi de la v1) : Majed met ~2,3 s à démarrer (mesuré au test 9) — les relances 700/1600/3200 ms l’étranglaient en l’annulant avant son départ ; désormais UNE parole + une seule relance à 4 s (sans objet voix) · sw v60';
+const BUILD='maj 13/07 · Les noms d’Allah (liste lisible, 3 noms, leçon en 3 temps Montessori — pilote Phase B) · correctifs validés : 1B ligne-son au vocabulaire, 🎉 dédoublonné, cartes retournées au QCM (3B), touche ⌫ clavier (4B) · + tout le lot son du 12/07 · sw v62';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2577,8 +2602,8 @@ function renderStep(){
       '<button class="bigspeak" onclick="speak(\''+st.w.w+'\')">🔊</button>'+
       '<div class="slots linear-ar" id="slots"></div>'+
       '<div class="tiles" id="tiles">'+shuffle(units.slice()).map((ch,k)=>
-        '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="tile'+k+'" onclick="tileTap('+k+',\''+ch+'\')">'+tileLabel(ch)+'</button>').join('')+'</div>'+
-      '<button class="undo" onclick="asmUndo()">↩️ Retirer la dernière lettre</button>';
+        '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="tile'+k+'" onclick="tileTap('+k+',\''+ch+'\')">'+tileLabel(ch)+'</button>').join('')+
+        '<button class="tile tdel" onclick="asmUndo()" aria-label="Effacer">⌫</button></div>'; // ⌫ en bas à droite, comme un vrai clavier (choix Myriam 4B)
     cta.textContent='VÉRIFIER';cta.onclick=ctaClick;
     renderSlots();
     return;
@@ -2648,8 +2673,7 @@ function renderStep(){
       '<button class="speak" style="margin:0 auto 12px" onclick="playVerse('+st.vi+')">🔊 Écouter le verset (al-ʿAfāsī)</button>'+
       '<div class="slots linear-ar" id="vwVerse" style="font-size:34px;line-height:2"></div>'+
       '<div class="hint" id="vwMsg" style="text-align:center;margin:6px 0;min-height:18px"></div>'+
-      '<div class="tiles" id="vwTiles"></div>'+
-      '<button class="undo" onclick="vwUndo()">↩️ Retirer la dernière lettre</button>';
+      '<div class="tiles" id="vwTiles"></div>';
     cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=true;
     renderVw();
     return;
@@ -2708,22 +2732,40 @@ function renderStep(){
     return;
   }
 
+  if(st.type==='lumnoms'){ // noms d'Allah ① : un seul nom illuminé à la fois, seul son son joue (Myriam 13/07)
+    window._lum=st.noms;
+    body.innerHTML='<div class="q-title">Touche un nom pour l’écouter</div>'+
+      '<div class="lumwrap">'+st.noms.map((n,k)=>
+        '<button class="lum" id="lum'+k+'" onclick="lumTap('+k+')">'+
+        '<span class="lnar">'+n.ar+'</span><span class="lnfr">'+n.fr+'</span></button>').join('')+'</div>';
+    cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=false;
+    return;
+  }
+
   /* mcq */
   cta.textContent='VÉRIFIER';cta.onclick=ctaClick;
   let html='<div class="q-title">'+st.prompt+'</div>';
+  if(st.flip)html+='<div class="hint" style="text-align:center;margin:-8px 0 10px">Devine… puis retourne les cartes</div>'; // choix Myriam 3B
   if(st.audio)html+='<button class="bigspeak" onclick="speak(\''+st.audio+'\')">🔊</button>';
   if(st.glyph){html+='<div class="glyph-big'+(st.glyphLinear?' linear-ar':'')+'">'+st.glyph+'</div>';}
   if(st.emo)html+='<div style="text-align:center;font-size:40px;margin:-6px 0 0">'+st.emo+'</div>';
   if(st.fr)html+='<div class="fr" style="text-align:center;margin:2px 0 10px">'+st.fr+'</div>';
-  html+='<div class="opts'+(st.grid?' '+st.grid:'')+'" id="opts"></div>';
+  html+='<div class="opts'+(st.flip?' flipcol':st.grid?' '+st.grid:'')+'" id="opts"></div>';
   st.options=balancePos(st.options,st.answer);
   body.innerHTML=html;
   const box=document.getElementById('opts');
   st.options.forEach((o,k)=>{
     const b=document.createElement('button');b.className='opt';
-    b.innerHTML=o.snd!==undefined?'<span class="sopt">🔊</span>':
+    const contenu=o.snd!==undefined?'<span class="sopt">🔊</span>':
       o.ar!==undefined?'<span class="ar">'+o.ar+'</span>':o.txt;
-    b.onclick=()=>{if(o.snd)speak(o.snd);selOpt(k,b);};
+    if(st.flip){ // cartes retournées : 1er toucher = retourner, 2e = choisir (choix Myriam 3B)
+      b.classList.add('fopt');
+      b.innerHTML='<span class="finner"><span class="fface fdos">؟</span><span class="fface fdevant">'+contenu+'</span></span>';
+      b.onclick=()=>{ if(!b.classList.contains('vu')){b.classList.add('vu');return;} if(o.snd)speak(o.snd);selOpt(k,b); };
+    }else{
+      b.innerHTML=contenu;
+      b.onclick=()=>{if(o.snd)speak(o.snd);selOpt(k,b);};
+    }
     box.appendChild(b);
   });
 }
@@ -2779,6 +2821,7 @@ function ctaClick(){
     ok=st.options[picked].key===st.answer;
     const opts=[...document.querySelectorAll('.opt')];
     opts.forEach((o,k)=>{o.disabled=true;
+      if(st.flip)o.classList.add('vu'); // toutes les cartes se révèlent à la vérification
       if(st.options[k].key===st.answer)o.classList.add('ok');
       else if(k===picked)o.classList.add('bad');});
     if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله';playSfx('bonne-reponse');}
@@ -4580,7 +4623,7 @@ function startReview(){
   const qs=[];
   if(bag.length>=2)qs.push({type:'match', graded:false, pairs:bag.map(w=>({ar:w.w,fr:w.fr,w:w.w}))}); // 1) associer (le mot arabe se prononce au toucher)
   shuffle(bag).forEach(w=>qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w}));       // 2) écrire chaque mot depuis le français (🔊 arabe dispo)
-  shuffle(bag).forEach(w=>qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,audio:w.w,graded:true,grid:'grid3',answer:w.fr,revWord:w.w,options:frOptions(pool,w)}))); // 3) traduire (🔊 arabe dispo, jamais de français)
+  shuffle(bag).forEach(w=>qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,audio:w.w,graded:true,flip:true,answer:w.fr,revWord:w.w,options:frOptions(pool,w)}))); // 3) traduire — cartes retournées (choix Myriam 3B)
   QUEUE=qs; // on attaque directement l'exercice (règle Myriam : pas d'écran d'annonce)
   REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
@@ -4638,12 +4681,61 @@ function matchTap(side,pi,el){
 /* ===== HUB « RÉVISER » : Qorān · vocabulaire · grammaire ===== */
 let curSourate=0;
 let curReviserTab='quran';
-let accQ={ill:false,ordre:false,ecrire:false,reciter:false}; // rétractés par défaut (choix Myriam)
+let accQ={ill:false,ordre:false,ecrire:false,reciter:false,noms:false}; // rétractés par défaut (choix Myriam)
 function accQTog(k){
   const was=accQ[k];
-  accQ={ill:false,ordre:false,ecrire:false,reciter:false};
+  accQ={ill:false,ordre:false,ecrire:false,reciter:false,noms:false};
   accQ[k]=!was; // une seule section ouverte à la fois
   renderReviser('quran');
+}
+/* ===== LES NOMS D'ALLAH — pilote de la Phase B (13/07) =====
+   Le contenu est 100 % DONNÉES : une ligne = un nom ; la leçon est une file de composants
+   génériques (lumnoms, match, mcq flip, assemble). Ajouter un nom = ajouter une ligne ici
+   + générer son mp3 (generer-noms-allah.js). Demain : cette table part dans Supabase. */
+const NOMS_ALLAH=[
+ {ar:'الرَّحْمَٰنُ',fr:'le Tout-Miséricordieux',snd:'nom-arrahman'},
+ {ar:'الرَّحِيمُ',fr:'le Très-Miséricordieux',snd:'nom-arrahim'},
+ {ar:'الْمَلِكُ',fr:'le Roi',snd:'nom-almalik'},
+ {ar:'السَّلَامُ',fr:'la Paix',snd:'nom-assalam'},
+ {ar:'الْمُؤْمِنُ',fr:'le Rassurant',snd:'nom-almumin'},
+ {ar:'الْعَلِيمُ',fr:'l’Omniscient',snd:'nom-alalim'},
+];
+NOMS_ALLAH.forEach(n=>{AUDIO[n.ar]='audios-app-alaq/'+n.snd+'.mp3';}); // speak(nom) joue son mp3 dédié partout
+const NASEL=new Set(); // les 3 noms choisis pour la leçon
+function nomTog(ar){
+  if(NASEL.has(ar))NASEL.delete(ar);
+  else if(NASEL.size<3)NASEL.add(ar);
+  renderReviser('quran');
+}
+function startNoms(){
+  if(NASEL.size!==3){toast('Choisis 3 noms à apprendre 🌟');return;}
+  const T=NOMS_ALLAH.filter(n=>NASEL.has(n.ar));
+  const qs=[];
+  // La leçon en 3 temps (Montessori) : nommer ①-②, reconnaître ③-⑧, restituer ⑨-⑪ (+ bilan = 12ᵉ écran)
+  qs.push({type:'lumnoms',noms:T});
+  qs.push({type:'match',graded:true,pairs:T.map(n=>({ar:n.ar,fr:n.fr}))});
+  T.forEach(n=>qs.push(mcq({prompt:'Que veut dire ce nom ?',audio:n.ar,graded:true,flip:true,answer:n.fr,
+    options:shuffle(T.map(m=>({txt:m.fr,key:m.fr})))})));
+  T.forEach(n=>qs.push(mcq({prompt:'« '+n.fr+' » — quel est ce nom ?',graded:true,flip:true,answer:n.ar,
+    options:shuffle(T.map(m=>({ar:m.ar,key:m.ar})))})));
+  T.forEach(n=>qs.push({type:'assemble',graded:true,fromFr:true,w:{w:n.ar,fr:n.fr,e:'✨'}}));
+  launchQuranReview(qs);
+}
+function lumTap(k){
+  document.querySelectorAll('.lum').forEach((el,i)=>el.classList.toggle('on',i===k)); // un seul nom illuminé
+  const n=window._lum&&window._lum[k]; if(n)speak(n.ar);                              // seul son son joue
+}
+function nomsListHtml(set){ // liste façon vocabulaire : seuls les noms LISIBLES avec les lettres apprises
+  const lisibles=NOMS_ALLAH.filter(function(n){return wordReadable(n.ar,set);});
+  if(!lisibles.length)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;text-align:center;margin:8px 0">Apprends encore quelques lettres pour lire les premiers noms 🌱</p>';
+  return lisibles.map(function(n){
+    const on=NASEL.has(n.ar);
+    return '<div class="wrow nrow'+(on?' nsel':'')+'" onclick="nomTog(\''+n.ar+'\')">'+
+      '<button class="wspk" onclick="event.stopPropagation();speak(\''+n.ar+'\')" aria-label="Écouter">🔊</button>'+
+      '<div class="wtx"><div class="ww">'+n.ar+'</div><div class="wfr">'+n.fr+'</div></div>'+
+      '<span class="ncoche">'+(on?'✓':'')+'</span></div>';
+  }).join('')+
+  '<button class="cbtn revbtn'+(NASEL.size===3?'':' noff')+'" style="margin-top:10px" onclick="startNoms()">APPRENDRE ('+NASEL.size+'/3)</button>';
 }
 let QCTX=null; // exercice mono-verset en cours : {kind:'ordre'|'ecrire'|'reciter', vi}
 function glossOf(SR,vi,k){ return (SR.tr&&SR.tr[vi]&&SR.tr[vi][k])?SR.tr[vi][k]:''; }
@@ -4795,7 +4887,8 @@ function renderReviser(sub){
       accSec('ill','📖','La sourate illuminée',versesHtml)+
       accSec('ordre','🧩','Remettre les mots dans l\u2019ordre',ordre)+
       accSec('ecrire','✍️','Réécrire les mots',ecrire)+
-      accSec('reciter','🎙️','Réciter',reciter);
+      accSec('reciter','🎙️','Réciter',reciter)+
+      accSec('noms','✨','Les noms d’Allah',nomsListHtml(set));
   }
   else if(sub==='lettres'){
     h+='<div class="ccard">'+letterGridHTML()+'</div>';
@@ -4805,8 +4898,9 @@ function renderReviser(sub){
     const nDue=dueReviewWords().length;          // mots dus aujourd'hui — le chiffre DÉCRÉMENTE après chaque série
     const ordered=vwords.slice().sort(function(a,b){return (wordDue(b)?1:0)-(wordDue(a)?1:0);});
     const vlist=ordered.map(function(w){
-      return '<div class="wrow">'+
-        '<button class="wspk" onclick="speak(\''+w.w+'\')" aria-label="Écouter">'+(w.e||'🔊')+'</button>'+
+      // choix Myriam 13/07 (variante 1B) : l'emoji reste, TOUTE la ligne joue le son du mot
+      return '<div class="wrow" style="cursor:pointer" role="button" aria-label="Écouter '+w.fr.replace(/"/g,'')+'" onclick="speak(\''+w.w+'\')">'+
+        '<span class="wspk">'+(w.e||'🔊')+'</span>'+
         '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
         (wordDue(w)?'<span class="wdot" title="à réviser"></span>':'')+
       '</div>';
@@ -4941,7 +5035,7 @@ function renderVw(){
     M.tilesFor=M.wi;M.shuffled=shuffle(M.units.slice());
     tiles.innerHTML=M.shuffled.map(function(ch,k){
       return '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="vwt'+k+'" onclick="vwTap('+k+')">'+tileLabel(ch)+'</button>';
-    }).join('');
+    }).join('')+'<button class="tile tdel" onclick="vwUndo()" aria-label="Effacer">⌫</button>'; // ⌫ dans le clavier (choix Myriam 4B)
   }
 }
 function vwTap(k){
@@ -5048,7 +5142,7 @@ function finishReview(){
   document.getElementById('fin-extra').innerHTML=(qNextVi()>=0)
     ?'<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="qNext()">▶ Verset suivant</button>'
     :'';
-  document.getElementById('fin-title').textContent='Révision terminée ! 🎉';
+  document.getElementById('fin-title').textContent='Révision terminée !'; // (émoji retiré : doublon avec le grand 🎉 — choix Myriam 13/07)
   document.getElementById('fin-xp').textContent='+10';
   document.getElementById('fin-acc').textContent=acc+'%';
   fillFinishConstance();
