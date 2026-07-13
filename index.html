@@ -2195,7 +2195,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 10/07f · FIX SON iOS (3) : réveil vocal à volume PLEIN (le volume 0 du warm-up se collait à toutes les utterances suivantes sur iOS) + volume explicite + 2e tentative auto si la synthèse n’a pas démarré en 700 ms';
+const BUILD='maj 12/07d · 150 audios ajoutés (ElevenLabs : 42 mots U4-7, 72 syllabes, 19 noms de lettres, 12 consignes, voyelles, sfx أَحْسَنْتِ · mot-madrasatoun = voix de Myriam retrouvée) — les mots parlent désormais en mp3, canal fiable à 100 % sur iPhone · sw v61';
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
