@@ -2125,8 +2125,8 @@ function rankTrackHTML(){ // le tracé seul (points + remplissage) — réutilis
   for(var i=0;i<7;i++){
     var reached=(i<=cur), isCur=(i===cur), last=(i===6);
     var c=reached?RANK_COLORS[i]:'#4A403A';
-    var sz=isCur?24:(last?22:15);
-    var sh=isCur?';box-shadow:0 0 0 4px rgba(232,169,79,.28)':(last&&reached?';box-shadow:0 0 8px '+c:'');
+    var sz=last?22:15; // le rang courant garde la MÊME taille que les autres : seule sa lumière le distingue (Myriam 13/07)
+    var sh=isCur?';box-shadow:0 0 0 3px rgba(232,169,79,.3),0 0 14px 3px rgba(244,208,137,.75)':(last&&reached?';box-shadow:0 0 8px '+c:'');
     dots+='<i onclick="event.stopPropagation();rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
   }
   // La progression FINE (au sein du rang) est fondue dans le chemin des 7 rangs : le remplissage
@@ -2241,7 +2241,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 13/07f · encadré du rang : rangée titre en haut, tracé des 7 rangs en PLEINE LARGEUR dessous avec plus d’air · la carte Ton parcours remonte juste sous l’encadré (avant les stats et les Succès) · sw v62';
+const BUILD='maj 13/07g · le point du rang courant garde la même taille que les autres — seul son halo lumineux le distingue · sw v62';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
