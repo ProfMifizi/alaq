@@ -35,14 +35,16 @@
   .l-haut .x{font-size:22px;color:var(--muted);cursor:pointer;padding:0 4px}
   .pbar{flex:1;height:12px;background:rgba(69,57,49,.7);border-radius:6px;overflow:hidden}
   .pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:6px;transition:width .3s}
-  .orn{text-align:center;color:var(--gold);opacity:.75;font-size:15px;letter-spacing:10px;margin:2px 0 0}
-  .l-corps{flex:1;overflow-y:auto;padding:6px 18px 12px;max-width:480px;width:100%;margin:0 auto;
-    display:flex;flex-direction:column;justify-content:center}
-  .q{font-size:19px;font-weight:900;margin:6px 0 4px;text-align:center}
-  .aide{font-size:13px;color:var(--muted);text-align:center;margin:0 0 14px}
+  .l-corps{flex:1;overflow-y:auto;padding:10px 18px 12px;max-width:480px;width:100%;margin:0 auto;
+    display:flex;flex-direction:column;justify-content:flex-start}
+  .q{font-size:20px;font-weight:900;margin:4px 0 2px;text-align:center}
+  .aide{font-size:13px;color:var(--muted);text-align:center;margin:0 0 6px}
+  /* instruction en haut, sections espacées pour remplir l'écran */
+  .zone{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;gap:10px;width:100%;padding:6px 0}
   /* slide 1 : un seul nom illuminé */
-  .lum{border:1px solid var(--or);border-radius:18px;padding:18px 12px;text-align:center;cursor:pointer;
-    margin:7px 0;background:linear-gradient(180deg,#2e2620,#292019);opacity:.42;
+  .lum{border:1px solid var(--or);border-radius:18px;padding:14px 12px;text-align:center;cursor:pointer;
+    flex:1;display:flex;flex-direction:column;justify-content:center;
+    background:linear-gradient(180deg,#2e2620,#292019);opacity:.42;
     transition:opacity .3s,box-shadow .3s,border-color .3s}
   .lum .ar{font-size:42px;display:block;line-height:1.5}
   .lum .fr{font-size:13px;color:var(--muted);font-weight:800}
@@ -54,10 +56,11 @@
     border-radius:14px;padding:8px 14px;background:#26302a;animation:pose .35s}
   @keyframes pose{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
   .paire .ar{font-size:26px}
-  .cols{display:flex;gap:10px}
-  .col{flex:1;display:flex;flex-direction:column;gap:8px}
-  .pion{border:1.5px solid var(--or);border-radius:14px;padding:13px 6px;text-align:center;background:var(--panel2);
-    cursor:pointer;font-weight:800;font-size:14px}
+  .cols{display:flex;gap:10px;flex:1}
+  .col{flex:1;display:flex;flex-direction:column;gap:10px}
+  .pion{border:1.5px solid var(--or);border-radius:14px;padding:8px 6px;text-align:center;background:var(--panel2);
+    cursor:pointer;font-weight:800;font-size:14px;
+    flex:1;display:flex;align-items:center;justify-content:center}
   .pion .ar{font-size:26px}
   .pion.att{border-color:var(--gold);background:#3d3120}
   .pion.non{border-color:var(--err);animation:tremble .3s}
@@ -66,8 +69,8 @@
   .spkG{width:76px;height:76px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--gold);
     display:grid;place-items:center;font-size:30px;margin:0 auto 14px;cursor:pointer;
     box-shadow:0 0 22px rgba(217,164,65,.18)}
-  .flips{display:flex;flex-direction:column;gap:9px}
-  .flip{perspective:700px;height:64px;cursor:pointer}
+  .flips{display:flex;flex-direction:column;gap:12px;flex:1}
+  .flip{perspective:700px;flex:1;min-height:58px;cursor:pointer}
   .flip .inner{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
   .flip.vu .inner{transform:rotateY(180deg)}
   .flip .face{position:absolute;inset:0;backface-visibility:hidden;border:1.5px solid var(--or);border-radius:14px;
@@ -77,8 +80,9 @@
   .flip.choisi .devant{border-color:var(--gold);background:#3d3120;box-shadow:0 0 14px rgba(217,164,65,.25)}
   .flip .devant .ar{font-size:26px}
   /* écriture : champ + clavier avec tachkīl et ⌫ en bas à droite (choix 4B) */
-  .champ{border:2px dashed var(--or);border-radius:16px;min-height:76px;display:grid;place-items:center;
-    margin:2px 0 14px;font-size:34px;padding:6px}
+  .champ{border:2px dashed var(--or);border-radius:16px;min-height:120px;display:grid;place-items:center;
+    font-size:38px;padding:6px}
+  .kb-wrap{display:flex;flex-direction:column;justify-content:flex-end}
   .kb{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
   .key{min-width:52px;height:52px;border-radius:11px;background:var(--panel2);border:1px solid var(--or);
     display:grid;place-items:center;font-family:'Noto Naskh Arabic',serif;font-size:24px;color:var(--gold2);
@@ -105,7 +109,6 @@
 
 <div id="lecteur">
   <div class="l-haut"><span class="x" onclick="fermer()">✕</span><div class="pbar"><i id="pb"></i></div><span>❤️ 7</span></div>
-  <div class="orn">✦ ✦ ✦</div>
   <div class="l-corps" id="corps"></div>
   <div class="l-bas"><button class="continuer" id="cont" onclick="suivant()">CONTINUER</button></div>
 </div>
@@ -212,7 +215,7 @@ function rend(){
   var s=S[qi];
   document.getElementById('pb').style.width=Math.round(qi/(S.length-1)*100)+'%';
   document.getElementById('corps').innerHTML=(s.q?'<div class="q">'+s.q+'</div>':'')+
-    (s.aide?'<div class="aide">'+s.aide+'</div>':'')+s.h;
+    (s.aide?'<div class="aide">'+s.aide+'</div>':'')+'<div class="zone">'+s.h+'</div>';
   document.getElementById('cont').textContent=(qi===S.length-1)?'TERMINER':'CONTINUER';
   if(s.audio)setTimeout(function(){joue(s.audio);},350); // l'oreille d'abord
 }
