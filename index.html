@@ -755,7 +755,8 @@
 .pcs-top b{color:var(--cream);font-size:15px}
 .pcs-top span{color:var(--gold2);font-weight:800;font-size:12.5px}
 .arw{font-family:var(--ar)}
-.rankcard{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:linear-gradient(135deg,#6f4b0f,#9a6813 60%,#b8770f);border:1px solid var(--gold2);border-radius:16px;padding:12px 14px;cursor:pointer;color:#241a06;margin:0 0 12px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.rankcard{display:block;width:100%;text-align:left;background:linear-gradient(135deg,#6f4b0f,#9a6813 60%,#b8770f);border:1px solid var(--gold2);border-radius:16px;padding:12px 14px 14px;cursor:pointer;color:#241a06;margin:0 0 12px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.rankcard .rk-row{display:flex;align-items:center;gap:14px}
 .rankcard:active{transform:scale(.99)}
 .rankcard .rk-ar{font-family:var(--quran);font-size:30px;color:#241a06;flex:0 0 auto}
 .rankcard .rk-mid{flex:1;min-width:0}
@@ -764,7 +765,7 @@
 .rankcard .rk-chev{font-size:24px;color:#241a06;font-weight:900;flex:0 0 auto}
 .rankcard .ubar{margin-top:5px;background:rgba(0,0,0,.22)}
 .rankcard .ubar i{background:#241a06}
-.rankcard .rbar-track{margin:7px 2px 0;height:26px}
+.rankcard .rbar-track{margin:16px 4px 0;height:26px} /* pleine largeur de la box, avec de l'air sous le titre */
 .rankcard .rbar-line{background:rgba(36,26,6,.32)}
 .rankcard .rbar-fill{background:#241a06}
 .rankcard .rbar-dots i{border:1.5px solid rgba(36,26,6,.4)}
@@ -2240,7 +2241,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 13/07e · le chemin des 7 rangs est IMBRIQUÉ dans l’encadré doré (une seule boîte : TON RANG + nom + tracé, plus de bloc séparé en dessous) — clic sur un point ouvre son détail sans rouvrir la vue d’ensemble · l’écran de fin de leçon garde son en-tête propre · sw v62';
+const BUILD='maj 13/07f · encadré du rang : rangée titre en haut, tracé des 7 rangs en PLEINE LARGEUR dessous avec plus d’air · la carte Ton parcours remonte juste sous l’encadré (avant les stats et les Succès) · sw v62';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4555,12 +4556,17 @@ function renderProg(){
   }
   var _R=rankFor(S.consScore);
   // Le tracé des 7 rangs est IMBRIQUÉ dans l'encadré doré (une seule boîte, choix Myriam 13/07) —
-  // div (pas button) car les points du tracé ont leur propre clic (rankInfo, stopPropagation).
+  // rangée titre en haut, tracé en PLEINE LARGEUR dessous. div (pas button) : les points du
+  // tracé ont leur propre clic (rankInfo, stopPropagation).
   h+='<div class="rankcard" role="button" tabindex="0" onclick="showRank()">'+
-       '<div class="rk-ar">'+_R.rank.ar+'</div>'+
-       '<div class="rk-mid"><div class="rk-lbl">TON RANG</div><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div>'+
+       '<div class="rk-row">'+
+         '<div class="rk-ar">'+_R.rank.ar+'</div>'+
+         '<div class="rk-mid"><div class="rk-lbl">TON RANG</div><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div></div>'+
+         '<div class="rk-chev">›</div>'+
+       '</div>'+
        rankTrackHTML()+
-       '</div><div class="rk-chev">›</div></div>';
+     '</div>';
+  h+=parcoursCardHTML(); // « Ton parcours » remonte juste sous l'encadré du rang (choix Myriam 13/07)
   h+='<div class="pgrid">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
      '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
@@ -4571,7 +4577,8 @@ function renderProg(){
               '<img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'">'+
               '</button>';}).join('')+
      '</div></div>';
-  h+=(function(){
+  // La carte « Ton parcours » (déclaration hissée : appelée plus haut, juste sous l'encadré du rang)
+  function parcoursCardHTML(){
     const ready=UNITS.map((U,i)=>({U,i})).filter(o=>o.U.ready);
     const nTot=UNITS.length, nVal=ready.filter(o=>unitValidated(o.i)).length;
     // unité en cours, sinon la dernière unité atteinte (on montre toujours où elle en est)
@@ -4589,7 +4596,7 @@ function renderProg(){
         '<div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>';
     }
     return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
-  })();
+  }
   // (« Mon compte » est désormais tout en haut — ancien code de sauvegarde ALAQ1 retiré le 07/07.)
   document.getElementById('view-prog').innerHTML=h; try{maybeGhufranPrompt();}catch(e){}
 }
