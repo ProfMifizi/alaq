@@ -1,118 +1,139 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PREVIEW — Les noms d'Allah (13/07)</title>
+<title>PREVIEW — Les noms d'Allah v2 (13/07)</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Naskh+Arabic:wght@600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#221c19;--panel:#2c2521;--panel2:#38302a;--line:#453931;--cream:#f3e8d8;--gold:#d9a441;--gold2:#f4d089;--muted:#a08d78;--ok:#35a468}
+  :root{--bg:#221c19;--panel:#2c2521;--panel2:#38302a;--line:#453931;--cream:#f3e8d8;--gold:#d9a441;--gold2:#f4d089;--muted:#a08d78;--ok:#35a468;--err:#d8463a}
   body{font-family:'Nunito',system-ui;background:var(--bg);color:var(--cream);max-width:480px;margin:0 auto;padding:18px 14px 80px}
   h1{color:var(--gold);font-size:20px;margin:0 0 2px}
   .sub{color:var(--muted);font-size:13px;margin:0 0 16px}
-  .etape{font-size:12px;font-weight:900;color:var(--bg);background:var(--gold);border-radius:8px;padding:2px 10px;display:inline-block;margin:20px 0 6px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:6px 0}
   .ar{font-family:'Noto Naskh Arabic',serif;color:var(--gold2)}
-  .titre-sec{display:flex;align-items:center;gap:10px;font-weight:900;font-size:16px}
-  .grille{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .nom{border:1.5px solid var(--line);border-radius:14px;padding:8px 12px;cursor:pointer;text-align:center;background:var(--panel2)}
-  .nom .ar{font-size:24px;display:block}
-  .nom .fr{font-size:11.5px;color:var(--muted)}
-  .nom.sel{border-color:var(--gold);background:#3d3120;box-shadow:0 0 0 1px var(--gold)}
-  .nom.verrou{opacity:.32;pointer-events:none}
-  .cta{display:block;width:100%;padding:14px;border:none;border-radius:14px;background:var(--gold);color:var(--bg);
-    font-weight:900;font-size:16px;margin-top:12px;cursor:pointer}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:6px 0}
+  .titre-sec{font-weight:900;font-size:16px}
   .note{font-size:12.5px;color:var(--muted)}
-  .gros{border:1.5px solid var(--line);border-radius:16px;background:var(--panel2);padding:16px;text-align:center;cursor:pointer;flex:1}
+  /* liste façon vocabulaire */
+  .row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:10px}
+  .row:last-child{border-bottom:none}
+  .row .spk{width:42px;height:42px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--gold);
+    display:grid;place-items:center;font-size:18px;flex:none}
+  .row .a{font-size:24px}
+  .row .fr{color:var(--muted);font-size:13.5px}
+  .row .coche{margin-left:auto;width:26px;height:26px;border-radius:50%;border:2px solid var(--line);
+    display:grid;place-items:center;font-size:15px;color:var(--bg);flex:none}
+  .row.sel{background:#3d3120}
+  .row.sel .coche{background:var(--gold);border-color:var(--gold)}
+  .cta{display:block;width:100%;padding:14px;border:none;border-radius:14px;background:var(--panel2);color:var(--muted);
+    font-weight:900;font-size:16px;margin-top:12px;cursor:pointer}
+  .cta.pret{background:var(--gold);color:var(--bg)}
+  /* le lecteur plein écran (la « popup » des disques) */
+  #lecteur{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:9}
+  #lecteur.on{display:flex}
+  .l-haut{display:flex;align-items:center;gap:10px;padding:14px}
+  .l-haut .x{font-size:22px;color:var(--muted);cursor:pointer}
+  .pbar{flex:1;height:12px;background:var(--panel2);border-radius:6px;overflow:hidden}
+  .pbar i{display:block;height:100%;background:var(--gold);border-radius:6px;transition:width .3s}
+  .l-corps{flex:1;overflow-y:auto;padding:10px 20px;max-width:480px;width:100%;margin:0 auto}
+  .q{font-size:19px;font-weight:900;margin:8px 0 18px}
+  .gros{border:1.5px solid var(--line);border-radius:16px;background:var(--panel2);padding:16px;text-align:center;cursor:pointer;margin:8px 0}
   .gros .ar{font-size:34px;display:block}
   .gros.on{border-color:var(--gold);background:#3d3120}
   .ligne{display:flex;gap:8px;margin:8px 0}
   .assoc-col{flex:1;display:flex;flex-direction:column;gap:8px}
-  .pion{border:1.5px solid var(--line);border-radius:12px;padding:10px;text-align:center;background:var(--panel2);cursor:pointer;font-weight:800}
+  .pion{border:1.5px solid var(--line);border-radius:12px;padding:12px 6px;text-align:center;background:var(--panel2);cursor:pointer;font-weight:800}
   .pion.ok{border-color:var(--ok);color:var(--ok)}
-  .opt{flex:1;border:1.5px solid var(--line);border-radius:12px;background:var(--panel2);padding:12px 6px;text-align:center;font-weight:800;cursor:pointer}
-  .opt.on{border-color:var(--gold)}
-  .spk{width:64px;height:64px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--gold);
-    display:grid;place-items:center;font-size:26px;margin:0 auto 10px;cursor:pointer}
-  .kb{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:10px}
-  .key{width:56px;height:52px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);
-    display:grid;place-items:center;font-family:'Noto Naskh Arabic',serif;font-size:24px;color:var(--gold2)}
+  .opt{flex:1;border:1.5px solid var(--line);border-radius:12px;background:var(--panel2);padding:14px 6px;text-align:center;font-weight:800;cursor:pointer}
+  .opt.on{border-color:var(--gold);background:#3d3120}
+  .spkG{width:70px;height:70px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--gold);
+    display:grid;place-items:center;font-size:28px;margin:0 auto 16px;cursor:pointer}
+  .kb{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:12px}
+  .key{min-width:54px;height:52px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);
+    display:grid;place-items:center;font-family:'Noto Naskh Arabic',serif;font-size:24px;color:var(--gold2);padding:0 8px}
   .key.del{font-family:'Nunito';font-size:20px;color:#e8926d;border-color:#e8926d;background:transparent}
-  .champ{border:2px dashed var(--line);border-radius:14px;min-height:64px;display:grid;place-items:center;margin-top:10px}
+  .champ{border:2px dashed var(--line);border-radius:14px;min-height:64px;display:grid;place-items:center;margin-top:6px;font-size:30px}
+  .fete{text-align:center;padding-top:40px}
+  .fete .big{font-size:70px}
+  .fete .pc{color:var(--gold);font-size:42px;font-weight:900}
+  .l-bas{padding:14px 20px 26px;max-width:480px;width:100%;margin:0 auto}
+  .continuer{display:block;width:100%;padding:15px;border:none;border-radius:14px;background:var(--gold);color:var(--bg);font-weight:900;font-size:16px;cursor:pointer}
+  .etiquette{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:.5px}
 </style></head><body>
-<h1>🕋 PREVIEW — Les noms d'Allah</h1>
-<p class="sub">Le parcours complet, à toucher. Rien n'est branché : tu valides le principe et les écrans, PUIS j'intègre dans l'app (et ce module sera le pilote de la Phase B : 100 % données + composants génériques).</p>
+<h1>🕋 PREVIEW v2 — Les noms d'Allah</h1>
+<p class="sub">Ta correction appliquée : une <b>liste</b> comme le vocabulaire · l'élève coche <b>3 noms</b> · APPRENDRE ouvre le <b>lecteur plein écran</b> (comme un disque de l'accueil) avec <b>12 slides</b>. Tout est navigable ici.</p>
 
-<div class="etape">L'entrée — nouvelle section dans Réviser · Le Qorān</div>
 <div class="card">
-  <div class="titre-sec">✨ Les noms d'Allah <span class="note" style="font-weight:700">· 5 lisibles</span></div>
-  <p class="note" style="margin:6px 0 0">Seuls les noms <b>lisibles avec tes lettres</b> apparaissent — les autres se dévoileront au fil des unités (ici : lettres des unités 1-5). Touche pour choisir, puis APPRENDRE.</p>
-  <div class="grille" id="grille"></div>
-  <button class="cta" onclick="alert('Dans l’app : lance la leçon en 3 temps avec les noms choisis')">APPRENDRE (2)</button>
+  <div class="titre-sec">✨ Les noms d'Allah <span class="note" style="font-weight:700">· lisibles avec tes lettres</span></div>
+  <div id="liste"></div>
+  <button class="cta" id="btn" onclick="lancer()">APPRENDRE (0/3)</button>
+</div>
+<p class="note">Le 🔊 de chaque ligne joue le nom sans le sélectionner. La sélection se fait en touchant la ligne (✓). À 3 cochés, le bouton s'allume.</p>
+
+<div id="lecteur">
+  <div class="l-haut"><span class="x" onclick="fermer()">✕</span><div class="pbar"><i id="pb"></i></div><span>❤️ 7</span></div>
+  <div class="l-corps" id="corps"></div>
+  <div class="l-bas"><button class="continuer" id="cont" onclick="suivant()">CONTINUER</button></div>
 </div>
 
-<div class="etape">① NOMMER — touche, écoute, répète (autant que tu veux)</div>
-<div class="card">
-  <div class="ligne">
-    <div class="gros" onclick="this.classList.toggle('on')"><span class="ar">الرَّحْمَٰنُ</span><span class="note">Ar-Raḥmān · le Tout-Miséricordieux</span></div>
-    <div class="gros" onclick="this.classList.toggle('on')"><span class="ar">السَّلَامُ</span><span class="note">As-Salām · la Paix</span></div>
-  </div>
-  <p class="note">Chaque toucher joue le nom (mp3 ElevenLabs / ta voix). Bouton CONTINUER quand l'élève se sent prête.</p>
-</div>
-
-<div class="etape">② NOMMER — associe l'arabe à son sens</div>
-<div class="card">
-  <div class="ligne">
-    <div class="assoc-col"><div class="pion ar" style="font-size:22px" onclick="this.classList.toggle('ok')">الرَّحْمَٰنُ</div><div class="pion ar" style="font-size:22px" onclick="this.classList.toggle('ok')">السَّلَامُ</div></div>
-    <div class="assoc-col"><div class="pion" onclick="this.classList.toggle('ok')">la Paix</div><div class="pion" onclick="this.classList.toggle('ok')">le Tout-Miséricordieux</div></div>
-  </div>
-  <p class="note">Le composant d'association existe déjà dans l'app (leçons de lettres) — réutilisé tel quel.</p>
-</div>
-
-<div class="etape">③ RECONNAÎTRE — tu entends, tu trouves le sens</div>
-<div class="card">
-  <div class="spk">🔊</div>
-  <div class="ligne">
-    <div class="opt" onclick="sel(this)">le Roi</div>
-    <div class="opt" onclick="sel(this)">la Paix</div>
-    <div class="opt" onclick="sel(this)">l'Apaisant</div>
-  </div>
-</div>
-
-<div class="etape">④ RECONNAÎTRE — tu lis le sens, tu trouves le nom</div>
-<div class="card">
-  <div style="text-align:center;font-weight:900;font-size:18px;margin-bottom:8px">le Tout-Miséricordieux</div>
-  <div class="ligne">
-    <div class="opt ar" style="font-size:24px" onclick="sel(this)">الرَّحِيمُ</div>
-    <div class="opt ar" style="font-size:24px" onclick="sel(this)">الرَّحْمَٰنُ</div>
-    <div class="opt ar" style="font-size:24px" onclick="sel(this)">الْمَلِكُ</div>
-  </div>
-</div>
-
-<div class="etape">⑤ RESTITUER — tu écris le nom en arabe</div>
-<div class="card">
-  <div style="text-align:center;font-weight:900">la Paix</div>
-  <div class="champ ar" style="font-size:30px" id="champ">&nbsp;</div>
-  <div class="kb">
-    <span class="key">س</span><span class="key">ل</span><span class="key">ا</span><span class="key">م</span>
-    <span class="key">ـَ</span><span class="key">ـُ</span><span class="key">ال</span><span class="key del">⌫</span>
-  </div>
-  <p class="note">Même clavier que « Écrire les mots », avec la touche ⌫ du correctif n°4.</p>
-</div>
-
-<p class="note" style="margin-top:20px">Tes 5 étapes = les 3 temps Montessori : <b>nommer</b> (①②) · <b>reconnaître</b> (③④) · <b>restituer</b> (⑤). Un nom est « acquis » quand ⑤ est réussi — il gagne alors sa ✓ dans la grille.</p>
-
+<audio id="a" preload="none"></audio>
 <script>
 var NOMS=[
- ['الرَّحْمَٰنُ','le Tout-Miséricordieux',1],['الرَّحِيمُ','le Très-Miséricordieux',1],
- ['الْمَلِكُ','le Roi',1],['السَّلَامُ','la Paix',1],['الْمُؤْمِنُ','le Rassurant',1],
- ['الْقُدُّوسُ','l’Infiniment Saint',0],['الْعَزِيزُ','le Tout-Puissant',0],['الْخَالِقُ','le Créateur',0]
+ ['الرَّحْمَٰنُ','le Tout-Miséricordieux','mot-arrahman'],
+ ['الرَّحِيمُ','le Très-Miséricordieux','mot-arrahim'],
+ ['الْمَلِكُ','le Roi','mot-malik'],
+ ['السَّلَامُ','la Paix',''],
+ ['الْمُؤْمِنُ','le Rassurant',''],
+ ['الْعَلِيمُ','l’Omniscient','']
 ];
-var g=document.getElementById('grille');
+var sel=[];
+function joue(n){if(!n)return;var a=document.getElementById('a');a.src='audios-app-alaq/'+n+'.mp3';a.play().catch(function(){});}
+var L=document.getElementById('liste');
 NOMS.forEach(function(n,i){
-  var d=document.createElement('div');
-  d.className='nom'+(n[2]?'':' verrou')+(i<2?' sel':'');
-  d.innerHTML='<span class="ar">'+n[0]+'</span><span class="fr">'+n[1]+'</span>';
-  if(n[2])d.onclick=function(){d.classList.toggle('sel')};
-  g.appendChild(d);
+  var d=document.createElement('div');d.className='row';
+  d.innerHTML='<span class="spk">🔊</span><div><div class="ar a">'+n[0]+'</div><div class="fr">'+n[1]+'</div></div><span class="coche"></span>';
+  d.querySelector('.spk').onclick=function(e){e.stopPropagation();joue(n[2]);};
+  d.onclick=function(){
+    var k=sel.indexOf(i);
+    if(k>=0){sel.splice(k,1);d.classList.remove('sel');d.querySelector('.coche').textContent='';}
+    else if(sel.length<3){sel.push(i);d.classList.add('sel');d.querySelector('.coche').textContent='✓';}
+    var b=document.getElementById('btn');
+    b.textContent='APPRENDRE ('+sel.length+'/3)';
+    b.className='cta'+(sel.length===3?' pret':'');
+  };
+  L.appendChild(d);
 });
-function sel(el){Array.prototype.forEach.call(el.parentNode.children,function(c){c.classList.remove('on')});el.classList.add('on');}
+
+/* ---- le lecteur : 12 slides ---- */
+var qi=0,S=[];
+function slides(){
+  var T=sel.map(function(i){return NOMS[i];});
+  var s=[];
+  s.push({t:'NOMMER · 1/12',q:'Touche chaque nom pour l’écouter, autant de fois que tu veux',
+    h:T.map(function(n){return '<div class="gros" onclick="this.classList.toggle(\'on\')"><span class="ar">'+n[0]+'</span><span class="note">'+n[1]+'</span></div>';}).join('')});
+  s.push({t:'NOMMER · 2/12',q:'Associe chaque nom à son sens',
+    h:'<div class="ligne"><div class="assoc-col">'+T.map(function(n){return '<div class="pion ar" style="font-size:22px" onclick="this.classList.toggle(\'ok\')">'+n[0]+'</div>';}).join('')+'</div>'+
+      '<div class="assoc-col">'+T.slice().reverse().map(function(n){return '<div class="pion" onclick="this.classList.toggle(\'ok\')">'+n[1]+'</div>';}).join('')+'</div></div>'});
+  T.forEach(function(n,k){ s.push({t:'RECONNAÎTRE · '+(3+k)+'/12',q:'Tu entends… que veut dire ce nom ?',
+    h:'<div class="spkG">🔊</div><div class="ligne">'+melange(T).map(function(m){return '<div class="opt" onclick="choix(this)">'+m[1]+'</div>';}).join('')+'</div>'});});
+  T.forEach(function(n,k){ s.push({t:'RECONNAÎTRE · '+(6+k)+'/12',q:'« '+n[1]+' » — quel est ce nom ?',
+    h:'<div class="ligne">'+melange(T).map(function(m){return '<div class="opt ar" style="font-size:24px" onclick="choix(this)">'+m[0]+'</div>';}).join('')+'</div>'});});
+  T.forEach(function(n,k){ s.push({t:'RESTITUER · '+(9+k)+'/12',q:'Écris « '+n[1]+' »',
+    h:'<div class="champ ar">&nbsp;</div><div class="kb">'+lettres(n[0])+'<span class="key del">⌫</span></div>'});});
+  s.push({t:'12/12',q:'',h:'<div class="fete"><div class="big">🎉</div><h3>Noms mémorisés !</h3><div class="pc">100%</div><div class="note">de réussite</div></div>'});
+  return s;
+}
+function melange(a){return a.slice().sort(function(){return Math.random()-.5;});}
+function lettres(mot){
+  var set=Array.from(new Set(mot.replace(/[ًٌٍَُِّْٰ]/g,'').split('')));
+  return melange(set).map(function(c){return '<span class="key">'+c+'</span>';}).join('');
+}
+function choix(el){Array.prototype.forEach.call(el.parentNode.children,function(c){c.classList.remove('on')});el.classList.add('on');}
+function lancer(){if(sel.length!==3)return;S=slides();qi=0;document.getElementById('lecteur').classList.add('on');rend();}
+function fermer(){document.getElementById('lecteur').classList.remove('on');}
+function rend(){
+  var s=S[qi];
+  document.getElementById('pb').style.width=Math.round(qi/(S.length-1)*100)+'%';
+  document.getElementById('corps').innerHTML='<div class="etiquette">'+s.t+'</div>'+(s.q?'<div class="q">'+s.q+'</div>':'')+s.h;
+  document.getElementById('cont').textContent=(qi===S.length-1)?'TERMINER':'CONTINUER';
+}
+function suivant(){if(qi<S.length-1){qi++;rend();}else fermer();}
 </script>
 </body></html>
