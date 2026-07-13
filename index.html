@@ -1743,7 +1743,8 @@ function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify
    est la source immédiate, le nuage est une copie synchronisée en arrière-plan. */
 const SUPA_URL='https://ykggxipgirgjwhhxmhbn.supabase.co';
 const SUPA_ANON='sb_publishable_IpnRJf3j3JfyRhQ0WWSeww_V5ctBrkh'; // clé PUBLIQUE (la RLS protège les données)
-let SB=null; try{ if(window.supabase)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON); }catch(e){}
+let SB=null; try{ if(window.supabase)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
+  {auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){} // la connexion SURVIT aux visites : jeton gardé et renouvelé tout seul (Myriam 13/07)
 const CLOUD={user:null};
 let _syncT=null;
 function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
@@ -1764,6 +1765,9 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
       S=Object.assign({},DEF,remote); delete S._fresh;
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
+      // élève reconnue (session encore vivante) : on referme l'onboarding qui aurait pu s'ouvrir
+      if(S.onboarded){try{document.getElementById('onb').classList.remove('on');}catch(e){}}
+      _homeFocusPending=true; // et on recentre sur son disque courant
       try{refreshStats();renderHome();}catch(e){}
     } else {
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
@@ -1905,6 +1909,7 @@ function onbBack(){ if(ONB.step>0){ONB.step--;onbShow();} }
 function onbExistingAccount(){ // élève existante sur un appareil neuf : le nuage fait foi (_fresh)
   S.onboarded=1; S.tutHome=1; S._fresh=1; save();
   document.getElementById('onb').classList.remove('on');
+  if(CLOUD.user){ cloudPull(); showTab('home'); toast('Bon retour ✨'); return; } // session encore vivante : AUCUNE reconnexion à saisir
   showTab('prog'); setTimeout(function(){try{toast('Connecte-toi ci-dessous ✨');}catch(e){}},300);
 }
 function onbLaunchLesson(){
@@ -2220,10 +2225,18 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 13/07 · Les noms d’Allah (liste lisible, 3 noms, leçon en 3 temps Montessori — pilote Phase B) · correctifs validés : 1B ligne-son au vocabulaire, 🎉 dédoublonné, cartes retournées au QCM (3B), touche ⌫ clavier (4B) · + tout le lot son du 12/07 · sw v62';
+const BUILD='maj 13/07b · Les noms d’Allah (leçon en 3 temps — pilote Phase B) · correctifs 1B/2/3B/4B · connexion gardée (session persistante, retour sans code si session vivante) · accueil centré sur le disque courant · Mon compte en tête du profil · + lot son du 12/07 · sw v62';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
+// L'accueil s'ouvre centré sur le DERNIER disque débloqué (choix Myriam 13/07) — à l'arrivée,
+// au retour d'une leçon et après restauration du nuage ; jamais pendant que l'élève fait défiler.
+let _homeFocusPending=true;
+function focusCurrentDisc(){
+  const nodes=document.querySelectorAll('.node.current');
+  const n=nodes[nodes.length-1]; if(!n)return;
+  setTimeout(function(){ try{ n.scrollIntoView({block:'center'}); }catch(e){} },80);
+}
 function renderHome(){
   const h=document.getElementById('home');
   h.innerHTML='';
@@ -2300,6 +2313,7 @@ function renderHome(){
   window._homeScroll=onHomeScroll;
   window.addEventListener('scroll',onHomeScroll,{passive:true});
   requestAnimationFrame(onHomeScroll);
+  if(_homeFocusPending){_homeFocusPending=false;focusCurrentDisc();} // centre sur le disque courant
 }
 // Remplit le bandeau du haut avec le titre de l'unite u (sans re-render inutile).
 function setBanner(u){
@@ -4516,6 +4530,7 @@ function renderCours(sub){
 
 function renderProg(){
   let h='<h1 class="vh">Ta progression</h1>';
+  h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>'; // en tête (choix Myriam 13/07)
   var _R=rankFor(S.consScore);
   h+='<button class="rankcard" onclick="showRank()">'+
        '<div class="rk-ar">'+_R.rank.ar+'</div>'+
@@ -4552,9 +4567,7 @@ function renderProg(){
     }
     return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
   })();
-  h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
-  // (Ancien système de code de sauvegarde ALAQ1 retiré le 07/07 : le compte
-  //  e-mail le remplace entièrement ; le garder découragerait l'inscription.)
+  // (« Mon compte » est désormais tout en haut — ancien code de sauvegarde ALAQ1 retiré le 07/07.)
   document.getElementById('view-prog').innerHTML=h; try{maybeGhufranPrompt();}catch(e){}
 }
 // Popup détail d'un succès (clic sur une image de la grille)
@@ -5151,7 +5164,7 @@ function finishReview(){
 function returnFromPlayer(){
   if(backTo==='reviser'){ backTo=null; showTab('reviser'); }
   else if(backTo==='cours'){ backTo=null; showTab('cours'); }
-  else { renderHome(); }
+  else { _homeFocusPending=true; renderHome(); } // au retour de leçon : recentrer sur le disque courant
 }
 
 document.getElementById('blogo').src=LOGO;
@@ -5178,6 +5191,7 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
   const n=document.getElementById('narrtog');if(n)n.textContent=NARR?'🗣️':'🚫';})();
 cloudInit();
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){} // demande au navigateur de NE PAS purger le stockage (connexion + progression)
 refreshStats();
 showTab('home');
 if(!S.onboarded){ setTimeout(function(){try{onbStart();}catch(e){}},120); } // 1er lancement : parcours de bienvenue
