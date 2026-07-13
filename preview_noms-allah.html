@@ -1,0 +1,118 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Les noms d'Allah (13/07)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Naskh+Arabic:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#221c19;--panel:#2c2521;--panel2:#38302a;--line:#453931;--cream:#f3e8d8;--gold:#d9a441;--gold2:#f4d089;--muted:#a08d78;--ok:#35a468}
+  body{font-family:'Nunito',system-ui;background:var(--bg);color:var(--cream);max-width:480px;margin:0 auto;padding:18px 14px 80px}
+  h1{color:var(--gold);font-size:20px;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .etape{font-size:12px;font-weight:900;color:var(--bg);background:var(--gold);border-radius:8px;padding:2px 10px;display:inline-block;margin:20px 0 6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin:6px 0}
+  .ar{font-family:'Noto Naskh Arabic',serif;color:var(--gold2)}
+  .titre-sec{display:flex;align-items:center;gap:10px;font-weight:900;font-size:16px}
+  .grille{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .nom{border:1.5px solid var(--line);border-radius:14px;padding:8px 12px;cursor:pointer;text-align:center;background:var(--panel2)}
+  .nom .ar{font-size:24px;display:block}
+  .nom .fr{font-size:11.5px;color:var(--muted)}
+  .nom.sel{border-color:var(--gold);background:#3d3120;box-shadow:0 0 0 1px var(--gold)}
+  .nom.verrou{opacity:.32;pointer-events:none}
+  .cta{display:block;width:100%;padding:14px;border:none;border-radius:14px;background:var(--gold);color:var(--bg);
+    font-weight:900;font-size:16px;margin-top:12px;cursor:pointer}
+  .note{font-size:12.5px;color:var(--muted)}
+  .gros{border:1.5px solid var(--line);border-radius:16px;background:var(--panel2);padding:16px;text-align:center;cursor:pointer;flex:1}
+  .gros .ar{font-size:34px;display:block}
+  .gros.on{border-color:var(--gold);background:#3d3120}
+  .ligne{display:flex;gap:8px;margin:8px 0}
+  .assoc-col{flex:1;display:flex;flex-direction:column;gap:8px}
+  .pion{border:1.5px solid var(--line);border-radius:12px;padding:10px;text-align:center;background:var(--panel2);cursor:pointer;font-weight:800}
+  .pion.ok{border-color:var(--ok);color:var(--ok)}
+  .opt{flex:1;border:1.5px solid var(--line);border-radius:12px;background:var(--panel2);padding:12px 6px;text-align:center;font-weight:800;cursor:pointer}
+  .opt.on{border-color:var(--gold)}
+  .spk{width:64px;height:64px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--gold);
+    display:grid;place-items:center;font-size:26px;margin:0 auto 10px;cursor:pointer}
+  .kb{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:10px}
+  .key{width:56px;height:52px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);
+    display:grid;place-items:center;font-family:'Noto Naskh Arabic',serif;font-size:24px;color:var(--gold2)}
+  .key.del{font-family:'Nunito';font-size:20px;color:#e8926d;border-color:#e8926d;background:transparent}
+  .champ{border:2px dashed var(--line);border-radius:14px;min-height:64px;display:grid;place-items:center;margin-top:10px}
+</style></head><body>
+<h1>🕋 PREVIEW — Les noms d'Allah</h1>
+<p class="sub">Le parcours complet, à toucher. Rien n'est branché : tu valides le principe et les écrans, PUIS j'intègre dans l'app (et ce module sera le pilote de la Phase B : 100 % données + composants génériques).</p>
+
+<div class="etape">L'entrée — nouvelle section dans Réviser · Le Qorān</div>
+<div class="card">
+  <div class="titre-sec">✨ Les noms d'Allah <span class="note" style="font-weight:700">· 5 lisibles</span></div>
+  <p class="note" style="margin:6px 0 0">Seuls les noms <b>lisibles avec tes lettres</b> apparaissent — les autres se dévoileront au fil des unités (ici : lettres des unités 1-5). Touche pour choisir, puis APPRENDRE.</p>
+  <div class="grille" id="grille"></div>
+  <button class="cta" onclick="alert('Dans l’app : lance la leçon en 3 temps avec les noms choisis')">APPRENDRE (2)</button>
+</div>
+
+<div class="etape">① NOMMER — touche, écoute, répète (autant que tu veux)</div>
+<div class="card">
+  <div class="ligne">
+    <div class="gros" onclick="this.classList.toggle('on')"><span class="ar">الرَّحْمَٰنُ</span><span class="note">Ar-Raḥmān · le Tout-Miséricordieux</span></div>
+    <div class="gros" onclick="this.classList.toggle('on')"><span class="ar">السَّلَامُ</span><span class="note">As-Salām · la Paix</span></div>
+  </div>
+  <p class="note">Chaque toucher joue le nom (mp3 ElevenLabs / ta voix). Bouton CONTINUER quand l'élève se sent prête.</p>
+</div>
+
+<div class="etape">② NOMMER — associe l'arabe à son sens</div>
+<div class="card">
+  <div class="ligne">
+    <div class="assoc-col"><div class="pion ar" style="font-size:22px" onclick="this.classList.toggle('ok')">الرَّحْمَٰنُ</div><div class="pion ar" style="font-size:22px" onclick="this.classList.toggle('ok')">السَّلَامُ</div></div>
+    <div class="assoc-col"><div class="pion" onclick="this.classList.toggle('ok')">la Paix</div><div class="pion" onclick="this.classList.toggle('ok')">le Tout-Miséricordieux</div></div>
+  </div>
+  <p class="note">Le composant d'association existe déjà dans l'app (leçons de lettres) — réutilisé tel quel.</p>
+</div>
+
+<div class="etape">③ RECONNAÎTRE — tu entends, tu trouves le sens</div>
+<div class="card">
+  <div class="spk">🔊</div>
+  <div class="ligne">
+    <div class="opt" onclick="sel(this)">le Roi</div>
+    <div class="opt" onclick="sel(this)">la Paix</div>
+    <div class="opt" onclick="sel(this)">l'Apaisant</div>
+  </div>
+</div>
+
+<div class="etape">④ RECONNAÎTRE — tu lis le sens, tu trouves le nom</div>
+<div class="card">
+  <div style="text-align:center;font-weight:900;font-size:18px;margin-bottom:8px">le Tout-Miséricordieux</div>
+  <div class="ligne">
+    <div class="opt ar" style="font-size:24px" onclick="sel(this)">الرَّحِيمُ</div>
+    <div class="opt ar" style="font-size:24px" onclick="sel(this)">الرَّحْمَٰنُ</div>
+    <div class="opt ar" style="font-size:24px" onclick="sel(this)">الْمَلِكُ</div>
+  </div>
+</div>
+
+<div class="etape">⑤ RESTITUER — tu écris le nom en arabe</div>
+<div class="card">
+  <div style="text-align:center;font-weight:900">la Paix</div>
+  <div class="champ ar" style="font-size:30px" id="champ">&nbsp;</div>
+  <div class="kb">
+    <span class="key">س</span><span class="key">ل</span><span class="key">ا</span><span class="key">م</span>
+    <span class="key">ـَ</span><span class="key">ـُ</span><span class="key">ال</span><span class="key del">⌫</span>
+  </div>
+  <p class="note">Même clavier que « Écrire les mots », avec la touche ⌫ du correctif n°4.</p>
+</div>
+
+<p class="note" style="margin-top:20px">Tes 5 étapes = les 3 temps Montessori : <b>nommer</b> (①②) · <b>reconnaître</b> (③④) · <b>restituer</b> (⑤). Un nom est « acquis » quand ⑤ est réussi — il gagne alors sa ✓ dans la grille.</p>
+
+<script>
+var NOMS=[
+ ['الرَّحْمَٰنُ','le Tout-Miséricordieux',1],['الرَّحِيمُ','le Très-Miséricordieux',1],
+ ['الْمَلِكُ','le Roi',1],['السَّلَامُ','la Paix',1],['الْمُؤْمِنُ','le Rassurant',1],
+ ['الْقُدُّوسُ','l’Infiniment Saint',0],['الْعَزِيزُ','le Tout-Puissant',0],['الْخَالِقُ','le Créateur',0]
+];
+var g=document.getElementById('grille');
+NOMS.forEach(function(n,i){
+  var d=document.createElement('div');
+  d.className='nom'+(n[2]?'':' verrou')+(i<2?' sel':'');
+  d.innerHTML='<span class="ar">'+n[0]+'</span><span class="fr">'+n[1]+'</span>';
+  if(n[2])d.onclick=function(){d.classList.toggle('sel')};
+  g.appendChild(d);
+});
+function sel(el){Array.prototype.forEach.call(el.parentNode.children,function(c){c.classList.remove('on')});el.classList.add('on');}
+</script>
+</body></html>

@@ -1,0 +1,89 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — 4 correctifs UI (13/07)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Naskh+Arabic:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#221c19;--panel:#2c2521;--panel2:#38302a;--line:#453931;--cream:#f3e8d8;--gold:#d9a441;--gold2:#f4d089;--muted:#a08d78;--ok:#35a468}
+  body{font-family:'Nunito',system-ui;background:var(--bg);color:var(--cream);max-width:480px;margin:0 auto;padding:18px 14px 60px}
+  h1{color:var(--gold);font-size:20px;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  h2{font-size:15px;color:var(--gold2);margin:26px 0 8px;border-top:1px solid var(--line);padding-top:16px}
+  .variant{font-size:12px;font-weight:900;color:var(--bg);background:var(--gold);border-radius:8px;padding:2px 8px;display:inline-block;margin:8px 0 6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin:6px 0}
+  .ar{font-family:'Noto Naskh Arabic',serif;font-size:26px;color:var(--gold2)}
+  .row{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .spk{width:44px;height:44px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--gold);
+    display:grid;place-items:center;font-size:20px;cursor:pointer;flex:none}
+  .spk:active{transform:scale(.94)}
+  .emo{width:44px;height:44px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:22px;flex:none}
+  .fr{color:var(--muted);font-size:14px}
+  .dot{margin-left:auto;width:10px;height:10px;border-radius:50%;background:#d8463a;flex:none}
+  .note{font-size:12.5px;color:var(--muted)}
+  /* fête */
+  .fete{text-align:center;padding:18px}
+  .fete .big{font-size:64px}
+  .fete h3{font-size:22px;margin:10px 0 2px}
+  /* cartes retournées */
+  .opts{display:flex;gap:8px;margin:10px 0}
+  .opt{flex:1;perspective:600px;height:76px;cursor:pointer}
+  .opt .inner{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .opt.flip .inner{transform:rotateY(180deg)}
+  .opt .face{position:absolute;inset:0;backface-visibility:hidden;border:1.5px solid var(--line);border-radius:12px;
+    display:grid;place-items:center;font-weight:800;font-size:14px;padding:4px;text-align:center}
+  .opt .dos{background:var(--panel2);color:var(--gold);font-size:26px}
+  .opt .devant{background:var(--panel);transform:rotateY(180deg)}
+  .consigne{font-size:13.5px;color:var(--muted);margin:6px 0}
+  /* clavier */
+  .kb{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+  .key{width:64px;height:58px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);
+    display:grid;place-items:center;font-family:'Noto Naskh Arabic',serif;font-size:26px;color:var(--gold2)}
+  .key.del{font-family:'Nunito';font-size:22px;color:#e8926d;border-color:#e8926d;background:transparent}
+  .old{font-size:13px;color:var(--muted);text-align:center;margin:6px 0}
+</style></head><body>
+<h1>🎨 PREVIEW — 4 correctifs d'interface</h1>
+<p class="sub">Rien n'est branché à l'app : tu regardes, tu choisis, PUIS j'intègre. Réponds par ex. « 1A · 2 ok · 3 texte court · 4B ».</p>
+
+<h2>1 · Liste de vocabulaire — le son au bout du doigt</h2>
+<div class="variant">Variante 1A — le 🔊 remplace l'emoji (ta demande)</div>
+<div class="card">
+  <div class="row"><button class="spk" onclick="joue('mot-iman')">🔊</button><div><div class="ar">إِيمَانٌ</div><div class="fr">de la foi</div></div><span class="dot"></span></div>
+  <div class="row"><button class="spk" onclick="joue('mot-umm')">🔊</button><div><div class="ar">أُمٌّ</div><div class="fr">une mère</div></div><span class="dot"></span></div>
+  <div class="row"><button class="spk" onclick="joue('mot-amin')">🔊</button><div><div class="ar">أَمِينٌ</div><div class="fr">digne de confiance</div></div><span class="dot"></span></div>
+</div>
+<div class="variant">Variante 1B — l'emoji reste, tout la ligne joue le son au toucher</div>
+<div class="card">
+  <div class="row" style="cursor:pointer" onclick="joue('mot-iman')"><span class="emo">🤲</span><div><div class="ar">إِيمَانٌ</div><div class="fr">de la foi</div></div><span class="dot"></span></div>
+  <div class="row" style="cursor:pointer" onclick="joue('mot-umm')"><span class="emo">👩</span><div><div class="ar">أُمٌّ</div><div class="fr">une mère</div></div><span class="dot"></span></div>
+</div>
+<p class="note">Les deux variantes jouent le vrai mp3 (touche pour entendre). La 1B garde l'emoji-sens, précieux pour la mémoire visuelle.</p>
+
+<h2>2 · Fin de révision — l'émoji en double</h2>
+<div class="card fete"><div class="big">🎉</div><h3>Révision terminée !</h3><div style="color:var(--gold);font-size:34px;font-weight:900">100%</div><div class="fr">de réussite</div></div>
+<p class="note">Corrigé : le 🎉 du titre est retiré (il reste le grand). Rien d'autre ne bouge.</p>
+
+<h2>3 · « Que veut dire ce mot ? » — cartes retournées</h2>
+<div class="consigne" id="c3long">« Essaie de deviner ce que signifie ce mot, puis retourne les cartes pour choisir la bonne réponse » <span class="variant" style="margin:0">texte 3A (le tien)</span></div>
+<div class="consigne">« Devine… puis retourne les cartes 🔄 » <span class="variant" style="margin:0">texte 3B (épuré, règle n°2)</span></div>
+<div class="card">
+  <div style="text-align:center"><div class="ar" style="font-size:40px">سَلَامٌ</div></div>
+  <div class="opts">
+    <div class="opt" onclick="this.classList.toggle('flip')"><div class="inner"><div class="face dos">؟</div><div class="face devant">nous adorons</div></div></div>
+    <div class="opt" onclick="this.classList.toggle('flip')"><div class="inner"><div class="face dos">؟</div><div class="face devant">la paix</div></div></div>
+    <div class="opt" onclick="this.classList.toggle('flip')"><div class="inner"><div class="face dos">؟</div><div class="face devant">un blâme</div></div></div>
+  </div>
+  <p class="note" style="text-align:center">Touche les cartes : elles se retournent ↺</p>
+</div>
+
+<h2>4 · Clavier d'écriture — la touche effacer</h2>
+<div class="old">Avant : le lien texte « 🔁 Retirer la dernière lettre »</div>
+<div class="variant">Variante 4A — ⌫ première touche</div>
+<div class="card"><div class="kb"><span class="key del">⌫</span><span class="key">ن</span><span class="key">م</span><span class="key">ـٌ</span><span class="key">ي</span><span class="key">ـَ</span><span class="key">إ</span><span class="key">ا</span></div></div>
+<div class="variant">Variante 4B — ⌫ en bas à droite, comme un vrai clavier</div>
+<div class="card"><div class="kb"><span class="key">ن</span><span class="key">م</span><span class="key">ـٌ</span><span class="key">ي</span><span class="key">ـَ</span><span class="key">إ</span><span class="key">ا</span><span class="key del">⌫</span></div></div>
+
+<audio id="a" preload="none"></audio>
+<script>
+function joue(n){var a=document.getElementById('a');a.src='audios-app-alaq/'+n+'.mp3';a.play().catch(function(){});}
+</script>
+</body></html>
