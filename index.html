@@ -2124,11 +2124,12 @@ function rankBarHTML(){ // le chemin des 7 rangs de constance, النية → ا
     var sh=isCur?';box-shadow:0 0 0 4px rgba(232,169,79,.28)':(last&&reached?';box-shadow:0 0 8px '+c:'');
     dots+='<i onclick="rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
   }
-  var fill=Math.max(4,Math.round(cur/6*100));
+  // La progression FINE (au sein du rang) est fondue dans le chemin des 7 rangs : le remplissage
+  // avance en continu vers le prochain point — plus de petite barre ni de légende à part (Myriam 13/07).
+  var fill=Math.min(100,Math.max(4,Math.round((cur+(rf.prog||0)/100)/6*100)));
   return '<div class="rbar">'+
     '<div class="rbar-head"><span>TA CONSTANCE</span><span>OBJECTIF : النور</span></div>'+
     '<div class="rbar-track"><div class="rbar-line"></div><div class="rbar-fill" style="width:'+fill+'%"></div><div class="rbar-dots">'+dots+'</div></div>'+
-    '<div class="rbar-lbl"><span class="ar">'+rf.rank.ar+'</span> <span class="fr">'+rf.rank.fr+'</span> <span class="n">('+(cur+1)+'/7)</span></div>'+
   '</div>';
 }
 function fillFinishConstance(){ // écran de fin fusionné : la barre des 7 rangs de constance
@@ -2235,7 +2236,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 13/07c · profil épuré : compte connecté = fine bande discrète (point vert + e-mail + se déconnecter), titre « Ta progression » remplacé par l’étiquette TON RANG dans l’encadré doré · noms d’Allah + correctifs 1B/2/3B/4B + connexion gardée + accueil centré + lot son 12/07 · sw v62';
+const BUILD='maj 13/07d · chemin des rangs unifié : la légende sous la barre est retirée et la progression fine est fondue dans la ligne des 7 rangs (remplissage continu vers le prochain point) ; l’encadré doré n’a plus de petite barre · + tout le lot 13/07 · sw v62';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4552,8 +4553,7 @@ function renderProg(){
   h+='<button class="rankcard" onclick="showRank()">'+
        '<div class="rk-ar">'+_R.rank.ar+'</div>'+
        '<div class="rk-mid"><div class="rk-lbl">TON RANG</div><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div>'+
-         '<div class="ubar"><i style="width:'+_R.prog+'%"></i></div>'+
-       '</div><div class="rk-chev">›</div></button>';
+       '</div><div class="rk-chev">›</div></button>'; // la progression vit désormais dans le chemin des 7 rangs, juste dessous
   h+=rankBarHTML();
   h+='<div class="pgrid">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
