@@ -693,6 +693,16 @@
 .opt.fopt.ok .fdevant{border-color:#35a468;background:#26302a}
 .opt.fopt.bad .fdevant{border-color:#d8463a}
 .tile.tdel{color:#e8926d;border-color:#e8926d;background:transparent;font-size:22px;font-family:var(--ui)}
+/* ===== Profil (13/07) : compte connecté = fine bande discrète · étiquette TON RANG ===== */
+.acct{display:flex;align-items:center;gap:9px;padding:9px 14px;margin:0 0 12px;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;font-family:var(--ui)}
+.acct-dot{flex:none;width:8px;height:8px;border-radius:50%;background:#35a468;box-shadow:0 0 6px rgba(53,164,104,.5)}
+.acct-mail{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--muted);font-size:12.5px;font-weight:700}
+.acct-out{flex:none;background:none;border:none;color:var(--muted);font-family:var(--ui);
+  font-size:12px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:2px}
+.acct-out:active{color:var(--cream)}
+.rk-lbl{font-family:var(--ui);font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#241a06;opacity:.55;margin:0 0 2px}
 .lspk{background:none;border:none;cursor:pointer;font-size:14px;opacity:.85;padding:0 2px;vertical-align:middle;line-height:1}
 .lspk:active{transform:scale(.9)}
 .sgn-card{background:#2a2422;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:8px}
@@ -1826,8 +1836,8 @@ async function cloudLogout(){
 function cloudCardHTML(){
   const inp='width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px';
   if(!SB)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0">Connexion indisponible hors ligne — ta progression reste enregistrée sur cet appareil.</p>';
-  if(CLOUD.user)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 10px">Connectée : <b style="color:var(--cream)">'+(CLOUD.user.email||'')+'</b><br>Ta progression se sauvegarde toute seule sur tous tes appareils.</p>'+
-    '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line)" onclick="cloudLogout()">Se déconnecter</button>';
+  if(CLOUD.user)return '<div class="acct" style="border:none;padding:4px 0"><span class="acct-dot"></span><span class="acct-mail">'+(CLOUD.user.email||'')+'</span>'+
+    '<button class="acct-out" onclick="cloudLogout()">se déconnecter</button></div>'; // sobre : point de présence + e-mail, rien d'autre (Myriam 13/07)
   return '<input id="cloudEmail" type="email" autocomplete="email" placeholder="Ton e-mail" style="'+inp+'">'+
     '<button class="cbtn" style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
     '<div id="cloudStep2" style="display:none;margin-top:10px">'+
@@ -2225,7 +2235,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='maj 13/07b · Les noms d’Allah (leçon en 3 temps — pilote Phase B) · correctifs 1B/2/3B/4B · connexion gardée (session persistante, retour sans code si session vivante) · accueil centré sur le disque courant · Mon compte en tête du profil · + lot son du 12/07 · sw v62';
+const BUILD='maj 13/07c · profil épuré : compte connecté = fine bande discrète (point vert + e-mail + se déconnecter), titre « Ta progression » remplacé par l’étiquette TON RANG dans l’encadré doré · noms d’Allah + correctifs 1B/2/3B/4B + connexion gardée + accueil centré + lot son 12/07 · sw v62';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4529,12 +4539,19 @@ function renderCours(sub){
 }
 
 function renderProg(){
-  let h='<h1 class="vh">Ta progression</h1>';
-  h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>'; // en tête (choix Myriam 13/07)
+  // Le compte d'abord, tout en discrétion quand on est connectée ; le titre « Ta progression »
+  // a disparu : c'est l'encadré du rang qui porte l'étiquette (choix Myriam 13/07).
+  let h='';
+  if(SB&&CLOUD.user){
+    h+='<div class="acct"><span class="acct-dot"></span><span class="acct-mail">'+(CLOUD.user.email||'')+'</span>'+
+       '<button class="acct-out" onclick="cloudLogout()">se déconnecter</button></div>';
+  } else {
+    h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
+  }
   var _R=rankFor(S.consScore);
   h+='<button class="rankcard" onclick="showRank()">'+
        '<div class="rk-ar">'+_R.rank.ar+'</div>'+
-       '<div class="rk-mid"><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div>'+
+       '<div class="rk-mid"><div class="rk-lbl">TON RANG</div><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div>'+
          '<div class="ubar"><i style="width:'+_R.prog+'%"></i></div>'+
        '</div><div class="rk-chev">›</div></button>';
   h+=rankBarHTML();
