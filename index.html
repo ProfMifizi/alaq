@@ -2241,7 +2241,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='phase-b-1 · PILOTE PHASE B : les noms d’Allah sont lus depuis la table Supabase noms_allah (graine en code, cache local, rafraîchissement silencieux — éditer la table change l’app sans redéploiement) · base 13/07g';
+const BUILD='phase-b-2 · le VOCABULAIRE des 7 unités (76 mots) et les VERSETS d’Al-Fātiḥa vivent en tables Supabase, comme les noms d’Allah — registre CONTENU générique (graine en code, cache local, adoption en place, rafraîchissement silencieux) · base 13/07g';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4744,26 +4744,59 @@ const NOMS_ALLAH=[
  {ar:'الْعَلِيمُ',fr:'l’Omniscient',snd:'nom-alalim'},
 ];
 NOMS_ALLAH.forEach(n=>{AUDIO[n.ar]='audios-app-alaq/'+n.snd+'.mp3';}); // speak(nom) joue son mp3 dédié partout
-/* ---- PHASE B (pilote) : les noms vivent dans la TABLE Supabase noms_allah ----
-   Le tableau en dur ci-dessus n'est que la GRAINE (1er chargement / hors-ligne).
-   Cache localStorage 'alaq_contenu_noms' + rafraîchissement réseau silencieux :
-   éditer une ligne dans le Table Editor Supabase se reflète dans l'app SANS redéploiement. */
+/* ---- PHASE B : LE CONTENU VIT DANS LES TABLES — le code n'est que la GRAINE ----
+   Registre CONTENU : pour chaque table Supabase, un cache localStorage + une fonction
+   d'adoption qui remplace les constantes EN PLACE (mêmes références : tout le code suit).
+   Table absente / hors-ligne : silence, la graine (ou le dernier cache) fait foi.
+   Éditer une ligne dans le Table Editor se reflète dans l'app SANS redéploiement. */
 function _adopteNoms(rows){
   if(!rows||!rows.length)return;
   NOMS_ALLAH.length=0;
   rows.forEach(function(n){NOMS_ALLAH.push(n);AUDIO[n.ar]='audios-app-alaq/'+n.snd+'.mp3';});
 }
-try{_adopteNoms(JSON.parse(localStorage.getItem('alaq_contenu_noms')||'null'));}catch(e){} // hors-ligne : le dernier contenu connu
-async function contentPull(){
-  try{
-    if(!SB)return;
-    const r=await SB.from('noms_allah').select('ar,fr,snd').eq('actif',true).order('ordre');
-    if(r&&r.data&&r.data.length){
-      _adopteNoms(r.data);
-      try{localStorage.setItem('alaq_contenu_noms',JSON.stringify(r.data));}catch(e){}
-      try{if(curReviserTab==='quran'&&(document.getElementById('view-reviser')||{}).innerHTML)renderReviser('quran');}catch(e){}
-    }
-  }catch(e){} // table absente / hors-ligne : silence, la graine suffit
+function _adopteVocab(rows){ // les mots des unités : U.words muté en place, AUDIO suit
+  if(!rows||!rows.length)return;
+  const parUnite={};
+  rows.forEach(function(r){(parUnite[r.unite_no]=parUnite[r.unite_no]||[]).push(r);});
+  UNITS.forEach(function(U){
+    const rs=parUnite[U.no]; if(!rs||!rs.length)return; // pas de lignes pour cette unité : sa graine reste
+    rs.sort(function(a,b){return (a.ordre||0)-(b.ordre||0);});
+    U.words.length=0;
+    rs.forEach(function(r){
+      U.words.push({w:r.ar,b:r.b||undefined,fr:r.fr,e:r.emoji||'',say:r.say||undefined,confus:r.confus||[]});
+      if(r.snd)AUDIO[r.ar]='audios-app-alaq/'+r.snd+'.mp3';
+    });
+  });
+}
+function _adopteVersets(rows){ // Al-Fātiḥa : FATIHA muté en place — SOURATES[0].verses EST FATIHA
+  if(!rows||!rows.length)return;
+  const f=rows.filter(function(r){return r.sourate_no===1;}).sort(function(a,b){return a.num-b.num;});
+  if(!f.length)return;
+  FATIHA.length=0; f.forEach(function(r){FATIHA.push(r.ar);});
+  const S0=SOURATES[0]; S0.tr.length=0; f.forEach(function(r){S0.tr.push(r.tr||[]);});
+}
+const CONTENU=[
+  {table:'noms_allah',  cols:'ar,fr,snd',                                   ordre:'ordre', adopte:_adopteNoms},
+  {table:'vocabulaire', cols:'unite_no,ordre,ar,b,fr,emoji,say,confus,snd', ordre:'ordre', adopte:_adopteVocab},
+  {table:'versets',     cols:'sourate_no,num,ar,tr',                        ordre:'num',   adopte:_adopteVersets},
+];
+CONTENU.forEach(function(c){ // 1) hors-ligne d'abord : le dernier contenu connu
+  try{const x=JSON.parse(localStorage.getItem('alaq_contenu_'+c.table)||'null');c.adopte(x);}catch(e){}
+});
+async function contentPull(){ // 2) le frais, en silence
+  if(!SB)return;
+  let touche=false;
+  for(const c of CONTENU){
+    try{
+      const r=await SB.from(c.table).select(c.cols).eq('actif',true).order(c.ordre);
+      if(r&&r.data&&r.data.length){
+        c.adopte(r.data);
+        try{localStorage.setItem('alaq_contenu_'+c.table,JSON.stringify(r.data));}catch(e){}
+        touche=true;
+      }
+    }catch(e){} // table pas encore créée / hors-ligne : la graine suffit
+  }
+  if(touche){try{if((document.getElementById('view-reviser')||{}).innerHTML)renderReviser(curReviserTab);}catch(e){}}
 }
 contentPull();
 const NASEL=new Set(); // les 3 noms choisis pour la leçon
