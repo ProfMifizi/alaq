@@ -842,7 +842,7 @@
 .acc-all{display:block;margin:0 0 12px auto;background:none;border:1px solid var(--line);color:var(--gold2);border-radius:999px;
   padding:7px 15px;font-family:var(--ui);font-weight:800;font-size:12px;cursor:pointer}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -2241,7 +2241,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='phase-b-2 · le VOCABULAIRE des 7 unités (76 mots) et les VERSETS d’Al-Fātiḥa vivent en tables Supabase, comme les noms d’Allah — registre CONTENU générique (graine en code, cache local, adoption en place, rafraîchissement silencieux) · base 13/07g';
+const BUILD='demarrage-1 · écran blanc corrigé : le service worker sert le cache TOUT DE SUITE (réseau en silence derrière), Supabase passe en defer, les 301 audios se pré-chargent APRÈS le premier rendu · sw v63';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5275,7 +5275,16 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
 }
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
   const n=document.getElementById('narrtog');if(n)n.textContent=NARR?'🗣️':'🚫';})();
-cloudInit();
+/* Supabase est en defer (il ne bloque plus le premier rendu) : on le branche quand il est là.
+   Les scripts defer s'exécutent AVANT DOMContentLoaded — window.supabase est donc garanti ici. */
+document.addEventListener('DOMContentLoaded',function(){
+  try{ if(window.supabase&&!SB)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
+    {auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){}
+  try{cloudInit();}catch(e){}
+  try{contentPull();}catch(e){} // le contenu des tables, une fois SB prêt
+  // au 1er lancement le SW ne contrôle pas encore la page : 'ready' attend qu'il soit actif
+  try{navigator.serviceWorker.ready.then(function(r){r.active&&r.active.postMessage('precache');});}catch(e){}
+});
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){} // demande au navigateur de NE PAS purger le stockage (connexion + progression)
 refreshStats();
 showTab('home');

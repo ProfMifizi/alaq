@@ -4,7 +4,7 @@
      cache en secours (avion, mosquée sans réseau…)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
    - les audios de la voix de Myriam + la Fātiḥa sont pré-chargés à l'installation */
-const CACHE='alaq-v62-2026-07-13';
+const CACHE='alaq-v63-2026-07-14';
 const CORE=['.','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-alaq-bilan.png",
@@ -321,12 +321,20 @@ const AUDIOS=[
 self.addEventListener('install',e=>{
   e.waitUntil((async()=>{
     const c=await caches.open(CACHE);
-    // le cœur d'abord (obligatoire), puis les audios un par un (tolérant aux absents)
-    await c.addAll(CORE);
-    await Promise.allSettled(IMAGES.concat(AUDIOS).map(u=>c.add(u).catch(()=>{})));
+    await c.addAll(CORE);   // le cœur SEULEMENT : l'installation doit être rapide
     self.skipWaiting();
   })());
 });
+/* Les 301 audios + les icônes sont pré-chargés APRÈS le premier rendu : la page envoie
+   « precache » quand elle est affichée. Avant, ils saturaient le réseau pendant le chargement
+   (écran blanc à chaque déploiement). */
+let _preFait=false;
+async function precacheLourd(){
+  if(_preFait)return; _preFait=true;
+  const c=await caches.open(CACHE);
+  await Promise.allSettled(IMAGES.concat(AUDIOS).map(u=>c.add(u).catch(()=>{})));
+}
+self.addEventListener('message',e=>{ if(e.data==='precache')e.waitUntil(precacheLourd()); });
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
     const keys=await caches.keys();
@@ -339,14 +347,12 @@ self.addEventListener('fetch',e=>{
   // navigation / index : réseau d'abord, cache en secours
   if(e.request.mode==='navigate'||url.pathname.endsWith('/index.html')||url.pathname==='/'){
     e.respondWith((async()=>{
-      try{
-        const r=await fetch(e.request);
-        const c=await caches.open(CACHE);
-        c.put('index.html',r.clone());
-        return r;
-      }catch(_){
-        return (await caches.match('index.html'))||(await caches.match('.'))||Response.error();
-      }
+      const c=await caches.open(CACHE);
+      const hit=await c.match('index.html');
+      // rafraîchissement SILENCIEUX en arrière-plan : la prochaine ouverture aura la nouvelle version
+      const frais=fetch(e.request).then(r=>{c.put('index.html',r.clone());return r;}).catch(()=>null);
+      // le cache d'abord : l'app s'ouvre TOUT DE SUITE, même si le réseau traîne
+      return hit || (await frais) || (await caches.match('.')) || Response.error();
     })());
     return;
   }
