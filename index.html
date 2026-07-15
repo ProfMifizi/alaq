@@ -2241,7 +2241,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='demarrage-1 · écran blanc corrigé : le service worker sert le cache TOUT DE SUITE (réseau en silence derrière), Supabase passe en defer, les 301 audios se pré-chargent APRÈS le premier rendu · sw v63';
+const BUILD='noms-99 · les 99 noms d’Allah sont en base (liste at-Tirmidĥī : Allāh en 1, sans al-Aḥad) ; 61 mp3 des noms lisibles ajoutés et pré-cachés · sw v64';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
