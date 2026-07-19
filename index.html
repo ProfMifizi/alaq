@@ -841,6 +841,73 @@
 .acc.open .acc-b{display:block}
 .acc-all{display:block;margin:0 0 12px auto;background:none;border:1px solid var(--line);color:var(--gold2);border-radius:999px;
   padding:7px 15px;font-family:var(--ui);font-weight:800;font-size:12px;cursor:pointer}
+/* ============================================================
+   MODE ORDINATEUR — 3 colonnes plein écran (@media ≥1024px uniquement)
+   N'altère pas le mobile : tout est sous min-width:1024px.
+   ============================================================ */
+.deskbrand, .botnav .bn-lab, .deskrail{ display:none; }
+
+@media (min-width:1024px){
+  body{ background:var(--bg); }
+  .topbar{ display:none; }
+
+  /* ---------- MENU GAUCHE (la botnav devient verticale) ---------- */
+  .botnav{
+    top:0; bottom:0; left:0; right:auto; width:210px; max-width:none; margin:0;
+    flex-direction:column; justify-content:flex-start; align-items:stretch; gap:4px;
+    padding:20px 14px; background:var(--bg); box-shadow:inset -1px 0 0 var(--line);
+  }
+  .deskbrand{
+    display:flex; align-items:center; gap:10px; font-weight:900; font-size:22px;
+    color:var(--gold2); padding:4px 12px 20px; letter-spacing:.02em;
+  }
+  .deskbrand .dl{ font-size:26px; line-height:1; }
+  .botnav .bn{
+    flex:0 0 auto; font-size:15px; color:var(--muted); font-weight:800;
+    display:flex; flex-direction:row; align-items:center; justify-content:flex-start;
+    gap:13px; padding:12px 15px; border-radius:14px; transition:background .15s,color .15s;
+  }
+  .botnav .bn .bi{ font-size:21px; line-height:1; }
+  .botnav .bn-lab{ display:inline; font-size:13px; letter-spacing:.06em; text-transform:uppercase; }
+  .botnav .bn:hover{ background:var(--panel); color:var(--cream); }
+  .botnav .bn.active{ background:var(--panel); color:var(--gold2); }
+
+  /* ---------- CENTRE : la vue active, entre les deux rails ---------- */
+  .wrap, .view{ max-width:none; margin:0; padding:34px 24px 64px; }
+  #home, #view-cours, #view-reviser, #view-prog{ margin-left:210px; margin-right:300px; }
+  #home > *, #view-cours > *, #view-reviser > *, #view-prog > *{
+    max-width:560px; margin-left:auto; margin-right:auto;
+  }
+  .unit-head{ top:16px; }
+
+  /* overlays plein écran : on retire la contrainte « colonne téléphone » (460px) */
+  .player, .finish, .onb{ max-width:none; margin:0; left:0; right:0; box-shadow:none; }
+
+  /* ---------- COLONNE DROITE ---------- */
+  .deskrail{
+    display:block; position:fixed; top:0; right:0; bottom:0; width:300px; z-index:25;
+    overflow-y:auto; padding:24px 20px 44px; background:var(--bg);
+    box-shadow:inset 1px 0 0 var(--line);
+  }
+  .dr-card{ background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:15px; }
+  .dr-h{ font-size:11px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-d); margin-bottom:11px; }
+  .dr-rank{ display:flex; align-items:center; gap:14px; cursor:pointer; }
+  .dr-rank .lamp{ flex:none; display:flex; }
+  .dr-rank-ar{ font-family:var(--ar); direction:rtl; font-size:24px; color:var(--gold2); line-height:1.3; }
+  .dr-rank-fr{ font-size:12.5px; color:var(--muted); font-weight:700; margin-top:2px; }
+  .dr-prog{ height:6px; border-radius:3px; background:var(--panel2); overflow:hidden; margin-top:12px; width:100%; }
+  .dr-prog i{ display:block; height:100%; background:var(--gold); border-radius:3px; }
+  .dr-stats{ display:flex; gap:12px; margin-bottom:15px; }
+  .dr-stats > div{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; font-weight:900; font-size:17px; color:var(--cream); }
+  .dr-stats small{ display:block; font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+  .dr-nom-ar{ font-family:var(--ar); direction:rtl; font-size:36px; color:var(--gold2); text-align:center; line-height:1.6; text-shadow:0 2px 14px rgba(232,169,79,.25); }
+  .dr-nom-fr{ text-align:center; color:var(--muted); font-size:14px; margin-top:6px; }
+  .dr-parole-ar{ font-family:var(--ar); direction:rtl; font-size:19px; color:var(--cream); line-height:2.1; text-align:center; }
+  .dr-parole-fr{ color:var(--muted); font-size:12.5px; font-style:italic; text-align:center; margin-top:8px; line-height:1.5; }
+  .dr-rev-n{ font-size:22px; font-weight:900; color:var(--gold2); }
+  .dr-rev-btn{ margin-top:12px; width:100%; background:var(--gold); color:#2a1c08; border:none; border-radius:12px; padding:12px; font-weight:900; font-size:13.5px; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; transition:background .15s; }
+  .dr-rev-btn:hover{ background:var(--gold2); }
+}
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -859,6 +926,7 @@
 <div class="view" id="view-cours" style="display:none"></div>
 <div class="view" id="view-reviser" style="display:none"></div>
 <div class="view" id="view-prog" style="display:none"></div>
+<aside class="deskrail" id="deskrail"></aside>
 
 <div class="player" id="player">
   <div class="p-top">
@@ -1031,10 +1099,11 @@
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
-  <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi">🏠</span></button>
-  <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi">📕</span></button>
-  <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi">🕋</span></button>
-  <button class="bn" id="bn-prog" onclick="showTab('prog')"><span class="bi">📊</span></button>
+  <div class="deskbrand"><span class="dl">🪔</span> ALAQ</div>
+  <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi">🏠</span><span class="bn-lab">Apprendre</span></button>
+  <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi">📕</span><span class="bn-lab">Cours</span></button>
+  <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi">🕋</span><span class="bn-lab">Réviser</span></button>
+  <button class="bn" id="bn-prog" onclick="showTab('prog')"><span class="bi">📊</span><span class="bn-lab">Progrès</span></button>
 </nav>
 
 <script>
@@ -2241,7 +2310,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='noms-99 · les 99 noms d’Allah sont en base (liste at-Tirmidĥī : Allāh en 1, sans al-Aḥad) ; 61 mp3 des noms lisibles ajoutés et pré-cachés · sw v64';
+const BUILD='desktop-3col · sur ordinateur l’app passe en 3 colonnes plein écran (menu à gauche, parcours au centre, colonne droite : rang, série, cœurs, nom d’Allah, parole du jour, révisions) ; mobile inchangé · sw v65';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5289,6 +5358,39 @@ try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 refreshStats();
 showTab('home');
 if(!S.onboarded){ setTimeout(function(){try{onbStart();}catch(e){}},120); } // 1er lancement : parcours de bienvenue
+</script>
+<script>
+/* MODE ORDINATEUR — colonne droite : rang, série/cœurs, nom d'Allah, parole du jour, révisions.
+   Lit l'état réel de l'app au runtime (rankFor, NOMS_ALLAH, dueReviewWords, S...). */
+(function(){
+  var PAROLES=[
+    {ar:'أَحَبُّ الأَعْمَالِ إِلَى اللهِ أَدْوَمُهَا وَإِنْ قَلَّ', fr:'Les œuvres les plus aimées d’Allah sont les plus constantes, même petites.'},
+    {ar:'مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللهِ فَلَهُ حَسَنَةٌ', fr:'Lire une seule lettre du Livre d’Allah vaut une bonne action, multipliée par dix.'},
+    {ar:'اقْرَأْ', fr:'« Lis ! » — le premier mot révélé du Qor’an (sourate Al-ʿAlaq).'}
+  ];
+  function pick(arr){ try{ return arr[(new Date().getDate())%arr.length]; }catch(e){ return arr[0]; } }
+  window.renderDeskRail=function(){
+    var el=document.getElementById('deskrail');
+    if(!el || typeof rankFor!=='function' || typeof S==='undefined') return;
+    var r=rankFor(S.consScore||0), rank=r.rank||{ar:'',fr:''};
+    var col=(typeof RANK_COLORS!=='undefined'&&RANK_COLORS[r.idx])?RANK_COLORS[r.idx]:'#DC902E';
+    var lamp=(typeof lampSVG==='function')?lampSVG(col,46):'';
+    var due=0; try{ due=dueReviewWords().length; }catch(e){}
+    var noms=[]; try{ noms=NOMS_ALLAH.filter(function(n){return wordReadable(n.ar,knownLetterSet());}); }catch(e){}
+    var nom=noms.length?pick(noms):((typeof NOMS_ALLAH!=='undefined'&&NOMS_ALLAH.length)?NOMS_ALLAH[0]:null), par=pick(PAROLES);
+    var hearts=(typeof HEARTS_MAX!=='undefined')?HEARTS_MAX:7;
+    var h='';
+    h+='<div class="dr-card dr-rank" onclick="try{showRank()}catch(e){}"><span class="lamp">'+lamp+'</span><div style="flex:1"><div class="dr-rank-ar">'+rank.ar+'</div><div class="dr-rank-fr">'+rank.fr+'</div><div class="dr-prog"><i style="width:'+Math.round((r.prog||0)*100)+'%"></i></div></div></div>';
+    h+='<div class="dr-stats"><div>🌾 '+(S.streak||0)+'<small>série</small></div><div>❤️ '+(S.hearts!=null?S.hearts:hearts)+'/'+hearts+'<small>cœurs</small></div></div>';
+    if(nom) h+='<div class="dr-card"><div class="dr-h">Nom d’Allah</div><div class="dr-nom-ar">'+nom.ar+'</div><div class="dr-nom-fr">'+nom.fr+'</div></div>';
+    h+='<div class="dr-card"><div class="dr-h">Parole du jour</div><div class="dr-parole-ar">'+par.ar+'</div><div class="dr-parole-fr">'+par.fr+'</div></div>';
+    h+='<div class="dr-card"><div class="dr-h">À réviser</div><div class="dr-rev-n">'+due+' mot'+(due>1?'s':'')+'</div><button class="dr-rev-btn" onclick="showTab(\'reviser\')">Réviser</button></div>';
+    el.innerHTML=h;
+  };
+  function hook(name){ var f=window[name]; if(typeof f==='function'){ window[name]=function(){ var x=f.apply(this,arguments); try{window.renderDeskRail();}catch(e){} return x; }; } }
+  function boot(){ hook('showTab'); hook('refreshStats'); try{window.renderDeskRail();}catch(e){} }
+  window.addEventListener('load', function(){ setTimeout(boot, 500); });
+})();
 </script>
 </body>
 </html>
