@@ -917,39 +917,52 @@
 .acc-all{display:block;margin:0 0 12px auto;background:none;border:1px solid var(--line);color:var(--gold2);border-radius:999px;
   padding:7px 15px;font-family:var(--ui);font-weight:800;font-size:12px;cursor:pointer}
 /* ============================================================
-   MODE ORDINATEUR — 3 colonnes plein écran (@media ≥1024px uniquement)
-   N'altère pas le mobile : tout est sous min-width:1024px.
+   MODE ORDINATEUR ET TABLETTE — 3 colonnes plein écran
+   Le basculement se lit en LARGEUR DE FENÊTRE, jamais en type d'appareil :
+   dès 700px de large, on passe en 3 colonnes. Cela couvre l'iPad en portrait
+   (744 à 834px), l'iPad en paysage, la fenêtre d'ordinateur non maximisée,
+   et le téléphone COUCHÉ (iPhone paysage = 844 à 932px de large) — choix de
+   Myriam le 02/08 : couché, le téléphone est plus large qu'un iPad debout.
+   Deux paliers de largeur : rails compacts sur tablette, larges sur ordinateur.
+   Un troisième palier allège les marges quand la fenêtre est BASSE (< 520px).
+   N'altère pas le téléphone debout : tout est sous min-width:700px.
    ============================================================ */
 .deskbrand, .botnav .bn-lab, .deskrail{ display:none; }
 
-@media (min-width:1024px){
+@media (min-width:700px){
+  /* Palier TABLETTE (valeurs par défaut) — l'ordinateur les élargit plus bas. */
+  :root{
+    --rail-l:170px; --rail-r:228px; --nav-gap:10px; --nav-pad:12px;
+    --brand-fs:18px; --lab-fs:10.5px; --dr-pad:14px; --nom-fs:30px;
+    --view-pad:24px 18px 56px;
+  }
   body{ background:var(--bg); }
   .topbar{ display:none; }
 
   /* ---------- MENU GAUCHE (la botnav devient verticale) ---------- */
   .botnav{
-    top:0; bottom:0; left:0; right:auto; width:210px; max-width:none; margin:0;
+    top:0; bottom:0; left:0; right:auto; width:var(--rail-l); max-width:none; margin:0; overflow-y:auto;
     flex-direction:column; justify-content:flex-start; align-items:stretch; gap:4px;
     padding:20px 14px; background:var(--bg); box-shadow:inset -1px 0 0 var(--line);
   }
   .deskbrand{
-    display:flex; align-items:center; gap:10px; font-weight:900; font-size:22px;
+    display:flex; align-items:center; gap:10px; font-weight:900; font-size:var(--brand-fs);
     color:var(--gold2); padding:4px 12px 20px; letter-spacing:.02em;
   }
   .deskbrand .dl{ font-size:26px; line-height:1; }
   .botnav .bn{
     flex:0 0 auto; font-size:15px; color:var(--muted); font-weight:800;
     display:flex; flex-direction:row; align-items:center; justify-content:flex-start;
-    gap:13px; padding:12px 15px; border-radius:14px; transition:background .15s,color .15s;
+    gap:var(--nav-gap); padding:12px var(--nav-pad); border-radius:14px; transition:background .15s,color .15s;
   }
   .botnav .bn .bi{ font-size:21px; line-height:1; }
-  .botnav .bn-lab{ display:inline; font-size:13px; letter-spacing:.06em; text-transform:uppercase; }
+  .botnav .bn-lab{ display:inline; font-size:var(--lab-fs); letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; }
   .botnav .bn:hover{ background:var(--panel); color:var(--cream); }
   .botnav .bn.active{ background:var(--panel); color:var(--gold2); }
 
   /* ---------- CENTRE : la vue active, entre les deux rails ---------- */
-  .wrap, .view{ max-width:none; margin:0; padding:34px 24px 64px; }
-  #home, #view-cours, #view-reviser, #view-prog{ margin-left:210px; margin-right:300px; }
+  .wrap, .view{ max-width:none; margin:0; padding:var(--view-pad); }
+  #home, #view-cours, #view-reviser, #view-prog{ margin-left:var(--rail-l); margin-right:var(--rail-r); }
   #home > *, #view-cours > *, #view-reviser > *, #view-prog > *{
     max-width:560px; margin-left:auto; margin-right:auto;
   }
@@ -957,14 +970,18 @@
 
   /* overlays plein écran : on retire la contrainte « colonne téléphone » (460px) */
   .player, .finish, .onb{ max-width:none; margin:0; left:0; right:0; box-shadow:none; }
+  /* …mais le CONTENU reste dans une colonne lisible et centrée : sans cela, la barre
+     de progression, les champs, « CONTINUER » et les .ob-opt s'étirent sur toute la
+     largeur de l'écran (retour de Myriam le 02/08). Le fond, lui, reste plein écran. */
+  .onb-top, .onb-body > .obs{ width:100%; max-width:440px; margin-left:auto; margin-right:auto; }
 
   /* ---------- COLONNE DROITE ---------- */
   .deskrail{
-    display:block; position:fixed; top:0; right:0; bottom:0; width:300px; z-index:25;
-    overflow-y:auto; padding:24px 20px 44px; background:var(--bg);
+    display:block; position:fixed; top:0; right:0; bottom:0; width:var(--rail-r); z-index:25;
+    overflow-y:auto; padding:var(--dr-pad) calc(var(--dr-pad) + 2px) 44px; background:var(--bg);
     box-shadow:inset 1px 0 0 var(--line);
   }
-  .dr-card{ background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px; margin-bottom:15px; }
+  .dr-card{ background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:var(--dr-pad); margin-bottom:13px; }
   .dr-h{ font-size:11px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-d); margin-bottom:11px; }
   .dr-rank{ display:flex; align-items:center; gap:14px; cursor:pointer; }
   .dr-rank .lamp{ flex:none; display:flex; }
@@ -975,13 +992,32 @@
   .dr-stats{ display:flex; gap:12px; margin-bottom:15px; }
   .dr-stats > div{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; font-weight:900; font-size:17px; color:var(--cream); }
   .dr-stats small{ display:block; font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
-  .dr-nom-ar{ font-family:var(--ar); direction:rtl; font-size:36px; color:var(--gold2); text-align:center; line-height:1.6; text-shadow:0 2px 14px rgba(232,169,79,.25); }
+  .dr-nom-ar{ font-family:var(--ar); direction:rtl; font-size:var(--nom-fs); color:var(--gold2); text-align:center; line-height:1.6; text-shadow:0 2px 14px rgba(232,169,79,.25); }
   .dr-nom-fr{ text-align:center; color:var(--muted); font-size:14px; margin-top:6px; }
   .dr-parole-ar{ font-family:var(--ar); direction:rtl; font-size:19px; color:var(--cream); line-height:2.1; text-align:center; }
   .dr-parole-fr{ color:var(--muted); font-size:12.5px; font-style:italic; text-align:center; margin-top:8px; line-height:1.5; }
   .dr-rev-n{ font-size:22px; font-weight:900; color:var(--gold2); }
   .dr-rev-btn{ margin-top:12px; width:100%; background:var(--gold); color:#2a1c08; border:none; border-radius:12px; padding:12px; font-weight:900; font-size:13.5px; letter-spacing:.05em; text-transform:uppercase; cursor:pointer; transition:background .15s; }
   .dr-rev-btn:hover{ background:var(--gold2); }
+}
+
+/* Palier ORDINATEUR (≥1024px) : mêmes règles, rails et typographie au large. */
+@media (min-width:1024px){
+  :root{
+    --rail-l:210px; --rail-r:300px; --nav-gap:13px; --nav-pad:15px;
+    --brand-fs:22px; --lab-fs:13px; --dr-pad:18px; --nom-fs:36px;
+    --view-pad:34px 24px 64px;
+  }
+}
+
+/* Palier FENÊTRE BASSE : téléphone couché (430px de haut). Trois colonnes aussi,
+   mais on récupère la hauteur perdue en marges — le menu de gauche défile au besoin. */
+@media (min-width:700px) and (max-height:520px){
+  :root{ --view-pad:14px 18px 34px; }
+  .botnav{ padding:12px 10px; }
+  .deskbrand{ font-size:16px; padding:2px 10px 10px; }
+  .botnav .bn{ padding:9px var(--nav-pad); }
+  .onb{ padding-top:calc(8px + env(safe-area-inset-top,0px)); padding-bottom:14px; }
 }
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1162,7 +1198,6 @@
 <div class="finish" id="obAccount">
   <div class="big" style="font-family:var(--ui)">👤</div>
   <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
-  <p id="obAccountSub" style="max-width:300px;color:var(--muted);font-size:14px;margin:-10px 0 10px">Crée ton profil pour t'aider à devenir assidu·e.</p>
   <p style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
   <div style="width:100%;max-width:320px">
     <input id="obPrenom" type="text" autocomplete="given-name" placeholder="Ton prénom" oninput="onbPrenomInput(this.value)" style="width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px;margin-bottom:8px">
@@ -1949,11 +1984,26 @@ async function cloudSendCode(btn){
   if(!/^\S+@\S+\.\S+$/.test(em)){toast('E-mail invalide 🤔');return;}
   if(btn)btn.disabled=true;
   try{
-    const r=await SB.auth.signInWithOtp({email:em});
-    if(r&&r.error)throw r.error;
+    // Compte déjà existant ? `shouldCreateUser:false` n'envoie un code QUE si le
+    // compte existe : c'est la sonde. Si elle échoue, on rappelle sans l'option et
+    // le compte est créé. Le verdict est MÉMORISÉ par e-mail : « Renvoyer un code »
+    // ne refait donc qu'UN seul appel, sinon la limite de débit de Supabase (60 s)
+    // ferait échouer le renvoi.
+    let known;
+    if(window._cloudProbe && window._cloudProbe.em===em){
+      known=window._cloudProbe.known;
+      const r=await SB.auth.signInWithOtp(known?{email:em,options:{shouldCreateUser:false}}:{email:em});
+      if(r&&r.error)throw r.error;
+    }else{
+      const probe=await SB.auth.signInWithOtp({email:em,options:{shouldCreateUser:false}});
+      known=!(probe&&probe.error);
+      if(!known){ const r=await SB.auth.signInWithOtp({email:em}); if(r&&r.error)throw r.error; }
+      window._cloudProbe={em:em,known:known};
+    }
     window._cloudEmail=em;
     const z=document.getElementById('cloudStep2'); if(z)z.style.display='block';
-    toast('Code envoyé — regarde tes e-mails 📧');
+    const k=document.getElementById('cloudKnown'); if(k)k.style.display=known?'block':'none';
+    toast(known?'Tu as déjà un compte — connecte-toi 🔑':'Code envoyé — regarde tes e-mails 📧');
   }catch(e){ toast('Envoi impossible — réessaie dans une minute'); }
   if(btn)btn.disabled=false;
 }
@@ -1990,6 +2040,7 @@ function cloudCardHTML(){
   return '<input id="cloudEmail" type="email" autocomplete="email" placeholder="Ton e-mail" style="'+inp+'">'+
     '<button class="cbtn" style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
     '<div id="cloudStep2" style="display:none;margin-top:10px">'+
+      '<p id="cloudKnown" style="display:none;color:var(--gold2);font-family:var(--ui);font-size:13px;font-weight:800;margin:0 0 8px;line-height:1.35">Tu as déjà un compte — entre le code pour te connecter.</p>'+
       '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" style="'+inp+';letter-spacing:.2em;text-align:center">'+
       '<button class="cbtn" style="margin-top:8px" onclick="cloudVerify()">✅ Me connecter</button>'+
       '<button onclick="cloudSendCode(this)" style="margin-top:8px;background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:13px;text-decoration:underline;cursor:pointer;width:100%">Renvoyer un code</button>'+
@@ -2393,7 +2444,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='revision-srs · vrai ou faux 45 s · l’association ne pénalise plus en secret · dates en heure locale · 7 nouveaux mots/jour · écriture à partir du palier 4 · stylo ✏️ · rattrapage en QCM · sw v66';
+const BUILD='tablette-3col · 3 colonnes dès 700px de large (iPad debout, téléphone couché, fenêtre étroite) · palier fenêtre basse · onboarding en colonne de 440px sur fond plein écran · sous-titre du profil retiré · compte déjà existant annoncé à l’envoi du code · sw v67';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
