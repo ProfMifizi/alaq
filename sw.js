@@ -4,7 +4,7 @@
      cache en secours (avion, mosquée sans réseau…)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
    - les audios de la voix de Myriam + la Fātiḥa sont pré-chargés à l'installation */
-const CACHE='alaq-v69-2026-08-02';
+const CACHE='alaq-v70-2026-08-02';
 const CORE=['.','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-alaq-bilan.png",
@@ -104,7 +104,6 @@ const AUDIOS=[
 "audios-app-alaq/instr-info-lettres-empilees.mp3",
 "audios-app-alaq/instr-info-soukoun.mp3",
 "audios-app-alaq/instr-info-tanwin.mp3",
-"audios-app-alaq/instr-intro-26-lettres.mp3",
 "audios-app-alaq/instr-intro-28-lettres.mp3",
 "audios-app-alaq/instr-intro-bienvenue.mp3",
 "audios-app-alaq/instr-intro-quiz.mp3",
