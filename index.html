@@ -28,6 +28,12 @@
     --cream:#F2E9DA; --muted:#B9A99A;
     --green:#6FB08A; --green-d:#558B6E; --green-bg:#22332B;
     --coral:#E07A5F; --coral-d:#BC5B43; --coral-bg:#3A2723;
+    /* bleu « information » (02/08) : ce qu'il y a à FAIRE, pas ce qui est raté.
+       Volontairement HORS de UNIT_ACCENTS — l'unité 1 est #d8463a (l'ancien rouge du point)
+       et l'unité 5 est #2f74d0. Même teinte 199°, deux valeurs selon le fond :
+       l'or est la complémentaire du bleu, un bleu clair y vibre (1,08:1 de contraste). */
+    --info:#5BA3C4;    /* le point, sur le fond brun — 5,7:1 */
+    --info-d:#1E4658;  /* la bulle, sur le bouton doré — 3,9:1 */
     --lock:#5A504A;
     --ui:'Nunito',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     --ar:'Noto Naskh Arabic',serif;       /* vocabulaire, exercices, lecture, tracé */
@@ -667,7 +673,76 @@
 .wtx{flex:1;min-width:0}
 .wtx .ww{font-family:var(--ar);font-size:24px;color:var(--gold);line-height:1.25}
 .wtx .wfr{font-family:var(--ui);font-size:13px;color:var(--muted);margin-top:1px}
-.wdot{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:#d8463a}
+/* Le point passe AVANT le crayon et sa place est TOUJOURS réservée : sinon le crayon
+   se décale sur les lignes sans point et la colonne des ✏️ se casse. */
+.wdot{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:var(--info)}
+.wdot.off{visibility:hidden}
+.wpen{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:none;background:none;
+  color:var(--muted);font-size:16px;display:grid;place-items:center;cursor:pointer}
+.wpen:active{transform:scale(.92);color:var(--gold)}
+/* ===== Vrai ou faux · 45 s (§3.2) — validé par Myriam le 02/08 (variante « dépouillé ») =====
+   Ni cœurs (la révision n'en coûte jamais) ni barre de série (le jeu recycle : pas de fin à atteindre). */
+#player.vfmode .pbar,#player.vfmode .hearts,#player.vfmode .narr-tog,#player.vfmode .p-foot{display:none}
+#player.vfmode .p-body{display:flex;flex-direction:column;padding:0 0 calc(18px + env(safe-area-inset-bottom,0px));overflow:hidden}
+.vf-hd{display:flex;align-items:center;gap:14px;padding:0 22px 7px}
+.vf-hd .secs{flex:1;text-align:center;font-size:23px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums}
+.vf-hd .secs small{font-size:13px;font-weight:800;color:var(--muted);margin-left:1px}
+.vf-hd.low .secs{color:var(--coral)}
+.vf-hd .score{font-size:19px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vf-hd .score.rec{color:var(--gold2)}
+.cbar{height:5px;margin:0 20px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.cbar i{display:block;height:100%;width:100%;background:var(--gold2);border-radius:3px;transition:width .25s linear}
+.cbar.low i{background:var(--coral)}
+.recflash{text-align:center;font-size:11.5px;font-weight:900;color:var(--gold2);letter-spacing:.08em;
+  height:15px;margin-top:7px;opacity:0;transition:opacity .3s}
+.recflash.on{opacity:1}
+.vf-mid{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 22px}
+.vfbare{width:100%;text-align:center;padding:18px 0;border-radius:20px;
+  border:2px solid transparent;transition:border-color .12s,background .12s}
+.vfbare.ok{border-color:var(--green);background:var(--green-bg)}
+.vfbare.ko{border-color:var(--coral);background:var(--coral-bg)}
+.vfbare .ar{font-family:var(--ar);font-size:64px;color:var(--gold);line-height:1.5;direction:rtl}
+.vfbare .fr{font-size:25px;font-weight:800;color:var(--cream);margin-top:16px;line-height:1.3}
+.vf-btns{display:flex;gap:12px;padding:0 22px}
+.vfb{flex:1;border:none;border-radius:16px;padding:20px 8px;font-size:19px;font-weight:900;letter-spacing:.03em;
+  font-family:var(--ui);cursor:pointer}
+.vfb.oui{background:var(--green);box-shadow:0 4px 0 var(--green-d);color:#1b2620}
+.vfb.non{background:var(--coral);box-shadow:0 4px 0 var(--coral-d);color:#2a1712}
+.vfb:active{transform:translateY(3px);box-shadow:none}
+.vf-fin{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:24px}
+.vf-fin .big{font-size:62px}
+.vf-fin .sc{font-size:34px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums}
+.vf-fin .lb{font-size:15px;font-weight:800}
+.vf-fin .rc{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ===== Le stylo ✏️ (§3.4) : entraînement libre — aucun palier, aucun cœur =====
+   Il ne juge pas, il guide : la mauvaise tuile est REFUSÉE (elle ne s'inscrit jamais, on
+   n'affiche donc jamais une graphie arabe fausse), et au 2e essai raté sur la même lettre
+   la bonne tuile respire en doré. Réglage « refus + indice », choisi par Myriam le 02/08. */
+.pen-box{width:min(420px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px 18px 18px;position:relative}
+.pen-x{position:absolute;top:8px;right:12px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.pen-fr{text-align:center;font-size:19px;font-weight:800;margin:2px 0 12px;color:var(--cream)}
+.pen-zone{direction:rtl;font-family:var(--ar);font-size:52px;color:var(--cream);text-align:center;min-height:96px;
+  display:flex;align-items:center;justify-content:center;line-height:1.4;transition:color .15s}
+.pen-zone .ph{color:var(--lock,#5A4F47)}
+.pen-zone.ok{color:var(--green)}
+.pen-zone.ko{color:var(--coral)}
+.pen-tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;direction:rtl;margin-top:6px}
+.pen-t{background:var(--panel2);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  min-width:56px;padding:8px 12px;font-family:var(--ar);font-size:30px;color:var(--cream);line-height:1.2;cursor:pointer}
+.pen-t[disabled]{opacity:.25}
+.pen-t.htile{font-size:26px}
+.pen-t.htile .dc{font-size:32px;opacity:.55}
+.pen-t.tdel{font-family:var(--ui);font-size:20px;color:var(--muted)}
+.pen-t.shake{border-color:var(--coral);background:var(--coral-bg);color:var(--coral);animation:penshake .35s}
+.pen-t.hint{animation:penhint 1.1s ease-in-out infinite;border-color:var(--gold-d)}
+@keyframes penshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes penhint{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 7px rgba(232,169,79,.26)}}
+@media (prefers-reduced-motion:reduce){.pen-t.shake,.pen-t.hint{animation:none}}
+.pen-btns{display:flex;gap:9px;margin-top:16px}
+.pen-btns button{flex:1;border:2px solid var(--line);border-bottom-width:4px;background:var(--panel2);
+  border-radius:13px;padding:12px 8px;font-weight:900;font-size:13.5px;font-family:var(--ui);color:var(--cream);cursor:pointer}
+.pen-btns button.prim{background:var(--gold);border-color:var(--gold-d);color:#241f1d}
 /* ===== Les noms d'Allah (13/07) : sélection, nom illuminé, cartes retournées, touche ⌫ ===== */
 .nrow{cursor:pointer;border-radius:12px}
 .nrow.nsel{background:#3d3120}
@@ -733,7 +808,7 @@
 .lact-b{background:rgba(220,144,46,.14);border:1px solid var(--gold-d);color:var(--gold2);border-radius:9px;padding:5px 12px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
 .lact-b:active{transform:scale(.95)}
 .revbtn{display:flex;align-items:center;justify-content:center;gap:10px}
-.revcount{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:#d8463a;color:#fff;font-family:var(--ui);font-size:13px;font-weight:900;line-height:1}
+.revcount{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:12px;background:var(--info-d);color:var(--cream);font-family:var(--ui);font-size:13px;font-weight:900;line-height:1}
 .revhint{text-align:center;font-family:var(--ui);font-size:12px;color:var(--muted);margin:8px 0 0}
 /* Succès : grille d'images seules (clic → popup détail) */
 .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -1847,7 +1922,7 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
     delete S._fresh;
     if(takeRemote){
       S=Object.assign({},DEF,remote); delete S._fresh;
-      S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};
+      S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
       // élève reconnue (session encore vivante) : on referme l'onboarding qui aurait pu s'ouvrir
       if(S.onboarded){try{document.getElementById('onb').classList.remove('on');}catch(e){}}
@@ -1924,10 +1999,13 @@ let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
 if(!S.rev||typeof S.rev!=='object')S.rev={};         // répétition espacée du vocabulaire : { mot:{n,next} }
+if(!S.revIn||typeof S.revIn!=='object')S.revIn={d:'',n:0}; // §2.5 : admissions du jour { d:date, n:nb de mots neufs entrés }
 if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revues (halo « nouveau »)
 if(typeof S.bigNext==='undefined')S.bigNext=0;          // prochaine révision = +3 (déblocage) ?
 if(typeof S.tutLetters==='undefined')S.tutLetters=0;    // tuto grille des lettres déjà vu ?
 if(typeof S.tutHome==='undefined')S.tutHome=0;          // tuto page d’accueil déjà vu ?
+if(typeof S.tutVocab==='undefined')S.tutVocab=0;        // tuto de la liste de vocabulaire déjà vu ?
+if(typeof S.vfBest==='undefined')S.vfBest=0;            // record au « vrai ou faux » (§3.2)
 if(typeof S.consScore!=='number')S.consScore=0;        // score de constance (rang)
 if(typeof S.ghufLeft!=='number')S.ghufLeft=2;          // Ghufrān restants ce mois (max 2, jamais à vendre)
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
@@ -2138,6 +2216,7 @@ function spokenInstr(st){
     case 'wordcard': return 'Touche le mot et écoute-le au moins une fois';
     case 'assemble': return st.fromFr?'Écris ce mot en arabe avec les lettres':'Écoute, puis écris le mot avec les lettres';
     case 'match': return 'Associe chaque mot à sa traduction';
+    case 'vf': return ''; // rien à lire : le chrono a démarré, une consigne parlée mangerait les 45 s
     case 'trace': return '';
     case 'vtiles': return 'Appuie sur ce que tu entends';
     case 'recite': return 'Écoute le modèle, enregistre-toi, ré-écoute-toi et compare, puis valide';
@@ -2151,7 +2230,11 @@ function spokenInstr(st){
     default: return ''; // jamais de titre
   }
 }
-function today(){return new Date().toISOString().slice(0,10)}
+function today(){ // heure LOCALE (§2.1) : en UTC la journée basculait à 02 h à Paris — un mot révisé à 00 h 30 était daté de la veille
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function yesterday(){ return _addDays(today(),-1); } // la veille DANS LE MÊME REPÈRE que today() (sinon la série casse entre 00 h et 02 h)
 
 /* ===== Rang de constance : 50% constance · 30% révision · 20% apprentissage ===== */
 const RANKS=[
@@ -2254,7 +2337,7 @@ function useGhufran(){
   var m=S.pendingMiss||0; if(m<=0){ closeGhufran(); return; }
   var use=Math.min(m,S.ghufLeft||0);
   if(use>0){ S.ghufLeft-=use; S.pendingMiss-=use;
-    S.lastDay=new Date(Date.now()-864e5).toISOString().slice(0,10); }   // pont : série préservée
+    S.lastDay=yesterday(); }   // pont : série préservée
   if(S.pendingMiss>0){ S.consScore=Math.max(0,(S.consScore||0)-3*S.pendingMiss); S.streak=0; S.pendingMiss=0; }
   save(); closeGhufran();
   toast('🕊️ Ghufrān utilisé — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
@@ -2310,7 +2393,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='desktop-3col · sur ordinateur l’app passe en 3 colonnes plein écran (menu à gauche, parcours au centre, colonne droite : rang, série, cœurs, nom d’Allah, parole du jour, révisions) ; mobile inchangé · sw v65';
+const BUILD='revision-srs · vrai ou faux 45 s · l’association ne pénalise plus en secret · dates en heure locale · 7 nouveaux mots/jour · écriture à partir du palier 4 · stylo ✏️ · rattrapage en QCM · sw v66';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2436,7 +2519,7 @@ function startDisque(u,i,recharge){
   total=QUEUE.filter(s=>s.graded).length;
   renderStep();
 }
-function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();REVIEW=false;REVSES=null;RECHARGE=false;returnFromPlayer();}
+function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();vfStop();window._vf=null;REVIEW=false;REVSES=null;REVFREE=false;RECHARGE=false;returnFromPlayer();}
 function progress(){document.getElementById('pbar-i').style.width=
   (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
 function advance(){stopAudio();qi++;renderStep();}
@@ -2444,6 +2527,7 @@ function prevStep(){if(inRetry||qi<=0)return;stopAudio();qi--;renderStep();}
 
 function renderStep(){
   answered=false;picked=null;progress();
+  vfStop(); document.getElementById('player').classList.remove('vfmode');   // on sort proprement du vrai/faux
   const body=document.getElementById('p-body');
   const foot=document.getElementById('p-foot');
   const cta=document.getElementById('cta');
@@ -2708,6 +2792,12 @@ function renderStep(){
     return;
   }
 
+  if(st.type==='vf'){                       // vrai ou faux 45 s : l'écran prend tout le lecteur
+    document.getElementById('player').classList.add('vfmode');
+    vfStart(st);
+    return;
+  }
+
   if(st.type==='match'){
     const _lp=shuffle(st.pairs.map((_,i)=>i));
     window._mt={pairs:st.pairs, leftPool:_lp, rightPool:derangedOrder(_lp), done:[], sel:null};
@@ -2936,7 +3026,12 @@ function ctaClick(){
   if(st.graded){
     const ek=st.type==='assemble'?st.w.w:(typeof st.answer==='string'?st.answer:null);
     if(ek){ if(!ok)S.err[ek]=(S.err[ek]||0)+1; else if(S.err[ek]){S.err[ek]=Math.max(0,S.err[ek]-1);} save(); }
-    if(REVIEW&&REVSES&&st.revWord&&!ok)REVSES[st.revWord]=false;   // le mot devra être revu
+    // §2.3 : le mot entre dans la session au moment où un écran noté le touche.
+    // §3.3/D5 : le rattrapage n'écrit RIEN — réussir la correction fait apprendre, mais ne rachète pas l'erreur.
+    if(REVIEW&&REVSES&&st.revWord&&!inRetry){
+      if(REVSES[st.revWord]===undefined)REVSES[st.revWord]=true;
+      if(!ok)REVSES[st.revWord]=false;
+    }
   }
   if(!ok&&st.explain){var w=document.getElementById('why');if(w)w.innerHTML='💡 '+st.explain;}
   if(ok){
@@ -2950,7 +3045,8 @@ function ctaClick(){
       wrongCount++;
       if(!EXAM&&!REVIEW)S.uerr[curU]=1; // l'unité n'est plus « sans erreur »
       // on mémorise la question ratée pour la rejouer en fin de leçon
-      if(MISSED.indexOf(st)<0)MISSED.push(st);
+      // §3.3 : un mot raté au vrai/faux ET à l'écriture ne produit QU'UN seul item de rattrapage
+      if(MISSED.indexOf(st)<0&&!(REVIEW&&st.revWord&&revMissedHas(st.revWord)))MISSED.push(st);
       if(!REVIEW&&!RECHARGE)S.hearts=Math.max(0,S.hearts-1); // ni la révision ni la reprise « recharge » ne coûtent de cœur
       save();
       document.getElementById('p-hearts').textContent=S.hearts;
@@ -2993,7 +3089,7 @@ function finishDisque(){
   const t=today();
   const streakBumped=(S.lastDay!==t);      // 1re leçon du jour → la série avance → écran « 7 épis »
   if(streakBumped){
-    const y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+    const y=yesterday();
     S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;
   }
   pendingStreak=streakBumped;
@@ -3069,7 +3165,7 @@ function finishExam(){
     }
     S.xp+=30;
     const t=today();
-    if(S.lastDay!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
+    if(S.lastDay!==t){const y=yesterday();S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
     save();
   }
   document.getElementById('player').classList.remove('on');
@@ -4493,7 +4589,8 @@ function importSave(){
 
 /* ================= MENU DU BAS · ONGLETS ================= */
 const UNIT_VIDEOS={1:'',2:'',3:''}; // ← colle ici l'ID ou le lien YouTube de chaque unité (clé = numéro d'unité)
-let REVIEW=false, backTo=null, REVSES=null, RECHARGE=false; // REVSES = résultats de la session de révision en cours { mot: true|false } ; RECHARGE = reprise « recharge cœurs » d'une leçon
+let REVIEW=false, backTo=null, REVSES=null, RECHARGE=false, REVFREE=false; // REVFREE = §3.5 : session d'entraînement libre (rien n'était dû) — cœurs oui, paliers NON
+// REVSES = résultats de la session de révision en cours { mot: true|false } ; RECHARGE = reprise « recharge cœurs » d'une leçon
 
 function unitValidated(idx){ if(idx<0||idx>=UNITS.length)return false; const ds=discsFor(idx); return !!(S.done&&S.done[dkey(idx,ds.length-1)]); }
 function unitUnlocked(idx){ const U=UNITS[idx]; if(!U||!U.ready)return false; if(U.no===1)return true; return unitValidated(idx-1); }
@@ -4710,6 +4807,15 @@ function frOptions(pool,w){
 // ===== Répétition espacée : sélection des mots à réviser =====
 const REVIEW_CAP=7; // 7 mots par session (choix Myriam 05/07) ; au-delà, sessions successives
 const REV_INT=[1,3,7,14,30]; // paliers de répétition espacée (jours) : 1 succès -> +1j, 2 -> +3j, 3 -> +7j, 4 -> +14j, 5+ -> +30j
+const REV_ECRIT_DES=4;       // §3.1/D9 : l'écriture n'apparaît qu'à partir du palier 4 (J26 pour un mot sans faute)
+function revPalier(w){ return (S.rev[w.w]&&S.rev[w.w].n)||0; }
+const REV_NEW_PER_DAY=7;     // §2.5 : au plus 7 mots NEUFS entrent en révision par jour (sinon les 76 mots voyagent en troupeau pour toujours)
+// Combien de places neuves reste-t-il aujourd'hui ? (le compteur se remet à zéro au changement de date)
+function revIntakeLeft(){
+  const t=today();
+  if(!S.revIn||S.revIn.d!==t)S.revIn={d:t,n:0};
+  return Math.max(0,REV_NEW_PER_DAY-S.revIn.n);
+}
 function _addDays(d,n){ return new Date((_dayNum(d)+n)*864e5).toISOString().slice(0,10); }
 // Un mot n'entre en révision QUE lorsqu'il a été APPRIS : leçon « 🔗 Lire des mots » de son unité terminée.
 function _lireDone(idx){ const ds=discsFor(idx); for(let i=0;i<ds.length;i++){ if(ds[i].build===buildWords)return !!S.done[dkey(idx,i)]; } return false; }
@@ -4717,7 +4823,10 @@ function allReviewWords(){ const p=[]; UNITS.forEach((U,idx)=>{ if(unitUnlocked(
 // Un mot est « dû » s'il n'a jamais été révisé, ou si sa date de prochaine révision est atteinte.
 function wordDue(w){ const r=S.rev[w.w]; return !r || r.next<=today(); }
 function dueReviewWords(){
-  return allReviewWords().filter(wordDue).sort((a,b)=>{
+  const t=today(), all=allReviewWords();
+  const vus  = all.filter(w=>S.rev[w.w] && S.rev[w.w].next<=t);          // déjà entrés en révision, leur date est atteinte
+  const neufs= all.filter(w=>!S.rev[w.w]).slice(0,revIntakeLeft());      // §2.5 : au plus 7/jour, dans l'ordre du programme
+  return vus.concat(neufs).sort((a,b)=>{
     const ra=S.rev[a.w]||{n:0,next:''}, rb=S.rev[b.w]||{n:0,next:''};
     return ra.next<rb.next?-1:ra.next>rb.next?1:(ra.n-rb.n);   // les plus anciens / les plus fragiles d'abord
   });
@@ -4728,21 +4837,31 @@ function startReview(){
   if(!pool.length){ toast('Termine d\u2019abord la leçon « 🔗 Lire des mots » pour débloquer la révision 🌱'); return; }
   const due=reviewSessionWords();
   // session = les mots dus ; s'il n'y en a aucun, entraînement libre sur des mots appris au hasard
-  const bag=shuffle(due.length?due:shuffle(pool).slice(0,REVIEW_CAP));
+  const libre=(due.length===0);
+  const bag=shuffle(libre?shuffle(pool).slice(0,REVIEW_CAP):due);
   if(!bag.length)return;
-  REVSES={}; bag.forEach(w=>{REVSES[w.w]=true;});   // vrai par défaut ; la moindre erreur le passe à false
-  // Déroulé voulu par Myriam (05/07) : 1 association des 7 mots, puis 7 écritures, puis 7 QCM = 15 écrans
+  REVFREE=libre;   // §3.5 : en libre, aucun palier n'est écrit (sinon des mots neufs entreraient hors quota, et un mot au palier 5 pourrait redescendre)
+  REVSES={};   // §2.3 : VIDE. Une clé n'apparaît que si un écran noté touche le mot — un mot jamais vu ne bouge pas de palier.
+  // §3.1 — la session s'adapte au PALIER de chaque mot : on ne fait pas écrire un mot qu'on
+  // vient de découvrir. 1-2 « je le reconnais » · 3 « je sais le retrouver » · ≥4 « je sais le produire ».
   const qs=[];
-  if(bag.length>=2)qs.push({type:'match', graded:false, pairs:bag.map(w=>({ar:w.w,fr:w.fr,w:w.w}))}); // 1) associer (le mot arabe se prononce au toucher)
-  shuffle(bag).forEach(w=>qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w}));       // 2) écrire chaque mot depuis le français (🔊 arabe dispo)
-  shuffle(bag).forEach(w=>qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,audio:w.w,graded:true,flip:true,answer:w.fr,revWord:w.w,options:frOptions(pool,w)}))); // 3) traduire — cartes retournées (choix Myriam 3B)
+  // 1) échauffement — association NON notée : elle réveille la mémoire, elle ne juge pas (§2.2)
+  if(bag.length>=2)qs.push({type:'match', graded:false, pairs:bag.map(w=>({ar:w.w,fr:w.fr,w:w.w}))});
+  // 2) vrai ou faux 45 s — UN écran qui couvre tous les mots, et c'est lui qui note la reconnaissance
+  qs.push({type:'vf', graded:true, weight:bag.length, words:bag.slice(), pool:pool, secs:45});
+  // 3) QCM — palier 3 seulement : le pont entre reconnaître et produire
+  shuffle(bag.slice()).filter(w=>revPalier(w)===3).forEach(w=>qs.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,audio:w.w,graded:true,flip:true,answer:w.fr,revWord:w.w,options:frOptions(pool,w)})));
+  // 4) écriture — palier ≥ 4 seulement : elle GRAVE un mot déjà solide, elle ne sert pas à le découvrir
+  shuffle(bag.slice()).filter(w=>revPalier(w)>=REV_ECRIT_DES).forEach(w=>qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w}));
   QUEUE=qs; // on attaque directement l'exercice (règle Myriam : pas d'écran d'annonce)
   REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
   document.getElementById('st-hearts').textContent=S.hearts;
-  total=QUEUE.filter(s=>s.graded).length;
+  // le vrai/faux est UN écran mais couvre tous les mots : il pèse son sac, sinon une seule
+  // erreur ferait tomber le score de fin de session à 0 %.
+  total=QUEUE.reduce(function(t,s){return t+(s.graded?(s.weight||1):0);},0);
   renderStep();
 }
 /* ----- association de mots (paires) ----- */
@@ -4781,15 +4900,203 @@ function matchTap(side,pi,el){
   } else {                     // mauvaise association : flash rouge bref
     const selBtn=document.querySelector('.m-cell.sel'); if(selBtn)selBtn.classList.add('bad');
     if(el)el.classList.add('bad');
-    if(REVIEW&&REVSES){          // les deux mots confondus devront être revus
-      const w1=M.pairs[pi]&&M.pairs[pi].w, w2=M.sel&&M.pairs[M.sel.pi]&&M.pairs[M.sel.pi].w;
-      if(w1&&REVSES[w1]!==undefined)REVSES[w1]=false;
-      if(w2&&REVSES[w2]!==undefined)REVSES[w2]=false;
-    }
+    // §2.2 : PLUS AUCUNE sanction cachée ici. L'association est un échauffement (graded:false) :
+    // elle réveille la mémoire, elle ne note pas. Le flash rouge suffit comme retour.
     M.sel=null;
     setTimeout(renderMatch,420);
   }
 }
+/* ═══════════ §3.2 · VRAI OU FAUX, 45 SECONDES ═══════════
+   Un SEUL écran qui couvre une vingtaine de tours. DEUX COUCHES qui ne se mélangent pas :
+     · couche JEU     — le score, le record, l'urgence : TOUS les tours comptent ;
+     · couche MÉMOIRE — les paliers : seuls les VF_TOURS premiers tours de chaque mot notent.
+   (décision Myriam 02/08 : le recyclage de fin de chrono ne doit pas punir celle qui répond vite ;
+    et un mot vu une seule fois, bien répondu, monte quand même.) */
+const VF_SECS=45, VF_TOURS=2;   // chaque mot est jugé sur exactement 2 tours : le vrai + un leurre
+let VFT=null;
+function vfStop(){ if(VFT){clearInterval(VFT);VFT=null;} }
+function vfRounds(st){
+  const r=[];
+  st.words.forEach(function(w){
+    r.push({w:w,fr:w.fr,vrai:true});
+    const autres=shuffle(st.pool.filter(function(x){return x.fr!==w.fr;})); // frOptions filtre déjà les synonymes
+    r.push({w:w,fr:(autres[0]||w).fr,vrai:false});
+  });
+  return shuffle(r);
+}
+function vfStart(st){
+  window._vf={st:st,rounds:vfRounds(st),ri:0,good:0,vus:{},rates:{},left:(st.secs||VF_SECS),locked:false};
+  vfDraw();
+  vfStop();
+  VFT=setInterval(function(){
+    const V=window._vf; if(!V)return vfStop();
+    V.left-=0.25;
+    if(V.left<=0){ vfStop(); vfEnd(); } else vfTick();
+  },250);
+}
+function vfTick(){
+  const V=window._vf, b=document.getElementById('vfBar'); if(!V||!b)return;
+  const tot=V.st.secs||VF_SECS, bas=(V.left<=10);   // les 10 dernières secondes passent en corail
+  b.firstChild.style.width=Math.max(0,V.left/tot*100)+'%';
+  b.className='cbar'+(bas?' low':'');
+  const hd=document.getElementById('vfHd'); if(hd)hd.className='vf-hd'+(bas?' low':'');
+  const s=document.getElementById('vfSecs'); if(s)s.innerHTML=Math.ceil(V.left)+'<small>s</small>';
+}
+function vfMarkRecord(){
+  const V=window._vf; if(!V||V.good<=(S.vfBest||0))return;
+  const s=document.getElementById('vfScore'), r=document.getElementById('vfRec');
+  if(s)s.classList.add('rec'); if(r)r.classList.add('on');
+}
+function vfDraw(){
+  const V=window._vf; if(!V)return;
+  if(V.ri>=V.rounds.length)V.rounds=V.rounds.concat(vfRounds(V.st));  // il reste du temps : on recycle
+  const r=V.rounds[V.ri];
+  document.getElementById('p-body').innerHTML=
+    '<div class="vf-hd" id="vfHd"><span class="secs" id="vfSecs">'+Math.ceil(V.left)+'<small>s</small></span>'+
+      '<span class="score" id="vfScore">✓ '+V.good+'</span></div>'+
+    '<div class="cbar" id="vfBar"><i></i></div>'+
+    '<div class="recflash" id="vfRec">RECORD BATTU</div>'+
+    '<div class="vf-mid"><div class="vfbare" id="vfCard">'+
+      '<div class="ar">'+r.w.w+'</div><div class="fr">'+r.fr+'</div></div></div>'+
+    '<div class="vf-btns"><button class="vfb non" onclick="vfRep(0)">✗ NON</button>'+
+      '<button class="vfb oui" onclick="vfRep(1)">✓ OUI</button></div>';
+  vfTick(); vfMarkRecord();
+  speak(r.w.w);   // le mot se prononce à l'affichage ; le tour suivant coupe le précédent (stopAudio)
+}
+function vfRep(oui){
+  const V=window._vf; if(!V||V.locked)return; V.locked=true;
+  const r=V.rounds[V.ri], juste=(!!oui===r.vrai), k=r.w.w;
+  if(juste)V.good++;
+  // couche MÉMOIRE : au-delà de VF_TOURS, le tour est joué mais n'écrit rien
+  if((V.vus[k]||0)<VF_TOURS){
+    V.vus[k]=(V.vus[k]||0)+1;
+    if(REVSES&&REVSES[k]===undefined)REVSES[k]=true;
+    if(!juste){ if(REVSES)REVSES[k]=false; V.rates[k]=1; }
+  }
+  const c=document.getElementById('vfCard'); if(c)c.classList.add(juste?'ok':'ko');
+  const s=document.getElementById('vfScore'); if(s)s.textContent='✓ '+V.good;
+  vfMarkRecord();
+  setTimeout(function(){                       // 150 ms de retour visuel, puis on enchaîne SANS confirmation
+    const W=window._vf; if(!W)return;
+    W.ri++; W.locked=false; if(W.left>0)vfDraw();
+  },150);
+}
+function vfEnd(){
+  const V=window._vf; if(!V)return;
+  vfStop(); stopAudio();
+  const st=V.st, rates=Object.keys(V.rates);
+  wrongCount+=rates.length;    // le score de fin de session compte les MOTS ratés, pas les tours
+  // §3.3 — chaque mot raté pousse UN item de rattrapage, et c'est un QCM : rejouer le même
+  // vrai/faux juste après le retour visuel ferait mémoriser l'écran, pas le mot ; et une
+  // reprise binaire se réussit une fois sur deux au hasard.
+  rates.forEach(function(k){
+    if(revMissedHas(k))return;                 // dédoublonnage : un mot raté deux fois = un seul item
+    const w=st.words.filter(function(x){return x.w===k;})[0]; if(!w)return;
+    MISSED.push(mcq({prompt:'Que veut dire ce mot ?',glyph:w.w,glyphLinear:true,audio:w.w,graded:true,
+                     flip:true,answer:w.fr,revWord:w.w,options:frOptions(st.pool,w)}));
+  });
+  const record=(V.good>(S.vfBest||0));
+  if(record){ S.vfBest=V.good; save(); }
+  document.getElementById('player').classList.remove('vfmode');   // on rend le pied de page
+  document.getElementById('p-body').innerHTML=
+    '<div class="vf-fin"><div class="big">'+(record?'🏆':'🎉')+'</div>'+
+    '<div class="sc">'+V.good+'</div>'+
+    '<div class="lb">bonne'+(V.good>1?'s':'')+' réponse'+(V.good>1?'s':'')+'</div>'+
+    '<div class="rc">'+(record?'nouveau record !':'meilleur score · '+(S.vfBest||0))+'</div></div>';
+  const cta=document.getElementById('cta');
+  cta.className='cta';cta.disabled=false;cta.textContent='CONTINUER';cta.onclick=advance;
+  window._vf=null;
+}
+function revMissedHas(w){ for(var i=0;i<MISSED.length;i++)if(MISSED[i].revWord===w)return true; return false; }
+
+/* ═══════════ §3.4 · LE STYLO ✏️ — entraînement libre ═══════════
+   Ne touche à AUCUN palier, ne coûte AUCUN cœur, n'entre PAS dans REVSES : c'est de
+   l'entraînement à la demande, pas une évaluation — sinon l'élève fabrique sa progression.
+   Correction « refus + indice » (choix Myriam 02/08) : la mauvaise tuile est REFUSÉE et ne
+   s'inscrit jamais (on n'affiche donc jamais une graphie arabe fausse, même 200 ms) ; au 2e
+   essai raté sur la MÊME lettre, la bonne tuile respire en doré. Le compteur repart à zéro
+   dès qu'elle pose la bonne lettre : l'aide arrive où elle bloque et disparaît quand ça repart. */
+let WPEN=null;
+function openWrite(ar){
+  const w=allReviewWords().filter(function(x){return x.w===ar;})[0]; if(!w)return;
+  const cible=splitUnits(w.w);
+  // Leurres : UNIQUEMENT des lettres des unités DÉJÀ ENSEIGNÉES (règle absolue)
+  const connues=[];
+  knownLetterSet().forEach(function(L){ if(L!=='ء'&&cible.indexOf(L)<0)connues.push(L); });
+  const leurres=shuffle(connues).slice(0,3);
+  WPEN={w:w,cible:cible,tiles:shuffle(cible.concat(leurres)),ch:[],used:{},rate:0,fini:false};
+  var m=document.getElementById('penModal');
+  if(!m){m=document.createElement('div');m.className='finish';m.id='penModal';document.body.appendChild(m);}
+  drawWrite(); m.classList.add('on');
+}
+function drawWrite(){
+  const W=WPEN, m=document.getElementById('penModal'); if(!W||!m)return;
+  const reste=W.cible.length-W.ch.length;
+  m.innerHTML='<div class="pen-box">'+
+    '<button class="pen-x" onclick="closeWrite()" aria-label="Fermer">✕</button>'+
+    '<div class="pen-fr">'+W.w.fr+'</div>'+
+    '<div class="pen-zone'+(W.fini?' ok':'')+'" id="penZone">'+W.ch.join('')+
+      '<span class="ph">'+'·'.repeat(reste)+'</span></div>'+
+    (W.fini?'':'<div class="pen-tiles">'+W.tiles.map(function(t,i){
+      return '<button class="pen-t'+(isHarakat(t)?' htile':'')+'" id="pt'+i+'"'+(W.used[i]?' disabled':'')+
+        ' onclick="penTap('+i+')">'+tileLabel(t)+'</button>';}).join('')+
+      '<button class="pen-t tdel" onclick="penUndo()" aria-label="Effacer">⌫</button></div>')+
+    '<div class="pen-btns">'+(W.fini
+      ?'<button onclick="openWrite(WPEN.w.w)">Recommencer</button><button class="prim" onclick="closeWrite()">Fermer</button>'
+      :'<button onclick="closeWrite()">Fermer</button>')+'</div></div>';
+  if(!W.fini&&W.rate>=2)penHint();
+  if(W.fini)speak(W.w.w);
+}
+function penTap(i){
+  const W=WPEN; if(!W||W.fini||W.used[i])return;
+  if(W.tiles[i]!==W.cible[W.ch.length]){        // ✗ mauvaise lettre : REFUSÉE, rien ne s'inscrit
+    W.rate++;
+    const t=document.getElementById('pt'+i), z=document.getElementById('penZone');
+    if(t)t.classList.add('shake'); if(z)z.classList.add('ko');
+    setTimeout(function(){ if(t)t.classList.remove('shake'); if(z)z.classList.remove('ko'); },380);
+    if(W.rate>=2)penHint();
+    return;
+  }
+  W.used[i]=1; W.ch.push(W.tiles[i]); W.rate=0;  // ✓ bonne lettre : on avance, le compteur repart
+  W.fini=(W.ch.length===W.cible.length);
+  drawWrite();
+}
+function penHint(){                              // la bonne tuile respire en doré
+  const W=WPEN; if(!W)return;
+  const attendu=W.cible[W.ch.length];
+  for(var i=0;i<W.tiles.length;i++){
+    if(!W.used[i]&&W.tiles[i]===attendu){ const t=document.getElementById('pt'+i); if(t)t.classList.add('hint'); return; }
+  }
+}
+function penUndo(){
+  const W=WPEN; if(!W||W.fini||!W.ch.length)return;
+  W.ch.pop(); W.rate=0;
+  const k=Object.keys(W.used).filter(function(i){return W.tiles[i]===W.cible[W.ch.length];}).pop();
+  if(k!==undefined)delete W.used[k];
+  drawWrite();
+}
+function closeWrite(){ var m=document.getElementById('penModal'); if(m)m.classList.remove('on'); WPEN=null; }
+
+/* ═══════════ Tuto de la liste de vocabulaire ═══════════
+   Réutilise le moteur de coach-marks de la grille des lettres (letterTut) : une étape par
+   signe, titre + UNE ligne. Ne se montre qu'une fois (S.tutVocab) ; le « ? » le rejoue. */
+function vocabTut(){ letterTut([
+  {t:function(){return document.querySelector('#view-reviser .wspk');},ti:'Écouter 🔊',
+   tx:'Touche la ligne : le mot se dit.'},
+  {t:function(){return document.querySelector('#view-reviser .wpen');},ti:'Écrire ✏️',
+   tx:'Entraîne-toi quand tu veux. Ça ne compte pas dans tes révisions.'},
+  {t:function(){return document.querySelector('#view-reviser .wdot:not(.off)');},ti:'Le point bleu',
+   tx:'Ce mot fait partie de ta série d\u2019aujourd\u2019hui.'},
+  {t:function(){return document.querySelector('#view-reviser .revcount');},ti:'Ta série 🌾',
+   tx:'Le nombre de mots à revoir aujourd\u2019hui. Il descend à mesure que tu révises.'}
+]); }
+function maybeShowVocabTut(){
+  if(S.tutVocab)return;
+  if(!document.querySelector('#view-reviser .wpen'))return;   // liste vide : pas de tuto
+  S.tutVocab=1; save();
+  setTimeout(vocabTut,320);
+}
+
 /* ===== HUB « RÉVISER » : Qorān · vocabulaire · grammaire ===== */
 let curSourate=0;
 let curReviserTab='quran';
@@ -5062,18 +5369,28 @@ function renderReviser(sub){
   }
   else if(sub==='vocab'){
     const vwords=allReviewWords();               // uniquement les mots APPRIS (leçon « Lire des mots » terminée)
-    const nDue=dueReviewWords().length;          // mots dus aujourd'hui — le chiffre DÉCRÉMENTE après chaque série
-    const ordered=vwords.slice().sort(function(a,b){return (wordDue(b)?1:0)-(wordDue(a)?1:0);});
+    // Règle Myriam : jamais deux chiffres en contradiction. Avec l'échelonnement (§2.5), un mot neuf
+    // hors quota n'est PAS dû aujourd'hui — il ne doit donc pas porter de point rouge.
+    const dueSet=new Set(dueReviewWords().map(function(w){return w.w;}));
+    const nDue=dueSet.size;                      // mots dus aujourd'hui — le chiffre DÉCRÉMENTE après chaque série
+    const ordered=vwords.slice().sort(function(a,b){return (dueSet.has(b.w)?1:0)-(dueSet.has(a.w)?1:0);});
     const vlist=ordered.map(function(w){
-      // choix Myriam 13/07 (variante 1B) : l'emoji reste, TOUTE la ligne joue le son du mot
+      // 02/08 : le 🔊 REMPLACE l'emoji du mot. Dès qu'il y a deux actions sur la ligne
+      // (écouter / écrire), chaque icône doit dire ce qu'elle FAIT — une fourmi à gauche et un
+      // crayon à droite se lisent « une image, un bouton ». Le point passe AVANT le crayon et
+      // sa place est toujours réservée, pour que tous les ✏️ tombent sur la même colonne.
       return '<div class="wrow" style="cursor:pointer" role="button" aria-label="Écouter '+w.fr.replace(/"/g,'')+'" onclick="speak(\''+w.w+'\')">'+
-        '<span class="wspk">'+(w.e||'🔊')+'</span>'+
+        '<span class="wspk">🔊</span>'+
         '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
-        (wordDue(w)?'<span class="wdot" title="à réviser"></span>':'')+
+        '<span class="wdot'+(dueSet.has(w.w)?'':' off')+'" title="à réviser aujourd\u2019hui"></span>'+
+        '<button class="wpen" onclick="event.stopPropagation();openWrite(\''+w.w+'\')" aria-label="S\'entraîner à écrire">✏️</button>'+
       '</div>';
     }).join('');
     h+='<div class="ccard">'+
-      '<button class="cbtn revbtn" onclick="startReview()">'+(nDue?'Réviser<span class="revcount">'+nDue+'</span>':'S\u2019entraîner')+'</button>'+
+      '<div style="display:flex;gap:10px;align-items:center;max-width:340px;margin:0 auto">'+
+        '<button class="cbtn revbtn" style="flex:1;margin:0" onclick="startReview()">'+(nDue?'Réviser<span class="revcount">'+nDue+'</span>':'S\u2019entraîner')+'</button>'+
+        (vwords.length?'<button class="lg-help" onclick="vocabTut()" aria-label="À quoi servent ces signes ?">?</button>':'')+
+      '</div>'+
       (vwords.length?'':'<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;text-align:center;margin:10px 0 0">Les mots apparaîtront ici après la leçon « 🔗 Lire des mots ».</p>')+
       '<div class="wlist">'+vlist+'</div></div>';
   }
@@ -5085,6 +5402,7 @@ function renderReviser(sub){
   }
   document.getElementById('view-reviser').innerHTML=h;
   if(sub==='lettres')setTimeout(maybeShowLetterTut,80);
+  if(sub==='vocab')setTimeout(maybeShowVocabTut,80);   // 1re ouverture seulement (S.tutVocab)
 }
 // Générateur commun : reconstruire un verset (mots lisibles = tuiles, le reste posé en gris)
 function buildVerseTiles(vi){
@@ -5282,25 +5600,25 @@ function vtUndo(){
   renderVt();document.getElementById('cta').disabled=true;
 }
 function finishReview(){
-  if(REVSES){ // répétition espacée : chaque mot de la session reçoit sa prochaine date
+  if(REVFREE)REVSES=null;   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
+  if(REVSES){ // répétition espacée : chaque mot touché par un écran noté reçoit sa prochaine date
     const t=today();
     Object.keys(REVSES).forEach(function(w){
-      if(REVSES[w]!==false){ // su : palier suivant, revu dans 1/3/7/14/30 jours
-        const n=((S.rev[w]&&S.rev[w].n)||0)+1;
-        S.rev[w]={n:n, next:_addDays(t,REV_INT[Math.min(n-1,REV_INT.length-1)])};
-      } else {               // raté : retour au palier 0, à revoir dès aujourd'hui
-        S.rev[w]={n:0, next:t};
-      }
+      if(!S.rev[w]){ if(!S.revIn||S.revIn.d!==t)S.revIn={d:t,n:0}; S.revIn.n++; }   // §2.5 : ce mot consomme une place d'admission du jour
+      // §2.4 : su -> palier suivant ; raté -> retour au PALIER 1 (donc revu demain, REV_INT[0]=1).
+      // Aucune date forcée : elle découle du palier, comme pour une réussite.
+      const n=(REVSES[w]!==false)?(((S.rev[w]&&S.rev[w].n)||0)+1):1;
+      S.rev[w]={n:n, next:_addDays(t,REV_INT[Math.min(n-1,REV_INT.length-1)])};
     });
     REVSES=null;
   }
-  REVIEW=false; S.xp+=10; S.nrev=(S.nrev||0)+1;
+  REVIEW=false;REVFREE=false; S.xp+=10; S.nrev=(S.nrev||0)+1;
   const before=S.hearts;
   const gain=S.bigNext?3:1;               // 1re révision après blocage = +3 ; les suivantes = +1
   S.hearts=Math.min(HEARTS_MAX,S.hearts+gain);S.bigNext=0;S.heartDay=today();
   if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ +'+gain+' cœur'+(gain>1?'s':'')+', ماشاء الله !'),600);
   checkBadges({review:true});
-  const t=today(); if(S.lastDay!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
+  const t=today(); if(S.lastDay!==t){const y=yesterday();S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
   bumpConstance('revise');
   save();
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
