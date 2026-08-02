@@ -1842,11 +1842,13 @@ function buildReview(U){
   return q;
 }
 
+// ORDRE PÉDAGOGIQUE : « Les formes » AVANT « Dans la Fātiḥa » — on ne peut pas demander de repérer
+// une lettre dans le verset (où elle est écrite liée) avant d'avoir montré début/milieu/fin.
 const DISQUES=[
  {icon:'💡',img:'images-app-alaq/icone-alaq-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
  {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
- {icon:'🕋',img:'images-app-alaq/icone-alaq-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
  {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les formes',build:buildForms},
+ {icon:'🕋',img:'images-app-alaq/icone-alaq-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
  {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les harakats',build:buildHarakat},
  {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les prolongations',build:buildMadd},
  {icon:'🔗',img:'images-app-alaq/icone-alaq-lire.png',label:'Lire des mots',build:buildWords},
@@ -1920,10 +1922,27 @@ const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq-decouvrir.pn
 function discsFor(u){
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
-    // Révision · Mémoriser · Lettres vs prolongations · Fātiḥa · Formes · Harakats · Lire · Écrire · Bilan
+    // Révision · Mémoriser · Lettres vs prolongations · Formes · Fātiḥa · Harakats · Lire · Écrire · Bilan
     // (pas de disque « Les prolongations » : redondant ici, et aucun mot propre en ū)
     return [REVISION_DISC, DISQUES[1], LETTREVSPRO_DISC, DISQUES[2], DISQUES[3], DISQUES[4], DISQUES[6], DISQUES[7], DISQUES[8]];
   return [REVISION_DISC, ...DISQUES.slice(1)];               // unités-consonnes : révision en tête
+}
+
+/* Ordre corrigé le 02/08 : « Les formes » passe AVANT « Dans la Fātiḥa ». La progression est
+   enregistrée par NUMÉRO de disque (dkey), donc la case du repérage devient celle des formes.
+   On la décoche pour la SEULE élève concernée — repérage fait, formes pas faites — sinon elle
+   sauterait « Les formes » sans jamais l'apprendre. Les deux autres cas (rien fait / tout fait)
+   restent justes tels quels. ⚠️ Le drapeau doit être ÉCRIT même quand rien ne change : sans lui,
+   une élève arrivée NORMALEMENT à « formes faites, repérage pas fait » serait décochée à tort. */
+function fixOrdreFormes(){
+  if(S.fixFormes0208)return;
+  S.fixFormes0208=1;
+  UNITS.forEach(function(U,u){
+    const i=discsFor(u).findIndex(function(d){return d.build===buildForms;});
+    if(i<0)return;
+    if(S.done[dkey(u,i)]&&!S.done[dkey(u,i+1)])delete S.done[dkey(u,i)];
+  });
+  save();
 }
 
 /* ================= ÉTAT ================= */
@@ -1958,6 +1977,7 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
     if(takeRemote){
       S=Object.assign({},DEF,remote); delete S._fresh;
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
+      fixOrdreFormes(); // l'état du nuage peut venir d'un appareil resté sur l'ancien ordre
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
       // élève reconnue (session encore vivante) : on referme l'onboarding qui aurait pu s'ouvrir
       if(S.onboarded){try{document.getElementById('onb').classList.remove('on');}catch(e){}}
@@ -2066,6 +2086,7 @@ if(typeof S.onboarded==='undefined')S.onboarded=((S.done&&Object.keys(S.done).le
 if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {source,intention[],niveau,objectif,ts}
 if(typeof S.prenom!=='string')S.prenom='';           // prénom (personnalisation + colonne Supabase profiles.prenom)
 (function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)save();})();
+fixOrdreFormes(); // échange formes ↔ repérage (02/08) : rattrape les progressions écrites sous l'ancien ordre
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
 let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(e){return true}})();
 function toggleSound(){
@@ -2444,7 +2465,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='tablette-3col · 3 colonnes dès 700px de large (iPad debout, téléphone couché, fenêtre étroite) · palier fenêtre basse · onboarding en colonne de 440px sur fond plein écran · sous-titre du profil retiré · compte déjà existant annoncé à l’envoi du code · sw v67';
+const BUILD='ordre-formes-fatiha · « Les formes » passe AVANT « Dans la Fātiḥa » dans les 7 unités (on ne repère pas une lettre liée avant d’avoir montré début/milieu/fin) · progressions écrites sous l’ancien ordre rattrapées à l’ouverture et après la synchro nuage · sw v68';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
