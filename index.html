@@ -777,6 +777,15 @@
 .acct-out{flex:none;background:none;border:none;color:var(--muted);font-family:var(--ui);
   font-size:12px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:2px}
 .acct-out:active{color:var(--cream)}
+/* Le nom choisi (prénom ou kunya) vit DANS la bande du compte, au-dessus du mail (Myriam 02/08) */
+.acct-id{flex:1;min-width:0}
+.acct-id b{display:block;font-family:var(--ui);font-size:14.5px;font-weight:900;color:var(--cream);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-id .acct-todo{color:var(--gold2)}
+.acct-id small{display:block;font-family:var(--ui);font-size:11.5px;font-weight:700;color:var(--muted);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-pen{flex:none;background:none;border:none;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px}
+.acct-pen:active{transform:scale(.9)}
 .rk-lbl{font-family:var(--ui);font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#241a06;opacity:.55;margin:0 0 2px}
 .lspk{background:none;border:none;cursor:pointer;font-size:14px;opacity:.85;padding:0 2px;vertical-align:middle;line-height:1}
 .lspk:active{transform:scale(.9)}
@@ -2184,6 +2193,37 @@ function streakContinue(){
 }
 function obAccTitle(){ return S.prenom?S.prenom+', sauvegarde ta progression.':'Sauvegarde ta progression'; }
 function onbPrenomInput(v){ S.prenom=(v||'').trim(); save(); var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle(); }
+/* ===== Le nom choisi, affiché et modifiable dans le profil (02/08) =====
+   Le prénom demandé à l'inscription n'apparaissait nulle part : il vit désormais dans la bande
+   du compte, au-dessus du mail. S'il manque, l'invitation « Choisis ta kunya » prend sa place —
+   il y a TOUJOURS un nom que l'élève a choisi. Le seul stockage est S.prenom (déjà poussé dans
+   profiles.prenom par cloudSaveNow) : rien de neuf à synchroniser. */
+function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
+function nomChoisiHTML(){
+  return S.prenom ? '<b>'+escHTML(S.prenom)+'</b>' : '<b class="acct-todo">Choisis ta kunya</b>';
+}
+function openPrenom(){
+  var m=document.getElementById('prenomModal');
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='prenomModal'; document.body.appendChild(m); }
+  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
+    '<button class="sm-close" onclick="closePrenom()" aria-label="Fermer">✕</button>'+
+    '<h2 style="margin:8px 0 2px">Ton nom</h2>'+
+    '<p class="succ-desc" style="margin:8px 0 14px">La <b style="color:var(--gold2)">kunya</b> <span class="arw" style="font-size:16px">كُنْيَة</span> est le nom d’affection en islam : <span class="arw" style="font-size:16px">أمّ</span> ou <span class="arw" style="font-size:16px">أبو</span> suivi d’un prénom comme Umm Salama, Abū Bakr. Tu peux aussi tout simplement écrire ton prénom.</p>'+
+    '<input id="prenomIn" type="text" maxlength="24" autocomplete="given-name" placeholder="Ton prénom ou ta kunya" value="'+escHTML(S.prenom||'')+'" style="width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:16px;text-align:center">'+
+    '<button class="cbtn" style="margin-top:12px" onclick="savePrenom()">Enregistrer</button>'+
+    '</div>';
+  m.classList.add('on');
+  var i=document.getElementById('prenomIn');
+  if(i){ i.addEventListener('keydown',function(e){ if(e.key==='Enter')savePrenom(); });
+         setTimeout(function(){ try{i.focus();}catch(_){}} ,80); }
+}
+function closePrenom(){ var m=document.getElementById('prenomModal'); if(m)m.classList.remove('on'); }
+function savePrenom(){
+  var i=document.getElementById('prenomIn');
+  S.prenom=(i?i.value:'').trim(); save();   // save() → cloudSaveSoon() → upsert profiles.prenom
+  closePrenom(); try{renderProg();}catch(_){}
+}
 function showObAccount(){
   var card=document.getElementById('obAccountCard'); if(card)card.innerHTML=cloudCardHTML();
   var pn=document.getElementById('obPrenom'); if(pn)pn.value=S.prenom||'';
@@ -2465,7 +2505,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='ordre-formes-fatiha · « Les formes » passe AVANT « Dans la Fātiḥa » dans les 7 unités (on ne repère pas une lettre liée avant d’avoir montré début/milieu/fin) · progressions écrites sous l’ancien ordre rattrapées à l’ouverture et après la synchro nuage · sw v68';
+const BUILD='prenom-profil · le nom choisi s’affiche dans le profil, au-dessus du mail, et se modifie par ✏️ · sans prénom, « Choisis ta kunya » (popup qui explique la kunya) · sw v69';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4787,9 +4827,14 @@ function renderProg(){
   // a disparu : c'est l'encadré du rang qui porte l'étiquette (choix Myriam 13/07).
   let h='';
   if(SB&&CLOUD.user){
-    h+='<div class="acct"><span class="acct-dot"></span><span class="acct-mail">'+(CLOUD.user.email||'')+'</span>'+
+    h+='<div class="acct"><span class="acct-dot"></span><div class="acct-id">'+nomChoisiHTML()+
+       '<small>'+escHTML(CLOUD.user.email||'')+'</small></div>'+
+       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">✏️</button>'+
        '<button class="acct-out" onclick="cloudLogout()">se déconnecter</button></div>';
   } else {
+    // Déconnectée, la bande du compte n'existe pas : le nom garde sa place, seul, au-dessus de la carte.
+    h+='<div class="acct"><div class="acct-id">'+nomChoisiHTML()+'</div>'+
+       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">✏️</button></div>';
     h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
   }
   var _R=rankFor(S.consScore);
