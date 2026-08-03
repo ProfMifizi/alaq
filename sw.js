@@ -3,8 +3,10 @@
    - index.html / navigation : réseau d'abord (toujours la dernière version en ligne),
      cache en secours (avion, mosquée sans réseau…)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
-   - les audios de la voix de Myriam + la Fātiḥa sont pré-chargés à l'installation */
-const CACHE='alaq-v70-2026-08-02';
+   - les audios de la voix de Myriam sont pré-chargés à l'installation
+   - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
+     et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
+const CACHE='alaq-v71-2026-08-03';
 const CORE=['.','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-alaq-bilan.png",
@@ -55,13 +57,6 @@ const AUDIOS=[
 "audios-app-alaq/dhal-kasra-son-court.mp3",
 "audios-app-alaq/dhal-waw-son-prolonge.mp3",
 "audios-app-alaq/dhal-ya-son-prolonge.mp3",
-"audios-app-alaq/fatiha-1.mp3",
-"audios-app-alaq/fatiha-2.mp3",
-"audios-app-alaq/fatiha-3.mp3",
-"audios-app-alaq/fatiha-4.mp3",
-"audios-app-alaq/fatiha-5.mp3",
-"audios-app-alaq/fatiha-6.mp3",
-"audios-app-alaq/fatiha-7.mp3",
 "audios-app-alaq/ghayn-alif-son-prolonge.mp3",
 "audios-app-alaq/ghayn-damma-son-court.mp3",
 "audios-app-alaq/ghayn-fatha-son-court.mp3",
@@ -419,7 +414,7 @@ self.addEventListener('fetch',e=>{
   // audios, polices Google, récitation, icônes : cache d'abord
   const cacheFirst=url.pathname.indexOf('/audios-app-alaq/')>=0
     ||url.hostname==='fonts.googleapis.com'||url.hostname==='fonts.gstatic.com'||url.hostname==='cdn.jsdelivr.net'
-    ||url.hostname==='everyayah.com'
+    ||url.hostname==='cdn.islamic.network'  // la récitation streamée : mise en cache côté client, comme leurs conditions le demandent
     ||/\.(png|jpe?g|mp3|mp4|woff2?)$/.test(url.pathname);
   if(cacheFirst){
     e.respondWith((async()=>{

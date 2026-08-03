@@ -1012,6 +1012,53 @@
   .botnav .bn{ padding:9px var(--nav-pad); }
   .onb{ padding-top:calc(8px + env(safe-area-inset-top,0px)); padding-bottom:14px; }
 }
+  /* ── Récitateur : la ligne d'accès et son sélecteur plein écran ── */
+  .qari{display:flex;align-items:center;gap:8px;width:100%;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px;
+    font-family:var(--ui);font-size:12.5px;font-weight:800;color:var(--muted);text-align:left;cursor:pointer}
+  .qari b{margin-left:auto;color:var(--gold2);font-size:13px;font-weight:900}
+  .qari .chev{color:var(--gold2);font-weight:900;font-size:14px}
+  .qsel{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column;
+    padding-top:env(safe-area-inset-top,0px)}
+  .qsel.on{display:flex}
+  .qsel-top{display:flex;align-items:center;gap:12px;padding:16px 20px 10px;flex:none}
+  .qsel-top .qx{background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1}
+  .qsel-top h3{font-size:17px;font-weight:900}
+  .qsel-top .qi{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--info);background:none;
+    color:var(--info);font-size:12px;font-weight:900;display:grid;place-items:center;line-height:1;cursor:pointer}
+  .qsel-top .qi.on{background:var(--info);color:#1b2529}
+  .qbulle{position:absolute;top:calc(46px + env(safe-area-inset-top,0px));left:20px;right:20px;z-index:70;
+    padding:11px 13px;border-radius:12px;background:#22323A;border:1px solid #33505E;
+    font-size:12.5px;color:#C6D9E2;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.5);display:none}
+  .qbulle.on{display:block}
+  .qbulle:before{content:'';position:absolute;top:-6px;left:118px;width:10px;height:10px;
+    background:#22323A;border-left:1px solid #33505E;border-top:1px solid #33505E;transform:rotate(45deg)}
+  .qpin{margin:0 14px 4px;padding:9px 12px 11px;border-radius:14px;background:#3A2F26;
+    border:2px solid var(--gold-d);display:flex;flex-direction:column;gap:4px;flex:none}
+  .qpin .cap{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-d)}
+  .qlist{flex:1;overflow-y:auto;padding:0 14px calc(14px + env(safe-area-inset-bottom,0px))}
+  .qgrp{font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:14px 6px 8px}
+  .qgrp em{font-style:normal;color:var(--lock);letter-spacing:0;text-transform:none;font-weight:700}
+  .qrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--panel);
+    border:2px solid transparent;border-radius:14px;padding:9px 10px 9px 12px;margin-bottom:7px;
+    color:var(--cream);font-family:var(--ui);cursor:pointer}
+  .qrow.on{border-color:var(--gold-d);background:#3A2F26}
+  .qrow .tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);
+    display:grid;place-items:center;font-size:11px;color:#241f1d}
+  .qrow.on .tick{background:var(--gold);border-color:var(--gold)}
+  .qnm{flex:1;min-width:0}
+  .qnm .fr{display:block;font-size:14px;font-weight:800;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qnm .arb{display:block;font-family:var(--ar);direction:rtl;text-align:right;font-size:13.5px;color:var(--muted);line-height:1.7}
+  .qsec{flex:none;font-size:12.5px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
+  .qsec em{font-style:normal;font-size:9.5px;font-weight:800;margin-left:1px;color:var(--lock)}
+  .qrow.on .qsec{color:var(--gold2)}
+  .qhear{flex:none;display:flex;align-items:center;gap:5px;border:2px solid var(--line);border-radius:11px;
+    padding:6px 9px;font-size:11px;font-weight:900;color:var(--muted)}
+  .qrow.play .qhear{border-color:var(--gold-d);color:var(--gold2)}
+  .qrow.load .qhear{border-color:var(--info);color:var(--info)}
+  .qpin .qrow{background:transparent;border:none;padding:0;margin:0}
+  /* la voix choisie est épinglée en haut : elle ne se répète pas dans la liste */
+  .qlist .qrow.on{display:none}
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1048,6 +1095,13 @@
   </div>
 </div>
 
+<div class="qsel" id="qsel" onclick="qariBulleOff()">
+<div class="qsel-top"><button class="qx" onclick="closeQari()">✕</button><h3>Récitateur</h3>
+<button class="qi" id="qbi" onclick="event.stopPropagation();qariBulleTog()">i</button></div>
+<div class="qbulle" id="qbulle">Ces voix sont diffusées depuis leur source. Elles nécessitent une connexion internet contrairement aux leçons qui sont accessibles hors ligne.</div>
+<div class="qpin" id="qpin"></div>
+<div class="qlist" id="qlist"></div>
+</div>
 <div class="finish" id="finish">
   <div class="big" id="fin-icon">✓</div>
   <h2 id="fin-title">Leçon terminée !</h2>
@@ -1472,7 +1526,7 @@ UNITS.forEach(function(U){U.strokes={};U.strokesPos={};(U.letters||[]).forEach(f
    Statique aujourd'hui (une seule sourate) ; miroir des futures tables
    units/lessons du backend Supabase. Ajouter une sourate = ajouter une entrée. */
 const SOURATES=[
- { no:1, nom:'Al-Fātiḥa', ar:'الفاتحة', sub:'L\u2019Ouverture · 7 versets · 7 unités',
+ { no:1, first:1, nom:'Al-Fātiḥa', ar:'الفاتحة', sub:'L\u2019Ouverture · 7 versets · 7 unités',
    verses:FATIHA, units:UNITS,
    tr:[ // traduction mot à mot (alignée sur les mots de chaque verset)
     ['Au nom','d\u2019Allah','le Tout-Miséricordieux','le Très-Miséricordieux'],
@@ -1934,7 +1988,7 @@ function fixOrdreFormes(){
 
 /* ================= ÉTAT ================= */
 const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
-const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null};
+const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qari:'ar.aymanswoaid'};
 function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
 function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} cloudSaveSoon();}
 
@@ -2482,7 +2536,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='alphabet-sans-francais · la 1re leçon ne passe plus par l’alphabet français (voyelles, m+a) ni par le mot « école » · sw v70';
+const BUILD='recitateur-selecteur · 17 voix streamées depuis cdn.islamic.network, plus aucune récitation hébergée · sw v71';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2821,7 +2875,7 @@ function renderStep(){
     window._spot={need,found:0};
     const tgt=ALIF_FAM.includes(st.L)?'ا · أ · إ':st.L;
     body.innerHTML='<div class="q-title">Verset '+(st.vi+1)+' — touche tous les <span class="gold" style="font-size:30px">'+tgt+'</span></div>'+
-      '<button class="speak" onclick="playVerse('+st.vi+')">🔊 Écouter le verset (al-ʿAfāsī)</button>'+
+      '<button class="speak" onclick="playVerse('+st.vi+')">🔊 Écouter le verset ('+qariCur().fr+')</button>'+
       '<button class="zoom-btn" onclick="zoomVerse(this)">🔍 Agrandir</button>'+
       '<div class="verse" id="verseBox">'+html+'</div>'+
       '<div class="hint" id="spot-c" style="text-align:center">0 / '+need+' trouvés</div>';
@@ -2926,7 +2980,7 @@ function renderStep(){
     window._vw={vi:st.vi,words:words,wi:0,units:splitUnits(words[0]),ch:[],err:false};
     body.innerHTML='<div class="q-title">Réécris le verset '+(st.vi+1)+' ✨</div>'+
       '<div class="hint" style="margin:-8px 0 12px">Le verset se construit sous tes yeux, mot après mot — avec les harakats.</div>'+
-      '<button class="speak" style="margin:0 auto 12px" onclick="playVerse('+st.vi+')">🔊 Écouter le verset (al-ʿAfāsī)</button>'+
+      '<button class="speak" style="margin:0 auto 12px" onclick="playVerse('+st.vi+')">🔊 Écouter le verset ('+qariCur().fr+')</button>'+
       '<div class="slots linear-ar" id="vwVerse" style="font-size:34px;line-height:2"></div>'+
       '<div class="hint" id="vwMsg" style="text-align:center;margin:6px 0;min-height:18px"></div>'+
       '<div class="tiles" id="vwTiles"></div>';
@@ -4377,21 +4431,103 @@ if(typeof document!=='undefined'&&document.addEventListener){
   document.addEventListener('pointerdown',warmVoices,{once:true});
   document.addEventListener('touchstart',warmVoices,{once:true});
 }
-function playVerse(i){ // récitation al-ʿAfāsī : fichier auto-hébergé d'abord, everyayah en secours
+/* ── LES RÉCITATEURS ─────────────────────────────────────────────────────────
+   17 voix, diffusées par cdn.islamic.network. RIEN n'est hébergé chez nous :
+   aucun grand catalogue ne concède l'usage commercial (Quran Foundation exige un
+   contrat écrit, QuranicAudio et everyayah sont non-commerciaux), mais les
+   conditions d'islamic.network autorisent explicitement le streaming et
+   demandent seulement de mettre en cache côté client — ce que sw.js fait.
+   Contrepartie assumée par Myriam le 02/08/2026 : « tant pis pour le réseau,
+   je préfère la légalité ». Les LEÇONS, elles, restent hors ligne.
+
+   kb  : le débit FAIT PARTIE de l'URL et change d'une voix à l'autre. Une valeur
+         fausse renvoie un 403, pas un son de moindre qualité.
+   sec : durée moyenne d'un verset de la Fātiḥa, mesurée sur les fichiers réels
+         (afinfo, pas la taille du mp3 : le débit réel diffère parfois de l'URL).
+         C'est le tempo, donc l'articulation — la liste s'ordonne dessus.
+
+   ÉCARTÉES APRÈS VÉRIFICATION, ne pas les remettre :
+   · ar.minshawimujawwad — fichiers identiques au MD5 près à ar.minshawi ;
+   · ar.abdulsamad — découpage décalé (67 s pour la basmala, 145 s pour الم).  */
+const VOIX=[
+ {id:'ar.aymanswoaid',        kb:64,  sec:7.1, fr:'Ayman Suwayd',          ar:'أيمن سويد',            st:'m', tag:'tajwīd'},
+ {id:'ar.ibrahimakhbar',      kb:32,  sec:7.2, fr:'Ibrāhīm al-Akhḍar',     ar:'إبراهيم الأخضر',       st:'m'},
+ {id:'ar.hudhaify',           kb:128, sec:7.0, fr:'ʿAlī al-Ḥudhayfī',      ar:'علي الحذيفي',          st:'m'},
+ {id:'ar.muhammadayyoub',     kb:128, sec:6.9, fr:'Muḥammad Ayyūb',        ar:'محمد أيوب',            st:'m'},
+ {id:'ar.alafasy',            kb:128, sec:6.1, fr:'al-ʿAfāsī',             ar:'مشاري راشد العفاسي',   st:'m'},
+ {id:'ar.husary',             kb:128, sec:6.1, fr:'al-Ḥuṣarī',             ar:'محمود خليل الحصري',    st:'m'},
+ {id:'ar.shaatree',           kb:128, sec:5.9, fr:'Abū Bakr ash-Shāṭirī',  ar:'أبو بكر الشاطري',      st:'m'},
+ {id:'ar.abdullahbasfar',     kb:192, sec:5.8, fr:'ʿAbdullāh Basfar',      ar:'عبد الله بصفر',        st:'m'},
+ {id:'ar.minshawi',           kb:128, sec:5.6, fr:'al-Minshāwī',           ar:'محمد صديق المنشاوي',   st:'m'},
+ {id:'ar.abdulbasitmurattal', kb:192, sec:5.1, fr:'ʿAbd al-Bāsiṭ',         ar:'عبد الباسط عبد الصمد', st:'m'},
+ {id:'ar.muhammadjibreel',    kb:128, sec:5.1, fr:'Muḥammad Jibrīl',       ar:'محمد جبريل',           st:'m'},
+ {id:'ar.hanirifai',          kb:192, sec:5.0, fr:'Hānī ar-Rifāʿī',        ar:'هاني الرفاعي',         st:'m'},
+ {id:'ar.saoodshuraym',       kb:64,  sec:4.6, fr:'ash-Shuraym',           ar:'سعود الشريم',          st:'m'},
+ {id:'ar.abdurrahmaansudais', kb:192, sec:4.2, fr:'as-Sudays',             ar:'عبد الرحمن السديس',    st:'m'},
+ {id:'ar.ahmedajamy',         kb:128, sec:4.0, fr:'Aḥmad al-ʿAjamī',       ar:'أحمد العجمي',          st:'m'},
+ {id:'ar.mahermuaiqly',       kb:128, sec:3.7, fr:'Māhir al-Muʿayqilī',    ar:'ماهر المعيقلي',        st:'m'},
+ {id:'ar.husarymujawwad',     kb:128, sec:11.1,fr:'al-Ḥuṣarī',             ar:'محمود خليل الحصري',    st:'j'}
+];
+function qariCur(){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===S.qari)return VOIX[i]; return VOIX[0]; }
+function qariById(id){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===id)return VOIX[i]; return VOIX[0]; }
+function qariUrl(v,aya){ return 'https://cdn.islamic.network/quran/audio/'+v.kb+'/'+v.id+'/'+aya+'.mp3'; }
+var _qariPlay=null; // la voix qu'on écoute DANS le sélecteur (≠ la voix choisie)
+
+function openQari(){ qariRender(); document.getElementById('qsel').classList.add('on'); }
+function closeQari(){ stopAudio(); _qariPlay=null; qariBulleOff(); document.getElementById('qsel').classList.remove('on'); }
+/* La bulle ⓘ se referme au geste suivant, où qu'il tombe — pas de croix à viser. */
+function qariBulleTog(){ var b=document.getElementById('qbulle'),i=document.getElementById('qbi');
+  var o=!b.classList.contains('on'); b.classList.toggle('on',o); i.classList.toggle('on',o); }
+function qariBulleOff(){ var b=document.getElementById('qbulle'),i=document.getElementById('qbi');
+  if(b)b.classList.remove('on'); if(i)i.classList.remove('on'); }
+
+function qariPick(id){ S.qari=id; save(); qariRender();
+  try{ renderReviser(curReviserTab); }catch(e){} }   // la ligne « Récitateur » se met à jour
+function qariHear(id,ev){
+  ev.stopPropagation();                              // toucher ▶ n'est PAS choisir la voix
+  if(_qariPlay===id){ stopAudio(); _qariPlay=null; qariRender(); return; }
+  stopAudio(); _qariPlay=id; qariRender('load');     // un seul son à la fois
+  var gen=_sndGen, v=qariById(id);
+  var a=new Audio(qariUrl(v,1)); _curAudio=a;        // verset 1 du mushaf = Al-Fātiḥa, verset 1
+  var ko=function(){ if(gen!==_sndGen)return; _qariPlay=null; qariRender(); toast('Récitation indisponible sans connexion'); };
+  a.addEventListener('playing',function(){ if(gen===_sndGen)qariRender('play'); },{once:true});
+  a.addEventListener('ended',function(){ if(gen!==_sndGen)return; _qariPlay=null; qariRender(); },{once:true});
+  a.addEventListener('error',ko,{once:true});
+  var p=a.play(); if(p&&p.catch)p.catch(ko);
+}
+function qariRow(v,etat){
+  var on=(v.id===S.qari), pl=(_qariPlay===v.id);
+  return '<button class="qrow'+(on?' on':'')+(pl?' '+(etat||'play'):'')+'" onclick="qariPick(\''+v.id+'\')">'+
+    '<span class="tick">'+(on?'✓':'')+'</span>'+
+    '<span class="qnm"><span class="fr">'+v.fr+
+      (v.tag?' <em style="font-style:normal;color:var(--info);font-size:11px">· '+v.tag+'</em>':'')+
+      '</span><span class="arb">'+v.ar+'</span></span>'+
+    '<span class="qsec">'+Math.round(v.sec)+'<em>s</em></span>'+
+    /* deux actions sur une ligne : le bouton DIT ce qu'il fait, l'icône seule ne suffirait pas */
+    '<span class="qhear" onclick="qariHear(\''+v.id+'\',event)">'+
+      (pl?(etat==='load'?'⋯ chargement':'⏸ stop'):'▶ écouter')+'</span></button>';
+}
+function qariRender(etat){
+  var h='';
+  [['m','Murattal','· de la plus posée à la plus rapide'],['j','Mujawwad','· chanté']].forEach(function(g){
+    var lot=VOIX.filter(function(v){return v.st===g[0];}).sort(function(a,b){return b.sec-a.sec;});
+    if(!lot.length)return;
+    h+='<div class="qgrp">'+g[1]+' <em>'+g[2]+'</em></div>'+
+       lot.map(function(v){return qariRow(v,etat);}).join('');
+  });
+  document.getElementById('qlist').innerHTML=h;
+  document.getElementById('qpin').innerHTML='<span class="cap">voix choisie</span>'+qariRow(qariCur(),etat);
+}
+
+function playVerse(i){ // le verset, streamé depuis la source, avec la voix choisie
   try{
     stopAudio();
-    const gen=_sndGen;
-    const a=new Audio('audios-app-alaq/fatiha-'+(i+1)+'.mp3'); _curAudio=a;
-    let settled=false;
-    const fallback=()=>{ if(settled||gen!==_sndGen)return; settled=true;
-      try{a.pause();}catch(_){ }
-      const b=new Audio('https://everyayah.com/data/Alafasy_128kbps/00100'+(i+1)+'.mp3'); _curAudio=b;
-      b.play().catch(()=>toast('Audio indisponible hors connexion'));
-    };
-    a.addEventListener('playing',()=>{settled=true;},{once:true});
-    a.addEventListener('error',fallback,{once:true});
-    const pr=a.play(); if(pr&&pr.catch)pr.catch(fallback);
-    setTimeout(()=>{ if(!settled&&a.paused)fallback(); },1200);
+    var gen=_sndGen;
+    var SRv=SOURATES[(typeof curSourate!=='undefined'?curSourate:0)]||SOURATES[0];
+    var a=new Audio(qariUrl(qariCur(),(SRv.first||1)+i)); _curAudio=a;  // n° GLOBAL du verset
+    var ko=function(){ if(gen===_sndGen)toast('Récitation indisponible sans connexion'); };
+    a.addEventListener('error',ko,{once:true});
+    var p=a.play(); if(p&&p.catch)p.catch(ko);
   }catch(e){}
 }
 // ===== Reconnaissance vocale (lecture à voix haute, modèle Duolingo) =====
@@ -5365,7 +5501,8 @@ function renderReviser(sub){
     const reciter='<button class="ritem all" onclick="startQuranRecite()">⚡ Toute la sourate</button>'+
       SR.verses.map(function(v,i){return '<button class="ritem" onclick="startQuranReciteV('+i+')">Verset '+(i+1)+
         '<span class="var">'+v+'</span></button>';}).join('');
-    h+='<div class="spick">'+
+    h+='<button class="qari" onclick="openQari()">Récitateur <b>'+qariCur().fr+'</b><span class="chev">›</span></button>'+
+      '<div class="spick">'+
       '<div class="sbtn" onclick="event.stopPropagation();var m=document.getElementById(\'smenu\');if(m)m.classList.toggle(\'open\')">'+
         '<span style="font-family:var(--quran);font-size:19px;color:var(--gold)">'+SR.ar+'</span> '+SR.nom+
         '<span class="pct">lisible à '+pc+' %</span><span style="color:var(--gold2);font-weight:900">▾</span></div>'+
