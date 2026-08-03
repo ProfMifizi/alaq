@@ -6,7 +6,12 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v71-2026-08-03';
+const CACHE='alaq-v72-2026-08-03';  // L'APP : versionné, purgé à chaque livraison
+/* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
+   ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
+   versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
+   chaque appareil. Ici ils se téléchargent une seule fois dans la vie de l'appareil. */
+const MEDIA='alaq-medias';
 const CORE=['.','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-alaq-bilan.png",
@@ -384,16 +389,32 @@ self.addEventListener('install',e=>{
    « precache » quand elle est affichée. Avant, ils saturaient le réseau pendant le chargement
    (écran blanc à chaque déploiement). */
 let _preFait=false;
+/* Six téléchargements à la fois, pas 360. Lancer toute la liste d'un coup ne la rendait
+   pas plus rapide — le navigateur la met de toute façon en file — mais cette file entrait
+   en concurrence avec ce dont l'app a besoin au même instant : Supabase, les polices, et
+   désormais la récitation streamée. Et l'on SAUTE ce qui est déjà là : au deuxième
+   passage, c'est 360 lectures de cache, zéro requête réseau. */
+async function enFile(liste,c,n){
+  let i=0;
+  const ouvrier=async()=>{
+    while(i<liste.length){
+      const u=liste[i++];
+      try{ if(await c.match(u))continue; await c.add(u); }catch(_){ } // un 404 ne doit rien casser
+    }
+  };
+  await Promise.all(Array.from({length:n},ouvrier));
+}
 async function precacheLourd(){
   if(_preFait)return; _preFait=true;
-  const c=await caches.open(CACHE);
-  await Promise.allSettled(IMAGES.concat(AUDIOS).map(u=>c.add(u).catch(()=>{})));
+  const c=await caches.open(MEDIA);
+  await enFile(IMAGES.concat(AUDIOS),c,6);
 }
 self.addEventListener('message',e=>{ if(e.data==='precache')e.waitUntil(precacheLourd()); });
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
     const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+    // MEDIA survit aux livraisons : c'est tout l'objet de la séparation
+    await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA).map(k=>caches.delete(k)));
     self.clients.claim();
   })());
 });
@@ -422,7 +443,8 @@ self.addEventListener('fetch',e=>{
       if(hit)return hit;
       try{
         const r=await fetch(e.request);
-        if(r&&(r.ok||r.type==='opaque')){const c=await caches.open(CACHE);c.put(e.request,r.clone());}
+        // sons, polices, icônes, récitation : tout ça va dans MEDIA, jamais dans le cache versionné
+        if(r&&(r.ok||r.type==='opaque')){const c=await caches.open(MEDIA);c.put(e.request,r.clone());}
         return r;
       }catch(_){return Response.error();}
     })());
