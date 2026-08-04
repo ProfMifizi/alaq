@@ -44,12 +44,15 @@ const CHAMPS = [
   { k:'lieuNaissance', l:'Lieu de naissance (ville)',    t:'text' },
   { k:'nationalite', l:'Nationalité',                    t:'text' },
   { k:'adresse',     l:'Adresse complète',               t:'text', large:1 },
-  { k:'pays',        l:'Pays de résidence',              t:'text' },
+  // « où tu vis et enregistres » : c'est la RÉSIDENCE qui compte, jamais la nationalité
+  { k:'pays',        l:'Pays de résidence (où tu vis et enregistres)', t:'text' },
   { k:'statut',      l:'Tu interviens en tant que',      t:'select',
-    o:[['independant','travailleur indépendant immatriculé'],
+    o:[['independant','travailleur indépendant'],
        ['societe','société'],
-       ['particulier','particulier (non immatriculé)']] },
-  { k:'immatriculation', l:'Numéro d’immatriculation (SIRET, registre du commerce…)', t:'text', si:d => d.statut !== 'particulier' },
+       ['particulier','particulier']] },
+  // facultatif : beaucoup de gens n'ont aucun numéro, et c'est un cas prévu par le contrat
+  { k:'immatriculation', l:'Numéro d’immatriculation — laisse vide si tu n’en as pas',
+    t:'text', large:1, opt:1 },
   { k:'raisonSociale',   l:'Raison sociale',       t:'text', si:d => d.statut === 'societe' },
   { k:'formeJuridique',  l:'Forme juridique',      t:'text', si:d => d.statut === 'societe' },
 ];
@@ -130,10 +133,28 @@ function montreContrat(SB, utilisateur, REMUNERATION, apresSignature) {
   ['cLu','cCede','cVrai'].forEach(i => document.getElementById(i).onchange = majBouton);
 
   function manquants() {
-    return CHAMPS.filter(c => (!c.si || c.si(d)) && !d[c.k]).map(c => c.l);
+    return CHAMPS.filter(c => !c.opt && (!c.si || c.si(d)) && !d[c.k]).map(c => c.l);
+  }
+
+  /* ⚠️ Un particulier NON IMMATRICULÉ qui enregistre DEPUIS LA FRANCE : le concours
+     rémunéré d'un artiste y est présumé être un contrat de travail (C. trav. L. 7121-3),
+     et l'exception L. 7121-4 ne joue que pour un professionnel immatriculé. Le payer
+     comme un prestataire exposerait au travail dissimulé. Le passage obligé est le GUSO
+     (guichet unique du spectacle occasionnel) ou un contrat de travail en bonne et due
+     forme — pas ce contrat-ci. On refuse de le laisser signer. */
+  const sansAccent = t => (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  function blocageFrance() {
+    return !estImmatricule(d) && /^(la )?france$/.test(sansAccent(d.pays));
   }
   function majBouton() {
     const m = manquants();
+    if (blocageFrance()) {
+      valider.disabled = true;
+      etat.className = 'etat ko';
+      etat.textContent = 'Non immatriculé et résidant en France : ce contrat ne convient pas. '
+                       + 'Écris à ' + CESSIONNAIRE.courriel + ', une autre formule est nécessaire.';
+      return;
+    }
     valider.disabled = m.length > 0 || vide || !cases();
     etat.className = 'etat';
     etat.textContent = m.length ? 'à compléter : ' + m.slice(0, 3).join(', ') + (m.length > 3 ? '…' : '')
@@ -157,6 +178,7 @@ function montreContrat(SB, utilisateur, REMUNERATION, apresSignature) {
   valider.onclick = async () => {
     valider.disabled = true; etat.className = 'etat'; etat.textContent = 'signature en cours…';
     try {
+      if (blocageFrance()) throw new Error('cas non couvert par ce contrat');
       const texte = contratTexte(d);                       // le texte EXACT, sans remplissage
       const sceau = await empreinte(texte);
       const signature = toile.toDataURL('image/png');

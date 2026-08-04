@@ -23,7 +23,7 @@
        en professionnel indépendant immatriculé (L7121-4) — d'où l'article 6 et la
        déclaration d'indépendance obligatoire dans le formulaire.                 */
 
-const CONTRAT_VERSION = '2026-08-04.2';
+const CONTRAT_VERSION = '2026-08-04.4';
 
 /* Les valeurs manquantes sont marquées « ⟨…⟩ » : la fabrication REFUSE de construire
    le dossier en ligne tant qu'il en reste une. Voir construire-en-ligne.js. */
@@ -40,16 +40,60 @@ const CESSIONNAIRE = {
   projet:        'ALAQ — application d’apprentissage de la lecture de l’arabe et du Qorān',
 };
 
+/* ARTICLE 6 — il change selon que la personne est immatriculée ou non.
+   ⚠️ Ne JAMAIS faire déclarer une immatriculation à qui n'en a pas : une fausse
+   déclaration fragilise tout l'acte. Et la présomption de contrat de travail des
+   artistes (C. trav. L. 7121-3) ne s'écarte par l'exception L. 7121-4 QUE pour un
+   professionnel immatriculé — un particulier ne peut pas s'en prévaloir.
+   ⚠️ La validité de la CESSION, elle, ne dépend pas de l'immatriculation : un
+   particulier cède valablement ses droits voisins. Ce qui change, c'est le régime
+   social et fiscal du paiement, et le risque de requalification EN FRANCE. */
+function article6(d) {
+  const commun = `
+L’Interprète déclare agir en toute autonomie quant à ses moyens, son matériel, son
+lieu et ses horaires de travail. Il n’existe entre les parties aucun lien de
+subordination, ni aucune exclusivité de temps de travail.
+
+La prestation est réalisée intégralement depuis ${d.pays}, au moyen du matériel
+personnel de l’Interprète.`;
+
+  if (!estImmatricule(d)) return `${commun}
+
+L’Interprète déclare ne pas être immatriculé en qualité de professionnel. Il fait son
+affaire personnelle de la déclaration des sommes perçues auprès des autorités
+compétentes de son pays de résidence, et garantit le Producteur contre toute
+réclamation d’un organisme social ou fiscal à ce titre.
+
+Les parties conviennent que la prestation, ponctuelle et réalisée hors du territoire
+français, ne relève pas du régime français des artistes du spectacle.`;
+
+  return `${commun}
+
+L’Interprète déclare être en règle au regard des obligations déclaratives, sociales et
+fiscales qui lui incombent dans son pays de résidence, et fait son affaire personnelle
+de la déclaration des sommes perçues.
+
+L’Interprète est informé de ce que l’article L. 7121-3 du code du travail français
+institue une présomption de contrat de travail pour le concours rémunéré d’un artiste
+du spectacle, et déclare relever de l’exception prévue à l’article L. 7121-4, exerçant
+son activité en professionnel indépendant immatriculé.`;
+}
+
 /* Le texte. `d` = les données saisies par la personne qui signe. */
+/* Est-on immatriculé ? Le FAIT, pas la case du menu : quelqu'un peut se dire
+   « indépendant » sans avoir de numéro. C'est le numéro qui emporte les conséquences. */
+const estImmatricule = d => !!(d.immatriculation && String(d.immatriculation).trim());
+
 function contratTexte(d) {
   const C = CESSIONNAIRE;
   /* le champ « date » du navigateur rend 1990-05-02 ; sur un contrat on écrit 02/05/1990 */
   const jour = t => /^\d{4}-\d{2}-\d{2}$/.test(t || '') ? t.slice(8) + '/' + t.slice(5, 7) + '/' + t.slice(0, 4) : t;
+  const num = estImmatricule(d) ? `, immatriculé${d.statut === 'societe' ? 'e' : ''} sous le numéro ${d.immatriculation}` : '';
   const qualite = d.statut === 'societe'
-    ? `${d.raisonSociale}, ${d.formeJuridique}, immatriculée sous le numéro ${d.immatriculation}, dont le siège est ${d.adresse} (${d.pays}), représentée par ${d.prenom} ${d.nom}`
+    ? `${d.raisonSociale}, ${d.formeJuridique}${num}, dont le siège est ${d.adresse} (${d.pays}), représentée par ${d.prenom} ${d.nom}`
     : d.statut === 'independant'
-      ? `${d.prenom} ${d.nom}, travailleur indépendant immatriculé sous le numéro ${d.immatriculation}, demeurant ${d.adresse} (${d.pays})`
-      : `${d.prenom} ${d.nom}, demeurant ${d.adresse} (${d.pays})`;
+      ? `${d.prenom} ${d.nom}, travailleur indépendant${num}, demeurant ${d.adresse} (${d.pays})`
+      : `${d.prenom} ${d.nom}${num}, demeurant ${d.adresse} (${d.pays})`;
 
   return `CONTRAT D’ENREGISTREMENT ET DE CESSION DE DROITS VOISINS D’ARTISTE-INTERPRÈTE
 
@@ -158,19 +202,7 @@ due à quelque titre que ce soit.
 
 
 ARTICLE 6 — QUALITÉ DE L’INTERPRÈTE
-
-L’Interprète déclare intervenir en qualité de prestataire indépendant, agissant en
-toute autonomie quant à ses moyens, son matériel, son lieu et ses horaires de travail.
-Il n’existe entre les parties aucun lien de subordination.
-
-L’Interprète déclare être en règle au regard des obligations déclaratives, sociales et
-fiscales qui lui incombent dans son pays de résidence, et fait son affaire personnelle
-de la déclaration des sommes perçues.
-
-L’Interprète est informé de ce que l’article L. 7121-3 du code du travail français
-institue une présomption de contrat de travail pour le concours rémunéré d’un artiste
-du spectacle, et déclare relever de l’exception prévue à l’article L. 7121-4, exerçant
-son activité en professionnel indépendant immatriculé.
+${article6(d)}
 
 
 ARTICLE 7 — GARANTIES DE L’INTERPRÈTE
@@ -249,4 +281,4 @@ En cochant les cases prévues et en apposant sa signature, l’Interprète décl
 `;
 }
 
-if (typeof module !== 'undefined') module.exports = { CONTRAT_VERSION, CESSIONNAIRE, contratTexte };
+if (typeof module !== 'undefined') module.exports = { CONTRAT_VERSION, CESSIONNAIRE, contratTexte, estImmatricule };
