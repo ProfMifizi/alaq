@@ -23,7 +23,7 @@
        en professionnel indépendant immatriculé (L7121-4) — d'où l'article 6 et la
        déclaration d'indépendance obligatoire dans le formulaire.                 */
 
-const CONTRAT_VERSION = '2026-08-04.4';
+const CONTRAT_VERSION = '2026-08-04.5';
 
 /* Les valeurs manquantes sont marquées « ⟨…⟩ » : la fabrication REFUSE de construire
    le dossier en ligne tant qu'il en reste une. Voir construire-en-ligne.js. */
@@ -37,7 +37,12 @@ const CESSIONNAIRE = {
   siren:         '528 136 666',
   adresse:       '6 passage de la Porte Comprise, 95800 Cergy, France',
   courriel:      'prof.mifizi@gmail.com',
-  projet:        'ALAQ — application d’apprentissage de la lecture de l’arabe et du Qorān',
+  /* ⚠️ « Qorân » et non « Qorān » : le ā (U+0101) n'existe pas dans la table de la police
+     standard du PDF. jsPDF bascule alors TOUTE la ligne en encodage deux octets — chaque
+     lettre s'espace — et le caractère fautif DISPARAÎT du document. Un seul caractère
+     suffit à faire s'évaporer du texte d'un contrat. Le garde-fou est dans
+     construire-en-ligne.js : la fabrication refuse tout caractère hors WinAnsi. */
+  projet:        'ALAQ — application d’apprentissage de la lecture de l’arabe et du Qorân',
 };
 
 /* ARTICLE 6 — il change selon que la personne est immatriculée ou non.

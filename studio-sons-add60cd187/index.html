@@ -171,7 +171,10 @@ async function ouvre() {
 
 function entreDansLeStudio() {
   document.getElementById('contrat').style.display = 'none';
-  studio.style.display = '';
+  // ⚠️ MÊME PIÈGE QUE POUR #contrat : le masquage vient de la RÈGLE CSS
+  //    #studio{display:none} ; remettre le style en ligne à '' la laisse s'appliquer,
+  //    et l'écran reste blanc après la signature. Il faut 'block'.
+  studio.style.display = 'block';
   monteChoixMicro(micbar).then(relit => relit(false));
   charge();
 }
