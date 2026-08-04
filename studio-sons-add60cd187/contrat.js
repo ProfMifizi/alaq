@@ -50,9 +50,11 @@ const CHAMPS = [
     o:[['independant','travailleur indépendant'],
        ['societe','société'],
        ['particulier','particulier']] },
-  // facultatif : beaucoup de gens n'ont aucun numéro, et c'est un cas prévu par le contrat
+  // Facultatif ET caché pour un particulier : lui montrer un champ qui ne le concerne
+  // pas invite à le remplir par erreur. Reste optionnel pour un indépendant, qui peut
+  // ne pas encore avoir de numéro — le contrat sait traiter les deux cas.
   { k:'immatriculation', l:'Numéro d’immatriculation — laisse vide si tu n’en as pas',
-    t:'text', large:1, opt:1 },
+    t:'text', large:1, opt:1, si:d => d.statut !== 'particulier' },
   { k:'raisonSociale',   l:'Raison sociale',       t:'text', si:d => d.statut === 'societe' },
   { k:'formeJuridique',  l:'Forme juridique',      t:'text', si:d => d.statut === 'societe' },
 ];
@@ -162,7 +164,13 @@ function montreContrat(SB, utilisateur, REMUNERATION, apresSignature) {
                      : !cases() ? 'il reste une case à cocher' : '';
   }
   function redessine() {
-    CHAMPS.forEach(c => { entrees[c.k].l.style.display = (!c.si || c.si(d)) ? '' : 'none'; });
+    CHAMPS.forEach(c => {
+      const visible = !c.si || c.si(d);
+      entrees[c.k].l.style.display = visible ? '' : 'none';
+      // ⚠️ VIDER un champ qu'on cache : sinon quelqu'un qui saisit un numéro puis
+      //    bascule sur « particulier » signerait un contrat le disant immatriculé.
+      if (!visible && d[c.k]) { d[c.k] = ''; entrees[c.k].i.value = ''; }
+    });
     boite.textContent = contratTexte(remplis(d));
     majBouton();
   }

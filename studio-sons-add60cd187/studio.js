@@ -329,7 +329,11 @@ async function poste(route, corps) {
    on écoute ce qu'on vient de dire et on garde (ou on refait).
    `deposer` dit OÙ va la prise : sur le disque en local, dans Supabase en ligne — même
    composant des deux côtés, une seule chaîne de nettoyage à entretenir.             */
-const DEPOT_LOCAL = (fichier, mp3) => poste('/api/enregistrer', { fichier, mp3: base64(mp3) });
+/* ⚠️ Une prise ne part JAMAIS directement dans l'app : elle attend dans
+   audios-generes-a-valider/, on la réécoute, et le bouton « prendre » l'installe.
+   Un son qu'on vient d'enregistrer n'a pas encore été jugé — surtout pas à l'oreille. */
+const DEPOT_LOCAL = (fichier, mp3) =>
+  poste('/api/enregistrer', { fichier, mp3: base64(mp3), dossier: 'attente' });
 
 function colonneMicro(cellule, fichier, apresDepot, deposer = DEPOT_LOCAL) {
   const td = document.createElement('div'); td.className = 'rec'; cellule.append(td);
@@ -390,14 +394,15 @@ function colonneMicro(cellule, fichier, apresDepot, deposer = DEPOT_LOCAL) {
 
     const garder = document.createElement('button');
     garder.className = 'bok apres'; garder.textContent = '✓ Garder';
-    garder.title = 'garder cette prise';
+    garder.title = 'mettre cette prise de côté — elle n’entre dans l’app qu’avec « prendre »';
     garder.onclick = async () => {
       garder.disabled = true; garder.textContent = '…';
       const r = await deposer(fichier, res.mp3);
       if (r.erreur) { garder.disabled = false; garder.textContent = '✓ Garder';
                       etat.className = 'etat ko'; etat.textContent = r.erreur; return; }
-      toast(r.sauvegarde ? fichier + ' remplacé — l’ancien est dans _remplaces/'
-                         : fichier + (r.envoye ? ' envoyé ✓' : ' déposé'));
+      toast(r.envoye ? fichier + ' envoyé ✓'
+          : r.dossier === 'attente' ? fichier + ' mis de côté — écoute-le, puis « prendre »'
+          : fichier + ' remplacé — l’ancien est dans _remplaces/');
       repos(); apresDepot && apresDepot(r);
     };
     td.append(ecoute, duree, garder);
