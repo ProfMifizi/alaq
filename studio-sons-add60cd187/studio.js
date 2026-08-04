@@ -8,11 +8,15 @@
 let _audio = null, _btn = null;
 
 /* Anti-cache : un fichier qu'on vient de réenregistrer doit se rejouer tout de suite.
-   ⚠️ Uniquement sur NOS fichiers. Les URL d'aperçu d'ElevenLabs portent parfois déjà
-   un « ?payload=… » : y coller un second « ? » donne une URL que le navigateur refuse
-   (error code 4), et le son ne part jamais. */
+   ⚠️ N'A DE SENS QUE SUR NOS CHEMINS RELATIFS. Toute URL portant un schéma est laissée
+   intacte, et il y en a deux sortes qu'un « ?t=… » casse net :
+     · blob: — l'enregistrement qu'on vient de faire ; un blob avec un paramètre
+       n'existe pas, le navigateur refuse de le lire ;
+     · https: — les aperçus ElevenLabs, dont certains portent déjà un « ?payload=… »
+       (deux « ? » donnent une adresse refusée, error code 4).
+   Le test de schéma est général : data:, blob:, http:, https: et tout ce qui viendra. */
 function fraiche(url) {
-  if (/^https?:/i.test(url)) return url;                 // URL extérieure : on n'y touche pas
+  if (/^[a-z][a-z0-9+.-]*:/i.test(url)) return url;      // l'URL porte un schéma : ne rien y ajouter
   return url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
 }
 
