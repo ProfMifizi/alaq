@@ -1,0 +1,271 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>ALAQ — enregistrement des sons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="studio.css">
+<style>
+  /* ---- la porte : rien n'est montré tant que la personne n'est pas connectée ---- */
+  #porte{max-width:430px;margin:9vh auto;padding:26px;background:var(--panel);
+    border:1px solid var(--line);border-radius:16px;text-align:center}
+  #porte h1{font-size:22px;margin-bottom:6px}
+  #porte p{color:var(--muted);font-size:13.5px;margin-bottom:16px}
+  #porte input{width:100%;margin-bottom:9px;text-align:center;font-size:15px;padding:10px}
+  #porte button{width:100%;padding:11px;border-radius:999px;background:var(--gold);
+    color:#2a2118;font-weight:800;font-size:15px}
+  #porte .msg{margin-top:11px;font-size:13px;min-height:19px}
+  #studio{display:none}
+  .qui{margin-left:auto;font-size:12.5px;color:var(--muted)}
+  .qui button{text-decoration:underline;font-size:12.5px;color:var(--muted)}
+</style>
+</head><body>
+
+<div id="porte">
+  <h1>🎙 ALAQ</h1>
+  <p>Enregistrement des sons arabes de l’application.<br>Cette page est privée : entre l’adresse
+     e-mail que Myriam a autorisée, tu recevras un code à 6 chiffres.</p>
+  <input type="email" id="mail" placeholder="ton adresse e-mail" autocomplete="email">
+  <input type="text" id="code" placeholder="code à 6 chiffres" inputmode="numeric"
+         autocomplete="one-time-code" style="display:none">
+  <button id="bPorte">Recevoir mon code</button>
+  <div class="msg" id="msgPorte"></div>
+</div>
+
+<div id="studio">
+  <div class="top">
+    <div class="tline">
+      <h1>🎙 Les sons à enregistrer <span class="em">· arabe</span></h1>
+      <span class="qui" id="qui"></span>
+    </div>
+
+    <div class="bilan" id="bilan"></div>
+
+    <div class="filtres">
+      <select id="fUnite"></select>
+      <select id="fFamille"></select>
+      <input type="search" id="fRech" placeholder="chercher un mot, un fichier…">
+      <span class="mini" id="compte"></span>
+    </div>
+
+    <div class="micbar" id="micbar"></div>
+
+    <details class="reglages">
+      <summary>Réglages du nettoyage</summary>
+      <div class="rgrid">
+        <label>Réduction du bruit <span class="val" id="vBruit">12 dB</span>
+          <input type="range" data-reglage="bruit" min="0" max="30" step="1" value="12"
+                 oninput="vBruit.textContent=this.value+' dB'"></label>
+        <label>Renfort de la voix <span class="val" id="vVoix">6 dB</span>
+          <input type="range" data-reglage="voix" min="0" max="18" step="1" value="6"
+                 oninput="vVoix.textContent=this.value+' dB'"></label>
+        <label>Marge de silence <span class="val" id="vMarge">90 ms</span>
+          <input type="range" data-reglage="marge" min="0" max="300" step="10" value="90"
+                 oninput="vMarge.textContent=this.value+' ms'"></label>
+      </div>
+    </details>
+  </div>
+
+  <p class="aide" id="aide"></p>
+
+  <table>
+    <colgroup>
+      <col class="c-u"><col class="c-lec"><col class="c-ar"><col class="c-fic"><col class="c-son"><col class="c-rec">
+    </colgroup>
+    <thead><tr>
+      <th>Unité</th><th>Leçon</th><th>À dire</th><th>Fichier audio</th>
+      <th>Son actuel</th><th>Enregistrer</th>
+    </tr></thead>
+    <tbody id="corps"></tbody>
+  </table>
+</div>
+
+<!-- Version FIGÉE + empreinte : sur une page qui gère une connexion, un CDN compromis
+     pourrait sinon servir un autre script. Le navigateur refuse tout fichier dont
+     l'empreinte ne correspond pas. Pour changer de version : recalculer l'empreinte
+     (openssl dgst -sha384 -binary <fichier> | openssl base64 -A). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.0/dist/umd/supabase.js"
+        integrity="sha384-3lSoufGjgosjqp3JDr/NReX3PjMd3SlC8wJ23CWFjB6DSFNf71I0DhcRTUm9MwgO"
+        crossorigin="anonymous"></script>
+<script src="vendor/lame.min.js"></script>
+<script src="studio.js"></script>
+<script>
+/* ===== réglages injectés à la construction (outils/construire-en-ligne.js) ===== */
+const SUPA_URL = 'https://ykggxipgirgjwhhxmhbn.supabase.co';
+const SUPA_ANON = 'sb_publishable_IpnRJf3j3JfyRhQ0WWSeww_V5ctBrkh';
+const SEAU = 'enregistrements';                 // l'espace de stockage qui reçoit les prises
+const SONS = 'https://app.alaq.fr/audios-app-alaq/';                 // où écouter les sons actuels de l'app
+const ACCENTS = ['#d8463a','#e07a1e','#ecc531','#35a468','#2f74d0','#5350c8','#8a4fc4'];
+
+const SB = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+let INV = null, ETAT = 'manquant';       // on ouvre sur ce qui MANQUE : c'est la mission
+
+/* ---------------------------------------------------------------- LA PORTE
+   Connexion par code e-mail, comme dans l'app. Ce n'est pas qu'un rideau : le droit
+   de déposer est vérifié par Supabase côté serveur, sur l'adresse connectée. Une
+   personne non autorisée peut voir la liste, elle ne peut RIEN envoyer.          */
+let etape = 'mail';
+bPorte.onclick = async () => {
+  const dit = (t, ok) => { msgPorte.textContent = t; msgPorte.className = 'msg etat ' + (ok ? 'ok' : 'ko'); };
+  bPorte.disabled = true;
+  try {
+    if (etape === 'mail') {
+      const { error } = await SB.auth.signInWithOtp({ email: mail.value.trim() });
+      if (error) return dit(error.message, false);
+      etape = 'code'; code.style.display = ''; bPorte.textContent = 'Me connecter';
+      dit('Code envoyé — regarde ta boîte mail.', true); code.focus();
+    } else {
+      const { error } = await SB.auth.verifyOtp({ email: mail.value.trim(), token: code.value.trim(), type: 'email' });
+      if (error) return dit(error.message, false);
+      ouvre();
+    }
+  } finally { bPorte.disabled = false; }
+};
+[mail, code].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') bPorte.click(); }));
+
+async function ouvre() {
+  const { data } = await SB.auth.getUser();
+  if (!data || !data.user) return;
+  porte.style.display = 'none'; studio.style.display = '';
+  qui.innerHTML = data.user.email + ' · ';
+  const sortir = document.createElement('button');
+  sortir.textContent = 'se déconnecter';
+  sortir.onclick = async () => { await SB.auth.signOut(); location.reload(); };
+  qui.append(sortir);
+  monteChoixMicro(micbar).then(relit => relit(false));
+  charge();
+}
+SB.auth.getSession().then(({ data }) => { if (data && data.session) ouvre(); });
+
+/* ---------------------------------------------------------------- LE DÉPÔT
+   Chaque prise part sous un nom horodaté : rien n'est jamais écrasé, et Myriam
+   garde toutes les versions d'un même mot pour choisir la meilleure.            */
+async function deposerSupabase(fichier, mp3) {
+  const t = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '');
+  const chemin = 'arabe/' + t + '_' + fichier;
+  const { error } = await SB.storage.from(SEAU)
+    .upload(chemin, new Blob([mp3], { type: 'audio/mpeg' }), { contentType: 'audio/mpeg' });
+  if (error) return { erreur: error.message === 'new row violates row-level security policy'
+    ? 'ton adresse n’est pas autorisée à déposer — préviens Myriam' : error.message };
+  envoyes.add(fichier); majEnvoyes();
+  return { ok: true, envoye: true };
+}
+
+/* ce qui a déjà été envoyé pendant cette séance : on le voit d'un coup d'œil */
+const envoyes = new Set();
+function majEnvoyes() {
+  compte.textContent = compte.textContent.replace(/ · \d+ envoyé.*$/, '')
+    + (envoyes.size ? ' · ' + envoyes.size + ' envoyé' + (envoyes.size > 1 ? 's' : '') : '');
+}
+
+/* ---------------------------------------------------------------- LE TABLEAU */
+const ETIQUETTE = { manquant:'à enregistrer', ok:'déjà enregistré', orphelin:'plus utilisé' };
+
+async function charge() {
+  INV = await (await fetch('inventaire.json')).json();
+  remplitFiltres(); dessineBilan(); dessine();
+}
+
+function dessineBilan() {
+  const b = INV.bilan.arabe;
+  bilan.innerHTML = '';
+  [['manquant','✗'],['ok','✓']].forEach(([e, ico]) => {
+    const d = document.createElement('button');
+    d.className = 'pastille' + (ETAT === e ? ' on' : ''); d.dataset.e = e;
+    d.innerHTML = ico + ' <b>' + b[e] + '</b> ' + ETIQUETTE[e];
+    d.onclick = () => { ETAT = ETAT === e ? '' : e; dessineBilan(); dessine(); };
+    bilan.append(d);
+  });
+}
+
+function remplitFiltres() {
+  if (fUnite.options.length) return;
+  fUnite.innerHTML = '<option value="">toutes les unités</option>' +
+    INV.unites.map(u => '<option value="' + u.no + '">Unité ' + u.no + ' · ' + u.lettres.join(' ') + '</option>').join('') +
+    '<option value="0">hors unités</option>';
+  const fams = [...new Set(INV.arabe.map(l => l.famille))].sort();
+  fFamille.innerHTML = '<option value="">toutes les familles</option>' +
+    fams.map(f => '<option>' + f + '</option>').join('');
+  [fUnite, fFamille].forEach(s => s.onchange = dessine);
+  fRech.oninput = dessine;
+  aide.innerHTML = '<b>Dis exactement ce qui est écrit dans la colonne « À dire »</b>, une seule fois, ' +
+    'sans rien ajouter. Pour une lettre seule, on demande tantôt son <b>NOM</b>, tantôt son <b>SON</b> : ' +
+    'la ligne le précise. Le silence de début et de fin est coupé tout seul, tu peux respirer avant et après. ' +
+    'Commence par <b>🎧 Écouter mon micro</b> pour régler ta distance.';
+}
+
+function filtre() {
+  const u = fUnite.value, f = fFamille.value, q = fRech.value.trim().toLowerCase();
+  return INV.arabe.filter(l =>
+    l.famille !== 'Orphelin' &&                       // rien à enregistrer pour ce que l'app n'appelle plus
+    (!u || (u === '0' ? !l.unite : l.unite == u)) &&
+    (!f || l.famille === f) &&
+    (!ETAT || l.statut === ETAT) &&
+    (!q || (l.fichier + ' ' + l.arabe + ' ' + l.sens + ' ' + l.translit).toLowerCase().includes(q)));
+}
+
+function dessine() {
+  const lignes = filtre();
+  compte.textContent = lignes.length + ' son' + (lignes.length > 1 ? 's' : '');
+  majEnvoyes();
+  corps.innerHTML = '';
+  if (!lignes.length) { corps.innerHTML = '<tr class="vide"><td colspan="6">aucun son ne correspond</td></tr>'; return; }
+  const frag = document.createDocumentFragment();
+  lignes.forEach(l => frag.append(rangee(l)));
+  corps.append(frag);
+}
+
+function rangee(l) {
+  const tr = document.createElement('tr');
+
+  const tdU = document.createElement('td');
+  const u = document.createElement('span'); u.className = 'u';
+  u.textContent = l.unite ? 'U' + l.unite : '—';
+  if (l.unite) u.style.setProperty('--accent', ACCENTS[(l.unite - 1) % 7]);
+  tdU.append(u);
+
+  const tdL = document.createElement('td'); tdL.className = 'lecon';
+  const lec = (l.lecons || []).map(x => x.replace('{L}', l.arabe || 'la lettre'));
+  tdL.textContent = lec[0] || '—';
+
+  const tdA = document.createElement('td'); tdA.className = 'mot';
+  const ar = document.createElement('div'); ar.className = 'ar'; ar.textContent = l.arabe || '—';
+  tdA.append(ar);
+  const s = document.createElement('div'); s.className = 'sens';
+  s.textContent = consigne(l);
+  tdA.append(s);
+
+  const tdF = document.createElement('td');
+  const c = document.createElement('code'); c.textContent = l.fichier; tdF.append(c);
+
+  const tdCell = document.createElement('td');
+  const tdS = document.createElement('div'); tdS.className = 'son'; tdCell.append(tdS);
+  if (l.present) {
+    const b = document.createElement('button'); b.className = 'play'; b.textContent = '▶';
+    b.title = 'écouter la version actuelle';
+    b.onclick = () => jouer(SONS + l.fichier, b);
+    tdS.append(b);
+  } else {
+    const x = document.createElement('span'); x.className = 'absent'; x.textContent = '✗ à faire';
+    tdS.append(x);
+  }
+
+  const tdR = document.createElement('td');
+  colonneMicro(tdR, l.fichier, null, deposerSupabase);
+
+  tr.append(tdU, tdL, tdA, tdF, tdCell, tdR);
+  return tr;
+}
+
+/* dire au preneur de son CE QU'IL DOIT DIRE — c'est toute sa mission */
+function consigne(l) {
+  if (l.famille === 'Nom de lettre') return 'le NOM de la lettre (' + l.translit + ')';
+  if (l.famille === 'Son de lettre')  return 'le SON de la lettre seul, sans son nom (' + l.translit + ')';
+  if (l.famille === 'Syllabe courte') return 'la syllabe, brève';
+  if (l.famille === 'Syllabe longue') return 'la syllabe, allongée deux fois plus';
+  if (l.famille === 'Nom d’Allah')    return l.sens || 'le Nom, seul';
+  return [l.translit, l.sens].filter(Boolean).join(' · ');
+}
+</script>
+</body></html>
