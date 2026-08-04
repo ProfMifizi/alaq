@@ -41,6 +41,29 @@ function toast(msg, ms = 2600) {
   document.body.appendChild(d); setTimeout(() => d.remove(), ms);
 }
 
+/* ---------------------------------------------------------------- SE TENIR À JOUR
+   L'inventaire dérive de index.html : une nouvelle leçon, un mot ajouté, et la liste
+   change. Le serveur ne renvoie qu'une DATE — on ne recharge le tableau que si elle a
+   bougé. On regarde au retour sur l'onglet (le moment où l'on revient d'avoir édité
+   l'app), et de loin en loin tant que l'onglet est visible.                        */
+function suisLesChangements(recharge) {
+  let connue = null, occupe = false;
+  async function regarde() {
+    if (occupe || document.hidden) return;
+    occupe = true;
+    try {
+      const { version } = await (await fetch('/api/version')).json();
+      if (connue === null) { connue = version; return; }
+      if (version !== connue) { connue = version; await recharge(); toast('Liste mise à jour'); }
+    } catch (e) { /* serveur arrêté : on réessaiera */ }
+    finally { occupe = false; }
+  }
+  regarde();
+  document.addEventListener('visibilitychange', regarde);
+  window.addEventListener('focus', regarde);
+  setInterval(regarde, 20000);
+}
+
 /* ---------------------------------------------------------------- RÉGLAGES
    Les valeurs par défaut donnent déjà un bon résultat ; le panneau ne sert qu'aux cas
    difficiles (pièce qui résonne, voix trop loin du micro).                       */
