@@ -34,7 +34,9 @@ function jouer(url, btn) {
   const rate = raison => { fini(); toast('Son injouable — ' + raison, 4200); };
   a.addEventListener('ended', fini);
   a.addEventListener('error', () => rate(({1:'lecture interrompue', 2:'réseau',
-      3:'fichier illisible', 4:'adresse refusée par le navigateur'})[a.error && a.error.code] || 'cause inconnue'));
+      3:'fichier illisible',
+      4:'le navigateur refuse cette source — adresse invalide ou format qu’il ne sait pas lire'
+      })[a.error && a.error.code] || 'cause inconnue'));
   a.play().catch(e => rate(e && e.name === 'NotAllowedError'
     ? 'le navigateur bloque le son tant que tu n’as pas cliqué dans la page' : (e.message || e)));
 }
@@ -298,7 +300,21 @@ class Micro {
       const v = Math.max(-1, Math.min(1, x[i] * k));
       pcm[i] = v < 0 ? v * 0x8000 : v * 0x7fff;
     }
-    return { mp3: encodeMP3(pcm, SR), secondes: x.length / SR };
+    const mp3 = encodeMP3(pcm, SR);
+
+    /* ⚠️ On RELIT ce qu'on vient d'encoder avant de le proposer. Un MP3 invalide ne se
+       voit pas : le bouton ▶ clignote et rien ne sort, sans qu'on sache si c'est la
+       prise, l'encodage ou la lecture. Ici, on sait. */
+    const verif = new AudioContext();
+    try {
+      const relu = await verif.decodeAudioData(mp3.slice().buffer);
+      if (!(relu.duration > 0.05)) throw new Error('durée nulle');
+    } catch (e) {
+      throw new Error('l’enregistrement n’a pas pu être encodé (' + (e.message || e)
+        + '). Refais la prise ; si ça recommence, préviens Myriam.');
+    } finally { verif.close(); }
+
+    return { mp3, secondes: x.length / SR };
   }
 }
 
