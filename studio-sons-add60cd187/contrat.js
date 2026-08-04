@@ -166,10 +166,13 @@ function montreContrat(SB, utilisateur, REMUNERATION, apresSignature) {
     boite.textContent = contratTexte(remplis(d));
     majBouton();
   }
-  /* les champs vides apparaissent en clair dans l'aperçu : on voit ce qui manque */
+  /* Les champs vides apparaissent en pointillés dans l'aperçu : on voit ce qui manque.
+     ⚠️ JAMAIS les champs FACULTATIFS — un « …… » est une valeur non vide, et le contrat
+     y lirait un numéro d'immatriculation inexistant. L'aperçu montrerait alors autre
+     chose que ce qui sera réellement signé. */
   function remplis(d) {
     const o = { ...d };
-    CHAMPS.forEach(c => { if (!o[c.k]) o[c.k] = '……………'; });
+    CHAMPS.forEach(c => { if (!c.opt && !o[c.k]) o[c.k] = '……………'; });
     return o;
   }
   redessine();
@@ -216,9 +219,24 @@ function montreContrat(SB, utilisateur, REMUNERATION, apresSignature) {
       setTimeout(() => { hote.style.display = 'none'; apresSignature(ligneBase); }, 1200);
     } catch (e) {
       valider.disabled = false;
-      etat.className = 'etat ko'; etat.textContent = 'échec : ' + (e.message || e);
+      etat.className = 'etat ko';
+      etat.textContent = 'Signature impossible — ' + enClair(e.message || String(e));
     }
   };
+}
+
+/* Traduire ce que renvoie Supabase : « Could not find the table 'public.contrats' »
+   ne dit rien à la personne qui signe, et ne dit pas à Myriam ce qu'il faut faire. */
+function enClair(m) {
+  if (/public\.contrats|schema cache/i.test(m))
+    return 'la base n’est pas encore prête côté Alaq. Préviens Myriam : il lui reste à exécuter '
+         + 'installer-supabase.sql (elle saura).';
+  if (/row-level security|violates/i.test(m))
+    return 'ton adresse n’est pas encore autorisée à signer. Préviens Myriam ('
+         + CESSIONNAIRE.courriel + ').';
+  if (/duplicate key/i.test(m)) return 'tu as déjà signé cette version du contrat.';
+  if (/fetch|network|Failed to/i.test(m)) return 'connexion perdue. Réessaie dans un instant.';
+  return m;
 }
 
 /* ---------------------------------------------------------------- LE PDF
