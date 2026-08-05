@@ -223,7 +223,11 @@
     background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 12px;margin-bottom:6px}
   .vl{border-radius:6px;padding:0}
   .vl.hit{color:var(--gold);text-shadow:0 0 14px rgba(220,144,46,.45)}
-  .vl.miss{color:var(--coral)}
+  .vl.miss{animation:vlmiss .38s ease-out}
+  @keyframes vlmiss{
+    0%{color:var(--coral);text-shadow:0 0 0 rgba(224,122,95,0)}
+    30%{color:var(--coral);text-shadow:0 0 18px rgba(224,122,95,.95)}
+    100%{color:inherit;text-shadow:0 0 0 rgba(224,122,95,0)}}
   .vw{display:inline-block;margin:0 10px}
   .zoom-btn{display:block;margin:0 auto 12px;background:var(--panel);border:1px solid var(--line);
     color:var(--gold2);font-weight:800;font-size:14px;border-radius:12px;padding:8px 16px}
@@ -1639,45 +1643,45 @@ const NONATTACH=['ا','د','ذ','ر','ز','و'];
 
 function buildAlphabet(U){
   const q=[
-   {type:'tapset',title:'',items:[],alphabet:true,cols:4,
+   {type:'tapset',title:'',items:[],alphabet:true,cols:4,instr:'l1-01-alphabet-28',
      note:'L\u2019alphabet arabe comporte <b>28 lettres</b>. Touche au moins 3 lettres.'},
-   {type:'harakat3',title:'',
+   {type:'harakat3',title:'',instr:'l1-02-harakat',
      note:'En arabe, il n’y a pas de voyelles dans l’alphabet mais des petits signes qui <b>habillent la lettre</b> en se plaçant au-dessus ou en dessous et qui s’appellent des <b>harakat</b>.'},
-   {type:'assoc',L:'م',title:'',
+   {type:'assoc',L:'م',title:'',instr:'l1-03-mim-harakat',
      note:'Habille la lettre <span class="ar">م</span> mim avec les harakats et écoute le son obtenu.'},
-   {type:'tapset',title:'',items:[['ا','alif'],['و','wāw'],['ي','yā’']],
+   {type:'tapset',title:'',items:[['ا','alif'],['و','wāw'],['ي','yā’']],instr:'l1-04-prolong-3',
      note:'Trois lettres servent à <b>allonger</b> le son. Touche-les pour découvrir leur nom.'},
-   {type:'findset',title:'',targets:['ا','و','ي'],highlight:false,
+   {type:'findset',title:'',targets:['ا','و','ي'],instr:'l1-05-prolong-trouve',highlight:false,
      note:'Retrouve les 3 lettres de prolongation dans l’alphabet arabe et touche-les pour entendre leur nom.'},
-   {type:'assoc',L:'م',madd:true,title:'',
+   {type:'assoc',L:'م',madd:true,title:'',instr:'l1-06-prolong-double',
      note:'Lorsqu\u2019on associe une lettre avec une lettre de prolongation, on étire le son deux fois plus. Touche pour entendre « mâââ », « mîîî », « mûûû ».'},
-   {type:'compare',title:'',
+   {type:'compare',title:'',instr:'l1-07-son-long',
      pairs:[['مَ','مَا','« ma » / « mâââ »'],['مِ','مِي','« mi » / « mîîî »'],['مُ','مُو','« mou » / « mûûû »']],
      note:'Écoute bien : le son long est étiré. Touche chaque case.'},
-   {type:'formslide',L:'م',title:'',
+   {type:'formslide',L:'م',title:'',instr:'l1-08-formes-mim',
      note:'Selon sa place dans le mot, la lettre change de forme. Fais glisser mim dans chaque case.'},
-   {type:'tapset',title:'',items:NONATTACH.map(L=>[L,ALPHABET.find(a=>a[0]===L)[1]]),
+   {type:'tapset',title:'',items:NONATTACH.map(L=>[L,ALPHABET.find(a=>a[0]===L)[1]]),instr:'l1-09-attache-droite',
      cols:3,
      note:'Les lettres arabes s\u2019attachent à gauche et à droite, <b>sauf 6</b> qui <b>ne s\u2019attachent qu\u2019à droite</b>. Touche-les pour entendre leur nom.'},
-   {type:'findset',title:'',targets:NONATTACH,highlight:false,
+   {type:'findset',title:'',targets:NONATTACH,instr:'l1-10-attache-trouve',highlight:false,
      note:'Retrouve les 6 lettres qui ne s\u2019attachent qu\u2019à droite dans l\u2019alphabet arabe et touche-les pour entendre leur nom.'},
-   {type:'read',word:'مَدْرَسَةٌ',lang:'ar',dir:'rtl',title:'',
-     note:'En arabe on lit de droite à gauche. Fais glisser ton doigt sur le mot madrassa, qui signifie école, dans le sens de l\u2019écriture arabe.'},
-   {type:'findword',word:'مَدْرَسَةٌ',targets:NONATTACH,title:'',
+   {type:'read',word:'مَدْرَسَةٌ',lang:'ar',dir:'rtl',title:'',instr:'l1-11-droite-gauche',
+     note:'En arabe on lit de droite à gauche. Fais glisser ton doigt sur le mot dans le sens de l\u2019écriture arabe.'},
+   {type:'findword',word:'مَدْرَسَةٌ',targets:NONATTACH,title:'',instr:'l1-12-repere-droite',
      note:'Repère les lettres qui ne s\u2019attachent qu\u2019à droite et touche-les.'},
-   mcq({prompt:'Combien de lettres dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'28',explain:'L’alphabet arabe compte 28 lettres.',
+   mcq({prompt:'Combien de lettres dans l\u2019alphabet arabe ?',instr:'l1-13-q-nb-lettres',graded:true,grid:'grid3',answer:'28',explain:'L’alphabet arabe compte 28 lettres.',
      options:shuffle([{txt:'28',key:'28'},{txt:'26',key:'26'},{txt:'30',key:'30'}])}),
-   mcq({prompt:'Combien de voyelles dans l\u2019alphabet arabe ?',graded:true,grid:'grid3',answer:'0',explain:'En arabe, aucune lettre n’est une voyelle. Le son des voyelles vient de petits signes posés sur la lettre : les harakāt.',
+   mcq({prompt:'Combien de voyelles dans l\u2019alphabet arabe ?',instr:'l1-14-q-nb-voyelles',graded:true,grid:'grid3',answer:'0',explain:'En arabe, aucune lettre n’est une voyelle. Le son des voyelles vient de petits signes posés sur la lettre : les harakāt.',
      options:shuffle([{txt:'Aucune',key:'0'},{txt:'3',key:'3'},{txt:'6',key:'6'}])}),
-   mcq({prompt:'Grâce à quoi forme-t-on les voyelles ?',graded:true,answer:'h',explain:'Les harakāt sont les petits signes au-dessus ou en dessous de la lettre : fatha « a », kasra « i », dhamma « ou ».',
+   mcq({prompt:'Grâce à quoi forme-t-on les voyelles ?',instr:'l1-15-q-harakat',graded:true,answer:'h',explain:'Les harakāt sont les petits signes au-dessus ou en dessous de la lettre : fatha « a », kasra « i », dhamma « ou ».',
      options:shuffle([{txt:'Les harakat',key:'h'},{txt:'Des lettres spéciales',key:'l'},{txt:'Des accents',key:'a'}])}),
-   mcq({prompt:'Combien de lettres de prolongation ?',graded:true,grid:'grid3',answer:'3',explain:'Il y a 3 lettres de prolongation, qui allongent le son : <span class="ar">ا</span>, <span class="ar">و</span>, <span class="ar">ي</span>.',
+   mcq({prompt:'Combien de lettres de prolongation ?',instr:'l1-16-q-nb-prolong',graded:true,grid:'grid3',answer:'3',explain:'Il y a 3 lettres de prolongation, qui allongent le son : <span class="ar">ا</span>, <span class="ar">و</span>, <span class="ar">ي</span>.',
      options:shuffle([{txt:'3',key:'3'},{txt:'2',key:'2'},{txt:'4',key:'4'}])}),
-   mcq({prompt:'Quelles sont les lettres de prolongation ?',graded:true,answer:'awy',explain:'Ce sont l’alif <span class="ar">ا</span>, le wāw <span class="ar">و</span> et le yā’ <span class="ar">ي</span> : elles étirent la voyelle qui précède.',
+   mcq({prompt:'Quelles sont les lettres de prolongation ?',instr:'l1-17-q-quelles-prolong',graded:true,answer:'awy',explain:'Ce sont l’alif <span class="ar">ا</span>, le wāw <span class="ar">و</span> et le yā’ <span class="ar">ي</span> : elles étirent la voyelle qui précède.',
      options:shuffle([{ar:'ا و ي',key:'awy'},{ar:'م ل ن',key:'mln'},{ar:'ب ت ث',key:'btt'}])}),
-   mcq({prompt:'Combien de lettres ne s\u2019attachent qu\u2019à droite ?',graded:true,grid:'grid3',answer:'6',explain:'Six lettres ne s’accrochent qu’à la lettre de droite : <span class="ar">ا</span>, <span class="ar">د</span>, <span class="ar">ذ</span>, <span class="ar">ر</span>, <span class="ar">ز</span>, <span class="ar">و</span>.',
+   mcq({prompt:'Combien de lettres ne s\u2019attachent qu\u2019à droite ?',instr:'l1-18-q-nb-attache',graded:true,grid:'grid3',answer:'6',explain:'Six lettres ne s’accrochent qu’à la lettre de droite : <span class="ar">ا</span>, <span class="ar">د</span>, <span class="ar">ذ</span>, <span class="ar">ر</span>, <span class="ar">ز</span>, <span class="ar">و</span>.',
      options:shuffle([{txt:'6',key:'6'},{txt:'4',key:'4'},{txt:'8',key:'8'}])}),
-   mcq({prompt:'Comment lit-on l\u2019arabe ?',graded:true,answer:'rtl',explain:'L’arabe se lit et s’écrit de droite à gauche, à l’inverse du français.',
+   mcq({prompt:'Comment lit-on l\u2019arabe ?',instr:'l1-19-q-sens-lecture',graded:true,answer:'rtl',explain:'L’arabe se lit et s’écrit de droite à gauche, à l’inverse du français.',
      options:shuffle([{txt:'De droite à gauche',key:'rtl'},{txt:'De gauche à droite',key:'ltr'}])}),
   ];
   return q;
@@ -2130,6 +2134,11 @@ if(typeof S.prenom!=='string')S.prenom='';           // prénom (personnalisatio
 fixOrdreFormes(); // échange formes ↔ repérage (02/08) : rattrape les progressions écrites sous l'ancien ordre
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
 let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(e){return true}})();
+/* Le GENRE de voix, pour tout ce que l'app fait dire. Le casting (05/08/2026) :
+     'f' → Marine (consignes FR) + Habibah (lettres et félicitations AR)
+     'h' → Dorian (consignes FR) + Mustafa (lettres et félicitations AR)
+   Les deux jeux complets existent ; ⏳ le sélecteur dans le profil de l'élève reste à faire. */
+let VOIX_G=(function(){try{return localStorage.getItem('alaq_voix')==='h'?'h':'f'}catch(e){return 'f'}})();
 function toggleSound(){
   SND=!SND;try{localStorage.setItem('alaq_snd',SND?'on':'off')}catch(e){}
   const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
@@ -2328,11 +2337,13 @@ const INSTR_LIST=[
 const INSTR_AUDIO={};
 INSTR_LIST.forEach(function(e){ INSTR_AUDIO[_normInstr(e[1])]='audios-app-alaq/instr-'+e[0]+'.mp3'; });
 
-function readInstr(t){ // narration de l'instruction — coupée par NARR uniquement
+function readInstr(t,id){ // narration de l'instruction — coupée par NARR uniquement
   if(!NARR||!t)return;
   const plain=_normInstr(t);
   if(!plain)return;
-  const url=INSTR_AUDIO[plain];
+  // `id` = le champ `instr` de l'écran. Il PRIME sur l'appariement par le texte, qui casse
+  // en silence dès qu'une consigne est reformulée (leçon 1, 10 écrans muets — 03/08/2026).
+  const url=id?('audios-app-alaq/instr-'+id+'-'+VOIX_G+'.mp3'):INSTR_AUDIO[plain];
   if(!url){ speakFr(plain,true); return; }       // pas d'enregistrement -> voix de synthèse
   try{
     stopAudio();
@@ -2349,6 +2360,9 @@ function readInstr(t){ // narration de l'instruction — coupée par NARR unique
 }
 function spokenInstr(st){
   // On lit UNIQUEMENT l'instruction (la consigne du dessous), jamais le titre/la question.
+  // EXCEPTION : un écran qui porte un `instr` explicite et pas de consigne fait lire sa
+  // QUESTION (les 7 quiz de la leçon 1 : chacun la sienne, au lieu du générique répété).
+  if(st.instr&&!st.note&&st.prompt)return st.prompt;
   if(st.note)return st.note;
   switch(st.type){
     case 'slide': return st.html;
@@ -2536,7 +2550,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='sens-ecriture-rtl · l\u2019alphabet se lit de droite à gauche (leçon 1 + grille des lettres) · sw v73';
+const BUILD='marque-sonore · leçon 1 : 19 consignes + 29 lettres en 2 voix, signature Bayātī, combo tous les 3 · sw v74';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2655,6 +2669,7 @@ function startDisque(u,i,recharge){
   if(!recharge&&S.hearts<=0){showNoHearts();return;}
   RECHARGE=!!recharge; // reprise depuis « Plus de cœurs » : aucune vie perdue, +3 à la fin
   EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
+  comboReset();
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
@@ -2684,9 +2699,9 @@ function renderStep(){
   // Lecture auto de la CONSIGNE (une ligne par écran, demande Myriam 06/07) — jamais relue
   // si c'est la même que l'écran précédent (séries de quiz), coupée par le toggle 🗣️/🔇.
   if(qi===0)window._lastInstr='';
-  {const _ins=spokenInstr(st);
-   if(_ins&&_ins!==window._lastInstr)setTimeout(()=>readInstr(_ins),250);
-   window._lastInstr=_ins;}
+  {const _ins=spokenInstr(st),_key=st.instr||_ins;
+   if(_ins&&_key!==window._lastInstr)setTimeout(()=>readInstr(_ins,st.instr),250);
+   window._lastInstr=_key;}
 
   body.classList.toggle('p-center',!!st.center);
   if(st.type==='slide'){
@@ -2768,7 +2783,7 @@ function renderStep(){
       grid='<div class="verse" style="font-size:88px;line-height:1.5">'+cl.map((c,i)=>{
         const jp=i>0&&joinsL(cl[i-1].b),jn=i<cl.length-1&&joinsL(c.b);
         const disp=(jp?ZWJ:'')+c.b+c.m+(jn?ZWJ:'');
-        return '<span class="vl" onclick="fwTap(this,'+(st.targets.includes(c.b)?1:0)+')">'+disp+'</span>';
+        return '<span class="vl" onclick="fwTap(this,'+(st.targets.includes(c.b)?1:0)+',\''+c.b+'\')">'+disp+'</span>';
       }).join('')+'</div>';
     }
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
@@ -3134,8 +3149,9 @@ function ctaClick(){
       if(st.flip)o.classList.add('vu'); // toutes les cartes se révèlent à la vérification
       if(st.options[k].key===st.answer)o.classList.add('ok');
       else if(k===picked)o.classList.add('bad');});
-    if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله';playSfx('bonne-reponse');}
+    if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله';comboBonneReponse();}
     else{
+      comboReset();      // le combo doit rester mérité : une erreur remet le compteur à zéro
       const good=st.options.find(o=>o.key===st.answer);
       fb.className='fb bad';
       const show=good.ar!==undefined?good.ar:(good.snd!==undefined?st.answer:null);
@@ -3234,7 +3250,8 @@ function finishDisque(){
   document.getElementById('fin-acc').textContent=acc+'%';
   fillFinishConstance();
   document.getElementById('finish').classList.add('on');
-  if(isBilan)confettiBurst();
+  confettiBurst();
+  playSfx('fin-lecon');   // silencieux tant que audios-app-alaq/sfx-fin-lecon.mp3 n'existe pas
   checkBadges({noMistake:wrongCount===0&&total>0,unitPerfect:isBilan&&!S.uerr[curU]});
 }
 function closeFinish(){
@@ -3358,7 +3375,7 @@ function assocTap(i,el){
   if(!window._asSet)window._asSet=new Set();window._asSet.add(i);
   if(window._asSet.size>=a.set.length){ctaOn();}
 }
-function tsTap(L,el){sayLetterSound(L);popIt(el);el.classList.add('seen');
+function tsTap(L,el){sayLetterName(L);popIt(el);el.classList.add('seen');
   window._ts.add(L);if(window._ts.size>=window._tsN)ctaOn();}
 function setupDrag(L){
   const src=document.getElementById('dragSrc');if(!src)return;
@@ -3401,7 +3418,8 @@ function fsTap(el,L,ok){
   if(ok){if(!el.classList.contains('hit')){el.classList.add('hit');speak(L);window._fs.found++;updFs();}}
   else{el.classList.add('miss');setTimeout(()=>el.classList.remove('miss'),400);}
 }
-function fwTap(el,ok){
+function fwTap(el,ok,L){
+  if(L)sayLetterName(L);            // toute lettre touchée dit son nom (demande Myriam 03/08)
   if(ok){if(!el.classList.contains('hit')){el.classList.add('hit');window._fs.found++;updFs();}}
   else{el.classList.add('miss');setTimeout(()=>el.classList.remove('miss'),400);}
 }
@@ -3699,7 +3717,7 @@ function sayLetterName(L){
   var gen=_sndGen;
   var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); return; }
   try{
-    var a=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'); _curAudio=a; var settled=false;
+    var a=new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3'); _curAudio=a; var settled=false;
     var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(L);}catch(_){ } }; // Majed dit le nom de la lettre (plus la translit en voix française)
     a.addEventListener('playing',function(){settled=true;},{once:true});
     a.addEventListener('error',fb,{once:true});
@@ -4371,6 +4389,33 @@ function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon 
 let _curAudio=null,_curUtter=null,_sndGen=0; // _sndGen = jeton de génération : tout repli/minuterie d'un ancien son est annulé
 // _curUtter = référence FORTE sur l'utterance en cours : sans elle, le ramasse-miettes de Safari/iOS
 // peut détruire l'utterance AVANT qu'elle parle (silence total, ni onstart ni onerror). Bug WebKit connu.
+/* ===== La marque sonore (validée par Myriam le 05/08/2026) — trois étages =====
+   ① la SIGNATURE à chaque bonne réponse : sfx-bonne-reponse.mp3, le motif « Ṭalaʿa al-badr »
+      en trois frappes sur la seconde neutre du maqām Bayātī. Toujours le même : c'est la
+      répétition qui grave, comme le « ding » de Duolingo.
+   ② le COMBO toutes les COMBO_TOUS bonnes réponses D'AFFILÉE : un mot tiré d'un pool qui
+      tourne. Rare donc précieux, varié donc jamais lassant — et la récompense enseigne du
+      vocabulaire, ce qu'une app d'arabe peut faire et pas une app généraliste.
+   ③ la CLÔTURE en fin de leçon : confettis + sfx-fin-lecon.mp3 (voir finishDisque). */
+const COMBO_TOUS=3;
+const COMBO_POOL=['moumtaz','sahih','rai','allahumma-barik'];
+let comboSerie=0, comboDernier='';
+function comboReset(){ comboSerie=0; }
+function comboBonneReponse(){
+  playSfx('bonne-reponse');                       // la signature, toujours
+  if(++comboSerie<COMBO_TOUS)return;
+  comboSerie=0;
+  // jamais deux fois le même d'affilée : c'est la variété qui empêche la lassitude
+  const dispo=COMBO_POOL.filter(m=>m!==comboDernier);
+  comboDernier=dispo[Math.floor(Math.random()*dispo.length)];
+  const gen=_sndGen, f='audios-app-alaq/felicit-'+comboDernier+'-'+VOIX_G+'.mp3';
+  // 520 ms : la signature dure ~420 ms, on enchaîne sans la couper ni laisser de trou.
+  // Le jeton _sndGen est revérifié : changer d'écran entre-temps annule la félicitation.
+  setTimeout(function(){
+    if(gen!==_sndGen)return;
+    try{ const a=new Audio(f); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
+  },520);
+}
 function playSfx(name){ // son de récompense : joue audios-app-alaq/sfx-<name>.mp3 s'il existe, sinon SILENCE (aucun repli)
   try{ stopAudio(); const a=new Audio('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
 }
