@@ -430,6 +430,22 @@
   .fourcells.ligne{grid-template-columns:repeat(4,1fr);gap:8px;direction:rtl}
   .readbox.reveal .rc{color:#57493e}
   .readbox.reveal .rc.on{color:var(--gold)}
+  .hkcirc .hbar{display:block;width:44px;height:10px;border-radius:6px;background:currentColor;transform:rotate(-18deg)}
+  .hkcirc .hdam{font-family:var(--ar);font-style:normal;font-weight:700;font-size:36px;line-height:.8;display:block}
+  .hkcirc .sign.top{top:14px}
+  .hkcirc .sign.bot{top:112px}
+  .hkcirc .sign.hi{top:-2px}
+  .fb span:first-child{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+    color:#fff;font-size:15px;flex:none}
+  .fb.ok span:first-child{background:var(--green)}
+  .fb.bad span:first-child{background:var(--coral)}
+  .masc-wrap{width:170px;margin:0 auto 6px}
+  #masc{width:170px;height:200px;overflow:visible;display:block}
+  #mhalo,#mcorps,#mbassin,.mjambe{transform-box:fill-box}
+  #mhalo{transform-origin:50% 50%;opacity:.55}
+  #mcorps{transform-origin:50% 100%}
+  #mbassin{transform-origin:50% 0%;transition:transform .12s cubic-bezier(.3,1.5,.5,1)}
+  .mjambe{transform-origin:50% 0%;transition:transform .13s cubic-bezier(.3,1.5,.5,1)}
   .lg-prompt{font-size:15px;font-weight:800;color:var(--cream);text-align:center;margin:0 0 10px}
   .lg-prompt.empty{color:var(--muted);font-weight:700}
   .lg-prog{margin:0 0 12px} .lg-plab{font-size:12.5px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:5px}
@@ -1140,7 +1156,32 @@
 <div class="qlist" id="qlist"></div>
 </div>
 <div class="finish" id="finish">
-  <div class="big" id="fin-icon">✓</div>
+  <div class="masc-wrap"><svg id="masc" viewBox="0 0 200 236" aria-label="mascotte Alaq">
+    <defs><radialGradient id="mgl"><stop offset="0" stop-color="#FFD98A" stop-opacity=".95"/><stop offset="52%" stop-color="#F0A73C" stop-opacity=".33"/><stop offset="100%" stop-color="#F0A73C" stop-opacity="0"/></radialGradient></defs>
+    <ellipse id="mhalo" cx="100" cy="126" rx="98" ry="102" fill="url(#mgl)"/>
+    <g id="mcorps">
+      <circle cx="100" cy="22" r="14" fill="none" stroke="#B9B2AC" stroke-width="7"/>
+      <rect x="92" y="32" width="16" height="18" rx="8" fill="#EFA63C"/>
+      <path d="M60 80 Q24 88 24 130 L24 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+      <path d="M140 80 Q176 88 176 130 L176 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+      <path d="M54 76 Q56 44 100 44 Q144 44 146 76 Z" fill="#EFA63C"/>
+      <ellipse cx="80" cy="60" rx="8" ry="11" fill="#FFD98A" opacity=".7" transform="rotate(-25 80 60)"/>
+      <rect x="48" y="74" width="104" height="13" rx="6.5" fill="#E39B2E"/>
+      <path d="M60 90 H140 Q148 134 134 172 H66 Q52 134 60 90 Z" fill="#F7EBC0"/>
+      <path d="M70 100 Q66 128 72 152" fill="none" stroke="#FFF8E0" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+      <ellipse cx="82" cy="120" rx="13" ry="16" fill="#fff"/><ellipse cx="118" cy="120" rx="13" ry="16" fill="#fff"/>
+      <ellipse cx="84" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/><ellipse cx="120" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/>
+      <circle cx="81" cy="117" r="2.8" fill="#fff"/><circle cx="117" cy="117" r="2.8" fill="#fff"/>
+      <path d="M88 142 Q100 152 112 142" fill="none" stroke="#E2622A" stroke-width="5.5" stroke-linecap="round"/>
+      <g id="mbassin">
+        <path d="M64 172 H136 L142 194 H58 Z" fill="#EFA63C"/>
+        <rect x="46" y="193" width="108" height="14" rx="7" fill="#E8A94F"/>
+      </g>
+    </g>
+    <rect class="mjambe" id="mjG" x="70" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(15)"/>
+    <rect class="mjambe" id="mjD" x="112" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(-15)"/>
+  </svg></div>
+  <div class="big" id="fin-icon" style="display:none">✓</div>
   <h2 id="fin-title">Leçon terminée !</h2>
   <div class="fin-score"><span class="fs-v" id="fin-acc">100%</span><span class="fs-l">de réussite</span></div>
   <div id="fin-extra"></div>
@@ -2163,7 +2204,9 @@ let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(
      'f' → Marine (consignes FR) + Habibah (lettres et félicitations AR)
      'h' → Dorian (consignes FR) + Mustafa (lettres et félicitations AR)
    Les deux jeux complets existent ; ⏳ le sélecteur dans le profil de l'élève reste à faire. */
-let VOIX_G=(function(){try{return localStorage.getItem('alaq_voix')==='h'?'h':'f'}catch(e){return 'f'}})();
+let VOIX_G='f'; // ⚠️ FORCÉ : aucun écran n'écrit encore alaq_voix, mais des 'h' d'anciens
+// essais traînaient dans des localStorage (iPhone de Myriam, 07/08 : « c'est encore Mehdi
+// qui parle »). Relire localStorage QUAND le sélecteur du profil existera.
 function toggleSound(){
   SND=!SND;try{localStorage.setItem('alaq_snd',SND?'on':'off')}catch(e){}
   const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
@@ -2576,7 +2619,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='lecon1-v2b · correctif iPhone : lecteurs bénis au 1er geste, chargement lent \u2260 fichier absent, purge alif/fā périmés · sw v76';
+const BUILD='lecon1-v2c · voix féminine forcée, harakat dessinées, pastilles ✓✕, la mascotte danse le maqsūm · sw v77';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2760,11 +2803,10 @@ function renderStep(){
     window._hk=new Set();
     // Révèle les harakat (07/08) : disque ET signe gris ; au toucher, SEUL le signe
     // s'illumine — le disque pointillé reste gris. Plus d'étiquettes françaises.
-    const H=[['\u064E','top'],['\u0650','bot'],['\u064F','top hi']];
     body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="hk3">'+H.map((h,i)=>
+      '<div class="hk3">'+[0,1,2].map(i=>
         '<button class="hkcirc gr" onclick="hkTap('+i+',this)">'+
-          '<span class="sign '+h[1]+'">'+h[0]+'</span>'+
+          signeHK(i)+
           '<span class="circ"></span>'+
         '</button>').join('')+'</div>';
     return;
@@ -3116,8 +3158,8 @@ function renderStep(){
   /* mcq */
   cta.textContent='VALIDER';cta.onclick=ctaClick;
   let html='<div class="q-title">'+st.prompt+'</div>';
-  if(st.signes)html+='<div class="hk3 mini">'+[['\u064E','top'],['\u0650','bot'],['\u064F','top hi']].map(h=>
-    '<span class="hkcirc gr lit"><span class="sign '+h[1]+'">'+h[0]+'</span><span class="circ"></span></span>').join('')+'</div>';
+  if(st.signes)html+='<div class="hk3 mini">'+[0,1,2].map(i=>
+    '<span class="hkcirc gr lit">'+signeHK(i)+'<span class="circ"></span></span>').join('')+'</div>';
   if(st.flip)html+='<div class="hint" style="text-align:center;margin:-8px 0 10px">Devine… puis retourne les cartes</div>'; // choix Myriam 3B
   if(st.audio)html+='<button class="bigspeak" onclick="speak(\''+st.audio+'\')">🔊</button>';
   if(st.glyph){html+='<div class="glyph-big'+(st.glyphLinear?' linear-ar':'')+'">'+st.glyph+'</div>';}
@@ -3300,10 +3342,12 @@ function finishDisque(){
   fillFinishConstance();
   document.getElementById('finish').classList.add('on');
   confettiBurst();
-  playSfx('fin-lecon');   // silencieux tant que audios-app-alaq/sfx-fin-lecon.mp3 n'existe pas
+  playSfx('fin-lecon');   // le maqsūm
+  mascotteDanse();        // le fanous danse dessus — même partition, mêmes dates
   checkBadges({noMistake:wrongCount===0&&total>0,unitPerfect:isBilan&&!S.uerr[curU]});
 }
 function closeFinish(){
+  mascotteStop();
   document.getElementById('finish').classList.remove('on');
   if(obAccountPending){ obAccountPending=false; showObAccount(); return; } // 1re leçon d'onboarding → proposer le compte
   returnFromPlayer();
@@ -3379,6 +3423,45 @@ function finishExam(){
 /* ================= INTERACTIONS ================= */
 function popIt(el){el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
 function ctaOn(){document.getElementById('cta').disabled=false;}
+function signeHK(i){ // les 3 harakat DESSINÉES — épaisses et collées au disque (Myriam 07/08)
+  return ['<span class="sign top"><i class="hbar"></i></span>',
+          '<span class="sign bot"><i class="hbar"></i></span>',
+          '<span class="sign top hi"><i class="hdam">و</i></span>'][i];
+}
+/* — la danse du fanous, calée sur les frappes RÉELLES du maqsūm (analysées le 07/08 :
+     deux hauteurs, Dum grave −12 / sol −5, en Dum-tak-tak · Dum-tak-tak) — */
+const FRAPPES_FIN=[[-5,0],[-12,210],[-12,320],[-5,460],[-12,675],[-12,785]];
+let _mascT=[];
+function mascotteStop(){_mascT.forEach(clearTimeout);_mascT=[];}
+function mascotteDanse(){
+  mascotteStop();
+  const c=document.getElementById('mcorps'),h=document.getElementById('mhalo'),
+        ba=document.getElementById('mbassin'),jG=document.getElementById('mjG'),jD=document.getElementById('mjD');
+  if(!c)return;
+  const T=(f,ms)=>_mascT.push(setTimeout(f,ms));
+  FRAPPES_FIN.forEach(([demi,ms],i)=>{
+    const dum=demi<=-10;
+    T(()=>{
+      c.style.transition='transform .11s cubic-bezier(.3,1.6,.5,1)';
+      c.style.transform='translateY(-'+(dum?18:8)+'px) scaleY(1.05)';
+      T(()=>{c.style.transition='transform .16s';c.style.transform='translateY(0) scaleY('+(dum?.94:.98)+')';},110);
+      T(()=>{c.style.transform='';},260);
+      // le balancier du postérieur : SEUL le bas de la lanterne se déhanche
+      ba.style.transform='rotate('+((i%2?1:-1)*(dum?10:6))+'deg)';
+      T(()=>{ba.style.transform='rotate(0deg)';},140);
+      jG.style.transform='rotate('+(dum?26:8)+'deg)';jD.style.transform='rotate('+(dum?-26:-8)+'deg)';
+      T(()=>{jG.style.transform='rotate(15deg)';jD.style.transform='rotate(-15deg)';},150);
+      h.style.transition='opacity .12s';h.style.opacity=dum?'.72':'.9';
+      T(()=>{h.style.opacity='.55';},170);
+    },ms);
+  });
+  T(()=>{ // le bouquet final, sur la dernière frappe — jamais sur une durée devinée
+    h.style.transition='opacity .3s, transform .3s';h.style.opacity='1';h.style.transform='scale(1.45)';
+    c.style.transition='transform .22s cubic-bezier(.3,1.7,.5,1)';c.style.transform='translateY(-16px) scale(1.05)';
+    T(()=>{h.style.transition='opacity .8s, transform .8s';h.style.opacity='.55';h.style.transform='';
+           c.style.transition='transform .35s';c.style.transform='';},340);
+  },FRAPPES_FIN[FRAPPES_FIN.length-1][1]+40);
+}
 /* ===== Leçon 1 v2 (07/08) — récompense d'objectif, éloges, erreur ===== */
 const ELOGES=[['مُمْتَاز','excellent'],['صَحِيح','juste'],['رَائِع','formidable'],['اللَّهُمَّ بَارِكْ','qu\u2019Allah te bénisse']];
 let _elDernier=-1;
