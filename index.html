@@ -432,9 +432,9 @@
   .readbox.reveal .rc.on{color:var(--gold)}
   .hkcirc .hbar{display:block;width:44px;height:10px;border-radius:6px;background:currentColor;transform:rotate(-18deg)}
   .hkcirc .hdam{font-family:var(--ar);font-style:normal;font-weight:700;font-size:36px;line-height:.8;display:block}
-  .hkcirc .sign.top{top:14px}
-  .hkcirc .sign.bot{top:112px}
-  .hkcirc .sign.hi{top:-2px}
+  .hkcirc .sign.top{top:5px}
+  .hkcirc .sign.bot{top:122px}
+  .hkcirc .sign.hi{top:-4px}
   .fb span:first-child{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
     color:#fff;font-size:15px;flex:none}
   .fb.ok span:first-child{background:var(--green)}
@@ -2619,7 +2619,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='lecon1-v2c · voix féminine forcée, harakat dessinées, pastilles ✓✕, la mascotte danse le maqsūm · sw v77';
+const BUILD='lecon1-v2d · bénédiction audio réparée (le Bayātī sonne sur iPhone), harakat écartées, éloge sur chaque écran, flèche retirée · sw v78';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2763,7 +2763,8 @@ function renderStep(){
   syncNarrLink();
   const st=QUEUE[qi];
   if(!st)return finishDisque();
-  {const bl=document.getElementById('backLink');if(bl)bl.style.display=(!st.graded&&qi>0&&!inRetry)?'block':'none';}
+  {const bl=document.getElementById('backLink');
+   if(bl)bl.style.display=(!st.graded&&qi>0&&!inRetry&&!SANS_RETOUR.has(st.type))?'block':'none';}
   body.scrollTop=0;
   // Lecture auto de la CONSIGNE (une ligne par écran, demande Myriam 06/07) — jamais relue
   // si c'est la même que l'écran précédent (séries de quiz), coupée par le toggle 🗣️/🔇.
@@ -3482,10 +3483,17 @@ function toc(){ // ⏳ PROVISOIRE : le son d'erreur définitif (famille Bayātī
     o.connect(g);g.connect(_tocCtx.destination);o.start();o.stop(_tocCtx.currentTime+.17);
   }catch(e){}
 }
-function ctaOn2(){const c=document.getElementById('cta');if(c&&c.disabled){c.disabled=false;c.classList.add('pope');}}
-function objectifAtteint(){ // signature PUIS le bouton s'allume — une seule fois par écran
+function ctaOn2(){const c=document.getElementById('cta');if(c&&c.disabled){c.disabled=false;c.className='cta ok pope';}}
+const SANS_RETOUR=new Set(['tapset','harakat3','fuse','findset','selson','formslide','read']);
+function objectifAtteint(){ // signature + éloge écrit + le bouton s'allume — une fois par écran
   if(window._objDone)return;window._objDone=true;
   playSfx('bonne-reponse');
+  // le message de réussite sur CHAQUE écran (Myriam, 07/08 soir) — l'éloge enseigne un mot
+  try{
+    const fb=document.getElementById('fb'),foot=document.getElementById('p-foot');
+    fb.className='fb ok';fb.innerHTML=elogeHTML();
+    foot.classList.remove('bad');foot.classList.add('ok');
+  }catch(e){}
   setTimeout(ctaOn2,150);
 }
 function quandSonFini(cb){ // rappelle cb à la fin du son EN COURS (filet 2,5 s : synthèse, silence)
@@ -3676,13 +3684,20 @@ function setupDrag(L){
   window.addEventListener('mouseup',end);
 }
 function fsTap(el,L,ok){
+  const fb=document.getElementById('fb'),foot=document.getElementById('p-foot');
   if(ok){
     if(el.classList.contains('hit'))return;
     el.classList.add('hit');window._fs.found++;updFs();
+    fb.className='fb';fb.innerHTML='';foot.classList.remove('bad');   // la bonne pioche efface le rouge
     sayLetterName(L);   // le NOM, comme partout ailleurs dans la leçon
     if(window._fs.found>=window._fs.need)quandSonFini(objectifAtteint);
   }
-  else{el.classList.add('miss');toc();setTimeout(()=>el.classList.remove('miss'),400);}
+  else{
+    el.classList.add('miss');toc();
+    fb.className='fb bad';fb.innerHTML='<span>✕</span> Essaie encore';
+    foot.classList.add('bad');
+    setTimeout(()=>el.classList.remove('miss'),400);
+  }
 }
 function fwTap(el,ok,L){
   if(L)sayLetterName(L);            // toute lettre touchée dit son nom (demande Myriam 03/08)
@@ -4686,20 +4701,25 @@ function comboBonneReponse(){
 }
 /* — le pool d'éléments audio bénis (iOS, 07/08) — */
 const _POOL=[];let _poolI=0;
-function benirAudio(){ // appelé au 1er geste : 4 lecteurs jouent un silence PENDANT le toucher
+/* ⚠️ Le 1er silence (v2b) était un base64 bricolé, INVALIDE : play() échouait, la
+   bénédiction ratait EN SILENCE et iOS continuait de bloquer la signature (vécu par
+   Myriam le soir même). Celui-ci est fabriqué octet par octet — 20 ms, 8 kHz. Et on
+   ne se déclare béni qu'après un play() RÉUSSI : sinon on réessaie au geste suivant. */
+const _SIL='data:audio/wav;base64,UklGRmQBAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
+function benirAudio(){
   if(_POOL.length)return;
-  // 30 ms de silence WAV : assez pour que play() aboutisse, inaudible par construction
-  const SIL='data:audio/wav;base64,UklGRiQFAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAFAAA'+'A'.repeat(1700);
-  for(let i=0;i<4;i++){
-    const a=new Audio(SIL);
-    const p=a.play();if(p&&p.catch)p.catch(()=>{});
-    setTimeout(()=>{try{a.pause();}catch(e){}},60);
-    _POOL.push(a);
-  }
+  const cand=[];for(let i=0;i<4;i++)cand.push(new Audio(_SIL));
+  const fini=()=>{
+    if(_POOL.length)return;
+    cand.forEach(a=>{try{a.pause();}catch(e){}_POOL.push(a);});
+    ['touchend','pointerup','mousedown','click'].forEach(ev=>document.removeEventListener(ev,benirAudio,true));
+  };
+  const p=cand[0].play();
+  cand.slice(1).forEach(a=>{const q=a.play();if(q&&q.catch)q.catch(()=>{});});
+  if(p&&p.then)p.then(fini).catch(()=>{});else fini();
 }
 try{
-  document.addEventListener('touchend',benirAudio,{once:true,capture:true});
-  document.addEventListener('mousedown',benirAudio,{once:true,capture:true});
+  ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,benirAudio,true));
 }catch(e){}
 function audioBeni(url){ // un lecteur du pool si béni, un neuf sinon (bureau)
   if(!_POOL.length)return new Audio(url);
