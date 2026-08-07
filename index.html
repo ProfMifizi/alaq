@@ -2453,40 +2453,6 @@ function sigPoster(s){
   }catch(e){}
 })();
 
-/*DIAG-DEBUT*/
-/* ===== 🔎 DIAGNOSTIC AUDIO TEMPORAIRE (v3c) — À RETIRER une fois le bug compris =====
-   Chaque événement audio est horodaté, affiché dans un petit panneau à l'écran, et la
-   traîne part automatiquement dans la table des signalements (motif 'diagnostic audio')
-   au moment de la récompense. Toutes les lignes ajoutées ailleurs portent le
-   marqueur DIAG pour être retirées d'un coup. */
-const DIAG=true;let _dT0=Date.now(),_dN=0;
-function alog(s){
-  if(!DIAG)return;
-  try{
-    const t=((Date.now()-_dT0)/1000).toFixed(1);
-    (window._ALOG=window._ALOG||[]).push(t+' '+s);
-    if(window._ALOG.length>120)window._ALOG.shift();
-    let p=document.getElementById('diagPanel');
-    if(!p){p=document.createElement('div');p.id='diagPanel';
-      p.style.cssText='position:fixed;left:4px;bottom:4px;z-index:999;max-width:80vw;background:rgba(0,0,0,.74);color:#8f8;font:9px/1.35 monospace;padding:4px 6px;border-radius:6px;pointer-events:none;white-space:pre-wrap';
-      document.body.appendChild(p);}
-    p.textContent=window._ALOG.slice(-9).join('\n');
-  }catch(e){}
-}
-function alogEnvoi(tag){
-  if(!DIAG||_dN>=6)return;_dN++;
-  try{
-    fetch(SUPA_URL+'/rest/v1/signalements',{method:'POST',
-      headers:{apikey:SUPA_ANON,Authorization:'Bearer '+SUPA_ANON,'Content-Type':'application/json',Prefer:'return=minimal'},
-      body:JSON.stringify({motif:'diagnostic audio',
-        detail:(tag+' | '+(window._ALOG||[]).slice(-14).join(' | ')).slice(0,600),
-        ecran:(typeof sigEcran==='function'?sigEcran():'?'),build:BUILD,
-        appareil:(navigator.userAgent||'').slice(0,300),
-        email:(CLOUD.user&&CLOUD.user.email)||null})}).catch(()=>{});
-  }catch(e){}
-}
-/*DIAG-FIN*/
-
 // ===== Consignes lues par l'appli =====
 // Dépose le .mp3 (ta voix) dans audios-app-alaq/ : il sera lu à la place de la
 // synthèse. Si le fichier manque, repli automatique sur la voix de synthèse.
@@ -2749,7 +2715,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='lecon1-v3c-diag · journal audio à l’écran + envoi automatique du diagnostic · sw v81';
+const BUILD='lecon1-v4 · la récompense retrouvée — purge du vieux أَحْسَنْتِ (13/07) que le cache MEDIA resservait à chaque bonne réponse · sw v82';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3617,7 +3583,6 @@ function ctaOn2(){const c=document.getElementById('cta');if(c&&c.disabled){c.dis
 const SANS_RETOUR=new Set(['tapset','harakat3','fuse','findset','selson','formslide','read']);
 function objectifAtteint(){ // signature + éloge écrit + le bouton s'allume — une fois par écran
   if(window._objDone)return;window._objDone=true;
-  alog('OBJECTIF ATTEINT → signature');/*DIAG*/setTimeout(function(){alogEnvoi('objectif');},2600);/*DIAG*/
   playSfx('bonne-reponse');
   // le message de réussite sur CHAQUE écran (Myriam, 07/08 soir) — l'éloge enseigne un mot
   try{
@@ -3632,7 +3597,6 @@ function quandSonFini(cb){ // rappelle cb à la fin du son EN COURS (filet 2,5 s
   const go=()=>{if(done||gen!==_sndGen)return;done=true;cb();};
   setTimeout(()=>{
     const a=_curAudio;
-    alog('fin-de-son : '+(a&&!a.paused&&!a.ended?'j’attends la fin du fichier':'filet 2,5 s'));/*DIAG*/
     if(a&&!a.paused&&!a.ended)a.addEventListener('ended',go,{once:true});
     setTimeout(go,2500);
   },150);
@@ -3642,7 +3606,7 @@ function jouerF(f,fallback,fin){ // un mp3 précis (voix IA « -f »), repli syn
   try{
     const a=audioBeni('audios-app-alaq/'+f);_curAudio=a;let ok=false,fini=false;
     const done=()=>{if(fini||gen!==_sndGen)return;fini=true;if(fin)fin();};
-    const fb2=()=>{if(ok||gen!==_sndGen)return;ok=true;alog('jouerF '+f+' → repli synthèse');/*DIAG*/try{_speakSynth(fallback);}catch(_){}
+    const fb2=()=>{if(ok||gen!==_sndGen)return;ok=true;try{_speakSynth(fallback);}catch(_){}
       setTimeout(done,1100);};
     a.onended=()=>done();
     a.onerror=()=>fb2();
@@ -4144,13 +4108,12 @@ function sayLetterName(L){
   var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); return; }
   try{
     var a=(_LNg===VOIX_G&&_LN[tr])||new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3');
-    alog('nom '+tr+(_LN[tr]===a?' pré':' neuf')+' rs='+a.readyState);/*DIAG*/
     try{ a.currentTime=0; }catch(_){}
     _curAudio=a; var settled=false;
-    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; alog('nom '+tr+' → repli synthèse');/*DIAG*/ try{_speakSynth(L);}catch(_){ } }; // Majed dit le nom de la lettre (plus la translit en voix française)
-    a.onplaying=function(){settled=true;alog('nom '+tr+' joue');/*DIAG*/};  // on* et pas addEventListener : l'élément préchargé est RÉUTILISÉ à chaque toucher
-    a.onerror=function(){alog('nom '+tr+' ERREUR média '+(a.error&&a.error.code));/*DIAG*/fb();};
-    var p=a.play(); if(p&&p.catch)p.catch(function(e){alog('nom '+tr+' play() REJETÉ '+(e&&e.name));/*DIAG*/fb(e);});
+    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(L);}catch(_){ } }; // Majed dit le nom de la lettre (plus la translit en voix française)
+    a.onplaying=function(){settled=true;};  // on* et pas addEventListener : l'élément préchargé est RÉUTILISÉ à chaque toucher
+    a.onerror=fb;
+    var p=a.play(); if(p&&p.catch)p.catch(fb);
     setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
   }catch(e){ try{_speakSynth(tr);}catch(_){ } }
 }
@@ -4776,7 +4739,6 @@ function ttsRom(x){ return (x||'').replace(/ā/g,'a').replace(/ī/g,'i').replace
    4. cancel() SEULEMENT si le moteur parle : les cancel() à vide décalent WebKit (voir stopAudio). */
 function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon — jamais de silence
   if(!('speechSynthesis'in window))return;
-  alog('SYNTHÈSE «'+String(t).slice(0,14)+'»');/*DIAG*/
   try{
     const gen=_sndGen;                            // annulé si un nouveau son démarre entre-temps
     const hasAr=/[؀-ۿ]/.test(String(t));
@@ -4832,7 +4794,6 @@ const COMBO_POOL=['moumtaz','sahih','rai','allahumma-barik'];
 let comboSerie=0, comboDernier='';
 function comboReset(){ comboSerie=0; }
 function comboBonneReponse(){
-  alog('bonne réponse (série '+(comboSerie+1)+'/'+COMBO_TOUS+')');/*DIAG*/setTimeout(function(){alogEnvoi('quiz');},2600);/*DIAG*/
   playSfx('bonne-reponse');                       // la signature, toujours
   if(++comboSerie<COMBO_TOUS)return;
   comboSerie=0;
@@ -4844,10 +4805,7 @@ function comboBonneReponse(){
   // Le jeton _sndGen est revérifié : changer d'écran entre-temps annule la félicitation.
   setTimeout(function(){
     if(gen!==_sndGen)return;
-    alog('felicit '+comboDernier+'-'+VOIX_G);/*DIAG*/
-    try{ const a=audioBeni(f); _curAudio=a;
-      a.onerror=function(){alog('felicit ERREUR média '+(a.error&&a.error.code));};/*DIAG*/
-      const p=a.play(); if(p&&p.catch)p.catch(function(e){alog('felicit play() REJETÉ '+(e&&e.name));/*DIAG*/}); }catch(e){}
+    try{ const a=audioBeni(f); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
   },350);
 }
 /* — le pool d'éléments audio bénis (iOS, 07/08) — */
@@ -4863,7 +4821,6 @@ function benirAudio(){
   const fini=()=>{
     if(_POOL.length)return;
     cand.forEach(a=>{try{a.pause();}catch(e){}_POOL.push(a);});
-    alog('pool <audio> béni ('+_POOL.length+')');/*DIAG*/
     ['touchend','pointerup','mousedown','click'].forEach(ev=>document.removeEventListener(ev,benirAudio,true));
   };
   const p=cand[0].play();
@@ -4886,17 +4843,16 @@ function audioBeni(url){ // un lecteur du pool si béni, un neuf sinon (bureau)
 const _SFXB={};let _sfxCtx=null,_curSrc=null;
 function chargerSfx(){ // réveille le moteur à chaque geste, décode les 2 sons courts une seule fois
   try{
-    if(!_sfxCtx){_sfxCtx=new (window.AudioContext||window.webkitAudioContext)();alog('ctx créé: '+_sfxCtx.state);/*DIAG*/}
-    if(_sfxCtx.state==='suspended')_sfxCtx.resume().then(()=>alog('ctx repris: '+_sfxCtx.state)/*DIAG*/);
+    _sfxCtx=_sfxCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(_sfxCtx.state==='suspended')_sfxCtx.resume();
     ['bonne-reponse','erreur'].forEach(n=>{
       if(_SFXB[n]||_SFXB['_'+n])return;
       _SFXB['_'+n]=1; // verrou : un seul téléchargement par son
       fetch('audios-app-alaq/sfx-'+n+'.mp3').then(r=>r.arrayBuffer())
         .then(ab=>new Promise((res,rej)=>_sfxCtx.decodeAudioData(ab,res,rej)))
-        .then(b=>{_SFXB[n]=b;alog('décodé '+n+' ('+b.duration.toFixed(2)+'s)');/*DIAG*/})
-        .catch(e=>{alog('décodage ÉCHEC '+n+' '+(e&&e.name));/*DIAG*/delete _SFXB['_'+n];});
+        .then(b=>{_SFXB[n]=b;}).catch(()=>{delete _SFXB['_'+n];});
     });
-  }catch(e){alog('chargerSfx ERREUR '+(e&&e.name));/*DIAG*/}
+  }catch(e){}
 }
 try{
   ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,chargerSfx,true));
@@ -4905,16 +4861,13 @@ function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jam
   try{
     stopAudio();
     const b=_SFXB[name];
-    alog('sfx '+name+' → '+(b&&_sfxCtx?'WebAudio ctx='+_sfxCtx.state:'<audio> pool='+_POOL.length));/*DIAG*/
     if(b&&_sfxCtx){
       if(_sfxCtx.state==='suspended')_sfxCtx.resume();
       const s=_sfxCtx.createBufferSource();s.buffer=b;s.connect(_sfxCtx.destination);_curSrc=s;s.start();
       return;
     }
-    const a=audioBeni('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a;
-    a.onerror=function(){alog('sfx <audio> ERREUR média '+(a.error&&a.error.code));};/*DIAG*/
-    const p=a.play(); if(p&&p.catch)p.catch(e=>{alog('sfx <audio> play() REJETÉ '+(e&&e.name));/*DIAG*/});
-  }catch(e){alog('playSfx ERREUR '+(e&&e.name));/*DIAG*/}
+    const a=audioBeni('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{});
+  }catch(e){}
 }
 function stopAudio(){ // un seul son à la fois : coupe le fichier, le tampon WebAudio ET la synthèse, et invalide les replis en attente
   _sndGen++;
@@ -4939,7 +4892,7 @@ function speak(t){
     if(!url){ _speakSynth(t); return; }            // aucun mapping -> synthèse directe
     const a=new Audio(url); _curAudio=a;
     let settled=false;
-    const toSynth=()=>{ if(settled||gen!==_sndGen)return; settled=true; alog('speak «'+String(t).slice(0,10)+'» → repli synthèse (err='+(a.error&&a.error.code)+')');/*DIAG*/ try{a.pause();}catch(_){ } _speakSynth(t); };
+    const toSynth=()=>{ if(settled||gen!==_sndGen)return; settled=true; try{a.pause();}catch(_){ } _speakSynth(t); };
     a.addEventListener('playing',()=>{ settled=true; },{once:true}); // le fichier joue : on neutralise tout repli
     a.addEventListener('error',toSynth,{once:true});   // fichier 404 / illisible -> synthèse
     a.addEventListener('stalled',toSynth,{once:true}); // chargement bloqué -> synthèse

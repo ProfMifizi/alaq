@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v81-2026-08-08b';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v82-2026-08-08c';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -493,11 +493,15 @@ self.addEventListener('activate',e=>{
     // MEDIA survit aux livraisons : c'est tout l'objet de la séparation
     await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA).map(k=>caches.delete(k)));
     // ⚠️ MEDIA n'est jamais purgé — donc un fichier REMPLACÉ sous le même nom y reste
-    // périmé pour toujours. Purge CIBLÉE des remplacés du 07/08 (alif « alfoun », fā
-    // emphatique, madrasatoun) : ils se re-téléchargent une fois, puis re-cache à vie.
+    // périmé pour toujours. Purge CIBLÉE de TOUS les remplacés (liste vérifiée au blob git
+    // le 08/08 : 7 fichiers). Les deux sfx du 05/08 manquaient — c'est pour ça que
+    // l'iPhone de Myriam jouait encore l'أَحْسَنْتِ (voix homme) du 13/07 à chaque bonne
+    // réponse, quel que soit le contenu poussé depuis. Un fichier re-déposé sous le
+    // même nom DOIT rejoindre cette liste (ou changer de nom).
     const m=await caches.open(MEDIA);
     await Promise.all(['lettre-alif-nom-f.mp3','lettre-alif-nom-h.mp3',
-      'lettre-fa-nom-f.mp3','lettre-fa-nom-h.mp3','mot-madrasatoun.mp3']
+      'lettre-fa-nom-f.mp3','lettre-fa-nom-h.mp3','mot-madrasatoun.mp3',
+      'sfx-bonne-reponse.mp3','sfx-fin-lecon.mp3']
       .map(f=>m.delete('audios-app-alaq/'+f,{ignoreSearch:true})));
     self.clients.claim();
   })());
