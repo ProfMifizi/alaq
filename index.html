@@ -441,6 +441,26 @@
   .fb.bad span:first-child{background:var(--coral);animation:fbpop .35s cubic-bezier(.3,1.6,.5,1),fbshake .35s ease .35s}
   @keyframes fbpop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
   @keyframes fbshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
+  /* ===== ⚑ Signalements (08/08) — préview validée : drapeau en haut à droite du bandeau bas ===== */
+  .p-flag{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--muted);
+    opacity:.75;font-size:18px;line-height:1;padding:2px 6px;cursor:pointer;z-index:3}
+  #player.vfmode .p-flag{display:none}
+  .sig-voile{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.25s;z-index:90}
+  .sig-voile.on{opacity:1;pointer-events:auto}
+  .sig-sheet{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-radius:22px 22px 0 0;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:.28s;z-index:91;
+    max-width:560px;margin:0 auto}
+  .sig-sheet.on{transform:none}
+  .sig-sheet h3{font-size:15px;margin:0 0 12px;text-align:center;color:var(--cream)}
+  .sig-opt{display:block;width:100%;text-align:left;background:var(--panel2);border:2px solid var(--line);
+    border-radius:12px;color:var(--cream);font-size:14px;font-weight:700;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+  .sig-opt.sel{border-color:var(--gold);background:#3a312b}
+  .sig-txt{width:100%;background:var(--panel2);border:2px solid var(--line);border-radius:12px;box-sizing:border-box;
+    color:var(--cream);font-family:inherit;font-size:14px;padding:10px;min-height:64px;display:none;margin-bottom:8px}
+  .sig-txt.on{display:block}
+  .sig-env{width:100%;background:var(--gold);border:none;border-radius:14px;color:#1a1410;
+    font-weight:900;font-size:15px;padding:14px;margin-top:4px;cursor:pointer}
+  .sig-env:disabled{opacity:.4}
   .masc-wrap{width:170px;margin:0 auto 6px}
   #masc{width:170px;height:200px;overflow:visible;display:block}
   #mhalo,#mcorps,#mbassin,.mjambe{transform-box:fill-box}
@@ -1143,6 +1163,7 @@
   </div>
   <div class="p-body" id="p-body"></div>
   <div class="p-foot" id="p-foot">
+    <button class="p-flag" onclick="sigOuvrir()" aria-label="Signaler un problème">⚑</button>
     <button class="back-link" id="backLink" onclick="prevStep()">← Précédent</button>
     <div id="fb"></div>
     <div id="why" class="why"></div>
@@ -1333,6 +1354,18 @@
   <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obAccountClose()">Plus tard</button>
 </div>
 
+<div class="sig-voile" id="sigVoile" onclick="sigFermer()"></div>
+<div class="sig-sheet" id="sigSheet">
+  <h3>⚑ Signaler un problème</h3>
+  <button class="sig-opt" data-motif="Le son ne se joue pas" onclick="sigChoisir(this)">🔇 Le son ne se joue pas</button>
+  <button class="sig-opt" data-motif="Le son arrive en retard" onclick="sigChoisir(this)">🐢 Le son arrive en retard</button>
+  <button class="sig-opt" data-motif="Ce n’est pas le bon son" onclick="sigChoisir(this)">🔊 Ce n’est pas le bon son</button>
+  <button class="sig-opt" data-motif="L’affichage est cassé" onclick="sigChoisir(this)">🎨 L’affichage est cassé</button>
+  <button class="sig-opt" data-motif="Ma réponse aurait dû être acceptée" onclick="sigChoisir(this)">✅ Ma réponse aurait dû être acceptée</button>
+  <button class="sig-opt" data-motif="Autre chose" data-libre="1" onclick="sigChoisir(this)">✍️ Autre chose</button>
+  <textarea class="sig-txt" id="sigTxt" maxlength="600" placeholder="Dis-nous ce qui ne va pas (facultatif)"></textarea>
+  <button class="sig-env" id="sigEnv" disabled onclick="sigEnvoyer()">ENVOYER</button>
+</div>
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
@@ -2359,6 +2392,67 @@ function _normInstr(t){ return String(t)
   .replace(/<[^>]+>/g,' ')
   .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu,' ')
   .replace(/\s+/g,' ').trim(); }
+/* ===== ⚑ Signalements (08/08) — le drapeau du bandeau bas =====
+   L'élève coche un motif, l'app capture TOUT le contexte (écran, build, appareil,
+   compte) : jamais rien à décrire. Dépôt en clé publique — la RLS de la table
+   n'autorise que l'insertion bornée (outils/installer-signalements.sql).
+   Hors ligne ou table absente : la file alaq_sigq réessaie au prochain lancement. */
+let _sigMotif=null;
+function sigOuvrir(){
+  _sigMotif=null;
+  document.querySelectorAll('#sigSheet .sig-opt').forEach(o=>o.classList.remove('sel'));
+  const t=document.getElementById('sigTxt');t.value='';t.classList.remove('on');
+  document.getElementById('sigEnv').disabled=true;
+  document.getElementById('sigVoile').classList.add('on');
+  document.getElementById('sigSheet').classList.add('on');
+}
+function sigFermer(){
+  document.getElementById('sigVoile').classList.remove('on');
+  document.getElementById('sigSheet').classList.remove('on');
+}
+function sigChoisir(b){
+  document.querySelectorAll('#sigSheet .sig-opt').forEach(o=>o.classList.remove('sel'));
+  b.classList.add('sel');_sigMotif=b.dataset.motif;
+  document.getElementById('sigTxt').classList.toggle('on',!!b.dataset.libre);
+  document.getElementById('sigEnv').disabled=false;
+}
+function sigEcran(){ // où l'élève se trouve — capturé, jamais demandé
+  try{
+    if(REVIEW)return 'révision · écran '+(qi+1)+(QUEUE[qi]&&QUEUE[qi].type?' · '+QUEUE[qi].type:'');
+    const st=QUEUE[qi];
+    return 'U'+((UNITS[curU]&&UNITS[curU].no)||curU+1)+'-D'+(curD+1)+'-E'+(qi+1)+(st&&st.type?' · '+st.type:' · quiz');
+  }catch(e){return '?';}
+}
+function sigEnvoyer(){
+  if(!_sigMotif)return;
+  const s={motif:_sigMotif,
+    detail:(document.getElementById('sigTxt').value||'').trim().slice(0,600)||null,
+    ecran:sigEcran(),build:BUILD,
+    appareil:(navigator.userAgent||'').slice(0,300),
+    email:(CLOUD.user&&CLOUD.user.email)||null};
+  sigFermer();toast('Merci ! Signalement envoyé 🌱');
+  sigPoster(s).catch(()=>{
+    try{const q=JSON.parse(localStorage.getItem('alaq_sigq')||'[]');q.push(s);
+        localStorage.setItem('alaq_sigq',JSON.stringify(q.slice(-20)));}catch(e){}
+  });
+}
+function sigPoster(s){
+  return fetch(SUPA_URL+'/rest/v1/signalements',{method:'POST',
+    headers:{apikey:SUPA_ANON,Authorization:'Bearer '+SUPA_ANON,'Content-Type':'application/json',Prefer:'return=minimal'},
+    body:JSON.stringify(s)}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);});
+}
+(function sigPurgerQueue(){ // les signalements restés à quai repartent au lancement
+  try{
+    const q=JSON.parse(localStorage.getItem('alaq_sigq')||'[]');
+    if(!q.length)return;
+    localStorage.removeItem('alaq_sigq');
+    q.forEach(s=>sigPoster(s).catch(()=>{
+      try{const r=JSON.parse(localStorage.getItem('alaq_sigq')||'[]');r.push(s);
+          localStorage.setItem('alaq_sigq',JSON.stringify(r.slice(-20)));}catch(e){}
+    }));
+  }catch(e){}
+})();
+
 // ===== Consignes lues par l'appli =====
 // Dépose le .mp3 (ta voix) dans audios-app-alaq/ : il sera lu à la place de la
 // synthèse. Si le fichier manque, repli automatique sur la voix de synthèse.
@@ -2621,7 +2715,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='lecon1-v3 · kasra abaissée, bandeau ✓/✕ animé, rattrapage sans texte, récompense = quartes de Myriam, erreur Bayātī douce, noms préchargés, sfx par WebAudio · sw v79';
+const BUILD='lecon1-v3b · le drapeau ⚑ de signalement dans le bandeau bas · sw v80';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
