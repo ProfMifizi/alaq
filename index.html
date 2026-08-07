@@ -358,7 +358,7 @@
   .hkcirc .sign{position:absolute;left:50%;transform:translateX(-50%);
     font-family:var(--ar);font-size:40px;color:var(--gold);line-height:1;z-index:2}
   .hkcirc .sign.top{top:6px}
-  .hkcirc .sign.bot{top:120px}
+  .hkcirc .sign.bot{top:120px}  /* valeur de base — l'ajustement qui FAIT FOI est plus bas (l.~436, harakat écartées) */
   .hkcirc .hl{position:absolute;bottom:0;font-size:11px;font-weight:900;color:var(--muted);white-space:nowrap}
   .hkcirc.lit .circ{border-color:var(--gold);border-style:solid}
   .hkcirc.lit .sign{color:var(--gold2)}
@@ -433,12 +433,14 @@
   .hkcirc .hbar{display:block;width:44px;height:10px;border-radius:6px;background:currentColor;transform:rotate(-18deg)}
   .hkcirc .hdam{font-family:var(--ar);font-style:normal;font-weight:700;font-size:36px;line-height:.8;display:block}
   .hkcirc .sign.top{top:5px}
-  .hkcirc .sign.bot{top:122px}
+  .hkcirc .sign.bot{top:130px}  /* 130 et non 122 : à 122 la kasra mordait encore le disque pointillé (Myriam 07/08) */
   .hkcirc .sign.hi{top:-4px}
   .fb span:first-child{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
     color:#fff;font-size:15px;flex:none}
-  .fb.ok span:first-child{background:var(--green)}
-  .fb.bad span:first-child{background:var(--coral)}
+  .fb.ok span:first-child{background:var(--green);animation:fbpop .45s cubic-bezier(.3,1.6,.5,1)}
+  .fb.bad span:first-child{background:var(--coral);animation:fbpop .35s cubic-bezier(.3,1.6,.5,1),fbshake .35s ease .35s}
+  @keyframes fbpop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+  @keyframes fbshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
   .masc-wrap{width:170px;margin:0 auto 6px}
   #masc{width:170px;height:200px;overflow:visible;display:block}
   #mhalo,#mcorps,#mbassin,.mjambe{transform-box:fill-box}
@@ -2619,7 +2621,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='lecon1-v2d · bénédiction audio réparée (le Bayātī sonne sur iPhone), harakat écartées, éloge sur chaque écran, flèche retirée · sw v78';
+const BUILD='lecon1-v3 · kasra abaissée, bandeau ✓/✕ animé, rattrapage sans texte, récompense = quartes de Myriam, erreur Bayātī douce, noms préchargés, sfx par WebAudio · sw v79';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2739,6 +2741,7 @@ function startDisque(u,i,recharge){
   RECHARGE=!!recharge; // reprise depuis « Plus de cœurs » : aucune vie perdue, +3 à la fin
   EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
   comboReset();
+  prechargerNoms(); // les 28 noms en mémoire avant le 1er toucher (latence, 07/08)
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
@@ -3300,9 +3303,7 @@ function finishDisque(){
     {const bl=document.getElementById('backLink');if(bl)bl.style.display='none';}
     body.innerHTML='<div class="learn" style="margin-top:24px">'+
       '<div style="font-size:60px">🔁</div>'+
-      '<div class="nm" style="margin-top:10px">On corrige tes erreurs</div>'+
-      '<div class="mn" style="font-size:16px;margin-top:10px">Reprenons les '+MISSED.length+
-      ' question'+(MISSED.length>1?'s':'')+' à revoir, jusqu\u2019à ce que tu les réussisses. ماشاء الله, tu y es presque !</div></div>';
+      '<div class="nm" style="margin-top:10px">On corrige tes erreurs</div></div>'; // le titre suffit (Myriam 07/08)
     const cta=document.getElementById('cta');
     cta.className='cta';cta.disabled=false;cta.textContent='CORRIGER MES ERREURS';
     cta.onclick=()=>renderStep();
@@ -3337,7 +3338,7 @@ function finishDisque(){
   document.getElementById('fin-extra').innerHTML=isBilan
     ?('<p style="color:var(--gold2);font-weight:800;margin:-8px 0 18px">🕋 Tu peux maintenant lire <b>'+fatihaPct()+' %</b> de la Fātiḥa !</p>')
     :'';
-  document.getElementById('fin-title').textContent=isBilan?('Unité '+toAr(UNITS[curU].no)+' validée ! 🎉'):(discLabel(discsFor(curU)[curD],UNITS[curU])+' — terminé !');
+  document.getElementById('fin-title').textContent=isBilan?('Unité '+toAr(UNITS[curU].no)+' validée ! 🎉'):'Leçon terminée !'; // plus de « L'alphabet — terminé ! » (Myriam 07/08)
   document.getElementById('fin-xp').textContent='+'+gain;
   document.getElementById('fin-acc').textContent=acc+'%';
   fillFinishConstance();
@@ -3472,7 +3473,8 @@ function elogeHTML(){ // jamais deux fois le même d'affilée — l'éloge écri
   return '<span>✓</span> <span class="ar" style="font-size:20px">'+ELOGES[k][0]+'</span> <span class="elfr">('+ELOGES[k][1]+')</span>';
 }
 let _tocCtx=null;
-function toc(){ // ⏳ PROVISOIRE : le son d'erreur définitif (famille Bayātī) le remplacera
+function toc(){ // l'erreur : deux frappes du timbre Bayātī, +1,5 puis −1,5 (choix Myriam 07/08) ; l'oscillateur reste en secours
+  if(_SFXB['erreur']){ playSfx('erreur'); return; }
   try{
     _tocCtx=_tocCtx||new (window.AudioContext||window.webkitAudioContext)();
     const o=_tocCtx.createOscillator(),g=_tocCtx.createGain();
@@ -3995,15 +3997,28 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
 /* ===== SON de la lettre (et non son nom) : joué en fin de tracé/démo. Prêt pour tes
    enregistrements lettre-<translit>-son.mp3 ; repli synthèse tant qu'ils n'existent pas. ===== */
 const LTRANS={'ا':'alif','ب':'ba','ت':'ta','ث':'tha','ج':'jim','ح':'hha','خ':'kha','د':'dal','ذ':'dhal','ر':'ra','ز':'zay','س':'sin','ش':'shin','ص':'sad','ض':'dad','ط':'tta','ظ':'dha','ع':'ayn','غ':'ghayn','ف':'fa','ق':'qaf','ك':'kaf','ل':'lam','م':'mim','ن':'nun','ه':'ha','و':'waw','ي':'ya'};
+/* — les 28 noms préchargés à l'entrée d'une leçon (latence, 07/08 soir) : le son part AU
+   TOUCHER. Sans cela, chaque toucher créait un <audio> neuf ; fichier lent → 1,1 s
+   d'attente puis repli sur Majed, la voix homme de l'iPhone — le « Mehdi » entendu. — */
+var _LN={},_LNg='';
+function prechargerNoms(){
+  if(_LNg===VOIX_G)return; _LNg=VOIX_G; _LN={};
+  try{
+    ALPHABET.forEach(function(a){ var tr=LTRANS[letterKey(a[0])]; if(!tr)return;
+      var el=new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3'); el.preload='auto'; _LN[tr]=el; });
+  }catch(e){}
+}
 function sayLetterName(L){
   stopAudio();
   var gen=_sndGen;
   var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); return; }
   try{
-    var a=new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3'); _curAudio=a; var settled=false;
+    var a=(_LNg===VOIX_G&&_LN[tr])||new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3');
+    try{ a.currentTime=0; }catch(_){}
+    _curAudio=a; var settled=false;
     var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(L);}catch(_){ } }; // Majed dit le nom de la lettre (plus la translit en voix française)
-    a.addEventListener('playing',function(){settled=true;},{once:true});
-    a.addEventListener('error',fb,{once:true});
+    a.onplaying=function(){settled=true;};  // on* et pas addEventListener : l'élément préchargé est RÉUTILISÉ à chaque toucher
+    a.onerror=fb;
     var p=a.play(); if(p&&p.catch)p.catch(fb);
     setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
   }catch(e){ try{_speakSynth(tr);}catch(_){ } }
@@ -4692,12 +4707,12 @@ function comboBonneReponse(){
   const dispo=COMBO_POOL.filter(m=>m!==comboDernier);
   comboDernier=dispo[Math.floor(Math.random()*dispo.length)];
   const gen=_sndGen, f='audios-app-alaq/felicit-'+comboDernier+'-'+VOIX_G+'.mp3';
-  // 520 ms : la signature dure ~420 ms, on enchaîne sans la couper ni laisser de trou.
+  // 350 ms : la signature (les quartes de Myriam, 287 ms) finit, on enchaîne sans trou.
   // Le jeton _sndGen est revérifié : changer d'écran entre-temps annule la félicitation.
   setTimeout(function(){
     if(gen!==_sndGen)return;
     try{ const a=audioBeni(f); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
-  },520);
+  },350);
 }
 /* — le pool d'éléments audio bénis (iOS, 07/08) — */
 const _POOL=[];let _poolI=0;
@@ -4728,11 +4743,41 @@ function audioBeni(url){ // un lecteur du pool si béni, un neuf sinon (bureau)
   a.onended=null;a.onerror=null;a.muted=false;a.src=url;
   return a;
 }
-function playSfx(name){ // son de récompense : joue audios-app-alaq/sfx-<name>.mp3 s'il existe, sinon SILENCE (aucun repli)
-  try{ stopAudio(); const a=audioBeni('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
+/* — les sfx par WebAudio (07/08 soir) : décodés au 1er geste, un tampon décodé se joue
+   TOUJOURS, même déclenché hors geste (à la fin du nom de lettre) — exactement là où
+   iOS coupait la signature quand elle passait par un élément <audio> non béni. — */
+const _SFXB={};let _sfxCtx=null,_curSrc=null;
+function chargerSfx(){ // réveille le moteur à chaque geste, décode les 2 sons courts une seule fois
+  try{
+    _sfxCtx=_sfxCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(_sfxCtx.state==='suspended')_sfxCtx.resume();
+    ['bonne-reponse','erreur'].forEach(n=>{
+      if(_SFXB[n]||_SFXB['_'+n])return;
+      _SFXB['_'+n]=1; // verrou : un seul téléchargement par son
+      fetch('audios-app-alaq/sfx-'+n+'.mp3').then(r=>r.arrayBuffer())
+        .then(ab=>new Promise((res,rej)=>_sfxCtx.decodeAudioData(ab,res,rej)))
+        .then(b=>{_SFXB[n]=b;}).catch(()=>{delete _SFXB['_'+n];});
+    });
+  }catch(e){}
 }
-function stopAudio(){ // un seul son à la fois : coupe le fichier ET la synthèse, et invalide les replis en attente
+try{
+  ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,chargerSfx,true));
+}catch(e){}
+function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jamais bloqué), sinon <audio> béni, sinon SILENCE
+  try{
+    stopAudio();
+    const b=_SFXB[name];
+    if(b&&_sfxCtx){
+      if(_sfxCtx.state==='suspended')_sfxCtx.resume();
+      const s=_sfxCtx.createBufferSource();s.buffer=b;s.connect(_sfxCtx.destination);_curSrc=s;s.start();
+      return;
+    }
+    const a=audioBeni('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{});
+  }catch(e){}
+}
+function stopAudio(){ // un seul son à la fois : coupe le fichier, le tampon WebAudio ET la synthèse, et invalide les replis en attente
   _sndGen++;
+  try{ if(_curSrc){ _curSrc.stop(); _curSrc=null; } }catch(e){}
   try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
   try{
     // cancel() UNIQUEMENT si le moteur a quelque chose à dire : sur WebKit, un cancel() à vide
