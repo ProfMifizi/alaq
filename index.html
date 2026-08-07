@@ -2576,7 +2576,7 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='lecon1-v2 · 15 écrans, titres-instructions, fusionner/sélectionner, VALIDER · J\u2019AI COMPRIS, éloges, voyelles voix Myriam · sw v75';
+const BUILD='lecon1-v2b · correctif iPhone : lecteurs bénis au 1er geste, chargement lent \u2260 fichier absent, purge alif/fā périmés · sw v76';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3417,14 +3417,18 @@ function quandSonFini(cb){ // rappelle cb à la fin du son EN COURS (filet 2,5 s
 function jouerF(f,fallback,fin){ // un mp3 précis (voix IA « -f »), repli synthèse, rappel de fin
   stopAudio();const gen=_sndGen;
   try{
-    const a=new Audio('audios-app-alaq/'+f);_curAudio=a;let ok=false;
+    const a=audioBeni('audios-app-alaq/'+f);_curAudio=a;let ok=false,fini=false;
+    const done=()=>{if(fini||gen!==_sndGen)return;fini=true;if(fin)fin();};
     const fb2=()=>{if(ok||gen!==_sndGen)return;ok=true;try{_speakSynth(fallback);}catch(_){}
-      if(fin)setTimeout(()=>{if(gen===_sndGen)fin();},1100);};
+      setTimeout(done,1100);};
+    a.onended=()=>done();
+    a.onerror=()=>fb2();
     a.addEventListener('playing',()=>{ok=true;},{once:true});
-    a.addEventListener('ended',()=>{if(gen===_sndGen&&fin)fin();},{once:true});
-    a.addEventListener('error',fb2,{once:true});
     const p=a.play();if(p&&p.catch)p.catch(fb2);
-    setTimeout(()=>{if(!ok&&gen===_sndGen&&a.paused)fb2();},1100);
+    // ⚠️ un chargement lent n'est PAS un fichier absent : on ne bascule en synthèse que
+    // si rien n'a été téléchargé après 3,5 s (readyState 0 = même pas les métadonnées).
+    setTimeout(()=>{if(!ok&&gen===_sndGen&&a.paused&&a.readyState===0)fb2();},3500);
+    setTimeout(done,8000);   // filet : quoi qu'il arrive, la leçon ne se bloque jamais
   }catch(e){if(fin)fin();}
 }
 /* — écrans 7 / 7 bis : sélection libre, 3 max, VALIDER juge — */
@@ -3637,7 +3641,7 @@ function setupRead(st){
   function finish(){
     if(window._rd.done)return;
     window._rd.done=true;
-    speak(st.word);                      // مَدْرَسَةٌ → mot-madrasatoun.mp3
+    jouerF('mot-madrasatoun.mp3',st.word); // مَدْرَسَةٌ — par le pool béni (iOS)
     const ar=document.getElementById('readArrow');if(ar)ar.style.display='none';
     quandSonFini(objectifAtteint);       // le bouton attend la fin du mot
   }
@@ -4594,11 +4598,35 @@ function comboBonneReponse(){
   // Le jeton _sndGen est revérifié : changer d'écran entre-temps annule la félicitation.
   setTimeout(function(){
     if(gen!==_sndGen)return;
-    try{ const a=new Audio(f); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
+    try{ const a=audioBeni(f); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
   },520);
 }
+/* — le pool d'éléments audio bénis (iOS, 07/08) — */
+const _POOL=[];let _poolI=0;
+function benirAudio(){ // appelé au 1er geste : 4 lecteurs jouent un silence PENDANT le toucher
+  if(_POOL.length)return;
+  // 30 ms de silence WAV : assez pour que play() aboutisse, inaudible par construction
+  const SIL='data:audio/wav;base64,UklGRiQFAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAFAAA'+'A'.repeat(1700);
+  for(let i=0;i<4;i++){
+    const a=new Audio(SIL);
+    const p=a.play();if(p&&p.catch)p.catch(()=>{});
+    setTimeout(()=>{try{a.pause();}catch(e){}},60);
+    _POOL.push(a);
+  }
+}
+try{
+  document.addEventListener('touchend',benirAudio,{once:true,capture:true});
+  document.addEventListener('mousedown',benirAudio,{once:true,capture:true});
+}catch(e){}
+function audioBeni(url){ // un lecteur du pool si béni, un neuf sinon (bureau)
+  if(!_POOL.length)return new Audio(url);
+  const a=_POOL[_poolI++%_POOL.length];
+  try{a.pause();}catch(e){}
+  a.onended=null;a.onerror=null;a.muted=false;a.src=url;
+  return a;
+}
 function playSfx(name){ // son de récompense : joue audios-app-alaq/sfx-<name>.mp3 s'il existe, sinon SILENCE (aucun repli)
-  try{ stopAudio(); const a=new Audio('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
+  try{ stopAudio(); const a=audioBeni('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
 }
 function stopAudio(){ // un seul son à la fois : coupe le fichier ET la synthèse, et invalide les replis en attente
   _sndGen++;
