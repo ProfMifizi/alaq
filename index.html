@@ -1184,7 +1184,7 @@
 <body>
 
 <div class="topbar">
-  <div class="brand" id="brand"><img class="blogo" id="blogo" alt=""> ALAQ</div>
+  <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ"></div>
   <div class="stats">
     <div class="stat">🌾 <span id="st-streak">0</span></div>
     <div class="stat">❤️ <span id="st-hearts">7</span></div>
@@ -1438,7 +1438,7 @@
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
-  <div class="deskbrand"><img class="dlg" src="icon-192.png" alt=""> ALAQ</div>
+  <div class="deskbrand"><img class="dlg" src="icon-192.png" alt="ALAQ"></div>
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi"><img class="bni" src="images-app-alaq/icone-menu-apprendre.png" alt=""></span><span class="bn-lab">Apprendre</span></button>
   <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi"><img class="bni" src="images-app-alaq/icone-menu-cours.png" alt=""></span><span class="bn-lab">Cours</span></button>
   <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi"><img class="bni" src="images-app-alaq/icone-menu-reviser.png" alt=""></span><span class="bn-lab">Réviser</span></button>
@@ -2923,7 +2923,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='icones-artlist · disques (ampoule→balance) et écrans (colombe, pousse, compte) en icônes Artlist, noms neufs anti-cache · sw v87';
+const BUILD='logo-seul · le nom ALAQ retiré à côté du logo (topbar et rail) · sw v88';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
