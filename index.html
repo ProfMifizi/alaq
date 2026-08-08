@@ -2128,19 +2128,19 @@ function buildReview(U){
 // ORDRE PÉDAGOGIQUE : « Les formes » AVANT « Dans la Fātiḥa » — on ne peut pas demander de repérer
 // une lettre dans le verset (où elle est écrite liée) avant d'avoir montré début/milieu/fin.
 const DISQUES=[
- {icon:'💡',img:'images-app-alaq/icone-disq7-a-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
- {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
- {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Les formes',build:buildForms},
- {icon:'🕋',img:'images-app-alaq/icone-disq7-a-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
- {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Les harakats',build:buildHarakat},
- {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Les prolongations',build:buildMadd},
- {icon:'🔗',img:'images-app-alaq/icone-disq7-a-lire.png',label:'Lire des mots',build:buildWords},
- {icon:'✏️',img:'images-app-alaq/icone-disq7-a-ecrire.png',label:'Écrire des mots',build:buildWrite},
- {icon:'🏆',img:'images-app-alaq/icone-disq7-a-bilan.png',label:'Bilan',build:buildBilan},
+ {icon:'💡',img:'images-app-alaq/icone-disq8-a-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
+ {icon:'📌',img:'images-app-alaq/icone-disq8-a-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
+ {icon:'📌',img:'images-app-alaq/icone-disq8-a-memoriser.png',label:'Les formes',build:buildForms},
+ {icon:'🕋',img:'images-app-alaq/icone-disq8-a-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
+ {icon:'📌',img:'images-app-alaq/icone-disq8-a-memoriser.png',label:'Les harakats',build:buildHarakat},
+ {icon:'📌',img:'images-app-alaq/icone-disq8-a-memoriser.png',label:'Les prolongations',build:buildMadd},
+ {icon:'🔗',img:'images-app-alaq/icone-disq8-a-lire.png',label:'Lire des mots',build:buildWords},
+ {icon:'✏️',img:'images-app-alaq/icone-disq8-a-ecrire.png',label:'Écrire des mots',build:buildWrite},
+ {icon:'🏆',img:'images-app-alaq/icone-disq8-a-bilan.png',label:'Bilan',build:buildBilan},
 ];
 
 // Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
-const REVISION_DISC={icon:'🔄',img:'images-app-alaq/icone-disq7-a-reviser.png',label:'Révision',build:buildReview};
+const REVISION_DISC={icon:'🔄',img:'images-app-alaq/icone-disq8-a-reviser.png',label:'Révision',build:buildReview};
 // Disque propre à l'unité « lettres faibles » — contenu (support/prolongation + hamza
 // et son siège) à construire avec le reste de l'unité 2.
 function buildLettreVsProlong(U){
@@ -2201,7 +2201,7 @@ function buildLettreVsProlong(U){
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
-const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-disq7-a-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
+const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-disq8-a-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
 function discsFor(u){
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
@@ -2984,7 +2984,9 @@ function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U
 /* Deux fichiers par disque (choix de Myriam 09/08) : variante A (remplissage brun moyen) sur les
    disques dorés, variante C (sable) sur les verrouillés, plus sombres. AUCUN filtre d'inversion :
    chaque image est déjà à la bonne clarté, et les masses épaisses (tronc cérébral) sont éclaircies. */
-function discImg(d,unlocked){ return unlocked?d.img:String(d.img).replace('icone-disq7-a-','icone-disq7-c-'); }
+/* Les verrouillés gardent le calibrage disq7-c (Myriam 09/08) : leur nom est DÉRIVÉ de celui
+   du doré — renommer l'un sans l'autre ferait servir l'icône dorée à tous les verrouillés. */
+function discImg(d,unlocked){ return unlocked?d.img:String(d.img).replace('icone-disq8-a-','icone-disq7-c-'); }
 /* Un disque touché n'ouvre plus la leçon directement : une popup annonce le titre et
    laisse choisir (COMMENCER / REFAIRE) — même geste que Duolingo (Myriam 08/08).
    Re-toucher le même disque referme la popup ; toucher ailleurs aussi. */
@@ -3015,7 +3017,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='lecon2-v2b · bulles plus vives · « Plus de cœurs » et « On corrige tes erreurs » épurés · sw v100';
+const BUILD='icones-disq8 · le marron externe des icônes de disque redevient le brun foncé d\u2019Alaq · sw v101';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
