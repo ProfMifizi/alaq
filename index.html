@@ -2064,15 +2064,15 @@ function buildReview(U){
 // ORDRE PÉDAGOGIQUE : « Les formes » AVANT « Dans la Fātiḥa » — on ne peut pas demander de repérer
 // une lettre dans le verset (où elle est écrite liée) avant d'avoir montré début/milieu/fin.
 const DISQUES=[
- {icon:'💡',img:'images-app-alaq/icone-alaq4-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
- {icon:'📌',img:'images-app-alaq/icone-alaq4-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
- {icon:'📌',img:'images-app-alaq/icone-alaq4-memoriser.png',label:'Les formes',build:buildForms},
- {icon:'🕋',img:'images-app-alaq/icone-alaq4-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
- {icon:'📌',img:'images-app-alaq/icone-alaq4-memoriser.png',label:'Les harakats',build:buildHarakat},
- {icon:'📌',img:'images-app-alaq/icone-alaq4-memoriser.png',label:'Les prolongations',build:buildMadd},
- {icon:'🔗',img:'images-app-alaq/icone-alaq4-lire.png',label:'Lire des mots',build:buildWords},
- {icon:'✏️',img:'images-app-alaq/icone-alaq4-ecrire.png',label:'Écrire des mots',build:buildWrite},
- {icon:'🏆',img:'images-app-alaq/icone-alaq4-bilan.png',label:'Bilan',build:buildBilan},
+ {icon:'💡',img:'images-app-alaq/icone-alaq5-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
+ {icon:'📌',img:'images-app-alaq/icone-alaq5-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
+ {icon:'📌',img:'images-app-alaq/icone-alaq5-memoriser.png',label:'Les formes',build:buildForms},
+ {icon:'🕋',img:'images-app-alaq/icone-alaq5-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
+ {icon:'📌',img:'images-app-alaq/icone-alaq5-memoriser.png',label:'Les harakats',build:buildHarakat},
+ {icon:'📌',img:'images-app-alaq/icone-alaq5-memoriser.png',label:'Les prolongations',build:buildMadd},
+ {icon:'🔗',img:'images-app-alaq/icone-alaq5-lire.png',label:'Lire des mots',build:buildWords},
+ {icon:'✏️',img:'images-app-alaq/icone-alaq5-ecrire.png',label:'Écrire des mots',build:buildWrite},
+ {icon:'🏆',img:'images-app-alaq/icone-alaq5-bilan.png',label:'Bilan',build:buildBilan},
 ];
 
 // Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
@@ -2137,7 +2137,7 @@ function buildLettreVsProlong(U){
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
-const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq4-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
+const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq5-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
 function discsFor(u){
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
@@ -2926,7 +2926,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='icones-v2 · détails crème sur les corps bruns des disques, Cours et Réviser passent des emojis aux icônes · sw v91';
+const BUILD='decoupes-propres · plus aucun fragment d\u2019icône voisine (livre, Qorān, qalam, disques refaits depuis la découpe par vides) · sw v92';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5555,7 +5555,7 @@ function fatihaWordFor(L){
 }
 function renderCours(sub){
   sub=sub||'video';
-  const tabs=[['video','<img class="itab-ic" src="images-app-alaq/icone-tab-video.png" alt="">','Vidéos'],['resume','<img class="itab-ic" src="images-app-alaq/icone-tab-livre.png" alt="">','Résumé'],['vocab','<img class="itab-ic" src="images-app-alaq/icone-tab-cartes.png" alt="">','Vocabulaire']];
+  const tabs=[['video','<img class="itab-ic" src="images-app-alaq/icone-tab-video.png" alt="">','Vidéos'],['resume','<img class="itab-ic" src="images-app-alaq/icone-tab2-lire.png" alt="">','Résumé'],['vocab','<img class="itab-ic" src="images-app-alaq/icone-tab-cartes.png" alt="">','Vocabulaire']];
   const unlocked=UNITS.map((U,i)=>i).filter(i=>unitUnlocked(i));
   let h='<h1 class="vh">Cours</h1><p class="vsub">Le contenu s\u2019ajoute à mesure que tu débloques les unités.</p>';
   h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderCours(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
@@ -6194,7 +6194,7 @@ function qNext(){
 }
 function renderReviser(sub){
   sub=sub||curReviserTab||'quran';curReviserTab=sub;
-  const tabs=[['quran','<img class="itab-ic" src="images-app-alaq/icone-tab-qoran.png" alt="">','Le Qorān'],['lettres','<img class="itab-ic" src="images-app-alaq/icone-tab-crayon.png" alt="">','Les lettres'],['vocab','<img class="itab-ic" src="images-app-alaq/icone-tab-cartes.png" alt="">','Le vocabulaire'],['grammaire','<img class="itab-ic" src="images-app-alaq/icone-tab-parchemin.png" alt="">','La grammaire']];
+  const tabs=[['quran','<img class="itab-ic" src="images-app-alaq/icone-tab2-qoran.png" alt="">','Le Qorān'],['lettres','<img class="itab-ic" src="images-app-alaq/icone-tab-crayon.png" alt="">','Les lettres'],['vocab','<img class="itab-ic" src="images-app-alaq/icone-tab-cartes.png" alt="">','Le vocabulaire'],['grammaire','<img class="itab-ic" src="images-app-alaq/icone-tab-parchemin.png" alt="">','La grammaire']];
   const SR=SOURATES[curSourate]||SOURATES[0];
   const set=knownLetterSet(), pc=fatihaPct();
   let h='<h1 class="vh">Réviser</h1>';
@@ -6245,9 +6245,9 @@ function renderReviser(sub){
       '</div></div>'+
       '<div style="display:flex;align-items:center;gap:10px;margin:0 0 12px"><div class="ubar" style="flex:1;margin:0"><i style="width:'+pc+'%"></i></div>'+
       '<b style="color:var(--gold2);font-family:var(--ui)">'+pc+' %</b></div>'+
-      accSec('ill','<img class="acc-ic" src="images-app-alaq/icone-tab-livre.png" alt="">','La sourate illuminée',versesHtml)+
+      accSec('ill','<img class="acc-ic" src="images-app-alaq/icone-tab2-lire.png" alt="">','La sourate illuminée',versesHtml)+
       accSec('ordre','<img class="acc-ic" src="images-app-alaq/icone-tab-puzzle.png" alt="">','Remettre les mots dans l\u2019ordre',ordre)+
-      accSec('ecrire','<img class="acc-ic" src="images-app-alaq/icone-tab-qalam.png" alt="">','Réécrire les mots',ecrire)+
+      accSec('ecrire','<img class="acc-ic" src="images-app-alaq/icone-tab2-ecrire.png" alt="">','Réécrire les mots',ecrire)+
       accSec('reciter','<img class="acc-ic" src="images-app-alaq/icone-tab-micro.png" alt="">','Réciter',reciter)+
       accSec('noms','<img class="acc-ic" src="images-app-alaq/icone-tab-etoiles.png" alt="">','Les noms d’Allah',nomsListHtml(set));
   }
