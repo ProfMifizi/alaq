@@ -1328,8 +1328,6 @@
 <div class="finish" id="noHearts">
   <div class="big">💔</div>
   <h2>Plus de cœurs !</h2>
-  <p id="nh-msg1" style="max-width:330px;color:var(--cream);opacity:.85;margin:-14px 0 8px"></p>
-  <p id="nh-msg2" style="max-width:330px;color:var(--muted);font-size:14px;margin:0 0 22px"></p>
   <div id="nh-actions" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>
 </div>
 
@@ -2456,11 +2454,11 @@ function currentLesson(){ // 1re leçon non terminée d'une unité débloquée =
 }
 function showNoHearts(){
   const hasRev=allReviewWords().length>0, L=currentLesson();
-  document.getElementById('nh-msg1').textContent="Sept erreurs — comme les sept versets de la Fātiḥa. "+(hasRev?"Une petite révision fera du bien, in shā' Allah.":"Pas de panique : on répare tout de suite, in shā' Allah.");
-  document.getElementById('nh-msg2').textContent=hasRev?"Révise ton vocabulaire ou refais ta leçon pour recharger tes 7 cœurs.":"Refais ta leçon en cours pour regagner tes cœurs — ou reviens demain, ils seront remplis.";
+  // Le titre suffit (Myriam 09/08). Les deux paragraphes disaient ce que les boutons font déjà ;
+  // le sens des 7 cœurs (les sept versets de la Fātiḥa) DISPARAÎT de l'app — décision assumée.
   let h='';
-  if(hasRev)h+='<button class="cta" style="max-width:300px" onclick="noHeartsReview()">🔄 RÉVISER ET RECHARGER</button>';
-  if(L)h+='<button class="cta" style="max-width:300px'+(hasRev?';background:none;color:var(--gold2);border:2px solid var(--gold-d);margin-top:10px':'')+'" onclick="noHeartsRedo()">🔁 REFAIRE MA LEÇON · +3 ❤️</button>';
+  if(hasRev)h+='<button class="cta" style="max-width:300px" onclick="noHeartsReview()">RÉVISER +3 ❤️</button>';
+  if(L)h+='<button class="cta" style="max-width:300px'+(hasRev?';background:none;color:var(--gold2);border:2px solid var(--gold-d);margin-top:10px':'')+'" onclick="noHeartsRedo()">RECOMMENCER +3 ❤️</button>';
   h+='<button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="closeNoHearts()">PLUS TARD</button>';
   document.getElementById('nh-actions').innerHTML=h;
   document.getElementById('noHearts').classList.add('on'); S.bigNext=1; save(); // la 1re recharge (révision OU reprise) donnera +3
@@ -3017,7 +3015,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='lecon2-v2 · Mémoriser refondue : 25 écrans → 14, jeu de bulles, haut-parleur dessiné, tracé centripète · sw v99';
+const BUILD='lecon2-v2b · bulles plus vives · « Plus de cœurs » et « On corrige tes erreurs » épurés · sw v100';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3717,9 +3715,11 @@ function finishDisque(){
     const foot=document.getElementById('p-foot');
     foot.className='p-foot';document.getElementById('fb').innerHTML='';document.getElementById('why').innerHTML='';
     {const bl=document.getElementById('backLink');if(bl)bl.style.display='none';}
-    body.innerHTML='<div class="learn" style="margin-top:24px">'+
-      '<img src="images-app-alaq/icone-ecran-corriger.png" alt="" style="width:96px;height:auto;margin:0 auto">'+
-      '<div class="nm" style="margin-top:10px">On corrige tes erreurs</div></div>'; // le titre suffit (Myriam 07/08)
+    // centré en hauteur ET largeur, sans la boîte (Myriam 09/08) — la classe p-center existe déjà
+    body.classList.add('p-center');
+    body.innerHTML='<div style="text-align:center">'+
+      '<img src="images-app-alaq/icone-ecran-corriger.png" alt="" style="width:120px;height:auto;margin:0 auto;display:block">'+
+      '<div class="nm" style="margin-top:14px;font-size:22px;font-weight:900">On corrige tes erreurs</div></div>';
     const cta=document.getElementById('cta');
     cta.className='cta';cta.disabled=false;cta.textContent='CORRIGER MES ERREURS';
     cta.onclick=()=>renderStep();
@@ -4500,7 +4500,7 @@ function objectifFilet(){
 /* ══ LE JEU DE BULLES ══
    Les bulles montent, dérivent au hasard et SE COGNENT : la non-superposition n'est pas
    une contrainte de placement, c'est la conséquence des chocs (idée de Myriam, 08/08). */
-var BUL={raf:0,items:[],W:0,H:0,reste:0,R:32,v:22,bruit:26,chocs:0};
+var BUL={raf:0,items:[],W:0,H:0,reste:0,R:32,v:40,bruit:70,chocs:0};   // v et bruit relevés le 09/08 : plus vif, plus désordonné
 function bulStop(){ if(BUL.raf)cancelAnimationFrame(BUL.raf); BUL.raf=0; BUL.items=[]; }
 function bulPose(b){
   b.el.style.setProperty('--x',b.x.toFixed(1)+'px');
@@ -4521,8 +4521,8 @@ function bulStart(lettres,parLettre){
     var b={el:el,L:L,
       x:col*(BUL.W-2*R)/2*0.98+(Math.random()-0.5)*16,
       y:-R+rang*((BUL.H+90)/lignes)+(Math.random()-0.5)*20,
-      vx:(Math.random()-0.5)*18,
-      vy:-BUL.v*(0.82+Math.random()*0.36),   // chacune sa vitesse : le flux n'est pas un bloc
+      vx:(Math.random()-0.5)*40,
+      vy:-BUL.v*(0.70+Math.random()*0.60),   // chacune sa vitesse : le flux n'est pas un bloc
       pop:false};
     b.x=Math.max(0,Math.min(BUL.W-2*R,b.x));
     el.onclick=function(){ bulPop(b); };
@@ -4545,24 +4545,25 @@ function bulTick(dt){
   var vivantes=BUL.items.filter(function(b){return !b.pop;});
   vivantes.forEach(function(b){
     b.vx+=(Math.random()-0.5)*BUL.bruit*dt;
-    b.vy+=(-BUL.v-b.vy)*0.7*dt;                 // après un choc, la bulle retrouve sa montée
-    b.vx=Math.max(-26,Math.min(26,b.vx));
+    b.vy+=(-BUL.v-b.vy)*0.45*dt;                // rappel PLUS MOU : un choc se voit plus longtemps
+    b.vx=Math.max(-46,Math.min(46,b.vx));
     b.x+=b.vx*dt; b.y+=b.vy*dt;
     if(b.x<0){b.x=0;b.vx=Math.abs(b.vx);}
     if(b.x>xmax){b.x=xmax;b.vx=-Math.abs(b.vx);}
     if(b.y<-D){                                  // sortie par le haut → retour par le bas
       b.y=BUL.H+6; b.x=Math.random()*xmax;
-      b.vx=(Math.random()-0.5)*18; b.vy=-BUL.v*(0.82+Math.random()*0.36);
+      b.vx=(Math.random()-0.5)*40; b.vy=-BUL.v*(0.70+Math.random()*0.60);
     }
   });
-  // six passes : séparer A de B peut renfoncer A dans C, et le rappel aux parois aussi
-  for(var pass=0;pass<6;pass++){
+  // dix passes, et on décolle 2 % au-delà du contact : séparer A de B peut renfoncer A dans C,
+  // le rappel aux parois aussi, et à 40 px/s six passes laissaient ~0,8 px de chevauchement.
+  for(var pass=0;pass<10;pass++){
     for(var i=0;i<vivantes.length;i++)for(var j=i+1;j<vivantes.length;j++){
       var a=vivantes[i], c=vivantes[j];
       var dx=c.x-a.x, dy=c.y-a.y, d=Math.hypot(dx,dy);
       if(d>=D||d===0)continue;
       if(pass===0)BUL.chocs++;
-      var nx=dx/d, ny=dy/d, ov=(D-d)/2;
+      var nx=dx/d, ny=dy/d, ov=(D-d)/2*1.02;
       a.x-=nx*ov; a.y-=ny*ov; c.x+=nx*ov; c.y+=ny*ov;
       var vrel=(c.vx-a.vx)*nx+(c.vy-a.vy)*ny;
       if(vrel<0&&pass===0){                      // choc élastique, masses égales
