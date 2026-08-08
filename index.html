@@ -993,6 +993,9 @@
 .ecu img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .ecu i{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);font-family:var(--ar);
   font-weight:700;color:#3d2405;white-space:nowrap;font-style:normal;line-height:1}
+.rk-stats{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap}
+.rk-stats span{display:inline-flex;align-items:center;gap:6px}
+.rk-stats img{height:22px;width:auto}
 .ecu-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:4px 0 12px;
   border-bottom:1px solid var(--line);margin-bottom:12px}
 .ecu-cell{display:flex;flex-direction:column;align-items:center;gap:5px;width:76px}
@@ -2871,16 +2874,29 @@ function acceptMiss(){
   closeGhufran(); if(_progVisible())renderProg();
 }
 /* Carte détail du rang (clic sur le rang) */
+/* La croix se cale en haut à droite de l'ÉCRAN (le .finish est fixed) ; le contenu vit
+   directement sur le fond, sans boîte. Règle posée par Myriam le 09/08. */
+const CROIX_SUCCES='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="closeSucces()" aria-label="Fermer">\u2715</button>'+
+  '<div style="max-width:340px;width:100%;margin:0 auto;text-align:center">';
+const CROIX_RANG='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="closeRank()" aria-label="Fermer">\u2715</button>'+
+  '<div style="max-width:340px;width:100%;margin:0 auto;text-align:center">';
+/* Les trois chiffres du rang, avec les icônes de la charte (plus d'emoji système) */
+function rkStatsHTML(){
+  return '<div class="rk-stats">'+
+    '<span><img src="badges/serie3.png" alt=""> '+(S.streak||0)+' j</span>'+
+    '<span><img src="badges/revision.png" alt=""> '+(S.nrev||0)+'</span>'+
+    '<span><img src="images-app-alaq/icone-ecran-ghufran.png" alt=""> '+(S.ghufLeft||0)+'</span>'+
+    '</div>';
+}
 function showRank(){
   var R=rankFor(S.consScore); var m=document.getElementById('rankModal');
   if(!m){ m=document.createElement('div'); m.className='finish'; m.id='rankModal'; document.body.appendChild(m); }
-  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
-    '<button class="sm-close" onclick="closeRank()" aria-label="Fermer">✕</button>'+
+  m.innerHTML=(CROIX_RANG)+
     '<div class="rk-big">'+R.rank.ar+'</div>'+
     '<h2 style="margin:8px 0 2px">'+R.rank.tr+'</h2>'+
     '<div class="succ-stat" style="color:var(--gold2)">'+R.rank.fr+'</div>'+
     '<p class="succ-desc">'+R.rank.desc+'</p>'+
-    '<div class="rk-stats">🌾 Série '+(S.streak||0)+' j · 🔁 '+(S.nrev||0)+' révisions · 🕊️ '+(S.ghufLeft||0)+' Ghufrān</div>'+
+    rkStatsHTML()+
     '</div>';
   m.classList.add('on');
 }
@@ -2890,8 +2906,7 @@ function rankInfo(idx){ // popup d'un rang cliqué depuis la barre du profil (Pr
   var status = idx<cur?'✓ Atteint' : (idx===cur?'⭐ En cours' : '🔒 À atteindre');
   var m=document.getElementById('rankModal');
   if(!m){ m=document.createElement('div'); m.className='finish'; m.id='rankModal'; document.body.appendChild(m); }
-  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
-    '<button class="sm-close" onclick="closeRank()" aria-label="Fermer">✕</button>'+
+  m.innerHTML=(CROIX_RANG)+
     '<div class="rk-big">'+R.ar+'</div>'+
     '<h2 style="margin:8px 0 2px">'+R.tr+'</h2>'+
     '<div class="succ-stat" style="color:var(--gold2)">'+R.fr+' · '+(idx+1)+' / 7</div>'+
@@ -2949,7 +2964,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='badges-v4 · 27 badges à la charte (pousses 3 métaux, médailles des leçons, épi en pot, révisions jusqu\u2019à 360) et les écussons de sourates en Amiri gras · sw v96';
+const BUILD='popups-sans-boite · badge = image + titre seuls, rang sans boîte mais avec son texte, croix en haut d\u2019écran, stats du rang aux nouvelles icônes · sw v97';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5733,12 +5748,10 @@ function showSucces(id){
   var got=!!(S.badges&&S.badges[b[0]]);
   var m=document.getElementById('succesModal');
   if(!m){m=document.createElement('div');m.className='finish';m.id='succesModal';document.body.appendChild(m);}
-  m.innerHTML='<div class="sm-box" style="max-width:320px;text-align:center">'+
-    '<button class="sm-close" onclick="closeSucces()" aria-label="Fermer">✕</button>'+
+  /* Un badge : son image et son titre. Pas de boîte, pas de corps de texte (règle Myriam 09/08). */
+  m.innerHTML=(CROIX_SUCCES)+
     '<div class="succ-big'+(got?' pop':' locked')+'"><img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'"></div>'+
-    '<h2 style="margin:14px 0 4px;font-size:19px">'+b[2]+'</h2>'+
-    '<div class="succ-stat" style="color:'+(got?'var(--gold2)':'var(--muted)')+'">'+(got?'✓ Débloqué':'🔒 À débloquer')+'</div>'+
-    '<p class="succ-desc">'+(SUCCES_DESC[id]||'')+'</p>'+
+    '<h2 style="margin:16px 0 0;font-size:20px">'+b[2]+'</h2>'+
     '</div>';
   m.classList.add('on');
   if(got){try{chime();}catch(e){}}
