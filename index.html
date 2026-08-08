@@ -109,7 +109,7 @@
   .bubble{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;border:none;font-weight:900}
   .bubble .bi{font-size:30px;line-height:1;font-family:var(--ar),'Nunito',sans-serif}
   .bimg{width:42px;height:42px;object-fit:contain;display:block;margin:auto}
-  .done .bubble{background:var(--gold);color:var(--bg);box-shadow:0 6px 0 var(--gold-d)}
+  .done .bubble{background:var(--gold);color:var(--bg);box-shadow:0 6px 0 var(--accent,var(--gold-d))}
   /* Disque « courant » : pièce d'or calligraphique — dégradé bombé + reflet balayé + léger flottement */
   .current .bubble{color:var(--bg);position:relative;overflow:hidden;
     background:radial-gradient(circle at 34% 26%,#f7cd74,var(--gold) 50%,#a86a12);
@@ -2064,19 +2064,19 @@ function buildReview(U){
 // ORDRE PÉDAGOGIQUE : « Les formes » AVANT « Dans la Fātiḥa » — on ne peut pas demander de repérer
 // une lettre dans le verset (où elle est écrite liée) avant d'avoir montré début/milieu/fin.
 const DISQUES=[
- {icon:'💡',img:'images-app-alaq/icone-alaq6-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
- {icon:'📌',img:'images-app-alaq/icone-alaq6-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
- {icon:'📌',img:'images-app-alaq/icone-alaq6-memoriser.png',label:'Les formes',build:buildForms},
- {icon:'🕋',img:'images-app-alaq/icone-alaq6-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
- {icon:'📌',img:'images-app-alaq/icone-alaq6-memoriser.png',label:'Les harakats',build:buildHarakat},
- {icon:'📌',img:'images-app-alaq/icone-alaq6-memoriser.png',label:'Les prolongations',build:buildMadd},
- {icon:'🔗',img:'images-app-alaq/icone-alaq6-lire.png',label:'Lire des mots',build:buildWords},
- {icon:'✏️',img:'images-app-alaq/icone-alaq6-ecrire.png',label:'Écrire des mots',build:buildWrite},
- {icon:'🏆',img:'images-app-alaq/icone-alaq6-bilan.png',label:'Bilan',build:buildBilan},
+ {icon:'💡',img:'images-app-alaq/icone-disq7-a-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
+ {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
+ {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Les formes',build:buildForms},
+ {icon:'🕋',img:'images-app-alaq/icone-disq7-a-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
+ {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Les harakats',build:buildHarakat},
+ {icon:'📌',img:'images-app-alaq/icone-disq7-a-memoriser.png',label:'Les prolongations',build:buildMadd},
+ {icon:'🔗',img:'images-app-alaq/icone-disq7-a-lire.png',label:'Lire des mots',build:buildWords},
+ {icon:'✏️',img:'images-app-alaq/icone-disq7-a-ecrire.png',label:'Écrire des mots',build:buildWrite},
+ {icon:'🏆',img:'images-app-alaq/icone-disq7-a-bilan.png',label:'Bilan',build:buildBilan},
 ];
 
 // Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
-const REVISION_DISC={icon:'🔄',img:'images-app-alaq/icone-alaq6-reviser.png',label:'Révision',build:buildReview};
+const REVISION_DISC={icon:'🔄',img:'images-app-alaq/icone-disq7-a-reviser.png',label:'Révision',build:buildReview};
 // Disque propre à l'unité « lettres faibles » — contenu (support/prolongation + hamza
 // et son siège) à construire avec le reste de l'unité 2.
 function buildLettreVsProlong(U){
@@ -2137,7 +2137,7 @@ function buildLettreVsProlong(U){
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
-const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq6-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
+const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-disq7-a-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
 function discsFor(u){
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
@@ -2896,6 +2896,10 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
+/* Deux fichiers par disque (choix de Myriam 09/08) : variante A (remplissage brun moyen) sur les
+   disques dorés, variante C (sable) sur les verrouillés, plus sombres. AUCUN filtre d'inversion :
+   chaque image est déjà à la bonne clarté, et les masses épaisses (tronc cérébral) sont éclaircies. */
+function discImg(d,unlocked){ return unlocked?d.img:String(d.img).replace('icone-disq7-a-','icone-disq7-c-'); }
 /* Un disque touché n'ouvre plus la leçon directement : une popup annonce le titre et
    laisse choisir (COMMENCER / REFAIRE) — même geste que Duolingo (Myriam 08/08).
    Re-toucher le même disque referme la popup ; toucher ailleurs aussi. */
@@ -2926,7 +2930,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='traits-fins-creme · sur les disques, seuls les traits fins INTÉRIEURS sont en crème — contours et zones au contact de l\u2019or en brun · sw v93';
+const BUILD='disques-option2 · terminé = or + ombre à la couleur de l\u2019unité (plus de pastille \u2713), verrouillé en sable, tronc cérébral éclairci · sw v94';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2988,8 +2992,7 @@ function renderHome(){
         node.className='node '+(done?'done':current?'current':'locked');
         node.innerHTML='<div class="bwrap"><div class="ring"></div>'+
           '<button class="bubble" '+(unlocked?'':'disabled')+' aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-            '<span class="bi"'+(unlocked?'':' style="opacity:.55;filter:grayscale(1) invert(.9)"')+'>'+(d.img?'<img class="bimg" src="'+d.img+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span>'+
-            (done?'<span class="check">\u2713</span>':'')+
+            '<span class="bi"'+(unlocked?'':' style="opacity:.62"')+'>'+(d.img?'<img class="bimg" src="'+discImg(d,unlocked)+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span>'+
           '</button></div>';
         if(unlocked)node.querySelector('.bubble').onclick=(ev)=>{ev.stopPropagation();discTip(node,u,i,discLabel(d,U),done);};
       } else if(U.ready && i===0){
@@ -3002,7 +3005,7 @@ function renderHome(){
       } else {
         node.className='node locked';
         node.innerHTML='<div class="bwrap"><button class="bubble" disabled aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-          '<span class="bi" style="opacity:.55;filter:grayscale(1) invert(.9)">'+(d.img?'<img class="bimg" src="'+d.img+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span></button></div>';
+          '<span class="bi" style="opacity:.62">'+(d.img?'<img class="bimg" src="'+discImg(d,false)+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span></button></div>';
       }
       path.appendChild(node);
     });
