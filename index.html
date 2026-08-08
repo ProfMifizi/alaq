@@ -989,6 +989,15 @@
 .prm-sw.on{background:var(--gold-d)}
 .prm-sw.on i{left:20px;background:var(--cream)}
 .prm-goals{display:flex;gap:8px}
+.ecu{position:relative;display:inline-block;flex:0 0 auto}
+.ecu img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.ecu i{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);font-family:var(--ar);
+  font-weight:700;color:#3d2405;white-space:nowrap;font-style:normal;line-height:1}
+.ecu-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:4px 0 12px;
+  border-bottom:1px solid var(--line);margin-bottom:12px}
+.ecu-cell{display:flex;flex-direction:column;align-items:center;gap:5px;width:76px}
+.ecu-cell span{font-size:9.5px;font-weight:800;color:var(--muted);text-align:center}
+.ecu-cell.lk{opacity:.38;filter:grayscale(.7)}
 .prm-ic{height:22px;width:auto;vertical-align:-5px;margin-right:3px}
 .prm-goal{flex:1;padding:11px 0;border-radius:12px;border:2px solid var(--line);background:var(--panel);
   color:var(--cream);font-family:var(--ui);font-weight:800;font-size:14px;cursor:pointer}
@@ -2940,7 +2949,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='parametres-voix · icônes des Paramètres + le CHOIX DE LA VOIX arabe (Habibah / Mustafa), les voyelles restent la voix de Myriam · sw v95';
+const BUILD='badges-v4 · 27 badges à la charte (pousses 3 métaux, médailles des leçons, épi en pot, révisions jusqu\u2019à 360) et les écussons de sourates en Amiri gras · sw v96';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5313,41 +5322,76 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 
 /* ===== Badges & confettis ===== */
 const BADGES=[
- ['disque1','🌱','Première leçon terminée'],
- ['sansfaute','💎','Une leçon sans aucune erreur'],
- ['unite-sansfaute','💠','Une unité entière sans erreur'],
- ['unite1','🎖️','Première unité validée'],
- ['unites2','🥈','2 unités validées'],
- ['unites4','🥇','4 unités validées'],
- ['unites7','👑','Les 7 unités de la Fātiḥa'],
- ['serie3','🔥','3 jours d\u2019affilée'],
- ['serie7','⚡','7 jours d\u2019affilée'],
- ['serie30','☀️','30 jours d\u2019affilée'],
- ['revision','🔄','Première révision'],
- ['revision3','📚','3 révisions'],
- ['revision7','🧠','7 révisions'],
- ['revision30','🦉','30 révisions'],
- ['fatiha50','🕋','La moitié de la Fātiḥa lisible'],
- ['fatiha100','🏆','Toute la Fātiḥa lisible'],
+ // les premières fois — une pousse, trois métaux
+ ['disque1','\u{1F331}','Première leçon terminée'],
+ ['unite1','\u{1F331}','Première unité validée'],
+ ['sourate1','\u{1F331}','Première sourate lisible'],
+ // la perfection
+ ['sansfaute','\u{1F48E}','Une leçon sans aucune erreur'],
+ ['unite-sansfaute','\u2734\uFE0F','Une unité entière sans erreur'],
+ // les leçons — chaque leçon est un pas vers Allah (bronze · argent · or · émeraude)
+ ['lecons1','\u{1F949}','1 leçon terminée'],
+ ['lecons2','\u{1F949}','2 leçons terminées'],
+ ['lecons3','\u{1F949}','3 leçons terminées'],
+ ['lecons10','\u{1F948}','10 leçons terminées'],
+ ['lecons20','\u{1F948}','20 leçons terminées'],
+ ['lecons50','\u{1F948}','50 leçons terminées'],
+ ['lecons100','\u{1F947}','100 leçons terminées'],
+ ['lecons200','\u{1F947}','200 leçons terminées'],
+ ['lecons500','\u{1F947}','500 leçons terminées'],
+ ['lecons1000','\u{1F48D}','1000 leçons terminées'],
+ // l'assiduité — l'épi dans son pot
+ ['serie3','\u{1F33E}','3 jours d\u2019affilée'],
+ ['serie7','\u{1F33E}','7 jours d\u2019affilée'],
+ ['serie30','\u{1F33E}','30 jours d\u2019affilée'],
+ ['serie120','\u{1F33E}','120 jours d\u2019affilée'],
+ ['serie360','\u{1F33E}','360 jours d\u2019affilée'],
+ // les révisions — le livre et sa pastille bleue
+ ['revision','\u{1F4D6}','Première révision'],
+ ['revision3','\u{1F4D6}','3 révisions'],
+ ['revision7','\u{1F4D6}','7 révisions'],
+ ['revision30','\u{1F4D6}','30 révisions'],
+ ['revision50','\u{1F4D6}','50 révisions'],
+ ['revision120','\u{1F4D6}','120 révisions'],
+ ['revision360','\u{1F4D6}','360 révisions'],
 ];
+/* Les écussons des sourates : UN gabarit doré, le nom composé par le code en Amiri gras
+   (choix de Myriam 09/08). L'IA ne sait pas écrire l'arabe — jamais de nom généré. */
+function ecussonHTML(ar,taille){
+  taille=taille||64;
+  return '<span class="ecu" style="width:'+taille+'px;height:'+taille+'px">'+
+    '<img src="badges/ecusson-vierge.png" alt="">'+
+    '<i style="font-size:'+Math.round(taille*0.165)+'px">'+ar+'</i></span>';
+}
 // Descriptions des succès (affichées dans le popup détail)
 const SUCCES_DESC={
  disque1:'Tu as terminé ta toute première leçon. Le début du chemin, bismillah !',
+ unite1:'Tu as validé ta première unité de la Fātiḥa.',
+ sourate1:'Tu peux lire une sourate entière. Allāhumma bārik.',
  sansfaute:'Une leçon entière réussie sans la moindre faute.',
  'unite-sansfaute':'Toute une unité validée sans commettre d’erreur.',
- unite1:'Tu as validé ta première unité de la Fātiḥa.',
- unites2:'Deux unités de la Fātiḥa validées.',
- unites4:'Quatre unités validées — belle avancée !',
- unites7:'Les 7 unités de la Fātiḥa validées, ma shā’ Allāh !',
- serie3:'Tu t’es entraînée 3 jours de suite.',
+ lecons1:'Une leçon terminée. Chaque leçon est un pas vers Allah.',
+ lecons2:'Deux leçons derrière toi.',
+ lecons3:'Trois leçons — la régularité s’installe.',
+ lecons10:'Dix leçons terminées.',
+ lecons20:'Vingt leçons terminées.',
+ lecons50:'Cinquante leçons. Le chemin se dessine.',
+ lecons100:'Cent leçons terminées, ma shā’ Allāh !',
+ lecons200:'Deux cents leçons.',
+ lecons500:'Cinq cents leçons — une assiduité rare.',
+ lecons1000:'Mille leçons. Qu’Allah te préserve sur ce chemin.',
+ serie3:'Tu es venue 3 jours de suite.',
  serie7:'Une semaine complète sans manquer un jour.',
- serie30:'Un mois entier de régularité. Bravo !',
+ serie30:'Un mois entier de régularité.',
+ serie120:'Cent vingt jours d’affilée.',
+ serie360:'Une année de régularité, ou presque. Allāhumma bārik.',
  revision:'Tu as terminé ta première révision.',
  revision3:'Trois révisions terminées.',
  revision7:'Sept révisions — ta mémoire se renforce.',
  revision30:'Trente révisions. La sagesse de la constance.',
- fatiha50:'Tu peux déjà lire la moitié de la Fātiḥa.',
- fatiha100:'Tu peux lire toute la Fātiḥa ! Allāhumma bārik.',
+ revision50:'Cinquante révisions.',
+ revision120:'Cent vingt révisions.',
+ revision360:'Trois cent soixante révisions. Ce que tu sais ne s’effacera plus.',
 };
 function confettiBurst(){
   try{
@@ -5386,25 +5430,16 @@ function award(id){
 }
 function checkBadges(ctx){
   ctx=ctx||{};
-  if(Object.keys(S.done||{}).length>=1)award('disque1');
-  if(UNITS.some((U,i)=>unitValidated(i)))award('unite1');
-  if(S.streak>=3)award('serie3');
-  if(S.streak>=7)award('serie7');
+  const nLecons=Object.keys(S.done||{}).length;          // chaque leçon est un pas vers Allah
+  [1,2,3,10,20,50,100,200,500,1000].forEach(function(n){ if(nLecons>=n)award('lecons'+n); });
+  if(nLecons>=1)award('disque1');                        // pousse de bronze
+  if(UNITS.some((U,i)=>unitValidated(i)))award('unite1'); // pousse d'argent
   if(ctx.noMistake)award('sansfaute');
   if(ctx.unitPerfect)award('unite-sansfaute');
-  if(ctx.review)award('revision');
-  const nv=UNITS.filter((U,i)=>unitValidated(i)).length;
-  if(nv>=2)award('unites2');
-  if(nv>=4)award('unites4');
-  if(nv>=7)award('unites7');
-  if(S.streak>=30)award('serie30');
-  if(S.nrev>=1)award('revision');
-  if(S.nrev>=3)award('revision3');
-  if(S.nrev>=7)award('revision7');
-  if(S.nrev>=30)award('revision30');
-  const pc=fatihaPct();
-  if(pc>=50)award('fatiha50');
-  if(pc>=100)award('fatiha100');
+  [3,7,30,120,360].forEach(function(j){ if((S.streak||0)>=j)award('serie'+j); });
+  if(ctx.review||(S.nrev||0)>=1)award('revision');
+  [3,7,30,50,120,360].forEach(function(n){ if((S.nrev||0)>=n)award('revision'+n); });
+  if(fatihaPct()>=100)award('sourate1');                 // pousse d'or : la 1re sourate lisible
 }
 /* ===== Carte de la Fātiḥa : les mots lisibles s'illuminent ===== */
 function knownLetterSet(){ // lettres des unités dont le disque « Mémoriser » est terminé
@@ -5643,7 +5678,12 @@ function renderProg(){
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
      '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
      '<div class="pstat" role="button" tabindex="0" style="cursor:pointer" onclick="showGhufranInfo()"><div class="pv">'+(S.ghufLeft||0)+'</div><div class="pl">🕊️ ghufrān</div></div></div>';
-  h+='<div class="ccard"><div class="ctt"><h3>🏆 Succès</h3></div><div class="sgrid">'+
+  h+='<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="badges/lecons100.png" alt=""> Succès</h3></div>'+
+     '<div class="ecu-row">'+SOURATES.map(function(SR,i){
+        var pris=(i===0&&fatihaPct()>=100);
+        return '<div class="ecu-cell'+(pris?'':' lk')+'">'+ecussonHTML(SR.ar,58)+'<span>'+escHTML(SR.nom)+'</span></div>';
+     }).join('')+'</div>'+
+     '<div class="sgrid">'+
      BADGES.map(function(b){var got=!!(S.badges&&S.badges[b[0]]);
        return '<button class="scell'+(got?'':' locked')+'" onclick="showSucces(\''+b[0]+'\')" aria-label="'+b[2].replace(/"/g,'')+'">'+
               '<img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'">'+

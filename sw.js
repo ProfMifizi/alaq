@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v95-2026-08-09f';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v96-2026-08-09g';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -24,6 +24,34 @@ const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques so
 "images-app-alaq/icone-tab2-lire.png",
 "images-app-alaq/icone-tab2-qoran.png",
 "images-app-alaq/icone-tab2-ecrire.png",
+"badges/disque1.png",
+"badges/unite1.png",
+"badges/sourate1.png",
+"badges/sansfaute.png",
+"badges/unite-sansfaute.png",
+"badges/ecusson-vierge.png",
+"badges/lecons1.png",
+"badges/lecons2.png",
+"badges/lecons3.png",
+"badges/lecons10.png",
+"badges/lecons20.png",
+"badges/lecons50.png",
+"badges/lecons100.png",
+"badges/lecons200.png",
+"badges/lecons500.png",
+"badges/lecons1000.png",
+"badges/serie3.png",
+"badges/serie7.png",
+"badges/serie30.png",
+"badges/serie120.png",
+"badges/serie360.png",
+"badges/revision.png",
+"badges/revision3.png",
+"badges/revision7.png",
+"badges/revision30.png",
+"badges/revision50.png",
+"badges/revision120.png",
+"badges/revision360.png",
 "images-app-alaq/icone-prm-sons.png",
 "images-app-alaq/icone-prm-objectif.png",
 "images-app-alaq/icone-prm-apropos.png",
