@@ -225,6 +225,50 @@
   .exp-card .enm{font-size:13px;font-weight:800;color:var(--muted)}
   .exp-card .dots{font-size:12px;color:var(--gold2);letter-spacing:2px;font-weight:900}
 
+
+  /* ══ LEÇON 2 v2 (08/08) — bulles, haut-parleur dessiné, icônes du tracé ══ */
+  .bulzone{position:relative;height:min(430px,52vh);margin-top:6px;overflow:hidden;border-radius:16px}
+  .bul{position:absolute;left:0;top:0;width:64px;height:64px;border-radius:50%;
+    display:grid;place-items:center;cursor:pointer;
+    background:radial-gradient(circle at 32% 28%, rgba(242,233,218,.20), rgba(220,144,46,.13) 55%, rgba(220,144,46,.05));
+    border:2px solid rgba(232,169,79,.55);
+    box-shadow:inset -6px -8px 14px rgba(0,0,0,.22), inset 6px 8px 12px rgba(255,255,255,.10);
+    font-family:var(--ar);font-size:32px;color:var(--gold2);will-change:transform;
+    transform:translate(var(--x,0px),var(--y,0px))}
+  .bul.pop{animation:bulpop .17s cubic-bezier(.3,1.8,.5,1) forwards;pointer-events:none}
+  /* ⚠️ la translation DOIT être reprise dans CHAQUE étape : une @keyframes qui déclare
+     `transform` remplace celui de l'élément — sans ça la bulle éclate en haut à gauche. */
+  @keyframes bulpop{0%{transform:translate(var(--x),var(--y)) scale(1);opacity:1;border-width:2px}
+    55%{transform:translate(var(--x),var(--y)) scale(1.22);opacity:.95;border-width:1px;filter:brightness(2.1)}
+    100%{transform:translate(var(--x),var(--y)) scale(1.34);opacity:0;border-width:0}}
+  .onde{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;
+    border:2px solid rgba(232,169,79,.85);pointer-events:none;
+    animation:ondele .4s cubic-bezier(.15,.7,.3,1) forwards}
+  @keyframes ondele{0%{transform:scale(.98);opacity:.9;border-width:2.5px}
+    100%{transform:scale(1.85);opacity:0;border-width:.5px}}
+  .goutte{position:absolute;border-radius:50%;pointer-events:none;background:var(--gold2);
+    box-shadow:0 0 5px rgba(232,169,79,.75);animation:gouttele .5s cubic-bezier(.15,.75,.35,1) forwards}
+  @keyframes gouttele{0%{transform:translate(0,0) scale(1);opacity:1}70%{opacity:.75}
+    100%{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+  .spkbtn{background:none;border:none;padding:0;margin:6px auto 18px;display:block;cursor:pointer;color:var(--gold)}
+  .spkbtn svg{width:112px;height:78px;display:block}
+  .spk .w{fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;opacity:.22}
+  .spk .cone{fill:currentColor}
+  .spk.on .w1{animation:spkw .78s ease-out infinite}
+  .spk.on .w2{animation:spkw .78s ease-out .13s infinite}
+  .spk.on .w3{animation:spkw .78s ease-out .26s infinite}
+  @keyframes spkw{0%{opacity:.15}38%{opacity:1}100%{opacity:.15}}
+  .spkbtn.on{animation:spkbob .78s ease-out infinite}
+  @keyframes spkbob{0%,100%{transform:scale(1)}38%{transform:scale(1.06)}}
+  .opts.rtl3{direction:rtl}
+  .opt .spk{width:56px;height:40px;color:var(--gold)}
+  .opt.ok .spk{color:var(--green)} .opt.bad .spk{color:var(--coral)}
+  .tico{display:flex;gap:14px;justify-content:center;margin-top:14px}
+  .tico button{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+    width:64px;height:56px;display:grid;place-items:center;cursor:pointer;color:var(--gold2)}
+  .tico button:active{transform:translateY(2px);border-bottom-width:2px}
+  .tico svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+  .tico .plein{fill:currentColor;stroke:none}
   .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;direction:rtl}
   .ag{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:10px 2px;
     font-family:var(--ar);font-size:30px;color:var(--gold);line-height:1.2}
@@ -1874,16 +1918,25 @@ function buildAlphabet(U){
   return q;
 }
 
+/* ══ LEÇON 2 v2 — « Mémoriser » refondue avec Myriam le 08/08. 25 écrans → 14. ══
+   Retirés : l'écran « touche chaque lettre 3 fois » (doublon des 3 cartes qui précèdent)
+   et 12 des 18 quiz (six suffisent, trois par sens). Ajoutés : le jeu de bulles (la vraie
+   phase d'apprentissage) et le repérage des 3 lettres dans l'alphabet, jumeau de la leçon 1.
+   ⚠️ Cette fonction sert les 7 unités : elle ne parle jamais de م ل ن en dur. */
 function buildMemo(U){
   const q=[];
   U.letters.forEach(L=>q.push({type:'learn',L}));
-  q.push({type:'explore',items:U.letters.map(L=>({ar:L,lab:U.alpha[L].n,say:L})),min:3,
-    title:''});
-  for(let r=0;r<3;r++)shuffle(U.letters).forEach(L=>q.push(mcq({
-    prompt:'Écoute… puis touche la bonne lettre',audio:L,graded:true,grid:'grid3',answer:L,
+  q.push({type:'bulles',lettres:U.letters.slice(),parLettre:5});
+  q.push({type:'findset',title:'Retrouve tes '+U.letters.length+' lettres',
+    targets:U.letters.slice(),highlight:false,greyEnd:true});
+  // le son → la lettre
+  shuffle(U.letters).forEach(L=>q.push(mcq({
+    prompt:'Choisis la bonne lettre',mute:true,spk:L,graded:true,grid:'grid3',answer:L,
     options:balancePos(shuffle(U.letters).map(x=>({ar:x,key:x})),L)})));
-  for(let r=0;r<3;r++)shuffle(U.letters).forEach(L=>q.push(mcq({
-    prompt:'Quel son fait cette lettre ?',glyph:L,graded:true,grid:'grid3',answer:L,
+  // la lettre → le son : 3 haut-parleurs qui sonnent de DROITE à GAUCHE
+  shuffle(U.letters).forEach(L=>q.push(mcq({
+    prompt:'Choisis le bon nom de la lettre',mute:true,glyph:L,spkOpts:true,
+    graded:true,grid:'grid3 rtl3',answer:L,
     options:balancePos(shuffle(U.letters).map(x=>({snd:x,key:x})),L)})));
   U.letters.forEach(L=>q.push({type:'trace',L}));
   return q;
@@ -2964,7 +3017,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='icone-corriger · l\u2019écran « On corrige tes erreurs » reçoit son icône (qalam qui retrace) · sw v98';
+const BUILD='lecon2-v2 · Mémoriser refondue : 25 écrans → 14, jeu de bulles, haut-parleur dessiné, tracé centripète · sw v99';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3099,6 +3152,7 @@ function prevStep(){if(inRetry||qi<=0)return;stopAudio();qi--;renderStep();}
 
 function renderStep(){
   answered=false;picked=null;progress();window._objDone=false;
+  bulStop();spkOff();                       // on quitte proprement le jeu de bulles
   vfStop(); document.getElementById('player').classList.remove('vfmode');   // on sort proprement du vrai/faux
   const body=document.getElementById('p-body');
   const foot=document.getElementById('p-foot');
@@ -3234,12 +3288,23 @@ function renderStep(){
     return;
   }
 
+  if(st.type==='bulles'){
+    body.innerHTML='<div class="q-title">Éclate les bulles</div>'+
+      '<div class="hint" id="bul-c" style="text-align:center;margin:-10px 0 0">0 / '+
+        (st.lettres.length*st.parLettre)+'</div>'+
+      '<div class="bulzone" id="bulzone"></div>';
+    setTimeout(function(){ bulStart(st.lettres,st.parLettre); },40);
+    return;
+  }
+
   if(st.type==='learn'){
     const d=UNITS[curU].alpha[st.L];
-    body.innerHTML='<div class="learn"><div class="badge-new">NOUVELLE LETTRE</div>'+
-      '<button class="ar-tap" onclick="speak(\''+st.L+'\');popIt(this);ctaOn()">'+st.L+'</button>'+
-      '<div class="nm">'+d.n+'</div><div class="son">'+d.son+'</div>'+
-      '<div class="hint">Touche la lettre pour écouter son nom</div></div>';
+    // titre-instruction court ; le badge et la pastille « son » tombent (Myriam 08/08) :
+    // le SON de la lettre s'apprend au disque « Les harakats », pas ici.
+    body.innerHTML='<div class="q-title">Touche la lettre</div>'+
+      '<div class="learn">'+
+      '<button class="ar-tap" onclick="lettreTap(this,\''+st.L+'\')">'+st.L+'</button>'+
+      '<div class="nm">'+d.n+'</div></div>';
     return;
   }
 
@@ -3357,13 +3422,15 @@ function renderStep(){
     const d=UNITS[uu].alpha[st.L];
     const posName={1:'au début',2:'au milieu',3:'à la fin'}[st.pos]||'isolée';
     const posGlyph=(!st.pos&&st.L==='ه')?'ﻩ':(st.pos?formGlyph(st.L,st.pos):st.L);
-    body.innerHTML='<div class="q-title">À toi d\u2019écrire : '+posGlyph+' ('+d.n+' · '+posName+')</div>'+
-
+    // Titre court quand la lettre est isolée (leçon « Mémoriser ») ; les formes liées gardent
+    // leur précision. Les deux boutons deviennent des icônes DESSINÉES, sans texte (choix de
+    // Myriam le 08/08 : triangle dans un cercle · flèche circulaire).
+    body.innerHTML='<div class="q-title">'+(st.pos?('À toi d\u2019écrire : '+posGlyph+' ('+d.n+' · '+posName+')'):('Écris la lettre '+d.n))+'</div>'+
       '<canvas id="trace" class="trace"></canvas>'+
       '<div class="hint" id="traceMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
-      '<div class="trow">'+
-      '<button class="speak" onclick="window._traceDemo&&window._traceDemo()">▶️ Regarder la démo</button>'+
-      '<button class="speak" onclick="window._traceClear&&window._traceClear()">🧽 Recommencer</button></div>';
+      '<div class="tico">'+
+      '<button onclick="window._traceDemo&&window._traceDemo()" aria-label="Regarder la démo" title="Regarder la démo">'+ICO_DEMO+'</button>'+
+      '<button onclick="window._traceClear&&window._traceClear()" aria-label="Recommencer" title="Recommencer">'+ICO_RECO+'</button></div>';
     setTimeout(()=>setupTrace(st.L,uu,st.pos),50);
     return;
   }
@@ -3508,6 +3575,8 @@ function renderStep(){
     '<span class="hkcirc gr lit">'+signeHK(i)+'<span class="circ"></span></span>').join('')+'</div>';
   if(st.flip)html+='<div class="hint" style="text-align:center;margin:-8px 0 10px">Devine… puis retourne les cartes</div>'; // choix Myriam 3B
   if(st.audio)html+='<button class="bigspeak" onclick="speak(\''+st.audio+'\')">🔊</button>';
+  // le haut-parleur DESSINÉ, sans boîte, dont les ondes bougent pendant le son (Myriam 08/08)
+  if(st.spk)html+='<button class="spkbtn" id="spkBig" onclick="spkRejouer(\''+st.spk+'\')" aria-label="Écouter">'+spkSVG()+'</button>';
   if(st.glyph){html+='<div class="glyph-big'+(st.glyphLinear?' linear-ar':'')+'">'+st.glyph+'</div>';}
   if(st.emo)html+='<div style="text-align:center;font-size:40px;margin:-6px 0 0">'+st.emo+'</div>';
   if(st.fr)html+='<div class="fr" style="text-align:center;margin:2px 0 10px">'+st.fr+'</div>';
@@ -3517,7 +3586,8 @@ function renderStep(){
   const box=document.getElementById('opts');
   st.options.forEach((o,k)=>{
     const b=document.createElement('button');b.className='opt';
-    const contenu=o.snd!==undefined?'<span class="sopt">🔊</span>':
+    const contenu=(o.snd!==undefined&&st.spkOpts)?spkSVG():
+      o.snd!==undefined?'<span class="sopt">🔊</span>':
       o.ar!==undefined?'<span class="ar">'+o.ar+'</span>':o.txt;
     if(st.flip){ // cartes retournées : 1er toucher = retourner, 2e = choisir (choix Myriam 3B)
       b.classList.add('fopt');
@@ -3525,10 +3595,14 @@ function renderStep(){
       b.onclick=()=>{ if(!b.classList.contains('vu')){b.classList.add('vu');return;} if(o.snd)speak(o.snd);selOpt(k,b); };
     }else{
       b.innerHTML=contenu;
-      b.onclick=()=>{if(o.snd)speak(o.snd);selOpt(k,b);};
+      if(st.spkOpts)b.id='sopt'+k;
+      b.onclick=()=>{if(o.snd){st.spkOpts?sayLetterName(o.snd,null,b):speak(o.snd);}selOpt(k,b);};
     }
     box.appendChild(b);
   });
+  // le son part tout seul à l'ouverture de l'écran (Myriam 08/08)
+  if(st.spk)setTimeout(()=>{ if(QUEUE[qi]===st)spkRejouer(st.spk); },320);
+  if(st.spkOpts)setTimeout(()=>{ if(QUEUE[qi]===st)spkSequence(st,0); },320);
 }
 
 function selOpt(k,el){
@@ -4350,10 +4424,18 @@ function prechargerNoms(){
       var el=new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3'); el.preload='auto'; _LN[tr]=el; });
   }catch(e){}
 }
-function sayLetterName(L){
+/* `fin` : rappelé quand CE son est terminé. `el` : le haut-parleur dont les ondes bougent
+   pendant qu'il joue — allumé APRÈS stopAudio(), qui les éteint toutes.
+   ⚠️ RÈGLE : « allumer le bouton après le son » passe TOUJOURS par `fin`, JAMAIS par
+   quandSonFini() armé AVANT l'appel : celui-ci capture le jeton audio du moment, que
+   stopAudio() incrémente aussitôt — il se croit alors périmé et n'allume plus rien. */
+function sayLetterName(L,fin,el){
   stopAudio();
+  spkOn(el);
   var gen=_sndGen;
-  var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); return; }
+  var fini=false;
+  var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
+  var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); setTimeout(termine,900); return; }
   try{
     var a=(_LNg===VOIX_G&&_LN[tr])||new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3');
     try{ a.currentTime=0; }catch(_){}
@@ -4361,10 +4443,203 @@ function sayLetterName(L){
     var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(L);}catch(_){ } }; // Majed dit le nom de la lettre (plus la translit en voix française)
     a.onplaying=function(){settled=true;};  // on* et pas addEventListener : l'élément préchargé est RÉUTILISÉ à chaque toucher
     a.onerror=fb;
+    a.onended=termine;
     var p=a.play(); if(p&&p.catch)p.catch(fb);
     setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
-  }catch(e){ try{_speakSynth(tr);}catch(_){ } }
+    setTimeout(termine,2200);                       // filet : le rappel finit toujours par venir
+  }catch(e){ try{_speakSynth(tr);}catch(_){ } setTimeout(termine,900); }
 }
+
+/* ══════════════ LEÇON 2 v2 (08/08) — bulles, haut-parleur, icônes ══════════════ */
+
+/* Les icônes du tracé, dessinées (choix de Myriam : triangle dans un cercle · flèche
+   circulaire). Sans texte : le libellé ne survit que pour les lecteurs d'écran. */
+const ICO_DEMO='<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.5"/><path class="plein" d="M12.5 9.5v13l10.5-6.5z"/></svg>';
+const ICO_RECO='<svg viewBox="0 0 32 32"><path d="M26 16a10 10 0 11-3.4-7.5"/><path d="M26 4.5V11h-6.5"/></svg>';
+
+/* Le haut-parleur dessiné. Les trois ondes s'animent en cascade tant que le son joue. */
+function spkSVG(cls){
+  return '<svg class="spk'+(cls?' '+cls:'')+'" viewBox="0 0 52 34" aria-hidden="true">'+
+    '<path class="cone" d="M5 12.5h7l9-7.5a1.6 1.6 0 012.6 1.2v21.6a1.6 1.6 0 01-2.6 1.2l-9-7.5H5a2 2 0 01-2-2v-5a2 2 0 012-2z"/>'+
+    '<path class="w w1" d="M30 12.5a7 7 0 010 9"/>'+
+    '<path class="w w2" d="M35.5 8a13 13 0 010 18"/>'+
+    '<path class="w w3" d="M41 3.5a19 19 0 010 27"/></svg>';
+}
+function spkOn(el){
+  if(!el)return;
+  el.classList.add('on');
+  var s=el.querySelector('.spk'); if(s)s.classList.add('on');
+}
+function spkOff(){
+  var l=document.querySelectorAll('.spk.on,.spkbtn.on,.opt.on');
+  for(var i=0;i<l.length;i++)l[i].classList.remove('on');
+}
+function spkRejouer(L){ sayLetterName(L,null,document.getElementById('spkBig')); }
+/* Les 3 haut-parleurs sonnent l'un après l'autre. La grille est en `direction:rtl`,
+   donc l'option 0 est celle de DROITE : la séquence suit le sens de l'arabe. */
+function spkSequence(st,k){
+  if(QUEUE[qi]!==st||answered)return;
+  if(!st.options||k>=st.options.length)return;
+  var o=st.options[k];
+  sayLetterName(o.snd,function(){ setTimeout(function(){ spkSequence(st,k+1); },260); },
+                document.getElementById('sopt'+k));
+}
+
+/* La carte d'une lettre nouvelle : le bouton s'allume quand le NOM est fini de sonner. */
+function lettreTap(el,L){
+  popIt(el);
+  sayLetterName(L,objectifAtteint);
+  objectifFilet();
+}
+/* Ceinture : le bouton ne doit JAMAIS rester gris si un son se perd. */
+function objectifFilet(){
+  var e=qi;
+  setTimeout(function(){ if(qi===e)objectifAtteint(); },2800);
+}
+
+/* ══ LE JEU DE BULLES ══
+   Les bulles montent, dérivent au hasard et SE COGNENT : la non-superposition n'est pas
+   une contrainte de placement, c'est la conséquence des chocs (idée de Myriam, 08/08). */
+var BUL={raf:0,items:[],W:0,H:0,reste:0,R:32,v:22,bruit:26,chocs:0};
+function bulStop(){ if(BUL.raf)cancelAnimationFrame(BUL.raf); BUL.raf=0; BUL.items=[]; }
+function bulPose(b){
+  b.el.style.setProperty('--x',b.x.toFixed(1)+'px');
+  b.el.style.setProperty('--y',b.y.toFixed(1)+'px');
+}
+function bulStart(lettres,parLettre){
+  var z=document.getElementById('bulzone'); if(!z)return;
+  BUL.W=z.clientWidth; BUL.H=z.clientHeight; BUL.items=[]; BUL.chocs=0;
+  var sac=[];
+  lettres.forEach(function(L){ for(var i=0;i<parLettre;i++)sac.push(L); });
+  shuffle(sac);
+  BUL.reste=sac.length;
+  var R=BUL.R, lignes=Math.ceil(sac.length/3);
+  sac.forEach(function(L,i){
+    var el=document.createElement('button');
+    el.className='bul'; el.textContent=L; el.setAttribute('aria-label',L);
+    var col=i%3, rang=Math.floor(i/3);
+    var b={el:el,L:L,
+      x:col*(BUL.W-2*R)/2*0.98+(Math.random()-0.5)*16,
+      y:-R+rang*((BUL.H+90)/lignes)+(Math.random()-0.5)*20,
+      vx:(Math.random()-0.5)*18,
+      vy:-BUL.v*(0.82+Math.random()*0.36),   // chacune sa vitesse : le flux n'est pas un bloc
+      pop:false};
+    b.x=Math.max(0,Math.min(BUL.W-2*R,b.x));
+    el.onclick=function(){ bulPop(b); };
+    bulPose(b); z.appendChild(el); BUL.items.push(b);
+  });
+  var last=null;
+  function frame(ts){
+    if(!document.getElementById('bulzone')){ BUL.raf=0; return; }
+    if(last===null)last=ts;
+    bulTick((ts-last)/1000); last=ts;
+    BUL.raf=requestAnimationFrame(frame);
+  }
+  BUL.raf=requestAnimationFrame(frame);
+}
+/* ⚠️ dt est PLAFONNÉ : un onglet revenu d'arrière-plan rend un dt énorme, et une bulle
+   traverserait sa voisine sans que le choc soit détecté. */
+function bulTick(dt){
+  dt=Math.min(dt,0.05);
+  var R=BUL.R, D=2*R, xmax=BUL.W-D;
+  var vivantes=BUL.items.filter(function(b){return !b.pop;});
+  vivantes.forEach(function(b){
+    b.vx+=(Math.random()-0.5)*BUL.bruit*dt;
+    b.vy+=(-BUL.v-b.vy)*0.7*dt;                 // après un choc, la bulle retrouve sa montée
+    b.vx=Math.max(-26,Math.min(26,b.vx));
+    b.x+=b.vx*dt; b.y+=b.vy*dt;
+    if(b.x<0){b.x=0;b.vx=Math.abs(b.vx);}
+    if(b.x>xmax){b.x=xmax;b.vx=-Math.abs(b.vx);}
+    if(b.y<-D){                                  // sortie par le haut → retour par le bas
+      b.y=BUL.H+6; b.x=Math.random()*xmax;
+      b.vx=(Math.random()-0.5)*18; b.vy=-BUL.v*(0.82+Math.random()*0.36);
+    }
+  });
+  // six passes : séparer A de B peut renfoncer A dans C, et le rappel aux parois aussi
+  for(var pass=0;pass<6;pass++){
+    for(var i=0;i<vivantes.length;i++)for(var j=i+1;j<vivantes.length;j++){
+      var a=vivantes[i], c=vivantes[j];
+      var dx=c.x-a.x, dy=c.y-a.y, d=Math.hypot(dx,dy);
+      if(d>=D||d===0)continue;
+      if(pass===0)BUL.chocs++;
+      var nx=dx/d, ny=dy/d, ov=(D-d)/2;
+      a.x-=nx*ov; a.y-=ny*ov; c.x+=nx*ov; c.y+=ny*ov;
+      var vrel=(c.vx-a.vx)*nx+(c.vy-a.vy)*ny;
+      if(vrel<0&&pass===0){                      // choc élastique, masses égales
+        a.vx+=vrel*nx; a.vy+=vrel*ny;
+        c.vx-=vrel*nx; c.vy-=vrel*ny;
+      }
+      a.x=Math.max(0,Math.min(xmax,a.x)); c.x=Math.max(0,Math.min(xmax,c.x));
+    }
+  }
+  vivantes.forEach(bulPose);
+}
+/* Le « plop » : un claquement de bruit très court (la membrane cède) puis une petite montée
+   résonante (l'air s'échappe). WebAudio, donc il ne compte pas comme « le son en cours » :
+   il se superpose au nom de la lettre au lieu de le couper. */
+function plop(){
+  if(!SND)return;
+  try{
+    var Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
+    var ac=window._ac||(window._ac=new Ctx());
+    if(ac.state==='suspended')ac.resume();
+    var t=ac.currentTime;
+    var n=ac.createBufferSource(), buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.02),ac.sampleRate);
+    var dd=buf.getChannelData(0);
+    for(var i=0;i<dd.length;i++)dd[i]=(Math.random()*2-1)*(1-i/dd.length);
+    n.buffer=buf;
+    var bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1400; bp.Q.value=1.2;
+    var gn=ac.createGain(); gn.gain.setValueAtTime(0.16,t); gn.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+    n.connect(bp);bp.connect(gn);gn.connect(ac.destination);n.start(t);
+    var o=ac.createOscillator(), g=ac.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(540,t);
+    o.frequency.exponentialRampToValueAtTime(1450,t+0.05);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.20,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.11);
+    o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+0.12);
+  }catch(e){}
+}
+/* L'éclat : l'onde de la paroi qui se détend, puis dix gouttelettes qui retombent. */
+function bulEclat(x,y){
+  var z=document.getElementById('bulzone'); if(!z)return;
+  var cx=x+32, cy=y+32;
+  var o=document.createElement('i'); o.className='onde';
+  o.style.left=cx+'px'; o.style.top=cy+'px';
+  z.appendChild(o);
+  setTimeout(function(){ if(o.parentNode)o.parentNode.removeChild(o); },420);
+  for(var i=0;i<10;i++){
+    var d=document.createElement('i');
+    d.className='goutte';
+    var a=(i/10)*6.283+(Math.random()-0.5)*0.55, r=30+Math.random()*30, t=3+Math.random()*6;
+    d.style.width=d.style.height=t.toFixed(1)+'px';
+    d.style.margin=(-t/2).toFixed(1)+'px 0 0 '+(-t/2).toFixed(1)+'px';
+    d.style.left=cx+'px'; d.style.top=cy+'px';
+    d.style.setProperty('--dx',(Math.cos(a)*r).toFixed(1)+'px');
+    d.style.setProperty('--dy',(Math.sin(a)*r+12).toFixed(1)+'px');   // +12 : la gravité
+    d.style.animationDuration=(0.42+Math.random()*0.22).toFixed(2)+'s';
+    z.appendChild(d);
+    (function(el){ setTimeout(function(){ if(el.parentNode)el.parentNode.removeChild(el); },700); })(d);
+  }
+}
+function bulPop(b){
+  if(b.pop)return; b.pop=true;
+  b.el.classList.add('pop');
+  bulEclat(b.x,b.y);
+  plop();
+  BUL.reste--;
+  var c=document.getElementById('bul-c');
+  var tot=BUL.items.length;
+  if(c)c.textContent=(tot-BUL.reste)+' / '+tot;
+  setTimeout(function(){ if(b.el.parentNode)b.el.parentNode.removeChild(b.el); },360);
+  var derniere=(BUL.reste<=0);
+  setTimeout(function(){                          // le plop d'abord, le nom juste après
+    sayLetterName(b.L, derniere?objectifAtteint:null);
+    if(derniere){ if(c)c.textContent='✓'; objectifFilet(); }
+  },80);
+}
+
 function sayLetterSound(L){
   stopAudio();
   var gen=_sndGen;
@@ -4525,17 +4800,33 @@ function setupTrace(L,u,posN){
     }
     return n?[sx/n,sy/n]:best;
   }
+  /* Catmull-Rom CENTRIPÈTE (α = 0,5) et non uniforme. Myriam : « le tracé manque un peu de
+     fluidité quand je t'ai donné beaucoup de coordonnées ». En uniforme, chaque intervalle
+     entre deux ancres reçoit le MÊME temps quelle que soit sa longueur : là où ses points
+     sont serrés, la courbe doit accélérer, elle dépasse et fait de petites boucles.
+     En centripète le temps est proportionnel à √(longueur) : plus de dépassement.
+     La courbe passe TOUJOURS exactement par ses ancres — rien n'est déplacé.
+     Mesuré sur ses coordonnées : l'écart maximal du م tombe de 2,94 px à 1,60 px. */
+  function mixPt(a,b,wa,wb){ return [a[0]*wa+b[0]*wb, a[1]*wa+b[1]*wb]; }
   function densify(anchors){
     const P=[anchors[0]].concat(anchors).concat([anchors[anchors.length-1]]);
     const out=[];
+    const dst=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]);
     for(let i=1;i<P.length-2;i++){
       const p0=P[i-1],p1=P[i],p2=P[i+1],p3=P[i+2];
-      const seg=Math.max(2,Math.round(Math.hypot(p2[0]-p1[0],p2[1]-p1[1])/3));
+      const t0=0,
+            t1=t0+Math.max(1e-3,Math.pow(dst(p0,p1),0.5)),
+            t2=t1+Math.max(1e-3,Math.pow(dst(p1,p2),0.5)),
+            t3=t2+Math.max(1e-3,Math.pow(dst(p2,p3),0.5));
+      const seg=Math.max(2,Math.round(dst(p1,p2)/2));
       for(let k=(i===1?0:1);k<=seg;k++){
-        const t=k/seg,t2=t*t,t3=t2*t;
-        out.push([
-          .5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),
-          .5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)]);
+        const t=t1+(t2-t1)*(k/seg);
+        const A1=mixPt(p0,p1,(t1-t)/(t1-t0),(t-t0)/(t1-t0));
+        const A2=mixPt(p1,p2,(t2-t)/(t2-t1),(t-t1)/(t2-t1));
+        const A3=mixPt(p2,p3,(t3-t)/(t3-t2),(t-t2)/(t3-t2));
+        const B1=mixPt(A1,A2,(t2-t)/(t2-t0),(t-t0)/(t2-t0));
+        const B2=mixPt(A2,A3,(t3-t)/(t3-t1),(t-t1)/(t3-t1));
+        out.push(mixPt(B1,B2,(t2-t)/(t2-t1),(t-t1)/(t2-t1)));
       }
     }
     return out; // ancres exactes de Myriam — aucun aimant
@@ -4604,7 +4895,15 @@ function setupTrace(L,u,posN){
     const p=paths[cur];
     if(p&&p.dots&&msg)msg.textContent='Ajoute '+(p.dots.length>1?'les points':'le point')+' 👆';
   }
-  function finishAll(){ doneAll=true;draw();sayLetterSound(L);ctaOn(); } // fin de tracé : le SON de la lettre
+  /* Fin de l'écriture : l'accord, puis le NOM enregistré de la lettre — et c'est seulement
+     quand ce nom est FINI que la récompense sonne et que CONTINUER s'allume (Myriam 08/08).
+     ⚠️ `lettre-X-son.mp3` n'existe pour aucune des 28 lettres : sayLetterSound tombait sur
+     la voix de synthèse de l'appareil à chaque fin de tracé. */
+  function finishAll(){
+    doneAll=true;draw();okBeep('final');
+    setTimeout(function(){ sayLetterName(L,objectifAtteint); },260);
+    objectifFilet();
+  }
   function nextStroke(){
     cur++;
     if(cur>=paths.length)finishAll();
@@ -4646,6 +4945,7 @@ function setupTrace(L,u,posN){
   function up(){tracking=false;}
   c.onmousedown=down;c.onmousemove=move;c.onmouseup=up;c.onmouseleave=up;
   c.ontouchstart=down;c.ontouchmove=move;c.ontouchend=up;
+  window._traceFin=finishAll;          // le harnais force la fin : on ne trace pas au doigt en test
   window._traceState=()=>({cur,prog:(paths[cur]&&paths[cur].pts)?paths[cur].prog:-1,
     total:(paths[cur]&&paths[cur].pts)?paths[cur].pts.length:0,doneAll});
   window._traceClear=()=>{
@@ -4672,7 +4972,7 @@ function setupTrace(L,u,posN){
         st8.waitEnd+=dt;
         if(st8.waitEnd>900){ // fin : on rend la main, progrès de l'élève restauré
           paths.forEach((p2,i)=>{if(p2.hit)p2.hit=saveHits[i];});
-          demoOn=false;draw();sayLetterSound(L);return;
+          demoOn=false;draw();sayLetterName(L);return;
         }
       } else if(st8.hold>0){ st8.hold-=dt; } // pause nette : un trait après l'autre
       else if(!p){ st8.full=true; }
