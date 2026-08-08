@@ -1389,7 +1389,7 @@
 </div>
 
 <div class="finish" id="obAccount">
-  <div class="big" style="font-family:var(--ui)">👤</div>
+  <img src="images-app-alaq/icone-ecran-compte.png" alt="" style="width:88px;height:auto">
   <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
   <p id="obQuote" style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
   <div id="obAccountCard" style="width:100%;max-width:320px"></div>
@@ -2061,15 +2061,15 @@ function buildReview(U){
 // ORDRE PÉDAGOGIQUE : « Les formes » AVANT « Dans la Fātiḥa » — on ne peut pas demander de repérer
 // une lettre dans le verset (où elle est écrite liée) avant d'avoir montré début/milieu/fin.
 const DISQUES=[
- {icon:'💡',img:'images-app-alaq/icone-alaq-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
- {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
- {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les formes',build:buildForms},
- {icon:'🕋',img:'images-app-alaq/icone-alaq-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
- {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les harakats',build:buildHarakat},
- {icon:'📌',img:'images-app-alaq/icone-alaq-memoriser.png',label:'Les prolongations',build:buildMadd},
- {icon:'🔗',img:'images-app-alaq/icone-alaq-lire.png',label:'Lire des mots',build:buildWords},
- {icon:'✏️',img:'images-app-alaq/icone-alaq-ecrire.png',label:'Écrire des mots',build:buildWrite},
- {icon:'🏆',img:'images-app-alaq/icone-alaq-bilan.png',label:'Bilan',build:buildBilan},
+ {icon:'💡',img:'images-app-alaq/icone-alaq2-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
+ {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
+ {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Les formes',build:buildForms},
+ {icon:'🕋',img:'images-app-alaq/icone-alaq2-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
+ {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Les harakats',build:buildHarakat},
+ {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Les prolongations',build:buildMadd},
+ {icon:'🔗',img:'images-app-alaq/icone-alaq2-lire.png',label:'Lire des mots',build:buildWords},
+ {icon:'✏️',img:'images-app-alaq/icone-alaq2-ecrire.png',label:'Écrire des mots',build:buildWrite},
+ {icon:'🏆',img:'images-app-alaq/icone-alaq2-bilan.png',label:'Bilan',build:buildBilan},
 ];
 
 // Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
@@ -2134,7 +2134,7 @@ function buildLettreVsProlong(U){
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
-const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
+const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq2-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
 function discsFor(u){
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
@@ -2803,14 +2803,14 @@ function maybeGhufranPrompt(){
   var perdu = S.pendingMiss>GHUF_MAX_JOURS || (S.ghufLeft||0)<1;
   if(perdu){
     m.innerHTML='<div style="max-width:340px;width:100%;margin:0 auto;text-align:center;position:relative">'+
-      '<div style="font-size:52px">\ud83c\udf31</div>'+
+      '<img src="images-app-alaq/icone-ecran-pousse.png" alt="" style="width:96px;height:auto;margin:0 auto">'+
       '<h2 style="margin:6px 0 18px">Ta s\u00e9rie repart \u00e0 z\u00e9ro</h2>'+
       '<button class="cbtn" onclick="acceptMiss()">JE REPRENDS AUJOURD\u2019HUI</button>'+
       '</div>';
     document.body.appendChild(m); return;
   }
   m.innerHTML='<div style="max-width:340px;width:100%;margin:0 auto;text-align:center;position:relative">'+
-    '<div style="font-size:52px">\ud83d\udd4a\ufe0f</div>'+
+    '<img src="images-app-alaq/icone-ecran-ghufran.png" alt="" style="width:104px;height:auto;margin:0 auto">'+
     '<h2 style="margin:6px 0 18px">Tu as manqu\u00e9 '+S.pendingMiss+' jour'+(S.pendingMiss>1?'s':'')+'</h2>'+
     '<button class="cbtn" onclick="useGhufran()">\ud83d\udd4a\ufe0f Utiliser un Ghufr\u0101n</button>'+
     '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line);margin-top:8px" onclick="acceptMiss()">Non, j\u2019assume</button>'+
@@ -2823,7 +2823,7 @@ function showGhufranInfo(){
   if(!m){ m=document.createElement('div'); m.className='finish'; m.id='ghufInfoModal'; document.body.appendChild(m); }
   m.innerHTML='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="document.getElementById(\'ghufInfoModal\').classList.remove(\'on\')" aria-label="Fermer">✕</button>'+
     '<div style="max-width:340px;width:100%;margin:0 auto;text-align:center">'+
-    '<div style="font-size:44px">\ud83d\udd4a\ufe0f</div>'+
+    '<img src="images-app-alaq/icone-ecran-ghufran.png" alt="" style="width:92px;height:auto;margin:0 auto">'+
     '<h2 style="margin:6px 0 8px">Le Ghufr\u0101n <span class="arw" style="font-size:22px">\u063a\u0641\u0631\u0627\u0646</span></h2>'+
     '<p class="succ-desc" style="margin:0 0 10px">Une absence pardonn\u00e9e : ta s\u00e9rie continue comme si tu \u00e9tais venue.</p>'+
     '<p class="succ-desc" style="margin:0 auto;width:fit-content;text-align:left">\u2022 2 par mois<br>\u2022 pour une absence de 1 ou 2 jours<br>\u2022 au-del\u00e0, la s\u00e9rie repart \u00e0 z\u00e9ro</p>'+
@@ -2923,7 +2923,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='menu-5-icones · icônes Artlist, Profil/Paramètres dissociés, majuscules, écrans sans boîte, popup fermée au défilement · sw v86';
+const BUILD='icones-artlist · disques (ampoule→balance) et écrans (colombe, pousse, compte) en icônes Artlist, noms neufs anti-cache · sw v87';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
