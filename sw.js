@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v88-2026-08-08i';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v89-2026-08-08j';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -22,13 +22,13 @@ const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques so
 "images-app-alaq/icone-menu-reviser.png",
 "images-app-alaq/icone-menu-profil.png",
 "images-app-alaq/icone-menu-parametres.png",
-"images-app-alaq/icone-alaq2-bilan.png",
-"images-app-alaq/icone-alaq2-decouvrir.png",
-"images-app-alaq/icone-alaq2-ecrire.png",
-"images-app-alaq/icone-alaq2-lire.png",
-"images-app-alaq/icone-alaq2-memoriser.png",
-"images-app-alaq/icone-alaq2-qoran.png",
-"images-app-alaq/icone-alaq-reviser.png"
+"images-app-alaq/icone-alaq3-bilan.png",
+"images-app-alaq/icone-alaq3-decouvrir.png",
+"images-app-alaq/icone-alaq3-ecrire.png",
+"images-app-alaq/icone-alaq3-lire.png",
+"images-app-alaq/icone-alaq3-memoriser.png",
+"images-app-alaq/icone-alaq3-qoran.png",
+"images-app-alaq/icone-alaq3-reviser.png"
 ];
 const AUDIOS=[
 "audios-app-alaq/ain-alif-son-prolonge.mp3",

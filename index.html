@@ -2061,19 +2061,19 @@ function buildReview(U){
 // ORDRE PÉDAGOGIQUE : « Les formes » AVANT « Dans la Fātiḥa » — on ne peut pas demander de repérer
 // une lettre dans le verset (où elle est écrite liée) avant d'avoir montré début/milieu/fin.
 const DISQUES=[
- {icon:'💡',img:'images-app-alaq/icone-alaq2-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
- {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
- {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Les formes',build:buildForms},
- {icon:'🕋',img:'images-app-alaq/icone-alaq2-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
- {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Les harakats',build:buildHarakat},
- {icon:'📌',img:'images-app-alaq/icone-alaq2-memoriser.png',label:'Les prolongations',build:buildMadd},
- {icon:'🔗',img:'images-app-alaq/icone-alaq2-lire.png',label:'Lire des mots',build:buildWords},
- {icon:'✏️',img:'images-app-alaq/icone-alaq2-ecrire.png',label:'Écrire des mots',build:buildWrite},
- {icon:'🏆',img:'images-app-alaq/icone-alaq2-bilan.png',label:'Bilan',build:buildBilan},
+ {icon:'💡',img:'images-app-alaq/icone-alaq3-decouvrir.png',label:'L\u2019alphabet',build:buildAlphabet},
+ {icon:'📌',img:'images-app-alaq/icone-alaq3-memoriser.png',label:'Mémoriser {L}',build:buildMemo},
+ {icon:'📌',img:'images-app-alaq/icone-alaq3-memoriser.png',label:'Les formes',build:buildForms},
+ {icon:'🕋',img:'images-app-alaq/icone-alaq3-qoran.png',label:'Dans la Fātiḥa',build:buildSpot},
+ {icon:'📌',img:'images-app-alaq/icone-alaq3-memoriser.png',label:'Les harakats',build:buildHarakat},
+ {icon:'📌',img:'images-app-alaq/icone-alaq3-memoriser.png',label:'Les prolongations',build:buildMadd},
+ {icon:'🔗',img:'images-app-alaq/icone-alaq3-lire.png',label:'Lire des mots',build:buildWords},
+ {icon:'✏️',img:'images-app-alaq/icone-alaq3-ecrire.png',label:'Écrire des mots',build:buildWrite},
+ {icon:'🏆',img:'images-app-alaq/icone-alaq3-bilan.png',label:'Bilan',build:buildBilan},
 ];
 
 // Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
-const REVISION_DISC={icon:'🔄',img:'images-app-alaq/icone-alaq-reviser.png',label:'Révision',build:buildReview};
+const REVISION_DISC={icon:'🔄',img:'images-app-alaq/icone-alaq3-reviser.png',label:'Révision',build:buildReview};
 // Disque propre à l'unité « lettres faibles » — contenu (support/prolongation + hamza
 // et son siège) à construire avec le reste de l'unité 2.
 function buildLettreVsProlong(U){
@@ -2134,7 +2134,7 @@ function buildLettreVsProlong(U){
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
-const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq2-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
+const LETTREVSPRO_DISC={icon:'💡',img:'images-app-alaq/icone-alaq3-decouvrir.png',label:'Lettres vs prolongations',build:buildLettreVsProlong};
 function discsFor(u){
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
@@ -2923,7 +2923,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='logo-seul · le nom ALAQ retiré à côté du logo (topbar et rail) · sw v88';
+const BUILD='icones-marron · icônes des disques en brun (lisibles sur l\u2019or), découpe propre sans fragments, haltère de révision · sw v89';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
