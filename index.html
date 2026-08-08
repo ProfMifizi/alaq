@@ -989,6 +989,7 @@
 .prm-sw.on{background:var(--gold-d)}
 .prm-sw.on i{left:20px;background:var(--cream)}
 .prm-goals{display:flex;gap:8px}
+.prm-ic{height:22px;width:auto;vertical-align:-5px;margin-right:3px}
 .prm-goal{flex:1;padding:11px 0;border-radius:12px;border:2px solid var(--line);background:var(--panel);
   color:var(--cream);font-family:var(--ui);font-weight:800;font-size:14px;cursor:pointer}
 .prm-goal.sel{border-color:var(--gold);background:rgba(220,144,46,.16);color:var(--gold2)}
@@ -2358,9 +2359,18 @@ let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(
      'f' → Marine (consignes FR) + Habibah (lettres et félicitations AR)
      'h' → Dorian (consignes FR) + Mustafa (lettres et félicitations AR)
    Les deux jeux complets existent ; ⏳ le sélecteur dans le profil de l'élève reste à faire. */
-let VOIX_G='f'; // ⚠️ FORCÉ : aucun écran n'écrit encore alaq_voix, mais des 'h' d'anciens
-// essais traînaient dans des localStorage (iPhone de Myriam, 07/08 : « c'est encore Mehdi
-// qui parle »). Relire localStorage QUAND le sélecteur du profil existera.
+/* Le sélecteur vit maintenant dans Paramètres (Myriam 09/08) : on relit donc localStorage.
+   ⚠️ Ce choix ne touche QUE ce qui existe dans les deux voix — consignes, noms de lettres,
+   félicitations. Les voyelles et syllabes (a/i/ou courts et prolongés) restent la voix de
+   Myriam : un TTS n'a jamais su les dire (décision ferme du 07/08). */
+let VOIX_G=(function(){try{return localStorage.getItem('alaq_voix')==='h'?'h':'f'}catch(e){return 'f'}})();
+function setVoix(g){
+  VOIX_G=(g==='h')?'h':'f';
+  try{localStorage.setItem('alaq_voix',VOIX_G)}catch(e){}
+  try{_LNg=null;_LN={};prechargerNoms();}catch(e){}   // les noms de lettres se rechargent dans la nouvelle voix
+  try{renderParams();}catch(e){}
+  try{sayLetterName('م');}catch(e){}                  // un échantillon immédiat : on ENTEND son choix
+}
 function toggleSound(){
   SND=!SND;try{localStorage.setItem('alaq_snd',SND?'on':'off')}catch(e){}
   const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
@@ -2930,7 +2940,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='disques-option2 · terminé = or + ombre à la couleur de l\u2019unité (plus de pastille \u2713), verrouillé en sable, tronc cérébral éclairci · sw v94';
+const BUILD='parametres-voix · icônes des Paramètres + le CHOIX DE LA VOIX arabe (Habibah / Mustafa), les voyelles restent la voix de Myriam · sw v95';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5477,16 +5487,23 @@ function renderParams(){
   var v=document.getElementById('view-params'); if(!v)return;
   var obj=(S.onb&&S.onb.objectif)||'';
   v.innerHTML=
-    '<div class="ccard"><div class="ctt"><h3>🔊 Sons</h3></div>'+
+    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="images-app-alaq/icone-prm-sons.png" alt=""> Sons</h3></div>'+
       '<button class="prm-row" onclick="toggleSound();renderParams()">Effets et voix'+prmSw(SND)+'</button>'+
       '<button class="prm-row" onclick="toggleNarr();renderParams()">Lecture des consignes'+prmSw(NARR)+'</button>'+
     '</div>'+
-    '<div class="ccard"><div class="ctt"><h3>🎯 Objectif quotidien</h3></div>'+
+    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="images-app-alaq/icone-prm-voix.png" alt=""> Voix arabe</h3></div>'+
+      '<div class="prm-goals">'+
+        '<button class="prm-goal'+(VOIX_G==='f'?' sel':'')+'" onclick="setVoix(\'f\')">Habibah</button>'+
+        '<button class="prm-goal'+(VOIX_G==='h'?' sel':'')+'" onclick="setVoix(\'h\')">Mustafa</button>'+
+      '</div>'+
+      '<p style="color:var(--muted);font-size:11.5px;margin:9px 2px 0;line-height:1.45">Les voyelles et les syllabes gardent la voix de Myriam.</p>'+
+    '</div>'+
+    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="images-app-alaq/icone-prm-objectif.png" alt=""> Objectif quotidien</h3></div>'+
       '<div class="prm-goals">'+['5','10','15','20'].map(function(m){
         return '<button class="prm-goal'+(obj===m?' sel':'')+'" onclick="prmObjectif(\''+m+'\')">'+m+' min</button>';
       }).join('')+'</div>'+
     '</div>'+
-    '<div class="ccard"><div class="ctt"><h3>📄 À propos</h3></div>'+
+    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="images-app-alaq/icone-prm-apropos.png" alt=""> À propos</h3></div>'+
       '<a class="prm-row" href="confidentialite.html" target="_blank" rel="noopener" style="text-decoration:none">Politique de confidentialité<span style="color:var(--muted)">›</span></a>'+
       '<div class="prm-row" style="cursor:default;color:var(--muted);font-size:12px">Version<span style="font-size:11px;max-width:55%;text-align:right">'+escHTML(String(BUILD).split('·')[0].trim())+'</span></div>'+
     '</div>';
