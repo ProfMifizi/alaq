@@ -2923,7 +2923,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='icones-marron · icônes des disques en brun (lisibles sur l\u2019or), découpe propre sans fragments, haltère de révision · sw v89';
+const BUILD='verrous-clairs · les icônes des disques verrouillés passent en clair (brun sur brun était invisible) · sw v90';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2985,7 +2985,7 @@ function renderHome(){
         node.className='node '+(done?'done':current?'current':'locked');
         node.innerHTML='<div class="bwrap"><div class="ring"></div>'+
           '<button class="bubble" '+(unlocked?'':'disabled')+' aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-            '<span class="bi"'+(unlocked?'':' style="opacity:.4;filter:grayscale(1)"')+'>'+(d.img?'<img class="bimg" src="'+d.img+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span>'+
+            '<span class="bi"'+(unlocked?'':' style="opacity:.55;filter:grayscale(1) invert(.9)"')+'>'+(d.img?'<img class="bimg" src="'+d.img+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span>'+
             (done?'<span class="check">\u2713</span>':'')+
           '</button></div>';
         if(unlocked)node.querySelector('.bubble').onclick=(ev)=>{ev.stopPropagation();discTip(node,u,i,discLabel(d,U),done);};
@@ -2999,7 +2999,7 @@ function renderHome(){
       } else {
         node.className='node locked';
         node.innerHTML='<div class="bwrap"><button class="bubble" disabled aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-          '<span class="bi" style="opacity:.4;filter:grayscale(1)">'+(d.img?'<img class="bimg" src="'+d.img+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span></button></div>';
+          '<span class="bi" style="opacity:.55;filter:grayscale(1) invert(.9)">'+(d.img?'<img class="bimg" src="'+d.img+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span></button></div>';
       }
       path.appendChild(node);
     });
