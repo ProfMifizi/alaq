@@ -2964,7 +2964,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='popups-sans-boite · badge = image + titre seuls, rang sans boîte mais avec son texte, croix en haut d\u2019écran, stats du rang aux nouvelles icônes · sw v97';
+const BUILD='icone-corriger · l\u2019écran « On corrige tes erreurs » reçoit son icône (qalam qui retrace) · sw v98';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3644,7 +3644,7 @@ function finishDisque(){
     foot.className='p-foot';document.getElementById('fb').innerHTML='';document.getElementById('why').innerHTML='';
     {const bl=document.getElementById('backLink');if(bl)bl.style.display='none';}
     body.innerHTML='<div class="learn" style="margin-top:24px">'+
-      '<div style="font-size:60px">🔁</div>'+
+      '<img src="images-app-alaq/icone-ecran-corriger.png" alt="" style="width:96px;height:auto;margin:0 auto">'+
       '<div class="nm" style="margin-top:10px">On corrige tes erreurs</div></div>'; // le titre suffit (Myriam 07/08)
     const cta=document.getElementById('cta');
     cta.className='cta';cta.disabled=false;cta.textContent='CORRIGER MES ERREURS';
