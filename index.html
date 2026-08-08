@@ -125,6 +125,18 @@
     background:radial-gradient(circle at 34% 26%,color-mix(in srgb,var(--accent,var(--gold)) 60%,#fff),var(--accent,var(--gold)) 55%,color-mix(in srgb,var(--accent,var(--gold)) 58%,#000));
     box-shadow:0 6px 0 color-mix(in srgb,var(--accent,var(--gold)) 45%,#000)}
   .jump .bubble .bi{color:#fff;letter-spacing:-3px;font-family:'Nunito',sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+  /* Popup de leçon façon Duolingo : titre + COMMENCER, ancrée SOUS le disque (08/08).
+     Elle prend la couleur d'accent de l'unité (variable CSS héritée de .unit-sec). */
+  .disc-tip{position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%);width:250px;
+    background:var(--accent,var(--gold));border-radius:16px;padding:14px;z-index:26;text-align:center;
+    box-shadow:0 12px 30px rgba(0,0,0,.5);animation:tipin .18s ease}
+  @keyframes tipin{from{opacity:0;transform:translateX(-50%) translateY(-6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  .disc-tip::before{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%) rotate(45deg);
+    width:14px;height:14px;background:inherit;border-radius:3px}
+  .disc-tip .dt-t{color:#fff;font-weight:900;font-size:15px;line-height:1.35;margin-bottom:11px}
+  .disc-tip .dt-t .arw{font-family:var(--ar)}
+  .disc-tip .dt-go{width:100%;background:#fff;border:none;border-radius:12px;padding:12px;font-family:var(--ui);
+    font-weight:900;letter-spacing:.05em;color:var(--accent,var(--gold-d));cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.22)}
   .jump-tip{position:absolute;bottom:calc(100% + 12px);left:50%;
     background:var(--panel2);color:var(--accent,var(--gold));border:2px solid var(--accent,var(--gold));
     font-weight:900;font-size:13px;padding:7px 13px;border-radius:12px;white-space:nowrap;z-index:3;pointer-events:none;
@@ -291,7 +303,13 @@
   .finish{position:fixed;inset:0;z-index:60;background:var(--bg);
     background-image:radial-gradient(circle at 50% 0%, #3a302b 0, #2c2624 38%, var(--bg) 75%);
     display:none;flex-direction:column;
-    align-items:center;justify-content:center;text-align:center;padding:calc(30px + env(safe-area-inset-top,0px)) 30px 30px}
+    align-items:center;justify-content:center;text-align:center;padding:calc(30px + env(safe-area-inset-top,0px)) 30px 30px;
+    /* Un contenu plus haut que l'écran (écran compte avec le code affiché, petit
+       téléphone) débordait des DEUX côtés : le centrage flex rend alors le HAUT
+       inatteignable. `safe center` recentre seulement quand ça tient ; sinon il
+       aligne au début et le défilement fait le reste. Les navigateurs qui ne le
+       connaissent pas gardent la déclaration précédente. */
+    overflow-y:auto;justify-content:safe center}
   .finish.on{display:flex}
   .finish .big{font-family:var(--ar);font-size:80px;color:var(--gold)}
   .finish h2{font-size:26px;font-weight:900;margin:10px 0 26px}
@@ -958,6 +976,16 @@
 .ubar i{display:block;height:100%;background:var(--gold);border-radius:99px}
 .cbtn{display:block;width:100%;max-width:340px;margin:8px auto 0;background:var(--gold);color:#1a1410;
   border:none;border-radius:16px;padding:15px;font-family:var(--ui);font-weight:900;font-size:16px;cursor:pointer}
+.cbtn:disabled{filter:grayscale(.85);opacity:.45;cursor:not-allowed}
+/* Consentement RGPD : sans case cochée, aucun e-mail ne part (08/08) */
+.rgpd-l{display:flex;gap:9px;align-items:flex-start;margin:10px 0 2px;text-align:left;
+  font-family:var(--ui);font-size:12.5px;line-height:1.45;color:var(--muted);cursor:pointer}
+.rgpd-l input{margin-top:2px;width:17px;height:17px;flex:0 0 auto;accent-color:var(--gold);cursor:pointer}
+.rgpd-l a{color:var(--info);font-weight:700}
+/* Compte déjà existant : un PANNEAU, plus un toast fugace qu'on rate (08/08) */
+.known-box{border:2px solid var(--gold);background:rgba(220,144,46,.13);border-radius:14px;padding:12px 13px;
+  font-family:var(--ui);font-size:13px;line-height:1.45;color:var(--cream);margin-bottom:10px;text-align:left}
+.known-box b{color:var(--gold2)}
 .cempty{text-align:center;color:var(--muted);font-family:var(--ui);padding:40px 20px;font-size:14px}
 .cempty .ce-ic{font-size:40px;opacity:.6;margin-bottom:10px}
 /* ===== Révision : association de mots (paires) ===== */
@@ -1018,6 +1046,7 @@
     color:var(--gold2); padding:4px 12px 20px; letter-spacing:.02em;
   }
   .deskbrand .dl{ font-size:26px; line-height:1; }
+  .deskbrand .dlg{ width:26px; height:26px; border-radius:7px; object-fit:cover; border:1px solid var(--line); }
   .botnav .bn{
     flex:0 0 auto; font-size:15px; color:var(--muted); font-weight:800;
     display:flex; flex-direction:row; align-items:center; justify-content:flex-start;
@@ -1339,19 +1368,43 @@
   <div style="font-weight:900;color:var(--gold2);margin-top:6px"><span id="streakNum" style="font-size:46px">1</span> <span id="streakUnit" style="font-size:18px">jour</span></div>
   <div class="ears" id="streakEars"></div>
   <p class="verse" style="max-width:330px;font-size:23px;color:var(--gold2);margin:10px 0 4px;line-height:1.9">كَمَثَلِ حَبَّةٍ أَنۢبَتَتْ سَبْعَ سَنَابِلَ</p>
-  <p style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 22px">« … comme un grain qui fait pousser sept épis » — sourate Al-Baqara, 261</p>
+  <p style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 22px">« … comme un grain qui fait pousser sept épis »<br>sourate Al-Baqara, 261</p>
   <button class="cta" style="max-width:300px" onclick="streakContinue()">CONTINUER</button>
 </div>
 
 <div class="finish" id="obAccount">
   <div class="big" style="font-family:var(--ui)">👤</div>
   <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
-  <p style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
-  <div style="width:100%;max-width:320px">
-    <input id="obPrenom" type="text" autocomplete="given-name" placeholder="Ton prénom" oninput="onbPrenomInput(this.value)" style="width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px;margin-bottom:8px">
-  </div>
+  <p id="obQuote" style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
   <div id="obAccountCard" style="width:100%;max-width:320px"></div>
-  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obAccountClose()">Plus tard</button>
+  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obLaterWarn()">Plus tard</button>
+</div>
+
+<div class="finish" id="obLogin">
+  <svg viewBox="0 0 200 236" style="width:96px;height:auto" aria-hidden="true">
+    <defs><radialGradient id="obgl"><stop offset="0" stop-color="#FFD98A" stop-opacity=".95"/><stop offset="52%" stop-color="#F0A73C" stop-opacity=".33"/><stop offset="100%" stop-color="#F0A73C" stop-opacity="0"/></radialGradient></defs>
+    <ellipse cx="100" cy="126" rx="98" ry="102" fill="url(#obgl)"/>
+    <circle cx="100" cy="22" r="14" fill="none" stroke="#B9B2AC" stroke-width="7"/>
+    <rect x="92" y="32" width="16" height="18" rx="8" fill="#EFA63C"/>
+    <path d="M60 80 Q24 88 24 130 L24 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+    <path d="M140 80 Q176 88 176 130 L176 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+    <path d="M54 76 Q56 44 100 44 Q144 44 146 76 Z" fill="#EFA63C"/>
+    <ellipse cx="80" cy="60" rx="8" ry="11" fill="#FFD98A" opacity=".7" transform="rotate(-25 80 60)"/>
+    <rect x="48" y="74" width="104" height="13" rx="6.5" fill="#E39B2E"/>
+    <path d="M60 90 H140 Q148 134 134 172 H66 Q52 134 60 90 Z" fill="#F7EBC0"/>
+    <path d="M70 100 Q66 128 72 152" fill="none" stroke="#FFF8E0" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+    <ellipse cx="82" cy="120" rx="13" ry="16" fill="#fff"/><ellipse cx="118" cy="120" rx="13" ry="16" fill="#fff"/>
+    <ellipse cx="84" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/><ellipse cx="120" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/>
+    <circle cx="81" cy="117" r="2.8" fill="#fff"/><circle cx="117" cy="117" r="2.8" fill="#fff"/>
+    <path d="M88 142 Q100 152 112 142" fill="none" stroke="#E2622A" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M64 172 H136 L142 194 H58 Z" fill="#EFA63C"/>
+    <rect x="46" y="193" width="108" height="14" rx="7" fill="#E8A94F"/>
+    <rect x="70" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(12 79 203)"/>
+    <rect x="112" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(-12 121 203)"/>
+  </svg>
+  <h2 style="margin:10px 0 14px">Content de te revoir !</h2>
+  <div id="obLoginCard" style="width:100%;max-width:320px"></div>
+  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obLoginClose()">Retour</button>
 </div>
 
 <div class="sig-voile" id="sigVoile" onclick="sigFermer()"></div>
@@ -1369,7 +1422,7 @@
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
-  <div class="deskbrand"><span class="dl">🪔</span> ALAQ</div>
+  <div class="deskbrand"><img class="dlg" src="icon-192.png" alt=""> ALAQ</div>
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi">🏠</span><span class="bn-lab">Apprendre</span></button>
   <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi">📕</span><span class="bn-lab">Cours</span></button>
   <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi">🕋</span><span class="bn-lab">Réviser</span></button>
@@ -2168,10 +2221,29 @@ async function cloudSendCode(btn){
     }
     window._cloudEmail=em;
     const z=document.getElementById('cloudStep2'); if(z)z.style.display='block';
-    const k=document.getElementById('cloudKnown'); if(k)k.style.display=known?'block':'none';
+    cloudApplyVerdict(known,em);
+    const ci=document.getElementById('cloudCode'); if(ci)setTimeout(function(){try{ci.focus();}catch(_){}} ,120);
     toast(known?'Tu as déjà un compte — connecte-toi 🔑':'Code envoyé — regarde tes e-mails 📧');
   }catch(e){ toast('Envoi impossible — réessaie dans une minute'); }
   if(btn)btn.disabled=false;
+}
+/* Le verdict de la sonde s'AFFICHE au lieu de passer dans un toast de 2 s (Myriam a
+   refait tout le parcours sans le voir). Compte existant + écran d'inscription visible :
+   l'écran se TRANSFORME — titre « Tu as déjà un compte », citation et cases masquées,
+   il ne reste que l'e-mail et le code. Fonction séparée : le harnais la rejoue. */
+function cloudApplyVerdict(known,em){
+  const k=document.getElementById('cloudKnown'); if(k)k.style.display=known?'block':'none';
+  const nw=document.getElementById('cloudNew'); if(nw)nw.style.display=known?'none':'block';
+  const ec=document.getElementById('cloudMailEcho'); if(ec)ec.textContent=em||'';
+  const vb=document.getElementById('cloudVerifyBtn');
+  if(vb)vb.textContent=known?'🔑 Me reconnecter':'✅ Valider mon e-mail';
+  const oa=document.getElementById('obAccount');
+  if(known&&oa&&oa.classList.contains('on')){
+    const t=document.getElementById('obAccountTitle'); if(t)t.textContent='Tu as déjà un compte';
+    const qd=document.getElementById('obQuote'); if(qd)qd.style.display='none';
+    oa.querySelectorAll('.rgpd-l').forEach(function(l){l.style.display='none';});
+    if(k)k.style.display='none';   // le titre suffit, pas de panneau en plus
+  }
 }
 async function cloudVerify(){
   const code=((document.getElementById('cloudCode')||{}).value||'').trim();
@@ -2181,9 +2253,14 @@ async function cloudVerify(){
     if(r&&r.error)throw r.error;
     CLOUD.user=r.data&&r.data.user;
   }catch(e){ toast('Code invalide ou expiré'); return; }
+  var _mk=null; try{var _me=document.getElementById('cloudMkt'); if(_me)_mk=_me.checked?1:0;}catch(_){}
   toast('Connectée, ماشاء الله ✨');
   try{ await cloudPull(); }catch(_){}          // une erreur ici ne doit PAS faire croire que le code est faux
+  if(_mk!==null){ S.mktOk=_mk; S.mktTs=Date.now(); save(); }  // consentement newsletter, HORODATÉ (preuve RGPD)
   try{ renderProg(); }catch(_){}
+  const lg=document.getElementById('obLogin');    // « J'ai déjà un compte » : on rejoint l'accueil
+  if(lg&&lg.classList.contains('on')){ lg.classList.remove('on'); var lc=document.getElementById('obLoginCard'); if(lc)lc.innerHTML='';
+    try{showTab('home');}catch(_){} try{maybeGhufranPrompt();}catch(_){} return; }
   const ov=document.getElementById('obAccount');  // dans l'onboarding : fermer l'écran compte et rejoindre l'accueil
   if(ov&&ov.classList.contains('on')){ ov.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; try{returnFromPlayer();}catch(_){ try{renderHome();}catch(_){}} }
 }
@@ -2198,19 +2275,41 @@ async function cloudLogout(){
   try{ localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){} // appareil marqué « vierge » : au prochain login, le nuage fait foi
   location.reload();
 }
-function cloudCardHTML(){
+function cloudCardHTML(mode){
   const inp='width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px';
   if(!SB)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0">Connexion indisponible hors ligne — ta progression reste enregistrée sur cet appareil.</p>';
   if(CLOUD.user)return '<div class="acct" style="border:none;padding:4px 0"><span class="acct-dot"></span><span class="acct-mail">'+(CLOUD.user.email||'')+'</span>'+
     '<button class="acct-out" onclick="cloudLogout()">se déconnecter</button></div>'; // sobre : point de présence + e-mail, rien d'autre (Myriam 13/07)
-  return '<input id="cloudEmail" type="email" autocomplete="email" placeholder="Ton e-mail" style="'+inp+'">'+
-    '<button class="cbtn" style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
+  /* mode 'login' = « J'ai déjà un compte » : le consentement a déjà été donné à
+     l'inscription, la case RGPD n'a donc pas à être redemandée pour se reconnecter. */
+  return '<input id="cloudEmail" type="email" autocomplete="email" inputmode="email" placeholder="Ton e-mail" oninput="cloudMailInput()" style="'+inp+'">'+
+    (mode==='login'?'':
+      '<label class="rgpd-l"><input type="checkbox" id="cloudRgpd" onchange="cloudMailInput()">'+
+      '<span>J\'accepte que mon e-mail serve à créer mon compte et à sauvegarder ma progression. '+
+      '<a href="confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a></span></label>'+
+      '<label class="rgpd-l"><input type="checkbox" id="cloudMkt">'+
+      '<span>Je veux recevoir les conseils d\'apprentissage et les nouveautés d\'ALAQ <i style="font-style:normal;opacity:.75">(facultatif)</i></span></label>')+
+    '<button class="cbtn" id="cloudSendBtn" disabled style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
     '<div id="cloudStep2" style="display:none;margin-top:10px">'+
-      '<p id="cloudKnown" style="display:none;color:var(--gold2);font-family:var(--ui);font-size:13px;font-weight:800;margin:0 0 8px;line-height:1.35">Tu as déjà un compte — entre le code pour te connecter.</p>'+
-      '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" style="'+inp+';letter-spacing:.2em;text-align:center">'+
-      '<button class="cbtn" style="margin-top:8px" onclick="cloudVerify()">✅ Me connecter</button>'+
+      '<div id="cloudKnown" class="known-box" style="display:none">🔑 <b>Tu as déjà un compte</b> — entre le code reçu.</div>'+
+      '<p id="cloudNew" style="display:none;color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 9px;line-height:1.45">Code envoyé à <b id="cloudMailEcho" style="color:var(--cream)"></b></p>'+
+      '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" oninput="cloudCodeInput()" style="'+inp+';letter-spacing:.2em;text-align:center">'+
+      '<button class="cbtn" id="cloudVerifyBtn" disabled style="margin-top:8px" onclick="cloudVerify()">✅ Valider mon e-mail</button>'+
       '<button onclick="cloudSendCode(this)" style="margin-top:8px;background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:13px;text-decoration:underline;cursor:pointer;width:100%">Renvoyer un code</button>'+
     '</div>';
+}
+/* Le bouton d'envoi reste GRIS tant que l'adresse n'est pas plausible ET que le
+   consentement n'est pas donné : le refus doit se voir AVANT le clic, pas après. */
+function cloudMailInput(){
+  var e=document.getElementById('cloudEmail'), b=document.getElementById('cloudSendBtn');
+  if(!b)return;
+  var ck=document.getElementById('cloudRgpd');
+  var ok=/^\S+@\S+\.\S+$/.test(((e||{}).value||'').trim()) && (!ck||ck.checked);
+  b.disabled=!ok;
+}
+function cloudCodeInput(){
+  var c=document.getElementById('cloudCode'), b=document.getElementById('cloudVerifyBtn');
+  if(b)b.disabled=(((c||{}).value||'').replace(/\D/g,'').length<6);
 }
 let S=load();
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
@@ -2282,6 +2381,7 @@ function onbStart(){ ONB={step:0,data:{}}; document.getElementById('onb').classL
 function onbShow(){
   var all=document.querySelectorAll('#onb [data-obs]');
   for(var i=0;i<all.length;i++)all[i].classList.toggle('on', +all[i].getAttribute('data-obs')===ONB.step);
+  if(ONB.step===1){ var pi=document.getElementById('obPrenomOnb'); if(pi&&pi.value!==(S.prenom||''))pi.value=S.prenom||''; }
   var q=(ONB.step>=1&&ONB.step<=6);
   document.getElementById('onbTop').style.visibility=q?'visible':'hidden';
   if(q)document.getElementById('onbFill').style.width=Math.round(ONB.step/6*100)+'%';
@@ -2297,9 +2397,45 @@ function onbExistingAccount(){ // élève existante sur un appareil neuf : le nu
   S.onboarded=1; S.tutHome=1; S._fresh=1; save();
   document.getElementById('onb').classList.remove('on');
   if(CLOUD.user){ cloudPull(); showTab('home'); toast('Bon retour ✨'); return; } // session encore vivante : AUCUNE reconnexion à saisir
-  showTab('prog'); setTimeout(function(){try{toast('Connecte-toi ci-dessous ✨');}catch(e){}},300);
+  obLoginOpen();
 }
+/* ===== Se reconnecter : un ÉCRAN, pas un dépôt sur l'onglet Progrès (08/08) =====
+   Avant, ce bouton menait à Progrès, où l'élève voyait « Choisis ta kunya » et un
+   champ e-mail : elle croyait devoir se réinscrire. Ici, e-mail puis code, rien d'autre.
+   Mode 'login' : pas de case RGPD — le consentement date de l'inscription. */
+function obLoginOpen(){
+  /* Une seule carte de connexion vivante à la fois : sinon deux #cloudEmail (et deux
+     #cloudRgpd) coexistent dans le DOM et getElementById rend le MAUVAIS — la case
+     RGPD de l'écran compte réapparaîtrait à la connexion. Attrapé par le harnais. */
+  var mien=document.getElementById('obLoginCard');
+  ['cloudEmail','cloudRgpd','cloudCode','cloudStep2','cloudSendBtn','cloudVerifyBtn','cloudKnown','cloudNew','cloudMailEcho']
+    .forEach(function(id){ var o=document.getElementById(id); if(o&&(!mien||!mien.contains(o))){ var c=o.closest('#obAccountCard,.ccard'); if(c)c.innerHTML=''; } });
+  var c=document.getElementById('obLoginCard'); if(c)c.innerHTML=cloudCardHTML('login');
+  document.getElementById('obLogin').classList.add('on');
+  var i=document.getElementById('cloudEmail'); if(i)setTimeout(function(){try{i.focus();}catch(_){}} ,120);
+}
+function obLoginClose(){
+  document.getElementById('obLogin').classList.remove('on');
+  var c=document.getElementById('obLoginCard'); if(c)c.innerHTML=''; // pas de #cloudEmail en double avec Progrès
+  if(!S.onboarded){ try{onbStart();}catch(_){} } else { try{showTab('home');}catch(_){} }
+}
+/* « Plus tard » : dire ce qu'on perd. Sans compte, la progression ne vit que dans
+   le localStorage de CET appareil — et cloudLogout() le vide (voir sa note). */
+function obLaterWarn(){
+  var m=document.getElementById('laterModal');
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='laterModal'; document.body.appendChild(m); }
+  m.innerHTML='<div class="sm-box" style="max-width:330px;text-align:center">'+
+    '<div style="font-size:44px">⚠️</div>'+
+    '<h2 style="margin:8px 0 18px;font-size:21px">Tu perdras ta progression</h2>'+
+    '<button class="cbtn" onclick="obLaterCancel()">CRÉER MON COMPTE</button>'+
+    '<button class="cbtn" style="background:none;color:var(--cream);border:2px solid var(--line);margin-top:8px" onclick="obLaterConfirm()">Continuer sans compte</button>'+
+    '</div>';
+  m.classList.add('on');
+}
+function obLaterCancel(){ var m=document.getElementById('laterModal'); if(m)m.classList.remove('on'); }
+function obLaterConfirm(){ obLaterCancel(); obAccountClose(); }
 function onbLaunchLesson(){
+  var pi=document.getElementById('obPrenomOnb'); if(pi)S.prenom=(pi.value||'').trim();
   S.onb={source:ONB.data.source||'', intention:ONB.data.intention||[], niveau:ONB.data.niveau||'', objectif:ONB.data.objectif||'', ts:Date.now()};
   S.onboarded=1; S.tutHome=1; save();
   document.getElementById('onb').classList.remove('on');
@@ -2370,7 +2506,7 @@ function savePrenom(){
 }
 function showObAccount(){
   var card=document.getElementById('obAccountCard'); if(card)card.innerHTML=cloudCardHTML();
-  var pn=document.getElementById('obPrenom'); if(pn)pn.value=S.prenom||'';
+  var q=document.getElementById('obQuote'); if(q)q.style.display='';
   var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle();
   document.getElementById('obAccount').classList.add('on');
 }
@@ -2639,30 +2775,55 @@ function bumpConstance(kind){
   save();
 }
 /* Ghufrān غفران : gel de série activé par l’élève (2/mois, jamais à vendre) */
+const GHUF_MAX_JOURS=2; // au-delà, aucun rattrapage : c'est la régularité qui est récompensée (Myriam 08/08)
 function maybeGhufranPrompt(){
   if(!(S.pendingMiss>0)) return;
   if(document.getElementById('ghufModal')) return;
   var m=document.createElement('div'); m.className='finish on'; m.id='ghufModal';
-  var can=Math.min(S.pendingMiss,S.ghufLeft||0);
+  /* Règle du 08/08 : UN Ghufrān couvre UNE absence entière (1 ou 2 jours), pas un par
+     jour. 2 par mois. Plus de 2 jours, ou plus de Ghufrān : la série repart à zéro.
+     Un titre et des boutons, AUCUN texte — la définition vit dans Progrès (🕊️). */
+  var perdu = S.pendingMiss>GHUF_MAX_JOURS || (S.ghufLeft||0)<1;
+  if(perdu){
+    m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
+      '<div style="font-size:52px">\ud83c\udf31</div>'+
+      '<h2 style="margin:6px 0 18px">Ta s\u00e9rie repart \u00e0 z\u00e9ro</h2>'+
+      '<button class="cbtn" onclick="acceptMiss()">JE REPRENDS AUJOURD\u2019HUI</button>'+
+      '</div>';
+    document.body.appendChild(m); return;
+  }
   m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
-    '<div style="font-size:52px">🕊️</div>'+
-    '<h2 style="margin:6px 0 6px">Tu as manqué '+S.pendingMiss+' jour'+(S.pendingMiss>1?'s':'')+'</h2>'+
-    '<p class="succ-desc" style="margin-top:0">Un <b style="color:var(--gold2)">Ghufrān</b> غفران préserve ta série. Il t’en reste <b style="color:var(--gold2)">'+(S.ghufLeft||0)+'</b> ce mois.</p>'+
-    (can>0?'<button class="cbtn" onclick="useGhufran()">🕊️ Utiliser '+can+' Ghufrān</button>':'')+
-    '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line);margin-top:8px" onclick="acceptMiss()">Non, j’assume</button>'+
+    '<div style="font-size:52px">\ud83d\udd4a\ufe0f</div>'+
+    '<h2 style="margin:6px 0 18px">Tu as manqu\u00e9 '+S.pendingMiss+' jour'+(S.pendingMiss>1?'s':'')+'</h2>'+
+    '<button class="cbtn" onclick="useGhufran()">\ud83d\udd4a\ufe0f Utiliser un Ghufr\u0101n</button>'+
+    '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line);margin-top:8px" onclick="acceptMiss()">Non, j\u2019assume</button>'+
     '</div>';
   document.body.appendChild(m);
+}
+/* La tuile 🕊️ de Progrès explique la règle — l'écran d'absence, lui, reste muet (08/08) */
+function showGhufranInfo(){
+  var m=document.getElementById('ghufInfoModal');
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='ghufInfoModal'; document.body.appendChild(m); }
+  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
+    '<button class="sm-close" onclick="document.getElementById(\'ghufInfoModal\').classList.remove(\'on\')" aria-label="Fermer">✕</button>'+
+    '<div style="font-size:44px">\ud83d\udd4a\ufe0f</div>'+
+    '<h2 style="margin:6px 0 8px">Le Ghufr\u0101n <span class="arw" style="font-size:22px">\u063a\u0641\u0631\u0627\u0646</span></h2>'+
+    '<p class="succ-desc" style="margin:0 0 6px">Une absence pardonn\u00e9e : ta s\u00e9rie continue comme si tu \u00e9tais venue.</p>'+
+    '<p class="succ-desc" style="margin:0">\u2022 2 par mois<br>\u2022 pour une absence de 1 ou 2 jours<br>\u2022 au-del\u00e0, la s\u00e9rie repart \u00e0 z\u00e9ro</p>'+
+    '<p style="color:var(--muted);font-size:12px;font-style:italic;margin:12px 0 0">C\u2019est la r\u00e9gularit\u00e9 qui est r\u00e9compens\u00e9e.</p>'+
+    '</div>';
+  m.classList.add('on');
 }
 function closeGhufran(){ var m=document.getElementById('ghufModal'); if(m)m.remove(); }
 function _progVisible(){ var v=document.getElementById('view-prog'); return v && v.offsetParent!==null; }
 function useGhufran(){
   var m=S.pendingMiss||0; if(m<=0){ closeGhufran(); return; }
-  var use=Math.min(m,S.ghufLeft||0);
-  if(use>0){ S.ghufLeft-=use; S.pendingMiss-=use;
-    S.lastDay=yesterday(); }   // pont : série préservée
-  if(S.pendingMiss>0){ S.consScore=Math.max(0,(S.consScore||0)-3*S.pendingMiss); S.streak=0; S.pendingMiss=0; }
+  if(m>GHUF_MAX_JOURS||(S.ghufLeft||0)<1){ acceptMiss(); return; }  // le plafond est une RÈGLE, pas un affichage
+  S.ghufLeft-=1;               // UN Ghufrān pardonne UNE absence entière (Myriam 08/08)
+  S.pendingMiss=0;
+  S.lastDay=yesterday();       // pont : la série continue comme si elle était venue
   save(); closeGhufran();
-  toast('🕊️ Ghufrān utilisé — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
+  toast('\ud83d\udd4a\ufe0f Ghufr\u0101n utilis\u00e9 — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
   if(_progVisible())renderProg();
 }
 function acceptMiss(){
@@ -2715,7 +2876,31 @@ function refreshStats(){
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-const BUILD='lecon1-v4 · la récompense retrouvée — purge du vieux أَحْسَنْتِ (13/07) que le cache MEDIA resservait à chaque bonne réponse · sw v82';
+/* Un disque touché n'ouvre plus la leçon directement : une popup annonce le titre et
+   laisse choisir (COMMENCER / REFAIRE) — même geste que Duolingo (Myriam 08/08).
+   Re-toucher le même disque referme la popup ; toucher ailleurs aussi. */
+function discTipClose(){
+  var t=document.querySelector('.disc-tip');
+  if(t){ var n=t._node; t.remove(); if(n)n.style.zIndex=''; }
+}
+function discTip(node,u,i,label,done){
+  var old=document.querySelector('.disc-tip'), same=(old&&old._node===node);
+  discTipClose(); if(same)return;
+  var tip=document.createElement('div'); tip.className='disc-tip'; tip._node=node;
+  tip.innerHTML='<div class="dt-t"></div><button class="dt-go">'+(done?'REFAIRE':'COMMENCER')+'</button>';
+  tip.querySelector('.dt-t').innerHTML=label;
+  tip.querySelector('.dt-go').onclick=function(ev){ev.stopPropagation();discTipClose();startDisque(u,i);};
+  tip.addEventListener('click',function(ev){ev.stopPropagation();});
+  /* les .node sont positionnés : les disques SUIVANTS se peignent au-dessus de la
+     popup sans ceci (vu à la capture du 08/08) — le nœud ouvert passe devant */
+  node.style.zIndex='30';
+  node.querySelector('.bwrap').appendChild(tip);
+}
+document.addEventListener('click',function(e){
+  var t=document.querySelector('.disc-tip');
+  if(t&&!e.target.closest('.disc-tip')&&!e.target.closest('.bubble'))discTipClose();
+});
+const BUILD='inscription-v2b · écrans allégés, newsletter opt-in, Ghufrān 1 par absence, popup de leçon, logo au rail · sw v84';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2780,7 +2965,7 @@ function renderHome(){
             '<span class="bi"'+(unlocked?'':' style="opacity:.4;filter:grayscale(1)"')+'>'+(d.img?'<img class="bimg" src="'+d.img+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span>'+
             (done?'<span class="check">\u2713</span>':'')+
           '</button></div>';
-        if(unlocked)node.querySelector('.bubble').onclick=()=>startDisque(u,i);
+        if(unlocked)node.querySelector('.bubble').onclick=(ev)=>{ev.stopPropagation();discTip(node,u,i,discLabel(d,U),done);};
       } else if(U.ready && i===0){
         // 1re leçon d'une unité future : « AVANCER ICI ? » (façon Duolingo) — test-out des unités précédentes
         node.className='node jump';
@@ -5387,7 +5572,7 @@ function renderProg(){
   h+='<div class="pgrid">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
      '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
-     '<div class="pstat"><div class="pv">'+(S.ghufLeft||0)+'</div><div class="pl">🕊️ ghufrān</div></div></div>';
+     '<div class="pstat" role="button" tabindex="0" style="cursor:pointer" onclick="showGhufranInfo()"><div class="pv">'+(S.ghufLeft||0)+'</div><div class="pl">🕊️ ghufrān</div></div></div>';
   h+='<div class="ccard"><div class="ctt"><h3>🏆 Succès</h3></div><div class="sgrid">'+
      BADGES.map(function(b){var got=!!(S.badges&&S.badges[b[0]]);
        return '<button class="scell'+(got?'':' locked')+'" onclick="showSucces(\''+b[0]+'\')" aria-label="'+b[2].replace(/"/g,'')+'">'+
@@ -6327,7 +6512,12 @@ document.addEventListener('DOMContentLoaded',function(){
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){} // demande au navigateur de NE PAS purger le stockage (connexion + progression)
 refreshStats();
 showTab('home');
-if(!S.onboarded){ setTimeout(function(){try{onbStart();}catch(e){}},120); } // 1er lancement : parcours de bienvenue
+/* alaq.fr ▸ « J'ai déjà un compte » arrive sur app.alaq.fr#connexion : l'écran de
+   connexion s'ouvre directement, sans traverser l'accueil ni l'onboarding. */
+if(location.hash==='#connexion'){
+  try{history.replaceState(null,'',location.pathname);}catch(e){}
+  setTimeout(function(){ try{ if(CLOUD.user){showTab('home');toast('Bon retour ✨');} else obLoginOpen(); }catch(e){} },200);
+} else if(!S.onboarded){ setTimeout(function(){try{onbStart();}catch(e){}},120); } // 1er lancement : parcours de bienvenue
 </script>
 <script>
 /* MODE ORDINATEUR — colonne droite : rang, série/cœurs, nom d'Allah, parole du jour, révisions.
