@@ -1255,9 +1255,15 @@ body.ciel #skyWrap{opacity:1}
 #skyMoon{position:absolute;top:104px;right:26px;width:26px;height:26px;opacity:0;transition:opacity .8s;
   filter:drop-shadow(0 0 10px rgba(239,230,207,.35))}
 /* les collines se peignent APRÈS le soleil : il se lève derrière elles et s'y couche */
-#skyDunes{position:absolute;left:0;right:0;bottom:0;width:100%;height:190px;display:block}
+/* ⚠️ à bottom:0 la crête des dunes tombait DERRIÈRE la barre du bas (62 px +
+   safe-area) : sur iPhone on ne voyait plus que le ciel, et la caravane posée
+   à une hauteur fixe semblait flotter. Les dunes remontent, et la caravane
+   n'est plus posée « à peu près » mais SUR la crête, mesurée. */
+#skyDunes{position:absolute;left:0;right:0;bottom:56px;width:100%;
+  height:min(240px,30vh);display:block}
 #skyDunes path{transition:none}
 #skyCarav{position:absolute;width:46px;height:auto;animation:cmarche 1.9s ease-in-out infinite}
+#skyCarav,#skyCamp,#skyFire{bottom:auto}
 #skyCarav.arrive{animation:none}
 @keyframes cmarche{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
 #skyFire{position:absolute;right:-24px;bottom:96px;width:170px;height:112px;opacity:0;
@@ -3139,7 +3145,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='ciel-v1 · la journée de marche : le ciel suit l\u2019avancée, pièces en ellipse, barre du bas en couleur · sw v102';
+const BUILD='ciel-v1b · les dunes remontent au-dessus de la barre du bas, la caravane est posée sur la crête mesurée · sw v103';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -7185,6 +7191,42 @@ function ombre(F){
   R.setProperty('--ciel-shb',b.toFixed(1)+'px'); R.setProperty('--ciel-sha',a.toFixed(2));
 }
 
+/* La crête des dunes, mesurée sur le tracé réel plutôt que devinée : on échantillonne
+   le bord supérieur de d1 et on interpole. Ainsi la caravane reste posée au sol quelle
+   que soit la taille de l'écran, l'orientation ou la hauteur de la barre du bas. */
+var CRETE=null;
+function tableCrete(){
+  if(CRETE || !D1.getTotalLength) return CRETE;
+  var L=D1.getTotalLength(), pts=[], p, prev=-1, k;
+  for(k=0;k<=140;k++){
+    p=D1.getPointAtLength(L*0.55*k/140);
+    if(p.x<=prev) break;                 // on s'arrête dès que le tracé redescend
+    prev=p.x; pts.push([p.x,p.y]);
+  }
+  CRETE = pts.length>2 ? pts : null;
+  return CRETE;
+}
+function creteY(xv){                      // y en unités de viewBox (0..110)
+  var pts=tableCrete(); if(!pts) return 70;
+  if(xv<=pts[0][0]) return pts[0][1];
+  var k; for(k=1;k<pts.length;k++){
+    if(xv<=pts[k][0]){
+      var f=(xv-pts[k-1][0])/(pts[k][0]-pts[k-1][0]||1);
+      return pts[k-1][1]+(pts[k][1]-pts[k-1][1])*f;
+    }
+  }
+  return pts[pts.length-1][1];
+}
+function poserSurLaCrete(el, xPct, enfonce){
+  /* ⚠️ on mesure le <svg>, pas le <path> : la boîte d'un tracé commence à son
+     encre (ici la crête, y=32) et non en haut du viewBox — l'échelle serait fausse. */
+  var sv=document.getElementById('skyDunes'); if(!sv) return;
+  var r=sv.getBoundingClientRect(); if(!r.height) return;
+  var h=el.offsetHeight || el.naturalHeight || 30;   // l'image peut ne pas être chargée
+  var y=r.top + creteY(xPct/100*390)/110*r.height;
+  el.style.top=(y - h + (enfonce||0))+'px';
+}
+
 var tCourant=-1;
 function peindre(t){
   if(Math.abs(t-tCourant)<0.004) return;
@@ -7200,9 +7242,12 @@ function peindre(t){
   MO.style.opacity=F.mn; FI.style.opacity=F.fi; CA.style.opacity=F.fi;
   D1.style.fill=rs(F.du[0]); D2.style.fill=rs(F.du[1]);
   var av=Math.min(t,CIEL.length-1)/(CIEL.length-1);
-  CV.style.left=(4+av*76)+'%';
-  CV.style.bottom=(104+av*30)+'px';
+  var xc=4+av*76;
+  CV.style.left=xc+'%';
+  poserSurLaCrete(CV, xc+5, 2);          // 5 % : le milieu de la bête, 2 px d'enfoncement
   CV.classList.toggle('arrive', av>=0.998);
+  poserSurLaCrete(CA, 88, 4);
+  poserSurLaCrete(FI, 88, -34);
   ombre(F);
   var R=document.documentElement.style;
   R.setProperty('--ciel-ink',rs(F.ink));
@@ -7246,7 +7291,7 @@ window.addEventListener('scroll', function(){
   if(attente) return; attente=true;
   requestAnimationFrame(function(){ cielSync(); attente=false; });
 }, {passive:true});
-window.addEventListener('resize', cielSync);
+window.addEventListener('resize', function(){ CRETE=null; tCourant=-1; cielSync(); });
 
 /* greffes : on enveloppe sans réécrire. Les appels internes de l'app passent par
    la portée globale, donc réassigner window.X suffit. */
@@ -7257,6 +7302,7 @@ window.addEventListener('resize', cielSync);
 });
 
 window.__ciel={sync:cielSync, position:position, accorder:accorder};  /* trappe de test */
+if(CV) CV.addEventListener('load', function(){ tCourant=-1; cielSync(); });
 cielSync();
 setTimeout(cielSync,300);
 })();
