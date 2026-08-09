@@ -6,16 +6,25 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v105-2026-08-09p';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v106-2026-08-10a';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
    chaque appareil. Ici ils se téléchargent une seule fois dans la vie de l'appareil. */
 const MEDIA='alaq-medias';
+/* LES IMAGES : un cache versionné À PART (10/08). Contrairement aux mp3, une icône
+   RETOUCHÉE garde souvent son nom — dans MEDIA elle restait alors périmée à vie.
+   Ici : une image change → IMGV s'incrémente → à l'activation l'ancien cache
+   d'images est jeté entier et tout se retélécharge frais (quelques Mo d'icônes,
+   rien à voir avec les 8 Mo d'audio qui ne bougent jamais). Plus de renommage
+   obligatoire, plus de liste de purge à tenir pour les images. */
+const IMGV=1;
+const IMGCACHE='alaq-images-v'+IMGV;
 const CORE=['.','index.html','confidentialite.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-tb-lanterne-v1.png",
 "images-app-alaq/icone-porte-v1.png",
+"images-app-alaq/icone-main-glisse-v2.png",
 "images-app-alaq/icone-ciel-dromadaire-v1.png",
 "images-app-alaq/icone-tb-epi-v1.png",
 "images-app-alaq/icone-tb-coeur-v1.png",
@@ -546,15 +555,24 @@ async function enFile(liste,c,n){
 }
 async function precacheLourd(){
   if(_preFait)return; _preFait=true;
-  const c=await caches.open(MEDIA);
-  await enFile(IMAGES.concat(AUDIOS),c,6);
+  await enFile(IMAGES,await caches.open(IMGCACHE),6); // les images dans LEUR cache versionné
+  await enFile(AUDIOS,await caches.open(MEDIA),6);
 }
 self.addEventListener('message',e=>{ if(e.data==='precache')e.waitUntil(precacheLourd()); });
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
     const keys=await caches.keys();
-    // MEDIA survit aux livraisons : c'est tout l'objet de la séparation
-    await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA).map(k=>caches.delete(k)));
+    // MEDIA survit aux livraisons ; IMGCACHE survit tant qu'IMGV ne bouge pas
+    await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA&&k!==IMGCACHE).map(k=>caches.delete(k)));
+    // ménage UNE fois : les images historiquement rangées dans MEDIA (jamais purgé)
+    // sont celles qui restaient périmées à vie sur les appareils — on les en sort,
+    // elles vivent désormais dans IMGCACHE.
+    try{
+      const md=await caches.open(MEDIA);
+      const ks=await md.keys();
+      await Promise.all(ks.filter(rq=>/\.(png|jpe?g|webp|gif)$/.test(new URL(rq.url).pathname))
+        .map(rq=>md.delete(rq)));
+    }catch(_){ }
     // ⚠️ MEDIA n'est jamais purgé — donc un fichier REMPLACÉ sous le même nom y reste
     // périmé pour toujours. Purge CIBLÉE de TOUS les remplacés (liste vérifiée au blob git
     // le 08/08 : 7 fichiers). Les deux sfx du 05/08 manquaient — c'est pour ça que
@@ -594,8 +612,11 @@ self.addEventListener('fetch',e=>{
       if(hit)return hit;
       try{
         const r=await fetch(e.request);
-        // sons, polices, icônes, récitation : tout ça va dans MEDIA, jamais dans le cache versionné
-        if(r&&(r.ok||r.type==='opaque')){const c=await caches.open(MEDIA);c.put(e.request,r.clone());}
+        // les IMAGES vont dans leur cache versionné ; sons, polices, récitation dans MEDIA
+        if(r&&(r.ok||r.type==='opaque')){
+          const img=/\.(png|jpe?g|webp|gif)$/.test(url.pathname);
+          const c=await caches.open(img?IMGCACHE:MEDIA);c.put(e.request,r.clone());
+        }
         return r;
       }catch(_){return Response.error();}
     })());
