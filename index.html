@@ -1238,16 +1238,138 @@
   .qpin .qrow{background:transparent;border:none;padding:0;margin:0}
   /* la voix choisie est épinglée en haut : elle ne se répète pas dans la liste */
   .qlist .qrow.on{display:none}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CIEL-V1 — la journée de marche.  Tout ce bloc est ajouté EN FIN de feuille :
+   il surcharge sans rien réécrire, donc il se retire d'un seul coup si besoin.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ---- le décor, fixe derrière l'app, visible sur le seul accueil ---- */
+#skyWrap{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .45s ease}
+body.ciel #skyWrap{opacity:1}
+#skyBg{position:absolute;inset:0}
+#skyStars{position:absolute;left:0;right:0;top:0;bottom:24%;transition:opacity .8s}
+#skyStars i{position:absolute;border-radius:50%;background:#EFE6D2;animation:ctw 3.4s ease-in-out infinite}
+@keyframes ctw{0%,100%{opacity:.95}50%{opacity:.25}}
+#skySun{position:absolute;transform:translate(-50%,-50%);border-radius:50%}
+#skyMoon{position:absolute;top:104px;right:26px;width:26px;height:26px;opacity:0;transition:opacity .8s;
+  filter:drop-shadow(0 0 10px rgba(239,230,207,.35))}
+/* les collines se peignent APRÈS le soleil : il se lève derrière elles et s'y couche */
+#skyDunes{position:absolute;left:0;right:0;bottom:0;width:100%;height:190px;display:block}
+#skyDunes path{transition:none}
+#skyCarav{position:absolute;width:46px;height:auto;animation:cmarche 1.9s ease-in-out infinite}
+#skyCarav.arrive{animation:none}
+@keyframes cmarche{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+#skyFire{position:absolute;right:-24px;bottom:96px;width:170px;height:112px;opacity:0;
+  background:radial-gradient(52% 62% at 50% 100%,rgba(235,140,66,.5),rgba(235,140,66,0) 72%)}
+#skyCamp{position:absolute;right:26px;bottom:124px;width:58px;height:49px;opacity:0}
+#skyCamp .fl{transform-origin:60px 86px}
+#skyCamp .f1{animation:cfl1 1.15s ease-in-out infinite}
+#skyCamp .f2{animation:cfl2 .78s ease-in-out infinite}
+#skyCamp .f3{animation:cfl3 .52s ease-in-out infinite}
+@keyframes cfl1{0%,100%{transform:scale(1,1) rotate(0)}30%{transform:scale(.93,1.09) rotate(-2.5deg)}
+  65%{transform:scale(1.07,.94) rotate(2deg)}}
+@keyframes cfl2{0%,100%{transform:scale(1,1) rotate(1.2deg)}45%{transform:scale(1.09,.9) rotate(-3deg)}}
+@keyframes cfl3{0%,100%{transform:scale(1,.95)}50%{transform:scale(.88,1.12)}}
+#skyCamp .braise{animation:cbraise 1.6s ease-in-out infinite}
+@keyframes cbraise{0%,100%{opacity:.45}50%{opacity:.9}}
+/* le contenu passe DEVANT le décor */
+body.ciel .wrap{position:relative;z-index:1}
+/* la barre du haut est transparente : sans ce voile aux couleurs de l'heure,
+   les chiffres deviennent illisibles sur le ciel clair de midi */
+body.ciel .topbar{background:linear-gradient(180deg,var(--ciel-scrim) 0%,var(--ciel-scrim) 64%,transparent 100%)}
+body.ciel .topbar .stats,body.ciel .topbar .stat{color:var(--ciel-ink)}
+/* ⚠️ renderHome() pose --accent en style INLINE (sec.style.setProperty) : seul
+   !important peut le couvrir. Les 7 accents arc-en-ciel cèdent la place à la
+   lumière de l'heure — à 12 unités, le modulo 7 les ferait de toute façon se répéter. */
+body.ciel .unit-sec{--accent:var(--gold2) !important}
+body.ciel .unit-head{--accent:var(--gold2) !important}
+body.ciel .unit-sep{color:var(--ciel-soft)}
+body.ciel .unit-sep::before,body.ciel .unit-sep::after{background:var(--ciel-soft);opacity:.5}
+.tbic{height:19px;width:auto;display:block;object-fit:contain}
+
+/* ---- les pièces : une ELLIPSE de rapport 1,23, comme celles de Duolingo ---- */
+.bwrap{width:80px;height:65px}
+.bubble{width:80px;height:65px;position:relative;overflow:hidden;
+  transition:box-shadow .16s linear}
+/* le reflet du dessus : c'est lui, plus que la forme, qui fait lire le volume */
+.bubble::before{content:'';position:absolute;left:10%;right:10%;top:5%;height:44%;border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.06) 62%,rgba(255,255,255,0));
+  pointer-events:none;z-index:2}
+.locked .bubble::before{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 70%)}
+.bimg{width:40px;height:40px;position:relative;z-index:1}
+.path{gap:30px}
+/* deux ombres distinctes : l'ÉPAISSEUR de la pièce (fixe) et l'OMBRE PORTÉE par
+   le soleil (mobile). Les confondre ferait basculer la pièce. */
+.done .bubble{box-shadow:0 8px 0 var(--accent,var(--gold-d)),
+  var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22))}
+.current .bubble{box-shadow:0 8px 0 var(--gold-d),0 0 0 5px color-mix(in srgb,var(--accent,var(--gold2)) 42%,transparent),
+  var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22))}
+.locked .bubble{box-shadow:0 8px 0 #2c2521,
+  var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22))}
+.jump .bubble{box-shadow:0 8px 0 color-mix(in srgb,var(--accent,var(--gold)) 45%,#000),
+  var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22))}
+/* un halo CONIQUE tourne mal sur une ellipse : il y accélère dans les petits
+   rayons. On pulse — l'onde épouse n'importe quelle forme. */
+.current .ring{inset:-7px;border:2.5px solid var(--accent,#f4d089);border-radius:50%;
+  background:none;-webkit-mask:none;mask:none;animation:cpulse 2.3s cubic-bezier(.2,.6,.3,1) infinite}
+@keyframes cpulse{0%{transform:scale(.96);opacity:.9}65%{transform:scale(1.26);opacity:0}
+  100%{transform:scale(1.26);opacity:0}}
+
+/* ---- la barre du bas : les icônes gardent LEUR couleur ---- */
+/* l'onglet actif est désigné par une pastille et un trait — des repères de forme,
+   qui survivent au daltonisme et au plein soleil, contrairement à une désaturation */
+.bn .bni{filter:none;opacity:.72;transition:opacity .18s ease,transform .18s ease}
+.bn.active .bni{opacity:1;transform:translateY(-1px) scale(1.06)}
+.botnav .bn .bi{position:relative;opacity:1}
+.botnav .bn.active .bi{background:rgba(220,144,46,.20);box-shadow:inset 0 0 0 1.5px rgba(232,169,79,.65)}
+.botnav .bn.active .bi::after{content:'';position:absolute;left:50%;bottom:1px;transform:translateX(-50%);
+  width:16px;height:2.5px;border-radius:2px;background:var(--gold2)}
+
+@media (prefers-reduced-motion: reduce){
+  #skyStars i,#skyCamp .fl,#skyCamp .braise,#skyCarav,.current .ring{animation:none}
+  #skyWrap,#skyStars,#skyMoon,.bubble{transition:none}
+}
+
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+<!-- ===== LE CIEL DE LA JOURNÉE (ciel-v1) — derrière toute l'app, sur l'accueil seul ===== -->
+<div id="skyWrap" aria-hidden="true">
+  <div id="skyBg"></div>
+  <div id="skyStars"></div>
+  <div id="skySun"></div>
+  <div id="skyMoon"><svg viewBox="0 0 24 24" width="26" height="26" fill="#EFE6CF"><path d="M15.4 3.6a8.6 8.6 0 1 0 5.1 11.6A7.1 7.1 0 0 1 15.4 3.6Z"/></svg></div>
+  <img id="skyCarav" src="images-app-alaq/icone-ciel-dromadaire-v1.png" alt="">
+  <svg id="skyDunes" viewBox="0 0 390 110" preserveAspectRatio="none">
+    <path id="skyD1" fill="#8A6E4A" d="M0 70 C60 50 120 58 180 44 C240 32 300 52 390 36 L390 110 L0 110 Z"/>
+    <path id="skyD2" fill="#6E5638" d="M0 88 C70 72 140 84 210 70 C280 58 330 76 390 64 L390 110 L0 110 Z"/>
+  </svg>
+  <div id="skyFire"></div>
+  <div id="skyCamp">
+    <svg viewBox="0 0 120 104" width="100%" height="100%" fill="none">
+      <defs><linearGradient id="gFlamme" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFD98A"/><stop offset=".45" stop-color="#E8901F"/>
+        <stop offset="1" stop-color="#B0563F"/></linearGradient></defs>
+      <ellipse cx="20" cy="92" rx="9" ry="4.5" stroke="#5E4C39" stroke-width="2"/>
+      <ellipse cx="60" cy="96" rx="10" ry="4.5" stroke="#5E4C39" stroke-width="2"/>
+      <ellipse cx="100" cy="92" rx="9" ry="4.5" stroke="#5E4C39" stroke-width="2"/>
+      <path d="M28 88 L92 78" stroke="#8A6A42" stroke-width="6.5" stroke-linecap="round"/>
+      <path d="M30 78 L90 89" stroke="#6E5233" stroke-width="6.5" stroke-linecap="round"/>
+      <ellipse class="braise" cx="60" cy="84" rx="21" ry="6" fill="#C4551F"/>
+      <path class="fl f1" d="M60 18 C44 46 36 58 36 72 C36 84 47 90 60 90 C73 90 84 84 84 72 C84 58 76 46 60 18Z" fill="url(#gFlamme)" opacity=".92"/>
+      <path class="fl f2" d="M60 42 C52 56 48 62 48 70 C48 78 53 83 60 83 C67 83 72 78 72 70 C72 62 68 56 60 42Z" fill="#F0A93A"/>
+      <path class="fl f3" d="M60 58 C56 66 54 69 54 73 C54 78 57 81 60 81 C63 81 66 78 66 73 C66 69 64 66 60 58Z" fill="#FFE9B0"/>
+    </svg>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ"></div>
   <div class="stats">
-    <div class="stat">🌾 <span id="st-streak">0</span></div>
-    <div class="stat">❤️ <span id="st-hearts">7</span></div>
+    <div class="stat"><img class="tbic" src="images-app-alaq/icone-tb-epi-v1.png" alt=""> <span id="st-streak">0</span></div>
+    <div class="stat"><img class="tbic" src="images-app-alaq/icone-tb-coeur-v1.png" alt=""> <span id="st-hearts">7</span></div>
     <div class="stat" onclick="showRank()" style="cursor:pointer;display:flex;align-items:center"><span id="st-lamp" style="display:flex"></span></div>
   </div>
 </div>
@@ -3017,7 +3139,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='icones-disq8 · le marron externe des icônes de disque redevient le brun foncé d\u2019Alaq · sw v101';
+const BUILD='ciel-v1 · la journée de marche : le ciel suit l\u2019avancée, pièces en ellipse, barre du bas en couleur · sw v102';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6976,6 +7098,167 @@ if(location.hash==='#connexion'){
   function hook(name){ var f=window[name]; if(typeof f==='function'){ window[name]=function(){ var x=f.apply(this,arguments); try{window.renderDeskRail();}catch(e){} return x; }; } }
   function boot(){ hook('showTab'); hook('refreshStats'); try{window.renderDeskRail();}catch(e){} }
   window.addEventListener('load', function(){ setTimeout(boot, 500); });
+})();
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   CIEL-V1 — la journée de marche.
+   Bloc ADDITIF : il n'entre dans aucune fonction existante. Il se greffe par
+   trois enveloppes (renderHome, showTab) et un écouteur de défilement propre.
+   Le retirer, c'est supprimer ce <script> et le bloc CSS jumeau.
+
+   Principe : une sourate = une journée. La position sur le sentier vaut
+   t = numéro d'unité + fraction parcourue dans l'unité ; comme une unité
+   contient 9 disques régulièrement espacés, TERMINER UNE LEÇON avance le
+   soleil d'un neuvième d'heure. Les 12 heures sont fixes et se répartissent
+   sur le nombre d'unités réellement construites : 7 aujourd'hui, 12 demain,
+   sans une ligne à changer ici.
+   ══════════════════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+var RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* les douze heures : ciel, étoiles, lune, soleil, feu, dunes, encre */
+function h(o){return Object.assign({st:0,mn:0,fi:0,ink:'#F0E6D2'},o);}
+var CIEL=[
+h({sky:['#1D2340','#41476F','#B98A6C'],st:.55,du:['#171226','#0E0B1C'],sun:{x:20,y:93,r:30,c:'#E8A57A',g:.30,op:1}}),
+h({sky:['#2A3760','#7A5E74','#E29A5F'],st:.18,du:['#241A2C','#150F20'],sun:{x:24,y:84,r:19,c:'#FFC07E',g:.5,op:1}}),
+h({sky:['#3E5C8F','#93A9C6','#E9CFA2'],du:['#8A6E4A','#6E5638'],ink:'#2E2314',sun:{x:32,y:52,r:15,c:'#FFDD9E',g:.55,op:1}}),
+h({sky:['#4A6CA0','#A6BBD5','#F0DCB4'],du:['#96794F','#78603B'],ink:'#2E2314',sun:{x:42,y:34,r:14,c:'#FFE9AE',g:.6,op:1}}),
+h({sky:['#5E82B0','#C2D0DF','#F4E8CD'],du:['#A0834F','#82683D'],ink:'#2E2314',sun:{x:52,y:25,r:17,c:'#FFEFA0',g:.85,op:1}}),
+h({sky:['#54749F','#B2BED2','#EFD9B0'],du:['#97783F','#7A5F32'],ink:'#2E2314',sun:{x:64,y:34,r:14,c:'#FFE3A0',g:.6,op:1}}),
+h({sky:['#4E5E8C','#9E90A2','#EBB47D'],du:['#8A6440','#6E4E30'],ink:'#2E2314',sun:{x:76,y:52,r:16,c:'#FFC985',g:.5,op:1}}),
+h({sky:['#33356B','#7E5077','#F08A4E'],st:.12,fi:.30,du:['#3A2438','#241528'],sun:{x:86,y:80,r:18,c:'#FF9058',g:.55,op:1}}),
+h({sky:['#262B58','#5E4468','#C06A55'],st:.35,fi:.55,du:['#221733','#150E22'],sun:{x:92,y:92,r:16,c:'#D95A38',g:.35,op:.45}}),
+h({sky:['#1B2148','#39406E','#6E5470'],st:.6,mn:.55,fi:.80,du:['#161227','#0D0A1A'],sun:{x:96,y:100,r:14,c:'#8A3A2E',g:.2,op:0}}),
+h({sky:['#141A3E','#2C3260','#463F63'],st:.85,mn:.85,fi:.92,du:['#120F22','#0A0817'],sun:{x:98,y:104,r:12,c:'#6B2E26',g:.1,op:0}}),
+h({sky:['#0D1130','#1C2148','#2E2A4E'],st:1,mn:1,fi:1,du:['#100D1E','#080614'],sun:{x:100,y:106,r:12,c:'#6B2E26',g:.1,op:0}})
+];
+
+var W=document.getElementById('skyWrap'), BG=document.getElementById('skyBg'),
+    ST=document.getElementById('skyStars'), SU=document.getElementById('skySun'),
+    MO=document.getElementById('skyMoon'), FI=document.getElementById('skyFire'),
+    CA=document.getElementById('skyCamp'), CV=document.getElementById('skyCarav'),
+    D1=document.getElementById('skyD1'), D2=document.getElementById('skyD2');
+if(!W) return;
+
+var st='',k;
+for(k=0;k<80;k++){var z=(Math.random()*1.6+0.6).toFixed(1);
+  st+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+
+      '%;width:'+z+'px;height:'+z+'px;animation-delay:'+(Math.random()*3.4).toFixed(1)+
+      's;opacity:'+(Math.random()*0.6+0.3).toFixed(2)+'"></i>';}
+ST.innerHTML=st;
+
+function lerp(a,b,f){return a+(b-a)*f;}
+function h2r(x){var n=parseInt(x.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+function rs(a){return 'rgb('+Math.round(a[0])+','+Math.round(a[1])+','+Math.round(a[2])+')';}
+function ra(a,l){return 'rgba('+Math.round(a[0])+','+Math.round(a[1])+','+Math.round(a[2])+','+l+')';}
+function mix(x,y,f){var a=h2r(x),b=h2r(y);return [lerp(a[0],b[0],f),lerp(a[1],b[1],f),lerp(a[2],b[2],f)];}
+function clair(c,t){return [lerp(c[0],255,t),lerp(c[1],255,t),lerp(c[2],255,t)];}
+function c01(x){return x<0?0:(x>1?1:x);}
+
+/* l'état du ciel à l'instant t (continu) : on mélange les deux heures encadrantes.
+   ⚠️ L'ENCRE ne se mélange PAS linéairement — au milieu d'une unité on obtiendrait
+   un gris illisible sur les deux fonds. Elle bascule au tiers du trajet. */
+function trame(t){
+  t=Math.max(0,Math.min(CIEL.length-1,t));
+  var i=Math.floor(t), j=Math.min(i+1,CIEL.length-1), f=t-i, A=CIEL[i], B=CIEL[j];
+  var fe=c01((f-0.35)/0.30);
+  return {sky:[mix(A.sky[0],B.sky[0],f),mix(A.sky[1],B.sky[1],f),mix(A.sky[2],B.sky[2],f)],
+    st:lerp(A.st,B.st,f), mn:lerp(A.mn,B.mn,f), fi:lerp(A.fi,B.fi,f),
+    ink:mix(A.ink,B.ink,fe), du:[mix(A.du[0],B.du[0],f),mix(A.du[1],B.du[1],f)],
+    sun:{x:lerp(A.sun.x,B.sun.x,f),y:lerp(A.sun.y,B.sun.y,f),r:lerp(A.sun.r,B.sun.r,f),
+         c:mix(A.sun.c,B.sun.c,f),g:lerp(A.sun.g,B.sun.g,f),op:lerp(A.sun.op,B.sun.op,f)}};
+}
+
+/* l'ombre portée des pièces suit la course du soleil ; la nuit, c'est le feu de
+   camp qui éclaire — par en dessous, donc l'ombre remonte */
+var BAS=93, HAUT=25;
+function ombre(F){
+  var alt=c01((BAS-F.sun.y)/(BAS-HAUT)), L=6+(1-alt)*16, hx=(50-F.sun.x)/50;
+  var x=L*hx, y=L*(0.30+0.55*alt), b=8+(1-alt)*10, a=0.18+(1-alt)*0.20;
+  if(F.sun.op<1){var q=1-F.sun.op; x=lerp(x,0,q); y=lerp(y,4,q); b=lerp(b,13,q); a=lerp(a,.26,q);}
+  var wf=F.fi*(1-F.sun.op);
+  if(wf>0){x=lerp(x,0,wf); y=lerp(y,-7,wf); b=lerp(b,16,wf); a=lerp(a,.32,wf);}
+  var R=document.documentElement.style;
+  R.setProperty('--ciel-shx',x.toFixed(1)+'px'); R.setProperty('--ciel-shy',y.toFixed(1)+'px');
+  R.setProperty('--ciel-shb',b.toFixed(1)+'px'); R.setProperty('--ciel-sha',a.toFixed(2));
+}
+
+var tCourant=-1;
+function peindre(t){
+  if(Math.abs(t-tCourant)<0.004) return;
+  tCourant=t;
+  var F=trame(t);
+  BG.style.background='linear-gradient(180deg,'+rs(F.sky[0])+' 0%,'+rs(F.sky[1])+' 46%,'+rs(F.sky[2])+' 84%)';
+  ST.style.opacity=F.st;
+  var D=F.sun.r*2;
+  SU.style.opacity=F.sun.op; SU.style.left=F.sun.x+'%'; SU.style.top=F.sun.y+'%';
+  SU.style.width=D+'px'; SU.style.height=D+'px';
+  SU.style.background='radial-gradient(circle,'+rs(clair(F.sun.c,.5))+' 0%,'+rs(F.sun.c)+' 58%,rgba(255,255,255,0) 76%)';
+  SU.style.boxShadow='0 0 '+Math.round(F.sun.r*2.6)+'px '+Math.round(F.sun.r*0.9)+'px '+ra(F.sun.c,F.sun.g);
+  MO.style.opacity=F.mn; FI.style.opacity=F.fi; CA.style.opacity=F.fi;
+  D1.style.fill=rs(F.du[0]); D2.style.fill=rs(F.du[1]);
+  var av=Math.min(t,CIEL.length-1)/(CIEL.length-1);
+  CV.style.left=(4+av*76)+'%';
+  CV.style.bottom=(104+av*30)+'px';
+  CV.classList.toggle('arrive', av>=0.998);
+  ombre(F);
+  var R=document.documentElement.style;
+  R.setProperty('--ciel-ink',rs(F.ink));
+  R.setProperty('--ciel-soft',ra(F.ink,.64));
+  R.setProperty('--ciel-scrim',ra(F.sky[0],.93));
+}
+
+/* où en est-on sur le sentier ? Le repère de lecture est le bas du bandeau
+   d'unité, celui-là même qui sert déjà à onHomeScroll. */
+function position(){
+  var home=document.getElementById('home'); if(!home) return 0;
+  var secs=home.querySelectorAll('.unit-sec'); if(!secs.length) return 0;
+  var bn=document.getElementById('unitBanner');
+  var repere=(bn?bn.getBoundingClientRect().bottom:90)+40;
+  var t=0,j,r;
+  for(j=0;j<secs.length;j++){
+    r=secs[j].getBoundingClientRect();
+    if(r.top<=repere && r.bottom>repere) return j+(repere-r.top)/r.height;
+    if(r.bottom<=repere) t=j+1;
+  }
+  return t;
+}
+/* les 12 heures se répartissent sur les unités RÉELLEMENT construites :
+   7 aujourd'hui, 12 quand la grammaire existera — rien à changer ici. */
+function accorder(){
+  var home=document.getElementById('home');
+  var n=home?home.querySelectorAll('.unit-sec').length:0;
+  if(n<2) return 0;
+  return Math.min(CIEL.length-1, position()/(n-1)*(CIEL.length-1));
+}
+
+var actif=false;
+function cielSync(){
+  var home=document.getElementById('home');
+  var visible=!!home && home.style.display!=='none';
+  if(visible!==actif){ actif=visible; document.body.classList.toggle('ciel',visible); }
+  if(visible) peindre(accorder());
+}
+var attente=false;
+window.addEventListener('scroll', function(){
+  if(attente) return; attente=true;
+  requestAnimationFrame(function(){ cielSync(); attente=false; });
+}, {passive:true});
+window.addEventListener('resize', cielSync);
+
+/* greffes : on enveloppe sans réécrire. Les appels internes de l'app passent par
+   la portée globale, donc réassigner window.X suffit. */
+['renderHome','showTab'].forEach(function(nom){
+  var avant=window[nom];
+  if(typeof avant!=='function') return;
+  window[nom]=function(){ var r=avant.apply(this,arguments); try{cielSync();}catch(e){} return r; };
+});
+
+window.__ciel={sync:cielSync, position:position, accorder:accorder};  /* trappe de test */
+cielSync();
+setTimeout(cielSync,300);
 })();
 </script>
 </body>
