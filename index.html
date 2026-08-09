@@ -1266,9 +1266,11 @@ body.ciel #skyWrap{opacity:1}
 #skyCarav,#skyCamp,#skyFire{bottom:auto}
 #skyCarav.arrive{animation:none}
 @keyframes cmarche{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
-#skyFire{position:absolute;right:-24px;bottom:96px;width:170px;height:112px;opacity:0;
+/* la lueur était plus large que la marge droite : son halo se coupait net
+   sur le bord de l'écran. Elle rentre, et le campement recule avec elle. */
+#skyFire{position:absolute;right:10px;width:150px;height:104px;opacity:0;
   background:radial-gradient(52% 62% at 50% 100%,rgba(235,140,66,.5),rgba(235,140,66,0) 72%)}
-#skyCamp{position:absolute;right:26px;bottom:124px;width:58px;height:49px;opacity:0}
+#skyCamp{position:absolute;right:56px;width:58px;height:49px;opacity:0}
 #skyCamp .fl{transform-origin:60px 86px}
 #skyCamp .f1{animation:cfl1 1.15s ease-in-out infinite}
 #skyCamp .f2{animation:cfl2 .78s ease-in-out infinite}
@@ -1417,7 +1419,8 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
 #portail.ouvert .pt-clarte{opacity:1}
 #portail .pt-seuil{width:96px;height:7px;margin:0 auto;border-radius:0 0 5px 5px;
   background:linear-gradient(180deg,#8A5A16,#3A2610)}
-#portail .pt-cad{margin-top:12px;font-size:9px;letter-spacing:.3em;font-weight:900;color:var(--gold2)}
+/* verrouillé : la porte est là, on voit qu'elle attend, on ne peut pas l'ouvrir */
+#portail.verrouille{filter:grayscale(.9) brightness(.5);cursor:default;opacity:.85}
 /* l'entrée dans l'histoire : la lumière de la porte envahit l'écran */
 #entreeHalte{position:fixed;inset:0;z-index:80;display:none;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:0 28px;
@@ -3250,7 +3253,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='ciel-v2 · la Fātiḥa passe à 12 unités, bandeau à deux lignes, parchemin et sommaire, lanterne à halo, portail de fin · sw v104';
+const BUILD='ciel-v2b · la porte reste éteinte jusqu’à la dernière leçon, la lueur du feu rentre dans l’écran, le dromadaire s’arrête avant · sw v105';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -7347,12 +7350,12 @@ function peindre(t){
   MO.style.opacity=F.mn; FI.style.opacity=F.fi; CA.style.opacity=F.fi;
   D1.style.fill=rs(F.du[0]); D2.style.fill=rs(F.du[1]);
   var av=Math.min(t,CIEL.length-1)/(CIEL.length-1);
-  var xc=4+av*76;
+  var xc=4+av*52;          // il s'arrête avant le feu : passer derrière ne rendait rien
   CV.style.left=xc+'%';
   poserSurLaCrete(CV, xc+5, 2);          // 5 % : le milieu de la bête, 2 px d'enfoncement
   CV.classList.toggle('arrive', av>=0.998);
-  poserSurLaCrete(CA, 88, 4);
-  poserSurLaCrete(FI, 88, -34);
+  poserSurLaCrete(CA, 80, 4);
+  poserSurLaCrete(FI, 80, -30);
   ombre(F);
   var R=document.documentElement.style;
   R.setProperty('--ciel-ink',rs(F.ink));
@@ -7547,14 +7550,14 @@ function poserPortail(){
   var d=document.createElement('div'); d.id='portail';
   d.innerHTML='<div class="pt-cadre"><div class="pt-jour">'+
       '<div class="pt-clarte"></div><div class="pt-v g"></div><div class="pt-v d"></div>'+
-    '</div></div><div class="pt-seuil"></div>'+
-    '<div class="pt-cad">LA HALTE</div>';
+    '</div></div><div class="pt-seuil"></div>';
   home.appendChild(d);
   d.addEventListener('click', function(){
-    if(d.classList.contains('ouvert')) return;
+    if(d.classList.contains('verrouille') || d.classList.contains('ouvert')) return;
     d.classList.add('ouvert');
     setTimeout(ouvrirHalte, 820);
   });
+  majPortail();
 }
 function ouvrirHalte(){
   var e=document.getElementById('entreeHalte');
@@ -7574,18 +7577,29 @@ function ouvrirHalte(){
   e.classList.add('on');
 }
 
+/* Le portail reste ÉTEINT tant que la sourate n'est pas achevée : il s'allume
+   quand la dernière leçon de la dernière unité disponible est terminée. */
+function majPortail(){
+  var d=document.getElementById('portail'); if(!d) return;
+  var dernier=-1, u;
+  for(u=0;u<UNITS.length;u++) if(UNITS[u].ready) dernier=u;
+  var fini=false;
+  try{ fini = dernier>=0 && unitValidated(dernier); }catch(e){}
+  d.classList.toggle('verrouille', !fini);
+}
+
 /* ---------- greffes ---------- */
 ['renderHome','refreshStats'].forEach(function(nom){
   var avant=window[nom]; if(typeof avant!=='function') return;
   window[nom]=function(){
     var r=avant.apply(this,arguments);
-    try{ if(nom==='renderHome'){ refaireBandeaux(); poserPortail(); } else poserLanterne(); }catch(e){}
+    try{ if(nom==='renderHome'){ refaireBandeaux(); poserPortail(); majPortail(); } else poserLanterne(); }catch(e){}
     return r;
   };
 });
 /* le parchemin ouvre le sommaire — c'est le bouton qui appelait le menu des sourates */
 window.openSurahMenu=function(){ ouvrirFeuille(); };
-window.__ciel2={feuille:ouvrirFeuille, portail:poserPortail, bandeaux:refaireBandeaux};
+window.__ciel2={feuille:ouvrirFeuille, portail:poserPortail, bandeaux:refaireBandeaux, majPortail:majPortail};
 try{ poserLanterne(); refaireBandeaux(); poserPortail(); }catch(e){}
 })();
 </script>
