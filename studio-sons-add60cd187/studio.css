@@ -39,6 +39,7 @@ h1 .em{font-weight:400;color:var(--muted);font-size:15px}
 .pastille[data-e="ok"] b{color:var(--green)}
 .pastille[data-e="manquant"] b{color:var(--coral)}
 .pastille[data-e="orphelin"] b{color:var(--info)}
+.pastille[data-e="a-refaire"] b{color:var(--gold2)}
 
 .filtres{display:flex;gap:8px;align-items:center;margin-top:9px;flex-wrap:wrap}
 /* le choix du micro : premier geste avant d'enregistrer, donc jamais dans un repli */

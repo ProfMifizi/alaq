@@ -129,7 +129,7 @@ const REMUNERATION = { remuneration: 'cinquante centimes d’euro (0,50 €) par
 const ACCENTS = ['#d8463a','#e07a1e','#ecc531','#35a468','#2f74d0','#5350c8','#8a4fc4'];
 
 const SB = window.supabase.createClient(SUPA_URL, SUPA_ANON);
-let INV = null, ETAT = 'manquant';       // on ouvre sur ce qui MANQUE : c'est la mission
+let INV = null, ETAT = 'a-refaire';      // on ouvre sur ce qui est en VOIX IA : c'est la mission du 10/08
 
 /* ---------------------------------------------------------------- LA PORTE
    Connexion par code e-mail, comme dans l'app. Ce n'est pas qu'un rideau : le droit
@@ -202,7 +202,7 @@ function majEnvoyes() {
 }
 
 /* ---------------------------------------------------------------- LE TABLEAU */
-const ETIQUETTE = { manquant:'à enregistrer', ok:'déjà enregistré', orphelin:'plus utilisé' };
+const ETIQUETTE = { 'a-refaire':'à refaire (voix IA)', manquant:'à enregistrer (rien du tout)', ok:'déjà ta voix', orphelin:'plus utilisé' };
 
 async function charge() {
   INV = await (await fetch('inventaire.json')).json();
@@ -212,7 +212,7 @@ async function charge() {
 function dessineBilan() {
   const b = INV.bilan.arabe;
   bilan.innerHTML = '';
-  [['manquant','✗'],['ok','✓']].forEach(([e, ico]) => {
+  [['a-refaire','↻'],['manquant','✗'],['ok','✓']].forEach(([e, ico]) => {
     const d = document.createElement('button');
     d.className = 'pastille' + (ETAT === e ? ' on' : ''); d.dataset.e = e;
     d.innerHTML = ico + ' <b>' + b[e] + '</b> ' + ETIQUETTE[e];
@@ -231,7 +231,9 @@ function remplitFiltres() {
     fams.map(f => '<option>' + f + '</option>').join('');
   [fUnite, fFamille].forEach(s => s.onchange = dessine);
   fRech.oninput = dessine;
-  aide.innerHTML = '<b>Dis exactement ce qui est écrit dans la colonne « À dire »</b>, une seule fois, ' +
+  aide.innerHTML = '<b>Le nom du fichier ne se choisit pas</b> : c\'est celui que l\'app va chercher, ' +
+    'il est lu directement dans le code — enregistre la ligne, le nom suit tout seul. ' +
+    '<b>Dis exactement ce qui est écrit dans la colonne « À dire »</b>, une seule fois, ' +
     'sans rien ajouter. Pour une lettre seule, on demande tantôt son <b>NOM</b>, tantôt son <b>SON</b> : ' +
     'la ligne le précise. Le silence de début et de fin est coupé tout seul, tu peux respirer avant et après. ' +
     'Commence par <b>🎧 Écouter mon micro</b> pour régler ta distance.';
@@ -240,7 +242,8 @@ function remplitFiltres() {
 function filtre() {
   const u = fUnite.value, f = fFamille.value, q = fRech.value.trim().toLowerCase();
   return INV.arabe.filter(l =>
-    l.famille !== 'Orphelin' &&                       // rien à enregistrer pour ce que l'app n'appelle plus
+    l.famille !== 'Orphelin' && l.famille !== 'Variante de voix' &&   // rien à enregistrer : ni ce que l'app n'appelle plus, ni les doublons de voix IA
+    l.famille !== 'Récitation' && l.famille !== 'Effet sonore' &&     // le Qorān se récite, il ne s'enregistre pas ici ; les effets ne sont pas de la voix
     (!u || (u === '0' ? !l.unite : l.unite == u)) &&
     (!f || l.famille === f) &&
     (!ETAT || l.statut === ETAT) &&

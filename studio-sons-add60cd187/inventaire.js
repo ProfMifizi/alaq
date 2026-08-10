@@ -27,6 +27,28 @@ const NOMS93  = premier(path.join(RACINE, 'donnees', 'noms-a-generer.json'),
                         path.join(__dirname, 'noms-a-generer.json'),
                         path.join(RACINE, 'noms-a-generer.json'));
 const SORTIE  = path.join(__dirname, 'inventaire.json');
+/* Les fichiers dits par une VOIX IA que Myriam réenregistre elle-même (décision du
+   10/08 : plus aucune voix IA sur les sons de l'app). Ils EXISTENT — sans cette liste
+   ils passeraient pour « ok » et n'apparaîtraient jamais dans le studio. */
+/* Le NOM arabe de chaque lettre — LU dans generer-noms-lettres.js, jamais recopié :
+   c'est lui qui porte les corrections faites à l'oreille (الِفْ, فا…). Sans lui, la
+   colonne « À dire » d'un nom de lettre était vide et on risquait d'enregistrer le SON
+   à la place du NOM. */
+const NOMS_AR = (() => {
+  try {
+    const j = path.join(__dirname, 'noms-lettres.json');      // dossier déployé : le générateur n'y est pas
+    if (fs.existsSync(j)) return JSON.parse(fs.readFileSync(j, 'utf8'));
+    const t = fs.readFileSync(path.join(__dirname, 'generer-noms-lettres.js'), 'utf8');
+    const bloc = t.match(/const NOMS\s*=\s*\{([\s\S]*?)\n\};/)[1];
+    const o = {};
+    for (const m of bloc.matchAll(/'([^']+)'\s*:\s*'([^']+)'/g)) o[m[1]] = m[2];
+    return o;
+  } catch (_) { return {}; }
+})();
+const AREFAIRE = new Set((() => {
+  const p = path.join(__dirname, 'a-reenregistrer.json');
+  try { return JSON.parse(fs.readFileSync(p, 'utf8')).fichiers || []; } catch (_) { return []; }
+})());
 
 /* les sources dont dépend l'inventaire — sert à savoir s'il est périmé */
 module.exports = { INDEX, SW, AUDIOS, SORTIE };
@@ -137,6 +159,11 @@ for (const [token, chemin] of Object.entries(AUDIO)) {
     famille = 'Nom de lettre';
     unite = uniteDeTranslit[RegExp.$1] ?? null;
     lecons = ['L’alphabet', 'Mémoriser {L}', 'Les formes'];
+    if (NOMS_AR[token]) {   // « À dire » = le NOM écrit en arabe (دَالْ), pas la lettre seule
+      pousse({ fichier, arabe: NOMS_AR[token], sens: 'le NOM de la lettre ' + token,
+               translit: RegExp.$1, emoji: '', famille, unite, lecons });
+      continue;
+    }
   } else if (/^lettre-(\w+)-son\.mp3$/.test(fichier)) {
     famille = 'Son de lettre';
     unite = uniteDeTranslit[RegExp.$1] ?? null;
@@ -165,10 +192,10 @@ for (const [token, chemin] of Object.entries(AUDIO)) {
 /* 2 · le nom et le son de chaque lettre — gabarits lettre-<translit>-nom/son.mp3 */
 for (const [L, tr] of Object.entries(LTRANS)) {
   const u = uniteDeTranslit[tr] ?? null;
-  pousse({ fichier: `lettre-${tr}-nom.mp3`, arabe: L, sens: `le NOM de la lettre (${tr})`,
+  pousse({ fichier: `lettre-${tr}-nom.mp3`, arabe: NOMS_AR[L] || L, sens: `le NOM de la lettre ${L} (${tr})`,
            translit: tr, emoji: '', famille: 'Nom de lettre', unite: u,
            lecons: ['L’alphabet', 'Mémoriser {L}', 'Les formes'] });
-  pousse({ fichier: `lettre-${tr}-son.mp3`, arabe: L, sens: `le SON de la lettre (${tr})`,
+  pousse({ fichier: `lettre-${tr}-son.mp3`, arabe: L, sens: `le SON de la lettre ${L} — pas son nom (${tr})`,
            translit: tr, emoji: '', famille: 'Son de lettre', unite: u,
            lecons: ['L’alphabet', 'Mémoriser {L}', 'Écrire des mots'] });
 }
@@ -199,7 +226,14 @@ VOIX.filter(v => v.loc).forEach(v => { for (let n = 1; n <= 7; n++)
 for (const f of presents) {
   if (vu.has(f) || /^instr-/.test(f)) continue;      // consignes françaises : page 2
   let famille = 'Orphelin', lecons = [], sens = '';
-  if (/^sfx-/.test(f)) { famille = 'Effet sonore'; lecons = ['Récompenses']; }
+  /* ⚠️ Les fichiers « -f » / « -h » ne sont PAS des orphelins : l'app construit leur nom
+     à la volée (`lettre-<tr>-nom-<VOIX_G>.mp3`, `<base>-<VOIX_G>.mp3`), invisible à une
+     lecture littérale. Ils ne se listent pas non plus dans le studio : Myriam enregistre
+     sous le nom PLAT, et la variante de voix s'efface quand sa prise arrive. */
+  const plat = f.replace(/-(f|h)\.mp3$/, '.mp3');
+  if (/-(f|h)\.mp3$/.test(f) && (vu.has(plat) || /^(lettre-|felicit-)/.test(f)))
+    { famille = 'Variante de voix'; sens = 'voix IA — l’app la joue tant que l’enregistrement de Myriam (' + plat + ') n’est pas là'; }
+  else if (/^sfx-/.test(f)) { famille = 'Effet sonore'; lecons = ['Récompenses']; }
   else if (/^nom-/.test(f)) { famille = 'Nom d’Allah'; lecons = ['Les Noms d’Allah']; }
   else if (/^fatiha-(\d)/.test(f)) sens = 'verset ' + RegExp.$1 + ' — jamais appelé : les versets sont diffusés depuis la source du récitateur';
   else if (/-isolee-nom-de-la-lettre\.mp3$/.test(f)) sens = 'ancien nommage — l’app appelle désormais lettre-<translit>-nom.mp3';
@@ -226,8 +260,10 @@ function etat(l) {
   l.taille   = tailles[l.fichier] || 0;
   l.precache = precache.has(l.fichier);
   l.attente  = attente.has(l.fichier);                 // une version IA dort dans audios-generes-a-valider/
+  l.arefaire = AREFAIRE.has(l.fichier);                // voix IA : à redire avec la voix de Myriam
   l.statut = !l.present ? 'manquant'                   // → l'app parle avec la voix du téléphone
            : l.famille === 'Récitation' ? 'ok'          // jamais pré-cachée : mise en cache À L'ÉCOUTE (MEDIA)
+           : l.arefaire ? 'a-refaire'                   // le fichier est là, mais ce n'est pas SA voix
            : l.famille === 'Orphelin' || l.famille === 'Orpheline' ? 'orphelin'
            : !l.precache ? 'hors-cache'                // existe, mais ne part pas hors ligne
            : 'ok';
@@ -252,7 +288,7 @@ const inv = {
   },
 };
 function compte(a) {
-  const c = { total: a.length, ok: 0, manquant: 0, orphelin: 0, 'hors-cache': 0 };
+  const c = { total: a.length, ok: 0, manquant: 0, 'a-refaire': 0, orphelin: 0, 'hors-cache': 0 };
   a.forEach(l => c[l.statut]++); return c;
 }
 

@@ -2303,7 +2303,7 @@ function buildMemo(U){
 function buildSpot(U){
   const q=[];
   FATIHA.forEach((v,vi)=>{
-    U.letters.forEach(L=>{ if([...strip(v)].some(ch=>sameLetter(ch,L))) q.push({type:'spot',vi,L}); });
+    U.letters.forEach(L=>{ if([...strip(v)].some(ch=>sameLetter(ch,L))) q.push({type:'spot',vi,L,mute:true}); });
   });
   return q;
 }
@@ -2497,13 +2497,13 @@ function buildReview(U){
   };
   // A — reconnaissance par position : début (1), milieu (2), fin (3)
   if(letters.length)[1,2,3].forEach(p=>shuffle(letters).forEach(L=>q.push(mcq({
-    prompt:'Touche la bonne lettre, même déguisée 🎭',audio:L,graded:true,grid:'grid3',answer:L,
+    prompt:'Touche la bonne lettre, même déguisée 🎭',audio:L,mute:true,graded:true,grid:'grid3',answer:L,
     options:pick3(letters,L,x=>formGlyph(x,p))}))));
   // B — reconnaissance avec un tachkīl (lettre + harakat) par le son
   const SYL=[];letters.forEach(L=>HK.forEach(h=>SYL.push(L+h[0])));
   const SYLW=weightedShuffle(SYL,x=>x);
   for(let r=0;r<3&&SYLW.length;r++){const a=SYLW[r%SYLW.length];
-    q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a,graded:true,grid:'grid3',answer:a,
+    q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a,mute:true,graded:true,grid:'grid3',answer:a,
       options:shuffle([a,...shuffle(SYL.filter(x=>x!==a)).slice(0,2)]).map(s=>({ar:s,key:s}))}));}
   // C — réécrire des mots déjà vus
   weightedShuffle(words,w=>w.w).slice(0,Math.min(5,words.length)).forEach(w=>q.push({type:'assemble',w,graded:true,mute:true}));
@@ -3445,7 +3445,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='syllabes-voix-myriam-v1 \u00b7 les syllabes IA retir\u00e9es, la voix de Myriam r\u00e9tablie (purge cibl\u00e9e) \u00b7 sw v115';
+const BUILD='voix-myriam-partout-v1 \u00b7 le nom PLAT (sa voix) joue partout en repli, m\u00e9nage des sons d\u2019essai \u00b7 sw v116';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5030,7 +5030,24 @@ function sayLetterName(L,fin,el){
     var a=(_LNg===VOIX_G&&_LN[tr])||new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3');
     try{ a.currentTime=0; }catch(_){}
     _curAudio=a; var settled=false;
-    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(L);}catch(_){ } }; // Majed dit le nom de la lettre (plus la translit en voix française)
+    /* 10/08 tard — LA VOIX DE MYRIAM D'ABORD EN REPLI : quand le fichier de voix (-f)
+       n'existe pas ou est retiré, on tente le nom PLAT (son enregistrement à elle)
+       AVANT la synthèse. Sans ce maillon, ses noms de lettres n'étaient jamais joués :
+       sayLetterName ne connaissait que le nom suffixé. */
+    var essaiPlat=false;
+    var fb=function(){
+      if(settled||gen!==_sndGen)return;
+      if(!essaiPlat){ essaiPlat=true;
+        try{ var b=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'); _curAudio=b;
+          b.onplaying=function(){settled=true;}; b.onended=termine;
+          b.onerror=function(){ if(!settled&&gen===_sndGen){settled=true;try{_speakSynth(L);}catch(_){ }} };
+          var q=b.play(); if(q&&q.catch)q.catch(function(){ if(!settled&&gen===_sndGen){settled=true;try{_speakSynth(L);}catch(_){ }} });
+          setTimeout(function(){ if(!settled&&gen===_sndGen&&b.paused){settled=true;try{_speakSynth(L);}catch(_){ }} },1100);
+          return;
+        }catch(_){ }
+      }
+      settled=true; try{_speakSynth(L);}catch(_){ }
+    }; // Majed dit le nom de la lettre (plus la translit en voix française)
     a.onplaying=function(){settled=true;};  // on* et pas addEventListener : l'élément préchargé est RÉUTILISÉ à chaque toucher
     a.onerror=fb;
     a.onended=termine;
@@ -5959,7 +5976,11 @@ function comboBonneReponse(){
   // Le jeton _sndGen est revérifié : changer d'écran entre-temps annule la félicitation.
   setTimeout(function(){
     if(gen!==_sndGen)return;
-    try{ const a=audioBeni(f); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(function(){}); }catch(e){}
+    try{ const a=audioBeni(f); _curAudio=a;
+      const plat='audios-app-alaq/felicit-'+comboDernier+'.mp3';   // repli : sa voix, si elle l'enregistre
+      a.onerror=function(){ if(gen!==_sndGen)return; try{ const b=audioBeni(plat); _curAudio=b; const r=b.play(); if(r&&r.catch)r.catch(function(){}); }catch(_){ } };
+      const p=a.play(); if(p&&p.catch)p.catch(function(){ if(gen!==_sndGen)return; try{ const b=audioBeni(plat); _curAudio=b; const r=b.play(); if(r&&r.catch)r.catch(function(){}); }catch(_){ } });
+    }catch(e){}
   },350);
 }
 /* — le pool d'éléments audio bénis (iOS, 07/08) — */

@@ -20,11 +20,13 @@ require('./inventaire.js');
 const complet = JSON.parse(fs.readFileSync(FICHIER, 'utf8'));
 
 const arabe = complet.arabe
-  .filter(l => l.famille !== 'Orphelin')      // rien à enregistrer pour ce que l'app n'appelle plus
-  .map(({ fichier, arabe, sens, translit, famille, unite, lecons, present, statut }) =>
-       ({ fichier, arabe, sens, translit, famille, unite, lecons, present, statut }));
+  .filter(l => !['Orphelin', 'Variante de voix', 'Récitation', 'Effet sonore'].includes(l.famille))
+  // rien à enregistrer : ce que l'app n'appelle plus, les doublons de voix IA (-f/-h),
+  // le Qorān (récité, jamais enregistré ici) et les effets sonores
+  .map(({ fichier, arabe, sens, translit, famille, unite, lecons, present, statut, arefaire }) =>
+       ({ fichier, arabe, sens, translit, famille, unite, lecons, present, statut, arefaire }));
 
-const compte = { total: arabe.length, ok: 0, manquant: 0 };
+const compte = { total: arabe.length, ok: 0, manquant: 0, 'a-refaire': 0 };
 arabe.forEach(l => { if (l.statut in compte) compte[l.statut]++; });
 
 fs.writeFileSync(FICHIER, JSON.stringify({
@@ -32,4 +34,4 @@ fs.writeFileSync(FICHIER, JSON.stringify({
 }));
 
 console.log('liste régénérée depuis le code de l’app — ' + arabe.length + ' sons ('
-  + compte.manquant + ' à enregistrer, ' + compte.ok + ' déjà là)');
+  + compte.manquant + ' à enregistrer, ' + compte['a-refaire'] + ' à refaire, ' + compte.ok + ' déjà là)');
