@@ -3235,15 +3235,24 @@ function objAddSec(sec){
     save(); }                                 // on n'écrit qu'à la MINUTE pleine — pas d'upsert nuage toutes les 15 s (audit 10/08)
   if(!avant&&(S.objMin||0)>=objGoal())objFete();
 }
-function objFete(){
+/* validerJour : LE SEUL endroit qui touche S.streak. Le jour se valide à l'objectif
+   atteint OU — règle ADOUCIE (oui de Myriam, 10/08 soir) — à une leçon/révision terminée.
+   Une élève qui pratique ne perd donc jamais sa série, même sous l'objectif. */
+function validerJour(){
   var t=today(), y=yesterday();
-  if(S.lastDay!==t){ S.streak=(S.lastDay===y)?S.streak+1:1; S.lastDay=t; feteJourPending=true; }
+  if(S.lastDay===t)return false;
+  S.streak=(S.lastDay===y)?S.streak+1:1; S.lastDay=t;
+  feteJourPending=true;                       // l'écran « 7 épis » se montrera à la fin de l'exercice
+  try{checkBadges({});}catch(e){}             // les badges de série (3/7/30…) tombent au bon moment
+  return true;
+}
+function objFete(){
+  validerJour();
   save();
   try{refreshStats();}catch(e){}
   try{confettiBurst();}catch(e){}
   try{playSfx('bonne-reponse');}catch(e){}
   try{toast(icoImg('tb-epi','','height:16px;vertical-align:-3px')+' Objectif du jour atteint — épi validé !');}catch(e){}
-  try{checkBadges({});}catch(e){}             // les badges de série (3/7/30…) tombent au bon moment
 }
 function objRingHTML(){ // l'anneau, SEUL, entre la carte du rang et « Ton parcours »
   var m=objMinutes(), g=objGoal(), ok=m>=g, C=2*Math.PI*50, off=C*(1-Math.min(1,m/g));
@@ -3412,7 +3421,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='lecons456-objectif-v1 \u00b7 le\u00e7ons 4/5/6 refondues pour les 7 unit\u00e9s (previews v3 valid\u00e9es), anneau de l\u2019objectif au Profil (l\u2019\u00e9pi vient de l\u2019objectif), r\u00e9citations locales, Habibah partout \u00b7 sw v109';
+const BUILD='objectif-epis-v1 \u00b7 s\u00e9rie adoucie (le\u00e7on/r\u00e9vision termin\u00e9e valide aussi le jour), \u00e9cran des 7 \u00e9pis rebranch\u00e9 \u00b7 sw v110';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4136,9 +4145,9 @@ function finishDisque(){
   S.done[id]=true;
   const gain=(curD===discsFor(curU).length-1?20:10)*(wasDone?0.5:1);
   S.xp+=gain;
-  /* La série ne se valide PLUS à la leçon : l'OBJECTIF QUOTIDIEN atteint plante l'épi
-     du jour (objFete). L'écran « 7 épis » se montre après la leçon pendant laquelle
-     l'objectif est tombé. */
+  /* L'épi du jour : objectif atteint OU leçon terminée (règle adoucie, oui de Myriam).
+     L'écran « 7 épis » se montre à la fermeture de l'écran de fin. */
+  validerJour();
   pendingStreak=feteJourPending; feteJourPending=false;
   bumpConstance('learn');
   if(RECHARGE){ // reprise depuis « Plus de cœurs » : on recharge comme une révision (1re fois après blocage = +3, ensuite +1)
@@ -4169,6 +4178,7 @@ function finishDisque(){
 function closeFinish(){
   mascotteStop();
   document.getElementById('finish').classList.remove('on');
+  if(pendingStreak){ pendingStreak=false; showStreak(); return; } // l'épi vient d'être planté → les 7 épis (rebranché le 10/08, oui de Myriam) ; streakContinue reprend la chaîne compte/retour
   if(obAccountPending){ obAccountPending=false; showObAccount(); return; } // 1re leçon d'onboarding → proposer le compte
   returnFromPlayer();
 }
@@ -4215,7 +4225,8 @@ function finishExam(){
       discsFor(k).forEach((d,i)=>{ S.done[dkey(k,i)]=true; });
     }
     S.xp+=30;
-    save();   // la série, elle, ne vient plus que de l'objectif quotidien (10/08)
+    validerJour(); pendingStreak=feteJourPending; feteJourPending=false;
+    save();
   }
   document.getElementById('player').classList.remove('on');
   document.querySelector('#finish .fin-score').style.display=''; // idem examen : le % revient
@@ -7421,7 +7432,9 @@ function finishReview(){
   S.hearts=Math.min(HEARTS_MAX,S.hearts+gain);S.bigNext=0;S.heartDay=today();
   if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+gain+' cœur'+(gain>1?'s':'')+', ماشاء الله !'),600);
   checkBadges({review:true});
-  bumpConstance('revise');   // la série, elle, ne vient plus que de l'objectif quotidien (10/08)
+  validerJour();                                     // une révision terminée valide AUSSI le jour (règle adoucie)
+  pendingStreak=feteJourPending; feteJourPending=false;
+  bumpConstance('revise');
   save();
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
   document.getElementById('player').classList.remove('on');
