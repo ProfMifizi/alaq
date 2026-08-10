@@ -242,6 +242,7 @@
     box-shadow:inset -6px -8px 14px rgba(0,0,0,.22), inset 6px 8px 12px rgba(255,255,255,.10);
     font-family:var(--ar);font-size:32px;color:var(--gold2);will-change:transform;
     transform:translate(var(--x,0px),var(--y,0px))}
+  .bul.frm{width:54px;height:54px;font-size:24px}
   .bul.pop{animation:bulpop .17s cubic-bezier(.3,1.8,.5,1) forwards;pointer-events:none}
   /* ⚠️ la translation DOIT être reprise dans CHAQUE étape : une @keyframes qui déclare
      `transform` remplace celui de l'élément — sans ça la bulle éclate en haut à gauche. */
@@ -1294,9 +1295,12 @@ body.ciel #skyWrap{opacity:1}
 #skyCarav.arrive{animation:none}
 @keyframes cmarche{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
 /* la lueur était plus large que la marge droite : son halo se coupait net
-   sur le bord de l'écran. Elle rentre, et le campement recule avec elle. */
+   sur le bord de l'écran. Elle rentre, et le campement recule avec elle.
+   ⚠️ centré sur le bord BAS (at 50% 100%), le dégradé était à son maximum là où
+   la boîte s'arrête : ligne horizontale dure au ras des flammes. Le centre rentre
+   au milieu et les rayons s'éteignent (72 % de 46 %) AVANT chaque bord. */
 #skyFire{position:absolute;right:10px;width:150px;height:104px;opacity:0;
-  background:radial-gradient(52% 62% at 50% 100%,rgba(235,140,66,.5),rgba(235,140,66,0) 72%)}
+  background:radial-gradient(52% 46% at 50% 50%,rgba(235,140,66,.5),rgba(235,140,66,0) 72%)}
 #skyCamp{position:absolute;right:56px;width:58px;height:49px;opacity:0}
 #skyCamp .fl{transform-origin:60px 86px}
 #skyCamp .f1{animation:cfl1 1.15s ease-in-out infinite}
@@ -2264,22 +2268,31 @@ function buildSpot(U){
 }
 
 function buildForms(U){
+  /* Refonte du 10/08 (tâche Notion « UNITÉ 1 - LEÇON 3 », preview v3 validée par Myriam),
+     pour les 7 unités d'un coup : chaque lettre suit un arc complet — on la GLISSE dans ses
+     4 cases (l'exercice de la leçon 1), puis on l'ÉCRIT dans ses 4 formes (isolée · début ·
+     milieu · fin — « pédagogiquement on n'a pas le choix »), puis 24 bulles-formes (chaque
+     forme deux fois) et les deux quiz de la leçon 2. Titres courts jamais lus (mute). */
   const q=[];
-  U.letters.forEach(L=>q.push({type:'formsintro',L}));
-  // début(1)/milieu(2)/fin(3) uniquement — jamais isolée ; on garantit que les 3 apparaissent
+  U.letters.forEach(L=>{
+    q.push({type:'formslide',L,title:'Fais glisser la lettre '+U.alpha[L].n});
+    q.push({type:'trace',L});
+    /* les lettres qui ne s'attachent qu'à droite (أ و ر د ذ…) n'ont que DEUX formes
+       réelles : début = isolée et milieu = fin. On n'écrit que les formes distinctes —
+       leurs tracés « début/milieu » n'existent d'ailleurs pas dans le pointage de Myriam. */
+    (joinsL(L)?[1,2,3]:[3]).forEach(p=>q.push({type:'trace',L,pos:p}));
+  });
+  q.push({type:'bulles',lettres:U.letters.slice(),formes:true});
   let pc=Math.floor(Math.random()*3); const nextPos=()=>1+(pc++%3);
-  // Mode A : un son → 3 lettres, chacune sous une position DIFFÉRENTE (début, milieu, fin)
-  for(let r=0;r<3;r++)shuffle(U.letters).forEach(L=>{
+  // le nom sonne tout seul (voix choisie), les 3 réponses sont des formes déguisées
+  shuffle(U.letters).forEach(L=>{
     const ps=shuffle([1,2,3]);
-    q.push(mcq({
-      prompt:'Écoute… puis touche la bonne lettre 🎭',
-      audio:L,graded:true,grid:'grid3',answer:L,
+    q.push(mcq({prompt:'Choisis la bonne lettre',mute:true,spk:L,graded:true,grid:'grid3',answer:L,
       options:balancePos(shuffle(U.letters).map((x,k)=>({ar:formGlyph(x,ps[k%3]),key:x})),L)}));
   });
-  // Mode B : une lettre déguisée → 3 sons (on cycle début → milieu → fin)
-  for(let r=0;r<3;r++)shuffle(U.letters).forEach(L=>q.push(mcq({
-    prompt:'Quel son fait cette lettre déguisée ? 🎭',
-    glyph:formGlyph(L,nextPos()),graded:true,grid:'grid3',answer:L,
+  // une forme en grand, 3 haut-parleurs qui sonnent de droite à gauche (grille rtl)
+  shuffle(U.letters).forEach(L=>q.push(mcq({prompt:'Choisis le bon nom de la lettre',mute:true,
+    glyph:formGlyph(L,nextPos()),spkOpts:true,graded:true,grid:'grid3 rtl3',answer:L,
     options:balancePos(shuffle(U.letters).map(x=>({snd:x,key:x})),L)})));
   return q;
 }
@@ -3326,7 +3339,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='correctifs-s02c · retours bureau du 10/08 : caravane jusqu\u2019au campement, feu agrandi, aide sur une case, main vers le haut sans flèche · sw v106';
+const BUILD='lecon3-formes-v1 · le\u00e7on 3 refondue (22 \u00e9crans, 7 unit\u00e9s), caravane born\u00e9e au campement, halo recentr\u00e9, sons Mustafa le\u00e7on 1 · sw v107';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3595,10 +3608,14 @@ function renderStep(){
   }
 
   if(st.type==='bulles'){
+    // leçon 3 : chaque forme DISTINCTE apparaît deux fois (4 formes si la lettre
+    // s'attache des deux côtés, 2 sinon) — même règle que le sac de bulStart
+    var totB=st.formes?st.lettres.reduce(function(n,L){return n+(joinsL(L)?8:4);},0)
+                      :st.lettres.length*st.parLettre;
     body.innerHTML='<div class="q-title">Éclate les bulles</div>'+
-      '<div id="bul-c">'+(st.lettres.length*st.parLettre)+'</div>'+
+      '<div id="bul-c">'+totB+'</div>'+
       '<div class="bulzone" id="bulzone"></div>';
-    setTimeout(function(){ bulStart(st.lettres,st.parLettre); },40);
+    setTimeout(function(){ bulStart(st.lettres,st.parLettre,st.formes); },40);
     return;
   }
 
@@ -4230,7 +4247,10 @@ function quandSonFini(cb){ // rappelle cb à la fin du son EN COURS (filet 2,5 s
     setTimeout(go,2500);
   },150);
 }
-function jouerF(f,fallback,fin){ // un mp3 précis (voix IA « -f »), repli synthèse, rappel de fin
+function jouerF(f,fallback,fin){ // un mp3 précis (voix IA), repli synthèse, rappel de fin
+  // le sélecteur de voix vaut AUSSI ici : chaque « -f » a son jumeau « -h » (lot du 10/08) ;
+  // madrasatoun garde son nom historique côté Habibah (cache MEDIA), le -h est un fichier neuf
+  if(VOIX_G==='h')f=(f==='mot-madrasatoun.mp3')?'mot-madrasatoun-h.mp3':f.replace(/-f\.mp3$/,'-h.mp3');
   stopAudio();const gen=_sndGen;
   try{
     const a=audioBeni('audios-app-alaq/'+f);_curAudio=a;let ok=false,fini=false;
@@ -4844,17 +4864,29 @@ function bulPose(b){
   b.el.style.setProperty('--x',b.x.toFixed(1)+'px');
   b.el.style.setProperty('--y',b.y.toFixed(1)+'px');
 }
-function bulStart(lettres,parLettre){
+function bulStart(lettres,parLettre,formes){
   var z=document.getElementById('bulzone'); if(!z)return;
   BUL.W=z.clientWidth; BUL.H=z.clientHeight; BUL.items=[]; BUL.chocs=0;
   var sac=[];
-  lettres.forEach(function(L){ for(var i=0;i<parLettre;i++)sac.push(L); });
+  if(formes){ // leçon 3 : chaque forme DISTINCTE deux fois (24 bulles pour م ل ن)
+    lettres.forEach(function(L){
+      (joinsL(L)?[0,1,2,3]:[0,3]).forEach(function(p){
+        sac.push({L:L,g:formGlyph(L,p)});sac.push({L:L,g:formGlyph(L,p)});
+      });
+    });
+  }else{
+    lettres.forEach(function(L){ for(var i=0;i<parLettre;i++)sac.push({L:L,g:L}); });
+  }
   shuffle(sac);
   BUL.reste=sac.length;
+  /* 24 bulles au lieu de 15 : elles rapetissent pour garder l'air (preview v3 validée) ;
+     le rayon vit dans BUL.R — la physique et l'éclat le lisent, jamais de 32 en dur */
+  BUL.R=formes?27:32;
   var R=BUL.R, lignes=Math.ceil(sac.length/3);
-  sac.forEach(function(L,i){
+  sac.forEach(function(it,i){
+    var L=it.L;
     var el=document.createElement('button');
-    el.className='bul'; el.textContent=L; el.setAttribute('aria-label',L);
+    el.className='bul'+(formes?' frm':''); el.textContent=it.g; el.setAttribute('aria-label',L);
     var col=i%3, rang=Math.floor(i/3);
     var b={el:el,L:L,
       x:col*(BUL.W-2*R)/2*0.98+(Math.random()-0.5)*16,
@@ -4943,7 +4975,7 @@ function plop(){
 /* L'éclat : l'onde de la paroi qui se détend, puis dix gouttelettes qui retombent. */
 function bulEclat(x,y){
   var z=document.getElementById('bulzone'); if(!z)return;
-  var cx=x+32, cy=y+32;
+  var cx=x+BUL.R, cy=y+BUL.R;
   var o=document.createElement('i'); o.className='onde';
   o.style.left=cx+'px'; o.style.top=cy+'px';
   z.appendChild(o);
@@ -7458,11 +7490,16 @@ function peindre(t){
   // ordinateur : la caravane marche jusqu'au campement (Myriam 10/08) ; mobile : elle
   // s'arrête avant le feu, comme validé — passer derrière ne rendait rien
   var xc=4+av*((W.clientWidth>=700)?72:52);
+  /* « jusqu'au campement », jamais DESSUS : l'arrivée est un % de la colonne alors
+     que le campement est ancré en PIXELS au bord droit — sur une colonne de 700 à
+     ~960 px, 76 % tombait dans le feu. On borne sur la position MESURÉE du campement. */
+  var lim=(CA.offsetLeft-(CV.offsetWidth||46)-8)/W.clientWidth*100;
+  if(lim>4 && xc>lim) xc=lim;
   CV.style.left=xc+'%';
   poserSurLaCrete(CV, xc+5, 2);          // 5 % : le milieu de la bête, 2 px d'enfoncement
   CV.classList.toggle('arrive', av>=0.998);
   poserSurLaCrete(CA, 80, 4);
-  poserSurLaCrete(FI, 80, -30);
+  poserSurLaCrete(FI, 80, 44);   // le cœur du halo au milieu des flammes, la lueur lèche le sable
   ombre(F);
   var R=document.documentElement.style;
   R.setProperty('--ciel-ink',rs(F.ink));
