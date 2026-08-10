@@ -63,6 +63,7 @@ const INSTR_LIST = litteral('INSTR_LIST');   // [slug, texte français]
 const LTRANS     = litteral('LTRANS');       // lettre arabe -> translittération du nom de fichier
 const UNITS      = litteral('UNITS');        // les 7 unités : lettres + mots
 const NOMS_ALLAH = litteral('NOMS_ALLAH');   // les Noms d'Allah (hors unités)
+const VOIX       = litteral('VOIX');         // les récitateurs — loc:1 = hébergé (10/08)
 
 /* les 9 disques (= leçons) d'une unité, dans l'ordre pédagogique */
 const DISQUES = [...src.slice(src.indexOf('const DISQUES=['))
@@ -71,6 +72,17 @@ const DISQUES = [...src.slice(src.indexOf('const DISQUES=['))
 /* ---------- fichiers présents / pré-cachés ---------- */
 const presents = new Set(fs.readdirSync(AUDIOS).filter(f => f.endsWith('.mp3')));
 const tailles  = {}; presents.forEach(f => { tailles[f] = fs.statSync(path.join(AUDIOS, f)).size; });
+/* les récitations HÉBERGÉES (10/08) : audios-app-alaq/recit/<voix>/<n°>.mp3 */
+const RECIT = path.join(AUDIOS, 'recit');
+if (fs.existsSync(RECIT)) for (const dossier of fs.readdirSync(RECIT)) {
+  const dp = path.join(RECIT, dossier);
+  if (!fs.statSync(dp).isDirectory()) continue;
+  for (const f of fs.readdirSync(dp).filter(x => x.endsWith('.mp3'))) {
+    const rel = 'recit/' + dossier + '/' + f;
+    presents.add(rel);
+    tailles[rel] = fs.statSync(path.join(dp, f)).size;
+  }
+}
 const precache = new Set([...fs.readFileSync(SW, 'utf8')
   .matchAll(/"audios-app-alaq\/([^"]+\.mp3)"/g)].map(m => m[1]));
 // les versions IA qui attendent encore l'oreille de Myriam
@@ -173,6 +185,14 @@ for (const [f, n] of Object.entries(nomsAr))
   pousse({ fichier: f, arabe: n.ar, sens: n.fr, translit: '', emoji: '',
            famille: 'Nom d’Allah', unite: null, lecons: ['Les Noms d’Allah'] });
 
+/* 3b · les récitations hébergées : 7 versets × chaque voix loc:1 (décision de Myriam
+   du 10/08 — provisoire tant que l'app est gratuite ; les autres voix restent streamées) */
+VOIX.filter(v => v.loc).forEach(v => { for (let n = 1; n <= 7; n++)
+  pousse({ fichier: 'recit/' + v.id + '/' + n + '.mp3', arabe: v.ar || '',
+           sens: v.fr + ' — Fātiḥa, verset ' + n, translit: '', emoji: '',
+           famille: 'Récitation', unite: null, lecons: ['Dans la Fātiḥa', 'Le Qorān'] });
+});
+
 /* 4 · ce qui reste dans le dossier sans que rien ne l'appelle : les ORPHELINS.
    Les versets sont diffusés depuis la source du récitateur (playVerse → qariUrl) :
    les fatiha-*.mp3 déposés en local ne sont donc jamais joués. */
@@ -207,6 +227,7 @@ function etat(l) {
   l.precache = precache.has(l.fichier);
   l.attente  = attente.has(l.fichier);                 // une version IA dort dans audios-generes-a-valider/
   l.statut = !l.present ? 'manquant'                   // → l'app parle avec la voix du téléphone
+           : l.famille === 'Récitation' ? 'ok'          // jamais pré-cachée : mise en cache À L'ÉCOUTE (MEDIA)
            : l.famille === 'Orphelin' || l.famille === 'Orpheline' ? 'orphelin'
            : !l.precache ? 'hors-cache'                // existe, mais ne part pas hors ligne
            : 'ok';
@@ -214,7 +235,7 @@ function etat(l) {
 }
 lignes.forEach(etat); consignes.forEach(etat);
 
-const ordreFam = ['Mot', 'Voyelle', 'Nom de lettre', 'Son de lettre', 'Syllabe courte', 'Syllabe longue', 'Nom d’Allah', 'Verset', 'Effet sonore', 'Orphelin'];
+const ordreFam = ['Mot', 'Voyelle', 'Nom de lettre', 'Son de lettre', 'Syllabe courte', 'Syllabe longue', 'Nom d’Allah', 'Récitation', 'Verset', 'Effet sonore', 'Orphelin'];
 lignes.sort((a, b) => (a.unite || 99) - (b.unite || 99)
   || ordreFam.indexOf(a.famille) - ordreFam.indexOf(b.famille)
   || a.fichier.localeCompare(b.fichier));

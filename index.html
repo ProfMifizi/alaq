@@ -20,7 +20,7 @@
 <meta name="apple-mobile-web-app-title" content="ALAQ">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#252120; --panel:#322B28; --panel2:#3C342F; --line:#4A403A;
@@ -37,7 +37,10 @@
     --lock:#5A504A;
     --ui:'Nunito',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     --ar:'Noto Naskh Arabic',serif;       /* vocabulaire, exercices, lecture, tracé */
-    --quran:'Amiri',serif;                /* UNIQUEMENT le texte du Qorān */
+    --quran:'Noto Naskh Arabic',serif;    /* Amiri RETIRÉ (Myriam 10/08) : la calligraphie
+                                             perdait les primo-lecteurs — une seule police
+                                             arabe partout, la calligraphie reviendra en
+                                             exercice dédié un jour */
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{touch-action:manipulation;overscroll-behavior:none} /* iOS : pas de zoom au double-tap ni de rebond élastique */
@@ -230,10 +233,11 @@
   .p-body.p-bulles{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
   .p-body.p-bulles .bulzone{flex:1;height:auto;margin-bottom:0;border-radius:16px 16px 0 0}
   /* le compteur : pastille dorée qui DÉCOMPTE les bulles restantes (Myriam 10/08) */
-  #bul-c{width:max-content;margin:-6px auto 4px;background:rgba(220,144,46,.16);
+  #bul-c,#spot-c{width:max-content;margin:-6px auto 4px;background:rgba(220,144,46,.16);
     border:1.5px solid var(--gold-d);border-radius:999px;padding:4px 16px;
     font-size:22px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums}
-  #bul-c.tick{animation:bultick .3s cubic-bezier(.3,1.8,.5,1)}
+  #spot-c{margin:0 auto 10px}
+  #bul-c.tick,#spot-c.tick{animation:bultick .3s cubic-bezier(.3,1.8,.5,1)}
   @keyframes bultick{45%{transform:scale(1.25)}}
   .bul{position:absolute;left:0;top:0;width:64px;height:64px;border-radius:50%;
     display:grid;place-items:center;cursor:pointer;
@@ -243,6 +247,7 @@
     font-family:var(--ar);font-size:32px;color:var(--gold2);will-change:transform;
     transform:translate(var(--x,0px),var(--y,0px))}
   .bul.frm{width:54px;height:54px;font-size:24px}
+  .bul.syl{width:60px;height:60px;font-size:26px} /* 18 bulles-syllabes (leçons 5/6) */
   .bul.pop{animation:bulpop .17s cubic-bezier(.3,1.8,.5,1) forwards;pointer-events:none}
   /* ⚠️ la translation DOIT être reprise dans CHAQUE étape : une @keyframes qui déclare
      `transform` remplace celui de l'élément — sans ça la bulle éclate en haut à gauche. */
@@ -288,9 +293,31 @@
   .ag.seen{border-color:var(--gold);color:var(--gold2)}
   .ag:active{background:#3a312b}
 
+  /* l'anneau de l'objectif quotidien — SEUL, dans le Profil (preview v2 validée 10/08) */
+  .obj-ring{display:grid;place-items:center;margin:14px 0}
+  .obj-ring .anneau{position:relative;width:118px;height:118px;display:grid;place-items:center}
+  .obj-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+  .obj-ring svg circle{fill:none;stroke-width:9}
+  .obj-ring .fond{stroke:var(--panel2)}
+  .obj-ring .prog{stroke:var(--gold);stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.3,1,.4,1)}
+  .obj-ring .mn{font-size:23px;font-weight:900;color:var(--gold2);text-align:center;line-height:1.05}
+  .obj-ring .mn small{display:block;font-size:11px;color:var(--muted);font-weight:700}
+  .obj-ring .mn b{display:block;font-size:26px;line-height:1}
+  .obj-ring .fete .prog{stroke:var(--gold2);filter:drop-shadow(0 0 8px rgba(232,169,79,.75))}
+  .obj-ring .obj-epi{position:absolute;top:-7px;right:-3px;height:30px}
   .verse{direction:rtl;font-family:var(--quran);font-size:36px;line-height:2.1;text-align:center;
     background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 12px;margin-bottom:6px}
   .vl{border-radius:6px;padding:0}
+  /* leçon 4 v3 (validée 10/08) : haut-parleur dessiné + nom du récitateur SANS boîte
+     (le toucher OUVRE le sélecteur) + loupe Artlist ; la loupe agrandit le verset */
+  .vtools{display:flex;align-items:center;justify-content:center;gap:8px;margin:-8px 0 10px}
+  .vspk{background:none;border:none;padding:2px;display:flex;align-items:center;gap:7px;color:var(--gold)}
+  .vspk .spk{width:44px;height:29px}
+  .qari-nom{font-size:13px;color:var(--muted);font-weight:700}
+  .vloupe{background:none;border:none;padding:2px;margin-left:14px}
+  .vloupe img{height:30px;width:30px;display:block;transition:transform .2s}
+  .vloupe.zoomed img{transform:scale(1.18)}
+  .verse.zoomed{font-size:52px;line-height:2.2}
   .vl.hit{color:var(--gold);text-shadow:0 0 14px rgba(220,144,46,.45)}
   .vl.miss{animation:vlmiss .38s ease-out}
   @keyframes vlmiss{
@@ -300,7 +327,7 @@
   .vw{display:inline-block;margin:0 10px}
   .zoom-btn{display:block;margin:0 auto 12px;background:var(--panel);border:1px solid var(--line);
     color:var(--gold2);font-weight:800;font-size:14px;border-radius:12px;padding:8px 16px}
-  .verse.zoomed{font-size:60px;line-height:2.4}
+
 
   .frow{display:flex;gap:10px;direction:rtl;justify-content:center;margin:10px 0 6px}
   .fcell{flex:1;max-width:86px;background:var(--panel);border:2px solid var(--line);border-radius:14px;
@@ -523,7 +550,9 @@
   @keyframes fbpop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
   @keyframes fbshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
   /* ===== ⚑ Signalements (08/08) — préview validée : drapeau en haut à droite du bandeau bas ===== */
-  .p-flag{position:absolute;top:4px;right:8px;background:none;border:none;color:var(--coral);
+  /* top NÉGATIF : le drapeau flotte AU-DESSUS du bandeau (il recouvrait le coin de
+     CONTINUER/VALIDER — Myriam 10/08, tâche leçon 4) */
+  .p-flag{position:absolute;top:-42px;right:8px;background:none;border:none;color:var(--coral);
     opacity:1;font-size:29px;line-height:1;padding:4px 8px;cursor:pointer;z-index:3}
   #player.vfmode .p-flag{display:none}
   .sig-voile{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.25s;z-index:90}
@@ -1540,7 +1569,7 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
   <div class="p-top">
     <button class="p-close" onclick="quitDisque()">✕</button>
     <div class="pbar"><i id="pbar-i"></i></div>
-    <div class="hearts">❤️ <span id="p-hearts">5</span></div>
+    <div class="hearts"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-coeur-v1.png" alt=""> <span id="p-hearts">5</span></div>
   </div>
   <div class="p-body" id="p-body"></div>
   <div class="p-foot" id="p-foot">
@@ -1554,7 +1583,7 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
 <div class="qsel" id="qsel" onclick="qariBulleOff()">
 <div class="qsel-top"><button class="qx" onclick="closeQari()">✕</button><h3>Récitateur</h3>
 <button class="qi" id="qbi" onclick="event.stopPropagation();qariBulleTog()">i</button></div>
-<div class="qbulle" id="qbulle">Ces voix sont diffusées depuis leur source. Elles nécessitent une connexion internet contrairement aux leçons qui sont accessibles hors ligne.</div>
+<div class="qbulle" id="qbulle">Dix voix sont enregistrées dans l'app ; les sept autres sont diffusées depuis leur source. Toutes demandent une connexion internet — seules les leçons fonctionnent hors ligne.</div>
 <div class="qpin" id="qpin"></div>
 <div class="qlist" id="qlist"></div>
 </div>
@@ -1790,6 +1819,7 @@ const LOGO='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAYGBgYHBgcIC
 var ICONES={
   'tb-epi':'icone-tb-epi-v1.png',
   'tb-coeur':'icone-tb-coeur-v1.png',
+  'loupe':'icone-loupe-v1.png',
   'tb-lanterne':'icone-tb-lanterne-v1.png',
   'dromadaire':'icone-ciel-dromadaire-v1.png',
   'porte':'icone-porte-v1.png',
@@ -2298,41 +2328,44 @@ function buildForms(U){
 }
 
 function sylHK(L,h){return L+h;}
-function buildHarakat(U){
+/* ══ LEÇONS 5 & 6 v2 — refonte du 10/08 (previews v3 validées par Myriam), MÊME moteur.
+   13 écrans pour 3 lettres, DYNAMIQUE pour les 7 unités : un « fuse » par lettre (glisser
+   les harakat/prolongations — l'exercice de la leçon 1), puis les bulles-syllabes (chaque
+   syllabe ×2, le son d'une bulle est SA syllabe), puis chaque syllabe testée UNE fois —
+   moitié haute « Choisis la bonne écriture » (son → écrit), moitié basse « Choisis le bon
+   son » (écrit → 3 haut-parleurs rtl). Distracteurs : même lettre autre signe + autre
+   lettre même signe. Le son passe par sayLetterName → jouerSyl (Habibah -f d'abord,
+   la voix de Myriam en repli). */
+function leconSyllabes(U,paires,fabrique,titreFuse){
   const q=[];
-  U.letters.forEach(L=>{
-    const syls=HK.map(h=>L+h[0]);
-    q.push({type:'explore',items:HK.map(h=>({ar:L+h[0],lab:U.lat[L]+h[1],say:L+h[0]})),min:3,
-      title:''});
-    // 3 tours : écoute → bonne syllabe
-    for(let r=0;r<3;r++){
-      const a1=syls[r%syls.length];
-      q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a1,graded:true,grid:'grid3',answer:a1,
-        options:balancePos(shuffle(syls).map(s=>({ar:s,key:s})),a1)}));
-    }
-    // 3 tours : lis la syllabe → bon son
-    for(let r=0;r<3;r++){
-      const a2=syls[r%syls.length];
-      q.push(mcq({prompt:'Comment se lit cette syllabe ?',glyph:a2,graded:true,grid:'grid3',answer:a2,
-        options:balancePos(shuffle(syls).map(s=>({snd:s,key:s})),a2)}));
-    }
+  U.letters.forEach(L=>q.push({type:'fuse',L,mute:true,title:titreFuse+' '+U.alpha[L].n,
+    jeux:paires.map(p=>({chip:p[0],fus:fabrique(L,p[0])}))}));
+  const syls=[];U.letters.forEach(L=>paires.forEach(p=>syls.push(fabrique(L,p[0]))));
+  q.push({type:'bulles',syllabes:syls.slice()});
+  const ordre=shuffle(syls.slice()), nEcrit=Math.ceil(ordre.length/2);
+  ordre.forEach((s,k)=>{
+    /* retrouver (lettre, signe) en BALAYANT — jamais via s[0] : les graphies corrigées
+       du hamza (إِ, آ) ne commencent pas par la lettre de la table (audit 10/08) */
+    let L=null,pMien=null;
+    U.letters.forEach(l=>paires.forEach(p=>{ if(fabrique(l,p[0])===s){L=l;pMien=p[0];} }));
+    const pAutre=shuffle(paires.filter(p=>p[0]!==pMien))[0][0];
+    const lAutre=shuffle(U.letters.filter(x=>x!==L))[0];
+    const opts=[s,fabrique(L,pAutre),fabrique(lAutre,pMien)];
+    if(k<nEcrit)q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:s,graded:true,grid:'grid3',answer:s,
+      options:balancePos(shuffle(opts.map(x=>({ar:x,key:x}))),s)}));
+    else q.push(mcq({prompt:'Choisis le bon son',mute:true,glyph:s,spkOpts:true,graded:true,grid:'grid3 rtl3',answer:s,
+      options:balancePos(shuffle(opts.map(x=>({snd:x,key:x}))),s)}));
   });
-  // Entraînement final : TOUTES les lettres × TOUTES les harakats, mélangées
-  const ALL=[];U.letters.forEach(L=>HK.forEach(h=>ALL.push(L+h[0])));
-  for(let i=0;i<8;i++){
-    const a=ALL[i%ALL.length];
-    q.push(mcq({prompt:'Quiz mélangé : écoute… puis touche',audio:a,graded:true,grid:'grid3',answer:a,
-      options:balancePos(shuffle([a, ...shuffle(ALL.filter(x=>x!==a)).slice(0,2)]).map(s=>({ar:s,key:s})),a)}));
-  }
-  for(let i=0;i<4;i++){
-    const a=ALL[(i*2)%ALL.length];
-    q.push(mcq({prompt:'Comment se lit cette syllabe ?',glyph:a,graded:true,grid:'grid3',answer:a,
-      options:balancePos(shuffle([a, ...shuffle(ALL.filter(x=>x!==a)).slice(0,2)]).map(s=>({snd:s,key:s})),a)}));
-  }
   return q;
 }
+function buildHarakat(U){ return leconSyllabes(U,HK,function(L,h){
+  return (L==='أ'&&h==='\u0650')?'إِ':L+h;   // la kasra porte le hamza DESSOUS : أِ n'existe pas (audit 10/08)
+},'Glisse les harakat sur la lettre'); }
 
-function buildMadd(U){
+function buildMadd(U){ return leconSyllabes(U,MD,function(L,m){
+  return (L==='أ'&&m==='ا')?'آ':maddSyl(L,m);  // hamza + alif = alif madda (آ), jamais أَا
+},'Glisse les prolongations sur la lettre'); }
+function buildMaddANCIEN(U){ // conservé quelques jours en référence, plus appelé — à jeter avec l'accord de Myriam
   const q=[];
   U.letters.forEach(L=>{
     const syls=MD.map(m=>maddSyl(L,m[0]));
@@ -2754,7 +2787,12 @@ let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(
    ⚠️ Ce choix ne touche QUE ce qui existe dans les deux voix — consignes, noms de lettres,
    félicitations. Les voyelles et syllabes (a/i/ou courts et prolongés) restent la voix de
    Myriam : un TTS n'a jamais su les dire (décision ferme du 07/08). */
-let VOIX_G=(function(){try{return localStorage.getItem('alaq_voix')==='h'?'h':'f'}catch(e){return 'f'}})();
+/* ⚠️ VOIX HOMME MASQUÉE (décision de Myriam, 10/08 au soir) : aucune voix d'homme testée
+   (Mustafa, Omar, le banc de 8, Khalil) n'a passé son oreille sur les syllabes. Habibah pour
+   toutes. Les fichiers -h restent servis et toute la mécanique est intacte : remettre
+   VOIX_HOMME_ACTIVE à true rallume le sélecteur ET la relecture du choix mémorisé. */
+const VOIX_HOMME_ACTIVE=false;
+let VOIX_G=(function(){try{return (VOIX_HOMME_ACTIVE&&localStorage.getItem('alaq_voix')==='h')?'h':'f'}catch(e){return 'f'}})();
 function setVoix(g){
   VOIX_G=(g==='h')?'h':'f';
   try{localStorage.setItem('alaq_voix',VOIX_G)}catch(e){}
@@ -2783,8 +2821,9 @@ function showNoHearts(){
   // Le titre suffit (Myriam 09/08). Les deux paragraphes disaient ce que les boutons font déjà ;
   // le sens des 7 cœurs (les sept versets de la Fātiḥa) DISPARAÎT de l'app — décision assumée.
   let h='';
-  if(hasRev)h+='<button class="cta" style="max-width:300px" onclick="noHeartsReview()">RÉVISER +3 ❤️</button>';
-  if(L)h+='<button class="cta" style="max-width:300px'+(hasRev?';background:none;color:var(--gold2);border:2px solid var(--gold-d);margin-top:10px':'')+'" onclick="noHeartsRedo()">RECOMMENCER +3 ❤️</button>';
+  var co=icoImg('tb-coeur','','height:18px;vertical-align:-3px'); // le MÊME cœur que la navbar — registre ICONES, jamais d'emoji (Myriam 10/08)
+  if(hasRev)h+='<button class="cta" style="max-width:300px" onclick="noHeartsReview()">RÉVISER +3 '+co+'</button>';
+  if(L)h+='<button class="cta" style="max-width:300px'+(hasRev?';background:none;color:var(--gold2);border:2px solid var(--gold-d);margin-top:10px':'')+'" onclick="noHeartsRedo()">RECOMMENCER +3 '+co+'</button>';
   h+='<button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="closeNoHearts()">PLUS TARD</button>';
   document.getElementById('nh-actions').innerHTML=h;
   document.getElementById('noHearts').classList.add('on'); S.bigNext=1; save(); // la 1re recharge (révision OU reprise) donnera +3
@@ -3181,6 +3220,40 @@ function rollConstance(){
   }
   save();
 }
+/* ══ L'OBJECTIF QUOTIDIEN (preview v2 validée le 10/08) ══
+   Les minutes RÉELLES d'exercice (lecteur ouvert, page visible) remplissent l'anneau du
+   Profil. L'objectif atteint VALIDE l'épi du jour : c'est LUI qui fait avancer la série —
+   les fins de leçon/révision ne la bumpent plus. S.lastDay garde son sens (dernier jour
+   validé) : la casse de série et le ghufrān fonctionnent inchangés. */
+let feteJourPending=false;   // l'écran « 7 épis » se montre après la leçon où l'objectif est tombé
+function objMinutes(){ var t=today(); if(S.objDay!==t){S.objDay=t;S.objMin=0;S.objSec=0;} return S.objMin||0; }
+function objGoal(){ var m=parseInt((S.onb&&S.onb.objectif)||'',10); return (m>=5)?m:10; }  // 10 min par défaut
+function objAddSec(sec){
+  var avant=objMinutes()>=objGoal();          // objMinutes remet aussi les compteurs à zéro au changement de jour
+  S.objSec=(S.objSec||0)+sec;
+  if(S.objSec>=60){ S.objMin=(S.objMin||0)+Math.floor(S.objSec/60); S.objSec%=60;
+    save(); }                                 // on n'écrit qu'à la MINUTE pleine — pas d'upsert nuage toutes les 15 s (audit 10/08)
+  if(!avant&&(S.objMin||0)>=objGoal())objFete();
+}
+function objFete(){
+  var t=today(), y=yesterday();
+  if(S.lastDay!==t){ S.streak=(S.lastDay===y)?S.streak+1:1; S.lastDay=t; feteJourPending=true; }
+  save();
+  try{refreshStats();}catch(e){}
+  try{confettiBurst();}catch(e){}
+  try{playSfx('bonne-reponse');}catch(e){}
+  try{toast(icoImg('tb-epi','','height:16px;vertical-align:-3px')+' Objectif du jour atteint — épi validé !');}catch(e){}
+  try{checkBadges({});}catch(e){}             // les badges de série (3/7/30…) tombent au bon moment
+}
+function objRingHTML(){ // l'anneau, SEUL, entre la carte du rang et « Ton parcours »
+  var m=objMinutes(), g=objGoal(), ok=m>=g, C=2*Math.PI*50, off=C*(1-Math.min(1,m/g));
+  return '<div class="obj-ring"><div class="anneau'+(ok?' fete':'')+'" title="Objectif quotidien : '+g+' min — se règle dans Paramètres">'+
+    '<svg viewBox="0 0 118 118"><circle class="fond" cx="59" cy="59" r="50"/>'+
+    '<circle class="prog" cx="59" cy="59" r="50" style="stroke-dasharray:'+C.toFixed(1)+';stroke-dashoffset:'+off.toFixed(1)+'"/></svg>'+
+    (ok?'<div class="mn"><b>✓</b><small>'+m+' min</small></div>'+icoImg('tb-epi','obj-epi')
+       :'<div class="mn">'+m+'<small>/ '+g+' min</small></div>')+
+    '</div></div>';
+}
 function bumpConstance(kind){
   rollConstance();
   var f=S.consFlags||(S.consFlags={});
@@ -3339,7 +3412,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='lecon3-formes-v1 · le\u00e7on 3 refondue (22 \u00e9crans, 7 unit\u00e9s), caravane born\u00e9e au campement, halo recentr\u00e9, sons Mustafa le\u00e7on 1 · sw v107';
+const BUILD='lecons456-objectif-v1 \u00b7 le\u00e7ons 4/5/6 refondues pour les 7 unit\u00e9s (previews v3 valid\u00e9es), anneau de l\u2019objectif au Profil (l\u2019\u00e9pi vient de l\u2019objectif), r\u00e9citations locales, Habibah partout \u00b7 sw v109';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3466,7 +3539,7 @@ function startDisque(u,i,recharge){
   total=QUEUE.filter(s=>s.graded).length;
   renderStep();
 }
-function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();vfStop();window._vf=null;REVIEW=false;REVSES=null;REVFREE=false;RECHARGE=false;returnFromPlayer();}
+function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();window._spotVi=null;vfStop();window._vf=null;REVIEW=false;REVSES=null;REVFREE=false;RECHARGE=false;returnFromPlayer();}
 function progress(){document.getElementById('pbar-i').style.width=
   (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
 function advance(){stopAudio();qi++;renderStep();}
@@ -3610,12 +3683,13 @@ function renderStep(){
   if(st.type==='bulles'){
     // leçon 3 : chaque forme DISTINCTE apparaît deux fois (4 formes si la lettre
     // s'attache des deux côtés, 2 sinon) — même règle que le sac de bulStart
-    var totB=st.formes?st.lettres.reduce(function(n,L){return n+(joinsL(L)?8:4);},0)
+    var totB=st.syllabes?st.syllabes.length*2
+                      :st.formes?st.lettres.reduce(function(n,L){return n+(joinsL(L)?8:4);},0)
                       :st.lettres.length*st.parLettre;
     body.innerHTML='<div class="q-title">Éclate les bulles</div>'+
       '<div id="bul-c">'+totB+'</div>'+
       '<div class="bulzone" id="bulzone"></div>';
-    setTimeout(function(){ bulStart(st.lettres,st.parLettre,st.formes); },40);
+    setTimeout(function(){ bulStart(st.lettres,st.parLettre,st.formes,st.syllabes); },40);
     return;
   }
 
@@ -3683,13 +3757,20 @@ function renderStep(){
       const ok=sameLetter(c.b,st.L)?1:0; if(ok)need++;
       return '<span class="vl" onclick="spotTap(this,'+ok+')">'+disp+'</span>';
     }).join('')+'</span>').join(' ');
-    window._spot={need,found:0};
+    window._spot={need,found:0}; window._spotVi=st.vi;
     const tgt=ALIF_FAM.includes(st.L)?'ا · أ · إ':st.L;
-    body.innerHTML='<div class="q-title">Verset '+(st.vi+1)+' — touche tous les <span class="gold" style="font-size:30px">'+tgt+'</span></div>'+
-      '<button class="speak" onclick="playVerse('+st.vi+')">🔊 Écouter le verset ('+qariCur().fr+')</button>'+
-      '<button class="zoom-btn" onclick="zoomVerse(this)">🔍 Agrandir</button>'+
-      '<div class="verse" id="verseBox">'+html+'</div>'+
-      '<div class="hint" id="spot-c" style="text-align:center">0 / '+need+' trouvés</div>';
+    /* v3 validée (10/08) : consigne minimale, haut-parleur DESSINÉ, le NOM du récitateur
+       ouvre le sélecteur, loupe Artlist, décompte = la pastille dorée des bulles,
+       et la récitation part TOUTE SEULE. */
+    body.innerHTML='<div class="q-title">Verset '+(st.vi+1)+' : touche tous les <span class="gold" style="font-size:30px">'+tgt+'</span></div>'+
+      '<div class="vtools">'+
+        '<button class="vspk" onclick="playVerse('+st.vi+')" aria-label="Écouter le verset">'+spkSVG()+'</button>'+
+        '<button class="vspk" onclick="openQari()" aria-label="Choisir le récitateur"><span class="qari-nom" id="qariNom">'+qariCur().fr+'</span></button>'+
+        '<button class="vloupe" onclick="zoomVerse(this)" aria-label="Agrandir">'+icoImg('loupe')+'</button>'+
+      '</div>'+
+      '<div id="spot-c">'+need+'</div>'+
+      '<div class="verse" id="verseBox">'+html+'</div>';
+    setTimeout(function(){ if(QUEUE[qi]===st&&document.getElementById('player').classList.contains('on'))playVerse(st.vi); },350);
     return;
   }
 
@@ -3873,7 +3954,7 @@ function renderStep(){
         '<div class="fuserow">'+
           '<div class="mimC ar">'+st.L+'</div>'+
           '<div class="farr">←</div>'+
-          '<div class="fchip ar" data-k="'+k+'">'+j.chip+'</div>'+
+          '<div class="fchip ar" data-k="'+k+'">'+chipAff(j.chip)+'</div>'+
         '</div>').join('')+'</div>';
     setTimeout(()=>setupFuse(st),40);
     return;
@@ -4055,19 +4136,16 @@ function finishDisque(){
   S.done[id]=true;
   const gain=(curD===discsFor(curU).length-1?20:10)*(wasDone?0.5:1);
   S.xp+=gain;
-  const t=today();
-  const streakBumped=(S.lastDay!==t);      // 1re leçon du jour → la série avance → écran « 7 épis »
-  if(streakBumped){
-    const y=yesterday();
-    S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;
-  }
-  pendingStreak=streakBumped;
+  /* La série ne se valide PLUS à la leçon : l'OBJECTIF QUOTIDIEN atteint plante l'épi
+     du jour (objFete). L'écran « 7 épis » se montre après la leçon pendant laquelle
+     l'objectif est tombé. */
+  pendingStreak=feteJourPending; feteJourPending=false;
   bumpConstance('learn');
   if(RECHARGE){ // reprise depuis « Plus de cœurs » : on recharge comme une révision (1re fois après blocage = +3, ensuite +1)
     const before=S.hearts, g=S.bigNext?3:1;
     S.hearts=Math.min(HEARTS_MAX,S.hearts+g); S.bigNext=0; S.heartDay=today(); RECHARGE=false;
     document.getElementById('st-hearts').textContent=S.hearts;
-    if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ +'+g+' cœur'+(g>1?'s':'')+', ماشاء الله !'),700);
+    if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+g+' cœur'+(g>1?'s':'')+', ماشاء الله !'),700);
   }
   save();
   document.getElementById('player').classList.remove('on');
@@ -4137,9 +4215,7 @@ function finishExam(){
       discsFor(k).forEach((d,i)=>{ S.done[dkey(k,i)]=true; });
     }
     S.xp+=30;
-    const t=today();
-    if(S.lastDay!==t){const y=yesterday();S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
-    save();
+    save();   // la série, elle, ne vient plus que de l'objectif quotidien (10/08)
   }
   document.getElementById('player').classList.remove('on');
   document.querySelector('#finish .fin-score').style.display=''; // idem examen : le % revient
@@ -4215,6 +4291,7 @@ function elogeHTML(){ // jamais deux fois le même d'affilée — l'éloge écri
 }
 let _tocCtx=null;
 function toc(){ // l'erreur : deux frappes du timbre Bayātī, +1,5 puis −1,5 (choix Myriam 07/08) ; l'oscillateur reste en secours
+  if(!SND)return; // même règle que playSfx : le repli oscillateur doit se taire aussi
   if(_SFXB['erreur']){ playSfx('erreur'); return; }
   try{
     _tocCtx=_tocCtx||new (window.AudioContext||window.webkitAudioContext)();
@@ -4324,7 +4401,9 @@ function setupFuse(st){
       chip.classList.add('gone');
       const fl=chip.parentNode.querySelector('.farr');if(fl)fl.classList.add('gone');
       window._fu.n++;
-      jouerF(j.son,j.fus,window._fu.n>=window._fu.tot?objectifAtteint:null);
+      const finF=window._fu.n>=window._fu.tot?objectifAtteint:null;
+      if(j.son)jouerF(j.son,j.fus,finF);      // leçon 1 : fichiers nommés explicitement (-f/-h)
+      else sayLetterName(j.fus,finF);         // leçons 5/6 : la syllabe (Habibah → Myriam en repli)
     };
     chip.addEventListener('touchstart',start,{passive:false});
     chip.addEventListener('touchmove',move,{passive:false});
@@ -4583,10 +4662,12 @@ function spotTap(el,ok){
   if(ok&&!el.classList.contains('hit')){
     el.classList.add('hit');window._spot.found++;
     const c=document.getElementById('spot-c');
-    c.textContent=window._spot.found+' / '+window._spot.need+' trouvés';
-    if(window._spot.found>=window._spot.need){c.textContent='✓ Tous trouvés ! ماشاء الله';ctaOn();}
+    const reste=window._spot.need-window._spot.found;
+    if(c){c.textContent=reste>0?reste:'✓';c.classList.remove('tick');void c.offsetWidth;c.classList.add('tick');} // le MÊME décompte que les bulles
+    if(window._spot.found>=window._spot.need){ stopAudio(); objectifAtteint(); } // récompense uniforme : signature + éloge + CONTINUER vert
   } else if(!ok){
     el.classList.add('miss');setTimeout(()=>el.classList.remove('miss'),400);
+    toc(); // la marque sonore de l'erreur, comme partout
   }
 }
 function splitUnits(word){
@@ -4600,6 +4681,9 @@ function splitUnits(word){
 }
 function isHarakat(ch){
   return '\u064B\u064C\u064D\u064E\u064F\u0650\u0651\u0652'.includes(ch);
+}
+function chipAff(ch){ // une harakat NUE est portée sur un tatweel — lisible partout (leçon 5 v3 validée ; unifie AUSSI la leçon 1)
+  return /^[\u064B-\u0652]$/.test(ch)?'\u0640'+ch:ch;
 }
 function tileLabel(ch){
   const HARAKAT='\u064B\u064C\u064D\u064E\u064F\u0650\u0651\u0652';
@@ -4786,7 +4870,52 @@ function prechargerNoms(){
    ⚠️ RÈGLE : « allumer le bouton après le son » passe TOUJOURS par `fin`, JAMAIS par
    quandSonFini() armé AVANT l'appel : celui-ci capture le jeton audio du moment, que
    stopAudio() incrémente aussitôt — il se croit alors périmé et n'allume plus rien. */
+/* ══ LES SYLLABES (leçons 5 & 6, refonte du 10/08) ══
+   sayLetterName reçoit indifféremment une LETTRE (→ son nom) ou une SYLLABE
+   (→ l'enregistrement <translit>-<signe>-son-court/prolonge). La voix choisie (-f Habibah)
+   d'abord, la voix de Myriam (fichier nu) en repli — la synthèse ne vient qu'en tout
+   dernier secours : sur une syllabe isolée elle improvise (règle gravée du 07/08). */
+const HKF={'\u064E':'fatha','\u0650':'kasra','\u064F':'damma'};
+const MDF={'ا':'alif','ي':'ya','و':'waw'};
+/* ⚠️ Les enregistrements de SYLLABES portent l'ANCIEN nommage pour deux lettres :
+   LTRANS dit nun/ayn, les fichiers disent noun-/ain- (attrapé par l'audit du 10/08 —
+   sans ça le ن de l'unité 1 partait en synthèse). */
+const SYLTR={'nun':'noun','ayn':'ain'};
+function sylBase(s){
+  if(typeof s!=='string')return null;
+  if(s==='آ')return 'alif-alif-son-prolonge';   // alif madda = la prolongation du hamza
+  if(s.length<2||s.length>3)return null;
+  var tr=LTRANS[letterKey(s[0])]; if(!tr)return null;
+  tr=SYLTR[tr]||tr;
+  if(s.length===2&&HKF[s[1]])return tr+'-'+HKF[s[1]]+'-son-court';
+  if(s.length===3&&MDF[s[2]]&&s[1]===MDH[s[2]])return tr+'-'+MDF[s[2]]+'-son-prolonge';
+  return null;
+}
+function jouerSyl(base,ar,fin,el){
+  stopAudio();
+  spkOff(); spkOn(el);
+  var gen=_sndGen, fini=false;
+  var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
+  var essais=['audios-app-alaq/'+base+'-'+VOIX_G+'.mp3','audios-app-alaq/'+base+'.mp3'];
+  var tente=function(i){
+    if(gen!==_sndGen)return;
+    if(i>=essais.length){ try{_speakSynth(ar);}catch(_){ } setTimeout(termine,900); return; }
+    var a=audioBeni(essais[i]); _curAudio=a; var ok=false, passe=false;
+    /* ⚠️ UN SEUL avancement par tentative : sur un 404, 'error' ET p.catch tombent tous
+       les deux — sans le verrou, la syllabe suivante jouait EN DOUBLE (audit du 10/08). */
+    var suivant=function(){ if(ok||passe||gen!==_sndGen)return; passe=true; tente(i+1); };
+    a.addEventListener('playing',function(){ok=true;},{once:true});
+    a.onended=termine;
+    a.onerror=suivant;
+    var p=a.play(); if(p&&p.catch)p.catch(suivant);
+    setTimeout(function(){ if(!ok&&gen===_sndGen&&a.paused&&a.readyState===0)suivant(); },1400);
+  };
+  tente(0);
+  setTimeout(termine,3200);  // filet : le rappel finit toujours par venir (bulles, séquences)
+}
 function sayLetterName(L,fin,el){
+  var _sb=sylBase(L);
+  if(_sb)return jouerSyl(_sb,L,fin,el);   // une syllabe : son enregistrement, jamais un nom de lettre
   stopAudio();
   spkOff(); // stopAudio n'éteint PAS les haut-parleurs : sans ça, deux boxes brillent quand on interrompt la séquence
   spkOn(el);
@@ -4864,11 +4993,13 @@ function bulPose(b){
   b.el.style.setProperty('--x',b.x.toFixed(1)+'px');
   b.el.style.setProperty('--y',b.y.toFixed(1)+'px');
 }
-function bulStart(lettres,parLettre,formes){
+function bulStart(lettres,parLettre,formes,syllabes){
   var z=document.getElementById('bulzone'); if(!z)return;
   BUL.W=z.clientWidth; BUL.H=z.clientHeight; BUL.items=[]; BUL.chocs=0;
   var sac=[];
-  if(formes){ // leçon 3 : chaque forme DISTINCTE deux fois (24 bulles pour م ل ن)
+  if(syllabes){ // leçons 5/6 : chaque syllabe deux fois — le son d'une bulle est SA syllabe
+    syllabes.forEach(function(s){ sac.push({L:s,g:s}); sac.push({L:s,g:s}); });
+  }else if(formes){ // leçon 3 : chaque forme DISTINCTE deux fois (24 bulles pour م ل ن)
     lettres.forEach(function(L){
       (joinsL(L)?[0,1,2,3]:[0,3]).forEach(function(p){
         sac.push({L:L,g:formGlyph(L,p)});sac.push({L:L,g:formGlyph(L,p)});
@@ -4881,12 +5012,12 @@ function bulStart(lettres,parLettre,formes){
   BUL.reste=sac.length;
   /* 24 bulles au lieu de 15 : elles rapetissent pour garder l'air (preview v3 validée) ;
      le rayon vit dans BUL.R — la physique et l'éclat le lisent, jamais de 32 en dur */
-  BUL.R=formes?27:32;
+  BUL.R=syllabes?30:(formes?27:32);
   var R=BUL.R, lignes=Math.ceil(sac.length/3);
   sac.forEach(function(it,i){
     var L=it.L;
     var el=document.createElement('button');
-    el.className='bul'+(formes?' frm':''); el.textContent=it.g; el.setAttribute('aria-label',L);
+    el.className='bul'+(formes?' frm':'')+(syllabes?' syl':''); el.textContent=it.g; el.setAttribute('aria-label',L);
     var col=i%3, rang=Math.floor(i/3);
     var b={el:el,L:L,
       x:col*(BUL.W-2*R)/2*0.98+(Math.random()-0.5)*16,
@@ -5778,6 +5909,7 @@ try{
   ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,chargerSfx,true));
 }catch(e){}
 function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jamais bloqué), sinon <audio> béni, sinon SILENCE
+  if(!SND)return; // « Effets sonores » coupe la récompense À L'INSTANT (Myriam 10/08) — avant, seul okBeep/plop obéissait, d'où l'impression qu'il fallait relancer l'app
   try{
     stopAudio();
     const b=_SFXB[name];
@@ -5866,27 +5998,32 @@ if(typeof document!=='undefined'&&document.addEventListener){
    · ar.minshawimujawwad — fichiers identiques au MD5 près à ar.minshawi ;
    · ar.abdulsamad — découpage décalé (67 s pour la basmala, 145 s pour الم).  */
 const VOIX=[
- {id:'ar.aymanswoaid',        kb:64,  sec:7.1, fr:'Ayman Suwayd',          ar:'أيمن سويد',            st:'m', tag:'tajwīd'},
+ {id:'ar.aymanswoaid', loc:1,        kb:64,  sec:7.1, fr:'Ayman Suwayd',          ar:'أيمن سويد',            st:'m', tag:'tajwīd'},
  {id:'ar.ibrahimakhbar',      kb:32,  sec:7.2, fr:'Ibrāhīm al-Akhḍar',     ar:'إبراهيم الأخضر',       st:'m'},
- {id:'ar.hudhaify',           kb:128, sec:7.0, fr:'ʿAlī al-Ḥudhayfī',      ar:'علي الحذيفي',          st:'m'},
- {id:'ar.muhammadayyoub',     kb:128, sec:6.9, fr:'Muḥammad Ayyūb',        ar:'محمد أيوب',            st:'m'},
- {id:'ar.alafasy',            kb:128, sec:6.1, fr:'al-ʿAfāsī',             ar:'مشاري راشد العفاسي',   st:'m'},
- {id:'ar.husary',             kb:128, sec:6.1, fr:'al-Ḥuṣarī',             ar:'محمود خليل الحصري',    st:'m'},
- {id:'ar.shaatree',           kb:128, sec:5.9, fr:'Abū Bakr ash-Shāṭirī',  ar:'أبو بكر الشاطري',      st:'m'},
- {id:'ar.abdullahbasfar',     kb:192, sec:5.8, fr:'ʿAbdullāh Basfar',      ar:'عبد الله بصفر',        st:'m'},
- {id:'ar.minshawi',           kb:128, sec:5.6, fr:'al-Minshāwī',           ar:'محمد صديق المنشاوي',   st:'m'},
- {id:'ar.abdulbasitmurattal', kb:192, sec:5.1, fr:'ʿAbd al-Bāsiṭ',         ar:'عبد الباسط عبد الصمد', st:'m'},
+ {id:'ar.hudhaify', loc:1,           kb:128, sec:7.0, fr:'ʿAlī al-Ḥudhayfī',      ar:'علي الحذيفي',          st:'m'},
+ {id:'ar.muhammadayyoub', loc:1,     kb:128, sec:6.9, fr:'Muḥammad Ayyūb',        ar:'محمد أيوب',            st:'m'},
+ {id:'ar.alafasy', loc:1,            kb:128, sec:6.1, fr:'al-ʿAfāsī',             ar:'مشاري راشد العفاسي',   st:'m'},
+ {id:'ar.husary', loc:1,             kb:128, sec:6.1, fr:'al-Ḥuṣarī',             ar:'محمود خليل الحصري',    st:'m'},
+ {id:'ar.shaatree', loc:1,           kb:128, sec:5.9, fr:'Abū Bakr ash-Shāṭirī',  ar:'أبو بكر الشاطري',      st:'m'},
+ {id:'ar.abdullahbasfar', loc:1,     kb:192, sec:5.8, fr:'ʿAbdullāh Basfar',      ar:'عبد الله بصفر',        st:'m'},
+ {id:'ar.minshawi', loc:1,           kb:128, sec:5.6, fr:'al-Minshāwī',           ar:'محمد صديق المنشاوي',   st:'m'},
+ {id:'ar.abdulbasitmurattal', loc:1, kb:192, sec:5.1, fr:'ʿAbd al-Bāsiṭ',         ar:'عبد الباسط عبد الصمد', st:'m'},
  {id:'ar.muhammadjibreel',    kb:128, sec:5.1, fr:'Muḥammad Jibrīl',       ar:'محمد جبريل',           st:'m'},
  {id:'ar.hanirifai',          kb:192, sec:5.0, fr:'Hānī ar-Rifāʿī',        ar:'هاني الرفاعي',         st:'m'},
  {id:'ar.saoodshuraym',       kb:64,  sec:4.6, fr:'ash-Shuraym',           ar:'سعود الشريم',          st:'m'},
  {id:'ar.abdurrahmaansudais', kb:192, sec:4.2, fr:'as-Sudays',             ar:'عبد الرحمن السديس',    st:'m'},
  {id:'ar.ahmedajamy',         kb:128, sec:4.0, fr:'Aḥmad al-ʿAjamī',       ar:'أحمد العجمي',          st:'m'},
- {id:'ar.mahermuaiqly',       kb:128, sec:3.7, fr:'Māhir al-Muʿayqilī',    ar:'ماهر المعيقلي',        st:'m'},
+ {id:'ar.mahermuaiqly', loc:1,       kb:128, sec:3.7, fr:'Māhir al-Muʿayqilī',    ar:'ماهر المعيقلي',        st:'m'},
  {id:'ar.husarymujawwad',     kb:128, sec:11.1,fr:'al-Ḥuṣarī',             ar:'محمود خليل الحصري',    st:'j'}
 ];
 function qariCur(){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===S.qari)return VOIX[i]; return VOIX[0]; }
 function qariById(id){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===id)return VOIX[i]; return VOIX[0]; }
-function qariUrl(v,aya){ return 'https://cdn.islamic.network/quran/audio/'+v.kb+'/'+v.id+'/'+aya+'.mp3'; }
+/* 10 voix HÉBERGÉES (Myriam 10/08 : « le Qorān ne se monnaie pas » — provisoire tant que
+   l'app est gratuite ; un récitateur sera payé plus tard pour des sons libres de droits).
+   Fichiers : audios-app-alaq/recit/<id>/<n°>.mp3, versets 1-7 (Fātiḥa). Le flux
+   cdn.islamic.network reste le repli et sert les 7 voix non hébergées. */
+function qariUrlCdn(v,aya){ return 'https://cdn.islamic.network/quran/audio/'+v.kb+'/'+v.id+'/'+aya+'.mp3'; }
+function qariUrl(v,aya){ return (v.loc&&aya>=1&&aya<=7)?('audios-app-alaq/recit/'+v.id+'/'+aya+'.mp3'):qariUrlCdn(v,aya); }
 var _qariPlay=null; // la voix qu'on écoute DANS le sélecteur (≠ la voix choisie)
 
 function openQari(){ qariRender(); document.getElementById('qsel').classList.add('on'); }
@@ -5898,18 +6035,32 @@ function qariBulleOff(){ var b=document.getElementById('qbulle'),i=document.getE
   if(b)b.classList.remove('on'); if(i)i.classList.remove('on'); }
 
 function qariPick(id){ S.qari=id; save(); qariRender();
-  try{ renderReviser(curReviserTab); }catch(e){} }   // la ligne « Récitateur » se met à jour
+  try{ renderReviser(curReviserTab); }catch(e){} // la ligne « Récitateur » se met à jour
+  try{ var n=document.getElementById('qariNom'), pl=document.getElementById('player');
+    // ⚠️ le #qariNom du DERNIER spot survit dans le lecteur CACHÉ (audit 10/08) : la branche
+    // « choisi depuis la leçon » exige le lecteur OUVERT, sinon Réviser garde son propre flux
+    if(n&&pl&&pl.classList.contains('on')){ n.textContent=qariCur().fr; closeQari(); if(typeof window._spotVi==='number')playVerse(window._spotVi); } }catch(e){}
+}
 function qariHear(id,ev){
   ev.stopPropagation();                              // toucher ▶ n'est PAS choisir la voix
   if(_qariPlay===id){ stopAudio(); _qariPlay=null; qariRender(); return; }
   stopAudio(); _qariPlay=id; qariRender('load');     // un seul son à la fois
   var gen=_sndGen, v=qariById(id);
-  var a=new Audio(qariUrl(v,1)); _curAudio=a;        // verset 1 du mushaf = Al-Fātiḥa, verset 1
+  var u=qariUrl(v,1);                                // verset 1 du mushaf = Al-Fātiḥa, verset 1
+  var a=new Audio(u); _curAudio=a;
   var ko=function(){ if(gen!==_sndGen)return; _qariPlay=null; qariRender(); toast('Récitation indisponible sans connexion'); };
-  a.addEventListener('playing',function(){ if(gen===_sndGen)qariRender('play'); },{once:true});
-  a.addEventListener('ended',function(){ if(gen!==_sndGen)return; _qariPlay=null; qariRender(); },{once:true});
-  a.addEventListener('error',ko,{once:true});
-  var p=a.play(); if(p&&p.catch)p.catch(ko);
+  var brancher=function(x){
+    x.addEventListener('playing',function(){ if(gen===_sndGen)qariRender('play'); },{once:true});
+    x.addEventListener('ended',function(){ if(gen!==_sndGen)return; _qariPlay=null; qariRender(); },{once:true});
+  };
+  brancher(a);
+  var lireCdn=function(){ if(gen!==_sndGen||_curAudio!==a)return;   // le MÊME repli que playVerse (audit 10/08)
+    var b=new Audio(qariUrlCdn(v,1)); _curAudio=b; brancher(b);
+    b.addEventListener('error',ko,{once:true});
+    var p2=b.play(); if(p2&&p2.catch)p2.catch(ko); };
+  var repli=(u===qariUrlCdn(v,1))?ko:lireCdn;
+  a.addEventListener('error',repli,{once:true});
+  var p=a.play(); if(p&&p.catch)p.catch(repli);
 }
 function qariRow(v,etat){
   var on=(v.id===S.qari), pl=(_qariPlay===v.id);
@@ -5935,15 +6086,28 @@ function qariRender(etat){
   document.getElementById('qpin').innerHTML='<span class="cap">voix choisie</span>'+qariRow(qariCur(),etat);
 }
 
-function playVerse(i){ // le verset, streamé depuis la source, avec la voix choisie
+function playVerse(i){ // le verset : fichier HÉBERGÉ si la voix l'a, sinon le flux ; repli flux si le fichier manque
   try{
     stopAudio();
     var gen=_sndGen;
     var SRv=SOURATES[(typeof curSourate!=='undefined'?curSourate:0)]||SOURATES[0];
-    var a=new Audio(qariUrl(qariCur(),(SRv.first||1)+i)); _curAudio=a;  // n° GLOBAL du verset
+    var v=qariCur(), aya=(SRv.first||1)+i;                       // n° GLOBAL du verset
+    var u=qariUrl(v,aya);
+    var a=new Audio(u); _curAudio=a;
+    var _ondes=function(x){ var s=document.querySelector('.vspk .spk'); if(!s)return;
+      x.addEventListener('playing',function(){ if(gen===_sndGen)s.classList.add('on'); });
+      x.addEventListener('ended',function(){ s.classList.remove('on'); });
+      x.addEventListener('pause',function(){ s.classList.remove('on'); });
+      x.addEventListener('error',function(){ s.classList.remove('on'); }); };
+    _ondes(a);
     var ko=function(){ if(gen===_sndGen)toast('Récitation indisponible sans connexion'); };
-    a.addEventListener('error',ko,{once:true});
-    var p=a.play(); if(p&&p.catch)p.catch(ko);
+    var lireCdn=function(){ if(gen!==_sndGen||_curAudio!==a)return; // garde : error + p.catch peuvent tomber tous les deux
+      var b=new Audio(qariUrlCdn(v,aya)); _curAudio=b; _ondes(b);
+      b.addEventListener('error',ko,{once:true});
+      var p2=b.play(); if(p2&&p2.catch)p2.catch(ko); };
+    var repli=(u===qariUrlCdn(v,aya))?ko:lireCdn;
+    a.addEventListener('error',repli,{once:true});
+    var p=a.play(); if(p&&p.catch)p.catch(repli);
   }catch(e){}
 }
 // ===== Reconnaissance vocale (lecture à voix haute, modèle Duolingo) =====
@@ -6002,9 +6166,9 @@ function recoSkip(){ctaOn();advance();}
 function zoomVerse(btn){
   const v=document.getElementById('verseBox');if(!v)return;
   const big=v.classList.toggle('zoomed');
-  btn.textContent=big?'🔍 Réduire':'🔍 Agrandir';
+  if(btn&&btn.classList)btn.classList.toggle('zoomed',big); // la loupe est une IMAGE (registre) — l'état vit dans la classe
 }
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');
+function toast(m){const t=document.getElementById('toast');t.innerHTML=m;t.classList.add('on'); // innerHTML : le cœur du registre ICONES peut s'y afficher (tous les appels sont nos littéraux)
   setTimeout(()=>t.classList.remove('on'),2600);}
 
 /* ===== Badges & confettis ===== */
@@ -6042,8 +6206,8 @@ const BADGES=[
  ['revision120','\u{1F4D6}','120 révisions'],
  ['revision360','\u{1F4D6}','360 révisions'],
 ];
-/* Les écussons des sourates : UN gabarit doré, le nom composé par le code en Amiri gras
-   (choix de Myriam 09/08). L'IA ne sait pas écrire l'arabe — jamais de nom généré. */
+/* Les écussons des sourates : UN gabarit doré, le nom composé par le code en Noto Naskh
+   (Amiri retiré de l'app le 10/08). L'IA ne sait pas écrire l'arabe — jamais de nom généré. */
 function ecussonHTML(ar,taille){
   taille=taille||64;
   return '<span class="ecu" style="width:'+taille+'px;height:'+taille+'px">'+
@@ -6207,19 +6371,19 @@ function showTab(name,sub){
 function prmSw(on){ return '<span class="prm-sw'+(on?' on':'')+'"><i></i></span>'; }
 function renderParams(){
   var v=document.getElementById('view-params'); if(!v)return;
-  var obj=(S.onb&&S.onb.objectif)||'';
+  var obj=(S.onb&&S.onb.objectif)||'10'; // 10 min par défaut — c'est ce que objGoal() applique
   v.innerHTML=
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-sons')+'" alt=""> Sons</h3></div>'+
-      '<button class="prm-row" onclick="toggleSound();renderParams()">Effets et voix'+prmSw(SND)+'</button>'+
-      '<button class="prm-row" onclick="toggleNarr();renderParams()">Lecture des consignes'+prmSw(NARR)+'</button>'+
+      '<button class="prm-row" onclick="toggleSound();renderParams()">Effets sonores'+prmSw(SND)+'</button>'+
     '</div>'+
+    (VOIX_HOMME_ACTIVE?
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Voix arabe</h3></div>'+
       '<div class="prm-goals">'+
         '<button class="prm-goal'+(VOIX_G==='f'?' sel':'')+'" onclick="setVoix(\'f\')">Habibah</button>'+
         '<button class="prm-goal'+(VOIX_G==='h'?' sel':'')+'" onclick="setVoix(\'h\')">Mustafa</button>'+
       '</div>'+
       '<p style="color:var(--muted);font-size:11.5px;margin:9px 2px 0;line-height:1.45">Les voyelles et les syllabes gardent la voix de Myriam.</p>'+
-    '</div>'+
+    '</div>':'')+
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-objectif')+'" alt=""> Objectif quotidien</h3></div>'+
       '<div class="prm-goals">'+['5','10','15','20'].map(function(m){
         return '<button class="prm-goal'+(obj===m?' sel':'')+'" onclick="prmObjectif(\''+m+'\')">'+m+' min</button>';
@@ -6227,10 +6391,14 @@ function renderParams(){
     '</div>'+
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-apropos')+'" alt=""> À propos</h3></div>'+
       '<a class="prm-row" href="confidentialite.html" target="_blank" rel="noopener" style="text-decoration:none">Politique de confidentialité<span style="color:var(--muted)">›</span></a>'+
-      '<div class="prm-row" style="cursor:default;color:var(--muted);font-size:12px">Version<span style="font-size:11px;max-width:55%;text-align:right">'+escHTML(String(BUILD).split('·')[0].trim())+'</span></div>'+
     '</div>';
+    /* La ligne « Version » est retirée de l'écran (Myriam 10/08) — le BUILD reste lisible
+       dans window.BUILD pour la page de diagnostic. */
 }
-function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.objectif=m; save(); renderParams(); }
+function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.objectif=m; save();
+  // abaisser l'objectif APRÈS avoir déjà dépassé le nouveau seuil doit valider le jour (audit 10/08)
+  if(objMinutes()>=objGoal()&&S.lastDay!==today())objFete();
+  renderParams(); }
 
 function ytEmbed(v){ if(!v)return''; v=String(v).trim(); let id='',m=v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); if(m)id=m[1]; else if(/^[\w-]{11}$/.test(v))id=v; return id?('https://www.youtube.com/embed/'+id):''; }
 
@@ -6360,6 +6528,7 @@ function renderProg(){
        '</div>'+
        rankTrackHTML()+
      '</div>';
+  h+=objRingHTML();      // l'anneau de l'objectif quotidien — seul, rien d'autre (validé 10/08)
   h+=parcoursCardHTML(); // « Ton parcours » remonte juste sous l'encadré du rang (choix Myriam 13/07)
   h+='<div class="pgrid">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
@@ -7250,10 +7419,9 @@ function finishReview(){
   const before=S.hearts;
   const gain=S.bigNext?3:1;               // 1re révision après blocage = +3 ; les suivantes = +1
   S.hearts=Math.min(HEARTS_MAX,S.hearts+gain);S.bigNext=0;S.heartDay=today();
-  if(before<HEARTS_MAX)setTimeout(()=>toast('❤️ +'+gain+' cœur'+(gain>1?'s':'')+', ماشاء الله !'),600);
+  if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+gain+' cœur'+(gain>1?'s':'')+', ماشاء الله !'),600);
   checkBadges({review:true});
-  const t=today(); if(S.lastDay!==t){const y=yesterday();S.streak=(S.lastDay===y)?S.streak+1:1;S.lastDay=t;}
-  bumpConstance('revise');
+  bumpConstance('revise');   // la série, elle, ne vient plus que de l'objectif quotidien (10/08)
   save();
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
   document.getElementById('player').classList.remove('on');
@@ -7298,6 +7466,12 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
   try{navigator.serviceWorker.register('sw.js');}catch(e){}
 }
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';})();
+/* Les minutes de l'objectif : 15 s de leçon visible = 15 s comptées. Le lecteur fermé
+   ou l'onglet caché ne comptent pas. */
+setInterval(function(){ try{
+  var pl=document.getElementById('player');
+  if(pl&&pl.classList.contains('on')&&document.visibilityState==='visible')objAddSec(15);
+}catch(e){} },15000);
 /* Supabase est en defer (il ne bloque plus le premier rendu) : on le branche quand il est là.
    Les scripts defer s'exécutent AVANT DOMContentLoaded — window.supabase est donc garanti ici. */
 document.addEventListener('DOMContentLoaded',function(){

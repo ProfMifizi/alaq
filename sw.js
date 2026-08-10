@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v107-2026-08-10b';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v109-2026-08-10d';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -28,6 +28,7 @@ const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques so
 "images-app-alaq/icone-ciel-dromadaire-v1.png",
 "images-app-alaq/icone-tb-epi-v1.png",
 "images-app-alaq/icone-tb-coeur-v1.png",
+"images-app-alaq/icone-loupe-v1.png",
 "images-app-alaq/icone-tab-video.png",
 "images-app-alaq/icone-tab-cartes.png",
 "images-app-alaq/icone-tab-crayon.png",
@@ -595,6 +596,11 @@ self.addEventListener('activate',e=>{
   })());
 });
 self.addEventListener('fetch',e=>{
+  /* ⚠️ LES REQUÊTES « Range » NE SE INTERCEPTENT JAMAIS (10/08). Safari streame l'audio
+     par tranches (Range: bytes=…) et exige un 206 ; le cache répondait un 200 complet
+     → AVFoundation refuse → « les sons de récitateurs ne fonctionnent pas » (Myriam),
+     alors que le CDN répond 200 partout. On laisse ces requêtes filer au réseau. */
+  if(e.request.headers.get('range'))return;
   const url=new URL(e.request.url);
   // navigation / index : réseau d'abord, cache en secours
   if(e.request.mode==='navigate'||url.pathname.endsWith('/index.html')||url.pathname==='/'){
@@ -602,7 +608,7 @@ self.addEventListener('fetch',e=>{
       const c=await caches.open(CACHE);
       const hit=await c.match('index.html');
       // rafraîchissement SILENCIEUX en arrière-plan : la prochaine ouverture aura la nouvelle version
-      const frais=fetch(e.request).then(r=>{c.put('index.html',r.clone());return r;}).catch(()=>null);
+      const frais=fetch(e.request).then(r=>{if(r&&r.ok)c.put('index.html',r.clone());return r;}).catch(()=>null); // jamais un 500/portail captif en cache (audit 10/08)
       // le cache d'abord : l'app s'ouvre TOUT DE SUITE, même si le réseau traîne
       return hit || (await frais) || (await caches.match('.')) || Response.error();
     })());
