@@ -254,6 +254,50 @@ const slugsVivants = new Set(consignes.map(c => c.fichier));
 for (const f of presents) if (/^instr-/.test(f) && !slugsVivants.has(f))
   consignes.push({ fichier: f, slug: f.slice(6, -4), texte: '', html: '', famille: 'Orpheline' });
 
+/* ---------- LA VÉRITÉ SUR « QUELLE LEÇON ? » (10/08/2026) ----------
+   Jusqu'ici la leçon et l'unité de chaque son étaient DEVINÉES (des listes écrites à la
+   main plus haut : « une syllabe courte → Les harakats, Bilan »). C'était faux dès qu'une
+   leçon changeait, et ça ne prouvait rien sur la couverture des 63 leçons.
+   On fait désormais tourner les 9 constructeurs × 7 unités et on relève, écran par écran,
+   les sons réellement demandés (sons-des-lecons.js).
+   ⚠️ REPLI OBLIGATOIRE : si le parcours échoue (index.html remanié), on garde les listes
+   devinées. Une colonne approximative vaut mieux qu'un studio hors ligne chez Vercel. */
+let couverture = null;
+try {
+  const { carteDesSons } = require('./sons-des-lecons.js');
+  const { carte, ordre, inconnus } = carteDesSons(src);
+  if (inconnus.length) console.warn('  ⚠️ types d’écran non traités :', inconnus.join(' '));
+  let vus = 0;
+  const rang = f => ordre.has(f) ? ordre.get(f) : 99;   // ordre pédagogique RÉEL (parcours des disques)
+  for (const l of lignes) {
+    const e = carte.get(l.fichier);
+    if (e) {
+      /* l'UNITÉ reste celle qui ENSEIGNE le son (elle vient des données UNITS, elle est juste).
+         On ne la remplace que si elle manquait : l'écran « voici les 28 lettres » de la leçon 1
+         rattacherait sinon toutes les lettres à l'unité 1. */
+      if (!l.unite) l.unite = Math.min(...e.unites);
+      // les leçons de SON unité d'abord (utile au preneur de son), sinon toutes
+      const propres = e.parUnite.get(l.unite);
+      l.lecons = [...(propres && propres.size ? propres : e.lecons)].sort((a, b) => rang(a) - rang(b));
+      l.lecon63 = true; vus++;
+    }
+    else if (/^lettre-\w+-son\.mp3$/.test(l.fichier))
+      // aucune leçon n'appelle sayLetterSound : il vit dans la grille des lettres et le Cours
+      l.lecons = ['Réviser · les lettres', 'Cours'];
+  }
+  /* On ne compte que ce qui S'ENREGISTRE : les 6 « mim-…-f.mp3 » ecrits en dur dans la
+     lecon 1 sont des doublons de voix IA — Myriam enregistre le nom PLAT, qui est demande
+     par ailleurs et bien present. Les compter ferait afficher « 6 manquent » a tort. */
+  const aEnregistrer = [...carte.keys()].filter(f => !/-(f|h)\.mp3$/.test(f));
+  couverture = { demandes: aEnregistrer.length,
+                 couverts: aEnregistrer.filter(f => vu.has(f)).length };
+  console.log('  couverture des 63 leçons : ' + carte.size + ' sons demandés, ' + vus + ' retrouvés dans l’inventaire');
+  const absents = [...carte.keys()].filter(f => !vu.has(f));
+  if (absents.length) console.warn('  ⚠️ demandés par une leçon mais ABSENTS de l’inventaire : ' + absents.join(', '));
+} catch (e) {
+  console.warn('  ⚠️ parcours des leçons impossible (' + e.message + ') — on garde les leçons devinées');
+}
+
 /* ---------- état de chaque ligne ---------- */
 function etat(l) {
   l.present  = presents.has(l.fichier);
@@ -285,6 +329,7 @@ const inv = {
   bilan: {
     arabe: compte(lignes), francais: compte(consignes),
     fichiersDansLeDossier: presents.size, fichiersPrecaches: precache.size,
+    lecons63: couverture,   // { demandes, couverts } — la PREUVE que rien ne manque aux 63 lecons
   },
 };
 function compte(a) {

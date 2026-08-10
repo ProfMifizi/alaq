@@ -30,7 +30,8 @@ const compte = { total: arabe.length, ok: 0, manquant: 0, 'a-refaire': 0 };
 arabe.forEach(l => { if (l.statut in compte) compte[l.statut]++; });
 
 fs.writeFileSync(FICHIER, JSON.stringify({
-  genere: complet.genere, unites: complet.unites, arabe, bilan: { arabe: compte },
+  genere: complet.genere, unites: complet.unites, arabe,
+  bilan: { arabe: compte, lecons63: complet.bilan.lecons63 },   // la garantie de couverture voyage avec la liste
 }));
 
 console.log('liste régénérée depuis le code de l’app — ' + arabe.length + ' sons ('

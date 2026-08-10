@@ -219,6 +219,17 @@ function dessineBilan() {
     d.onclick = () => { ETAT = ETAT === e ? '' : e; dessineBilan(); dessine(); };
     bilan.append(d);
   });
+  /* La garantie de couverture : le chiffre vient du PARCOURS des 63 lecons (les 9 lecons
+     x 7 unites sont construites pour de vrai), jamais d'une liste tenue a la main. */
+  const c = INV.bilan.lecons63;
+  if (c && c.demandes) {
+    const g = document.createElement('div');
+    g.className = 'garantie';
+    g.textContent = 'Les 63 le\u00E7ons demandent ' + c.demandes + ' sons \u2014 '
+      + (c.couverts >= c.demandes ? 'tous sont dans cette liste \u2713'
+                                  : (c.demandes - c.couverts) + ' manquent \u26A0');
+    bilan.append(g);
+  }
 }
 
 function remplitFiltres() {
