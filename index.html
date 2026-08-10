@@ -231,7 +231,7 @@
   /* pleine hauteur (Myriam 10/08) : la zone s'étire jusqu'à la ligne du bandeau bas —
      les bulles recyclées à y=BUL.H+6 semblent en sortir. La hauteur figée reste en filet. */
   .p-body.p-bulles{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
-  .p-body.p-bulles .bulzone{flex:1;height:auto;margin-bottom:0;border-radius:16px 16px 0 0}
+  .p-body.p-bulles .bulzone{flex:1;height:auto;margin-bottom:42px;border-radius:16px} /* 42px : le couloir du drapeau ⚑ — les bulles ne passent plus dessous (10/08 soir) */
   /* le compteur : pastille dorée qui DÉCOMPTE les bulles restantes (Myriam 10/08) */
   #bul-c,#spot-c{width:max-content;margin:-6px auto 4px;background:rgba(220,144,46,.16);
     border:1.5px solid var(--gold-d);border-radius:999px;padding:4px 16px;
@@ -361,6 +361,13 @@
   .tile[disabled]{opacity:.25}
   .tile.htile{font-family:'Noto Naskh Arabic',serif;font-size:24px}
   .tile.htile .dc{font-size:30px;opacity:.55}
+  .tile.miss{animation:tileshk .32s}
+  @keyframes tileshk{25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
+  .tile.hint{border-color:var(--gold);color:var(--gold2);animation:tilehint .9s ease-in-out infinite}
+  @keyframes tilehint{0%,100%{transform:scale(1)}50%{transform:scale(1.1);box-shadow:0 0 0 5px rgba(232,169,79,.22)}}
+  .p-body.p-asm{display:flex;flex-direction:column}
+  .p-body.p-asm .spkbtn{align-self:center}
+  .asm-fr{flex:1;display:grid;place-items:center;font-size:22px;font-weight:700;color:var(--cream);padding:10px 0}
   .undo{display:block;margin:14px auto 0;background:none;border:none;color:var(--muted);font-weight:800;font-size:14px}
 
   .trow{display:flex;gap:10px;justify-content:center;margin-top:14px}
@@ -554,6 +561,10 @@
      CONTINUER/VALIDER — Myriam 10/08, tâche leçon 4) */
   .p-flag{position:absolute;top:-42px;right:8px;background:none;border:none;color:var(--coral);
     opacity:1;font-size:29px;line-height:1;padding:4px 8px;cursor:pointer;z-index:3}
+  /* DYNAMIQUE (10/08 soir) : dès que le pied porte un verdict ou l'éloge (.ok/.bad), il est
+     grand — le drapeau RENTRE à son coin haut-droit (position validée le 08/08) au lieu de
+     monter sur la leçon ; au repos il flotte au-dessus du bandeau (position validée le 10/08). */
+  #p-foot.ok .p-flag,#p-foot.bad .p-flag{top:2px}
   #player.vfmode .p-flag{display:none}
   .sig-voile{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.25s;z-index:90}
   .sig-voile.on{opacity:1;pointer-events:auto}
@@ -1302,7 +1313,7 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ---- le décor, fixe derrière l'app, visible sur le seul accueil ---- */
-#skyWrap{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .45s ease}
+#skyWrap{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .45s ease;overflow:hidden}
 body.ciel #skyWrap{opacity:1}
 #skyBg{position:absolute;inset:0}
 #skyStars{position:absolute;left:0;right:0;top:0;bottom:24%;transition:opacity .8s}
@@ -1319,7 +1330,7 @@ body.ciel #skyWrap{opacity:1}
 #skyDunes{position:absolute;left:0;right:0;bottom:56px;width:100%;
   height:min(240px,30vh);display:block}
 #skyDunes path{transition:none}
-#skyCarav{position:absolute;width:46px;height:auto;animation:cmarche 1.9s ease-in-out infinite}
+#skyCarav{position:absolute;width:46px;height:auto;z-index:1;animation:cmarche 1.9s ease-in-out infinite} /* z-index:1 : il passe DEVANT dunes et feu pendant la traversée */
 #skyCarav,#skyCamp,#skyFire{bottom:auto}
 #skyCarav.arrive{animation:none}
 @keyframes cmarche{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
@@ -2358,13 +2369,11 @@ function leconSyllabes(U,paires,fabrique,titreFuse){
   });
   return q;
 }
-function buildHarakat(U){ return leconSyllabes(U,HK,function(L,h){
-  return (L==='أ'&&h==='\u0650')?'إِ':L+h;   // la kasra porte le hamza DESSOUS : أِ n'existe pas (audit 10/08)
-},'Glisse les harakat sur la lettre'); }
+function sylHKG(L,h){ return (L==='أ'&&h==='\u0650')?'إِ':L+h; }    // la kasra porte le hamza DESSOUS : أِ n'existe pas (audit 10/08) — partagée leçon 5 + bilan
+function sylMDG(L,m){ if(L==='أ'&&m==='ا')return 'آ'; if(L==='أ'&&m==='ي')return 'إِي'; return maddSyl(L,m); } // hamza : آ (jamais أَا) et إِي (jamais أِي — attrapé par le harnais du bilan, 10/08 tard) — partagée leçon 6 + bilan
+function buildHarakat(U){ return leconSyllabes(U,HK,sylHKG,'Glisse les harakat sur la lettre'); }
 
-function buildMadd(U){ return leconSyllabes(U,MD,function(L,m){
-  return (L==='أ'&&m==='ا')?'آ':maddSyl(L,m);  // hamza + alif = alif madda (آ), jamais أَا
-},'Glisse les prolongations sur la lettre'); }
+function buildMadd(U){ return leconSyllabes(U,MD,sylMDG,'Glisse les prolongations sur la lettre'); }
 function buildMaddANCIEN(U){ // conservé quelques jours en référence, plus appelé — à jeter avec l'accord de Myriam
   const q=[];
   U.letters.forEach(L=>{
@@ -2428,30 +2437,45 @@ function buildWords(U){
   return q;
 }
 
+/* ══ LEÇON 8 « Écrire des mots » v2 (10/08 soir) — écriture GUIDÉE (tuile fausse
+   refusée + indice au 2e refus), un écran par mot, du plus court au plus long. 7 unités. ══ */
 function buildWrite(U){
-  return shuffle(U.words).map(w=>({type:'assemble',w,graded:true}));
+  return U.words.slice()
+    .sort((a,b)=>splitUnits(a.w).length-splitUnits(b.w).length)
+    .map(w=>({type:'assemble',w,graded:true,mute:true}));
 }
 
+/* ══ LEÇON 9 « Bilan » v2 (10/08 soir) — chaque acquis testé UNE fois, par le JUMEAU
+   de sa leçon : lettre (L1-2) → nom (L2-3) → forme déguisée (L3) → syllabe (L5) →
+   prolongation (L6) → lecture de mots (L7) → écriture guidée (L8). 10 écrans, 7 unités. ══ */
 function buildBilan(U){
-  const q=[];
-  shuffle(U.letters).slice(0,2).forEach(L=>q.push(mcq({
-    prompt:'Écoute… puis touche la bonne lettre',audio:L,graded:true,grid:'grid3',answer:L,
-    options:shuffle(U.letters).map(x=>({ar:x,key:x}))})));
-  shuffle(U.letters).slice(0,2).forEach(L=>q.push(mcq({
-    prompt:'Quel son fait cette lettre ?',glyph:L,graded:true,grid:'grid3',answer:L,
-    options:shuffle(U.letters).map(x=>({snd:x,key:x}))})));
-  shuffle(U.letters).slice(0,2).forEach(L=>q.push(mcq({
-    prompt:'Touche la bonne lettre, même déguisée 🎭',audio:L,graded:true,grid:'grid3',answer:L,
-    options:shuffle(U.letters).map(x=>({ar:formGlyph(x,1+Math.floor(Math.random()*3)),key:x}))})));
-  const HALL=[];U.letters.forEach(L=>HK.forEach(h=>HALL.push(L+h[0])));
-  for(let i=0;i<2;i++){const a=rnd(HALL);
-    q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a,graded:true,grid:'grid3',answer:a,
-      options:shuffle([a,...shuffle(HALL.filter(x=>x!==a)).slice(0,2)]).map(s=>({ar:s,key:s}))}));}
-  const MALL=[];U.letters.forEach(L=>MD.forEach(m=>MALL.push(maddSyl(L,m[0]))));
-  const ma=rnd(MALL);
-  q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:ma,graded:true,grid:'grid3',answer:ma,
-    options:shuffle([ma,...shuffle(MALL.filter(x=>x!==ma)).slice(0,2)]).map(s=>({ar:s,key:s}))}));
-  shuffle(U.words).slice(0,2).forEach(w=>q.push({type:'assemble',w,graded:true}));
+  const q=[], L=shuffle(U.letters.slice());
+  const l=i=>L[i%L.length];
+  q.push(mcq({prompt:'Choisis la bonne lettre',mute:true,spk:l(0),graded:true,grid:'grid3',answer:l(0),
+    options:balancePos(shuffle(U.letters).map(x=>({ar:x,key:x})),l(0))}));
+  q.push(mcq({prompt:'Choisis le bon nom de la lettre',mute:true,glyph:formGlyph(l(1),1+Math.floor(Math.random()*3)),
+    spkOpts:true,graded:true,grid:'grid3 rtl3',answer:l(1),
+    options:balancePos(shuffle(U.letters).map(x=>({snd:x,key:x})),l(1))}));
+  const ps=shuffle([1,2,3]);
+  q.push(mcq({prompt:'Choisis la bonne lettre',mute:true,spk:l(2),graded:true,grid:'grid3',answer:l(2),
+    options:balancePos(shuffle(U.letters).map((x,k)=>({ar:formGlyph(x,ps[k%3]),key:x})),l(2))}));
+  const s4=sylHKG(l(0),rnd(HK)[0]);
+  q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:s4,graded:true,grid:'grid3',answer:s4,
+    options:balancePos(shuffle(HK.map(h=>{const s=sylHKG(l(0),h[0]);return {ar:s,key:s};})),s4)}));
+  const s5=sylHKG(l(1),rnd(HK)[0]);
+  q.push(mcq({prompt:'Choisis le bon son',mute:true,glyph:s5,spkOpts:true,graded:true,grid:'grid3 rtl3',answer:s5,
+    options:balancePos(shuffle(HK.map(h=>{const s=sylHKG(l(1),h[0]);return {snd:s,key:s};})),s5)}));
+  const s6=sylMDG(l(2),rnd(MD)[0]);
+  q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:s6,graded:true,grid:'grid3',answer:s6,
+    options:balancePos(shuffle(MD.map(m=>{const s=sylMDG(l(2),m[0]);return {ar:s,key:s};})),s6)}));
+  const W=shuffle(U.words.slice());
+  q.push(mcq({prompt:'Choisis le bon mot',mute:true,glyph:W[0].w,glyphLinear:true,spkOpts:true,graded:true,
+    grid:'grid3 rtl3',answer:W[0].w,options:wordSoundOptions(U,W[0])}));
+  q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:W[1].w,graded:true,grid:'grid3',answer:W[1].w,
+    options:balancePos(shuffle([W[1],W[2],W[3]]).map(x=>({ar:x.w,key:x.w})),W[1].w)}));
+  const parTaille=U.words.slice().sort((a,b)=>splitUnits(a.w).length-splitUnits(b.w).length);
+  q.push({type:'assemble',w:parTaille[0],graded:true,mute:true});
+  q.push({type:'assemble',w:parTaille[parTaille.length-1],graded:true,mute:true});
   return q;
 }
 
@@ -2482,7 +2506,7 @@ function buildReview(U){
     q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a,graded:true,grid:'grid3',answer:a,
       options:shuffle([a,...shuffle(SYL.filter(x=>x!==a)).slice(0,2)]).map(s=>({ar:s,key:s}))}));}
   // C — réécrire des mots déjà vus
-  weightedShuffle(words,w=>w.w).slice(0,Math.min(5,words.length)).forEach(w=>q.push({type:'assemble',w,graded:true}));
+  weightedShuffle(words,w=>w.w).slice(0,Math.min(5,words.length)).forEach(w=>q.push({type:'assemble',w,graded:true,mute:true}));
   return q;
 }
 
@@ -3421,7 +3445,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='objectif-epis-v1 \u00b7 s\u00e9rie adoucie (le\u00e7on/r\u00e9vision termin\u00e9e valide aussi le jour), \u00e9cran des 7 \u00e9pis rebranch\u00e9 \u00b7 sw v110';
+const BUILD='lecons89-caravane-v1 \u00b7 le\u00e7ons 8-9 guid\u00e9es 7 unit\u00e9s, Habibah -f, la caravane traverse \u00b7 sw v114';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3574,6 +3598,7 @@ function renderStep(){
 
   body.classList.toggle('p-center',!!st.center);
   body.classList.toggle('p-bulles',st.type==='bulles'); // pleine hauteur (Myriam 10/08) — se retire seule à l'écran suivant
+  body.classList.toggle('p-asm',st.type==='assemble');  // écriture : colonne flex, la traduction se centre tuiles↔bandeau
   if(st.type==='slide'){
     body.innerHTML='<div class="learn">'+(st.nobadge?'':'<div class="badge-new">À DÉCOUVRIR</div>')+
       '<div class="nm">'+st.title+'</div>'+
@@ -3797,20 +3822,19 @@ function renderStep(){
     return;
   }
 
-  if(st.type==='assemble'){
+  if(st.type==='assemble'){ // v2 (10/08 soir) : titre-instruction seul, haut-parleur dessiné, écriture guidée
     const units=splitUnits(st.w.w);
-    window._asm={t:units,ch:[],w:st.w};
-    body.innerHTML='<div class="q-title">'+(st.fromFr?'Écris ce mot en arabe ✍️':'Écoute… puis écris le mot')+'</div>'+
-      '<div style="text-align:center;font-size:46px">'+st.w.e+'</div>'+
-      '<div class="fr" style="text-align:center;margin:2px 0 8px'+(st.fromFr?';font-size:22px;color:var(--cream)':'')+'">'+st.w.fr+'</div>'+
-      '<div class="hint" style="text-align:center;margin:0 0 10px">N\u2019oublie pas les harakats !</div>'+
-      '<button class="bigspeak" onclick="speak(\''+st.w.w+'\')">🔊</button>'+
+    window._asm={t:units,ch:[],w:st.w,rate:0,fini:false,fromFr:!!st.fromFr};
+    body.innerHTML='<div class="q-title">'+(st.fromFr?'Écris ce mot en arabe':'Écoute… puis écris le mot')+'</div>'+
+      (st.fromFr?'<div style="text-align:center;font-size:46px">'+(st.w.e||'')+'</div>'+
+        '<div class="fr" style="text-align:center;margin:2px 0 10px;font-size:22px;color:var(--cream)">'+(st.w.fr||'')+'</div>':
+        '<button class="spkbtn" id="asmSpk" onclick="jouerMot(window._asm.w.w,null,this)" aria-label="Écouter">'+spkSVG()+'</button>')+
       '<div class="slots linear-ar" id="slots"></div>'+
-      '<div class="tiles" id="tiles">'+shuffle(units.slice()).map((ch,k)=>
-        '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="tile'+k+'" onclick="tileTap('+k+',\''+ch+'\')">'+tileLabel(ch)+'</button>').join('')+
+      '<div class="tiles" id="tiles">'+shuffle(units.map((ch,i)=>({ch,i}))).map((o,k)=>
+        '<button class="tile'+(isHarakat(o.ch)?' htile':'')+'" id="tile'+k+'" data-ch="'+o.ch+'" onclick="tileTap('+k+',\''+o.ch+'\')">'+tileLabel(o.ch)+'</button>').join('')+
         '<button class="tile tdel" onclick="asmUndo()" aria-label="Effacer">⌫</button></div>'; // ⌫ en bas à droite, comme un vrai clavier (choix Myriam 4B)
-    cta.textContent='VALIDER';cta.onclick=ctaClick;
     renderSlots();
+    if(!st.fromFr)setTimeout(()=>{ if(QUEUE[qi]===st)jouerMot(st.w.w,null,document.getElementById('asmSpk')); },350); /* le mot part tout seul */
     return;
   }
 
@@ -4710,22 +4734,68 @@ function renderSlots(){
   const rest='·'.repeat(a.t.length-a.ch.length);
   s.innerHTML=done+'<span class="ph">'+rest+'</span>';
 }
-function tileTap(k,ch){
+function asmAttendu(a){ // les unités acceptées à cette position — harakat d'une même lettre : ordre LIBRE (retour Myriam 10/08, équivalence canonique)
+  const pos=a.ch.length, att=a.t[pos];
+  if(att===undefined)return [];
+  if(!isHarakat(att))return [att];
+  let debut=pos; while(debut>0&&isHarakat(a.t[debut-1]))debut--;
+  let fin=pos; while(fin<a.t.length&&isHarakat(a.t[fin]))fin++;
+  const reste=a.t.slice(debut,fin);
+  a.ch.slice(debut).forEach(p=>{const i=reste.indexOf(p); if(i>-1)reste.splice(i,1);});
+  return reste;
+}
+function tileTap(k,ch){ // v3 (10/08 tard) : tuile fausse REFUSÉE — jamais de graphie fausse (règle du ✏️) ; harakat en ordre libre
   const a=window._asm;
-  if(a.ch.length>=a.t.length)return;
+  if(!a||a.fini||answered||a.ch.length>=a.t.length)return;
+  const acceptes=asmAttendu(a);
+  const t=document.getElementById('tile'+k);
+  if(!acceptes.includes(ch)){
+    if(t){ if(t.classList.contains('miss'))return; // anti-rafale : pas 2 cœurs sur un double-tap (fsTap)
+      t.classList.add('miss'); setTimeout(()=>t.classList.remove('miss'),400); }
+    toc();
+    a.rate=(a.rate||0)+1;
+    if(a.rate>=2){ // 2e refus au même emplacement : la bonne tuile s'éclaire (l'indice de Myriam)
+      asmHintOff();
+      const bon=[...document.querySelectorAll('#tiles .tile')].find(x=>!x.disabled&&acceptes.includes(x.dataset.ch));
+      if(bon)bon.classList.add('hint');
+    }
+    if(!REVIEW&&!RECHARGE){ // même règle que fsTap : ni la révision ni la recharge ne coûtent de cœur
+      S.hearts=Math.max(0,S.hearts-1);save();
+      document.getElementById('p-hearts').textContent=S.hearts;
+      document.getElementById('st-hearts').textContent=S.hearts;
+      if(S.hearts<=0)document.getElementById('cta').onclick=goNoHearts;
+    }
+    return;
+  }
+  a.rate=0; asmHintOff();
   a.ch.push(ch);
-  const t=document.getElementById('tile'+k);t.disabled=true;t.dataset.used=a.ch.length;
+  if(t){t.disabled=true;t.dataset.used=a.ch.length;}
   renderSlots();
-  if(a.ch.length===a.t.length)ctaOn();
+  if(a.ch.length===a.t.length)asmFini();
+}
+function asmHintOff(){document.querySelectorAll('#tiles .tile.hint').forEach(x=>x.classList.remove('hint'));}
+function asmFini(){ // complet — donc juste : récompense uniforme, le mot se rejoue, CONTINUER attend la fin du son
+  const a=window._asm;a.fini=true;
+  if(window._objDone)return;window._objDone=true;
+  playSfx('bonne-reponse');
+  try{
+    const fb=document.getElementById('fb'),foot=document.getElementById('p-foot');
+    fb.className='fb ok';fb.innerHTML=elogeHTML();
+    foot.classList.remove('bad');foot.classList.add('ok');
+  }catch(e){}
+  if(!a.fromFr&&a.w.fr){ // la traduction se révèle à la réussite — centrée tuiles↔bandeau, sans emoji (Myriam 10/08)
+    const dv=document.createElement('div'); dv.className='asm-fr'; dv.textContent=a.w.fr;
+    document.getElementById('p-body').appendChild(dv);
+  }
+  setTimeout(()=>jouerMot(a.w.w,ctaOn2,document.getElementById('asmSpk')),380);
 }
 function asmUndo(){
   const a=window._asm;
-  if(!a.ch.length||answered)return;
-  const n=a.ch.length;a.ch.pop();
+  if(!a||a.fini||answered||!a.ch.length)return;
+  const n=a.ch.length;a.ch.pop();a.rate=0;asmHintOff();
   [...document.querySelectorAll('.tile')].forEach(t=>{
     if(t.dataset.used==n){t.disabled=false;delete t.dataset.used;}});
   renderSlots();
-  document.getElementById('cta').disabled=true;
 }
 
 /* tracé */
@@ -4924,9 +4994,31 @@ function jouerSyl(base,ar,fin,el){
   tente(0);
   setTimeout(termine,3200);  // filet : le rappel finit toujours par venir (bulles, séquences)
 }
+function jouerMot(ar,fin,el){ // un MOT enregistré : voix choisie (-f/-h) d'abord, l'enregistrement historique ensuite, synthèse en dernier
+  stopAudio();
+  spkOff(); spkOn(el);
+  var gen=_sndGen, fini=false;
+  var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
+  var base=AUDIO[ar];
+  var essais=base?[base.replace(/\.mp3$/,'-'+VOIX_G+'.mp3'),base]:[];
+  var tente=function(i){
+    if(gen!==_sndGen)return;
+    if(i>=essais.length){ try{_speakSynth(ar);}catch(_){ } setTimeout(termine,900); return; }
+    var a=audioBeni(essais[i]); _curAudio=a; var ok=false, passe=false;
+    var suivant=function(){ if(ok||passe||gen!==_sndGen)return; passe=true; tente(i+1); }; // verrou : 'error' ET p.catch tombent tous les deux sur un 404
+    a.addEventListener('playing',function(){ok=true;},{once:true});
+    a.onended=termine;
+    a.onerror=suivant;
+    var p=a.play(); if(p&&p.catch)p.catch(suivant);
+    setTimeout(function(){ if(!ok&&gen===_sndGen&&a.paused&&a.readyState===0)suivant(); },1400);
+  };
+  tente(0);
+  setTimeout(termine,6000);  // filet : le rappel finit toujours par venir (CONTINUER ne reste jamais gris)
+}
 function sayLetterName(L,fin,el){
   var _sb=sylBase(L);
   if(_sb)return jouerSyl(_sb,L,fin,el);   // une syllabe : son enregistrement, jamais un nom de lettre
+  if(typeof L==='string'&&L.length>3&&AUDIO[L])return jouerMot(L,fin,el); // un MOT connu : son enregistrement, jamais un nom de lettre (options/séquences des quiz de mots)
   stopAudio();
   spkOff(); // stopAudio n'éteint PAS les haut-parleurs : sans ça, deux boxes brillent quand on interrompt la séquence
   spkOn(el);
@@ -7674,17 +7766,15 @@ function peindre(t){
   MO.style.opacity=F.mn; FI.style.opacity=F.fi; CA.style.opacity=F.fi;
   D1.style.fill=rs(F.du[0]); D2.style.fill=rs(F.du[1]);
   var av=Math.min(t,CIEL.length-1)/(CIEL.length-1);
-  // ordinateur : la caravane marche jusqu'au campement (Myriam 10/08) ; mobile : elle
-  // s'arrête avant le feu, comme validé — passer derrière ne rendait rien
-  var xc=4+av*((W.clientWidth>=700)?72:52);
-  /* « jusqu'au campement », jamais DESSUS : l'arrivée est un % de la colonne alors
-     que le campement est ancré en PIXELS au bord droit — sur une colonne de 700 à
-     ~960 px, 76 % tombait dans le feu. On borne sur la position MESURÉE du campement. */
-  var lim=(CA.offsetLeft-(CV.offsetWidth||46)-8)/W.clientWidth*100;
-  if(lim>4 && xc>lim) xc=lim;
+  /* le dromadaire ne se gare plus au campement (proposition Myriam 10/08, validée en
+     preview ciel v2) : il entre hors écran à GAUCHE (−14 %) et SORT hors écran à
+     DROITE (112 %) — « le lendemain », en haut du sentier, il revient de la gauche.
+     Il TRAVERSE le campement en passant DEVANT le feu (z-index:1 — derrière, on ne le
+     voyait pas). Le bornage lim et .arrive disparaissent : plus de lecture de
+     CA.offsetLeft à chaque frame. */
+  var xc=-14+av*126;
   CV.style.left=xc+'%';
   poserSurLaCrete(CV, xc+5, 2);          // 5 % : le milieu de la bête, 2 px d'enfoncement
-  CV.classList.toggle('arrive', av>=0.998);
   poserSurLaCrete(CA, 80, 4);
   poserSurLaCrete(FI, 80, 44);   // le cœur du halo au milieu des flammes, la lueur lèche le sable
   ombre(F);
