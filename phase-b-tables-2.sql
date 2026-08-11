@@ -119,8 +119,11 @@ insert into public.vocabulaire (unite_no, ordre, ar, b, fr, emoji, say, confus, 
   (7, 2, 'اهْدِنَا', 'اهدنا', 'guide-nous', '🧭', 'ihdinā', '["اهْدِمَا","هَدَانَا","اهْدِيَا"]'::jsonb, 'mot-ihdina'),
   (7, 3, 'الَّذِينَ', 'الذين', 'ceux que, ceux qui', '👥', 'alladhīna', '["الَّذِي","الَّذَيْنِ","الَّدِينَ"]'::jsonb, 'mot-alladhina'),
   (7, 4, 'عَلَيْهِمْ', 'عليهم', 'envers eux, sur eux', '👆', 'ʿalayhim', '["عَلَيْكُمْ","إِلَيْهِمْ","عَلَيْهِنَّ"]'::jsonb, 'mot-alayhim'),
-  (7, 5, 'الْمَغْضُوبِ', 'المغضوب', 'ceux qui ont encouru la colère', '⚡', 'al-maghḍoub', '["الْمَعْضُوبِ","الْمَغْصُوبِ","الْمَضْغُوبِ"]'::jsonb, 'mot-almaghdub'),
-  (7, 6, 'الضَّالِّينَ', 'الضالين', 'les égarés', '🌫️', 'aḍ-ḍāllīn', '["الصَّالِّينَ","الضَّامِّينَ","الضَّالِّيلَ"]'::jsonb, 'mot-addallin'),
+  -- 11/08/2026 : forme de CITATION (marfūʿ). Dans le verset ces deux mots portent la finale
+  -- de leur position (muḍāf ilayh de غَيْرِ pour le premier, pluriel sain jarr pour le second) ;
+  -- un vocabulaire cite le mot, pas sa place. Sons renommés : les vieilles prises disent l'ancienne finale.
+  (7, 5, 'الْمَغْضُوبُ', 'المغضوب', 'ceux qui ont encouru la colère', '⚡', 'al-maghḍoubou', '["الْمَعْضُوبُ","الْمَغْصُوبُ","الْمَضْغُوبُ"]'::jsonb, 'mot-almaghdoubou'),
+  (7, 6, 'الضَّالُّونَ', 'الضالون', 'les égarés', '🌫️', 'aḍ-ḍāllūn', '["الصَّالُّونَ","الضَّامُّونَ","الضَّالُّولَ"]'::jsonb, 'mot-addalloun'),
   (7, 7, 'هُوَ', 'هو', 'Lui', '👤', 'houwa', '["هِيَ","هُمْ","هُنَّ"]'::jsonb, 'mot-huwa'),
   (7, 8, 'أَعُوذُ', 'أعوذ', 'je cherche refuge', '🛡️', 'aʿoudhou', '["أَعُودُ","نَعُوذُ","يَعُوذُ"]'::jsonb, 'mot-audhu'),
   (7, 9, 'إِلَٰهٌ', 'إله', 'une divinité', '🕌', 'ilāh', '["إِلَيْهِ","إِلَٰهِي","هِلَالٌ"]'::jsonb, 'mot-ilah'),

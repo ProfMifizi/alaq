@@ -178,6 +178,8 @@
   .p-body{flex:1;overflow-y:auto;padding:8px 22px 24px;max-width:560px;width:100%;margin:0 auto}
   .p-body.p-center{display:flex;flex-direction:column;justify-content:center}
   .q-title{font-size:21px;font-weight:900;margin:14px 0 22px}
+  /* la lettre nommée dans une consigne s'écrit EN ARABE, jamais en phonétique (Myriam 11/08) */
+  .q-title .ar{font-family:var(--ar);font-size:1.5em;color:var(--gold);vertical-align:-.12em;line-height:1}
   .q-note{font-size:20px;font-weight:900;color:var(--cream);line-height:1.35;margin:8px 0 22px}
   .glyph-big{font-family:var(--ar);font-size:80px;text-align:center;color:var(--gold);
     margin:4px 0 24px;line-height:1;padding:44px 0 14px}
@@ -324,7 +326,16 @@
     0%{color:var(--coral);text-shadow:0 0 0 rgba(224,122,95,0)}
     30%{color:var(--coral);text-shadow:0 0 18px rgba(224,122,95,.95)}
     100%{color:inherit;text-shadow:0 0 0 rgba(224,122,95,0)}}
-  .vw{display:inline-block;margin:0 10px}
+  .vw{display:inline-block;margin:0 10px;transition:color .25s ease,text-shadow .25s ease}
+  /* une icône du registre posée DANS une ligne de texte (remplace les emoji, 11/08) */
+  .ic-inline{height:1.15em;width:auto;vertical-align:-.18em;margin-right:.28em}
+  /* la couleur de base : ce que l'élève sait déjà lire, et ce qu'elle ne sait pas encore */
+  .vw.dispo{color:var(--gold)} .vw.absent{color:var(--lock)}
+  /* SUIVRE LA RÉCITATION (11/08) : ces deux règles viennent APRÈS, donc elles l'emportent */
+  .vw.lu{color:var(--gold2)}
+  .vw.en{color:#FFE0AE;text-shadow:0 0 18px rgba(232,169,79,.6)}
+  .spk-mini{width:20px;height:13px;vertical-align:-2px}
+  .spk-mini .cone{fill:currentColor} .spk-mini .w{fill:none;stroke:currentColor;stroke-width:3.4;stroke-linecap:round;opacity:.5}
   .zoom-btn{display:block;margin:0 auto 12px;background:var(--panel);border:1px solid var(--line);
     color:var(--gold2);font-weight:800;font-size:14px;border-radius:12px;padding:8px 16px}
 
@@ -556,6 +567,39 @@
   .fb.bad span:first-child{background:var(--coral);animation:fbpop .35s cubic-bezier(.3,1.6,.5,1),fbshake .35s ease .35s}
   @keyframes fbpop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
   @keyframes fbshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
+  /* ═══ LEÇON 7 « Lire des mots » v3 (11/08) — glisser le signe · bulles-mots · le tri ═══ */
+  .sigchip{width:96px;height:96px;margin:6px auto 26px;border-radius:20px;
+    background:var(--panel);border:2px solid var(--line);border-bottom-width:5px;
+    display:grid;place-items:center;font-family:var(--ar);font-size:52px;color:var(--gold);
+    touch-action:none;cursor:grab;user-select:none}
+  .grps{display:flex;flex-direction:column;gap:12px;align-items:center}
+  .grp{min-width:150px;padding:10px 18px;border-radius:16px;background:var(--panel);
+    border:2px dashed var(--line);font-family:var(--ar);font-size:44px;line-height:1.5;
+    direction:rtl;text-align:center}
+  .grp .gpre{color:var(--cream);opacity:.4}      /* le أَ : grisé, JAMAIS une cible */
+  .grp .gcib{color:var(--gold)}
+  .grp.done{border-style:solid;border-color:var(--gold);background:#3a312b}
+  .grp.done .gcib{color:var(--gold2)}
+  .bul.mot{width:96px;height:96px;font-size:25px}   /* un mot entier dans la bulle */
+  .bul.shk{animation:bulshk .35s ease}
+  /* ⚠️ la translation est reprise à CHAQUE étape (piège gravé de la leçon 2) */
+  @keyframes bulshk{0%,100%{transform:translate(var(--x),var(--y))}
+    25%{transform:translate(calc(var(--x) - 6px),var(--y))}
+    60%{transform:translate(calc(var(--x) + 6px),var(--y))}}
+  .trirow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;direction:rtl;margin-bottom:22px}
+  .chipmot{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;
+    border-radius:14px;padding:8px 16px;font-family:var(--ar);font-size:30px;color:var(--gold);
+    touch-action:none;cursor:grab;user-select:none}
+  .chipmot.gone{visibility:hidden}
+  .chipmot.shake{animation:penshake .35s}
+  .paniers{display:flex;gap:14px}
+  .panier{flex:1;min-height:170px;background:var(--panel);border:2px dashed var(--line);
+    border-radius:16px;padding:8px;text-align:center}
+  .panier .psig{font-family:var(--ar);font-size:46px;color:var(--gold);line-height:1.4}
+  .panier .pmots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;direction:rtl}
+  .panier .pmots span{font-family:var(--ar);font-size:23px;color:var(--gold2);background:#3a312b;
+    border:1px solid var(--gold-d);border-radius:10px;padding:2px 10px}
+
   /* ===== ⚑ Signalements (08/08) — préview validée : drapeau en haut à droite du bandeau bas ===== */
   /* top NÉGATIF : le drapeau flotte AU-DESSUS du bandeau (il recouvrait le coin de
      CONTINUER/VALIDER — Myriam 10/08, tâche leçon 4) */
@@ -1484,29 +1528,29 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
 #sommCiel .srow.ici .cnum{background:var(--gold);color:#241703}
 
 /* ---- le portail de fin de sourate ---- */
-#portail{margin:26px auto 40px;text-align:center;cursor:pointer;-webkit-user-select:none;user-select:none;
+#portail{margin:20px auto 32px;text-align:center;cursor:pointer;-webkit-user-select:none;user-select:none;
   filter:drop-shadow(0 14px 24px rgba(0,0,0,.5))}
-#portail .pt-cadre{position:relative;width:120px;margin:0 auto;padding:11px 10px 10px;
+#portail .pt-cadre{position:relative;width:88px;margin:0 auto;padding:8px 7px 7px;
   border-radius:60px 60px 13px 13px;
   background:linear-gradient(178deg,#4A3416 0%,#2E1F0C 58%,#1E1408 100%);
   box-shadow:inset 0 0 0 2.4px var(--gold),inset 0 0 0 6px rgba(20,12,4,.9),
              inset 0 0 0 7.4px rgba(220,144,46,.45)}
-#portail .pt-jour{position:relative;width:100px;height:134px;margin:0 auto;overflow:hidden;
-  border-radius:50px 50px 6px 6px;background:#0E0904;perspective:560px}
+#portail .pt-jour{position:relative;width:74px;height:99px;margin:0 auto;overflow:hidden;
+  border-radius:37px 37px 5px 5px;background:#0E0904;perspective:420px}
 #portail .pt-clarte{position:absolute;inset:0;opacity:0;transition:opacity 1s .3s;
   background:radial-gradient(74% 62% at 50% 80%,#FFF3D2 0%,#F0B75A 36%,rgba(220,144,46,0) 80%)}
 #portail .pt-v{position:absolute;top:0;bottom:0;width:50%;background-color:#C07E12;
-  background-image:var(--im-porte,url('images-app-alaq/icone-porte-v1.png'));background-size:100px auto;
+  background-image:var(--im-porte,url('images-app-alaq/icone-porte-v1.png'));background-size:74px auto;
   background-repeat:no-repeat;transition:transform .9s cubic-bezier(.35,.02,.2,1)}
 #portail .pt-v.g{left:0;transform-origin:left center;background-position:left top}
 #portail .pt-v.d{right:0;transform-origin:right center;background-position:right top}
 #portail.ouvert .pt-v.g{transform:rotateY(-102deg)}
 #portail.ouvert .pt-v.d{transform:rotateY(102deg)}
 #portail.ouvert .pt-clarte{opacity:1}
-#portail .pt-seuil{width:96px;height:7px;margin:0 auto;border-radius:0 0 5px 5px;
+#portail .pt-seuil{width:71px;height:5px;margin:0 auto;border-radius:0 0 4px 4px;
   background:linear-gradient(180deg,#8A5A16,#3A2610)}
 /* verrouillé : la porte est là, on voit qu'elle attend, on ne peut pas l'ouvrir */
-#portail.verrouille{filter:grayscale(.9) brightness(.5);cursor:default;opacity:.85}
+#portail.verrouille{filter:grayscale(.9) brightness(.5);cursor:default;opacity:.85;pointer-events:none}
 /* l'entrée dans l'histoire : la lumière de la porte envahit l'écran */
 #entreeHalte{position:fixed;inset:0;z-index:80;display:none;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:0 28px;
@@ -1641,7 +1685,7 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
 </div>
 
 <div class="finish" id="noHearts">
-  <div class="big">💔</div>
+  <div class="big"><img src="images-app-alaq/icone-tb-coeur-v1.png" data-ico="tb-coeur" alt="" style="height:64px;filter:grayscale(1) opacity(.55)"></div>
   <h2>Plus de cœurs !</h2>
   <div id="nh-actions" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>
 </div>
@@ -1799,12 +1843,12 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
 <div class="sig-voile" id="sigVoile" onclick="sigFermer()"></div>
 <div class="sig-sheet" id="sigSheet">
   <h3>⚑ Signaler un problème</h3>
-  <button class="sig-opt" data-motif="Le son ne se joue pas" onclick="sigChoisir(this)">🔇 Le son ne se joue pas</button>
-  <button class="sig-opt" data-motif="Le son arrive en retard" onclick="sigChoisir(this)">🐢 Le son arrive en retard</button>
-  <button class="sig-opt" data-motif="Ce n’est pas le bon son" onclick="sigChoisir(this)">🔊 Ce n’est pas le bon son</button>
-  <button class="sig-opt" data-motif="L’affichage est cassé" onclick="sigChoisir(this)">🎨 L’affichage est cassé</button>
-  <button class="sig-opt" data-motif="Ma réponse aurait dû être acceptée" onclick="sigChoisir(this)">✅ Ma réponse aurait dû être acceptée</button>
-  <button class="sig-opt" data-motif="Autre chose" data-libre="1" onclick="sigChoisir(this)">✍️ Autre chose</button>
+  <button class="sig-opt" data-motif="Le son ne se joue pas" onclick="sigChoisir(this)">Le son ne se joue pas</button>
+  <button class="sig-opt" data-motif="Le son arrive en retard" onclick="sigChoisir(this)">Le son arrive en retard</button>
+  <button class="sig-opt" data-motif="Ce n’est pas le bon son" onclick="sigChoisir(this)">Ce n’est pas le bon son</button>
+  <button class="sig-opt" data-motif="L’affichage est cassé" onclick="sigChoisir(this)">L’affichage est cassé</button>
+  <button class="sig-opt" data-motif="Ma réponse aurait dû être acceptée" onclick="sigChoisir(this)">Ma réponse aurait dû être acceptée</button>
+  <button class="sig-opt" data-motif="Autre chose" data-libre="1" onclick="sigChoisir(this)">Autre chose</button>
   <textarea class="sig-txt" id="sigTxt" maxlength="600" placeholder="Dis-nous ce qui ne va pas (facultatif)"></textarea>
   <button class="sig-env" id="sigEnv" disabled onclick="sigEnvoyer()">ENVOYER</button>
 </div>
@@ -2103,8 +2147,8 @@ const UNITS=[
  {w:'اهْدِنَا',b:'اهدنا',fr:'guide-nous',e:'🧭',say:'ihdinā',confus:['اهْدِمَا','هَدَانَا','اهْدِيَا']},
  {w:'الَّذِينَ',b:'الذين',fr:'ceux que, ceux qui',e:'👥',say:'alladhīna',confus:['الَّذِي','الَّذَيْنِ','الَّدِينَ']},
  {w:'عَلَيْهِمْ',b:'عليهم',fr:'envers eux, sur eux',e:'👆',say:'ʿalayhim',confus:['عَلَيْكُمْ','إِلَيْهِمْ','عَلَيْهِنَّ']},
- {w:'الْمَغْضُوبِ',b:'المغضوب',fr:'ceux qui ont encouru la colère',e:'⚡',say:'al-maghḍoub',confus:['الْمَعْضُوبِ','الْمَغْصُوبِ','الْمَضْغُوبِ']},
- {w:'الضَّالِّينَ',b:'الضالين',fr:'les égarés',e:'🌫️',say:'aḍ-ḍāllīn',confus:['الصَّالِّينَ','الضَّامِّينَ','الضَّالِّيلَ']},
+ {w:'الْمَغْضُوبُ',b:'المغضوب',fr:'ceux qui ont encouru la colère',e:'⚡',say:'al-maghḍoubou',confus:['الْمَعْضُوبُ','الْمَغْصُوبُ','الْمَضْغُوبُ']},
+ {w:'الضَّالُّونَ',b:'الضالون',fr:'les égarés',e:'🌫️',say:'aḍ-ḍāllūn',confus:['الصَّالُّونَ','الضَّامُّونَ','الضَّالُّولَ']},
  {w:'هُوَ',b:'هو',fr:'Lui',e:'👤',say:'houwa',confus:['هِيَ','هُمْ','هُنَّ']},
  {w:'أَعُوذُ',b:'أعوذ',fr:'je cherche refuge',e:'🛡️',say:'aʿoudhou',confus:['أَعُودُ','نَعُوذُ','يَعُوذُ']},
  {w:'إِلَٰهٌ',b:'إله',fr:'une divinité',e:'🕌',say:'ilāh',confus:['إِلَيْهِ','إِلَٰهِي','هِلَالٌ']},
@@ -2260,7 +2304,7 @@ function buildAlphabet(U){
    {type:'selson',title:'Sélectionne les sons longs',bons:['مَا','مِي','مُو'],
      tous:['مِ','مَا','مُ','مِي','مَ','مُو'],
      corr:'Les sons longs : <span class="ar">مَا · مِي · مُو</span>'},
-   {type:'formslide',L:'م',title:'Fais glisser la lettre mim'},
+   {type:'formslide',L:'م',title:'Fais glisser la lettre\u00A0<span class="ar">م</span>'},
    {type:'read',word:'مَدْرَسَةٌ',lang:'ar',dir:'rtl',title:'Révèle le mot'},
    mcq({prompt:'L\u2019alphabet arabe comporte :',mute:true,graded:true,grid:'grid3',answer:'28',explain:'L\u2019alphabet arabe compte 28 lettres.',
      options:shuffle([{txt:'26 lettres',key:'26'},{txt:'28 lettres',key:'28'},{txt:'30 lettres',key:'30'}])}),
@@ -2316,7 +2360,7 @@ function buildForms(U){
      forme deux fois) et les deux quiz de la leçon 2. Titres courts jamais lus (mute). */
   const q=[];
   U.letters.forEach(L=>{
-    q.push({type:'formslide',L,title:'Fais glisser la lettre '+U.alpha[L].n});
+    q.push({type:'formslide',L,title:'Fais glisser la lettre\u00A0'+letAr(L)});
     q.push({type:'trace',L});
     /* les lettres qui ne s'attachent qu'à droite (أ و ر د ذ…) n'ont que DEUX formes
        réelles : début = isolée et milieu = fin. On n'écrit que les formes distinctes —
@@ -2349,7 +2393,7 @@ function sylHK(L,h){return L+h;}
    la voix de Myriam en repli). */
 function leconSyllabes(U,paires,fabrique,titreFuse){
   const q=[];
-  U.letters.forEach(L=>q.push({type:'fuse',L,mute:true,title:titreFuse+' '+U.alpha[L].n,
+  U.letters.forEach(L=>q.push({type:'fuse',L,mute:true,title:titreFuse+'\u00A0'+letAr(L),
     jeux:paires.map(p=>({chip:p[0],fus:fabrique(L,p[0])}))}));
   const syls=[];U.letters.forEach(L=>paires.forEach(p=>syls.push(fabrique(L,p[0]))));
   q.push({type:'bulles',syllabes:syls.slice()});
@@ -2405,34 +2449,110 @@ function buildMaddANCIEN(U){ // conservé quelques jours en référence, plus ap
   return q;
 }
 
+/* ══ LEÇON 7 « Lire des mots » v3 — refonte du 11/08 (preview preview_lecon7_lire_v3,
+   retours de Myriam du 10/08 : plus AUCUNE traduction ni emoji, on GLISSE les signes,
+   « Touche le mot qui porte… », grosses bulles-mots, le tri final).
+   DYNAMIQUE pour les 7 unités : chaque écran se construit sur U.words / U.letters.
+   Les 4 anciens écrans `info` en paragraphes (relus à l'identique dans CHAQUE unité)
+   sont morts : les signes ne s'expliquent plus, ils se manipulent — et une seule fois,
+   en unité 1, là où ils sont NEUFS. Les unités suivantes attaquent les mots. ══ */
 function buildWords(U){
-  const q=[
-   {type:'info',title:'Le soukoun ـْ',html:
-     '<div class="demo linear-ar">نَمْلٌ</div>'+
-     '<p>Le petit rond <span class="gold">ـْ</span> est le <b>soukoun</b> : la lettre se prononce '+
-     '<b>sans voyelle</b>, elle s\u2019arrête net. نَمْلٌ se lit « naml » — le م s\u2019arrête : fourmi 🐜.</p>'},
-   {type:'info',title:'Lettres superposées',html:
-     '<div class="demo">نَمْلٌ</div>'+
-     '<p>Très souvent, l\u2019écriture arabe <b>superpose</b> certaines lettres au début d\u2019un mot — '+
-     'ici le <span class="gold">ن</span> et le <span class="gold">م</span> s\u2019empilent. '+
-     'C\u2019est le <b>même mot</b> que نَمْلٌ écrit en ligne : on apprend à reconnaître les deux.</p>'},
-   {type:'info',title:'La chedda ـّ',html:
-     '<div class="demo linear-ar">لَمَّا</div>'+
-     '<p>Le signe <span class="gold">ـّ</span> est la <b>chedda</b> : la lettre est <b>doublée</b>, '+
-     'on appuie dessus. لَمَّا se lit « lam-mā » — comme dans le Qor\u2019an.</p>'},
-   {type:'info',title:'Le tanwīn ـٌ (dammatayn)',html:
-     '<div class="demo linear-ar">نَمْلٌ</div>'+
-     '<p>Les deux petits signes <span class="gold">ـٌ</span> à la fin sont un <b>tanwīn</b> '+
-     '(ici la <b>dammatayn</b>). On ajoute le son <b>« oun »</b> : نَمْلٌ se lit « naml-oun ». '+
-     'C\u2019est du tachkīl, comme le soukoun et la chedda.</p>'},
-  ];
-  shuffle(U.words).forEach(w=>{
-    q.push(mcq({prompt:'Lis le mot, puis touche le bon son',
-      glyph:w.w,glyphLinear:true,emo:w.e,fr:w.fr,graded:true,grid:'grid3',answer:w.w,
-      options:wordSoundOptions(U,w)}));
+  const SUK='ْ', CHD='ّ', TAN='ٌ', FAT='َ', TAT='ـ';
+  const ui=UNITS.indexOf(U), q=[], W=(U.words||[]).slice();
+  const porte=(m,sig)=>m.w.indexOf(sig)>-1;
+  /* les mots DÉJÀ lisibles : cette unité + les précédentes (le tri et les leurres y puisent) */
+  const dejaVus=[]; for(let k=0;k<=ui;k++)if(UNITS[k]&&UNITS[k].words)dejaVus.push(...UNITS[k].words);
+
+  /* ── A · LES SIGNES SE GLISSENT (unité 1 seulement : c'est là qu'ils sont neufs) ──
+     Le أَ est grisé et n'est JAMAIS une cible ; la chedda arrive sur une lettre qui
+     porte déjà sa fatha (design de Myriam). Le son de chaque groupe est SA syllabe. */
+  if(ui===0){
+    const SIGNES=[
+      {chip:TAT+SUK, nom:'le soukoun',    cib:L=>L,       fin:L=>L+SUK},
+      {chip:TAT+CHD, nom:'la chedda',     cib:L=>L+FAT,   fin:L=>L+CHD+FAT},
+      {chip:TAT+TAN, nom:'le dhammatayn', cib:L=>L,       fin:L=>L+TAN},
+    ];
+    SIGNES.forEach(sg=>q.push({type:'place',mute:true,chip:sg.chip,nom:sg.nom,
+      grps:U.letters.map(L=>({pre:'أَ',cib:sg.cib(L),fin:sg.fin(L)}))}));
+  }
+
+  /* ── B · ÉCOUTE → 2 ÉCRITURES : le même mot avec et sans son signe ──
+     La variante se FABRIQUE (chedda retirée · soukoun devenu fatha · tanwīn retiré) :
+     aucune liste à la main, les 7 unités sont servies. */
+  const varSansSigne=(w,sig)=>{
+    if(sig===CHD)return w.replace(CHD,'');
+    if(sig===SUK)return w.replace(SUK,FAT);
+    return w.replace(new RegExp(TAN+'$'),'');
+  };
+  const prisB={};
+  [CHD,SUK,TAN].forEach(sig=>{
+    const cands=W.filter(m=>porte(m,sig)&&!prisB[m.w]);
+    if(!cands.length)return;
+    const m=cands[0], autre=varSansSigne(m.w,sig);
+    if(autre===m.w||dejaVus.some(x=>x.w===autre))return;   // jamais un VRAI mot comme leurre
+    prisB[m.w]=1;
+    q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:m.w,graded:true,grid:'grid2',answer:m.w,
+      options:shuffle([{ar:m.w,key:m.w},{ar:autre,key:autre}])}));
   });
-  // « Appuie sur ce que tu entends » : reconstruire la partie du verset dont
-  // toutes les lettres sont connues (le reste, gris, est posé à sa place)
+
+  /* ── C · « TOUCHE LE MOT QUI PORTE… » : reconnaître un signe DANS un mot ── */
+  [[SUK,'un soukoun'],[CHD,'une chedda'],[TAN,'un tanwīn']].forEach(pair=>{
+    const sig=pair[0];
+    const bons=W.filter(m=>porte(m,sig)), autres=W.filter(m=>!porte(m,sig));
+    if(!bons.length||autres.length<2)return;
+    const bon=rnd(bons), lot=shuffle(autres).slice(0,2);
+    q.push(mcq({prompt:'Touche le mot qui porte '+pair[1],mute:true,graded:true,grid:'grid3',answer:bon.w,
+      options:balancePos(shuffle([bon,...lot].map(x=>({ar:x.w,key:x.w}))),bon.w)}));
+  });
+
+  /* ── D · LES MOTS : « Choisis le bon mot » (écrit → 3 sons) et « la bonne écriture »
+     (son → 3 écrits). Un mot par écran, en alternance, jamais deux fois le même. ── */
+  shuffle(W).slice(0,5).forEach((m,k)=>{   // 5 mots, comme la preview validée — pas les 9
+    if(k%2===0)
+      q.push(mcq({prompt:'Choisis le bon mot',mute:true,glyph:m.w,glyphLinear:true,spkOpts:true,graded:true,
+        grid:'grid3 rtl3',answer:m.w,options:wordSoundOptions(U,m)}));
+    else
+      q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:m.w,graded:true,grid:'grid3',answer:m.w,
+        options:balancePos(shuffle([m.w,...shuffle(W.filter(x=>x.w!==m.w)).slice(0,2).map(x=>x.w)])
+          .map(x=>({ar:x,key:x})),m.w)}));
+  });
+
+  /* ── E · LES GROSSES BULLES-MOTS : seules celles qui portent le signe éclatent ──
+     Un leurre touché SECOUE et reste (erreur d'exploration : jamais de cœur perdu). */
+  {
+    const NOMS={}; NOMS[SUK]='un soukoun'; NOMS[CHD]='une chedda'; NOMS[TAN]='un tanwīn';
+    /* On choisit le signe dont les porteurs sont MINORITAIRES : chercher 8 mots sur 9
+       ne fait rien chercher du tout. 2 ou 3 cibles pour 3 ou 4 leurres, 6 bulles en tout. */
+    const cand=[SUK,CHD,TAN].map(sig=>({sig,bons:W.filter(m=>porte(m,sig))}))
+      .filter(x=>x.bons.length>=2&&x.bons.length<=Math.floor(W.length/2))
+      .sort((a,b)=>a.bons.length-b.bons.length)[0];
+    if(cand){
+      const cibles=shuffle(cand.bons).slice(0,3);
+      const leurres=shuffle(W.filter(m=>!porte(m,cand.sig))).slice(0,6-cibles.length);
+      q.push({type:'bulmots',mute:true,signe:NOMS[cand.sig],
+        mots:shuffle([...cibles.map(m=>({w:m.w,cible:true})),
+                      ...leurres.map(m=>({w:m.w,cible:false}))])});
+    }
+  }
+
+  /* ── F · LE TRI : deux paniers de SIGNES (jamais leur nom écrit — retour de Myriam) ──
+     On puise dans TOUS les mots déjà lisibles : 3 par panier dès l'unité 1. */
+  {
+    const parSigne={}; [SUK,CHD].forEach(sig=>{ parSigne[sig]=dejaVus.filter(m=>m.w.indexOf(sig)>-1); });
+    /* Unité 1 : un seul mot porte un soukoun (نَمْلٌ). Les syllabes-signes qu'on vient de
+       fabriquer à l'écran A complètent les paniers — elles ont leur son dans AUDIO.
+       Dès l'unité 2, les mots déjà lus suffisent : aucun ajout. */
+    if(ui===0)U.letters.forEach(L=>{ parSigne[SUK].push({w:'أَ'+L+SUK}); parSigne[CHD].push({w:'أَ'+L+CHD+FAT}); });
+    if(parSigne[SUK].length>=2&&parSigne[CHD].length>=2){
+      const n=Math.min(3,parSigne[SUK].length,parSigne[CHD].length);
+      q.push({type:'tri',mute:true,
+        paniers:[{sig:TAT+SUK,cle:'s'},{sig:TAT+CHD,cle:'c'}],
+        mots:shuffle([...shuffle(parSigne[SUK]).slice(0,n).map(m=>({w:m.w,cle:'s'})),
+                      ...shuffle(parSigne[CHD]).slice(0,n).map(m=>({w:m.w,cle:'c'}))])});
+    }
+  }
+
+  // « Appuie sur ce que tu entends » : la partie du verset dont toutes les lettres sont connues
   if(U.vtiles){ const st=buildVerseTiles(U.vtiles.vi); if(st)q.push(st); }
   return q;
 }
@@ -3044,7 +3164,7 @@ function sigEnvoyer(){
     ecran:sigEcran(),build:BUILD,
     appareil:(navigator.userAgent||'').slice(0,300),
     email:(CLOUD.user&&CLOUD.user.email)||null};
-  sigFermer();toast('Merci ! Signalement envoyé 🌱');
+  sigFermer();toast('Merci ! Signalement envoyé');
   sigPoster(s).catch(()=>{
     try{const q=JSON.parse(localStorage.getItem('alaq_sigq')||'[]');q.push(s);
         localStorage.setItem('alaq_sigq',JSON.stringify(q.slice(-20)));}catch(e){}
@@ -3445,7 +3565,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='voix-myriam-partout-v1 \u00b7 le nom PLAT (sa voix) joue partout en repli, m\u00e9nage des sons d\u2019essai \u00b7 sw v116';
+const BUILD='correctifs-11aout-v2 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3597,7 +3717,7 @@ function renderStep(){
    window._lastInstr=_key;}
 
   body.classList.toggle('p-center',!!st.center);
-  body.classList.toggle('p-bulles',st.type==='bulles'); // pleine hauteur (Myriam 10/08) — se retire seule à l'écran suivant
+  body.classList.toggle('p-bulles',st.type==='bulles'||st.type==='bulmots'); // pleine hauteur (Myriam 10/08) — se retire seule à l'écran suivant
   body.classList.toggle('p-asm',st.type==='assemble');  // écriture : colonne flex, la traduction se centre tuiles↔bandeau
   if(st.type==='slide'){
     body.innerHTML='<div class="learn">'+(st.nobadge?'':'<div class="badge-new">À DÉCOUVRIR</div>')+
@@ -3714,6 +3834,41 @@ function renderStep(){
     return;
   }
 
+  /* ══ LEÇON 7 v3 (11/08) — GLISSER LE SIGNE sur les lettres ══
+     Gabarit du fuse : une pastille qu'on traîne, un fantôme, la cible qui se remplit et
+     SONNE. Le أَ est grisé et n'est jamais une cible : lâcher à côté ne fait rien. */
+  if(st.type==='place'){
+    window._pl={n:0,tot:st.grps.length};
+    body.innerHTML='<div class="q-title">Glisse '+st.nom+' <span class="ar">'+st.chip+'</span> sur les lettres</div>'+
+      '<div class="sigchip" id="sigchip">'+st.chip+'</div>'+
+      '<div class="grps" id="grps">'+st.grps.map(function(g,k){
+        return '<div class="grp" data-k="'+k+'"><span class="gpre">'+g.pre+'</span>'+
+               '<span class="gcib">'+g.cib+'</span></div>'; }).join('')+'</div>';
+    setTimeout(function(){ setupPlace(st); },40);
+    return;
+  }
+
+  if(st.type==='bulmots'){
+    var cibles=st.mots.filter(function(m){return m.cible;}).length;
+    body.innerHTML='<div class="q-title">Éclate les mots qui portent '+st.signe+'</div>'+
+      '<div id="bul-c">'+cibles+'</div>'+
+      '<div class="bulzone" id="bulzone"></div>';
+    setTimeout(function(){ bulStart(null,null,null,null,st.mots); },40);
+    return;
+  }
+
+  if(st.type==='tri'){
+    window._tri={reste:st.mots.length};
+    body.innerHTML='<div class="q-title">Trie les mots</div>'+
+      '<div class="trirow" id="trirow">'+shuffle(st.mots.slice()).map(function(m){
+        return '<div class="chipmot" data-w="'+m.w+'" data-cle="'+m.cle+'">'+m.w+'</div>'; }).join('')+'</div>'+
+      '<div class="paniers">'+st.paniers.map(function(pa){
+        return '<div class="panier" data-cle="'+pa.cle+'"><div class="psig">'+pa.sig+'</div>'+
+               '<div class="pmots"></div></div>'; }).join('')+'</div>';
+    setTimeout(function(){ setupTri(); },40);
+    return;
+  }
+
   if(st.type==='bulles'){
     // leçon 3 : chaque forme DISTINCTE apparaît deux fois (4 formes si la lettre
     // s'attache des deux côtés, 2 sinon) — même règle que le sac de bulStart
@@ -3799,7 +3954,9 @@ function renderStep(){
     body.innerHTML='<div class="q-title">Verset '+(st.vi+1)+' : touche tous les <span class="gold" style="font-size:30px">'+tgt+'</span></div>'+
       '<div class="vtools">'+
         '<button class="vspk" onclick="playVerse('+st.vi+')" aria-label="Écouter le verset">'+spkSVG()+'</button>'+
-        '<button class="vspk" onclick="openQari()" aria-label="Choisir le récitateur"><span class="qari-nom" id="qariNom">'+qariCur().fr+'</span></button>'+
+        /* Le CHOIX du récitateur a quitté l'exercice (Myriam 11/08 : « il doit se faire dans
+           les paramètres, pas les exercices ») — il ne reste que son NOM, pour dire qui récite. */
+        '<span class="qari-nom" id="qariNom">'+qariCur().fr+'</span>'+
         '<button class="vloupe" onclick="zoomVerse(this)" aria-label="Agrandir">'+icoImg('loupe')+'</button>'+
       '</div>'+
       '<div id="spot-c">'+need+'</div>'+
@@ -3814,7 +3971,7 @@ function renderStep(){
       '<div class="linear-ar" id="readword" dir="rtl" style="font-size:72px;color:var(--gold);margin:10px 0 4px">'+st.w.w+'</div>'+
       '<div class="fr">'+st.w.fr+'</div>'+
       '<button class="speak" style="margin:14px auto 6px" onclick="speak(\''+st.w.w+'\')">🔊 Écouter le modèle</button>'+
-      '<button class="mic-btn" id="micBtn" onclick="startReco(this)">🎙️ Lis le mot</button>'+
+      '<button class="mic-btn" id="micBtn" onclick="startReco(this)">'+icoImg('tab-micro','ic-inline')+' Lis le mot</button>'+
       '<div class="reco-fb" id="recoFb"></div>'+
       '<button class="narr-link" style="margin-top:6px" onclick="recoSkip()">Je ne peux pas parler — passer</button>'+
       '</div>';
@@ -3861,7 +4018,7 @@ function renderStep(){
     // Titre court quand la lettre est isolée (leçon « Mémoriser ») ; les formes liées gardent
     // leur précision. Les deux boutons deviennent des icônes DESSINÉES, sans texte (choix de
     // Myriam le 08/08 : triangle dans un cercle · flèche circulaire).
-    body.innerHTML='<div class="q-title">'+(st.pos?('À toi d\u2019écrire : '+posGlyph+' ('+d.n+' · '+posName+')'):('Écris la lettre '+d.n))+'</div>'+
+    body.innerHTML='<div class="q-title">'+(st.pos?('À toi d\u2019écrire :\u00A0'+letAr(posGlyph)+' ('+posName+')'):('Écris la lettre\u00A0'+letAr(st.L)))+'</div>'+
       '<canvas id="trace" class="trace"></canvas>'+
       '<div class="hint" id="traceMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
       '<div class="tico">'+
@@ -4415,6 +4572,61 @@ function ssValider(){
   cta.onclick=advance;
 }
 /* — écrans 3 / 6 : le glisser-fusionner — */
+/* ══ Le glisser générique de la leçon 7 (11/08) — même mécanique que setupFuse :
+   fantôme suivi au doigt, cible qui se remplit, son de la syllabe, récompense à la fin. */
+function draggable(el,texte,surLache){
+  var ghost=null,drag=false;
+  var xy=function(e){var t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;return[t.clientX,t.clientY];};
+  var mv=function(x,y){if(ghost){ghost.style.left=x+'px';ghost.style.top=y+'px';}};
+  var start=function(e){e.preventDefault();drag=true;var c=xy(e);
+    ghost=document.createElement('div');ghost.className='drag-ghost';ghost.textContent=texte();
+    document.body.appendChild(ghost);mv(c[0],c[1]);el.style.opacity=.35;};
+  var move=function(e){if(!drag)return;e.preventDefault();var c=xy(e);mv(c[0],c[1]);};
+  var end=function(e){if(!drag)return;drag=false;
+    if(ghost){ghost.remove();ghost=null;}el.style.opacity=1;
+    var c=xy(e);surLache(c[0],c[1]);};
+  el.addEventListener('touchstart',start,{passive:false});
+  el.addEventListener('touchmove',move,{passive:false});
+  el.addEventListener('touchend',end);
+  el.addEventListener('mousedown',start);
+  window.addEventListener('mousemove',move);
+  window.addEventListener('mouseup',end);
+}
+function dansRect(x,y,el){ var r=el.getBoundingClientRect(); return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom; }
+function setupPlace(st){
+  var chip=document.getElementById('sigchip'); if(!chip)return;
+  draggable(chip,function(){return st.chip;},function(x,y){
+    var c=[].slice.call(document.querySelectorAll('#grps .grp')).filter(function(g){
+      return !g.classList.contains('done')&&dansRect(x,y,g.querySelector('.gcib')); })[0];
+    if(!c)return;                                   // le أَ n'est jamais une cible : rien ne se passe
+    var g=st.grps[+c.dataset.k];
+    c.classList.add('done'); c.querySelector('.gcib').textContent=g.fin; popIt(c);
+    window._pl.n++;
+    var fin=(window._pl.n>=window._pl.tot)?objectifAtteint:null;
+    speak(g.pre+g.fin);                             // la syllabe : carte AUDIO, synthèse en repli
+    if(fin)setTimeout(fin,700);
+  });
+}
+function setupTri(){
+  [].slice.call(document.querySelectorAll('#trirow .chipmot')).forEach(function(chip){
+    draggable(chip,function(){return chip.dataset.w;},function(x,y){
+      if(chip.classList.contains('gone'))return;
+      var p=[].slice.call(document.querySelectorAll('.panier')).filter(function(pa){return dansRect(x,y,pa);})[0];
+      if(!p)return;
+      if(p.dataset.cle===chip.dataset.cle){
+        chip.classList.add('gone');
+        var sp=document.createElement('span'); sp.textContent=chip.dataset.w;
+        p.querySelector('.pmots').appendChild(sp); popIt(p);
+        window._tri.reste--;
+        var fin=(window._tri.reste<=0)?objectifAtteint:null;
+        sayLetterName(chip.dataset.w,fin);
+      }else{
+        chip.classList.remove('shake'); void chip.offsetWidth; chip.classList.add('shake');
+        toc();                                      // erreur d'exploration : le timbre, jamais un cœur
+      }
+    });
+  });
+}
 function setupFuse(st){
   const cells=[...document.querySelectorAll('#fuzone .mimC')];
   document.querySelectorAll('#fuzone .fchip').forEach(chip=>{
@@ -4717,6 +4929,10 @@ function splitUnits(word){
 function isHarakat(ch){
   return '\u064B\u064C\u064D\u064E\u064F\u0650\u0651\u0652'.includes(ch);
 }
+/* Une consigne qui NOMME une lettre l'écrit en arabe, jamais en phonétique (Myriam 11/08,
+   « mettre la lettre en arabe pas en phonétique — valable sur toutes les slides de ce type »).
+   Le nom translittéré (mīm, lām…) reste sur l'écran « L'alphabet », où il s'APPREND. */
+function letAr(L){ return '<span class="ar">'+L+'</span>'; }
 function chipAff(ch){ // une harakat NUE est portée sur un tatweel — lisible partout (leçon 5 v3 validée ; unifie AUSSI la leçon 1)
   return /^[\u064B-\u0652]$/.test(ch)?'\u0640'+ch:ch;
 }
@@ -5113,11 +5329,13 @@ function bulPose(b){
   b.el.style.setProperty('--x',b.x.toFixed(1)+'px');
   b.el.style.setProperty('--y',b.y.toFixed(1)+'px');
 }
-function bulStart(lettres,parLettre,formes,syllabes){
+function bulStart(lettres,parLettre,formes,syllabes,mots){
   var z=document.getElementById('bulzone'); if(!z)return;
   BUL.W=z.clientWidth; BUL.H=z.clientHeight; BUL.items=[]; BUL.chocs=0;
   var sac=[];
-  if(syllabes){ // leçons 5/6 : chaque syllabe deux fois — le son d'une bulle est SA syllabe
+  if(mots){ // leçon 7 : une bulle par MOT — seules les cibles éclatent, un leurre secoue et reste
+    mots.forEach(function(m){ sac.push({L:m.w,g:m.w,cible:!!m.cible}); });
+  }else if(syllabes){ // leçons 5/6 : chaque syllabe deux fois — le son d'une bulle est SA syllabe
     syllabes.forEach(function(s){ sac.push({L:s,g:s}); sac.push({L:s,g:s}); });
   }else if(formes){ // leçon 3 : chaque forme DISTINCTE deux fois (24 bulles pour م ل ن)
     lettres.forEach(function(L){
@@ -5129,17 +5347,17 @@ function bulStart(lettres,parLettre,formes,syllabes){
     lettres.forEach(function(L){ for(var i=0;i<parLettre;i++)sac.push({L:L,g:L}); });
   }
   shuffle(sac);
-  BUL.reste=sac.length;
+  BUL.reste=mots?sac.filter(function(x){return x.cible;}).length:sac.length;
   /* 24 bulles au lieu de 15 : elles rapetissent pour garder l'air (preview v3 validée) ;
      le rayon vit dans BUL.R — la physique et l'éclat le lisent, jamais de 32 en dur */
-  BUL.R=syllabes?30:(formes?27:32);
+  BUL.R=mots?48:(syllabes?30:(formes?27:32));   // un mot entier tient dans la bulle
   var R=BUL.R, lignes=Math.ceil(sac.length/3);
   sac.forEach(function(it,i){
     var L=it.L;
     var el=document.createElement('button');
-    el.className='bul'+(formes?' frm':'')+(syllabes?' syl':''); el.textContent=it.g; el.setAttribute('aria-label',L);
+    el.className='bul'+(formes?' frm':'')+(syllabes?' syl':'')+(mots?' mot':''); el.textContent=it.g; el.setAttribute('aria-label',L);
     var col=i%3, rang=Math.floor(i/3);
-    var b={el:el,L:L,
+    var b={el:el,L:L,cible:(it.cible!==false),
       x:col*(BUL.W-2*R)/2*0.98+(Math.random()-0.5)*16,
       y:-R+rang*((BUL.H+90)/lignes)+(Math.random()-0.5)*20,
       vx:(Math.random()-0.5)*40,
@@ -5246,7 +5464,12 @@ function bulEclat(x,y){
   }
 }
 function bulPop(b){
-  if(b.pop)return; b.pop=true;
+  if(b.pop)return;
+  if(b.cible===false){  // leçon 7 : ce mot ne porte pas le signe — secousse + timbre doux, la bulle reste
+    b.el.classList.remove('shk'); void b.el.offsetWidth; b.el.classList.add('shk');
+    toc(); return;
+  }
+  b.pop=true;
   b.el.classList.add('pop');
   bulEclat(b.x,b.y);
   plop();
@@ -5286,7 +5509,7 @@ function startSelectedLetters(){
   var byKey={}; learnedLettersList().forEach(function(x){byKey[letterKey(x.L)]=x;});
   var seen=S.letSeen||(S.letSeen={}); var steps=[];
   LETSEL.forEach(function(k){ var x=byKey[k]; if(x){ formsOf(x.L,x.u).forEach(function(st){steps.push(st);}); seen[k]=1; } });
-  if(!steps.length){ toast('Choisis au moins une lettre débloquée 🌱'); return; }
+  if(!steps.length){ toast('Choisis au moins une lettre débloquée'); return; }
   save(); QCTX=null; launchQuranReview(steps);
 }
 function letterTut(customSteps){
@@ -5625,6 +5848,19 @@ function expandShadda(t){
 // Priorité d'enregistrement (sons mal rendus par l'IA) :
 //   hamza (coup de glotte) · chedda · diphtongue vs prolongation.
 const AUDIO={
+  /* Leçon « Lire des mots » v3 (11/08) — les 9 syllabes-signes de l'unité 1.
+     ⚠️ SYLLABES : JAMAIS PAR IA. Ces 9 fichiers sont à enregistrer par Myriam (studio) ;
+     en attendant, speak() retombe proprement sur la synthèse. Ils sont dans la carte AUDIO
+     pour que l'inventaire du studio les réclame tout seul (sons-des-lecons.js lit AUDIO). */
+  'أَمْ':'audios-app-alaq/am-soukoun.mp3',
+  'أَنْ':'audios-app-alaq/an-soukoun.mp3',
+  'أَلْ':'audios-app-alaq/al-soukoun.mp3',
+  'أَمَّ':'audios-app-alaq/am-chedda.mp3',
+  'أَنَّ':'audios-app-alaq/an-chedda.mp3',
+  'أَلَّ':'audios-app-alaq/al-chedda.mp3',
+  'أَمٌ':'audios-app-alaq/am-tanwin.mp3',
+  'أَنٌ':'audios-app-alaq/an-tanwin.mp3',
+  'أَلٌ':'audios-app-alaq/al-tanwin.mp3',
   'نَمْلٌ':'audios-app-alaq/mot-naml.mp3',
   'مَنٌّ':'audios-app-alaq/mot-mann.mp3',
   'مَنَالٌ':'audios-app-alaq/mot-manal.mp3',
@@ -5850,8 +6086,8 @@ const AUDIO={
   'اهْدِنَا':'audios-app-alaq/mot-ihdina.mp3',
   'الَّذِينَ':'audios-app-alaq/mot-alladhina.mp3',
   'عَلَيْهِمْ':'audios-app-alaq/mot-alayhim.mp3',
-  'الْمَغْضُوبِ':'audios-app-alaq/mot-almaghdub.mp3',
-  'الضَّالِّينَ':'audios-app-alaq/mot-addallin.mp3',
+  'الْمَغْضُوبُ':'audios-app-alaq/mot-almaghdoubou.mp3',   // NOM NEUF (11/08) : les prises mot-almaghdub(-f) disent la kasra du verset, plus la ḍamma de la forme de citation
+  'الضَّالُّونَ':'audios-app-alaq/mot-addalloun.mp3',   // NOM NEUF (11/08) : forme de citation au marfūʿ, la prise mot-addallin dit la finale du verset
   'هُوَ':'audios-app-alaq/mot-huwa.mp3',
   'أَعُوذُ':'audios-app-alaq/mot-audhu.mp3',
   'إِلَٰهٌ':'audios-app-alaq/mot-ilah.mp3',
@@ -6047,6 +6283,7 @@ function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jam
 }
 function stopAudio(){ // un seul son à la fois : coupe le fichier, le tampon WebAudio ET la synthèse, et invalide les replis en attente
   _sndGen++;
+  try{ if(typeof suivreArret==='function')suivreArret(); }catch(e){}   // et l'illumination du verset s'éteint avec lui
   try{ if(_curSrc){ _curSrc.stop(); _curSrc=null; } }catch(e){}
   try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
   try{
@@ -6160,6 +6397,7 @@ function qariBulleOff(){ var b=document.getElementById('qbulle'),i=document.getE
 
 function qariPick(id){ S.qari=id; save(); qariRender();
   try{ renderReviser(curReviserTab); }catch(e){} // la ligne « Récitateur » se met à jour
+  try{ renderParams(); }catch(e){}               // et la carte « Récitateur » des Paramètres (11/08)
   try{ var n=document.getElementById('qariNom'), pl=document.getElementById('player');
     // ⚠️ le #qariNom du DERNIER spot survit dans le lecteur CACHÉ (audit 10/08) : la branche
     // « choisi depuis la leçon » exige le lecteur OUVERT, sinon Réviser garde son propre flux
@@ -6210,6 +6448,52 @@ function qariRender(etat){
   document.getElementById('qpin').innerHTML='<span class="cap">voix choisie</span>'+qariRow(qariCur(),etat);
 }
 
+/* ═══════════ SUIVRE LA RÉCITATION MOT À MOT (11/08/2026, demande de Myriam) ═══════════
+   quran.com publie, pour chaque verset, le DÉBUT et la FIN de chaque mot en millisecondes.
+   Vérifié le 11/08 : leurs fichiers et ceux qu'on diffuse (cdn.islamic.network, et nos 70
+   récitations hébergées) sont le MÊME master — 2:261 al-ʿAfāsī fait 384 231 octets et
+   23,980 s des deux côtés. Les repères s'appliquent donc tels quels, sans rien re-télécharger.
+   La Fātiḥa entière × 8 de nos 17 voix tient en 3,2 Ko : c'est EMBARQUÉ, donc HORS LIGNE.
+   ⚠️ On vérifie TOUJOURS que le nombre de segments égale le nombre de mots du verset :
+   as-Sudays fusionne des mots du verset 1, ʿAbd al-Bāsiṭ le verset 4. Quand ça ne colle pas
+   — ou quand la voix n'est pas dans la table (Ayman Suwayd, Ḥudhayfī…) — on n'illumine PAS.
+   On n'invente pas un repère : le verset s'affiche simplement comme avant.
+   Relevés bruts : donnees/horodatage-mots-fatiha.json. */
+const HOROV={"ar.alafasy":{"1":[[60,610],[620,1310],[1320,2450],[2460,5970]],"2":[[80,960],[970,1800],[1810,2460],[2470,5140]],"3":[[40,1230],[1240,4160]],"4":[[60,840],[850,1400],[1410,4280]],"5":[[30,970],[980,1710],[1720,2870],[2880,6290]],"6":[[30,670],[680,1630],[1640,5120]],"7":[[30,740],[750,1700],[1710,2620],[2630,3590],[3600,4210],[4220,5290],[5300,6320],[6330,6630],[6640,12320]]},"ar.husary":{"1":[[50,510],[520,1180],[1190,2340],[2350,4480]],"2":[[700,1410],[1420,2200],[2210,2880],[2890,5310]],"3":[[150,1400],[1410,3530]],"4":[[0,1040],[1050,1660],[1670,3630]],"5":[[350,1310],[1320,2210],[2220,3510],[3520,5900]],"6":[[300,870],[880,1790],[1800,4480]],"7":[[450,1200],[1210,2110],[2120,3070],[3080,4220],[4230,4940],[4950,6200],[6210,7370],[7380,7690],[7700,13830]]},"ar.minshawi":{"1":[[600,930],[940,1630],[1640,2730],[2740,4170]],"2":[[800,1710],[1720,2630],[2640,3290],[3300,4890]],"3":[[800,2080],[2090,3700]],"4":[[0,1720],[1730,2320],[2330,3570]],"5":[[1000,2040],[2050,2860],[2870,4120],[4130,5570]],"6":[[900,1490],[1500,2660],[2670,4390]],"7":[[950,1680],[1690,2760],[2770,3770],[3780,4900],[4910,5500],[5510,6780],[6790,7810],[7820,8290],[8300,10630]]},"ar.abdulbasitmurattal":{"1":[[600,970],[980,1560],[1570,2520],[2530,3920]],"2":[[1050,1700],[1710,2470],[2480,2970],[2980,4670]],"3":[[950,1920],[1930,3850]],"4":[[0,4573]],"5":[[900,1670],[1680,2340],[2350,3460],[3470,5040]],"6":[[1050,1540],[1550,2500],[2510,4480]],"7":[[1800,2340],[2350,3140],[3150,4010],[4020,4870],[4880,5470],[5480,6460],[6470,7390],[7400,7770],[7780,12350]]},"ar.shaatree":{"1":[[260,920],[930,1840],[1850,3430],[3440,6080]],"2":[[100,850],[860,1670],[1680,2320],[2330,4550]],"3":[[110,1530],[1540,4390]],"4":[[80,1050],[1060,2640],[2650,3670]],"5":[[150,1170],[1180,2200],[2210,3600],[3610,5730]],"6":[[40,870],[880,2060],[2070,5100]],"7":[[50,1080],[1090,2230],[2240,3360],[3370,5370],[5380,6270],[6280,8210],[8220,10520],[10530,11040],[11050,18510]]},"ar.abdurrahmaansudais":{"1":[["380","730"],["740","3082"]],"2":[["420","1000"],["1010","1860"],["1870","2430"],["2440","4190"]],"3":[["180","1140"],["1150","2880"]],"4":[["90","840"],["850","1620"],["1630","3010"]],"5":[["30","970"],["980","1720"],["1730","2840"],["2850","4400"]],"6":[["0","780"],["790","1620"],["1630","3850"]],"7":[["170","1030"],["1040","2050"],["2060","2910"],["2920","3930"],["3940","4580"],["4590","5660"],["5670","6650"],["6660","11140"]]},"ar.hanirifai":{"1":[[0,1810],[1820,2770],[2780,3710]],"2":[[650,1290],[1300,2300],[2310,2920],[2930,4920]],"3":[[30,1430],[1440,2960]],"4":[[80,980],[990,1610],[1620,2690]],"5":[[180,1170],[1180,1980],[1990,3260],[3270,4820]],"6":[[250,920],[930,1940],[1950,4100]],"7":[[40,740],[750,1770],[1780,2880],[2890,4330],[4340,4920],[4930,6070],[6080,7220],[7230,7530],[7540,12670]]},"ar.saoodshuraym":{"1":[[140,650],[660,1160],[1170,2110],[2120,2560]],"2":[[100,610],[620,1410],[1420,1810],[1820,3270]],"3":[[30,890],[900,2820]],"4":[[100,790],[800,1510],[1520,2560]],"5":[[50,1060],[1070,1840],[1850,3120],[3130,4410]],"6":[[200,680],[690,1690],[1700,3320]],"7":[[60,690],[700,1560],[1570,2370],[2380,3670],[3680,4170],[4180,5110],[5120,6020],[6030,6380],[6390,11650]]}};
+var _suivi=0;
+function suivreArret(){
+  if(_suivi)cancelAnimationFrame(_suivi); _suivi=0;
+  var l=document.querySelectorAll('.vw.lu,.vw.en');
+  for(var i=0;i<l.length;i++)l[i].classList.remove('lu','en');
+}
+/* Illumine les mots du verset vi au fil de l'audio a. Sans repères : ne fait rien. */
+function suivreVerset(vi,a){
+  suivreArret();
+  try{
+    if(!a)return;
+    if((typeof curSourate!=='undefined'?curSourate:0)!==0)return;   // seule la Fātiḥa est relevée
+    var box=document.querySelector('[data-suivre="'+vi+'"]'); if(!box)return;
+    var mots=box.querySelectorAll('.vw'); if(!mots.length)return;
+    var h=(HOROV[S.qari]||{})[vi+1];
+    if(!h||h.length!==mots.length)return;                           // segmentation absente ou partielle
+    var gen=_sndGen;
+    var pas=function(){
+      if(gen!==_sndGen||!_curAudio){ suivreArret(); return; }
+      var ms=a.currentTime*1000, cour=-1, i;
+      for(i=0;i<h.length;i++) if(ms>=h[i][0]) cour=i;
+      for(i=0;i<mots.length;i++){
+        mots[i].classList.toggle('lu', i<cour);
+        mots[i].classList.toggle('en', i===cour);
+      }
+      if(a.ended){                                                  // le verset entier reste allumé un instant
+        for(i=0;i<mots.length;i++){ mots[i].classList.add('lu'); mots[i].classList.remove('en'); }
+        _suivi=0; setTimeout(suivreArret,1400); return;
+      }
+      _suivi=requestAnimationFrame(pas);
+    };
+    _suivi=requestAnimationFrame(pas);
+  }catch(e){}
+}
 function playVerse(i){ // le verset : fichier HÉBERGÉ si la voix l'a, sinon le flux ; repli flux si le fichier manque
   try{
     stopAudio();
@@ -6223,10 +6507,10 @@ function playVerse(i){ // le verset : fichier HÉBERGÉ si la voix l'a, sinon le
       x.addEventListener('ended',function(){ s.classList.remove('on'); });
       x.addEventListener('pause',function(){ s.classList.remove('on'); });
       x.addEventListener('error',function(){ s.classList.remove('on'); }); };
-    _ondes(a);
+    _ondes(a); suivreVerset(i,a);
     var ko=function(){ if(gen===_sndGen)toast('Récitation indisponible sans connexion'); };
     var lireCdn=function(){ if(gen!==_sndGen||_curAudio!==a)return; // garde : error + p.catch peuvent tomber tous les deux
-      var b=new Audio(qariUrlCdn(v,aya)); _curAudio=b; _ondes(b);
+      var b=new Audio(qariUrlCdn(v,aya)); _curAudio=b; _ondes(b); suivreVerset(i,b);
       b.addEventListener('error',ko,{once:true});
       var p2=b.play(); if(p2&&p2.catch)p2.catch(ko); };
     var repli=(u===qariUrlCdn(v,aya))?ko:lireCdn;
@@ -6256,14 +6540,14 @@ function startReco(btn){
   }
   let rec;try{rec=new SR();}catch(e){recoSelf();return;}
   rec.lang='ar-SA';rec.interimResults=false;rec.maxAlternatives=5;
-  btn.classList.add('listening');btn.textContent='🎙️ J\u2019écoute…';
+  btn.classList.add('listening');btn.innerHTML=icoImg('tab-micro','ic-inline')+' J\u2019écoute…';
   fb.innerHTML='<div class="hint">Parle maintenant…</div>';
   let got=false;
   rec.onresult=(ev)=>{
     got=true;const alts=[];
     for(let i=0;i<ev.results[0].length;i++)alts.push(ev.results[0][i].transcript);
     const ok=alts.some(a=>recoMatch(a,window._reco.w));
-    btn.classList.remove('listening');btn.textContent='🎙️ Réessayer';
+    btn.classList.remove('listening');btn.innerHTML=icoImg('tab-micro','ic-inline')+' Réessayer';
     if(ok){window._reco.ok=true;
       fb.innerHTML='<div class="reco-ok">✅ Très bien ! ماشاء الله</div>';
       speak(window._reco.w.w);ctaOn();
@@ -6273,12 +6557,12 @@ function startReco(btn){
     }
   };
   rec.onerror=(e)=>{
-    btn.classList.remove('listening');btn.textContent='🎙️ Lis le mot';
+    btn.classList.remove('listening');btn.innerHTML=icoImg('tab-micro','ic-inline')+' Lis le mot';
     fb.innerHTML='<div class="reco-warn">🎤 Micro indisponible. Lis à voix haute puis confirme.</div>'+
       '<button class="cta" style="margin-top:10px" onclick="recoSelf()">✅ Je l\u2019ai lu</button>';
   };
   rec.onend=()=>{btn.classList.remove('listening');
-    if(!got&&!window._reco.ok)btn.textContent='🎙️ Lis le mot';};
+    if(!got&&!window._reco.ok)btn.innerHTML=icoImg('tab-micro','ic-inline')+' Lis le mot';};
   try{rec.start();}catch(e){recoSelf();}
 }
 function recoSelf(){
@@ -6500,6 +6784,11 @@ function renderParams(){
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-sons')+'" alt=""> Sons</h3></div>'+
       '<button class="prm-row" onclick="toggleSound();renderParams()">Effets sonores'+prmSw(SND)+'</button>'+
     '</div>'+
+    /* Le récitateur se choisit ICI, plus dans les exercices (Myriam 11/08). La même feuille
+       basse que le Qorān — une seule liste de voix, un seul S.qari. */
+    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Récitateur</h3></div>'+
+      '<button class="prm-row" onclick="openQari()">'+escHTML(qariCur().fr)+'<span style="color:var(--muted)">›</span></button>'+
+    '</div>'+
     (VOIX_HOMME_ACTIVE?
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Voix arabe</h3></div>'+
       '<div class="prm-goals">'+
@@ -6570,7 +6859,7 @@ function coursSignsHTML(){
     {t:'La '+arReveal('chedda','شَدَّة'), d:'La lettre est doublée : on insiste.', c:[['مّ','m·m']]},
     {t:'Le '+arReveal('tanwīn','تَنْوِين'), d:'Un « n » à la fin (indéfini) : dhammatayn, kasratayn, fathatayn.', c:[['مٌ','oun'],['مٍ','in'],['مً','an']]},
   ];
-  return '<div class="ccard"><div class="ctt"><h3>📖 '+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</h3></div>'+
+  return '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('menu-cours')+'" alt=""> '+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</h3></div>'+
     SIGNS.map(function(g){
       return '<div class="sgn-card"><div class="sgn-head">'+g.t+'</div>'+
         '<div class="sgn-chips">'+g.c.map(function(x){
@@ -6600,7 +6889,7 @@ function renderCours(sub){
     h+=unlocked.map(i=>{ const U=UNITS[i]; const emb=ytEmbed(UNIT_VIDEOS[U.no]);
       return '<div class="ccard">'+head(U)+(emb
         ?'<div class="vembed"><iframe src="'+emb+'" allowfullscreen loading="lazy"></iframe></div>'
-        :'<div class="vsoon"><div class="vic">🎬</div>Vidéo bientôt disponible</div>')+'</div>'; }).join('');
+        :'<div class="vsoon"><div class="vic">'+icoImg('tab-video')+'</div>Vidéo bientôt disponible</div>')+'</div>'; }).join('');
   }
   else if(sub==='resume'){
     h+=accAllBtn('resume')+coursSignsHTML();
@@ -6632,12 +6921,12 @@ function renderProg(){
   if(SB&&CLOUD.user){
     h+='<div class="acct"><span class="acct-dot"></span><div class="acct-id">'+nomChoisiHTML()+
        '<small>'+escHTML(CLOUD.user.email||'')+'</small></div>'+
-       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">✏️</button>'+
+       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">'+icoImg('tab-crayon','ic-inline')+'</button>'+
        '<button class="acct-out" onclick="cloudLogout()">se déconnecter</button></div>';
   } else {
     // Déconnectée, la bande du compte n'existe pas : le nom garde sa place, seul, au-dessus de la carte.
     h+='<div class="acct"><div class="acct-id">'+nomChoisiHTML()+'</div>'+
-       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">✏️</button></div>';
+       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">'+icoImg('tab-crayon','ic-inline')+'</button></div>';
     h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
   }
   var _R=rankFor(S.consScore);
@@ -6687,7 +6976,7 @@ function renderProg(){
         '<div class="ust">'+d+' / '+n+' '+arReveal('leçons','دروس')+'</div>'+
         '<div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>';
     }
-    return '<div class="ccard"><div class="ctt"><h3>🧭 Ton parcours</h3></div>'+inner+'</div>';
+    return '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('menu-profil')+'" alt=""> Ton parcours</h3></div>'+inner+'</div>';
   }
   // (« Mon compte » est désormais tout en haut — ancien code de sauvegarde ALAQ1 retiré le 07/07.)
   document.getElementById('view-prog').innerHTML=h; try{maybeGhufranPrompt();}catch(e){}
@@ -6758,7 +7047,7 @@ function dueReviewWords(){
 function reviewSessionWords(){ return dueReviewWords().slice(0,REVIEW_CAP); }
 function startReview(){
   const pool=allReviewWords();
-  if(!pool.length){ toast('Termine d\u2019abord la leçon « 🔗 Lire des mots » pour débloquer la révision 🌱'); return; }
+  if(!pool.length){ toast('Termine d\u2019abord la leçon « Lire des mots » pour débloquer la révision'); return; }
   const due=reviewSessionWords();
   // session = les mots dus ; s'il n'y en a aucun, entraînement libre sur des mots appris au hasard
   const libre=(due.length===0);
@@ -7199,7 +7488,7 @@ function startLettersReview(oneL,oneU){
   if(oneL){ steps=formsOf(oneL,oneU); } // la lettre sous TOUTES ses formes
   else{
     const ls=shuffle(learnedLettersList());
-    if(!ls.length){toast('Termine d\u2019abord « Mémoriser » de l\u2019unité 1 🌱');return;}
+    if(!ls.length){toast('Termine d\u2019abord « Mémoriser » de l\u2019unité 1');return;}
     steps=ls.map(function(x){return {type:'trace',L:x.L,u:x.u};});
   }
   launchQuranReview(steps);
@@ -7211,7 +7500,7 @@ function startFormsReview(){ // 🎭 toutes les formes liées, mélangées
     const sp=UNITS[x.u].strokesPos&&UNITS[x.u].strokesPos[x.L];
     if(sp)[1,2,3].forEach(function(p){ if(sp[p])steps.push({type:'trace',L:x.L,u:x.u,pos:p}); });
   });
-  if(!steps.length){toast('Termine d\u2019abord « Mémoriser » de l\u2019unité 1 🌱');return;}
+  if(!steps.length){toast('Termine d\u2019abord « Mémoriser » de l\u2019unité 1');return;}
   launchQuranReview(shuffle(steps));
 }
 function qNextVi(){
@@ -7247,29 +7536,31 @@ function renderReviser(sub){
     const ord1=SR.verses.map(function(v,i){return {i:i,n:v.split(' ').filter(function(w){return wordReadable(w,set);}).length};}).filter(function(x){return x.n>=1;});
     const versesHtml=SR.verses.map(function(v,vi){
       const words=v.split(' ').map(function(w){
-        return '<span class="vw" style="color:'+(wordReadable(w,set)?'var(--gold)':'var(--lock)')+'">'+w+'</span>';
+        /* la couleur passe par une CLASSE : un style inline battrait .lu/.en et le mot
+           récité ne s'illuminerait jamais (11/08) */
+        return '<span class="vw '+(wordReadable(w,set)?'dispo':'absent')+'">'+w+'</span>';
       }).join(' ');
-      return '<div class="verse" style="font-size:25px;line-height:1.95;cursor:pointer;margin:0 0 8px" onclick="playVerse('+vi+')">'+words+
-        '<div style="font-family:var(--ui);font-size:10.5px;color:var(--muted);direction:ltr;margin-top:2px">Verset '+(vi+1)+' · 🔊</div></div>';
+      return '<div class="verse" data-suivre="'+vi+'" style="font-size:25px;line-height:1.95;cursor:pointer;margin:0 0 8px" onclick="playVerse('+vi+')">'+words+
+        '<div style="font-family:var(--ui);font-size:10.5px;color:var(--muted);direction:ltr;margin-top:2px">Verset '+(vi+1)+' '+spkSVG('spk-mini')+'</div></div>';
     }).join('');
     function accSec(key,ic,titre,inner){
       return '<div class="racc'+(accQ[key]?' open':'')+'">'+
         '<button class="racc-h" onclick="accQTog(\''+key+'\')"><span class="aic">'+ic+'</span> '+titre+' <span class="chev">▾</span></button>'+
         '<div class="racc-b">'+inner+'</div></div>';
     }
-    const ordre='<button class="ritem all" onclick="startSourateOrder()">📜 La sourate entière : remets les versets dans l\u2019ordre</button>'+
-      '<button class="ritem all" onclick="startQuranOrder()">⚡ Tous les versets disponibles ('+ord2.length+')</button>'+
+    const ordre='<button class="ritem all" onclick="startSourateOrder()">La sourate entière : remets les versets dans l\u2019ordre</button>'+
+      '<button class="ritem all" onclick="startQuranOrder()">Tous les versets disponibles ('+ord2.length+')</button>'+
       ord2.map(function(x){return '<button class="ritem" onclick="startQuranOrderV('+x.i+')">Verset '+(x.i+1)+
         ' <span style="color:var(--muted);font-weight:700">· '+x.n+' mots</span><span class="var">'+SR.verses[x.i]+'</span></button>';}).join('');
-    const ecrire='<button class="ritem all" onclick="startQuranWrite()">⚡ Tous les mots lisibles</button>'+
-      (pc>=100?'<button class="ritem all" onclick="startSourateWrite()">🏆 La sourate entière, mot après mot</button>':'')+
+    const ecrire='<button class="ritem all" onclick="startQuranWrite()">Tous les mots lisibles</button>'+
+      (pc>=100?'<button class="ritem all" onclick="startSourateWrite()">La sourate entière, mot après mot</button>':'')+
       ord1.map(function(x){
         const full=verseFullyReadable(x.i);
         return '<button class="ritem'+(full?' all':'')+'" onclick="startQuranWriteV('+x.i+')">'+
           (full?'✨ Verset '+(x.i+1)+' en entier':'Verset '+(x.i+1))+
           '<span class="var">'+(full?SR.verses[x.i]:SR.verses[x.i].split(' ').filter(function(w){return wordReadable(w,set);}).join(' · '))+'</span></button>';
       }).join('');
-    const reciter='<button class="ritem all" onclick="startQuranRecite()">⚡ Toute la sourate</button>'+
+    const reciter='<button class="ritem all" onclick="startQuranRecite()">Toute la sourate</button>'+
       SR.verses.map(function(v,i){return '<button class="ritem" onclick="startQuranReciteV('+i+')">Verset '+(i+1)+
         '<span class="var">'+v+'</span></button>';}).join('');
     h+='<button class="qari" onclick="openQari()">Récitateur <b>'+qariCur().fr+'</b><span class="chev">›</span></button>'+
@@ -7324,7 +7615,7 @@ function renderReviser(sub){
   else{
     h+='<div class="ccard" style="opacity:.7;text-align:center">'+
       '<div style="font-size:40px;margin:6px 0 10px">✍️</div>'+
-      '<h3 style="font-family:var(--ui);font-size:17px;margin:0 0 8px">La grammaire — bientôt ✨</h3>'+
+      '<h3 style="font-family:var(--ui);font-size:17px;margin:0 0 8px">La grammaire — bientôt</h3>'+
       '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0">S\u2019entraîner au-delà du Qorān : former des phrases, conjuguer les verbes, maîtriser la langue du Qorān, in shā\u2019 Allah.</p></div>';
   }
   document.getElementById('view-reviser').innerHTML=h;
@@ -7360,7 +7651,7 @@ function startQuranOrder(){
   const SR=SOURATES[curSourate]||SOURATES[0];
   const qs=[];
   SR.verses.forEach(function(v,vi){ const st=buildVerseTiles(vi); if(st)qs.push(st); });
-  if(!qs.length){toast('Apprends encore quelques lettres pour débloquer cet exercice 🌱');return;}
+  if(!qs.length){toast('Apprends encore quelques lettres pour débloquer cet exercice');return;}
   launchQuranReview(shuffle(qs));
 }
 function startQuranWrite(){
@@ -7372,7 +7663,7 @@ function startQuranWrite(){
       const g=glossOf(SR,vi,k);
       words.push({w:w,fr:(g?'« '+g+' » — ':'')+SR.nom+', verset '+(vi+1),e:'🕋',b:strip(w)});}
   }); });
-  if(!words.length){toast('Apprends encore quelques lettres pour débloquer cet exercice 🌱');return;}
+  if(!words.length){toast('Apprends encore quelques lettres pour débloquer cet exercice');return;}
   const picks=weightedShuffle(words,x=>x.w).slice(0,6).map(w=>({type:'assemble',w:w,graded:true}));
   launchQuranReview(picks);
 }
@@ -7388,7 +7679,7 @@ function recToggle(){
   const btn=document.getElementById('recBtn'), msg=document.getElementById('recMsg');
   if(_rec.on){ try{_rec.mr.stop();}catch(e){} return; }
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){
-    if(msg)msg.textContent='🎤 Enregistrement indisponible ici — récite à voix haute, puis valide.';
+    if(msg)msg.textContent='Enregistrement indisponible ici — récite à voix haute, puis valide.';
     return;
   }
   navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
@@ -7402,7 +7693,7 @@ function recToggle(){
         if(_rec.url)URL.revokeObjectURL(_rec.url);
         _rec.url=URL.createObjectURL(new Blob(_rec.chunks,{type:mr.mimeType||'audio/mp4'}));
       }catch(e){}
-      if(btn)btn.textContent='🎙️ Me réenregistrer';
+      if(btn)btn.innerHTML=icoImg('tab-micro','ic-inline')+' Me réenregistrer';
       const pb=document.getElementById('recPlay'); if(pb){pb.disabled=false;pb.style.opacity=1;}
       if(msg)msg.textContent='✅ Enregistré ! Ré-écoute-toi et compare au modèle.';
     };
@@ -7410,7 +7701,7 @@ function recToggle(){
     if(btn)btn.textContent='⏹ Terminer';
     if(msg)msg.textContent='🔴 Enregistrement… récite le verset.';
   }).catch(function(){
-    if(msg)msg.textContent='🎤 Micro refusé — récite à voix haute, puis valide.';
+    if(msg)msg.textContent='Micro refusé — récite à voix haute, puis valide.';
   });
 }
 function recPlay(){ if(_rec.url){ try{ stopAudio(); _curAudio=new Audio(_rec.url); _curAudio.play(); }catch(e){} } }
@@ -8023,11 +8314,22 @@ function ouvrirHalte(){
    quand la dernière leçon de la dernière unité disponible est terminée. */
 function majPortail(){
   var d=document.getElementById('portail'); if(!d) return;
-  var dernier=-1, u;
-  for(u=0;u<UNITS.length;u++) if(UNITS[u].ready) dernier=u;
-  var fini=false;
-  try{ fini = dernier>=0 && unitValidated(dernier); }catch(e){}
+  /* 11/08 — Myriam : « qu'elle ne soit pas active tant qu'on n'a pas atteint la dernière
+     étape du parcours de la Fātiḥa ». On n'exige plus la seule DERNIÈRE unité prête, mais
+     TOUT le parcours : chaque unité qui a des lettres doit être validée. Plus robuste quand
+     une unité s'ajoute, et fidèle à ce que la porte raconte — on sort quand on a tout lu.
+     ⚠️ `verrouille` porte aussi pointer-events:none : un toucher ne l'atteint même plus. */
+  var reste=[], u;
+  for(u=0;u<UNITS.length;u++){
+    var U=UNITS[u];
+    if(!U||!U.ready||!U.letters||!U.letters.length) continue;
+    var ok=false; try{ ok=unitValidated(u); }catch(e){}
+    if(!ok) reste.push(U.no);
+  }
+  var fini=(reste.length===0);
   d.classList.toggle('verrouille', !fini);
+  d.setAttribute('aria-disabled', fini?'false':'true');
+  d.title = fini ? 'La halte' : ('Termine le parcours de la Fātiḥa — il reste l\u2019unité '+reste[0]);
 }
 
 /* ---------- greffes ---------- */
