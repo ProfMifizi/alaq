@@ -77,6 +77,8 @@ const REGLAGES = {
   bruit: 12,      // dB au-dessus du plancher de bruit mesuré : sous ce seuil, on baisse
   voix: 6,        // dB de renfort de la voix (compresseur + gain)
   marge: 90,      // ms de silence gardés avant et après la voix
+  fin: 0,         // ms jetés en plus tout à la fin — le clic est déjà retiré tout seul
+
 };
 function litReglages() {
   document.querySelectorAll('[data-reglage]').forEach(i => { REGLAGES[i.dataset.reglage] = +i.value; });
@@ -261,6 +263,13 @@ class Micro {
 
     let x = rendu.getChannelData(0).slice();
 
+    /* étage 3 bis — soupape : couper AVEUGLÉMENT la fin est dangereux (mesuré : à
+       300 ms, la queue du mot y passe quand le ⏹ est cliqué vite). Le clic est retiré
+       proprement à l'étage 5 ; ce réglage reste à 0 et n'existe que pour un micro qui
+       ferait un bruit d'arrêt plus long que prévu.                                  */
+    const queue = Math.round(SR * r.fin / 1000);
+    if (queue && x.length > queue * 2) x = x.subarray(0, x.length - queue);
+
     // étage 4 — plancher de bruit mesuré, puis expandeur doux
     const F = Math.round(SR * .02);                                   // fenêtres de 20 ms
     const rms = [];
@@ -290,6 +299,29 @@ class Micro {
     while (d < x.length && Math.abs(x[d]) < parle) d++;
     while (f > d && Math.abs(x[f]) < parle) f--;
     if (d >= f) return null;                                           // rien que du silence
+
+    /* LE CLIC DE LA SOURIS. La prise s'arrête au clic sur « ⏹ Stop » : le bruit du
+       bouton est donc toujours à la toute fin, et comme c'est un son franc, le rognage
+       ci-dessus le prend pour de la voix — la marge de 90 ms le laissait même bien
+       audible. On le reconnaît à ce qu'il est : une bouffée COURTE et DÉTACHÉE. Aucune
+       syllabe de la liste ne dure moins de 120 ms — celle-là n'est pas de la voix.
+       ⚠️ Le silence se lit sur l'ENVELOPPE, jamais échantillon par échantillon : un son
+       traverse zéro à chaque période, un balayage naïf s'arrête au premier passage.  */
+    const enveloppe = [];                                              // crête par fenêtre de 20 ms
+    for (let i = 0; i + F <= x.length; i += F) {
+      let c = 0; for (let j = i; j < i + F; j++) c = Math.max(c, Math.abs(x[j]));
+      enveloppe.push(c);
+    }
+    const COURT = 6, TROU = 2;                                         // 120 ms de voix, 40 ms de blanc
+    for (let tour = 0; tour < 3; tour++) {                             // deux clics d'affilée, ça arrive
+      const bout = Math.min(Math.floor(f / F), enveloppe.length - 1);
+      let b = bout;   while (b >= 0 && enveloppe[b] >= parle) b--;     // début de la bouffée finale
+      let t = b;      while (t >= 0 && enveloppe[t] <  parle) t--;     // et le silence qui la précède
+      if (b < 0 || t < 0 || bout - b > COURT || b - t < TROU) break;   // trop longue ou collée : c'est la voix
+      f = (b + 1) * F - 1;
+      while (f > d && Math.abs(x[f]) < parle) f--;
+    }
+    if (d >= f) return null;
     const marge = Math.round(SR * r.marge / 1000);
     x = x.subarray(Math.max(0, d - marge), Math.min(x.length, f + marge));
 
@@ -355,6 +387,16 @@ async function poste(route, corps) {
 const DEPOT_LOCAL = (fichier, mp3) =>
   poste('/api/enregistrer', { fichier, mp3: base64(mp3), dossier: 'attente' });
 
+/* Le secours quand le dépôt ne passe pas : le fichier tombe dans les Téléchargements,
+   sous le nom EXACT que l'app cherche — il n'y aura rien à renommer. */
+function telecharger(fichier, mp3) {
+  const b = document.createElement('a');
+  b.className = 'dl apres'; b.textContent = '⬇ garder sur mon ordinateur';
+  b.href = URL.createObjectURL(new Blob([mp3], { type: 'audio/mpeg' }));
+  b.download = fichier;
+  return b;
+}
+
 function colonneMicro(cellule, fichier, apresDepot, deposer = DEPOT_LOCAL) {
   const td = document.createElement('div'); td.className = 'rec'; cellule.append(td);
   let micro = null;
@@ -415,15 +457,33 @@ function colonneMicro(cellule, fichier, apresDepot, deposer = DEPOT_LOCAL) {
     const garder = document.createElement('button');
     garder.className = 'bok apres'; garder.textContent = '✓ Garder';
     garder.title = 'mettre cette prise de côté — elle n’entre dans l’app qu’avec « prendre »';
+    /* ⚠️ UNE PRISE NE SE PERD JAMAIS. Un dépôt peut échouer (réseau coupé, session
+       expirée) : on le dit EN GROS, la prise reste écoutable, et un ⬇ permet de la
+       mettre à l'abri sur l'ordinateur en attendant. Le petit message gris d'avant
+       passait inaperçu — on croyait avoir gardé, et rien n'était parti.            */
     garder.onclick = async () => {
       garder.disabled = true; garder.textContent = '…';
-      const r = await deposer(fichier, res.mp3);
-      if (r.erreur) { garder.disabled = false; garder.textContent = '✓ Garder';
-                      etat.className = 'etat ko'; etat.textContent = r.erreur; return; }
+      let r;
+      try { r = await deposer(fichier, res.mp3); }
+      catch (e) { r = { erreur: 'dépôt impossible (' + (e.message || e) + ')' }; }
+      if (r.erreur) {
+        garder.disabled = false; garder.textContent = '✓ Garder';
+        etat.className = 'etat ko'; etat.textContent = '✗ PAS DÉPOSÉ — ' + r.erreur;
+        if (!td.querySelector('.dl')) td.append(telecharger(fichier, res.mp3));
+        toast('« ' + fichier + ' » N’EST PAS parti — ' + r.erreur, 6500);
+        return;
+      }
       toast(r.envoye ? fichier + ' envoyé ✓'
           : r.dossier === 'attente' ? fichier + ' mis de côté — écoute-le, puis « prendre »'
           : fichier + ' remplacé — l’ancien est dans _remplaces/');
-      repos(); apresDepot && apresDepot(r);
+      repos();
+      /* la marque reste : `repos()` n'efface que les `.apres`. Sans elle, la ligne
+         redevenait identique à une ligne jamais enregistrée. */
+      td.querySelectorAll('.depose').forEach(e => e.remove());
+      const marque = document.createElement('span'); marque.className = 'depose';
+      marque.textContent = '✓ déposé ' + new Date().toTimeString().slice(0, 5);
+      td.append(marque);
+      apresDepot && apresDepot(r);
     };
     td.append(ecoute, duree, garder);
   }

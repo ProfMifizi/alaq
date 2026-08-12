@@ -89,6 +89,10 @@
         <label>Marge de silence <span class="val" id="vMarge">90 ms</span>
           <input type="range" data-reglage="marge" min="0" max="300" step="10" value="90"
                  oninput="vMarge.textContent=this.value+' ms'"></label>
+        <label>Fin coupée en plus <span class="val" id="vFin">0 ms</span>
+          <input type="range" data-reglage="fin" min="0" max="800" step="50" value="0"
+                 oninput="vFin.textContent=this.value+' ms'"
+                 title="le clic de souris est déjà retiré tout seul — à ne toucher que s’il en reste quelque chose"></label>
       </div>
     </details>
   </div>
@@ -190,15 +194,37 @@ async function deposerSupabase(fichier, mp3) {
     .upload(chemin, new Blob([mp3], { type: 'audio/mpeg' }), { contentType: 'audio/mpeg' });
   if (error) return { erreur: error.message === 'new row violates row-level security policy'
     ? 'ton adresse n’est pas autorisée à déposer — préviens Myriam' : error.message };
-  envoyes.add(fichier); majEnvoyes();
+  DEPOSES.set(fichier, new Date()); majEnvoyes();
   return { ok: true, envoye: true };
 }
 
-/* ce qui a déjà été envoyé pendant cette séance : on le voit d'un coup d'œil */
-const envoyes = new Set();
+/* ---------------------------------------------------------------- CE QUI EST DÉJÀ LÀ
+   ⚠️ La seule vérité sur « est-ce que ma prise est partie ? » est DANS LE SEAU, jamais
+   dans un compteur de la page : au chargement on lit ce qui s'y trouve vraiment, et
+   chaque ligne déjà déposée le dit, avec la date. Avant, une prise envoyée laissait la
+   ligne strictement identique à une ligne jamais enregistrée — on ne pouvait pas savoir.
+   Les noms sont horodatés en UTC (20260812T… → 20260812143012_mot-dars.mp3) : on trie
+   par nom, donc la DERNIÈRE prise d'un même son gagne.                              */
+const DEPOSES = new Map();                         // fichier → date de la dernière prise
+async function litDeposes() {
+  DEPOSES.clear();
+  for (let debut = 0; ; ) {
+    const { data, error } = await SB.storage.from(SEAU)
+      .list('arabe', { limit: 1000, offset: debut, sortBy: { column: 'name', order: 'asc' } });
+    if (error) { toast('Impossible de lire les prises déjà déposées — ' + error.message, 5000); return; }
+    if (!data || !data.length) return;
+    data.forEach(o => {
+      const m = o.name.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})_(.+)$/);
+      if (m) DEPOSES.set(m[7], new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6])));
+    });
+    if (data.length < 1000) return;
+    debut += data.length;
+  }
+}
+
 function majEnvoyes() {
-  compte.textContent = compte.textContent.replace(/ · \d+ envoyé.*$/, '')
-    + (envoyes.size ? ' · ' + envoyes.size + ' envoyé' + (envoyes.size > 1 ? 's' : '') : '');
+  compte.textContent = compte.textContent.replace(/ · \d+ déposé.*$/, '')
+    + (DEPOSES.size ? ' · ' + DEPOSES.size + ' déposé' + (DEPOSES.size > 1 ? 's' : '') + ' en ligne' : '');
 }
 
 /* ---------------------------------------------------------------- LE TABLEAU */
@@ -206,6 +232,7 @@ const ETIQUETTE = { 'a-refaire':'à refaire (voix IA)', manquant:'à enregistrer
 
 async function charge() {
   INV = await (await fetch('inventaire.json')).json();
+  await litDeposes();
   remplitFiltres(); dessineBilan(); dessine();
 }
 
@@ -309,6 +336,14 @@ function rangee(l) {
 
   const tdR = document.createElement('td');
   colonneMicro(tdR, l.fichier, null, deposerSupabase);
+  const deja = DEPOSES.get(l.fichier);
+  if (deja) {
+    const m = document.createElement('span'); m.className = 'depose';
+    m.textContent = '✓ déposé le ' + deja.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+      + ' à ' + deja.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    m.title = 'ta prise est bien en ligne — Myriam la récolte avec « node recolter.js »';
+    tdR.firstChild.append(m);
+  }
 
   tr.append(tdU, tdL, tdA, tdF, tdCell, tdR);
   return tr;
