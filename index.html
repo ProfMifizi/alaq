@@ -786,12 +786,13 @@
     touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform;transition:border-color .2s,box-shadow .2s}
   .da-tile.drag{cursor:grabbing;z-index:50;border-color:var(--gold);box-shadow:0 10px 22px rgba(0,0,0,.55)}
   .da-tile.placed{opacity:.18;pointer-events:none}
+  .da-tile.hint,.dm-tile.hint{border-color:var(--gold);color:var(--gold2);animation:tilehint .9s ease-in-out infinite}
   .lvp-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--line);
-    border-radius:14px;padding:12px 14px;cursor:pointer;user-select:none;transition:transform .12s,border-color .2s,background .2s}
+    border-radius:16px;padding:16px 20px;cursor:pointer;user-select:none;transition:transform .12s,border-color .2s,background .2s}
   .lvp-row:active{transform:scale(.98)}
   .lvp-row.lit{border-color:var(--gold);background:#3a312b}
   .lvp-row .lr-eq{font-family:var(--ar);font-size:24px;color:var(--cream);direction:rtl}
-  .lvp-row .lr-c{font-family:var(--ar);font-size:30px;color:var(--gold)}
+  .lvp-row .lr-c{font-family:var(--ar);font-size:52px;color:var(--gold);line-height:1.35}
   .lvp-row .lr-arrow{color:var(--muted);font-weight:900}
   .lvp-row .lr-long{font-family:var(--ar);font-size:30px;color:var(--gold);display:inline-block;transform-origin:right center}
   .lvp-row.lit .lr-long{animation:lvpStretch 1s ease}
@@ -803,12 +804,12 @@
   .lvp-glotte span:nth-child(2){animation-delay:.18s;color:var(--gold);font-family:var(--ar)}
   @keyframes lvpBeat{0%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
   .lvp-seat{display:flex;gap:10px;justify-content:center;margin-top:8px}
-  .lvp-seat .ls{flex:1;max-width:150px;background:var(--panel);border:2px solid var(--line);border-radius:16px;
+  .lvp-seat .ls{flex:1;max-width:165px;background:var(--panel);border:2px solid var(--line);border-radius:16px;
     padding:12px;text-align:center;cursor:pointer;user-select:none;transition:transform .12s,border-color .2s,background .2s}
   .lvp-seat .ls:active{transform:scale(.96)}
   .lvp-seat .ls.lit{border-color:var(--gold);background:#3a312b}
-  .lvp-seat .ls-ar{font-family:var(--ar);font-size:50px;color:var(--gold);line-height:1.1}
-  .lvp-seat .ls-lab{font-size:12px;font-weight:800;color:var(--muted);margin-top:4px}
+  .lvp-seat .ls-ar{font-family:var(--ar);font-size:76px;color:var(--gold);line-height:1.15}
+  .lvp-seat .ls-lab{font-size:14px;font-weight:800;color:var(--muted);margin-top:6px}
   .lvp-seat .ls.lit .ls-lab{color:var(--gold2)}
 /* ===== Hub Réviser + onglets icônes (validés 02/07) ===== */
 .heartline{background:var(--green-bg);border:1px solid var(--green);border-radius:12px;padding:9px 12px;
@@ -3036,7 +3037,7 @@ function buildReview(U){
   const SYL=[];letters.forEach(L=>HK.forEach(h=>SYL.push(L+h[0])));
   SYL.forEach(s=>cands.push({k:'syl',s:s}));
   weightedShuffle(cands,c=>c.k==='pos'?c.L:c.s).slice(0,Math.max(0,nLettres)).forEach(c=>{
-    if(c.k==='pos')q.push(mcq({prompt:'Touche la bonne lettre, même déguisée',spk:c.L,mute:true,graded:true,
+    if(c.k==='pos')q.push(mcq({prompt:'Touche la bonne lettre',spk:c.L,mute:true,graded:true,
       grid:'grid3',answer:c.L,options:pick3(letters,c.L,x=>formGlyph(x,c.p))}));
     else q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',spk:c.s,mute:true,graded:true,grid:'grid3',
       answer:c.s,options:shuffle([c.s,...shuffle(SYL.filter(x=>x!==c.s)).slice(0,2)]).map(s=>({ar:s,key:s}))}));
@@ -3075,60 +3076,44 @@ const REVISION_DISC={icon:'🔄',img:'reviser',label:'Révision',build:buildRevi
 // Disque propre à l'unité « lettres faibles » — contenu (support/prolongation + hamza
 // et son siège) à construire avec le reste de l'unité 2.
 function buildLettreVsProlong(U){
-  const S=(title,html,note)=>({type:'slide',title,html,note});
   const DM=(base,hk,answer,result,tag,read)=>({type:'dragmad',base,hk,answer,result,tag,read,say:result,note:'Glisse la bonne lettre de prolongation sur la lettre'});
   const DA=(carrier,cells)=>({type:'dragassoc',carrier,cells,note:'Glisse chaque prolongation sur la lettre qui lui correspond'});
   return [
-    {type:'slide',gate:true,title:'Trois lettres à double visage',
-      html:`<p>Les lettres <b>ي · و · ا</b> ont deux visages.</p>
-       <p style="color:var(--gold2);font-weight:800">👉 Clique deux fois sur chaque carte pour écouter les deux sons.</p>
-       <div class="lvp"><div class="lvp-cards" data-gate="1">
-         <div class="lvp-flip" onclick="lvpFlip(this,'يَ','إِي')"><div class="lvp-flip-in">
-           <div class="face-cons"><div class="ff-ar">ي</div><div class="ff-role">je suis une consonne</div><div class="ff-son">« y »</div><div class="ff-spk">🔊 tape</div></div>
-           <div class="face-pro"><div class="ff-ar">ي</div><div class="ff-role">lettre de prolongation</div><div class="ff-son">« ī »</div><div class="ff-spk">🔊</div></div>
-         </div></div>
-         <div class="lvp-flip" onclick="lvpFlip(this,'وَ','أُو')"><div class="lvp-flip-in">
-           <div class="face-cons"><div class="ff-ar">و</div><div class="ff-role">je suis une consonne</div><div class="ff-son">« w »</div><div class="ff-spk">🔊 tape</div></div>
-           <div class="face-pro"><div class="ff-ar">و</div><div class="ff-role">lettre de prolongation</div><div class="ff-son">« ū »</div><div class="ff-spk">🔊</div></div>
-         </div></div>
-         <div class="lvp-flip" onclick="lvpFlip(this,'','أَا')"><div class="lvp-flip-in">
-           <div class="face-cons"><div class="ff-ar">ا</div><div class="ff-role">support (muet)</div><div class="ff-son">pas de son</div><div class="ff-spk">↻ tape</div></div>
-           <div class="face-pro"><div class="ff-ar">ا</div><div class="ff-role">lettre de prolongation</div><div class="ff-son">« ā »</div><div class="ff-spk">🔊</div></div>
-         </div></div>
-       </div><div class="lvp-flip-hint">↻ Tape pour retourner · 🔊 écoute le son de chaque face</div></div>`,
-      note:'Clique deux fois sur chaque carte pour écouter les deux sons'},
+    /* 13/08 — principe 1 appliqué (Myriam : « trop trop trop de texte, c'est illisible ») :
+       le titre EST l'instruction, il n'y a plus ni boîte, ni badge « À DÉCOUVRIR », ni
+       paragraphe, ni rappel fléché. Sur chaque face : la lettre et son RÔLE, rien de plus —
+       le son s'entend, il ne s'écrit pas (principe 2). */
+    {type:'flipcards', gate:true, cartes:[
+      {ar:'ي', cons:'يَ', pro:'إِي'},
+      {ar:'و', cons:'وَ', pro:'أُو'},
+      {ar:'ا', cons:'',   pro:'أَا', consRole:'support'}
+    ]},
     DM('ن','\u0650','ي','نِي','ī','ni'),
     DM('م','\u064E','ا','مَا','ā','ma'),
     DM('ل','\u064F','و','لُو','ū','lou'),
     DA('ي',[{short:'يَ',madd:'ا',long:'يَا',say:'يَا'},{short:'يِ',madd:'ي',long:'يِي',say:'يِي'},{short:'يُ',madd:'و',long:'يُو',say:'يُو'}]),
     DA('و',[{short:'وَ',madd:'ا',long:'وَا',say:'وَا'},{short:'وِ',madd:'ي',long:'وِي',say:'وِي'},{short:'وُ',madd:'و',long:'وُو',say:'وُو'}]),
     DA('ء',[{short:'أَ',madd:'ا',long:'آ',say:'أَا'},{short:'إِ',madd:'ي',long:'إِي',say:'إِي'},{short:'أُ',madd:'و',long:'أُو',say:'أُو'}]),
-    S('La hamza',
-      `<p>En arabe, une voyelle (<b>a · i · ou</b>) ne peut pas s\u2019écrire toute seule : il lui faut un <b>support muet</b>.</p>
-       <p>La <b>hamza</b> (ء) posée sur le alif joue ce rôle — elle permet de dire la voyelle seule. Tape pour écouter.</p>
-       <div class="lvp">
-         <div class="lvp-row" onclick="lvpHit(this,'أَ')"><span class="lr-c">أَ</span><span class="lr-arrow">→</span><span class="lr-tag">« a »</span><span class="lr-spk">🔊</span></div>
-         <div class="lvp-row" onclick="lvpHit(this,'إِ')"><span class="lr-c">إِ</span><span class="lr-arrow">→</span><span class="lr-tag">« i »</span><span class="lr-spk">🔊</span></div>
-         <div class="lvp-row" onclick="lvpHit(this,'أُ')"><span class="lr-c">أُ</span><span class="lr-arrow">→</span><span class="lr-tag">« ou »</span><span class="lr-spk">🔊</span></div>
-       </div>`,
-      'La hamza permet de dire une voyelle seule : a, i, ou ; tape pour écouter'),
-    S('Le siège du alif',
-      `<p>Posée sur le alif, la hamza se place au-dessus ou en dessous. Tape pour comparer.</p>
-       <div class="lvp-seat">
-         <div class="ls" onclick="lvpHit(this,'أَمَانٌ')"><div class="ls-ar">أ</div><div class="ls-lab">au-dessus · أَمَانٌ</div></div>
-         <div class="ls" onclick="lvpHit(this,'إِيمَانٌ')"><div class="ls-ar">إ</div><div class="ls-lab">en dessous · إِيمَانٌ</div></div>
-       </div>
-       <p style="margin-top:8px;font-size:13px;color:var(--muted)">Les autres sièges (sur le و, le ي, sur la ligne) viendront plus tard, in shā\u2019 Allah.</p>`,
-      'Tape les deux cartes pour comparer la hamza au-dessus et en dessous'),
-    mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,graded:true,answer:'p',explain:'Dans <span class="ar">مَالٌ</span>, le <span class="ar">ا</span> suit une fatḥa et prolonge le son : on dit « māl ». C’est son rôle de prolongation, pas de consonne.',
+    /* 13/08 — mêmes principes que l'écran 1 : le titre EST l'instruction, et l'écran est
+       un GESTE. Les deux paragraphes et les étiquettes latines tombent — le son enseigne
+       ce que la lettre dit (principe 2), l'œil n'a pas besoin d'un doublon écrit. */
+    {type:'taprow', title:'Touche chaque voyelle', lignes:['أَ','إِ','أُ']},
+    /* La position de la hamza EST le contenu : les deux étiquettes restent, les deux
+       paragraphes partent (dont la promesse « les autres sièges viendront plus tard »,
+       qui ne sert pas la leçon EN COURS — principe 6). */
+    {type:'seats', title:'Compare les deux sièges', cartes:[
+      {ar:'أ', lab:'au-dessus', mot:'أَمَانٌ'},
+      {ar:'إ', lab:'en dessous', mot:'إِيمَانٌ'}
+    ]},
+    mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,mute:true,graded:true,answer:'p',explain:'Dans <span class="ar">مَالٌ</span>, le <span class="ar">ا</span> suit une fatḥa et prolonge le son : on dit « māl ». C’est son rôle de prolongation, pas de consonne.',
       options:shuffle([{txt:'Il prolonge le son « ā »',key:'p'},{txt:'Il fait le son « l »',key:'l'},{txt:'Il ne sert à rien',key:'x'}])}),
-    mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,graded:true,answer:'c',explain:'Au début de <span class="ar">يَوْمٌ</span> (« yawm »), le <span class="ar">ي</span> porte une fatḥa et se prononce « y » : ici c’est une consonne, pas une prolongation.',
+    mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,mute:true,graded:true,answer:'c',explain:'Au début de <span class="ar">يَوْمٌ</span> (« yawm »), le <span class="ar">ي</span> porte une fatḥa et se prononce « y » : ici c’est une consonne, pas une prolongation.',
       options:shuffle([{txt:'une consonne « y »',key:'c'},{txt:'une prolongation « ī »',key:'i'},{txt:'une harakat',key:'h'}])}),
-    mcq({prompt:'Le و prolonge le son « ū »…',graded:true,answer:'d',explain:'Le <span class="ar">و</span> prolonge en « ū » seulement après une ḍamma. Chaque prolongation suit sa voyelle : <span class="ar">ا</span> après fatḥa, <span class="ar">ي</span> après kasra, <span class="ar">و</span> après ḍamma.',
+    mcq({prompt:'Le و prolonge le son « ū »…',mute:true,graded:true,answer:'d',explain:'Le <span class="ar">و</span> prolonge en « ū » seulement après une ḍamma. Chaque prolongation suit sa voyelle : <span class="ar">ا</span> après fatḥa, <span class="ar">ي</span> après kasra, <span class="ar">و</span> après ḍamma.',
       options:shuffle([{txt:'après une ḍamma <span style="font-family:var(--ar);font-size:1.7em">ـُ</span>',key:'d'},{txt:'après une fatḥa <span style="font-family:var(--ar);font-size:1.7em">ـَ</span>',key:'f'},{txt:'après une kasra <span style="font-family:var(--ar);font-size:1.7em">ـِ</span>',key:'k'}])}),
-    mcq({prompt:'À quoi sert la hamza <span style="font-family:var(--ar)">(ء)</span> posée sur le alif ?',graded:true,answer:'v',explain:'La hamza <span class="ar">ء</span> est une vraie lettre (un petit coup de glotte). Posée sur le alif, elle permet de prononcer une voyelle seule — a, i ou ou — au début d’un mot.',
+    mcq({prompt:'À quoi sert la hamza <span style="font-family:var(--ar)">(ء)</span> posée sur le alif ?',mute:true,graded:true,answer:'v',explain:'La hamza <span class="ar">ء</span> est une vraie lettre (un petit coup de glotte). Posée sur le alif, elle permet de prononcer une voyelle seule — a, i ou ou — au début d’un mot.',
       options:shuffle([{txt:'à dire une voyelle seule : a, i, ou',key:'v'},{txt:'à prolonger le son',key:'l'},{txt:'à séparer deux mots',key:'s'}])}),
-    mcq({prompt:'Lorsqu\u2019on veut faire le son « i » tout seul, quel support utilise-t-on ?',graded:true,grid:'grid3',answer:'i',explain:'Pour le son « i », la hamza se place sous le alif : <span class="ar">إ</span>. Au-dessus (<span class="ar">أ</span>) on dit « a » ou « ou » ; le alif nu <span class="ar">ا</span> sert seulement à prolonger.',
+    mcq({prompt:'Lorsqu\u2019on veut faire le son « i » tout seul, quel support utilise-t-on ?',mute:true,graded:true,grid:'grid3',answer:'i',explain:'Pour le son « i », la hamza se place sous le alif : <span class="ar">إ</span>. Au-dessus (<span class="ar">أ</span>) on dit « a » ou « ou » ; le alif nu <span class="ar">ا</span> sert seulement à prolonger.',
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
@@ -3981,7 +3966,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='accessibilite-v2 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
+const BUILD='lecon3-u2-refondue \u00b7 alif trouvable \u00b7 \u00e9crans sans pav\u00e9 \u00b7 plus de r\u00e9compense sous l'exercice \u00b7 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4145,6 +4130,46 @@ function renderStep(){
     cta.disabled=st.gate?true:false;return;
   }
 
+  /* Les cartes à deux visages : consonne au recto, prolongation au verso. Le contrat du
+     bouton est celui de tous les écrans — il s'allume quand les trois cartes ont montré
+     leurs DEUX faces (gate), jamais avant. */
+  /* Une rangée de jetons qu'on touche pour entendre : le geste minimal du principe 3.
+     Le bouton s'allume quand chaque ligne a sonné au moins une fois. */
+  if(st.type==='taprow'){
+    window._tr={n:0,tot:st.lignes.length};
+    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+      '<div class="lvp">'+st.lignes.map(function(x){
+        return '<div class="lvp-row" onclick="taprowTap(this,\''+x+'\')"><span class="lr-c">'+x+'</span>'+
+               '<span class="lr-spk">'+spkSVG('spk-mini')+'</span></div>'; }).join('')+'</div>';
+    return;
+  }
+
+  /* Les deux sièges de la hamza : la POSITION est le contenu, elle reste écrite. */
+  if(st.type==='seats'){
+    window._tr={n:0,tot:st.cartes.length};
+    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
+      '<div class="lvp-seat">'+st.cartes.map(function(c){
+        return '<div class="ls" onclick="taprowTap(this,\''+c.mot+'\')"><div class="ls-ar">'+c.ar+'</div>'+
+               '<div class="ls-lab">'+c.lab+' · '+c.mot+'</div></div>'; }).join('')+'</div>';
+    return;
+  }
+
+  if(st.type==='flipcards'){
+    body.innerHTML='<div class="q-title">Retourne les cartes</div>'+
+      '<div class="lvp"><div class="lvp-cards" data-gate="'+(st.gate?1:0)+'">'+
+      st.cartes.map(function(c){
+        return '<div class="lvp-flip" onclick="lvpFlip(this,\''+c.cons+'\',\''+c.pro+'\')">'+
+          '<div class="lvp-flip-in">'+
+            '<div class="face-cons"><div class="ff-ar">'+c.ar+'</div>'+
+              '<div class="ff-role">'+(c.consRole||'consonne')+'</div></div>'+
+            '<div class="face-pro"><div class="ff-ar">'+c.ar+'</div>'+
+              '<div class="ff-role">prolongation</div></div>'+
+          '</div></div>';
+      }).join('')+'</div></div>';
+    cta.disabled=st.gate?true:false;
+    return;
+  }
+
   if(st.type==='info'){
     body.innerHTML='<div class="learn"><div class="badge-new">À DÉCOUVRIR</div>'+
       '<div class="nm">'+st.title+'</div>'+
@@ -4203,7 +4228,12 @@ function renderStep(){
     let grid;
     if(st.type==='findset'){
       grid='<div class="agrid">'+ALPHABET.map(a=>{
-        const isT=st.targets.includes(a[0]);
+        /* ⚠️ 13/08 — l'unité 2 enseigne **أ** (le hamza posé sur le alif) alors que
+           l'alphabet des 28 porte **ا**, la lettre. Une comparaison stricte rendait le
+           alif INTROUVABLE : chaque toucher coûtait un cœur et l'écran ne pouvait pas
+           se terminer (signalé par Myriam). `sameLetter` connaît la famille du alif
+           (ا أ إ آ ٱ) — c'est le même outil que le repérage dans le verset. */
+        const isT=st.targets.some(t=>sameLetter(t,a[0]));
         return '<button class="ag'+(st.highlight&&isT?' hl':'')+'" onclick="fsTap(this,\''+a[0]+'\','+(isT?1:0)+')">'+a[0]+'</button>';
       }).join('')+'</div>';
     } else {
@@ -4451,7 +4481,6 @@ function renderStep(){
       '<div class="da-wrap" id="da-wrap">'+
         '<div class="da-tops">'+tops+'</div>'+
         '<div class="da-bottoms">'+tiles+'</div>'+
-        '<div class="dm-fb" id="da-fb"></div>'+
       '</div>';
     setTimeout(()=>setupDragAssoc(st),50);
     return;
@@ -4463,7 +4492,6 @@ function renderStep(){
       '<div class="dm-wrap" id="dm-wrap">'+
         '<div class="dm-target" id="dm-target">'+st.base+st.hk+'</div>'+
         '<div class="dm-tray">'+tiles+'</div>'+
-        '<div class="dm-fb" id="dm-fb"></div>'+
       '</div>';
     setTimeout(()=>setupDragMad(st),50);
     return;
@@ -5444,8 +5472,6 @@ function errorBeep(){
 function setupDragAssoc(st){
   const wrap=document.getElementById('da-wrap'); if(!wrap)return;
   const cells=[...wrap.querySelectorAll('.da-cell')];
-  const fb=document.getElementById('da-fb');
-  const cta=document.getElementById('cta');
   const tiles=[...wrap.querySelectorAll('.da-tile')];
   let done=0;
   const cellUnder=(tile)=>{
@@ -5468,15 +5494,20 @@ function setupDragAssoc(st){
         tile.style.transform=''; tile.classList.add('placed');
         c.innerHTML='<span class="da-long">'+c.dataset.long+'</span>'; c.classList.add('done');
         warmVoices(); speak(c.dataset.say); done++;
-        if(fb){ fb.className='dm-fb ok'; fb.textContent='ماشاء الله — '+c.dataset.long; }
-        if(done>=cells.length){ if(cta)cta.disabled=false; if(fb){fb.className='dm-fb ok';fb.textContent='Bravo ! Tu peux continuer ✓';} }
+        /* Plus AUCUNE récompense sous l'exercice (Myriam 13/08 : « les récompenses sous les
+           associations sont inutiles »). Le contrat est celui de tous les écrans : on pose,
+           le bouton s'allume, l'éloge discret vit dans la div du bas. */
+        wrap.dataset.refus=0;
+        if(done>=cells.length){ objectifAtteint(); objectifFilet(); }
       } else {
         tile.style.transition='transform .25s ease'; tile.style.transform='';
         setTimeout(()=>{tile.style.transition='';},260);
-        if(c && !c.classList.contains('done')){ errorBeep();
-          if(fb){ fb.className='dm-fb bad'; fb.textContent='Pas la bonne lettre';
-            setTimeout(()=>{ if(done<cells.length){fb.className='dm-fb';fb.textContent='';} },1400); } }
-      } };
+        if(c && !c.classList.contains('done')){ toc();
+          /* même contrat que partout : au 2ᵉ refus, la bonne tuile respire en doré */
+          var r=(parseInt(wrap.dataset.refus||'0',10))+1; wrap.dataset.refus=r;
+          if(r>=2)tiles.forEach(function(x){ if(!x.classList.contains('placed')&&x.dataset.ch===c.dataset.madd)x.classList.add('hint'); });
+        } }
+      };
     tile.addEventListener('pointerdown',down);
     tile.addEventListener('pointermove',move);
     tile.addEventListener('pointerup',up);
@@ -5486,8 +5517,6 @@ function setupDragAssoc(st){
 function setupDragMad(st){
   const wrap=document.getElementById('dm-wrap'); if(!wrap)return;
   const target=document.getElementById('dm-target');
-  const fb=document.getElementById('dm-fb');
-  const cta=document.getElementById('cta');
   let solved=false;
   const tiles=[...wrap.querySelectorAll('.dm-tile')];
   const overTarget=(tile)=>{
@@ -5514,19 +5543,18 @@ function setupDragMad(st){
         tile.classList.add('placed');
         target.innerHTML='<span class="dm-res">'+st.result+'</span>';
         target.classList.add('done');
-        fb.className='dm-fb ok'; fb.textContent='ماشاء الله — '+st.result+' « '+st.tag+' »';
+        /* Plus de récompense sous l'exercice, plus de pavé d'explication avec son bouton
+           « J'ai compris » (Myriam 13/08). Contrat unique : on pose, la syllabe SONNE,
+           le bouton s'allume et l'éloge discret vit dans la div du bas. */
         warmVoices(); speak(st.say);
-        cta.disabled=false;
+        objectifAtteint(); objectifFilet();
       } else {
         tile.style.transition='transform .25s ease'; tile.style.transform='';
         setTimeout(()=>{tile.style.transition='';},260);
         if(ok){ // déposée sur la cible, mais mauvaise prolongation
-          errorBeep();
-          const wrong=tile.dataset.ch;
-          fb.className='dm-fb bad';
-          fb.innerHTML='<div class="dm-exp"><span style="font-family:var(--ar);font-size:24px">'+wrong+'</span> prolonge '+MADD_SOUND[wrong]+'.<br>'+
-            'Mais ici c\u2019est écrit « '+st.read+' » : on ne peut le prolonger que par la prolongation « '+st.tag+' » (<span style="font-family:var(--ar);font-size:22px">'+st.answer+'</span>).'+
-            '<br><button class="dm-ok" onclick="this.closest(\'.dm-fb\').className=\'dm-fb\';this.closest(\'.dm-fb\').innerHTML=\'\'">J\u2019ai compris</button></div>';
+          toc();
+          var r=(parseInt(wrap.dataset.refus||'0',10))+1; wrap.dataset.refus=r;
+          if(r>=2)tiles.forEach(function(x){ if(x.dataset.ch===st.answer)x.classList.add('hint'); });
         }
       } };
     tile.addEventListener('pointerdown',down);
@@ -6543,6 +6571,15 @@ function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) 
       }
     }
   }catch(e){ try{card.classList.toggle('flipped');}catch(_){ } }
+}
+/* Une ligne touchée : elle s'allume, elle sonne, et quand toutes ont sonné le bouton
+   s'allume — le contrat de tous les écrans, jamais une récompense sous l'exercice. */
+function taprowTap(el,word){
+  lvpHit(el,word);
+  if(!window._tr)return;
+  if(el.dataset.vu)return;
+  el.dataset.vu=1; window._tr.n++;
+  if(window._tr.n>=window._tr.tot){ objectifAtteint(); objectifFilet(); }
 }
 function lvpHit(el,word){ // slides Lettres vs prolongations : rejoue l'anim + audio au tap
   try{ el.classList.remove('lit'); void el.offsetWidth; el.classList.add('lit'); }catch(e){}
