@@ -675,6 +675,20 @@
   .lg-cell.avail{color:#a9843c;background:#2b2622;cursor:pointer}
   .lg-cell.sel{color:var(--gold2);background:rgba(232,169,79,.14);border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2);cursor:pointer;font-weight:700}
   .lg-cell.nouv{animation:lgglow 1.6s ease-in-out infinite}
+  /* ═══ LA HAMZA ET SES SIÈGES (13/08) ═══
+     Une ligne À PART, séparée par un filet : c'est ce qui dit, sans un mot, qu'elle ne
+     compte pas parmi les 28. Les cases sont plus petites que celles des lettres — elles
+     ne prétendent pas au même rang. */
+  .lg-hamza{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;direction:rtl;
+    margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+  .lg-hamza .hz{position:relative;border-radius:12px;padding:7px 0 5px;text-align:center;
+    border:1.5px solid var(--line);background:#2a2422;font-family:"Noto Naskh Arabic",serif;
+    font-size:23px;line-height:1.15;color:#a9843c;cursor:pointer}
+  .lg-hamza .hz .hzl{display:block;font-family:var(--ui);font-size:8.5px;font-weight:800;
+    color:var(--muted);letter-spacing:.02em;margin-top:2px}
+  .lg-hamza .hz.locked{color:#5b524c;background:#2a2624;border-color:#332e2a;opacity:.55;cursor:default}
+  .lg-hamza .hz:not(.locked):active{border-color:var(--gold);color:var(--gold2)}
+  .lg-hamza .hz.lit{border-color:var(--gold);color:var(--gold2);background:rgba(232,169,79,.12)}
   @keyframes lgglow{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 2px rgba(232,169,79,.45)}}
   .lg-cell .lk{position:absolute;top:5px;left:7px;font-size:10px;opacity:.6}
   .lg-cell .bd{position:absolute;top:3px;right:5px;font-size:11px}
@@ -1761,6 +1775,9 @@ html.clair .nrow.nsel,
 html.clair .opt.fopt.sel .fdevant,
 html.clair .lg-rev:disabled{ background:var(--sunk) }
 html.clair .lg-cell.locked{ background:var(--sunk);color:var(--lock);border-color:#DCD2C0 }
+html.clair .lg-hamza .hz{ background:var(--sunk);color:var(--gold2) }
+html.clair .lg-hamza .hz.locked{ background:var(--sunk);color:var(--lock);border-color:#DCD2C0 }
+html.clair .lg-hamza .hz.lit{ background:#FBE9C4;border-color:var(--gold);color:#8A4A00 }
 html.clair .lg-cell.avail{ background:#FBEFD8;color:var(--gold2) }
 html.clair .lum{ background:linear-gradient(180deg,#FFFDF8,#F4EBDA);border:1px solid #C9AF7C }
 html.clair .opt.fopt.ok .fdevant{ background:var(--green-bg);border-color:var(--green) }
@@ -3966,7 +3983,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='lecon3-u2-refondue \u00b7 alif trouvable \u00b7 \u00e9crans sans pav\u00e9 \u00b7 plus de r\u00e9compense sous l'exercice \u00b7 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
+const BUILD='hamza-sieges \u00b7 CORRECTIF URGENT apostrophe BUILD \u00b7 \u00b7 alif trouvable \u00b7 \u00e9crans sans pav\u00e9 \u00b7 plus de r\u00e9compense sous l\u2019exercice \u00b7 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5959,6 +5976,15 @@ function sayLetterSound(L){
 }
 /* ===== Réviser « Les lettres » : la grille des 28, sélectionnable ===== */
 var LETSEL=new Set();
+/* Toucher un siège : il s'allume et il SONNE. La hamza seule dit son nom, les sièges
+   disent la voyelle qu'ils permettent — c'est exactement ce que la hamza sert à faire. */
+const HAMZA_SON={'ء':'ء','أ':'أَ','إ':'إِ'};
+function hamzaTap(el,s){
+  try{ document.querySelectorAll('.lg-hamza .hz.lit').forEach(function(x){x.classList.remove('lit');}); }catch(e){}
+  el.classList.add('lit');
+  var t=HAMZA_SON[s]||s;
+  if(s==='ء')sayLetterName('ء'); else speak(t);
+}
 function letToggle(k){ if(LETSEL.has(k))LETSEL.delete(k); else{ LETSEL.add(k); sayLetterSound(k); } renderReviser('lettres'); }
 function letSelAll(){ knownLetterSet().forEach(function(k){LETSEL.add(k);}); renderReviser('lettres'); }
 function letSelClear(){ LETSEL.clear(); renderReviser('lettres'); }
@@ -5975,6 +6001,10 @@ function letterTut(customSteps){
     {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
     {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées ✨',tx:'Celles-ci sont prêtes ! Touche-les pour les choisir.<br>✨ tout juste débloquée<br>🔸 à revoir'},
     {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Touche une lettre dorée : elle passe en JAUNE FONCÉ, avec un ✓. Tu peux en prendre plusieurs.',enter:function(){var a=document.querySelectorAll('.lg-cell.avail');var c=a[Math.min(3,a.length-1)]||a[0];if(c&&!c.querySelector('.ck')){c.classList.remove('avail');c.classList.add('sel','coachdemo');c.insertAdjacentHTML('afterbegin','<span class="ck">✓</span>');}},leave:function(){var c=document.querySelector('.lg-cell.coachdemo');if(c){c.classList.remove('sel','coachdemo');c.classList.add('avail');var k=c.querySelector('.ck');if(k)k.remove();}}},
+    /* Le SEUL endroit où la hamza s'explique — Myriam a tranché : pas de texte permanent
+       à l'écran, la ligne se montre, le guide raconte. */
+    {t:function(){return document.querySelector('.lg-hamza');},ti:'La hamza ء',
+     tx:'L’alphabet compte <b>28 lettres</b>, et la hamza n’en fait pas partie : <b>elle n’a pas de forme à elle</b>.<br>Elle se pose toujours sur un <b>siège</b> — le alif (أ إ), le wāw (ؤ) ou le yāʾ (ئ).<br>Touche-la pour l’entendre.'},
     {t:function(){return document.querySelector('.lg-rev');},ti:'On révise ! 🌙',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
   ]).filter(function(x){return x.t();});
   if(!steps.length)return;
@@ -6062,6 +6092,21 @@ function letterGridHTML(){
     var mk=(sel?'<span class="ck">✓</span>':'')+(nouv.has(k)?'<span class="bd">✨</span>':'')+(revoir.has(k)?'<span class="rv">🔸</span>':'');
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
+  /* ═══ LA HAMZA — hors des 28, et c'est TOUT l'enseignement ═══
+     Elle apparaît dès que le alif est connu (`knownLetterSet` l'ajoute déjà : « la hamza
+     s'apprend avec le alif »). Les deux sièges que l'app n'enseigne pas encore — le wāw et
+     le yāʾ — restent VERROUILLÉS, comme les lettres d'une unité future : on montre qu'ils
+     existent sans prétendre les avoir enseignés.
+     ⚠️ Ces cases ne se SÉLECTIONNENT pas : réviser la hamza, ce serait tracer le alif, qui
+     a déjà sa case. Ici on touche pour ENTENDRE — le geste le plus universel de l'app. */
+  if(unlocked.has('ا')){
+    var SIEGES=[['ء','seule',1],['أ','alif',1],['إ','alif',1],['ؤ','wāw',0],['ئ','yāʾ',0]];
+    h+='<div class="lg-hamza">'+SIEGES.map(function(s){
+      return s[2]
+        ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>'
+        : '<div class="hz locked">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>';
+    }).join('')+'</div>';
+  }
   if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
   return h;
 }
