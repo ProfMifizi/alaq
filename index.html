@@ -683,7 +683,7 @@
     margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
   .lg-hamza .hz{position:relative;border-radius:12px;padding:7px 0 5px;text-align:center;
     border:1.5px solid var(--line);background:#2a2422;font-family:"Noto Naskh Arabic",serif;
-    font-size:23px;line-height:1.15;color:#a9843c;cursor:pointer}
+    font-size:23px;line-height:1.15;color:var(--gold2);cursor:pointer}
   .lg-hamza .hz .hzl{display:block;font-family:var(--ui);font-size:8.5px;font-weight:800;
     color:var(--muted);letter-spacing:.02em;margin-top:2px}
   .lg-hamza .hz.locked{color:#5b524c;background:#2a2624;border-color:#332e2a;opacity:.55;cursor:default}
@@ -1395,11 +1395,11 @@
     background:#22323A;border-left:1px solid #33505E;border-top:1px solid #33505E;transform:rotate(45deg)}
   .qpin{margin:0 14px 4px;padding:9px 12px 11px;border-radius:14px;background:#3A2F26;
     border:2px solid var(--gold-d);display:flex;flex-direction:column;gap:4px;flex:none}
-  .qpin .cap{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-d)}
+  .qpin .cap{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--gold2)}
   .qrow .qhoro{display:block;font-size:10.5px;font-weight:800;color:var(--gold);margin-top:1px}
   .qlist{flex:1;overflow-y:auto;padding:0 14px calc(14px + env(safe-area-inset-bottom,0px))}
   .qgrp{font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:14px 6px 8px}
-  .qgrp em{font-style:normal;color:var(--lock);letter-spacing:0;text-transform:none;font-weight:700}
+  .qgrp em{font-style:normal;color:var(--muted);letter-spacing:0;text-transform:none;font-weight:700}
   .qrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--panel);
     border:2px solid transparent;border-radius:14px;padding:9px 10px 9px 12px;margin-bottom:7px;
     color:var(--cream);font-family:var(--ui);cursor:pointer}
@@ -1411,7 +1411,7 @@
   .qnm .fr{display:block;font-size:14px;font-weight:800;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .qnm .arb{display:block;font-family:var(--ar);direction:rtl;text-align:right;font-size:13.5px;color:var(--muted);line-height:1.7}
   .qsec{flex:none;font-size:12.5px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
-  .qsec em{font-style:normal;font-size:9.5px;font-weight:800;margin-left:1px;color:var(--lock)}
+  .qsec em{font-style:normal;font-size:9.5px;font-weight:800;margin-left:1px;color:var(--muted)}
   .qrow.on .qsec{color:var(--gold2)}
   .qhear{flex:none;display:flex;align-items:center;gap:5px;border:2px solid var(--line);border-radius:11px;
     padding:6px 9px;font-size:11px;font-weight:900;color:var(--muted)}
@@ -1590,10 +1590,10 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
 #sommCiel .srow.off .sc-m b{color:#6E6455}
 #sommCiel .srow .sc-x1{flex:1;min-width:0;font-size:12.5px;font-weight:900;color:var(--cream)}
 #sommCiel .srow .sc-x1 .ar{font-family:var(--ar);font-size:14.5px;color:var(--gold2)}
-#sommCiel .srow .sc-e{flex:none;font-size:10px;font-weight:900;letter-spacing:.06em;color:#7E7260}
+#sommCiel .srow .sc-e{flex:none;font-size:10px;font-weight:900;letter-spacing:.06em;color:var(--muted)}
 #sommCiel .srow.fait .sc-e{color:var(--gold2)}
 #sommCiel .srow.ici{background:rgba(220,144,46,.15);box-shadow:inset 0 0 0 1px rgba(220,144,46,.5)}
-#sommCiel .sc-sep{margin:10px 8px 4px;font-size:8.5px;letter-spacing:.26em;font-weight:900;color:#6E6455}
+#sommCiel .sc-sep{margin:10px 8px 4px;font-size:8.5px;letter-spacing:.26em;font-weight:900;color:var(--muted)}
 #sommCiel .cnum{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
   background:rgba(220,144,46,.13);color:var(--gold2);font-size:12px;font-weight:900}
 #sommCiel .srow.ici .cnum{background:var(--gold);color:#241703}
@@ -1703,6 +1703,15 @@ html.clair .itab .tip,
 html.clair #ltBubble,
 html.clair #ltBubble .lt-arrow{ background:var(--tip); color:var(--tip-txt) }
 html.clair #ltBubble .lt-next{ color:var(--on-gold) }
+/* ⚠️ La bulle garde son fond sombre, mais chacun de ses enfants déclare SA couleur :
+   `color` posé sur #ltBubble ne les atteint jamais. En clair, --cream/--muted/--gold2
+   deviennent des encres foncées → texte noir sur bulle noire (1,05:1, INVISIBLE).
+   Règle : une règle de thème qui reteint un CONTENEUR doit reteindre ses enfants
+   qui portent une couleur propre. */
+html.clair #ltBubble .lt-t{ color:#F0C46A }
+html.clair #ltBubble .lt-x{ color:var(--tip-txt) }
+html.clair #ltBubble .lt-step,
+html.clair #ltBubble .lt-skip{ color:#BCAF9C }
 
 /* ── FAMILLE A · la surface « allumée » (19 règles, ex-#3a312b) ─────────── */
 html.clair .opt.sel,
@@ -1777,6 +1786,10 @@ html.clair .lg-rev:disabled{ background:var(--sunk) }
 html.clair .lg-cell.locked{ background:var(--sunk);color:var(--lock);border-color:#DCD2C0 }
 html.clair .lg-hamza .hz{ background:var(--sunk);color:var(--gold2) }
 html.clair .lg-hamza .hz.locked{ background:var(--sunk);color:var(--lock);border-color:#DCD2C0 }
+/* ⚠️ Un style INLINE bat toute règle de thème : l’encre de ce bouton devait quitter
+   l’attribut style pour pouvoir basculer. En clair, --coral fonce — l’encre s’éclaircit. */
+.cta-danger{ background:var(--coral);color:#1a1410 }
+html.clair .cta-danger{ color:var(--on-gold) }
 html.clair .lg-hamza .hz.lit{ background:#FBE9C4;border-color:var(--gold);color:#8A4A00 }
 html.clair .lg-cell.avail{ background:#FBEFD8;color:var(--gold2) }
 html.clair .lum{ background:linear-gradient(180deg,#FFFDF8,#F4EBDA);border:1px solid #C9AF7C }
@@ -1849,12 +1862,46 @@ html.clair .itab.active .itab-ic{ filter:none }
    thème — les valeurs sont celles du sombre, écrites en clair. */
 html.clair .done .bubble{ background:#DC902E;color:#252120 }
 html.clair .current .bubble{ background:radial-gradient(circle at 34% 26%,#f7cd74,#DC902E 50%,#a86a12);color:#252120 }
-html.clair .locked .bubble{ background:#3C342F;color:#5A504A }
-html.clair .locked .bubble{ box-shadow:0 8px 0 #2c2521,
+/* ⚠️ MAIS LES VERROUILLÉS, SI (Myriam, 13/08 : « les disques sombres étaient au
+   début passés en clair et ce n’est plus le cas »). Ils n’ont pas d’or à
+   protéger : un galet de parchemin se repère MIEUX sur la nuit qu’un galet sombre.
+   ⚠️ Leur icône est un dessin SABLE, dessiné pour un fond sombre : sur le parchemin
+   elle s’évanouirait. Elle est assombrie ici, sinon le disque devient un galet nu. */
+html.clair .locked .bubble{ box-shadow:0 8px 0 #CFC3AC,
   var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22)) }
+html.clair .locked .bimg{ filter:sepia(.55) saturate(1.5) brightness(.5) }
+/* ⚠️ MÊME CAUSE, TROUVÉE À L'ŒIL ET NON AU CALCUL : sur le ciel, `--accent` est forcé
+   à --gold2, qui devient un brun en clair. Le disque « AVANCER ICI ? » et l'auréole du
+   disque courant viraient donc au brun sur la nuit — un contraste correct (l'encre est
+   blanche), mais la repérabilité perdue, exactement ce que Myriam avait refusé pour les
+   disques. Sur le ciel, l'accent garde l'or du sombre. */
+html.clair body.ciel .unit-sec,
+html.clair body.ciel .unit-head{ --accent:#DC902E !important }
 html.clair .unit-head{ background:linear-gradient(135deg,#6f4b0f,#9a6813 55%,#c08b1e) }
 html.clair .unit-head .uh-top,html.clair .unit-head h2,html.clair .unit-head .uh-burger{ color:#fff }
 html.clair .unit-head .uh-sub{ color:#3a2a08 }
+
+/* ── LE SOMMAIRE DU CIEL ────────────────────────────────────────────────── */
+/* Sa feuille portait `background:#1B1510` EN DUR : elle est restée sombre pendant
+   que ses onze textes suivaient le thème. Neuf défauts d'un coup, dont le nom de
+   chaque leçon à 1,09:1. C'est une FEUILLE, pas le décor : elle s'éclaircit comme
+   celles du récitateur et du signalement. Le ciel derrière, lui, reste la nuit. */
+html.clair #sommCiel .sc-in{ background:var(--panel);border-top-color:var(--gold-d) }
+html.clair #sommCiel .sc-x{ color:var(--muted) }
+html.clair #sommCiel .srow .sc-x1{ color:var(--cream) }
+html.clair #sommCiel .srow .sc-e,
+html.clair #sommCiel .sc-sep,
+html.clair #sommCiel .srow.off .sc-m b{ color:var(--muted) }
+
+/* ── LES DERNIÈRES ENCRES TROP PÂLES ────────────────────────────────────── */
+/* le ⌫ du clavier : un corail clair pensé pour un fond sombre (2,13:1) */
+html.clair .tile.tdel,
+html.clair .wtile.tdel{ color:var(--coral);border-color:var(--coral) }
+/* les petites italiques du récitateur, posées sur du blanc : --lock n'y vaut que 3,8:1 */
+html.clair .qsec em,
+html.clair .qgrp em{ color:var(--muted) }
+/* l'aperçu du verset dans la liste : --gold sur --panel2 tombait à 4,45:1 */
+html.clair .ritem .var{ color:var(--gold2) }
 
 html.clair .prm-sw.on i{ background:var(--on-gold) }
 html.clair .dm-tile.drag,
@@ -2098,7 +2145,7 @@ html.gtexte .onb-body{ zoom:1.22 }
   <div class="big">⚠️</div>
   <h2>Réinitialiser la progression ?</h2>
   <p style="max-width:320px;color:var(--cream);opacity:.8;margin:-14px 0 26px">Tout repart à zéro (étoiles, disques terminés). Cette action est irréversible.</p>
-  <button class="cta" style="max-width:300px;background:var(--coral);color:#1a1410" onclick="doReset()">RÉINITIALISER</button>
+  <button class="cta cta-danger" style="max-width:300px" onclick="doReset()">RÉINITIALISER</button>
   <button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="cancelReset()">ANNULER</button>
 </div>
 
@@ -3983,7 +4030,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='hamza-sieges \u00b7 CORRECTIF URGENT apostrophe BUILD \u00b7 \u00b7 alif trouvable \u00b7 \u00e9crans sans pav\u00e9 \u00b7 plus de r\u00e9compense sous l\u2019exercice \u00b7 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
+const BUILD='qa-mode-clair \u00b7 tuto lisible \u00b7 sommaire du ciel \u00b7 disques verrouill\u00e9s clairs \u00b7 accent dor\u00e9 sur le ciel \u00b7 917 \u00e9crans balay\u00e9s \u00b7 \u00b7 hamza-sieges \u00b7 CORRECTIF URGENT apostrophe BUILD \u00b7 \u00b7 alif trouvable \u00b7 \u00e9crans sans pav\u00e9 \u00b7 plus de r\u00e9compense sous l\u2019exercice \u00b7 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
