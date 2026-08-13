@@ -1773,7 +1773,26 @@ html.clair .vembed{ background:#111 }
 html.clair .hkcirc.gr .circ,
 html.clair .hkcirc.gr.lit .circ{ border-color:var(--lock) }
 html.clair .hkcirc.gr .sign{ color:var(--lock) }
-html.clair .readbox.reveal .rc{ color:#A9998A }
+/* ⚠️ PIÈGE DE SPÉCIFICITÉ (13/08) : `html.clair .readbox.reveal .rc` pèse plus lourd
+   que `.readbox.reveal .rc.on` — ma règle de thème écrasait donc l'état RÉVÉLÉ, et le
+   mot restait de la couleur du mot caché. Toute règle de thème qui vise un état « au
+   repos » doit redéclarer l'état « allumé » juste après. */
+html.clair .readbox.reveal .rc{ color:#C6B8A6 }
+html.clair .rc.on,
+html.clair .readbox.reveal .rc.on{ color:#8A4A00;text-shadow:0 0 14px rgba(154,90,11,.4) }
+/* Les harakat révélées : en sombre, « allumé » = plus CLAIR que le fond. En clair il faut
+   l'inverse — l'éteint pâlit, l'allumé fonce et s'auréole. Sans ça les deux états se
+   ressemblaient (Myriam : « la sélection en surbrillance n'existe plus »). */
+html.clair .hkcirc.gr .circ,
+html.clair .hkcirc.gr.lit .circ{ border-color:#C6B8A6 }
+html.clair .hkcirc.gr .sign{ color:#C6B8A6 }
+html.clair .hkcirc.gr.lit .sign,
+html.clair .hkcirc.lit .sign{ color:#8A4A00;text-shadow:0 0 14px rgba(154,90,11,.4) }
+html.clair .hkcirc.lit .circ{ border-color:var(--gold) }
+/* Les mêmes états « allumé » ailleurs, redéclarés pour la même raison */
+html.clair .vl.hit{ color:#8A4A00;text-shadow:0 0 14px rgba(154,90,11,.4) }
+html.clair .lum.on,html.clair .ex-chip.lit,html.clair .fourc.lit,
+html.clair .assoc-c.lit,html.clair .lvp-row.lit{ border-color:var(--gold) }
 html.clair .lg-rev:disabled{ color:var(--muted) }
 html.clair .ucard.lock .uno{ color:var(--lock) }
 html.clair .vw.en{ color:#7A3F00;text-shadow:0 0 14px rgba(154,90,11,.28) }
@@ -1791,17 +1810,34 @@ html.clair .qbulle:before{ background:var(--info-d);border-color:var(--info);col
    pas de seconde famille de fichiers : un filtre les fonce, ce qui préserve
    leur dessin et coûte zéro octet. ⚠️ à revoir si Myriam veut des originaux
    clairs (ce serait plus propre, mais c'est un lot Artlist entier). */
+/* ⚠️ `brightness()` seul DÉSATURE en même temps qu'il assombrit : le crème des icônes
+   virait au gris (Myriam : « le blanc des icônes est plutôt gris, il devrait être
+   beige »). On les fait passer par le sépia AVANT de les assombrir — le crème devient
+   un beige chaud, le brun un brun profond, et le dessin garde son relief. */
 html.clair .itab-ic,
 html.clair .acc-ic,
 html.clair .bn .bi img,
 html.clair .ic-inline,
-html.clair .case .ic img{ filter:brightness(.42) saturate(1.15) }
+html.clair .case .ic img{ filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) brightness(.62) }
 html.clair .itab.active .itab-ic{ filter:none }
 
 /* ── L'ombre portée : sur clair, une ombre noire salit ──────────────────── */
 /* ⚠️ La pastille de l'interrupteur ALLUMÉ est `--cream` : en clair, --cream devient
    presque noir et la pastille disparaissait sur la piste dorée foncée. Elle prend
    l'encre des aplats. (Trouvé au harnais, pas à l'œil.) */
+/* ⚠️ LES DISQUES DE L'ACCUEIL GARDENT LEUR OR (Myriam, 13/08 : « tu as assombri le
+   jaune des disques »). Ils sont posés sur le CIEL, qui reste sombre par sa décision :
+   un or foncé y perd exactement ce qui les rend repérables. Ils ne suivent donc pas le
+   thème — les valeurs sont celles du sombre, écrites en clair. */
+html.clair .done .bubble{ background:#DC902E;color:#252120 }
+html.clair .current .bubble{ background:radial-gradient(circle at 34% 26%,#f7cd74,#DC902E 50%,#a86a12);color:#252120 }
+html.clair .locked .bubble{ background:#3C342F;color:#5A504A }
+html.clair .locked .bubble{ box-shadow:0 8px 0 #2c2521,
+  var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22)) }
+html.clair .unit-head{ background:linear-gradient(135deg,#6f4b0f,#9a6813 55%,#c08b1e) }
+html.clair .unit-head .uh-top,html.clair .unit-head h2,html.clair .unit-head .uh-burger{ color:#fff }
+html.clair .unit-head .uh-sub{ color:#3a2a08 }
+
 html.clair .prm-sw.on i{ background:var(--on-gold) }
 html.clair .dm-tile.drag,
 html.clair .da-tile.drag{ box-shadow:0 10px 22px rgba(90,70,40,.28) }
@@ -3945,7 +3981,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='accessibilite-v1 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
+const BUILD='accessibilite-v2 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6906,7 +6942,13 @@ function suivreVerset(vi,a){
       }
       if(a.ended){                                                  // le verset entier reste allumé un instant
         for(i=0;i<mots.length;i++){ mots[i].classList.add('lu'); mots[i].classList.remove('en'); }
-        _suivi=0; setTimeout(suivreArret,1400); return;
+        /* ⚠️ 13/08 — CETTE minuterie était la seule du fichier sans jeton. Avec
+           « LIRE TOUT », le verset suivant démarre 120 ms après la fin du précédent :
+           l'extinction différée du verset FINI venait éteindre le verset EN COURS,
+           1,4 s plus tard, pendant que la récitation continuait. (Signalé par Myriam :
+           « ça s'arrête brutalement tout en continuant la récitation orale ».) */
+        _suivi=0; var _j=jeton;
+        setTimeout(function(){ if(_j===_suiviJeton)suivreArret(); },1400); return;
       }
       _suivi=requestAnimationFrame(pas);
     };
