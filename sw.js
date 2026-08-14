@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v124-2026-08-13f';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v125-2026-08-14a';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -281,6 +281,9 @@ const AUDIOS=[
 "audios-app-alaq/mot-alayhim.mp3",
 "audios-app-alaq/mot-alhamdu.mp3",
 "audios-app-alaq/mot-alim.mp3",
+/* les deux mots du jeu de tri de la leçon 3 (14/08) — la leçon doit tourner hors ligne */
+"audios-app-alaq/mot-imam-f.mp3",
+"audios-app-alaq/mot-ilayna-f.mp3",
 "audios-app-alaq/mot-alladhina.mp3",
 "audios-app-alaq/mot-allah.mp3",
 "audios-app-alaq/mot-almaghdub.mp3",

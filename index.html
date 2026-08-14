@@ -28,6 +28,8 @@
     --cream:#F2E9DA; --muted:#B9A99A;
     --green:#6FB08A; --green-d:#558B6E; --green-bg:#22332B;
     --coral:#E07A5F; --coral-d:#BC5B43; --coral-bg:#3A2723;
+    /* Le rouge de la TACHKĪL (14/08) — celui des manuscrits, jamais celui de l'erreur */
+    --tach:#F0714A;
     /* bleu « information » (02/08) : ce qu'il y a à FAIRE, pas ce qui est raté.
        Volontairement HORS de UNIT_ACCENTS — l'unité 1 est #d8463a (l'ancien rouge du point)
        et l'unité 5 est #2f74d0. Même teinte 199°, deux valeurs selon le fond :
@@ -193,10 +195,15 @@
   .opts{display:grid;gap:12px}
   .opts.grid2{grid-template-columns:1fr 1fr}
   .opts.grid3{grid-template-columns:1fr 1fr 1fr}
+  /* ⚠️ 14/08 — Myriam : « les box contenant les mots doivent avoir un peu plus de padding
+     sur le haut, parce que là les tachkīl touchent le contour de la box ». Un mot comme
+     أُمٌّ empile ḍamma + chedda + tanwīn au-dessus de la ligne : à `line-height:1.2` la pile
+     sort de sa boîte. Le remède est la HAUTEUR DE LIGNE de l'arabe, pas seulement le
+     rembourrage — le rembourrage seul décale le mot sans lui donner de place au-dessus. */
   .opt{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;color:var(--cream);
-    border-radius:14px;padding:16px 10px;font-size:17px;font-weight:800;text-align:center;transition:.08s;
-    min-height:60px;display:grid;place-items:center}
-  .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.2}
+    border-radius:14px;padding:20px 10px 16px;font-size:17px;font-weight:800;text-align:center;transition:.08s;
+    min-height:68px;display:grid;place-items:center}
+  .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.55}
   .opt.sel{border-color:var(--gold);background:#3a312b;box-shadow:inset 0 0 0 1px var(--gold)}
   .opt.ok{border-color:var(--green);background:var(--green-bg);color:var(--green)}
   .opt.ok .ar{color:var(--green)}
@@ -294,6 +301,29 @@
     font-family:var(--ar);font-size:30px;color:var(--gold);line-height:1.2}
   .ag.seen{border-color:var(--gold);color:var(--gold2)}
   .ag:active{background:#3a312b}
+  /* ── L'écran « 2 rôles » (14/08) ────────────────────────────────────────────
+     Les trois lettres faibles sont LÉGÈREMENT dorées ; touchées, elles passent à l'or
+     franc. Les 25 autres sont désactivées : elles n'ont rien à révéler, et un bouton
+     désactivé sort du décompte WCAG — c'est éteint EXPRÈS, pas un défaut de contraste. */
+  /* « légèrement jaune comparé aux autres » : à 14 % seule la bordure se voyait — c'est le
+     FOND qui doit porter l'indice, comme pour les cartes. */
+  .ag.faible{background:rgba(232,169,79,.22);border-color:var(--gold-d)}
+  .ag.faible.lit{background:var(--gold);border-color:var(--gold);color:var(--on-gold,#241c10)}
+  .ag[disabled]{opacity:.5;cursor:default}
+  /* ⚠️ 14/08, TROUVÉ À L'ŒIL SUR LA CAPTURE ET NON AU CALCUL : les 28 lettres + le filet +
+     les 5 sièges ne tenaient pas au-dessus du bouton, et la rangée des sièges était rognée —
+     or c'est ELLE que l'écran fait apparaître, c'est la récompense du geste. La grille de CET
+     écran se resserre donc (les cases ne sont pas là pour être lues de près, mais touchées),
+     et la rangée garde le couloir de 42 px du drapeau ⚑, comme le jeu de bulles. */
+  .agrid.agrid-rl{gap:6px}
+  .agrid.agrid-rl .ag{padding:5px 2px;font-size:25px}
+  .rl-sep{position:relative;text-align:center;margin:12px 0 0}
+  .rl-sep::before{content:'';position:absolute;left:0;right:0;bottom:-7px;border-top:1px dashed var(--line)}
+  .rl-sep span{font-size:11.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .lg-hamza.rl-sieges{margin-top:12px;margin-bottom:42px;border-top:none;padding-top:0}
+  .lg-hamza .hz.vide{background:none;border-style:dashed;min-height:44px;cursor:default}
+  .lg-hamza .hz.neuf{animation:hzpose .32s ease-out}
+  @keyframes hzpose{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
 
   /* l'anneau de l'objectif quotidien — SEUL, dans le Profil (preview v2 validée 10/08) */
   .obj-ring{display:grid;place-items:center;margin:14px 0}
@@ -391,10 +421,22 @@
   .slots .ph{color:var(--lock)}
   .tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;direction:rtl}
   .tile{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
-    width:64px;height:64px;font-family:var(--ar);font-size:36px;color:var(--gold);display:grid;place-items:center}
+    width:64px;height:64px;font-family:var(--ar);font-size:36px;color:var(--gold);display:grid;place-items:center;
+    position:relative}
+  /* La zone de TOUCHE déborde la tuile de 4 px sans rien déplacer (14/08 — « la sensibilité
+     des box pourrait être améliorée au toucher »). 4 et pas 6 : les tuiles sont espacées de
+     10 px, deux zones élargies de 6 se chevaucheraient et voleraient le doigt à la voisine. */
+  .tile::after{content:'';position:absolute;inset:-4px;border-radius:18px}
   .tile[disabled]{opacity:.25}
+  .tile[disabled]::after{display:none}
+  /* ⚠️ 14/08 — Myriam : « les harakat sont trop petites. Pour les gens ayant des problèmes de
+     vue comme mon mari ce sera illisible. Il faut grossir UNIQUEMENT les tachkīl dans ce type
+     d'exercice et les mettre en gras. » Le signe était à 30 px ET à 55 % d'opacité : deux
+     handicaps cumulés sur le seul élément qui portait l'information. Il passe à 42 px, opaque.
+     Le « gras » ne peut pas venir de font-weight — Noto Naskh Arabic n'a qu'une graisse et le
+     navigateur ne ferait qu'un faux gras irrégulier ; c'est le tracé qui est épaissi. */
   .tile.htile{font-family:'Noto Naskh Arabic',serif;font-size:24px}
-  .tile.htile .dc{font-size:30px;opacity:.55}
+  .tile.htile .dc{font-size:42px;opacity:1;-webkit-text-stroke:.55px currentColor}
   .tile.miss{animation:tileshk .32s}
   @keyframes tileshk{25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
   .tile.hint{border-color:var(--gold);color:var(--gold2);animation:tilehint .9s ease-in-out infinite}
@@ -474,6 +516,16 @@
   .ob-in:focus{border-color:var(--gold);outline:none}
   .ears{display:flex;gap:9px;justify-content:center;margin:12px 0 8px}
   .ob-ear{font-size:28px;line-height:1}
+  /* Les épis de l'assiduité : DESSINS du registre, plus d'emoji (Myriam 14/08). L'épi du jour
+     à venir garde la même image, éteinte — on voit d'un coup d'œil combien il en reste. */
+  .ob-ear img{height:26px;width:auto;display:block}
+  .ob-ear.off img{filter:grayscale(1);opacity:.3}
+  /* Le verset de l'assiduité, en entier : il ne peut plus tenir en 36 px sur un iPhone. */
+  #streak .verse{font-size:21px;line-height:2.05;max-width:340px;margin:6px 0 8px}
+  .stk-tr{max-width:340px;color:var(--cream);font-size:13px;line-height:1.6;margin:0 0 4px}
+  .stk-src{max-width:340px;color:var(--muted);font-size:11.5px;font-weight:800;margin:0 0 18px}
+  .stk-spk{background:none;border:none;padding:6px;cursor:pointer;line-height:0}
+  .stk-spk .spk{width:44px;height:29px}
   .rewards{display:flex;gap:14px;margin-bottom:30px}
   .reward{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px 22px;min-width:120px}
   .reward .lab{font-size:12px;font-weight:900;letter-spacing:.1em;color:var(--gold2)}
@@ -603,7 +655,11 @@
   .grp .gcib{color:var(--gold)}
   .grp.done{border-style:solid;border-color:var(--gold);background:#3a312b}
   .grp.done .gcib{color:var(--gold2)}
-  .bul.mot{width:96px;height:96px;font-size:25px}   /* un mot entier dans la bulle */
+  /* 14/08 — Myriam : « les mots dans les bulles sont trop petits, faut grossir les bulles
+     et la taille de la police ». 96 → 112 px et 25 → 30 px. ⚠️ Le plafond n'est pas
+     esthétique, il est ARITHMÉTIQUE : la mise en place range les bulles par 3 en largeur
+     et le lecteur fait 346 px utiles — 3 × 116 px ne tiendrait plus. */
+  .bul.mot{width:112px;height:112px;font-size:30px}   /* un mot entier dans la bulle */
   .bul.shk{animation:bulshk .35s ease}
   /* ⚠️ la translation est reprise à CHAQUE étape (piège gravé de la leçon 2) */
   @keyframes bulshk{0%,100%{transform:translate(var(--x),var(--y))}
@@ -684,11 +740,20 @@
   .lg-hamza .hz{position:relative;border-radius:12px;padding:7px 0 5px;text-align:center;
     border:1.5px solid var(--line);background:#2a2422;font-family:"Noto Naskh Arabic",serif;
     font-size:23px;line-height:1.15;color:var(--gold2);cursor:pointer}
+  /* L'étiquette nomme le SIÈGE. Depuis le 14/08 elle est écrite en arabe (règle absolue :
+     aucune translittération sous un glyphe arabe) — sauf « seule », qui est un mot français
+     descriptif, pas la transcription d'un nom de lettre. */
+  .lg-hamza .hz .hzl.ar{font-family:var(--ar);font-size:12px}
   .lg-hamza .hz .hzl{display:block;font-family:var(--ui);font-size:8.5px;font-weight:800;
     color:var(--muted);letter-spacing:.02em;margin-top:2px}
   .lg-hamza .hz.locked{color:#5b524c;background:#2a2624;border-color:#332e2a;opacity:.55;cursor:default}
   .lg-hamza .hz:not(.locked):active{border-color:var(--gold);color:var(--gold2)}
   .lg-hamza .hz.lit{border-color:var(--gold);color:var(--gold2);background:rgba(232,169,79,.12)}
+  /* La même ligne, posée sous la grille d'un EXERCICE (14/08) : elle respire un peu plus,
+     le compteur « 0 / 3 » vient juste après et ne doit pas lui coller. */
+  .lg-hamza.ex-hamza{margin-top:12px;padding-top:12px;margin-bottom:6px}
+  /* La fiche du Cours : le nom de la lettre ne s'écrit plus, le bouton dit ce qu'il joue. */
+  .lcap{font-size:12px;font-weight:800;color:var(--muted)}
   @keyframes lgglow{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 2px rgba(232,169,79,.45)}}
   .lg-cell .lk{position:absolute;top:5px;left:7px;font-size:10px;opacity:.6}
   .lg-cell .bd{position:absolute;top:3px;right:5px;font-size:11px}
@@ -720,6 +785,12 @@
   .srcL:active{background:#3a312b}
   .drag-ghost{position:fixed;transform:translate(-50%,-50%);z-index:200;pointer-events:none;
     font-family:var(--ar);font-size:60px;color:var(--gold);text-shadow:0 4px 12px rgba(0,0,0,.5)}
+  /* Le fantôme-CLONE (14/08) : il garde le fond, la bordure et la police de la pastille
+     d'origine ; on ne lui impose que sa position et son détachement. Les marges de la
+     pastille sont neutralisées — sinon le clone se recentre à côté du doigt. */
+  .drag-clone{position:fixed;left:0;top:0;transform:translate(-50%,-50%) scale(1.06);
+    z-index:200;pointer-events:none;margin:0!important;opacity:1!important;
+    box-shadow:0 12px 26px rgba(0,0,0,.45)}
   .fourc.hover{border-color:var(--gold2);background:#3a312b;border-style:solid}
   .fourcells{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .fourc{background:var(--panel);border:2px dashed var(--line);border-radius:16px;min-height:96px;
@@ -738,21 +809,34 @@
   .lvp-flip{flex:1;cursor:pointer;user-select:none;position:relative}
   .lvp-flip.seen::after{content:'✓';position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;
     background:var(--green);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:5}
-  .lvp-flip-in{border-radius:16px;border:2px solid #3c4a41;background:var(--panel);min-height:158px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;text-align:center;
-    transition:transform .24s ease,border-color .2s}
+  /* ═══ LES CARTES À DEUX VISAGES, v3 (Myriam, 14/08) ═══
+     « Ce n'est pas la LETTRE qui doit être colorée, mais le FOND de la box, sinon ce n'est
+     pas assez visible. » C'est la règle 5 bis du cerveau — deux natures opposées = deux
+     couleurs — appliquée là où elle se voit : le RECTO porte l'or (la lettre au travail),
+     le VERSO le bleu information (son second rôle). L'encre reste sombre/claire selon le
+     thème, jamais une troisième couleur.
+     Le terme (« consonne » / « support » / « prolongation ») est POUSSÉ EN BAS de la carte
+     par un `margin-top:auto` — il ne flotte plus sous le glyphe au milieu du vide — et il
+     passe de 10,5 à 13 px. Le glyphe passe de 44 à 58 px. */
+  .lvp-flip-in{border-radius:16px;border:2px solid var(--gold-d);background:var(--face-or,#4a3a1e);min-height:172px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 8px 10px;text-align:center;
+    transition:transform .24s ease,border-color .2s,background .2s}
   .lvp-flip.flipping .lvp-flip-in{transform:scaleX(.04)}
-  .lvp-flip.flipped .lvp-flip-in{border-color:#4a3f2b}
-  .lvp-flip .face-cons{display:flex;flex-direction:column;align-items:center;gap:4px}
-  .lvp-flip .face-pro{display:none;flex-direction:column;align-items:center;gap:4px}
+  .lvp-flip.flipped .lvp-flip-in{border-color:var(--info);background:var(--face-info,#173a49)}
+  .lvp-flip .face-cons{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%}
+  .lvp-flip .face-pro{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%}
   .lvp-flip.flipped .face-cons{display:none}
   .lvp-flip.flipped .face-pro{display:flex}
-  .lvp-flip .ff-ar{font-family:var(--ar);font-size:44px;line-height:1}
-  .lvp-flip .ff-role{font-size:10.5px;font-weight:800;line-height:1.3;color:var(--muted)}
+  .lvp-flip .ff-ar{font-family:var(--ar);font-size:58px;line-height:1.15}
+  .lvp-flip .ff-role{margin-top:auto;font-size:13px;font-weight:900;line-height:1.25;letter-spacing:.01em}
   .lvp-flip .ff-son{font-size:14px;font-weight:900}
   .lvp-flip .ff-spk{font-size:13px;opacity:.85;margin-top:2px}
-  .lvp-flip:not(.flipped) .ff-ar,.lvp-flip:not(.flipped) .ff-son{color:var(--green)}
-  .lvp-flip.flipped .ff-ar,.lvp-flip.flipped .ff-son{color:var(--gold2)}
+  /* L'encre : la lettre et son terme prennent la couleur POSÉE SUR leur aplat, jamais
+     l'aplat lui-même (piège du token à double rôle, 13/08). */
+  .lvp-flip:not(.flipped) .ff-ar,.lvp-flip:not(.flipped) .ff-son,
+  .lvp-flip:not(.flipped) .ff-role{color:#FFE7B8}
+  .lvp-flip.flipped .ff-ar,.lvp-flip.flipped .ff-son,
+  .lvp-flip.flipped .ff-role{color:#D8EEF8}
   .lvp-flip-hint{font-size:11px;color:var(--muted);font-weight:800;text-align:center;margin-top:8px}
   .lvp-exrow{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px 12px}
   .lvp-exrow .ex-tag{font-weight:900;color:var(--gold2);min-width:22px;text-align:center;font-size:15px}
@@ -768,6 +852,8 @@
   .dm-target{min-width:150px;min-height:96px;border:3px dashed var(--line);border-radius:20px;
     display:flex;align-items:center;justify-content:center;gap:4px;font-family:var(--ar);font-size:46px;color:var(--cream);
     padding:6px 20px;direction:rtl;transition:border-color .15s,background .15s}
+  /* La tachkīl en rouge (14/08) — son propre token, jamais le corail de l'erreur. */
+  .tach{color:var(--tach)}
   .dm-target.over{border-color:var(--gold2);background:#3a312b}
   .dm-target.done{border-style:solid;border-color:var(--green);background:var(--green-bg)}
   .dm-target .dm-res{color:var(--green)}
@@ -990,9 +1076,8 @@
 /* ═══ L'ÉCRAN DE RÉCOMPENSE (13/08) — la mascotte danse, puis les 3 cases tombent ═══
    Validé par Myriam : plus de 🎉/🏆, plus d'éloge écrit (« il y a la mascotte qui danse,
    c'est suffisant »), et la monnaie apparaît enfin. */
-.vf-fin{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:18px}
-.vf-fin .masc-wrap{width:150px;margin:0 auto 10px}
-.vf-fin .masc{width:150px;height:176px}
+/* .vf-fin : supprimé le 14/08 avec l'écran de récompense du vrai/faux — la fin de session
+   passe désormais par #finish, qui centre déjà en hauteur (reproche de Myriam). */
 .cases{display:flex;gap:10px;width:100%;max-width:400px;margin-top:6px}
 .case{flex:1;border-radius:16px;padding:2px;opacity:0;transform:scale(.82) translateY(10px);
   animation:casePose .42s cubic-bezier(.28,1.5,.5,1) forwards}
@@ -1001,12 +1086,19 @@
 .case-in{background:var(--bg);border-radius:14px;padding:11px 6px 12px;height:100%;
   display:flex;flex-direction:column;align-items:center;gap:5px}
 .case .lab{font-size:10.5px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
-.case .val{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
+/* ⚠️ 14/08, vu sur la capture : « 90 % » se coupait entre le nombre et le signe — la case
+   fait 1/3 de 400 px et l'espace typographique du français y devient un point de rupture. */
+.case .val{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap}
 .case .ic{height:30px;display:grid;place-items:center}
 .case .ic svg{height:28px;width:auto;fill:none;stroke:currentColor}
 .c-score{background:var(--info-d)} .c-score .val{color:var(--info)} .c-score .ic{color:var(--info)}
 .c-reus{background:var(--green-d)} .c-reus .val{color:var(--green)} .c-reus .ic{color:var(--green)}
 .c-grain{background:var(--gold-d)} .c-grain .val{color:var(--gold2)} .c-grain .ic{color:var(--gold2)}
+/* L'assiduité (14/08) : l'épi, dans le bleu information — c'est un compte, pas une note. */
+.c-assid{background:var(--info-d)} .c-assid .val{color:var(--info)} .c-assid .ic{color:var(--info)}
+/* Les cases vivent aussi sur #finish, qui centre déjà tout : elles n'ont plus à se recentrer
+   elles-mêmes (Myriam 14/08 : « il faut centrer les éléments dans le sens de la hauteur »). */
+#finish .cases{margin:14px auto 4px}
 .vf-rec{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 16px;border-radius:999px;
   background:var(--green-bg);border:1.5px solid var(--green-d);color:var(--green);font-size:13px;font-weight:800;
   opacity:0;animation:casePose .5s 1.75s ease-out forwards}
@@ -1027,8 +1119,10 @@
 .pen-t{background:var(--panel2);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
   min-width:56px;padding:8px 12px;font-family:var(--ar);font-size:30px;color:var(--cream);line-height:1.2;cursor:pointer}
 .pen-t[disabled]{opacity:.25}
+/* Le clavier du stylo ✏️ suit la même règle que celui des leçons (14/08) : le signe est
+   l'information, il ne peut pas être à la fois le plus petit et le plus pâle. */
 .pen-t.htile{font-size:26px}
-.pen-t.htile .dc{font-size:32px;opacity:.55}
+.pen-t.htile .dc{font-size:40px;opacity:1;-webkit-text-stroke:.5px currentColor}
 .pen-t.tdel{font-family:var(--ui);font-size:20px;color:var(--muted)}
 .pen-t.shake{border-color:var(--coral);background:var(--coral-bg);color:var(--coral);animation:penshake .35s}
 .pen-t.hint{animation:penhint 1.1s ease-in-out infinite;border-color:var(--gold-d)}
@@ -1186,6 +1280,9 @@
   color:var(--muted);font-family:var(--ui);font-weight:800;font-size:14px;text-align:center;padding:0 18px}
 .vsoon .vic{font-size:34px;opacity:.7}
 .pgrid{display:flex;gap:10px;margin:0 0 18px}
+/* Quatre cases au lieu de trois (14/08) : elles respirent moins, la valeur reste lisible. */
+.pgrid4{gap:7px} .pgrid4 .pstat{padding:13px 3px}
+.pgrid4 .pv{font-size:21px} .pgrid4 .pl{font-size:10px;letter-spacing:0}
 .pstat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center}
 .pstat .pv{font-family:var(--ui);font-size:24px;font-weight:900;color:var(--gold)}
 .pstat .pl{font-family:var(--ui);font-size:11px;font-weight:800;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.03em}
@@ -1503,6 +1600,23 @@ body.ciel .unit-sep::before,body.ciel .unit-sep::after{background:var(--ciel-sof
   var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22))}
 .jump .bubble{box-shadow:0 8px 0 color-mix(in srgb,var(--accent,var(--gold)) 45%,#000),
   var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22))}
+/* ═══ 14/08 — LE RELIEF DU DISQUE TERMINÉ ÉTAIT À L'ENVERS (Myriam) ═══
+   « Il faut inverser les couleurs : le dessus doit être plus clair que le rebord pour donner
+   une impression d'ombre, comme tu l'as justement fait pour les disques grisés. »
+   Mesuré, elle a raison, et sur CE disque-là seulement :
+     terminé    dessus L=0,354  rebord L=0,461  ← le rebord était le plus CLAIR
+     courant    dessus L=0,647  rebord L=0,226  ✓
+     verrouillé dessus L=0,036  rebord L=0,020  ✓  (sa référence)
+   La cause : le dessus prend `--gold` (#DC902E, l'or SOMBRE) et le rebord prend `--accent`,
+   que le ciel force à `--gold2` (#E8A94F, l'or CLAIR). La lumière semblait venir d'en bas.
+   ⚠️ On ne touche PAS à `--accent` : il porte aussi l'auréole du disque courant et le disque
+   « AVANCER ICI ? », pour lesquels l'or clair a été choisi exprès le 13/08 (repérabilité sur
+   la nuit). On écrit donc le relief du disque terminé en toutes lettres — dessus l'or clair,
+   rebord l'or foncé. Rapport final 0,461 / 0,226 = 2,0× : une vraie ombre, pas un dégradé. */
+body.ciel .done .bubble{background:var(--gold2)}
+body.ciel .done .bubble{box-shadow:0 8px 0 var(--gold-d),
+  var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22))}
+
 /* un halo CONIQUE tourne mal sur une ellipse : il y accélère dans les petits
    rayons. On pulse — l'onde épouse n'importe quelle forme. */
 .current .ring{inset:-7px;border:2.5px solid var(--accent,#f4d089);border-radius:50%;
@@ -1680,6 +1794,7 @@ html.clair{
   --coral:#B3411F; --coral-d:#8C3117; --coral-bg:#FAE2DA;
   --info:#12607F; --info-d:#D6EAF3;
   --lock:#8E8071;
+  --tach:#A8300B;       /* 6,9:1 sur blanc — la tachkīl doit se lire, pas se deviner */
   --ar:'Noto Naskh Arabic',serif;
   /* tokens NEUFS, créés pour ce thème (les 154 règles en dur s'y branchent) */
   --surf-hi:#F3E4CB;    /* la surface « allumée / choisie » (ex-#3a312b) */
@@ -1699,6 +1814,20 @@ html.clair .onb{
   background:var(--bg);
   background-image:radial-gradient(circle at 50% 0%, #FFFDF7 0, #FBF6EB 38%, var(--bg) 75%);
 }
+/* ── LA MASCOTTE SE DÉTACHE DU PARCHEMIN (Myriam, 14/08 : « la mascotte ne se distingue
+   pas très bien à cause des couleurs similaires ») ───────────────────────────
+   Sa lanterne est crème (#F7EBC0) et le fond de l'écran de fin l'est aussi (#FBF6EB) :
+   1,08:1, elle flotte sans contour. Le DESSIN n'est pas touché (il est validé) — c'est son
+   HALO, déjà présent dans le dessin, qui devient un vrai coussin ambré en mode clair, plus
+   une ombre portée qui suit exactement la silhouette.
+   ⚠️ On ne peut PAS passer par `opacity` : `mascotteDanse` la repose en style INLINE à la
+   fin de la danse, et un style inline bat toute règle de thème (piège du 13/08). On teinte
+   donc les ARRÊTS du dégradé, que la danse ne touche jamais. */
+html.clair .masc{filter:drop-shadow(0 4px 12px rgba(101,58,6,.30))}
+html.clair .masc stop:first-child{stop-color:#F0BE63;stop-opacity:.98}
+html.clair .masc stop:nth-child(2){stop-color:#DE9A31;stop-opacity:.62}
+html.clair .masc stop:last-child{stop-color:#DE9A31;stop-opacity:0}
+
 html.clair .itab .tip,
 html.clair #ltBubble,
 html.clair #ltBubble .lt-arrow{ background:var(--tip); color:var(--tip-txt) }
@@ -1784,6 +1913,18 @@ html.clair .nrow.nsel,
 html.clair .opt.fopt.sel .fdevant,
 html.clair .lg-rev:disabled{ background:var(--sunk) }
 html.clair .lg-cell.locked{ background:var(--sunk);color:var(--lock);border-color:#DCD2C0 }
+/* Les cartes à deux visages en mode clair : les MÊMES deux natures, en aplats pâles et
+   encre sombre. ⚠️ Une règle de thème qui vise l'état au repos doit redéclarer l'état
+   allumé (règle du 13/08) — ici l'état « retournée » a donc sa propre ligne. */
+html.clair .lvp-flip-in{ background:#F6E3BE;border-color:var(--gold-d) }
+html.clair .lvp-flip.flipped .lvp-flip-in{ background:#D6EAF3;border-color:var(--info) }
+html.clair .lvp-flip:not(.flipped) .ff-ar,
+html.clair .lvp-flip:not(.flipped) .ff-son,
+html.clair .lvp-flip:not(.flipped) .ff-role{ color:#4A2E05 }
+html.clair .lvp-flip.flipped .ff-ar,
+html.clair .lvp-flip.flipped .ff-son,
+html.clair .lvp-flip.flipped .ff-role{ color:#0C3D52 }
+
 html.clair .lg-hamza .hz{ background:var(--sunk);color:var(--gold2) }
 html.clair .lg-hamza .hz.locked{ background:var(--sunk);color:var(--lock);border-color:#DCD2C0 }
 /* ⚠️ Un style INLINE bat toute règle de thème : l’encre de ce bouton devait quitter
@@ -1860,7 +2001,7 @@ html.clair .itab.active .itab-ic{ filter:none }
    jaune des disques »). Ils sont posés sur le CIEL, qui reste sombre par sa décision :
    un or foncé y perd exactement ce qui les rend repérables. Ils ne suivent donc pas le
    thème — les valeurs sont celles du sombre, écrites en clair. */
-html.clair .done .bubble{ background:#DC902E;color:#252120 }
+html.clair .done .bubble{ background:#E8A94F;color:#252120 }   /* inversé le 14/08, comme en sombre */
 html.clair .current .bubble{ background:radial-gradient(circle at 34% 26%,#f7cd74,#DC902E 50%,#a86a12);color:#252120 }
 /* ⚠️ MAIS LES VERROUILLÉS, SI (Myriam, 13/08 : « les disques sombres étaient au
    début passés en clair et ce n’est plus le cas »). Ils n’ont pas d’or à
@@ -2063,7 +2204,7 @@ html.gtexte .onb-body{ zoom:1.22 }
   <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ"></div>
   <div class="stats">
     <div class="stat"><img class="tbic" data-ico="tb-epi" src="images-app-alaq/icone-tb-epi-v1.png" alt=""> <span id="st-streak">0</span></div>
-    <div class="stat"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-coeur-v1.png" alt=""> <span id="st-hearts">7</span></div>
+    <div class="stat" onclick="showHearts()" style="cursor:pointer" role="button" tabindex="0" aria-label="Tes cœurs"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-coeur-v1.png" alt=""> <span id="st-hearts">7</span></div>
     <div class="stat" onclick="showRank()" style="cursor:pointer;display:flex;align-items:center"><span id="st-lamp" style="display:flex"></span></div>
   </div>
 </div>
@@ -2126,6 +2267,10 @@ html.gtexte .onb-body{ zoom:1.22 }
   <div class="big" id="fin-icon" style="display:none">✓</div>
   <h2 id="fin-title">Leçon terminée !</h2>
   <div class="fin-score"><span class="fs-v" id="fin-acc">100%</span><span class="fs-l">de réussite</span></div>
+  <!-- Les trois cases (Myriam, 14/08 : « ce type d'écran devrait être celui de chaque fin de
+       leçon » + « je préfère avoir les trois petites box… le nombre de graines, le pourcentage
+       de réussite et l'assiduité »). Elles remplacent le grand pourcentage seul. -->
+  <div id="fin-cases"></div>
   <div id="fin-extra"></div>
   <span id="fin-xp" style="display:none"></span>
   <button class="cta" id="fin-cta" style="max-width:300px;margin-top:14px" onclick="closeFinish()">CONTINUER</button>
@@ -2262,11 +2407,16 @@ html.gtexte .onb-body{ zoom:1.22 }
   </div>
 </div>
 
+<!-- L'ÉCRAN D'ASSIDUITÉ (refondu le 14/08 sur les demandes de Myriam : plus d'emoji, le verset
+     ENTIER, la traduction ENTIÈRE, et la récitation). Les épis sont désormais les icônes du
+     registre (icone-tb-epi) — jamais 🌾/🌱, qui se peignent tout seuls et ignorent le thème. -->
 <div class="finish" id="streak">
   <div style="font-weight:900;color:var(--gold2);margin-top:6px"><span id="streakNum" style="font-size:46px">1</span> <span id="streakUnit" style="font-size:18px">jour</span></div>
   <div class="ears" id="streakEars"></div>
-  <p class="verse" style="max-width:330px;font-size:23px;color:var(--gold2);margin:10px 0 4px;line-height:1.9">كَمَثَلِ حَبَّةٍ أَنۢبَتَتْ سَبْعَ سَنَابِلَ</p>
-  <p style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 22px">« … comme un grain qui fait pousser sept épis »<br>sourate Al-Baqara, 261</p>
+  <button class="stk-spk" id="streakSpk" onclick="streakRecite()" aria-label="Écouter le verset"></button>
+  <p class="verse" id="streakVerse">مَّثَلُ الَّذِينَ يُنْفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنْبَتَتْ سَبْعَ سَنَابِلَ فِي كُلِّ سُنْبُلَةٍ مِائَةُ حَبَّةٍ ۗ وَاللَّهُ يُضَاعِفُ لِمَنْ يَشَاءُ ۗ وَاللَّهُ وَاسِعٌ عَلِيمٌ</p>
+  <p class="stk-tr">« Ceux qui dépensent leurs biens dans le chemin d’Allah sont à l’image d’un grain qui fait pousser sept épis, à cent grains chacun. Et Allah multiplie la récompense à qui Il veut. Allah est Immense et Savant. »</p>
+  <p class="stk-src">sourate Al-Baqara, verset 261</p>
   <button class="cta" style="max-width:300px" onclick="streakContinue()">CONTINUER</button>
 </div>
 
@@ -3147,10 +3297,14 @@ function buildLettreVsProlong(U){
        le titre EST l'instruction, il n'y a plus ni boîte, ni badge « À DÉCOUVRIR », ni
        paragraphe, ni rappel fléché. Sur chaque face : la lettre et son RÔLE, rien de plus —
        le son s'entend, il ne s'écrit pas (principe 2). */
+    /* 14/08 — l'écran d'ouverture demandé par Myriam : l'alphabet en deux parties, et les
+       trois lettres qui ont un second rôle se découvrent au doigt. Il vient AVANT les
+       cartes : on voit d'abord QUI a deux rôles, on retourne ensuite pour voir LESQUELS. */
+    {type:'roles', gate:true, title:'3 lettres peuvent avoir 2 rôles'},
     {type:'flipcards', gate:true, cartes:[
       {ar:'ي', cons:'يَ', pro:'إِي'},
       {ar:'و', cons:'وَ', pro:'أُو'},
-      {ar:'ا', cons:'',   pro:'أَا', consRole:'support'}
+      {ar:'ا', cons:'',   pro:'أَا'}
     ]},
     DM('ن','\u0650','ي','نِي','ī','ni'),
     DM('م','\u064E','ا','مَا','ā','ma'),
@@ -3161,14 +3315,25 @@ function buildLettreVsProlong(U){
     /* 13/08 — mêmes principes que l'écran 1 : le titre EST l'instruction, et l'écran est
        un GESTE. Les deux paragraphes et les étiquettes latines tombent — le son enseigne
        ce que la lettre dit (principe 2), l'œil n'a pas besoin d'un doublon écrit. */
-    {type:'taprow', title:'Touche chaque voyelle', lignes:['أَ','إِ','أُ']},
-    /* La position de la hamza EST le contenu : les deux étiquettes restent, les deux
-       paragraphes partent (dont la promesse « les autres sièges viendront plus tard »,
-       qui ne sert pas la leçon EN COURS — principe 6). */
-    {type:'seats', title:'Compare les deux sièges', cartes:[
-      {ar:'أ', lab:'au-dessus', mot:'أَمَانٌ'},
-      {ar:'إ', lab:'en dessous', mot:'إِيمَانٌ'}
-    ]},
+    /* 14/08 — « change instruction par "touche chaque support" » : ces trois lignes sont
+       le alif PORTANT la hamza, donc des supports ; « voyelle » nommait le son entendu,
+       pas ce qu'on touche. Le mot est aussi celui du filet de l'écran 1 — un seul terme
+       pour une seule idée, d'un bout à l'autre de la leçon. */
+    {type:'taprow', title:'Touche chaque support', lignes:['أَ','إِ','أُ']},
+    /* ═══ ÉCRAN 10 — LE TRI, à la place de « Compare les deux sièges » (Myriam, 14/08) ═══
+       Comparer deux cartes était un écran à REGARDER ; trier six mots est un écran à FAIRE
+       (principe ③ : chaque écran est un geste). Le tri est le moteur déjà écrit pour le
+       soukoun/chedda de la leçon 6 — écrans jumeaux, un seul moteur (principe ⑨) : il fait
+       sonner chaque mot posé et n'allume CONTINUER qu'à la fin du dernier son.
+       Les mots : quatre viennent du vocabulaire de l'unité 2 ; إِمَامٌ et إِلَيْنَا sont ajoutés
+       ICI (et non dans U.words, que Supabase écrase au démarrage) — ils n'utilisent que des
+       lettres déjà connues, il fallait trois mots par panier pour que le tri soit un tri. */
+    {type:'tri', mute:true,
+      paniers:[{sig:'أ',cle:'a'},{sig:'إ',cle:'i'}],
+      mots:shuffle([
+        {w:'أَمَانٌ',cle:'a'},{w:'أَمِينٌ',cle:'a'},{w:'أَلِيمٌ',cle:'a'},
+        {w:'إِيمَانٌ',cle:'i'},{w:'إِمَامٌ',cle:'i'},{w:'إِلَيْنَا',cle:'i'}
+      ])},
     mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,mute:true,graded:true,answer:'p',explain:'Dans <span class="ar">مَالٌ</span>, le <span class="ar">ا</span> suit une fatḥa et prolonge le son : on dit « māl ». C’est son rôle de prolongation, pas de consonne.',
       options:shuffle([{txt:'Il prolonge le son « ā »',key:'p'},{txt:'Il fait le son « l »',key:'l'},{txt:'Il ne sert à rien',key:'x'}])}),
     mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,mute:true,graded:true,answer:'c',explain:'Au début de <span class="ar">يَوْمٌ</span> (« yawm »), le <span class="ar">ي</span> porte une fatḥa et se prononce « y » : ici c’est une consonne, pas une prolongation.',
@@ -3448,6 +3613,37 @@ function showNoHearts(){
   document.getElementById('noHearts').classList.add('on'); S.bigNext=1; save(); // la 1re recharge (révision OU reprise) donnera +3
 }
 function closeNoHearts(){ document.getElementById('noHearts').classList.remove('on'); }
+/* ═══ LE CŒUR DE LA BARRE DU HAUT RÉPOND (demande de Myriam, 14/08) ═══
+   « si le user clique sur le cœur, ça lui affiche son nombre de cœurs, et si c'est ≤ 4,
+   ça lui propose de réviser. » Le seuil 4 est le moment où la partie n'est pas encore
+   perdue mais le devient : proposer la révision AVANT le mur des 0 cœur, pas après.
+   ⚠️ À 0 cœur on ouvre l'écran « Plus de cœurs » existant — inutile d'en avoir deux.
+   La rangée de cœurs est DESSINÉE avec l'icône du registre (jamais un emoji) : les cœurs
+   dépensés restent visibles, éteints — on voit ce qu'on a perdu, pas seulement ce qu'il
+   reste. Ces cœurs éteints sont volontairement en retrait : ils sortent du décompte du
+   balayage de contraste comme tout élément désactivé. */
+function showHearts(){
+  if(S.hearts<=0){ showNoHearts(); return; }
+  var m=document.getElementById('heartsModal');
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='heartsModal'; document.body.appendChild(m); }
+  var rangee='';
+  for(var i=1;i<=HEARTS_MAX;i++)
+    rangee+=icoImg('tb-coeur','','height:26px;margin:0 2px'+(i<=S.hearts?'':';filter:grayscale(1);opacity:.28'));
+  var bas=S.hearts<=4
+    ? (allReviewWords().length>0
+        ? '<p class="succ-desc" style="margin:10px 0 14px">Une révision t’en rend trois.</p>'+
+          '<button class="cta" style="max-width:300px" onclick="heartsReview()">RÉVISER +3 '+icoImg('tb-coeur','','height:18px;vertical-align:-3px')+'</button>'
+        : '<p class="succ-desc" style="margin:10px 0 0">Ils reviennent au complet demain.</p>')
+    : '<p class="succ-desc" style="margin:10px 0 0">Ils reviennent au complet demain.</p>';
+  m.innerHTML='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="closeHearts()" aria-label="Fermer">✕</button>'+
+    '<div style="max-width:340px;width:100%;margin:0 auto;text-align:center">'+
+    '<div style="margin-bottom:10px">'+rangee+'</div>'+
+    '<h2 style="margin:8px 0 2px">'+S.hearts+' / '+HEARTS_MAX+'</h2>'+
+    bas+'</div>';
+  m.classList.add('on');
+}
+function closeHearts(){ var m=document.getElementById('heartsModal'); if(m)m.classList.remove('on'); }
+function heartsReview(){ closeHearts(); S.bigNext=1; save(); startReview(); } // même barème que « Plus de cœurs » : la 1re recharge rend +3
 function noHeartsReview(){ closeNoHearts(); startReview(); }
 function noHeartsRedo(){ const L=currentLesson(); closeNoHearts(); if(L)startDisque(L.u,L.i,true); } // reprise « sans risque » de la leçon en cours
 function goNoHearts(){ document.getElementById('player').classList.remove('on'); showNoHearts(); }
@@ -3535,15 +3731,33 @@ document.addEventListener('click',function(e){
     b.classList.add('sel');
   }
 });
-function showStreak(){ // 7 épis = 7 jours ; une pousse mûrit en épi doré à chaque jour du cycle
+function showStreak(){ // 7 épis = 7 jours ; l'épi du jour s'allume, ceux à venir restent éteints
   var n=S.streak||1, inCycle=((n-1)%7)+1, h='';
-  for(var i=1;i<=7;i++)h+='<span class="ob-ear">'+(i<=inCycle?'🌾':'🌱')+'</span>';
+  for(var i=1;i<=7;i++)h+='<span class="ob-ear'+(i<=inCycle?'':' off')+'">'+icoImg('tb-epi')+'</span>';
   document.getElementById('streakEars').innerHTML=h;
   document.getElementById('streakNum').textContent=n;
   document.getElementById('streakUnit').textContent=(n>1?'jours':'jour');
+  var s=document.getElementById('streakSpk'); if(s&&!s.innerHTML)s.innerHTML=spkSVG();
   document.getElementById('streak').classList.add('on');
 }
+/* La récitation du verset 2:261 — demandée par Myriam le 14/08.
+   Le verset est joué par la voix CHOISIE par l'élève : la Fātiḥa compte 7 versets, donc
+   Al-Baqara 261 porte le numéro 268 dans le mushaf continu. ⚠️ Ce fichier-là n'est PAS
+   hébergé chez nous (`qariUrl` ne sert en local que les 7 versets de la Fātiḥa) : il passe
+   par le flux, donc il demande une connexion. On le dit au lieu de rester muet. */
+function streakRecite(){
+  var b=document.getElementById('streakSpk');
+  if(_curAudio&&!_curAudio.paused){ stopAudio(); spkOff(b&&b.querySelector('.spk')); return; }
+  stopAudio();
+  var gen=_sndGen, a=new Audio(qariUrlCdn(qariCur(),268)); _curAudio=a;
+  spkOn(b&&b.querySelector('.spk'));
+  var fin=function(){ if(gen===_sndGen)spkOff(b&&b.querySelector('.spk')); };
+  a.addEventListener('ended',fin,{once:true});
+  a.addEventListener('error',function(){ fin(); toast('Récitation indisponible sans connexion'); },{once:true});
+  var p=a.play(); if(p&&p.catch)p.catch(function(){ fin(); toast('Récitation indisponible sans connexion'); });
+}
 function streakContinue(){
+  stopAudio();
   document.getElementById('streak').classList.remove('on');
   if(obAccountPending){ obAccountPending=false; showObAccount(); return; }
   returnFromPlayer();
@@ -3805,6 +4019,33 @@ function fillFinishConstance(){ // écran de fin fusionné : la barre des 7 rang
   var r=document.getElementById('fin-rank'); if(r)r.innerHTML=rankBarHTML();
   var v=document.getElementById('fin-verse'); if(v)v.innerHTML='';
 }
+/* ═══ LES TROIS CASES DE FIN — UN SEUL ÉCRAN POUR TOUT (Myriam, 14/08) ═══
+   Elle a vu ces cases à la fin du vrai/faux et a tranché : « ce type d'écran devrait être
+   celui de chaque fin de leçon ». Et pour le bilan d'unité : « je préfère avoir les trois
+   petites box qui donnent le nombre de graines, le pourcentage de réussite et l'assiduité ».
+   Ce sont donc les MÊMES trois partout — fin de leçon, bilan, révision (principe ⑨ : les
+   écrans jumeaux partagent un moteur). Le grand pourcentage seul disparaît : il disait déjà
+   ce que dit la case « Réussite », en prenant dix fois la place.
+   L'ordre suit la lecture : ce que j'ai réussi · ce que j'ai gagné · depuis combien de temps
+   je tiens. */
+const ICO_COCHE_FIN='<svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const ICO_GRAIN_FIN='<svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 13c0-3-2-5-5-5 0 3 2 5 5 5z"/><path d="M12 15c0-3 2-5 5-5 0 3-2 5-5 5z"/></svg>';
+const ICO_EPI_FIN='<svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><path d="M12 8c0-2.6 1.6-4.6 4-5 0 2.6-1.6 4.6-4 5z"/><path d="M12 12c0-2.6-1.6-4.6-4-5 0 2.6 1.6 4.6 4 5z"/><path d="M12 16c0-2.6 1.6-4.6 4-5 0 2.6-1.6 4.6-4 5z"/><path d="M12 20c0-2.6-1.6-4.6-4-5 0 2.6 1.6 4.6 4 5z"/></svg>';
+function caseHTML(cl,ic,lab,val){
+  return '<div class="case '+cl+'"><div class="case-in">'+
+    '<div class="ic">'+ic+'</div><div class="lab">'+lab+'</div><div class="val">'+val+'</div></div></div>';
+}
+function fillFinishCases(pct,graines){
+  var e=document.getElementById('fin-cases'); if(!e)return;
+  var j=S.streak||0;
+  e.innerHTML='<div class="cases">'+
+    caseHTML('c-reus',ICO_COCHE_FIN,'Réussite',pct+' %')+
+    caseHTML('c-grain',ICO_GRAIN_FIN,'Graines','+'+(graines||0))+
+    caseHTML('c-assid',ICO_EPI_FIN,'Assiduité',j+' j')+
+    '</div>';
+  // Le grand pourcentage seul ne coexiste pas avec la case qui dit la même chose.
+  var fs=document.querySelector('#finish .fin-score'); if(fs)fs.style.display='none';
+}
 function _dayNum(x){ if(!x)return 0; var p=x.split('-'); return Math.round(Date.UTC(+p[0],(+p[1])-1,+p[2])/864e5); }
 function daysGap(a,b){ return _dayNum(b)-_dayNum(a); }
 function rollConstance(){
@@ -3979,7 +4220,26 @@ function rankInfo(idx){ // popup d'un rang cliqué depuis la barre du profil (Pr
     '</div>';
   m.classList.add('on');
 }
-(function(){if(S.heartDay!==today()){S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;save();}})();
+/* ═══ LE PASSAGE DE MINUIT (correctif du 14/08, retour de Myriam : « les cœurs ne se remettent
+   pas à 7 le matin ») ═══
+   La recharge quotidienne ne tournait qu'AU CHARGEMENT. Or Alaq est une application installée :
+   sur iPhone elle n'est jamais rechargée, elle est mise en veille puis reprise — l'élève qui la
+   laisse ouverte la nuit rouvre le lendemain avec les cœurs de la veille. Le jour est donc
+   revérifié à CHAQUE reprise (retour à l'écran, focus de la fenêtre) et par une minuterie d'une
+   minute pour celle qui la laisse ouverte à minuit. La fonction est idempotente : elle ne fait
+   rien tant que la date locale n'a pas changé. */
+function majJour(){
+  if(S.heartDay===today())return false;
+  S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;save();
+  try{rollConstance();}catch(e){}
+  var a=document.getElementById('st-hearts');if(a)a.textContent=S.hearts;
+  var b=document.getElementById('p-hearts');if(b)b.textContent=S.hearts;
+  return true;
+}
+majJour();
+document.addEventListener('visibilitychange',function(){ if(!document.hidden)majJour(); });
+window.addEventListener('focus',majJour);
+setInterval(majJour,60000);
 try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
 (function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();save();} })();
@@ -4030,7 +4290,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='qa-mode-clair \u00b7 tuto lisible \u00b7 sommaire du ciel \u00b7 disques verrouill\u00e9s clairs \u00b7 accent dor\u00e9 sur le ciel \u00b7 917 \u00e9crans balay\u00e9s \u00b7 \u00b7 hamza-sieges \u00b7 CORRECTIF URGENT apostrophe BUILD \u00b7 \u00b7 alif trouvable \u00b7 \u00e9crans sans pav\u00e9 \u00b7 plus de r\u00e9compense sous l\u2019exercice \u00b7 \u00b7 disques dor\u00e9s en clair \u00b7 surbrillance r\u00e9tablie \u00b7 ic\u00f4nes beiges \u00b7 suivi mot \u00e0 mot r\u00e9par\u00e9 \u00b7 \u00b7 mode clair \u00b7 grands caract\u00e8res \u00b7 glisser en grand \u00b7 traduction au toucher \u00b7 \u00b7 plus aucune consigne lue \u00b7 haut-parleur dessin\u00e9 partout \u00b7 titres sans emoji \u00b7 tuiles fig\u00e9es \u00b7 tri d\u00e9bloqu\u00e9 \u00b7 (h\u00e9ritage) dromadaire droite\u2192gauche \u00b7 vocabulaire sans emoji \u00b7 suivi mot \u00e0 mot corrig\u00e9 \u00b7 lettre arabe dans les consignes \u00b7 r\u00e9citateur dans les Param\u00e8tres \u00b7 le\u00e7on 7 refondue (7 unit\u00e9s) \u00b7 porte du parcours \u00b7 r\u00e9citation suivie mot \u00e0 mot \u00b7 vocabulaire au marf\u016b\u02bf \u00b7 emoji \u2192 ic\u00f4nes';
+const BUILD='review-u2-14aout \u00b7 c\u0153urs \u00e0 minuit \u00b7 popup des c\u0153urs \u00b7 assiduit\u00e9 verset entier \u00b7 mascotte d\u00e9tach\u00e9e \u00b7 z\u00e9ro transcription (847 \u00e9crans) \u00b7 alphabet \u00e0 jour d\u00e8s U2 \u00b7 le\u00e7on 3 : \u00e9cran des r\u00f4les, cartes color\u00e9es, tachkil rouge, jeu de tri \u00b7 filet du CONTINUER (4 \u00e9crans) \u00b7 ligature lam-alif \u00b7 disque entier au glisser \u00b7 box plus a\u00e9r\u00e9es \u00b7 bulles agrandies \u00b7 f\u00e9licitations \u00e0 la vraie fin \u00b7 3 cases partout \u00b7 graines au profil \u00b7 tachkil du clavier lisibles \u00b7 relief des disques invers\u00e9';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4208,13 +4468,36 @@ function renderStep(){
     return;
   }
 
-  /* Les deux sièges de la hamza : la POSITION est le contenu, elle reste écrite. */
-  if(st.type==='seats'){
-    window._tr={n:0,tot:st.cartes.length};
+  /* Le type `seats` (« Compare les deux sièges ») est SUPPRIMÉ le 14/08 : Myriam l'a remplacé
+     par le jeu de tri. Il n'est pas laissé en place — un renderer sans appelant finit par
+     rendre un test vert sans rien prouver (leçon `buildMaddANCIEN`, 13/08). */
+
+  /* ═══ ÉCRAN 1 DE LA LEÇON 3 — « 3 lettres peuvent avoir 2 rôles » (Myriam, 14/08) ═══
+     L'alphabet en DEUX parties, séparées par le filet de la hamza. En haut les 28 lettres,
+     dont ا و ي sont légèrement dorées : ce sont elles qui ont un second rôle. En bas, les
+     sièges — vides au départ, sauf la hamza seule ء, qui existe sans support.
+     Toucher une des trois lettres dorées la fonce ET fait apparaître le ou les sièges
+     qu'elle permet : أ إ pour le alif, ؤ pour le wāw, ئ pour le yāʾ. C'est le principe ⑦
+     (montrer plutôt que dire) — la règle n'est écrite nulle part, elle se fabrique sous le
+     doigt. Le bouton s'allume quand les trois ont été touchées.
+     ⚠️ Un siège apparu reste touchable pour ENTENDRE (hamzaTap), comme dans le Cours : la
+     curiosité n'est jamais punie et rien ici n'est évalué. */
+  if(st.type==='roles'){
+    window._rl=new Set();
+    const SIEGES_DE={'ا':['أ','إ'],'و':['ؤ'],'ي':['ئ']};
+    const ORDRE=['ء','أ','إ','ؤ','ئ'];
     body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="lvp-seat">'+st.cartes.map(function(c){
-        return '<div class="ls" onclick="taprowTap(this,\''+c.mot+'\')"><div class="ls-ar">'+c.ar+'</div>'+
-               '<div class="ls-lab">'+c.lab+' · '+c.mot+'</div></div>'; }).join('')+'</div>';
+      '<div class="agrid agrid-rl">'+ALPHABET.map(function(a){
+        var f=!!SIEGES_DE[a[0]];
+        return '<button class="ag'+(f?' faible':'')+'"'+(f?' onclick="roleTap(this,\''+a[0]+'\')"':' disabled')+'>'+a[0]+'</button>';
+      }).join('')+'</div>'+
+      '<div class="rl-sep"><span>support</span></div>'+
+      '<div class="lg-hamza ex-hamza rl-sieges">'+ORDRE.map(function(s){
+        return s==='ء'
+          ? '<div class="hz" data-s="ء" onclick="hamzaTap(this,\'ء\')">ء<span class="hzl">seule</span></div>'
+          : '<div class="hz vide" data-s="'+s+'"></div>';
+      }).join('')+'</div>';
+    cta.disabled=st.gate?true:false;
     return;
   }
 
@@ -4224,8 +4507,13 @@ function renderStep(){
       st.cartes.map(function(c){
         return '<div class="lvp-flip" onclick="lvpFlip(this,\''+c.cons+'\',\''+c.pro+'\')">'+
           '<div class="lvp-flip-in">'+
+            /* 14/08 — Myriam a tranché : « support » sur les TROIS cartes. Le mot ne décrit
+               plus la nature grammaticale de la lettre (ي et و SONT des consonnes) mais son
+               RÔLE DANS CETTE LEÇON : ce sur quoi la voyelle vient s'appuyer. C'est le même
+               mot que le filet de l'écran 1 et que le titre de l'écran 9 — un seul terme,
+               d'un bout à l'autre de la leçon. */
             '<div class="face-cons"><div class="ff-ar">'+c.ar+'</div>'+
-              '<div class="ff-role">'+(c.consRole||'consonne')+'</div></div>'+
+              '<div class="ff-role">support</div></div>'+
             '<div class="face-pro"><div class="ff-ar">'+c.ar+'</div>'+
               '<div class="ff-role">prolongation</div></div>'+
           '</div></div>';
@@ -4299,14 +4587,20 @@ function renderStep(){
            (ا أ إ آ ٱ) — c'est le même outil que le repérage dans le verset. */
         const isT=st.targets.some(t=>sameLetter(t,a[0]));
         return '<button class="ag'+(st.highlight&&isT?' hl':'')+'" onclick="fsTap(this,\''+a[0]+'\','+(isT?1:0)+')">'+a[0]+'</button>';
-      }).join('')+'</div>';
+      }).join('')+'</div>'+hamzaRailHTML();
     } else {
       const cl=splitWord(st.word);
-      window._fs.need=cl.filter(c=>st.targets.includes(c.b)).length;
+      // une case peut porter DEUX lettres (la ligature لا) : on cherche la cible dans les deux,
+      // et la lettre qu'on fait SONNER est celle qui est visée, pas systématiquement la première
+      const cible=c=>cellBases(c).filter(b=>st.targets.includes(b))[0]||'';
+      window._fs.need=cl.filter(c=>!!cible(c)).length;
       grid='<div class="verse" style="font-size:88px;line-height:1.5">'+cl.map((c,i)=>{
-        const jp=i>0&&joinsL(cl[i-1].b),jn=i<cl.length-1&&joinsL(c.b);
-        const disp=(jp?ZWJ:'')+c.b+c.m+(jn?ZWJ:'');
-        return '<span class="vl" onclick="fwTap(this,'+(st.targets.includes(c.b)?1:0)+',\''+c.b+'\')">'+disp+'</span>';
+        // la ligature se termine par un alif : elle ne se lie JAMAIS à gauche
+        const finLettre=c.lig||c.b;
+        const jp=i>0&&joinsL(cl[i-1].lig||cl[i-1].b),jn=i<cl.length-1&&joinsL(finLettre);
+        const disp=(jp?ZWJ:'')+cellText(c)+(jn?ZWJ:'');
+        const t=cible(c);
+        return '<span class="vl" onclick="fwTap(this,'+(t?1:0)+',\''+(t||c.b)+'\')">'+disp+'</span>';
       }).join('')+'</div>';
     }
     body.innerHTML='<div class="q-title">'+st.title+'</div>'+grid+
@@ -4331,8 +4625,8 @@ function renderStep(){
     if(st.lang==='ar'){
       const cl=splitWord(st.word);
       inner=cl.map((c,i)=>{
-        const jp=i>0&&joinsL(cl[i-1].b), jn=i<cl.length-1&&joinsL(c.b);
-        const disp=(jp?ZWJ:'')+c.b+c.m+(jn?ZWJ:'');
+        const jp=i>0&&joinsL(cl[i-1].lig||cl[i-1].b), jn=i<cl.length-1&&joinsL(c.lig||c.b);
+        const disp=(jp?ZWJ:'')+cellText(c)+(jn?ZWJ:'');
         return '<span class="rc" data-i="'+i+'">'+disp+'</span>';
       }).join('');
     } else {
@@ -4394,13 +4688,17 @@ function renderStep(){
   }
 
   if(st.type==='learn'){
-    const d=UNITS[curU].alpha[st.L];
     // titre-instruction court ; le badge et la pastille « son » tombent (Myriam 08/08) :
     // le SON de la lettre s'apprend au disque « Les harakats », pas ici.
+    /* ⚠️ RÈGLE POSÉE PAR MYRIAM LE 14/08, VALABLE PARTOUT : « Pas de transcription sous les
+       lettres arabes. JAMAIS. » Le nom translittéré (yāʾ, mīm…) était écrit sous le glyphe :
+       l'élève lisait le latin et n'avait plus besoin de l'arabe. Le nom de la lettre
+       s'ENTEND au toucher (principe ② : seul l'arabe parle). Il reste ÉCRIT dans le Cours,
+       qui est une fiche de référence et non un exercice. */
     body.innerHTML='<div class="q-title">Touche la lettre</div>'+
       '<div class="learn">'+
       '<button class="ar-tap" onclick="lettreTap(this,\''+st.L+'\')">'+st.L+'</button>'+
-      '<div class="nm">'+d.n+'</div></div>';
+      '</div>';
     return;
   }
 
@@ -4409,8 +4707,10 @@ function renderStep(){
     body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
       '<div class="hint" style="margin:-8px 0 18px">Touche chaque lettre au moins trois fois.</div>'+
       '<div class="explore">'+st.items.map(it=>
+        // Pas de transcription sous l'arabe (règle du 14/08) : la syllabe s'ENTEND au toucher,
+        // les pastilles ○ ○ ○ disent déjà combien de fois il reste à la toucher.
         '<button class="exp-card" onclick="reqTap(\''+it.say+'\',this)">'+
-          '<span class="ar">'+it.ar+'</span><span class="enm">'+it.lab+'</span>'+
+          '<span class="ar">'+it.ar+'</span>'+
           '<span class="dots">'+'○ '.repeat(st.min).trim()+'</span></button>').join('')+'</div>';
     return;
   }
@@ -4441,20 +4741,18 @@ function renderStep(){
   if(st.type==='spot'){
     const verse=FATIHA[st.vi];
     let need=0;
-    const words=verse.split(' ').map(word=>{
-      const cl=[];
-      for(const ch of word){
-        if(DIA.test(ch.replace(DIA,m=>m))&&cl.length&&ch.match(DIA)){cl[cl.length-1].m+=ch;}
-        else if(ch.match(DIA)&&cl.length){cl[cl.length-1].m+=ch;}
-        else cl.push({b:ch,m:''});
-      }
-      return cl;
-    });
+    /* ⚠️ 14/08 — C'EST ICI QUE LE لا SE CASSAIT (le retour de Myriam sur la leçon 5).
+       Cet écran avait son PROPRE découpeur, recopié à côté de `splitWord` — avec en prime
+       une condition morte (`DIA.test` sur une regex /g, dont l'état se promène). Deux
+       découpeurs pour un seul geste, c'est deux endroits où corriger et un seul qu'on
+       corrige : `splitWord` sait maintenant que لا est UNE case, et cet écran l'utilise
+       (principe ⑨ — les écrans jumeaux partagent un moteur). */
+    const words=verse.split(' ').map(splitWord);
     const html=words.map(cl=>'<span class="vw">'+cl.map((c,i)=>{
-      const jp=i>0&&joinsL(cl[i-1].b);
-      const jn=i<cl.length-1&&joinsL(c.b);
-      const disp=(jp?ZWJ:'')+c.b+c.m+(jn?ZWJ:'');
-      const ok=sameLetter(c.b,st.L)?1:0; if(ok)need++;
+      const jp=i>0&&joinsL(cl[i-1].lig||cl[i-1].b);
+      const jn=i<cl.length-1&&joinsL(c.lig||c.b);
+      const disp=(jp?ZWJ:'')+cellText(c)+(jn?ZWJ:'');
+      const ok=cellBases(c).some(b=>sameLetter(b,st.L))?1:0; if(ok)need++;
       return '<span class="vl" onclick="spotTap(this,'+ok+')">'+disp+'</span>';
     }).join('')+'</span>').join(' ');
     window._spot={need,found:0}; window._spotVi=st.vi;
@@ -4554,7 +4852,7 @@ function renderStep(){
     const tiles=shuffle(['ا','و','ي']).map(ch=>'<div class="dm-tile" data-ch="'+ch+'">'+ch+'</div>').join('');
     body.innerHTML='<div class="q-title">Fais glisser la bonne prolongation</div>'+
       '<div class="dm-wrap" id="dm-wrap">'+
-        '<div class="dm-target" id="dm-target">'+st.base+st.hk+'</div>'+
+        '<div class="dm-target" id="dm-target">'+tachRouge(st.base+st.hk)+'</div>'+
         '<div class="dm-tray">'+tiles+'</div>'+
       '</div>';
     setTimeout(()=>setupDragMad(st),50);
@@ -4826,16 +5124,19 @@ function finishDisque(){
   save();
   document.getElementById('player').classList.remove('on');
   _grainesSession=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));
-  document.querySelector('#finish .fin-score').style.display=''; // #finish est partagé : la fin de LEÇON garde son %
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
   const isBilan=(curD===discsFor(curU).length-1);
-  document.getElementById('fin-icon').textContent=isBilan?'🏆':'✓';
-  document.getElementById('fin-extra').innerHTML=isBilan
-    ?('<p style="color:var(--gold2);font-weight:800;margin:-8px 0 18px">🕋 Tu peux maintenant lire <b>'+fatihaPct()+' %</b> de la Fātiḥa !</p>')
-    :'';
-  document.getElementById('fin-title').textContent=isBilan?('Unité '+toAr(UNITS[curU].no)+' validée ! 🎉'):'Leçon terminée !'; // plus de « L'alphabet — terminé ! » (Myriam 07/08)
+  /* ⚠️ 14/08 — LE BILAN NE PROMET PLUS CE QU'IL NE SAIT PAS. Myriam : « à la leçon 2 on ne
+     peut pas écrire qu'on peut lire 100 % de la Fātiḥa… je préfère avoir les trois petites
+     box ». La phrase était fausse deux fois : elle affichait un pourcentage calculé sur TOUTES
+     les unités faites, sur l'écran d'UNE unité — et elle le faisait avec un emoji, dans une
+     app qui n'en porte plus (règle du 13/08). Les trois cases disent des chiffres vrais. */
+  document.getElementById('fin-icon').textContent='';
+  document.getElementById('fin-extra').innerHTML='';
+  document.getElementById('fin-title').textContent=isBilan?('Unité '+toAr(UNITS[curU].no)+' validée !'):'Leçon terminée !';
   document.getElementById('fin-xp').textContent='+'+gain;
   document.getElementById('fin-acc').textContent=acc+'%';
+  fillFinishCases(acc,_grainesSession);
   fillFinishConstance();
   document.getElementById('finish').classList.add('on');
   confettiBurst();
@@ -4935,14 +5236,9 @@ function mascotteStop(){_mascT.forEach(clearTimeout);_mascT=[];}
    (ils doivent rester uniques) ; seul le dégradé du halo garde un id, renommé, car il est
    référencé par `fill="url(#…)"` — un `url()` qui pointe dans un sous-arbre `display:none`
    ne peint rien de fiable. */
-function mascotteHTML(suffixe){
-  const src=document.querySelector('#finish .masc-wrap'); if(!src)return '';
-  const n=src.cloneNode(true);
-  const g=n.querySelector('radialGradient'), e=n.querySelector('.mhalo');
-  n.querySelectorAll('[id]').forEach(function(x){ x.removeAttribute('id'); });
-  if(g&&e){ g.id='mgl-'+suffixe; e.setAttribute('fill','url(#mgl-'+suffixe+')'); }
-  return n.outerHTML;
-}
+/* `mascotteHTML(suffixe)` (le clone de la mascotte) est SUPPRIMÉ le 14/08 : il n'existait que
+   pour l'écran de récompense du vrai/faux, lui-même supprimé. #finish porte la mascotte
+   d'origine — il n'y en a de nouveau qu'UNE, et plus de dégradé à renommer. */
 function mascotteDanse(racine){   // racine = l'écran qui porte la mascotte (défaut : #finish)
   mascotteStop();
   const R=racine||document;
@@ -5074,13 +5370,30 @@ function ssValider(){
 /* — écrans 3 / 6 : le glisser-fusionner — */
 /* ══ Le glisser générique de la leçon 7 (11/08) — même mécanique que setupFuse :
    fantôme suivi au doigt, cible qui se remplit, son de la syllabe, récompense à la fin. */
+/* ═══ C'EST LE DISQUE ENTIER QUI SE DÉPLACE (Myriam, 14/08, leçon 6) ═══
+   « Pour ceux qui ont des problèmes de vue, il est préférable que ce soit le disque complet
+   qui se déplace, et pas seulement l'ombre de la tachkīl, car elle est peu visible. »
+   Le fantôme n'était qu'un CARACTÈRE nu de 60 px : sous le doigt, une ḍamma fait quelques
+   pixels et la moitié est cachée par le doigt lui-même. Il est désormais un CLONE de la
+   pastille — même boîte, même bordure, même fond — figé à sa taille mesurée pour que rien
+   ne saute au décollage. Règle §12 (une vue abîmée) : ce qu'on déplace doit avoir la taille
+   de ce qu'on a touché. */
+/* Le fabricant de fantôme, UN pour les quatre glisser de l'app (14/08) — `draggable`
+   (harakat posées, tri), `setupFuse` (leçons 6 et « Les prolongations ») et `setupDrag`
+   (les formes). Il y avait quatre créations de fantôme recopiées : j'ai corrigé la première
+   et Myriam aurait retrouvé le même défaut sur les trois autres. */
+function fantomeDe(el){
+  var r=el.getBoundingClientRect();
+  var g=el.cloneNode(true); g.removeAttribute('id'); g.classList.add('drag-clone');
+  g.style.width=r.width+'px'; g.style.height=r.height+'px';
+  document.body.appendChild(g); return g;
+}
 function draggable(el,texte,surLache){
   var ghost=null,drag=false;
   var xy=function(e){var t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;return[t.clientX,t.clientY];};
   var mv=function(x,y){if(ghost){ghost.style.left=x+'px';ghost.style.top=y+'px';}};
   var start=function(e){e.preventDefault();drag=true;var c=xy(e);
-    ghost=document.createElement('div');ghost.className='drag-ghost';ghost.textContent=texte();
-    document.body.appendChild(ghost);mv(c[0],c[1]);el.style.opacity=.35;};
+    ghost=fantomeDe(el);mv(c[0],c[1]);el.style.opacity=.35;};
   var move=function(e){if(!drag)return;e.preventDefault();var c=xy(e);mv(c[0],c[1]);};
   var end=function(e){if(!drag)return;drag=false;
     if(ghost){ghost.remove();ghost=null;}el.style.opacity=1;
@@ -5093,11 +5406,19 @@ function draggable(el,texte,surLache){
   window.addEventListener('mouseup',end);
 }
 function dansRect(x,y,el){ var r=el.getBoundingClientRect(); return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom; }
+/* La même chose, avec une MARGE (14/08 — « la sensibilité des box pourrait être améliorée au
+   toucher »). Une cible d'écriture arabe fait souvent 30 px de large ; le doigt en couvre 45
+   et le point de contact rendu par le navigateur est le centre de la pulpe, pas le bout du
+   doigt. 18 px de tolérance, c'est ce qui sépare « j'ai visé juste » de « ça n'a pas pris ».
+   ⚠️ La marge ne rend jamais deux cibles ambiguës ici : elles sont empilées avec plus de
+   36 px d'écart, et le premier candidat trouvé est le plus haut. */
+function dansRectMarge(x,y,el,m){ var r=el.getBoundingClientRect(); m=m||18;
+  return x>=r.left-m&&x<=r.right+m&&y>=r.top-m&&y<=r.bottom+m; }
 function setupPlace(st){
   var chip=document.getElementById('sigchip'); if(!chip)return;
   draggable(chip,function(){return st.chip;},function(x,y){
     var c=[].slice.call(document.querySelectorAll('#grps .grp')).filter(function(g){
-      return !g.classList.contains('done')&&dansRect(x,y,g.querySelector('.gcib')); })[0];
+      return !g.classList.contains('done')&&dansRectMarge(x,y,g.querySelector('.gcib')); })[0];
     if(!c)return;                                   // le أَ n'est jamais une cible : rien ne se passe
     var g=st.grps[+c.dataset.k];
     c.classList.add('done'); c.querySelector('.gcib').textContent=g.fin; popIt(c);
@@ -5136,8 +5457,7 @@ function setupFuse(st){
     const xy=e=>{const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;return[t.clientX,t.clientY];};
     const mv=(x,y)=>{if(ghost){ghost.style.left=x+'px';ghost.style.top=y+'px';}};
     const start=e=>{e.preventDefault();drag=true;const[x,y]=xy(e);
-      ghost=document.createElement('div');ghost.className='drag-ghost';ghost.textContent=chip.textContent;
-      document.body.appendChild(ghost);mv(x,y);chip.style.opacity=.35;};
+      ghost=fantomeDe(chip);mv(x,y);chip.style.opacity=.35;};   // le DISQUE entier, pas le signe nu (14/08)
     const move=e=>{if(!drag)return;e.preventDefault();const[x,y]=xy(e);mv(x,y);};
     const end=e=>{if(!drag)return;drag=false;
       if(ghost){ghost.remove();ghost=null;}chip.style.opacity=1;
@@ -5171,14 +5491,31 @@ function reqTap(key,el){
   if(d)d.textContent=('● '.repeat(n)+'○ '.repeat(min-n)).trim();
   if(Object.values(window._req).every(v=>v>=min))ctaOn();
 }
+/* ═══ LE لا EST UNE SEULE CASE — CORRECTIF DU 14/08 ═══
+   Myriam, leçon 5 : « le لا n'est pas correct sur cette écriture dans le dernier verset ».
+   Dans وَلَا, le lām et le alif tombaient dans DEUX <span> voisins ; ils s'affichaient alors
+   en deux hampes droites côte à côte au lieu de la ligature لا — et, le alif étant une
+   lettre-cible de l'unité 2, la moitié du signe était même dorée et l'autre non.
+   La cause n'est pas le CSS : la ligature lām-alif est OBLIGATOIRE en arabe, aucun ZWJ ne la
+   reconstitue par-dessus une frontière d'élément. Un caractère ne peut donc pas être découpé
+   n'importe où — لا est UN signe, et il devient UNE case.
+   ⚠️ Conséquence assumée : une case لا vaut UNE cible même si les deux lettres sont visées.
+   Le cas ne se présente dans aucune unité (le ل et le ا ne sont jamais enseignés ensemble),
+   et découper la ligature pour compter juste casserait l'écriture — c'est le mauvais échange. */
 function splitWord(w){
   const cl=[];
   for(const ch of w){
-    if(ch.match(DIA)&&cl.length)cl[cl.length-1].m+=ch;
-    else cl.push({b:ch,m:''});
+    if(ch.match(DIA)&&cl.length){ cl[cl.length-1].m+=ch; continue; }
+    const p=cl[cl.length-1];
+    if(p&&p.b==='ل'&&!p.lig&&ALIF_FAM.includes(ch)){ p.lig=ch; continue; }
+    cl.push({b:ch,m:'',lig:''});
   }
   return cl;
 }
+// Le texte RENDU d'une case : base + ses signes + l'éventuel alif de la ligature.
+function cellText(c){ return c.b+c.m+(c.lig||''); }
+// Les lettres qu'une case porte — une case لا en porte deux.
+function cellBases(c){ return c.lig?[c.b,c.lig]:[c.b]; }
 function doCombine(res){
   const r=document.getElementById('cmbR');
   document.getElementById('cmbA').classList.add('merge');
@@ -5189,7 +5526,7 @@ function hkTap(i,el){
   speak(['أَ','إِ','أُ'][i]); // les voyelles nues = LA VOIX DE MYRIAM (décision 07/08)
   el.classList.add('lit');popIt(el);
   window._hk.add(i);
-  if(window._hk.size>=3)quandSonFini(objectifAtteint);objectifFilet();
+  if(window._hk.size>=3){ quandSonFini(objectifAtteint); objectifFilet(); }
 }
 function assocTap(i,el){
   const a=window._as;
@@ -5215,7 +5552,7 @@ function tsTap(L,el){
     // objectif atteint : le reste de la grille s'estompe mais RESTE cliquable (curiosité)
     document.querySelectorAll('.ts-card').forEach(c=>{if(!c.classList.contains('seen'))c.classList.add('dim');});}
   sayLetterName(L);
-  if(window._ts.size>=window._tsN)quandSonFini(objectifAtteint);objectifFilet();
+  if(window._ts.size>=window._tsN){ quandSonFini(objectifAtteint); objectifFilet(); }
 }
 function setupDrag(L){
   const src=document.getElementById('dragSrc');if(!src)return;
@@ -5235,8 +5572,8 @@ function setupDrag(L){
   },10000); }
   armerInvite();
   function makeGhost(x,y){
-    ghost=document.createElement('div');ghost.className='drag-ghost';ghost.textContent=L;
-    document.body.appendChild(ghost);moveGhost(x,y);
+    ghost=fantomeDe(src);   // la PASTILLE de la lettre, pas la lettre nue (14/08) — déjà posée dans le body
+    moveGhost(x,y);
   }
   function moveGhost(x,y){if(ghost){ghost.style.left=x+'px';ghost.style.top=y+'px';}}
   function cellAt(x,y){
@@ -5252,7 +5589,7 @@ function setupDrag(L){
       c.classList.add('lit');popIt(slot);
       sayLetterName(L);   // le NOM de la lettre à chaque pose (Myriam 07/08)
       window._fsl.add(pos);
-      if(window._fsl.size>=4)quandSonFini(objectifAtteint);objectifFilet();
+      if(window._fsl.size>=4){ quandSonFini(objectifAtteint); objectifFilet(); }
     }
   }
   function xy(e){const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0])||e;return[t.clientX,t.clientY];}
@@ -5277,7 +5614,7 @@ function fsTap(el,L,ok){
     el.classList.add('hit');window._fs.found++;updFs();
     fb.className='fb';fb.innerHTML='';foot.classList.remove('bad');   // la bonne pioche efface le rouge
     sayLetterName(L);   // le NOM, comme partout ailleurs dans la leçon
-    if(window._fs.found>=window._fs.need)quandSonFini(objectifAtteint);objectifFilet();
+    if(window._fs.found>=window._fs.need){ quandSonFini(objectifAtteint); objectifFilet(); }
   }
   else{
     if(el.classList.contains('miss'))return; // anti-rafale : pas 2 cœurs sur un double-tap de la même lettre
@@ -5557,12 +5894,18 @@ function setupDragAssoc(st){
       if(c && !c.classList.contains('done') && c.dataset.madd===tile.dataset.ch){
         tile.style.transform=''; tile.classList.add('placed');
         c.innerHTML='<span class="da-long">'+c.dataset.long+'</span>'; c.classList.add('done');
+        // chaque pose SONNE (règle §6.3 du cerveau) — et `speak` coupe déjà le son précédent
+        // si l'élève enchaîne sur une autre prolongation (Myriam, 14/08)
         warmVoices(); speak(c.dataset.say); done++;
         /* Plus AUCUNE récompense sous l'exercice (Myriam 13/08 : « les récompenses sous les
            associations sont inutiles »). Le contrat est celui de tous les écrans : on pose,
            le bouton s'allume, l'éloge discret vit dans la div du bas. */
         wrap.dataset.refus=0;
-        if(done>=cells.length){ objectifAtteint(); objectifFilet(); }
+        /* ⚠️ 14/08 — « le bouton continuer s'affiche après la fin du DERNIER son ».
+           `objectifAtteint` commence par `playSfx`, donc par `stopAudio()` : lancé tout de
+           suite, il coupait la syllabe qu'on venait de former. Le filet 2,8 s reste en
+           soupape si le rappel de fin se perd (cas gravé le 13/08). */
+        if(done>=cells.length){ quandSonFini(objectifAtteint); objectifFilet(); }
       } else {
         tile.style.transition='transform .25s ease'; tile.style.transform='';
         setTimeout(()=>{tile.style.transition='';},260);
@@ -5605,13 +5948,15 @@ function setupDragMad(st){
       if(ok && tile.dataset.ch===st.answer){
         solved=true; tile.style.transform='';
         tile.classList.add('placed');
-        target.innerHTML='<span class="dm-res">'+st.result+'</span>';
+        target.innerHTML='<span class="dm-res">'+tachRouge(st.result)+'</span>';
         target.classList.add('done');
         /* Plus de récompense sous l'exercice, plus de pavé d'explication avec son bouton
            « J'ai compris » (Myriam 13/08). Contrat unique : on pose, la syllabe SONNE,
            le bouton s'allume et l'éloge discret vit dans la div du bas. */
+        /* 14/08 — « quand la prolongation est glissée et les lettres transformées, ça doit
+           jouer le son PUIS afficher le bouton continuer à la fin du son. » */
         warmVoices(); speak(st.say);
-        objectifAtteint(); objectifFilet();
+        quandSonFini(objectifAtteint); objectifFilet();
       } else {
         tile.style.transition='transform .25s ease'; tile.style.transform='';
         setTimeout(()=>{tile.style.transition='';},260);
@@ -5712,13 +6057,25 @@ function jouerSyl(base,ar,fin,el){
   tente(0);
   setTimeout(termine,3200);  // filet : le rappel finit toujours par venir (bulles, séquences)
 }
+/* ═══ LES MOTS DONT LA PRISE IA EST FAUSSE (14/08) ═══
+   Myriam, leçon 7 : « la voix dit ananoun au lieu de amanoun ». Le mot أَمَانٌ a DEUX
+   enregistrements : le sien (mot-aman.mp3, 21/06 — donc antérieur au 13/07, sa voix selon la
+   règle de provenance) et celui de Habibah (mot-aman-f.mp3, 10/08, généré). L'app essaie la
+   voix choisie EN PREMIER : c'est donc la prise générée qui parlait, et le modèle a lu أَنَامٌ
+   — précisément l'un des leurres de ce mot.
+   Le remède n'est pas de régénérer sous le même nom : un fichier remplacé à nom constant
+   reste l'ANCIEN à vie sur les appareils (règle du cache MEDIA). On saute la prise fautive,
+   et l'app retombe sur l'enregistrement de Myriam, qui est juste.
+   ⚠️ Ce n'est PAS une liste à tenir à la main : chaque entrée doit citer le retour qui l'a
+   créée, et disparaître le jour où une prise neuve arrive SOUS UN NOM NEUF. */
+const MOTS_SANS_IA={'أَمَانٌ':'Myriam 14/08 — la prise Habibah dit « anāmun »'};
 function jouerMot(ar,fin,el){ // un MOT enregistré : voix choisie (-f/-h) d'abord, l'enregistrement historique ensuite, synthèse en dernier
   stopAudio();
   spkOff(); spkOn(el);
   var gen=_sndGen, fini=false;
   var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
   var base=AUDIO[ar];
-  var essais=base?[base.replace(/\.mp3$/,'-'+VOIX_G+'.mp3'),base]:[];
+  var essais=base?(MOTS_SANS_IA[ar]?[base]:[base.replace(/\.mp3$/,'-'+VOIX_G+'.mp3'),base]):[];
   var tente=function(i){
     if(gen!==_sndGen)return;
     if(i>=essais.length){ try{_speakSynth(ar);}catch(_){ } setTimeout(termine,900); return; }
@@ -5837,6 +6194,18 @@ function lettreTap(el,L){
   objectifFilet();
 }
 /* Ceinture : le bouton ne doit JAMAIS rester gris si un son se perd. */
+/* ⚠️ 14/08 — LE FILET NE S'ARME QU'UNE FOIS L'ÉCRAN FINI. Myriam, leçon 4 : « le bouton
+   continuer s'affiche après quelques secondes d'attente même si le user n'a pas déplacé la
+   lettre dans tous les box. » La cause tenait en DEUX ACCOLADES MANQUANTES :
+
+       if(window._fsl.size>=4)quandSonFini(objectifAtteint);objectifFilet();
+
+   sans bloc, seul `quandSonFini` était gardé — `objectifFilet()` partait à CHAQUE pose, et
+   2,8 s plus tard il allumait CONTINUER sur un écran à moitié rempli. La même ligne était
+   copiée sur QUATRE écrans (harakat, tapset, formes, repérage) : un seul symptôme signalé,
+   quatre écrans réparés. Le filet reste indispensable — il existe parce qu'un rappel de fin
+   de son se perd dès qu'un autre son démarre — mais il est une CEINTURE, pas un minuteur :
+   il ne doit jamais valider ce que l'élève n'a pas fait. */
 function objectifFilet(){
   var e=qi;
   setTimeout(function(){ if(qi===e)objectifAtteint(); },2800);
@@ -5872,7 +6241,7 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   BUL.reste=mots?sac.filter(function(x){return x.cible;}).length:sac.length;
   /* 24 bulles au lieu de 15 : elles rapetissent pour garder l'air (preview v3 validée) ;
      le rayon vit dans BUL.R — la physique et l'éclat le lisent, jamais de 32 en dur */
-  BUL.R=mots?48:(syllabes?30:(formes?27:32));   // un mot entier tient dans la bulle
+  BUL.R=mots?56:(syllabes?30:(formes?27:32));   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot)
   var R=BUL.R, lignes=Math.ceil(sac.length/3);
   sac.forEach(function(it,i){
     var L=it.L;
@@ -6025,7 +6394,46 @@ function sayLetterSound(L){
 var LETSEL=new Set();
 /* Toucher un siège : il s'allume et il SONNE. La hamza seule dit son nom, les sièges
    disent la voyelle qu'ils permettent — c'est exactement ce que la hamza sert à faire. */
-const HAMZA_SON={'ء':'ء','أ':'أَ','إ':'إِ'};
+const HAMZA_SON={'ء':'ء','أ':'أَ','إ':'إِ','ؤ':'ؤُ','ئ':'ئِ'};
+/* Toucher une des trois lettres faibles de l'écran « 2 rôles » : elle se fonce, elle SONNE,
+   et ses sièges se posent en bas. Idempotent — retoucher la même lettre ne rejoue que le son
+   et ne débloque pas deux fois le bouton. */
+const SIEGES_DE_LETTRE={'ا':['أ','إ'],'و':['ؤ'],'ي':['ئ']};
+function roleTap(el,L){
+  try{ sayLetterName(L); }catch(e){}
+  el.classList.add('lit');
+  (SIEGES_DE_LETTRE[L]||[]).forEach(function(s){
+    var c=document.querySelector('.rl-sieges .hz[data-s="'+s+'"]');
+    if(!c||!c.classList.contains('vide'))return;
+    c.classList.remove('vide'); c.classList.add('neuf');
+    c.innerHTML=s+'<span class="hzl ar">'+(s==='ؤ'?'و':s==='ئ'?'ي':'ا')+'</span>';
+    c.setAttribute('onclick','hamzaTap(this,\''+s+'\')');
+  });
+  if(!window._rl)window._rl=new Set();
+  window._rl.add(L);
+  if(window._rl.size>=3)document.getElementById('cta').disabled=false;
+}
+/* ═══ LA MÊME LIGNE DE HAMZA DANS LES EXERCICES (Myriam, 14/08) ═══
+   « dans les leçons tu n'as pas utilisé l'alphabet mis à jour… j'ai pas envie que ça
+   apparaisse à l'unité 1 leçon 1 non plus. En revanche dans les exercices après l'unité 2
+   oui. » La grille du Cours porte la ligne de la hamza depuis le 13/08 ; la grille des
+   leçons ne l'avait pas. Elle est désormais RENDUE PAR LA MÊME FONCTION — plus deux
+   alphabets à tenir à jour séparément, ce qui est exactement ce qui a créé l'écart.
+   ⚠️ Ces cases ne comptent PAS dans l'exercice : on cherche ses 3 lettres parmi les 28, et
+   la hamza n'est pas une des 28. On la touche pour ENTENDRE (principe ⑧ : explorer n'est
+   pas être évalué) — un toucher n'y coûte donc jamais un cœur.
+   Le seuil est l'unité, pas la leçon : dès l'unité 2 (curU ≥ 1), l'alif est enseigné, donc
+   ses sièges ont un sens. Avant, ils n'en auraient aucun. */
+function hamzaRailHTML(){
+  if(!(curU>=1))return '';
+  // le siège est écrit EN ARABE (14/08) : aucune translittération sous un glyphe arabe
+  var SIEGES=[['ء','seule',1],['أ','ا',1],['إ','ا',1],['ؤ','و',0],['ئ','ي',0]];
+  return '<div class="lg-hamza ex-hamza">'+SIEGES.map(function(s){
+    return s[2]
+      ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>'
+      : '<div class="hz locked">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>';
+  }).join('')+'</div>';
+}
 function hamzaTap(el,s){
   try{ document.querySelectorAll('.lg-hamza .hz.lit').forEach(function(x){x.classList.remove('lit');}); }catch(e){}
   el.classList.add('lit');
@@ -6147,7 +6555,8 @@ function letterGridHTML(){
      ⚠️ Ces cases ne se SÉLECTIONNENT pas : réviser la hamza, ce serait tracer le alif, qui
      a déjà sa case. Ici on touche pour ENTENDRE — le geste le plus universel de l'app. */
   if(unlocked.has('ا')){
-    var SIEGES=[['ء','seule',1],['أ','alif',1],['إ','alif',1],['ؤ','wāw',0],['ئ','yāʾ',0]];
+    // le siège est écrit EN ARABE (14/08) : aucune translittération sous un glyphe arabe
+    var SIEGES=[['ء','seule',1],['أ','ا',1],['إ','ا',1],['ؤ','و',0],['ئ','ي',0]];
     h+='<div class="lg-hamza">'+SIEGES.map(function(s){
       return s[2]
         ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>'
@@ -6430,6 +6839,10 @@ const AUDIO={
   'أَمِينٌ':'audios-app-alaq/mot-amin.mp3',
   'يَمِينٌ':'audios-app-alaq/mot-yamin.mp3',
   'أَمَانٌ':'audios-app-alaq/mot-aman.mp3',
+  /* Les deux mots du jeu de tri de la leçon 3 (14/08). Prises Habibah, générées à la
+     demande de Myriam ; noms NEUFS, donc aucun risque de cache. */
+  'إِمَامٌ':'audios-app-alaq/mot-imam.mp3',
+  'إِلَيْنَا':'audios-app-alaq/mot-ilayna.mp3',
   'مَمْنُونٌ':'audios-app-alaq/mot-mamnoun.mp3',
   'يَ':'audios-app-alaq/ya-fatha-son-court.mp3',
   'إِي':'audios-app-alaq/alif-ya-son-prolonge.mp3',
@@ -6671,7 +7084,11 @@ function taprowTap(el,word){
   if(!window._tr)return;
   if(el.dataset.vu)return;
   el.dataset.vu=1; window._tr.n++;
-  if(window._tr.n>=window._tr.tot){ objectifAtteint(); objectifFilet(); }
+  /* ⚠️ 14/08 — Myriam : « le son de la dernière box ne s'active pas ». Il s'activait bien :
+     `objectifAtteint()` commence par `playSfx`, qui appelle `stopAudio()` — la récompense
+     COUPAIT le son qu'on venait de déclencher. On attend donc la fin du son avant de
+     récompenser, avec le filet 2,8 s en soupape si le rappel de fin se perd. */
+  if(window._tr.n>=window._tr.tot){ quandSonFini(objectifAtteint); objectifFilet(); }
 }
 function lvpHit(el,word){ // slides Lettres vs prolongations : rejoue l'anim + audio au tap
   try{ el.classList.remove('lit'); void el.offsetWidth; el.classList.add('lit'); }catch(e){}
@@ -6688,6 +7105,17 @@ const AR2LAT={
  '\u0652':'','\u0651':'','\u0670':'a','\u0640':''
 };
 function translit(t){ let o=''; for(const ch of (t||'')) o += (ch in AR2LAT)?AR2LAT[ch]:ch; return o.trim(); }
+/* ═══ LA TACHKĪL EN ROUGE (Myriam, 14/08 — écrans 3 à 5 de la leçon 3) ═══
+   Le signe qui commande la prolongation doit se voir : c'est LUI qui dit quelle lettre
+   viendra. Le rouge est aussi celui des manuscrits — Abū al-Aswad notait déjà les voyelles
+   à l'encre rouge sur un texte à l'encre noire. Il porte donc son propre token, `--tach` :
+   ce n'est PAS le corail de l'erreur (une couleur par idée, règle du 10/08).
+   ⚠️ On n'enveloppe QUE les marques combinantes, jamais une lettre : une lettre isolée dans
+   un span casserait sa liaison, et c'est exactement la panne du لا déjà connue. */
+// U+064B→U+0652 : les deux tanwīn, fatḥa, ḍamma, kasra, chedda, soukoun · U+0670 : alif poignard.
+// Volontairement PAS U+0654/0655 (la hamza combinante) : elle fait partie de la lettre.
+const RE_TACHKIL=/[\u064B-\u0652\u0670]/g;
+function tachRouge(s){ return String(s==null?'':s).replace(RE_TACHKIL,function(c){ return '<span class="tach">'+c+'</span>'; }); }
 /* Repli audio SANS voix arabe : on lit la romanisation PROPRE du mot (w.say) au lieu de
    translittérer l'arabe vocalisé (qui donnait « samakoune »). Voix latine -> son compréhensible. */
 const WSAY={}; try{UNITS.forEach(function(U){(U.words||[]).forEach(function(w){if(w&&w.w&&w.say)WSAY[w.w]=w.say;});});}catch(e){}
@@ -7542,9 +7970,9 @@ function playLetterAnim(btn,L,c){
   V.forEach(function(v){
     var sh=L+v.h, lg=L+v.h+v.m;
     T(function(){W.innerHTML=L;Bar.style.width='0';Ro.textContent='';},t);
-    T(function(){W.innerHTML=sh;pop();Bar.style.width='30px';Ro.textContent=c+v.vs;say(sh);},t+320);      // le signe se pose (bref)
+    T(function(){W.innerHTML=sh;pop();Bar.style.width='30px';Ro.textContent='';say(sh);},t+320);      // le signe se pose (bref)
     T(function(){W.innerHTML='<span>'+sh+'</span><span class="la-l2 away">'+v.m+'</span>';setTimeout(function(){var e=W.querySelector('.la-l2');if(e)e.classList.remove('away');},60);},t+1150); // la madd glisse
-    T(function(){W.innerHTML=lg;pop();Bar.style.width='92px';Ro.textContent=c+v.vl;say(lg);},t+1800);      // soudure (long)
+    T(function(){W.innerHTML=lg;pop();Bar.style.width='92px';Ro.textContent='';say(lg);},t+1800);      // soudure (long)
     t+=2600;
   });
   T(function(){W.innerHTML=L;Bar.style.width='0';Ro.textContent='';},t);
@@ -7594,8 +8022,11 @@ function renderCours(sub){
     h+=unlocked.map(function(i){ const U=UNITS[i];
       const rows=U.letters.map(function(L){ const d=U.alpha[L]; var ex=fatihaWordFor(L);
         return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
-          '<div class="ln">'+d.n+' <button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">🔊</button></div>'+
-          '<div class="ls">'+d.son+' <button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button></div>'+
+          /* ⚠️ 14/08 — RÈGLE ABSOLUE DE MYRIAM : « pas de transcription ». Le nom translittéré
+             (yāʾ, mīm…) quitte AUSSI la fiche du Cours, dernier endroit où il survivait. Le nom
+             ne s'écrit plus nulle part : il s'ÉCOUTE. Le bouton dit donc ce qu'il joue. */
+          '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">🔊</button> <span class="lcap">son nom</span></div>'+
+          '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button> '+d.son+'</div>'+
           (ex?'<div class="lex">📖 <span class="lex-w" onclick="speak(\''+ex+'\')">'+ex+'</span> <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button></div>':'')+
           '<div class="lanim"><button class="la-btn" onclick="playLetterAnim(this,\''+L+'\',\''+(U.lat[L]||'')+'\')">▶ voir la prolongation</button><div class="la-stage" style="display:none"><div class="la-word">'+L+'</div><div class="la-track"><div class="la-bar"></div></div><div class="la-ro"></div></div></div>'+
           '</div></div>';
@@ -7641,10 +8072,17 @@ function renderProg(){
      '</div>';
   h+=objRingHTML();      // l'anneau de l'objectif quotidien — seul, rien d'autre (validé 10/08)
   h+=parcoursCardHTML(); // « Ton parcours » remonte juste sous l'encadré du rang (choix Myriam 13/07)
-  h+='<div class="pgrid">'+
+  /* ═══ LES GRAINES ENTRENT DANS LE PROFIL (Myriam, 14/08) ═══
+     « Que fait-on des graines gagnées ? Elles n'apparaissent même pas dans le profil. Je sais
+     qu'on permettra plus tard d'acheter des danses ou des skins… mais le nombre de graines
+     gagnées au total doit quand même apparaître. » Une monnaie qu'on ne peut pas compter n'est
+     pas une monnaie : elles étaient gagnées, comptées dans S.graines, et visibles nulle part
+     hors de l'écran de fin. Elles rejoignent la rangée du Profil, à côté de la série. */
+  h+='<div class="pgrid pgrid4">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
+     '<div class="pstat"><div class="pv">'+(S.graines||0)+'</div><div class="pl">graines</div></div>'+
      '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
-     '<div class="pstat" role="button" tabindex="0" style="cursor:pointer" onclick="showGhufranInfo()"><div class="pv">'+(S.ghufLeft||0)+'</div><div class="pl">🕊️ ghufrān</div></div></div>';
+     '<div class="pstat" role="button" tabindex="0" style="cursor:pointer" onclick="showGhufranInfo()"><div class="pv">'+(S.ghufLeft||0)+'</div><div class="pl">ghufrān</div></div></div>';
   h+='<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="badges/lecons100.png" alt=""> Succès</h3></div>'+
      '<div class="ecu-row">'+SOURATES.map(function(SR,i){
         var pris=(i===0&&fatihaPct()>=100);
@@ -7913,26 +8351,25 @@ function vfEnd(){
   document.getElementById('player').classList.remove('vfmode');   // on rend le pied de page
   // le taux de réussite du JEU : les tours joués, pas les paliers de mémoire
   const tours=V.ri||1, pct=Math.round(V.good/Math.max(1,tours)*100);
-  const gr=gagnerGraines(GRAINES.lecon+(rates.length?0:GRAINES.sansFaute));
-  const ICO_CIBLE='<svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>',
-        ICO_COCHE='<svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
-        ICO_GRAIN='<svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 13c0-3-2-5-5-5 0 3 2 5 5 5z"/><path d="M12 15c0-3 2-5 5-5 0 3-2 5-5 5z"/></svg>';
-  const cases=function(cl,ic,lab,val){ return '<div class="case '+cl+'"><div class="case-in">'+
-    '<div class="ic">'+ic+'</div><div class="lab">'+lab+'</div><div class="val">'+val+'</div></div></div>'; };
-  document.getElementById('p-body').innerHTML=
-    '<div class="vf-fin">'+mascotteHTML('vf')+
-      '<div class="cases">'+
-        cases('c-score',ICO_CIBLE,'Réponses',V.good)+
-        cases('c-reus',ICO_COCHE,'Réussite',pct+' %')+
-        cases('c-grain',ICO_GRAIN,'Graines','+'+gr)+
-      '</div>'+
-      (record?'<div class="vf-rec">RECORD BATTU — ancien : '+(V.ancienBest||0)+'</div>':'')+
-    '</div>';
-  playSfx('fin-lecon');
-  mascotteDanse(document.querySelector('.vf-fin'));   // la mascotte danse ICI, pas sur #finish
-  const cta=document.getElementById('cta');
-  cta.className='cta';cta.disabled=false;cta.textContent='CONTINUER';cta.onclick=advance;
+  /* ═══ LES FÉLICITATIONS NE VIENNENT PLUS AVANT LE TRAVAIL (Myriam, 14/08) ═══
+     « L'écran de félicitations est arrivé trop tôt et m'a induit en erreur : il doit arriver
+     après les mots à revoir. » Il s'affichait à la seconde où le chrono tombait — mascotte qui
+     danse, cases, graines — alors qu'il restait les corrections. Myriam a lu « c'est fini »,
+     elle a quitté, et elle a perdu ses trois cœurs ET le compte des mots révisés : tout cela
+     n'est écrit qu'à la toute fin de la session. Un écran de fin qui n'est pas la fin coûte à
+     l'élève ce qu'elle vient de gagner.
+     Le jeu ne rend donc plus qu'UN résultat, mis de côté ; l'unique écran de félicitations est
+     celui de `finishReview`, une fois les mots à revoir corrigés. La barre du haut y est à 100 %
+     — c'était l'autre reproche (« la barre n'est qu'à la moitié du parcours »). */
+  window._vfGraines=gagnerGraines(GRAINES.lecon+(rates.length?0:GRAINES.sansFaute));
+  window._vfRecord=record; window._vfAncien=V.ancienBest||0;
+  window._vfPct=pct;
   window._vf=null;
+  /* ⚠️ `advance()` et SURTOUT PAS `finishDisque()` : le vrai/faux n'est que le 2ᵉ écran de la
+     file — le QCM (palier 3) et l'écriture (palier ≥ 4) viennent APRÈS lui. Court-circuiter
+     la file les sauterait en silence. `advance()` passe à l'écran suivant, et c'est
+     `renderStep` qui appelle `finishDisque` quand la file est réellement vide. */
+  advance();
 }
 function revMissedHas(w){ for(var i=0;i<MISSED.length;i++)if(MISSED[i].revWord===w)return true; return false; }
 
@@ -8623,15 +9060,25 @@ function finishReview(){
   pendingStreak=feteJourPending; feteJourPending=false;
   bumpConstance('revise');
   save();
-  const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
+  // le vrai/faux compte en TOURS joués, pas en écrans de file : son taux à lui fait foi
+  const acc=(typeof window._vfPct==='number')?window._vfPct
+           :(total?Math.round((total-Math.min(total,wrongCount))/total*100):100);
+  window._vfPct=null;
   document.getElementById('player').classList.remove('on');
-  document.querySelector('#finish .fin-score').style.display='none'; // un titre seul — la récompense est le son + la danse (Myriam 10/08)
   document.getElementById('fin-extra').innerHTML=(qNextVi()>=0)
     ?'<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="qNext()">▶ Verset suivant</button>'
     :'';
-  document.getElementById('fin-title').textContent='Révision terminée !'; // (émoji retiré : doublon avec le grand 🎉 — choix Myriam 13/07)
+  document.getElementById('fin-icon').textContent='';
+  document.getElementById('fin-title').textContent='Révision terminée !';
   document.getElementById('fin-xp').textContent='+10';
   document.getElementById('fin-acc').textContent=acc+'%';
+  /* Les graines du vrai/faux ont été gagnées à la fin du jeu ; c'est ICI, une fois les mots à
+     revoir corrigés, qu'on les MONTRE — l'écran de félicitations ne peut pas précéder le
+     travail qu'il félicite (Myriam, 14/08). `_vfGraines` vaut 0 pour une révision ordinaire. */
+  fillFinishCases(acc,(window._vfGraines||0)||_grainesSession);
+  if(window._vfRecord)document.getElementById('fin-extra').innerHTML+=
+    '<div class="vf-rec">RECORD BATTU — ancien : '+(window._vfAncien||0)+'</div>';
+  window._vfGraines=0; window._vfRecord=false;
   fillFinishConstance();
   document.getElementById('finish').classList.add('on');
   confettiBurst();
