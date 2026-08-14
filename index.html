@@ -256,7 +256,11 @@
     font-family:var(--ar);font-size:32px;color:var(--gold2);will-change:transform;
     transform:translate(var(--x,0px),var(--y,0px))}
   .bul.frm{width:54px;height:54px;font-size:24px}
-  .bul.syl{width:60px;height:60px;font-size:26px} /* 18 bulles-syllabes (leçons 5/6) */
+  /* 14/08 (correctifs 4) — Myriam, leçon 6 « Éclate les bulles » : « double la taille de la
+     police et des bulles ». BUL.R (la physique des chocs, plus bas) double avec elle — sinon
+     les bulles se chevauchent au double de leur taille visuelle sans jamais se toucher pour
+     de vrai. */
+  .bul.syl{width:120px;height:120px;font-size:52px} /* 18 bulles-syllabes (leçons 5/6) */
   .bul.pop{animation:bulpop .17s cubic-bezier(.3,1.8,.5,1) forwards;pointer-events:none}
   /* ⚠️ la translation DOIT être reprise dans CHAQUE étape : une @keyframes qui déclare
      `transform` remplace celui de l'élément — sans ça la bulle éclate en haut à gauche. */
@@ -296,9 +300,14 @@
 .tico button:disabled{opacity:.35;pointer-events:none}
   .tico svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
   .tico .plein{fill:currentColor;stroke:none}
-  .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;direction:rtl}
-  .ag{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:10px 2px;
-    font-family:var(--ar);font-size:30px;color:var(--gold);line-height:1.2}
+  /* 14/08 (correctifs 4) — Myriam : « adapte la box à la lettre, elle est trop large ». La
+     case s'étirait à toute la colonne (1fr) autour d'un glyphe étroit ; `justify-items:center`
+     la fait se resserrer sur son contenu au lieu d'occuper toute la largeur — c'est CE vide-là
+     qui rendait la case « trop large », pas le padding (qui, lui, monte pour ne jamais laisser
+     un tachkil toucher le contour). */
+  .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;direction:rtl;justify-items:center}
+  .ag{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:12px 12px;
+    min-width:58px;font-family:var(--ar);font-size:34px;color:var(--gold);line-height:1.2}
   .ag.seen{border-color:var(--gold);color:var(--gold2)}
   .ag:active{background:#3a312b}
   /* ── L'écran « 2 rôles » (14/08) ────────────────────────────────────────────
@@ -316,7 +325,7 @@
      écran se resserre donc (les cases ne sont pas là pour être lues de près, mais touchées),
      et la rangée garde le couloir de 42 px du drapeau ⚑, comme le jeu de bulles. */
   .agrid.agrid-rl{gap:6px}
-  .agrid.agrid-rl .ag{padding:5px 2px;font-size:25px}
+  .agrid.agrid-rl .ag{padding:6px 8px;min-width:44px;font-size:28px}
   .rl-sep{position:relative;text-align:center;margin:12px 0 0}
   .rl-sep::before{content:'';position:absolute;left:0;right:0;bottom:-7px;border-top:1px dashed var(--line)}
   .rl-sep span{font-size:11.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -340,6 +349,12 @@
   .verse{direction:rtl;font-family:var(--quran);font-size:36px;line-height:2.1;text-align:center;
     background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 12px;margin-bottom:6px}
   .vl{border-radius:6px;padding:0}
+  /* 14/08 (correctifs 4) — l'alif poignard (le petit alif de prolongation caché, ex. sur le
+     mīm de الرَّحْمَٰنِ) est minuscule même à pleine taille, zoomé — vérifié à l'œil. Il reste
+     DANS sa case (jamais isolé de sa lettre porteuse : la leçon de la kasra, plus haut dans ce
+     fichier, s'applique aussi ici — un span séparé casserait son rattachement). Toute la case
+     grossit un peu, cible comme les autres, juste plus dure à repérer sans ce coup de pouce. */
+  .vl-madd{font-size:1.18em}
   /* leçon 4 v3 (validée 10/08) : haut-parleur dessiné + nom du récitateur SANS boîte
      (le toucher OUVRE le sélecteur) + loupe Artlist ; la loupe agrandit le verset */
   .vtools{display:flex;align-items:center;justify-content:center;gap:8px;margin:-8px 0 10px}
@@ -436,7 +451,14 @@
      Le « gras » ne peut pas venir de font-weight — Noto Naskh Arabic n'a qu'une graisse et le
      navigateur ne ferait qu'un faux gras irrégulier ; c'est le tracé qui est épaissi. */
   .tile.htile{font-family:'Noto Naskh Arabic',serif;font-size:24px}
-  .tile.htile .dc{font-size:42px;opacity:1;-webkit-text-stroke:.55px currentColor}
+  /* 14/08 (correctifs 4) — Myriam : « les harakat sont pas centrées sur la hauteur de leur
+     box, alors qu'avant c'était le cas ». `.tile` centre la BOÎTE de `.dc` (place-items:center),
+     pas l'encre à l'intérieur : un signe posé sur un tatweel se dessine près du haut de sa
+     ligne (métrique du signe, pas du glyphe complet d'une lettre), donc restait haut même
+     boîte centrée. `line-height:1` resserre la ligne sur le signe ; le décalage qui reste
+     est compensé à la main. */
+  .tile.htile .dc{font-size:42px;line-height:1;opacity:1;-webkit-text-stroke:.55px currentColor;
+    display:inline-block;transform:translateY(8px)}
   .tile.miss{animation:tileshk .32s}
   @keyframes tileshk{25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
   .tile.hint{border-color:var(--gold);color:var(--gold2);animation:tilehint .9s ease-in-out infinite}
@@ -666,18 +688,24 @@
     25%{transform:translate(calc(var(--x) - 6px),var(--y))}
     60%{transform:translate(calc(var(--x) + 6px),var(--y))}}
   .trirow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;direction:rtl;margin-bottom:22px}
+  /* 14/08 (correctifs 4) — Myriam, jeu de tri (écran 10 leçon 3 ET leçon 7, même moteur) :
+     « augmente la taille de la police des mots à trier, et la hauteur des box pointillées ». */
   .chipmot{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;
-    border-radius:14px;padding:8px 16px;font-family:var(--ar);font-size:30px;color:var(--gold);
+    border-radius:14px;padding:9px 18px;font-family:var(--ar);font-size:38px;color:var(--gold);
     touch-action:none;cursor:grab;user-select:none}
   .chipmot.gone{visibility:hidden}
   .chipmot.shake{animation:penshake .35s}
   .paniers{display:flex;gap:14px}
-  .panier{flex:1;min-height:170px;background:var(--panel);border:2px dashed var(--line);
+  .panier{flex:1;min-height:210px;background:var(--panel);border:2px dashed var(--line);
     border-radius:16px;padding:8px;text-align:center}
-  .panier .psig{font-family:var(--ar);font-size:46px;color:var(--gold);line-height:1.4}
+  /* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — « le critère de tri est
+     l'élément le plus petit de l'écran » : les mots agrandis (38 px) écrasent l'étiquette du
+     panier, qui reste le repère à lire en premier. */
+  .panier .psig{font-family:var(--ar);font-size:64px;color:var(--gold);line-height:1.3}
   .panier .pmots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;direction:rtl}
   .panier .pmots span{font-family:var(--ar);font-size:23px;color:var(--gold2);background:#3a312b;
-    border:1px solid var(--gold-d);border-radius:10px;padding:2px 10px}
+    border:1px solid var(--gold-d);border-radius:10px;padding:2px 10px;cursor:pointer}
+  .panier .pmots span:active{transform:scale(.94)}
 
   /* ===== ⚑ Signalements (08/08) — préview validée : drapeau en haut à droite du bandeau bas ===== */
   /* top NÉGATIF : le drapeau flotte AU-DESSUS du bandeau (il recouvrait le coin de
@@ -737,7 +765,16 @@
      ne prétendent pas au même rang. */
   .lg-hamza{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;direction:rtl;
     margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
-  .lg-hamza .hz{position:relative;border-radius:12px;padding:7px 0 5px;text-align:center;
+  /* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — depuis le retrait de l'annotation
+     sur les sièges, la rangée s'étire à la hauteur de la SEULE case qui gardait encore un label
+     (« seule », sous ء) : les 4 autres cases suivent (grid stretch) mais leur glyphe restait
+     collé en haut, avec du vide dessous. flex+centrage vertical règle ça quelle que soit la
+     hauteur de la rangée, avec ou sans étiquette. ⚠️ « seule » retiré à son tour (même agent,
+     seconde passe) : les 5 cases retombent alors à ~38 px de haut sans lui — sous la zone de
+     touche de 44 px. min-height le garantit maintenant pour TOUTES les cases, pas seulement
+     `.vide` (qui perd cette classe dès que roleTap remplit le siège). */
+  .lg-hamza .hz{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:44px;border-radius:12px;padding:7px 0 5px;text-align:center;
     border:1.5px solid var(--line);background:#2a2422;font-family:"Noto Naskh Arabic",serif;
     font-size:23px;line-height:1.15;color:var(--gold2);cursor:pointer}
   /* L'étiquette nomme le SIÈGE. Depuis le 14/08 elle est écrite en arabe (règle absolue :
@@ -823,12 +860,20 @@
     transition:transform .24s ease,border-color .2s,background .2s}
   .lvp-flip.flipping .lvp-flip-in{transform:scaleX(.04)}
   .lvp-flip.flipped .lvp-flip-in{border-color:var(--info);background:var(--face-info,#173a49)}
-  .lvp-flip .face-cons{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%}
-  .lvp-flip .face-pro{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%}
+  .lvp-flip .face-cons{display:flex;flex:1;flex-direction:column;align-items:center;gap:4px;width:100%}
+  .lvp-flip .face-pro{display:none;flex:1;flex-direction:column;align-items:center;gap:4px;width:100%}
   .lvp-flip.flipped .face-cons{display:none}
   .lvp-flip.flipped .face-pro{display:flex}
+  /* 14/08 (correctifs 4) — Myriam : « les lettres ne sont pas alignées, centre-les sur la
+     hauteur ». `.ff-role` poussait le glyphe vers le haut (margin-top:auto, 14/08 matin) pour
+     ne pas le laisser flotter au milieu du vide — mais chaque glyphe se retrouvait calé sur SA
+     propre hauteur de trait (ا grand, و bas, ي avec hampe), donc désaligné d'une carte à
+     l'autre. `.ff-slot` prend maintenant tout l'espace disponible et centre le glyphe DEDANS :
+     les trois cartes centrent sur le MÊME repère, et « support »/« prolongation » reste juste
+     en dessous, sans flotter (il n'a plus besoin de l'auto-margin pour ça). */
+  .lvp-flip .ff-slot{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
   .lvp-flip .ff-ar{font-family:var(--ar);font-size:58px;line-height:1.15}
-  .lvp-flip .ff-role{margin-top:auto;font-size:13px;font-weight:900;line-height:1.25;letter-spacing:.01em}
+  .lvp-flip .ff-role{font-size:13px;font-weight:900;line-height:1.25;letter-spacing:.01em}
   .lvp-flip .ff-son{font-size:14px;font-weight:900}
   .lvp-flip .ff-spk{font-size:13px;opacity:.85;margin-top:2px}
   /* L'encre : la lettre et son terme prennent la couleur POSÉE SUR leur aplat, jamais
@@ -852,7 +897,10 @@
   .dm-target{min-width:150px;min-height:96px;border:3px dashed var(--line);border-radius:20px;
     display:flex;align-items:center;justify-content:center;gap:4px;font-family:var(--ar);font-size:46px;color:var(--cream);
     padding:6px 20px;direction:rtl;transition:border-color .15s,background .15s}
-  /* La tachkīl en rouge (14/08) — son propre token, jamais le corail de l'erreur. */
+  /* La tachkīl en rouge (14/08) — son propre token, jamais le corail de l'erreur.
+     ⚠️ 14/08 (correctifs 4) — `.tach` colore maintenant le CLUSTER ENTIER (lettre + signe),
+     jamais le signe seul : voir le commentaire de `tachRouge()` (trois pistes fausses avant
+     celle-ci, chacune reproduite et prouvée au harnais). */
   .tach{color:var(--tach)}
   .dm-target.over{border-color:var(--gold2);background:#3a312b}
   .dm-target.done{border-style:solid;border-color:var(--green);background:var(--green-bg)}
@@ -887,17 +935,24 @@
   .da-tile.drag{cursor:grabbing;z-index:50;border-color:var(--gold);box-shadow:0 10px 22px rgba(0,0,0,.55)}
   .da-tile.placed{opacity:.18;pointer-events:none}
   .da-tile.hint,.dm-tile.hint{border-color:var(--gold);color:var(--gold2);animation:tilehint .9s ease-in-out infinite}
-  .lvp-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--line);
+  .lvp-row{position:relative;display:flex;align-items:center;gap:10px;background:var(--panel);border:2px solid var(--line);
     border-radius:16px;padding:16px 20px;cursor:pointer;user-select:none;transition:transform .12s,border-color .2s,background .2s}
   .lvp-row:active{transform:scale(.98)}
   .lvp-row.lit{border-color:var(--gold);background:#3a312b}
   .lvp-row .lr-eq{font-family:var(--ar);font-size:24px;color:var(--cream);direction:rtl}
-  .lvp-row .lr-c{font-family:var(--ar);font-size:52px;color:var(--gold);line-height:1.35}
+  /* 14/08 (correctifs 4) — Myriam, écran 9 « Touche chaque support » : le glyphe collait au
+     bord gauche de la large box (le haut-parleur, en margin-left:auto, le poussait tout seul
+     à droite). flex:1 + text-align:center l'a rapproché du centre, mais restait décalé de la
+     largeur du haut-parleur (trouvé par l'agent qa-visuel-alaq) : tant que le haut-parleur
+     occupe une place dans la ligne, le CENTRE de l'espace qui reste n'est pas le centre de la
+     box. Le haut-parleur sort du flux (position:absolute, ancré à droite) : le glyphe seul
+     dans la ligne peut enfin se centrer sur la box ENTIÈRE. */
+  .lvp-row .lr-c{width:100%;text-align:center;font-family:var(--ar);font-size:52px;color:var(--gold);line-height:1.35}
   .lvp-row .lr-arrow{color:var(--muted);font-weight:900}
   .lvp-row .lr-long{font-family:var(--ar);font-size:30px;color:var(--gold);display:inline-block;transform-origin:right center}
   .lvp-row.lit .lr-long{animation:lvpStretch 1s ease}
   .lvp-row .lr-tag{font-weight:800;color:var(--gold2)}
-  .lvp-row .lr-spk{margin-left:auto;font-size:20px;opacity:.85}
+  .lvp-row .lr-spk{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:20px;opacity:.85}
   @keyframes lvpStretch{0%{transform:scaleX(1)}40%{transform:scaleX(1.75)}100%{transform:scaleX(1)}}
   .lvp-glotte{display:flex;justify-content:center;gap:16px;font-size:30px;font-weight:900;margin:10px 0}
   .lvp-glotte span{display:inline-block;animation:lvpBeat 1.6s ease-in-out infinite}
@@ -1936,8 +1991,12 @@ html.clair .lg-cell.avail{ background:#FBEFD8;color:var(--gold2) }
 html.clair .lum{ background:linear-gradient(180deg,#FFFDF8,#F4EBDA);border:1px solid #C9AF7C }
 html.clair .opt.fopt.ok .fdevant{ background:var(--green-bg);border-color:var(--green) }
 html.clair .opt.fopt.bad .fdevant{ border-color:var(--coral) }
-html.clair .lvp-flip-in{ border:2px solid #BBD0C2 }
-html.clair .lvp-flip.flipped .lvp-flip-in{ border-color:#D6C39A }
+/* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — DEUX règles concurrentes pour la
+   même carte : celle-ci (sans commentaire, tons #BBD0C2/#D6C39A qui n'appartiennent à AUCUN
+   token du thème) écrasait border-color APRÈS la règle juste de la ligne ~1953, en clair
+   seulement. Chaque face affichait donc la bordure pensée pour l'AUTRE — le recto (or) cerclé
+   d'un vert-de-gris froid, le verso (bleu) cerclé d'un sable chaud. Supprimée : la ligne ~1953
+   suffit et reste la seule source de vérité. */
 html.clair .locked .bubble{ box-shadow:0 6px 0 #CFC3AC }
 html.clair .vembed{ background:#111 }
 
@@ -1967,6 +2026,13 @@ html.clair .lum.on,html.clair .ex-chip.lit,html.clair .fourc.lit,
 html.clair .assoc-c.lit,html.clair .lvp-row.lit{ border-color:var(--gold) }
 html.clair .lg-rev:disabled{ color:var(--muted) }
 html.clair .ucard.lock .uno{ color:var(--lock) }
+/* 14/08 (correctifs 4) — Myriam : « la box Assiduité n'a plus son contour bleu foncé ». Cause :
+   `.c-assid`/`.c-score` peignent leur anneau avec `--info-d`, qui en clair vaut #D6EAF3 — un
+   bleu pâle pensé pour UN AUTRE usage (le fond d'une pastille pleine, .qbulle, où le texte
+   sombre lu PAR-DESSUS a besoin de rester clair). Sur le parchemin de `.case-in`, ce même pâle
+   ne fait plus un anneau visible. On ne touche pas le token partagé (`.qbulle` reste juste) :
+   ces deux cases reprennent la teinte foncée déjà validée en sombre. */
+html.clair .c-assid,html.clair .c-score{ background:#1E4658 }
 html.clair .vw.en{ color:#7A3F00;text-shadow:0 0 14px rgba(154,90,11,.28) }
 html.clair .mushaf .vw.en,
 html.clair .mushaf .vw.solo{ color:#7A3F00;text-shadow:none;background:#FBE9C4;border-radius:6px }
@@ -3160,8 +3226,12 @@ function buildWords(U){
     if(ui===0)U.letters.forEach(L=>{ parSigne[SUK].push({w:'أَ'+L+SUK}); parSigne[CHD].push({w:'أَ'+L+CHD+FAT}); });
     if(parSigne[SUK].length>=2&&parSigne[CHD].length>=2){
       const n=Math.min(3,parSigne[SUK].length,parSigne[CHD].length);
+      /* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — un tatweel (ـ) porte très peu
+         d'encre : agrandir sa police ne change rien, le signe reste presque invisible à côté
+         d'un mot entier. Il porte maintenant une VRAIE lettre (ن, déjà l'exemple générique de
+         l'app) — toujours le signe SEUL, jamais son nom écrit (règle de Myriam), mais lisible. */
       q.push({type:'tri',mute:true,
-        paniers:[{sig:TAT+SUK,cle:'s'},{sig:TAT+CHD,cle:'c'}],
+        paniers:[{sig:'ن'+SUK,cle:'s'},{sig:'ن'+CHD,cle:'c'}],
         mots:shuffle([...shuffle(parSigne[SUK]).slice(0,n).map(m=>({w:m.w,cle:'s'})),
                       ...shuffle(parSigne[CHD]).slice(0,n).map(m=>({w:m.w,cle:'c'}))])});
     }
@@ -4290,7 +4360,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='review-u2-14aout \u00b7 c\u0153urs \u00e0 minuit \u00b7 popup des c\u0153urs \u00b7 assiduit\u00e9 verset entier \u00b7 mascotte d\u00e9tach\u00e9e \u00b7 z\u00e9ro transcription (847 \u00e9crans) \u00b7 alphabet \u00e0 jour d\u00e8s U2 \u00b7 le\u00e7on 3 : \u00e9cran des r\u00f4les, cartes color\u00e9es, tachkil rouge, jeu de tri \u00b7 filet du CONTINUER (4 \u00e9crans) \u00b7 ligature lam-alif \u00b7 disque entier au glisser \u00b7 box plus a\u00e9r\u00e9es \u00b7 bulles agrandies \u00b7 f\u00e9licitations \u00e0 la vraie fin \u00b7 3 cases partout \u00b7 graines au profil \u00b7 tachkil du clavier lisibles \u00b7 relief des disques invers\u00e9';
+const BUILD='correctifs-4 \u00b7 box alphabet adapt\u00e9e (padding + police) \u00b7 annotation des si\u00e8ges de la hamza retir\u00e9e \u00b7 cartes recto/verso centr\u00e9es \u00b7 kasra repositionn\u00e9e (cluster color\u00e9 en bloc, jamais le signe seul) \u00b7 touche chaque support centr\u00e9 \u00b7 jeu de tri agrandi + retrait de mot + \u00e9tiquette panier lisible \u00b7 bulles-syllabes doubl\u00e9es sans d\u00e9border \u00b7 case assiduit\u00e9 bleu fonc\u00e9 en clair \u00b7 clavier \u00e9criture guid\u00e9e harakat centr\u00e9es \u00b7 bordures flipcards en clair corrig\u00e9es \u00b7 rang\u00e9e si\u00e8ges hamza hauteur uniforme \u00b7 alif poignard compt\u00e9 comme prolongation \u00b7 cartes retourn\u00e9es deux fois';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4494,7 +4564,12 @@ function renderStep(){
       '<div class="rl-sep"><span>support</span></div>'+
       '<div class="lg-hamza ex-hamza rl-sieges">'+ORDRE.map(function(s){
         return s==='ء'
-          ? '<div class="hz" data-s="ء" onclick="hamzaTap(this,\'ء\')">ء<span class="hzl">seule</span></div>'
+          /* 14/08 (correctifs 4, agent qa-visuel-alaq) — « seule » restait le SEUL texte
+             permanent d'un écran qui s'est délibérément débarrassé des annotations (règle
+             de Myriam) ; à 8,5 px, sans règle html.gros pour le grossir, c'est le seul mot de
+             toute l'app que son mari ne pourrait lire dans aucun réglage. Retiré comme les 4
+             autres — le ء se découvre au doigt (hamzaTap), pas à la lecture. */
+          ? '<div class="hz" data-s="ء" onclick="hamzaTap(this,\'ء\')">ء</div>'
           : '<div class="hz vide" data-s="'+s+'"></div>';
       }).join('')+'</div>';
     cta.disabled=st.gate?true:false;
@@ -4502,7 +4577,7 @@ function renderStep(){
   }
 
   if(st.type==='flipcards'){
-    body.innerHTML='<div class="q-title">Retourne les cartes</div>'+
+    body.innerHTML='<div class="q-title">Retourne les cartes 2 fois</div>'+
       '<div class="lvp"><div class="lvp-cards" data-gate="'+(st.gate?1:0)+'">'+
       st.cartes.map(function(c){
         return '<div class="lvp-flip" onclick="lvpFlip(this,\''+c.cons+'\',\''+c.pro+'\')">'+
@@ -4512,9 +4587,9 @@ function renderStep(){
                RÔLE DANS CETTE LEÇON : ce sur quoi la voyelle vient s'appuyer. C'est le même
                mot que le filet de l'écran 1 et que le titre de l'écran 9 — un seul terme,
                d'un bout à l'autre de la leçon. */
-            '<div class="face-cons"><div class="ff-ar">'+c.ar+'</div>'+
+            '<div class="face-cons"><div class="ff-slot"><div class="ff-ar">'+c.ar+'</div></div>'+
               '<div class="ff-role">support</div></div>'+
-            '<div class="face-pro"><div class="ff-ar">'+c.ar+'</div>'+
+            '<div class="face-pro"><div class="ff-slot"><div class="ff-ar">'+c.ar+'</div></div>'+
               '<div class="ff-role">prolongation</div></div>'+
           '</div></div>';
       }).join('')+'</div></div>';
@@ -4748,12 +4823,19 @@ function renderStep(){
        corrige : `splitWord` sait maintenant que لا est UNE case, et cet écran l'utilise
        (principe ⑨ — les écrans jumeaux partagent un moteur). */
     const words=verse.split(' ').map(splitWord);
+    /* ⚠️ 14/08 (correctifs 4) — Myriam, sur le petit alif au-dessus du mīm de الرَّحْمَٰنِ :
+       « ça reste une prolongation même si elle est cachée, et dans le Qorān il faut la lire
+       comme telle ». L'alif poignard (ٰ, U+0670) ne fait PAS sa propre case — `splitWord` le
+       range dans les marques (.m) de la lettre qui le porte (ici le mīm), donc `cellBases`
+       (qui ne lit que .b et .lig) ne le voyait jamais : chercher « tous les alif » ne
+       trouvait donc jamais celui-là, dans AUCUN verset où il apparaît (pas seulement le 3). */
     const html=words.map(cl=>'<span class="vw">'+cl.map((c,i)=>{
       const jp=i>0&&joinsL(cl[i-1].lig||cl[i-1].b);
       const jn=i<cl.length-1&&joinsL(c.lig||c.b);
       const disp=(jp?ZWJ:'')+cellText(c)+(jn?ZWJ:'');
-      const ok=cellBases(c).some(b=>sameLetter(b,st.L))?1:0; if(ok)need++;
-      return '<span class="vl" onclick="spotTap(this,'+ok+')">'+disp+'</span>';
+      const poignard=ALIF_FAM.includes(st.L)&&c.m.includes('ٰ');
+      const ok=(cellBases(c).some(b=>sameLetter(b,st.L))||poignard)?1:0; if(ok)need++;
+      return '<span class="vl'+(poignard?' vl-madd':'')+'" onclick="spotTap(this,'+ok+')">'+disp+'</span>';
     }).join('')+'</span>').join(' ');
     window._spot={need,found:0}; window._spotVi=st.vi;
     const tgt=ALIF_FAM.includes(st.L)?'ا · أ · إ':st.L;
@@ -4947,7 +5029,15 @@ function renderStep(){
         '<div class="fuserow">'+
           '<div class="mimC ar">'+st.L+'</div>'+
           '<div class="farr">←</div>'+
-          '<div class="fchip ar" data-k="'+k+'">'+chipAff(j.chip)+'</div>'+
+          /* ═══ 14/08 — LA TACHKĪL EN ROUGE ARRIVE ICI AUSSI (accord de Myriam) ═══
+             Cet écran enseigne exactement le même geste que les écrans 3-5 de la leçon 3 de
+             l'unité 2, dans les 7 unités. Règle §17 du cerveau : sur un écran qui ENSEIGNE un
+             signe, le signe se voit.
+             ⚠️ Le mécanisme se limite tout seul, et c'est ce qui le rend juste : `tachRouge`
+             n'enveloppe QUE les marques combinantes. Sur la leçon des harakat le jeton EST un
+             signe → il rougit ; sur la leçon des prolongations le jeton est une LETTRE
+             (ا · و · ي) → il reste doré. Le rouge ne désigne jamais qu'une chose. */
+          '<div class="fchip ar" data-k="'+k+'">'+tachRouge(chipAff(j.chip))+'</div>'+
         '</div>').join('')+'</div>';
     setTimeout(()=>setupFuse(st),40);
     return;
@@ -5437,6 +5527,14 @@ function setupTri(){
       if(p.dataset.cle===chip.dataset.cle){
         chip.classList.add('gone');
         var sp=document.createElement('span'); sp.textContent=chip.dataset.w;
+        /* 14/08 (correctifs 4) — Myriam : « on doit pouvoir retirer un mot une fois placé si
+           on s'est trompé, tant qu'on n'a pas tout placé ». `reste` est relu AU CLIC (pas
+           figé à la pose) : une fois le dernier mot posé, tous les mots redeviennent fixes
+           d'un coup, sans qu'il faille les reparcourir un par un. */
+        sp.onclick=function(){
+          if(window._tri.reste<=0)return;
+          sp.remove(); chip.classList.remove('gone'); window._tri.reste++;
+        };
         p.querySelector('.pmots').appendChild(sp); popIt(p);
         window._tri.reste--;
         var fin=(window._tri.reste<=0)?objectifAtteint:null;
@@ -5465,7 +5563,7 @@ function setupFuse(st){
       const c=cells.find(c2=>{const r=c2.getBoundingClientRect();
         return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom&&!c2.classList.contains('done');});
       if(!c)return;
-      c.classList.add('done');c.textContent=j.fus;popIt(c);
+      c.classList.add('done');c.innerHTML=tachRouge(j.fus);popIt(c);   // le signe posé garde son rouge (14/08)
       chip.classList.add('gone');
       const fl=chip.parentNode.querySelector('.farr');if(fl)fl.classList.add('gone');
       window._fu.n++;
@@ -5948,7 +6046,12 @@ function setupDragMad(st){
       if(ok && tile.dataset.ch===st.answer){
         solved=true; tile.style.transform='';
         tile.classList.add('placed');
-        target.innerHTML='<span class="dm-res">'+tachRouge(st.result)+'</span>';
+        /* 14/08 (correctifs 4) — plus de tachRouge() ici : `.tach` colore maintenant le
+           cluster ENTIER (lettre + signe, seule façon qui shape juste — voir la fonction), et
+           l'imbriquer dans `.dm-res` (vert, la couleur de la réussite) le peindrait rouge en
+           entier. Le signe s'est déjà vu en rouge pendant la pose ; le résultat reste vert,
+           sans ambiguïté sur ce que la couleur veut dire. */
+        target.innerHTML='<span class="dm-res">'+escHTML(st.result)+'</span>';
         target.classList.add('done');
         /* Plus de récompense sous l'exercice, plus de pavé d'explication avec son bouton
            « J'ai compris » (Myriam 13/08). Contrat unique : on pose, la syllabe SONNE,
@@ -6241,16 +6344,26 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   BUL.reste=mots?sac.filter(function(x){return x.cible;}).length:sac.length;
   /* 24 bulles au lieu de 15 : elles rapetissent pour garder l'air (preview v3 validée) ;
      le rayon vit dans BUL.R — la physique et l'éclat le lisent, jamais de 32 en dur */
-  BUL.R=mots?56:(syllabes?30:(formes?27:32));   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot)
-  var R=BUL.R, lignes=Math.ceil(sac.length/3);
+  BUL.R=mots?56:(syllabes?60:(formes?27:32));   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot) ; 60 = .bul.syl doublée (14/08)
+  var R=BUL.R;
+  /* ⚠️ 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — LES 3 COLONNES ET LE PAS DES
+     RANGÉES ÉTAIENT FIXES, LE RAYON NON. « mots » (R=56) tenait tout juste dans 3 colonnes ;
+     doubler les bulles-syllabes à R=60 les a fait déborder des deux côtés — trois colonnes de
+     120 px ne rentrent plus dans la largeur de l'aire, et six rangées de 120 px ne rentrent
+     plus dans sa hauteur. Colonnes et pas de rangée se calculent maintenant sur LE RAYON RÉEL —
+     inchangé pour les 32/27/56 déjà validés (3 colonnes leur suffisaient encore), corrigé pour
+     60 (et pour tout rayon futur qui ne rentrerait plus). */
+  var cols=(2*R*3<=BUL.W)?3:((2*R*2<=BUL.W)?2:1);
+  var lignes=Math.ceil(sac.length/cols);
+  var pitchY=Math.max((BUL.H+90)/lignes,2*R+8);
   sac.forEach(function(it,i){
     var L=it.L;
     var el=document.createElement('button');
     el.className='bul'+(formes?' frm':'')+(syllabes?' syl':'')+(mots?' mot':''); el.textContent=it.g; el.setAttribute('aria-label',L);
-    var col=i%3, rang=Math.floor(i/3);
+    var col=i%cols, rang=Math.floor(i/cols);
     var b={el:el,L:L,cible:(it.cible!==false),
-      x:col*(BUL.W-2*R)/2*0.98+(Math.random()-0.5)*16,
-      y:-R+rang*((BUL.H+90)/lignes)+(Math.random()-0.5)*20,
+      x:(cols>1?col*(BUL.W-2*R)/(cols-1)*0.98:(BUL.W-2*R)/2)+(Math.random()-0.5)*16,
+      y:-R+rang*pitchY+(Math.random()-0.5)*20,
       vx:(Math.random()-0.5)*40,
       vy:-BUL.v*(0.70+Math.random()*0.60),   // chacune sa vitesse : le flux n'est pas un bloc
       pop:false};
@@ -6406,7 +6519,10 @@ function roleTap(el,L){
     var c=document.querySelector('.rl-sieges .hz[data-s="'+s+'"]');
     if(!c||!c.classList.contains('vide'))return;
     c.classList.remove('vide'); c.classList.add('neuf');
-    c.innerHTML=s+'<span class="hzl ar">'+(s==='ؤ'?'و':s==='ئ'?'ي':'ا')+'</span>';
+    /* 14/08 (correctifs 4) — Myriam : « enlève les annotations sur les box ayant les supports
+       de la hamza ». Le siège se découvre au TOUCHER (roleTap l'a déjà fait sonner) : la
+       petite lettre en indice n'apprend rien de plus, elle encombre juste la case. */
+    c.innerHTML=s;
     c.setAttribute('onclick','hamzaTap(this,\''+s+'\')');
   });
   if(!window._rl)window._rl=new Set();
@@ -7115,7 +7231,34 @@ function translit(t){ let o=''; for(const ch of (t||'')) o += (ch in AR2LAT)?AR2
 // U+064B→U+0652 : les deux tanwīn, fatḥa, ḍamma, kasra, chedda, soukoun · U+0670 : alif poignard.
 // Volontairement PAS U+0654/0655 (la hamza combinante) : elle fait partie de la lettre.
 const RE_TACHKIL=/[\u064B-\u0652\u0670]/g;
-function tachRouge(s){ return String(s==null?'':s).replace(RE_TACHKIL,function(c){ return '<span class="tach">'+c+'</span>'; }); }
+/* \u26A0\uFE0F 14/08 (correctifs 4) \u2014 TROIS FAUSSES PISTES AVANT CELLE-CI, LES TROIS PROUV\u00C9ES FAUSSES AU
+   HARNAIS (previews/_capture_kasra_*.html, relu deux fois par l'agent qa-visuel-alaq) \u2014 gard\u00E9
+   en m\u00E9moire pour ne pas y retomber :
+   \u2460 envelopper CHAQUE signe dans son propre <span> HTML : coup\u00E9 de sa lettre porteuse, il perd
+   l'ancrage GPOS calcul\u00E9 pour CE couple pr\u00E9cis et retombe sur une position par d\u00E9faut \u2014 m\u00EAme
+   dans Chrome (\u0646\u0650 isol\u00E9 flotte loin de la lettre ; \u0646\u0650 entier colle dessous).
+   \u2461 mesurer la position du signe avec Range().getClientRects() puis repeindre un calque
+   dessus : UN SIGNE COMBINANT A UNE AVANCE NULLE, son Range rend le M\u00CAME rectangle que tout le
+   cluster de base \u2014 il n'y a pas de sous-position \u00E0 mesurer.
+   \u2462 un <text>/<tspan> SVG : le tspan fractionne le run de shaping EXACTEMENT comme le span
+   HTML (l'agent l'a prouv\u00E9, rendu c\u00F4te \u00E0 c\u00F4te, profil neuf) \u2014 le signe traverse la lettre.
+   Une variante \u00E0 deux calques (le mot entier color\u00E9 dessous, le mot SANS ses signes redessin\u00E9
+   par-dessus dans la couleur ambiante \u2014 un signe combinant n'ayant pas d'avance, le retirer ne
+   d\u00E9cale rien) marche pour la kasra mais PAS pour la fat\u1E25a/\u1E0Damma : leur pr\u00E9sence d\u00E9place
+   l\u00E9g\u00E8rement le glyphe de la lettre elle-m\u00EAme (m\u00E9trique du couple, propre \u00E0 cette police), et
+   les deux calques cessent de co\u00EFncider pixel pour pixel.
+   La seule chose qui a shap\u00E9 JUSTE dans TOUS les essais (test\u00E9 lettre par lettre, kasra ET
+   fat\u1E25a ET \u1E0Damma ET un r\u00E9sultat \u00E0 3 caract\u00E8res) : ne JAMAIS s\u00E9parer le signe de sa lettre \u2014 le
+   cluster entier (lettre + signe) part dans UNE seule couleur. On perd la nuance \u00AB seul le
+   signe est rouge \u00BB, mais un signe visible au bon endroit vaut mieux qu'un signe illisible au
+   bon endroit ou lisible au mauvais \u2014 Myriam tranchera si elle veut la nuance \u00E0 ce prix. */
+function tachRouge(s){
+  s=String(s==null?'':s);
+  if(!s)return '';
+  var esc=s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  RE_TACHKIL.lastIndex=0;
+  return RE_TACHKIL.test(s) ? ('<span class="tach">'+esc+'</span>') : esc;
+}
 /* Repli audio SANS voix arabe : on lit la romanisation PROPRE du mot (w.say) au lieu de
    translittérer l'arabe vocalisé (qui donnait « samakoune »). Voix latine -> son compréhensible. */
 const WSAY={}; try{UNITS.forEach(function(U){(U.words||[]).forEach(function(w){if(w&&w.w&&w.say)WSAY[w.w]=w.say;});});}catch(e){}
