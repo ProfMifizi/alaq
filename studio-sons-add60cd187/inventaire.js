@@ -311,7 +311,14 @@ try {
 
 /* ---------- état de chaque ligne ---------- */
 function etat(l) {
-  l.present  = presents.has(l.fichier);
+  /* ⚠️ LA PRÉSENCE SUIT LA MÊME RÈGLE QUE jouerMot : -f (voix IA) essayé avant le nom
+     plat, -h en dernier repli. Sans ça, un mot déposé UNIQUEMENT en -f (comme les 14
+     de l'unité 8, jamais sous le nom plat) rendait « manquant » — silence annoncé,
+     alors qu'une voix S'ENTEND, la mauvaise. « Manquant » et « à refaire » ne sont
+     pas la même faute : l'un dit qu'il n'y a rien, l'autre que ce n'est pas SA voix. */
+  l.present  = presents.has(l.fichier)
+            || presents.has(l.fichier.replace(/\.mp3$/, '-f.mp3'))
+            || presents.has(l.fichier.replace(/\.mp3$/, '-h.mp3'));
   l.taille   = tailles[l.fichier] || 0;
   l.precache = precache.has(l.fichier);
   l.attente  = attente.has(l.fichier);                 // une version IA dort dans audios-generes-a-valider/

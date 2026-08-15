@@ -84,15 +84,327 @@
   ]
  },
  {
-  "translit": "",
+  "fichier": "mot-qalam.mp3",
+  "arabe": "قَلَمٌ",
+  "sens": "قَلَمٌ — un stylo",
+  "translit": "qalam",
   "emoji": "",
-  "famille": "Unité 8 — Fātiḥa",
+  "famille": "Unité 8 — mots",
   "unite": 8,
   "lecons": [
-   "Les الـ de la Fātiḥa"
-  ],
-  "fichier": "mot-alamin.mp3",
-  "arabe": "الْعَالَمِينَ",
-  "sens": "les mondes — ⚠️ à ne pas confondre avec mot-aalim, qui dit عَالِمٌ « savant »"
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-alqalam.mp3",
+  "arabe": "الْقَلَمُ",
+  "sens": "الْقَلَمُ — le stylo",
+  "translit": "qalam",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-qamar.mp3",
+  "arabe": "قَمَرٌ",
+  "sens": "قَمَرٌ — une lune",
+  "translit": "qamar",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-alqamar.mp3",
+  "arabe": "الْقَمَرُ",
+  "sens": "الْقَمَرُ — la lune",
+  "translit": "qamar",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-albab.mp3",
+  "arabe": "الْبَابُ",
+  "sens": "الْبَابُ — la porte",
+  "translit": "bab",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-yad.mp3",
+  "arabe": "يَدٌ",
+  "sens": "يَدٌ — une main",
+  "translit": "yad",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-alyad.mp3",
+  "arabe": "الْيَدُ",
+  "sens": "الْيَدُ — la main",
+  "translit": "yad",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-bayt.mp3",
+  "arabe": "بَيْتٌ",
+  "sens": "بَيْتٌ — une maison",
+  "translit": "bayt",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-albayt.mp3",
+  "arabe": "الْبَيْتُ",
+  "sens": "الْبَيْتُ — la maison",
+  "translit": "bayt",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-habl.mp3",
+  "arabe": "حَبْلٌ",
+  "sens": "حَبْلٌ — une corde",
+  "translit": "habl",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-alhabl.mp3",
+  "arabe": "الْحَبْلُ",
+  "sens": "الْحَبْلُ — la corde",
+  "translit": "habl",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-himar.mp3",
+  "arabe": "حِمَارٌ",
+  "sens": "حِمَارٌ — un âne",
+  "translit": "himar",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-alhimar.mp3",
+  "arabe": "الْحِمَارُ",
+  "sens": "الْحِمَارُ — l'âne",
+  "translit": "himar",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-dalw.mp3",
+  "arabe": "دَلْوٌ",
+  "sens": "دَلْوٌ — un seau",
+  "translit": "dalw",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-aldalw.mp3",
+  "arabe": "الدَّلْوُ",
+  "sens": "الدَّلْوُ — le seau",
+  "translit": "dalw",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-dar.mp3",
+  "arabe": "دَارٌ",
+  "sens": "دَارٌ — une maison",
+  "translit": "dar",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-aldar.mp3",
+  "arabe": "الدَّارُ",
+  "sens": "الدَّارُ — la maison",
+  "translit": "dar",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-tayr.mp3",
+  "arabe": "طَيْرٌ",
+  "sens": "طَيْرٌ — un oiseau",
+  "translit": "tayr",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-altayr.mp3",
+  "arabe": "الطَّيْرُ",
+  "sens": "الطَّيْرُ — l'oiseau",
+  "translit": "tayr",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-rumman.mp3",
+  "arabe": "رُمَّانٌ",
+  "sens": "رُمَّانٌ — une grenade",
+  "translit": "rumman",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-alrumman.mp3",
+  "arabe": "الرُّمَّانُ",
+  "sens": "الرُّمَّانُ — la grenade",
+  "translit": "rumman",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-nahl.mp3",
+  "arabe": "نَحْلٌ",
+  "sens": "نَحْلٌ — une abeille",
+  "translit": "nahl",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-alnahl.mp3",
+  "arabe": "النَّحْلُ",
+  "sens": "النَّحْلُ — l'abeille",
+  "translit": "nahl",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-dhahab.mp3",
+  "arabe": "ذَهَبٌ",
+  "sens": "ذَهَبٌ — un or",
+  "translit": "dhahab",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-aldhahab.mp3",
+  "arabe": "الذَّهَبُ",
+  "sens": "الذَّهَبُ — l'or",
+  "translit": "dhahab",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
+ },
+ {
+  "fichier": "mot-tin.mp3",
+  "arabe": "تِينٌ",
+  "sens": "تِينٌ — une figue",
+  "translit": "tin",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "L’article الـ"
+  ]
+ },
+ {
+  "fichier": "mot-altin.mp3",
+  "arabe": "التِّينُ",
+  "sens": "التِّينُ — la figue",
+  "translit": "tin",
+  "emoji": "",
+  "famille": "Unité 8 — mots",
+  "unite": 8,
+  "lecons": [
+   "Écrire avec الـ"
+  ]
  }
 ]
