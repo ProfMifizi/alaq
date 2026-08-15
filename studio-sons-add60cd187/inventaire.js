@@ -220,6 +220,17 @@ VOIX.filter(v => v.loc).forEach(v => { for (let n = 1; n <= 7; n++)
            famille: 'Récitation', unite: null, lecons: ['Dans la Fātiḥa', 'Le Qorān'] });
 });
 
+/* 3c · LES SONS DE L'UNITÉ 8 — elle n'est pas encore dans l'app, donc invisible à
+   la lecture d'index.html. La liste est produite par  DEPUIS
+   previews/_u8/ (la source des previews), jamais tenue à la main ; sur Vercel elle
+   arrive embarquée, comme noms-lettres.json.
+   ⚠️ Elle contient les 7 lectures VOLONTAIREMENT FAUSSES du disque 6 : Myriam les
+   enregistre elle-même (aucune IA ne sait prononcer faux à la demande). */
+const U8JSON = premier(path.join(__dirname, 'sons-u8.json'),
+                       path.join(RACINE, 'outils', 'sons-u8.json'));
+if (fs.existsSync(U8JSON))
+  JSON.parse(fs.readFileSync(U8JSON, 'utf8')).forEach(l => pousse(l));
+
 /* 4 · ce qui reste dans le dossier sans que rien ne l'appelle : les ORPHELINS.
    Les versets sont diffusés depuis la source du récitateur (playVerse → qariUrl) :
    les fatiha-*.mp3 déposés en local ne sont donc jamais joués. */
@@ -323,6 +334,9 @@ lignes.sort((a, b) => (a.unite || 99) - (b.unite || 99)
 const inv = {
   genere: new Date().toISOString(),
   disques: DISQUES,
+  /* ⚠️ NE PAS AJOUTER L'UNITÉ 8 ICI : UNITS en compte DÉJÀ 12 — les cinq dernières
+     sont des coquilles sans lettres ("La grammaire de la Fātiḥa — à construire"). Le
+     sélecteur la propose donc tout seul ; l'y rajouter la ferait apparaître deux fois. */
   unites: UNITS.map(U => ({ no: U.no, sub: U.sub, lettres: U.letters })),
   arabe: lignes,
   francais: consignes,

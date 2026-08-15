@@ -1,0 +1,98 @@
+[
+ {
+  "fichier": "faux-albayt.mp3",
+  "arabe": "البَّيْتُ",
+  "sens": "⚠️ lecture VOLONTAIREMENT FAUSSE de الْبَيْتُ — dire « ab-baytou » (le ل devient muet et le ب double, alors qu'il devrait se prononcer)",
+  "translit": "ab-baytou",
+  "emoji": "",
+  "famille": "Unité 8 — lecture fautive",
+  "unite": 8,
+  "lecons": [
+   "Reconnaître à l'oreille"
+  ]
+ },
+ {
+  "fichier": "faux-aldalw.mp3",
+  "arabe": "الْدَلْوُ",
+  "sens": "⚠️ lecture VOLONTAIREMENT FAUSSE de الدَّلْوُ — dire « al-dalwou » (le ل se prononce alors qu'il devrait être muet)",
+  "translit": "al-dalwou",
+  "emoji": "",
+  "famille": "Unité 8 — lecture fautive",
+  "unite": 8,
+  "lecons": [
+   "Reconnaître à l'oreille"
+  ]
+ },
+ {
+  "fichier": "faux-alqamar.mp3",
+  "arabe": "القَّمَرُ",
+  "sens": "⚠️ lecture VOLONTAIREMENT FAUSSE de الْقَمَرُ — dire « aq-qamarou » (le ل devient muet et le ق double, alors qu'il devrait se prononcer)",
+  "translit": "aq-qamarou",
+  "emoji": "",
+  "famille": "Unité 8 — lecture fautive",
+  "unite": 8,
+  "lecons": [
+   "Reconnaître à l'oreille"
+  ]
+ },
+ {
+  "fichier": "faux-alrumman.mp3",
+  "arabe": "الْرُمَّانُ",
+  "sens": "⚠️ lecture VOLONTAIREMENT FAUSSE de الرُّمَّانُ — dire « al-rummanou » (le ل se prononce alors qu'il devrait être muet)",
+  "translit": "al-rummanou",
+  "emoji": "",
+  "famille": "Unité 8 — lecture fautive",
+  "unite": 8,
+  "lecons": [
+   "Reconnaître à l'oreille"
+  ]
+ },
+ {
+  "fichier": "faux-alyad.mp3",
+  "arabe": "اليَّدُ",
+  "sens": "⚠️ lecture VOLONTAIREMENT FAUSSE de الْيَدُ — dire « ay-yadou » (le ل devient muet et le ي double, alors qu'il devrait se prononcer)",
+  "translit": "ay-yadou",
+  "emoji": "",
+  "famille": "Unité 8 — lecture fautive",
+  "unite": 8,
+  "lecons": [
+   "Reconnaître à l'oreille"
+  ]
+ },
+ {
+  "fichier": "faux-aldhahab.mp3",
+  "arabe": "الْذَهَبُ",
+  "sens": "⚠️ lecture VOLONTAIREMENT FAUSSE de الذَّهَبُ — dire « al-dhahabou » (le ل se prononce alors qu'il devrait être muet)",
+  "translit": "al-dhahabou",
+  "emoji": "",
+  "famille": "Unité 8 — lecture fautive",
+  "unite": 8,
+  "lecons": [
+   "Reconnaître à l'oreille"
+  ]
+ },
+ {
+  "fichier": "faux-alhimar.mp3",
+  "arabe": "الحِّمَارُ",
+  "sens": "⚠️ lecture VOLONTAIREMENT FAUSSE de الْحِمَارُ — dire « ah-himarou » (le ل devient muet et le ح double, alors qu'il devrait se prononcer)",
+  "translit": "ah-himarou",
+  "emoji": "",
+  "famille": "Unité 8 — lecture fautive",
+  "unite": 8,
+  "lecons": [
+   "Reconnaître à l'oreille"
+  ]
+ },
+ {
+  "translit": "",
+  "emoji": "",
+  "famille": "Unité 8 — Fātiḥa",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ],
+  "fichier": "mot-alamin.mp3",
+  "arabe": "الْعَالَمِينَ",
+  "sens": "les mondes — ⚠️ à ne pas confondre avec mot-aalim, qui dit عَالِمٌ « savant »"
+ }
+]
