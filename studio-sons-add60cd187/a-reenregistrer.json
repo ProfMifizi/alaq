@@ -1,9 +1,14 @@
 {
  "genere": "2026-08-10",
- "pourquoi": "Décision de Myriam le 10/08 : elle réenregistre TOUT elle-même. Ces fichiers existent mais sont dits par une voix IA (lots ElevenLabs du 13/07 et suivants) — provenance établie par la date des fichiers : ≤ 11/07 = sa voix, ≥ 13/07 = IA. ⚠️ Un fichier de cette liste qu'elle redépose garde LE MÊME NOM : il doit rejoindre la purge ciblée de sw.js (cache MEDIA), sinon les appareils gardent l'ancienne voix à vie. Les récitations (Qorān) et les effets sonores n'en font pas partie. ⚠️ TENUE À JOUR PAR outils/installer-prises.js : un son que Myriam redépose en sort automatiquement. La liste du 10/08 était juste CE JOUR-LÀ ; figée, elle a fait afficher « 202 à refaire » au studio le 15/08 alors qu'elle venait d'en refaire 209.",
+ "pourquoi": "Décision de Myriam le 10/08 : elle réenregistre TOUT elle-même. Ces fichiers existent mais sont dits par une voix IA (lots ElevenLabs du 13/07 et suivants) — provenance établie par la date des fichiers : ≤ 11/07 = sa voix, ≥ 13/07 = IA. ⚠️ Un fichier de cette liste qu'elle redépose garde LE MÊME NOM : il doit rejoindre la purge ciblée de sw.js (cache MEDIA), sinon les appareils gardent l'ancienne voix à vie. Les récitations (Qorān) et les effets sonores n'en font pas partie. ⚠️ TENUE À JOUR PAR outils/installer-prises.js : un son que Myriam redépose en sort automatiquement. La liste du 10/08 était juste CE JOUR-LÀ ; figée, elle a fait afficher « 202 à refaire » au studio le 15/08 alors qu'elle venait d'en refaire 209. ⚠️ 16/08 : DEUX ENTRÉES ÉTAIENT PÉRIMÉES — mot-addallin et mot-almaghdub avaient été renommés au marfū' le 11/08 (mot-addalloun / mot-almaghdoubou). Figée sous l'ancien nom, la liste ne correspondait à aucun fichier de l'app : le studio annonçait « 0 son à refaire » alors que les deux prises sont toujours en voix IA. RÈGLE : renommer un son oblige à renommer son entrée ici, sinon la demande de réenregistrement disparaît en silence. Ajoutés le même jour à la demande de Myriam : les noms des lettres ر ن ي ب et le mot بَابُ (mot-bab), tous dits par l'IA.",
  "fichiers": [
-  "mot-addallin.mp3",
-  "mot-almaghdub.mp3"
+  "lettre-ba-nom.mp3",
+  "lettre-nun-nom.mp3",
+  "lettre-ra-nom.mp3",
+  "lettre-ya-nom.mp3",
+  "mot-addalloun.mp3",
+  "mot-almaghdoubou.mp3",
+  "mot-bab.mp3"
  ],
  "maj": "2026-08-16"
 }
