@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v129-2026-08-15c';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v134-2026-08-16a';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -18,7 +18,17 @@ const MEDIA='alaq-medias';
    d'images est jeté entier et tout se retélécharge frais (quelques Mo d'icônes,
    rien à voir avec les 8 Mo d'audio qui ne bougent jamais). Plus de renommage
    obligatoire, plus de liste de purge à tenir pour les images. */
-const IMGV=1;
+/* 🔴 RETOUCHÉES TROIS FOIS SOUS LE MÊME NOM (Myriam, 15/08 : « le test dans localhost
+   me donne toujours les mêmes images »). Les 40 illustrations de l'unité 8 sont
+   passées par trois régénérations — 8,1 Mo → 420 Ko, puis 384 px, puis sans tramage
+   — toujours sous les noms qalam.png, himar.png… Chaque image est CACHE-D'ABORD
+   (voir le fetch handler plus bas) : le navigateur a gardé la TOUTE PREMIÈRE version
+   vue de chaque fichier, et rien sur le disque ne pouvait la déloger.
+   Bumper IMGV renomme le cache (alaq-images-v1 → v2) : l'ancien ne correspond plus
+   à rien, `activate` le jette, et chaque image repart chercher le réseau. C'est la
+   règle que ce projet a déjà pour toute image retouchée sous le même nom — je l'ai
+   moi-même oubliée trois fois de suite ici. */
+const IMGV=2;
 const IMGCACHE='alaq-images-v'+IMGV;
 const CORE=['.','index.html','confidentialite.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
@@ -154,18 +164,8 @@ const AUDIOS=[
 // les 4 félicitations du combo × 2 voix, et le son de fin de leçon =====
 "audios-app-alaq/lettre-alif-nom-f.mp3",
 "audios-app-alaq/lettre-ba-nom-f.mp3",
-"audios-app-alaq/lettre-tha-nom-f.mp3",
-"audios-app-alaq/lettre-jim-nom-f.mp3",
-"audios-app-alaq/lettre-kha-nom-f.mp3",
-"audios-app-alaq/lettre-dal-nom-f.mp3",
 "audios-app-alaq/lettre-ra-nom-f.mp3",
-"audios-app-alaq/lettre-zay-nom-f.mp3",
-"audios-app-alaq/lettre-sin-nom-f.mp3",
-"audios-app-alaq/lettre-shin-nom-f.mp3",
-"audios-app-alaq/lettre-dha-nom-f.mp3",
 "audios-app-alaq/lettre-ayn-nom-f.mp3",
-"audios-app-alaq/lettre-fa-nom-f.mp3",
-"audios-app-alaq/lettre-kaf-nom-f.mp3",
 "audios-app-alaq/lettre-lam-nom-f.mp3",
 "audios-app-alaq/lettre-mim-nom-f.mp3",
 "audios-app-alaq/lettre-nun-nom-f.mp3",
@@ -289,34 +289,7 @@ const AUDIOS=[
 "audios-app-alaq/mot-audhu.mp3",
 "audios-app-alaq/mot-ayn.mp3",
 "audios-app-alaq/mot-bab.mp3",
-"audios-app-alaq/mot-qalam-f.mp3",
-"audios-app-alaq/mot-alqalam-f.mp3",
-"audios-app-alaq/mot-qamar-f.mp3",
-"audios-app-alaq/mot-alqamar-f.mp3",
 "audios-app-alaq/mot-bab-f.mp3",
-"audios-app-alaq/mot-albab-f.mp3",
-"audios-app-alaq/mot-yad-f.mp3",
-"audios-app-alaq/mot-alyad-f.mp3",
-"audios-app-alaq/mot-bayt-f.mp3",
-"audios-app-alaq/mot-albayt-f.mp3",
-"audios-app-alaq/mot-habl-f.mp3",
-"audios-app-alaq/mot-alhabl-f.mp3",
-"audios-app-alaq/mot-himar-f.mp3",
-"audios-app-alaq/mot-alhimar-f.mp3",
-"audios-app-alaq/mot-dalw-f.mp3",
-"audios-app-alaq/mot-aldalw-f.mp3",
-"audios-app-alaq/mot-dar-f.mp3",
-"audios-app-alaq/mot-aldar-f.mp3",
-"audios-app-alaq/mot-tayr-f.mp3",
-"audios-app-alaq/mot-altayr-f.mp3",
-"audios-app-alaq/mot-rumman-f.mp3",
-"audios-app-alaq/mot-alrumman-f.mp3",
-"audios-app-alaq/mot-nahl-f.mp3",
-"audios-app-alaq/mot-alnahl-f.mp3",
-"audios-app-alaq/mot-dhahab-f.mp3",
-"audios-app-alaq/mot-aldhahab-f.mp3",
-"audios-app-alaq/mot-tin-f.mp3",
-"audios-app-alaq/mot-altin-f.mp3",
 "audios-app-alaq/mot-bismi.mp3",
 "audios-app-alaq/mot-dars.mp3",
 "audios-app-alaq/mot-dhahaba.mp3",
@@ -891,6 +864,88 @@ self.addEventListener('activate',e=>{
       'voyelle-a.mp3',
       'voyelle-i.mp3',
       'voyelle-ou.mp3',
+      /* 16/08 — les prises de Myriam remplacent des
+         fichiers déjà servis : sans cette liste, les appareils qui les ont entendus
+         garderaient l'ancienne voix à vie (cache MEDIA, jamais purgé). */
+      'dal-alif-son-prolonge.mp3',
+      'dal-damma-son-court.mp3',
+      'dal-fatha-son-court.mp3',
+      'dal-kasra-son-court.mp3',
+      'dal-waw-son-prolonge.mp3',
+      'dal-ya-son-prolonge.mp3',
+      'kaf-alif-son-prolonge.mp3',
+      'kaf-damma-son-court.mp3',
+      'kaf-fatha-son-court.mp3',
+      'kaf-kasra-son-court.mp3',
+      'kaf-waw-son-prolonge.mp3',
+      'lettre-dal-nom.mp3',
+      'lettre-dal-nom-f.mp3',
+      'lettre-dha-nom.mp3',
+      'lettre-dha-nom-f.mp3',
+      'lettre-fa-nom.mp3',
+      'lettre-jim-nom.mp3',
+      'lettre-jim-nom-f.mp3',
+      'lettre-kaf-nom.mp3',
+      'lettre-kaf-nom-f.mp3',
+      'lettre-kha-nom.mp3',
+      'lettre-kha-nom-f.mp3',
+      'lettre-shin-nom.mp3',
+      'lettre-shin-nom-f.mp3',
+      'lettre-sin-nom.mp3',
+      'lettre-sin-nom-f.mp3',
+      'lettre-tha-nom.mp3',
+      'lettre-tha-nom-f.mp3',
+      'lettre-zay-nom.mp3',
+      'lettre-zay-nom-f.mp3',
+      'mot-albab-f.mp3',
+      'mot-albayt-f.mp3',
+      'mot-aldalw-f.mp3',
+      'mot-aldar-f.mp3',
+      'mot-aldhahab-f.mp3',
+      'mot-alhabl-f.mp3',
+      'mot-alhimar-f.mp3',
+      'mot-alnahl-f.mp3',
+      'mot-alqalam-f.mp3',
+      'mot-alqamar-f.mp3',
+      'mot-alrumman-f.mp3',
+      'mot-altayr-f.mp3',
+      'mot-altin-f.mp3',
+      'mot-alyad-f.mp3',
+      'mot-annas.mp3',
+      'mot-annas-f.mp3',
+      'mot-bayt-f.mp3',
+      'mot-bismi.mp3',
+      'mot-bismi-f.mp3',
+      'mot-dalw-f.mp3',
+      'mot-dar-f.mp3',
+      'mot-dars.mp3',
+      'mot-dars-f.mp3',
+      'mot-dhahab-f.mp3',
+      'mot-din.mp3',
+      'mot-din-f.mp3',
+      'mot-habl-f.mp3',
+      'mot-himar-f.mp3',
+      'mot-iyyaka.mp3',
+      'mot-iyyaka-f.mp3',
+      'mot-karim.mp3',
+      'mot-karim-f.mp3',
+      'mot-kasaba.mp3',
+      'mot-maalik.mp3',
+      'mot-maalik-f.mp3',
+      'mot-malik.mp3',
+      'mot-malik-f.mp3',
+      'mot-naabudu.mp3',
+      'mot-naabudu-f.mp3',
+      'mot-nahl-f.mp3',
+      'mot-qalam-f.mp3',
+      'mot-qamar-f.mp3',
+      'mot-rumman-f.mp3',
+      'mot-tayr-f.mp3',
+      'mot-tin-f.mp3',
+      'mot-yad-f.mp3',
+      'sin-damma-son-court.mp3',
+      'sin-fatha-son-court.mp3',
+      'sin-kasra-son-court.mp3',
     ]
       .map(f=>m.delete('audios-app-alaq/'+f,{ignoreSearch:true})));
     self.clients.claim();
