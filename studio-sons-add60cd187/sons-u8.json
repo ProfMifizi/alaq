@@ -84,6 +84,126 @@
   ]
  },
  {
+  "fichier": "mot-alhamdu.mp3",
+  "arabe": "الْحَمْدُ",
+  "translit": "alhamdu",
+  "emoji": "",
+  "sens": "dans le verset",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-arrahmani.mp3",
+  "arabe": "الرَّحْمَٰنِ",
+  "translit": "arrahmani",
+  "emoji": "",
+  "sens": "dans le verset — finale au majrūr ⚠️ PAS الرَّحْمَٰنُ (la forme du vocabulaire, qui garde son propre fichier)",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-arrahimi.mp3",
+  "arabe": "الرَّحِيمِ",
+  "translit": "arrahimi",
+  "emoji": "",
+  "sens": "dans le verset — finale au majrūr ⚠️ PAS الرَّحِيمُ (la forme du vocabulaire, qui garde son propre fichier)",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-addini.mp3",
+  "arabe": "الدِّينِ",
+  "translit": "addini",
+  "emoji": "",
+  "sens": "dans le verset — finale au majrūr ⚠️ PAS دِينٌ (la forme du vocabulaire, qui garde son propre fichier)",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-assirata.mp3",
+  "arabe": "الصِّرَاطَ",
+  "translit": "assirata",
+  "emoji": "",
+  "sens": "dans le verset — finale au mansūb ⚠️ PAS صِرَاطٌ (la forme du vocabulaire, qui garde son propre fichier)",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-almustaqima.mp3",
+  "arabe": "الْمُسْتَقِيمَ",
+  "translit": "almustaqima",
+  "emoji": "",
+  "sens": "dans le verset — finale au mansūb ⚠️ PAS مُسْتَقِيمٌ (la forme du vocabulaire, qui garde son propre fichier)",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-almaghdub.mp3",
+  "arabe": "الْمَغْضُوبِ",
+  "translit": "almaghdub",
+  "emoji": "",
+  "sens": "dans le verset — finale au majrūr",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-addallin.mp3",
+  "arabe": "الضَّالِّينَ",
+  "translit": "addallin",
+  "emoji": "",
+  "sens": "dans le verset — finale au majrūr",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-alladhina.mp3",
+  "arabe": "الَّذِينَ",
+  "translit": "alladhina",
+  "emoji": "",
+  "sens": "dans le verset — finale au majrūr",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
+  "fichier": "mot-alamin.mp3",
+  "arabe": "الْعَالَمِينَ",
+  "translit": "alamin",
+  "emoji": "",
+  "sens": "dans le verset — finale au majrūr ⚠️ ne pas confondre avec mot-aalim, qui dit عَالِمٌ « savant »",
+  "famille": "Unité 8 — Fātiḥa (déclinés)",
+  "unite": 8,
+  "lecons": [
+   "Les الـ de la Fātiḥa"
+  ]
+ },
+ {
   "fichier": "mot-qalam.mp3",
   "arabe": "قَلَمٌ",
   "sens": "قَلَمٌ — un stylo",
