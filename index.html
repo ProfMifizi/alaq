@@ -1238,7 +1238,7 @@
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .acct-pen{flex:none;background:none;border:none;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px}
 .acct-pen:active{transform:scale(.9)}
-.rk-lbl{font-family:var(--ui);font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#241a06;opacity:.55;margin:0 0 2px}
+.rk-lbl{font-family:var(--ui);font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#241a06;opacity:.72;margin:0 0 2px}/* 🔴 2,19:1 — LA DERNIÈRE DETTE DU MODE SOMBRE, TRANCHÉE PAR MYRIAM LE 17/08 (preview_carte_rang_v1, variante ② : « la carte la plus lisible »). L'encre brune #241a06 était posée sur l'extrémité SOMBRE du dégradé doré. C'est le FOND qui monte en lumière (#6f4b0f→#b07c16), pas le texte : la carte reste la plaque d'or qu'elle a validée. Mesuré au point le plus sombre du dégradé : 2,19 → 4,68:1. */
 .lspk{background:none;border:none;cursor:pointer;font-size:14px;opacity:.85;padding:0 2px;vertical-align:middle;line-height:1}
 .lspk:active{transform:scale(.9)}
 .sgn-card{background:#2a2422;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:8px}
@@ -1291,7 +1291,7 @@
 .pcs-top b{color:var(--cream);font-size:15px}
 .pcs-top span{color:var(--gold2);font-weight:800;font-size:12.5px}
 .arw{font-family:var(--ar)}
-.rankcard{display:block;width:100%;text-align:left;background:linear-gradient(135deg,#6f4b0f,#9a6813 60%,#b8770f);border:1px solid var(--gold2);border-radius:16px;padding:12px 14px 14px;cursor:pointer;color:#241a06;margin:0 0 12px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.rankcard{display:block;width:100%;text-align:left;background:linear-gradient(135deg,#b07c16,#c99320 60%,#d9a52a);border:1px solid var(--gold2);border-radius:16px;padding:12px 14px 14px;cursor:pointer;color:#241a06;margin:0 0 12px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
 .rankcard .rk-row{display:flex;align-items:center;gap:14px}
 .rankcard:active{transform:scale(.99)}
 .rankcard .rk-ar{font-family:var(--quran);font-size:30px;color:#241a06;flex:0 0 auto}
@@ -1944,6 +1944,14 @@ html.clair .rankcard .rk-ar,
 html.clair .rankcard .rk-tr,
 html.clair .rankcard .rk-next,
 html.clair .rankcard .rk-chev{ color:var(--on-gold) }
+/* 🔴 LE CLAIR GARDE L'OR FONCÉ. En éclaircissant le dégradé pour le mode SOMBRE
+   (2,19 → 4,68), j'allais casser le clair sans le voir : son encre est CRÈME
+   (--on-gold #FFF8EA), pas brune — sur l'or clair elle tombe à 3,46:1 alors
+   qu'elle était à 7,39:1. Les deux thèmes n'ont pas la même encre sur cette carte,
+   ils ne peuvent donc pas partager le même fond. Piège de la règle du 13/08 :
+   « toute règle de thème qui vise un état au repos doit redéclarer l'état allumé »
+   — ici, corriger une couleur COMMUNE oblige à revérifier les deux thèmes. */
+html.clair .rankcard{ background:linear-gradient(135deg,#6f4b0f,#9a6813 60%,#b8770f) }
 html.clair .rankcard .ubar i,
 html.clair .rankcard .rbar-fill{ background:var(--on-gold) }
 html.clair .cta{ color:var(--on-gold) }          /* bouton doré foncé, encre claire */
@@ -7478,7 +7486,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='unite8-grammaire-v14 \u00b7 voix de Myriam partout, le ? qui appelle a l aide, tableaux a hauteur variable';
+const BUILD='unite8-grammaire-v15 \u00b7 carte du rang lisible (variante 2, choisie par Myriam)';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
