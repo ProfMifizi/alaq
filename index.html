@@ -651,7 +651,54 @@
   .farr{font-size:24px;color:var(--muted);animation:farr 1.5s infinite;flex:none}
   @keyframes farr{0%{transform:translateX(12px);opacity:0}30%{opacity:1}100%{transform:translateX(-16px);opacity:0}}
   .fchip{width:74px;height:74px;border-radius:50%;background:var(--panel);border:2px solid var(--line);
-    display:grid;place-items:center;font-size:34px;color:var(--gold);flex:none;touch-action:none;cursor:grab}
+    display:grid;place-items:center;font-size:34px;color:var(--gold);flex:none;touch-action:none;
+    cursor:grab;position:relative}
+  /* ═══ 17/08 — LE TRAIT DU JETON AU MILIEU DU CERCLE (preview validée) ═══════════
+     Myriam : « le trait représentant la lettre doit être centré au milieu du cercle, et
+     les harakat au-dessus / en dessous ne doivent pas toucher le bord ». Les deux
+     demandes se règlent au même endroit : là où tombe la LIGNE DE BASE, sur laquelle le
+     tatweel (ـ) repose. Une boîte de texte se centre sur sa hauteur de ligne, or
+     l'ascendante d'une police arabe est bien plus grande que sa descendante — le trait
+     tombait donc 10 px trop bas (20 px en grands caractères).
+     ⚠️ LA POLICE EST ÉPINGLÉE, ET CE N'EST PAS COSMÉTIQUE : `.fchip` ne déclarait aucune
+     `font-family` et il n'existe aucune règle `.ar` nue, donc le signe était dessiné par
+     une police de SECOURS choisie par le système — autre sur iPhone que sur ce Mac. La
+     correction en `em` n'était juste nulle part. Mesuré : avec Naskh épinglée, 0,22em
+     centre le trait à ±1 px dans les TROIS tailles (74/34, 104/60, 85/49 × zoom 1,22).
+     ⚠️ EN `em`, JAMAIS EN PIXELS : c'est un RAPPORT à la taille du glyphe, donc il suit
+     tout seul le réglage « grands caractères ». En pixels il y serait faux du double.
+     ⚠️ Ne vise QUE `.tach` — donc les seuls jetons qui portent un SIGNE. Sur la leçon des
+     prolongations le jeton est une LETTRE (ا · و · ي) : `tachRouge` ne l'enveloppe pas,
+     elle garde exactement son rendu validé.
+     ⚠️ NE PAS ANCRER CES RÈGLES SUR `#fuzone`. `fantomeDe` (le fantôme qu'on traîne au doigt)
+     fait `cloneNode` puis `document.body.appendChild` : le clone n'est PLUS descendant de
+     `#fuzone`. Ancrées, ces règles le rataient — au moment de la prise en main le signe
+     perdait sa police et son centrage (10 px de saut, 20 en grands caractères), et la 2ᵈᵉ
+     couche de la kasra, privée de `position:absolute`, redevenait une CELLULE de grille :
+     deux traits empilés dans le fantôme. Le geste de glisser EST la leçon : le défaut se
+     verrait à chaque prise. */
+  .fchip .tach{font-family:var(--ar);display:block;line-height:1;
+    transform:translateY(-0.22em)}
+  /* ═══ LA KASRA, UN SOUFFLE PLUS BAS (retour de Myriam : « trop près du trait ») ═════
+     L'écart signe↔trait est GRAVÉ dans la police (l'ancre GPOS du couple) : impossible de
+     l'agrandir sur un cluster intact, et un span autour d'une marque combinante ne la
+     déplace pas plus qu'il ne la colore. D'où la règle du projet — DUPLIQUER, jamais
+     découper : une couche porte le trait SEUL (c'est elle qui donne la position), l'autre
+     porte le cluster ENTIER descendu de 0,09em, son propre trait retiré par un clip-path.
+     ⚠️ le clip vit dans les coordonnées de la boîte, AVANT le transform : décaler la
+     couche ne fait donc pas réapparaître le trait clippé.
+     ⚠️ la 2ᵈᵉ couche est en `position:absolute` — c'est CE QUI LA SAUVE : `.fchip` est en
+     `display:grid`, et une couche EN FLUX deviendrait une CELLULE séparée qui disloquerait
+     le jeton (piège déjà vécu le 17/08 sur `.mimC`).
+     ⚠️ SON ANCRAGE (`position:relative`) VIT SUR LA RÈGLE DE BASE `.fchip`, ET C'EST OBLIGÉ :
+     posé sur une CLASSE il pèserait (0,2,0) et battrait `.drag-clone{position:fixed}` (0,1,0),
+     qui est justement la règle qui fait suivre le fantôme au doigt — ses `left`/`top` en ligne
+     deviendraient des décalages relatifs et le fantôme se figerait. Sur la règle de base il
+     pèse (0,1,0) et `.drag-clone`, déclarée plus loin dans le fichier, gagne par ORDRE.
+     (Même motif que `.tile`, qui porte déjà `position:relative` sur sa règle de base.) */
+  .fchip .tach.fk{position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%) translateY(calc(-0.22em + 0.09em));
+    clip-path:inset(0.78em 0 0 0)}
   .gone{visibility:hidden}
   .g6{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;direction:rtl;margin-top:8px}
   .b6{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
@@ -7723,7 +7770,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='correctifs5-17aout \u00b7 synchro par compte, harakat bleues en calque, voix de Myriam en tete, coeurs U8, verrou connexion';
+const BUILD='correctifs5-17aout-b \u00b7 jeton centre dans le cercle, kasra en calque, police du jeton epinglee, 67 variantes IA retirees';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -8423,7 +8470,7 @@ function renderStep(){
              n'enveloppe QUE les marques combinantes. Sur la leçon des harakat le jeton EST un
              signe → il rougit ; sur la leçon des prolongations le jeton est une LETTRE
              (ا · و · ي) → il reste doré. Le rouge ne désigne jamais qu'une chose. */
-          '<div class="fchip ar" data-k="'+k+'">'+tachRouge(chipAff(j.chip))+'</div>'+
+          '<div class="fchip ar" data-k="'+k+'">'+chipHTML(j.chip)+'</div>'+
         '</div>').join('')+'</div>';
     setTimeout(()=>setupFuse(st),40);
     return;
@@ -9269,6 +9316,32 @@ function isHarakat(ch){
 function letAr(L){ return '<span class="ar">'+L+'</span>'; }
 function chipAff(ch){ // une harakat NUE est portée sur un tatweel — lisible partout (leçon 5 v3 validée ; unifie AUSSI la leçon 1)
   return /^[\u064B-\u0652]$/.test(ch)?'\u0640'+ch:ch;
+}
+/* \u2550\u2550\u2550 17/08 \u2014 LES SIGNES QUI SE DESSINENT SOUS LA LIGNE \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+   La kasra (U+0650) et la kasratayn (U+064D) se posent SOUS la ligne de base ; toutes les
+   autres marques du jeton sont au-dessus (fat\u1E25a, \u1E0Damma, soukoun, chedda, dhammatayn).
+   \u26A0\uFE0F Le motif est \u00E9crit en \u00C9CHAPPEMENTS, jamais avec les caract\u00E8res arabes en clair : une
+   classe de caract\u00E8res arabes tap\u00E9e litt\u00E9ralement dans ce fichier ne matche rien, et le
+   test passe alors en ne testant RIEN (pi\u00E8ge v\u00E9cu deux fois cette semaine).
+   \u26A0\uFE0F La kasratayn n'appara\u00EEt dans AUCUN jeton aujourd'hui \u2014 elle est l\u00E0 pour que le jour
+   o\u00F9 elle arrive, elle h\u00E9rite du bon traitement sans que personne y pense.
+   \u26A0\uFE0F LE TEST PORTE SUR LA SORTIE DE `chipAff`, ET C'EST CE QUI LE REND S\u00DBR : il exige le
+   cluster COMPLET \u00AB tatweel + marque sous la ligne \u00BB. Il accepte donc les deux \u00E9critures qui
+   arrivent (la marque nue, \u00E0 qui `chipAff` pose le tatweel, et la forme d\u00E9j\u00E0 compos\u00E9e fa\u00E7on
+   `TAT+SUK`), et il REFUSE tout le reste \u2014 une lettre portant une kasra (\u0628\u0650) prendrait sinon
+   la branche \u00E0 deux couches, qui \u00E9crirait un trait nu en couche 1 et la lettre clipp\u00E9e en
+   couche 2 : rendu faux et silencieux. Refus\u00E9e, elle retombe sur le chemin d'avant. */
+var CHIP_SOUS_LIGNE=/^\u0640[\u064D\u0650]$/;
+function chipSousLigne(ch){ return CHIP_SOUS_LIGNE.test(chipAff(String(ch==null?'':ch))); }
+/* Le contenu du jeton. Un signe SOUS la ligne r\u00E9clame deux couches (voir le pav\u00E9 CSS
+   `.fchip .tach.fk`) : le trait seul, puis le cluster entier d\u00E9cal\u00E9. Tout le reste \u2014
+   les signes au-dessus, et les LETTRES de la le\u00E7on des prolongations \u2014 passe par
+   `tachRouge` exactement comme avant, donc leur rendu valid\u00E9 ne bouge pas d'un pixel. */
+function chipHTML(ch){
+  var aff=chipAff(ch);
+  if(!chipSousLigne(ch))return tachRouge(aff);
+  // `aff` ne peut porter qu'un tatweel et une marque arabe : rien \u00E0 \u00E9chapper ici.
+  return '<span class="tach">\u0640</span><span class="tach fk">'+aff+'</span>';
 }
 function tileLabel(ch){
   const HARAKAT='\u064B\u064C\u064D\u064E\u064F\u0650\u0651\u0652';

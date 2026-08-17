@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v149-2026-08-17f';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v150-2026-08-17g';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -162,12 +162,9 @@ const AUDIOS=[
 "audios-app-alaq/hha-ya-son-prolonge.mp3",
 // ===== lot « marque sonore » du 05/08/2026 : 19 consignes + 29 lettres × 2 voix,
 // les 4 félicitations du combo × 2 voix, et le son de fin de leçon =====
-"audios-app-alaq/lettre-alif-nom-f.mp3",
-"audios-app-alaq/lettre-ayn-nom-f.mp3",
-"audios-app-alaq/lettre-lam-nom-f.mp3",
-"audios-app-alaq/lettre-mim-nom-f.mp3",
-"audios-app-alaq/lettre-waw-nom-f.mp3",
-"audios-app-alaq/lettre-hamza-nom-f.mp3",
+// 17/08 — les 6 noms de lettres « -f » (voix IA) SORTENT du pré-cache et du dépôt :
+// Myriam a enregistré les six, et l'app demande désormais le nom PLAT en premier.
+// Leurs prises plates sont pré-cachées juste au-dessus, donc le hors ligne est intact.
 "audios-app-alaq/felicit-moumtaz-f.mp3",
 "audios-app-alaq/felicit-sahih-f.mp3",
 "audios-app-alaq/felicit-rai-f.mp3",
@@ -569,6 +566,12 @@ self.addEventListener('activate',e=>{
     await Promise.all(['lettre-alif-nom-f.mp3','lettre-alif-nom-h.mp3',
       'lettre-fa-nom-f.mp3','lettre-fa-nom-h.mp3','mot-madrasatoun.mp3',
       'sfx-bonne-reponse.mp3','sfx-fin-lecon.mp3',
+      /* 17/08 — les 5 autres noms de lettres en voix IA, RETIRÉS du dépôt le même jour.
+         `sayLetterName` demande le nom PLAT d'abord, mais retombe sur le « -f » si la
+         prise plate échoue (hors ligne, cache incomplet) : sans cette purge, un appareil
+         qui a entendu l'IA la garderait en secours à vie. */
+      'lettre-ayn-nom-f.mp3','lettre-hamza-nom-f.mp3','lettre-lam-nom-f.mp3',
+      'lettre-mim-nom-f.mp3','lettre-waw-nom-f.mp3',
       /* 10/08 tard — les syllabes IA RETIRÉES (« c'est la cata », Myriam) + 4 mots à
          revoir : servis quelques heures, ils doivent sortir du cache des appareils
          qui les ont entendus, sinon ils y restent à vie (cache MEDIA). */
