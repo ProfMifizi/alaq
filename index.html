@@ -28,8 +28,13 @@
     --cream:#F2E9DA; --muted:#B9A99A;
     --green:#6FB08A; --green-d:#558B6E; --green-bg:#22332B;
     --coral:#E07A5F; --coral-d:#BC5B43; --coral-bg:#3A2723;
-    /* Le rouge de la TACHKĪL (14/08) — celui des manuscrits, jamais celui de l'erreur */
-    --tach:#F0714A;
+    /* ⚠️ 17/08 — LA TACHKĪL PASSE AU BLEU (décision de Myriam, preview harakat-bleu-v1
+       validée). C'est LE MÊME bleu que l'unité 8 (`--info`, noyau.css) : elle y avait déjà
+       mis la terminaison dhamma/dhammatayn en bleu, et Myriam veut une seule couleur pour
+       les signes dans toute l'app. Le rouge des manuscrits (#F0714A) est retiré.
+       Contrastes MESURÉS dans la preview : 4,52:1 sur la case, 4,34:1 dans le jeton —
+       seuil 3:1 pour des glyphes de 42 px, donc large. */
+    --tach:#5BA3C4;
     /* bleu « information » (02/08) : ce qu'il y a à FAIRE, pas ce qui est raté.
        Volontairement HORS de UNIT_ACCENTS — l'unité 1 est #d8463a (l'ancien rouge du point)
        et l'unité 5 est #2f74d0. Même teinte 199°, deux valeurs selon le fond :
@@ -385,12 +390,18 @@
      numéro en fin, dans le signe ۝. */
   .mushaf{direction:rtl;font-family:var(--quran);font-size:27px;line-height:2.45;
     text-align:center;padding:2px 2px 8px}
-  .mushaf .vw{display:inline-block;margin:0 6px;padding:0 2px;border-radius:6px;
+  /* ⚠️ 17/08 — « je ne peux pas cliquer sur un mot » (Myriam, sur ordinateur). Le mot ÉTAIT
+     cliquable : rien ne le DISAIT. Sur téléphone il n'y a pas de pointeur, donc l'absence de
+     `cursor` ne se remarque pas ; à la souris, la flèche reste une flèche au-dessus de chaque
+     mot et l'écran se lit comme une page morte. Le survol double l'indice pour la souris,
+     sans rien changer au toucher. */
+  .mushaf .vw{display:inline-block;margin:0 6px;padding:0 2px;border-radius:6px;cursor:pointer;
     transition:color .25s ease,text-shadow .25s ease,background .2s}
   .mushaf .vw:active{background:rgba(232,169,79,.14)}
+  @media (hover:hover){ .mushaf .vw:hover{background:rgba(232,169,79,.10)} }
   .ayat .tete{white-space:nowrap}   /* le haut-parleur ne se sépare jamais du 1er mot */
   .vspk-in{background:none;border:none;padding:0;margin:0 2px 0 6px;color:var(--gold-d);
-    vertical-align:-.06em;display:inline-block}
+    vertical-align:-.06em;display:inline-block;cursor:pointer}
   .vspk-in .spk{width:26px;height:17px}
   .vspk-in.on{color:var(--gold2)}
   .ayano{display:inline-block;margin:0 8px;font-family:var(--quran);color:var(--gold-d);
@@ -398,7 +409,7 @@
   .ayat.en{background:rgba(232,169,79,.06);border-radius:10px}
   .lire-tout{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
     background:var(--panel);border:2px solid var(--gold-d);border-radius:14px;padding:12px;
-    color:var(--gold2);font-weight:900;font-size:15px;letter-spacing:.03em;margin:0 0 6px}
+    color:var(--gold2);font-weight:900;font-size:15px;letter-spacing:.03em;margin:0 0 6px;cursor:pointer}
   .lire-tout.on{background:var(--gold);color:var(--bg);border-color:var(--gold)}
   .lire-tout svg{height:19px;width:19px;fill:currentColor}
   .mushaf-sous{text-align:center;font-size:12px;color:var(--muted);margin:0 0 12px}
@@ -588,8 +599,14 @@
   .assoc-c .res{font-family:var(--ar);font-size:40px;color:var(--gold);line-height:1.3}
   .tapset{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;direction:rtl}
   .tapset.c3{grid-template-columns:1fr 1fr 1fr}
+  /* ⚠️ 17/08 — `justify-content:center` AJOUTÉ (Myriam : « faut centrer en hauteur les
+     lettres dans les box »). Une grille étire toutes les cases à la hauteur de la PLUS
+     HAUTE ; sans centrage vertical, les glyphes restaient collés en haut avec du vide
+     dessous — d'autant plus visible que certaines cartes portent une étiquette et d'autres
+     non. C'est le même défaut que la ligne de la hamza, corrigé le 14/08 de la même façon. */
   .ts-card{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
-    padding:14px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;direction:ltr}
+    padding:14px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;direction:ltr}
   .ts-card.seen{background:var(--gold);border-color:var(--gold)}
   .ts-card.seen .ar{color:var(--bg)}
   .ts-card.seen .enm{color:var(--bg)}
@@ -658,10 +675,16 @@
   .hkcirc .sign.top{top:5px}
   .hkcirc .sign.bot{top:130px}  /* 130 et non 122 : à 122 la kasra mordait encore le disque pointillé (Myriam 07/08) */
   .hkcirc .sign.hi{top:-4px}
+  /* ⚠️ 17/08 — LE DERNIER DÉFAUT DE CONTRASTE, tranché par Myriam (« corrige le dernier
+     point ») : le ✓ blanc sur la pastille verte faisait 2,54:1 en mode sombre (documenté le
+     13/08, laissé alors à son arbitrage). L'encre devient SOMBRE sur les pastilles claires du
+     mode nuit (vert 5,2:1 · corail 4,8:1, calculés) ; en mode clair les pastilles sont FONCÉES
+     (--green #1F6B45) : le blanc y était déjà bon (5,5:1) et le sombre y serait illisible —
+     d'où l'inversion plus bas, même logique que « l'allumé fonce en clair ». */
   .fb span:first-child{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
-    color:#fff;font-size:15px;flex:none}
-  .fb.ok span:first-child{background:var(--green);animation:fbpop .45s cubic-bezier(.3,1.6,.5,1)}
-  .fb.bad span:first-child{background:var(--coral);animation:fbpop .35s cubic-bezier(.3,1.6,.5,1),fbshake .35s ease .35s}
+    font-size:15px;flex:none}
+  .fb.ok span:first-child{background:var(--green);color:#22332B;animation:fbpop .45s cubic-bezier(.3,1.6,.5,1)}
+  .fb.bad span:first-child{background:var(--coral);color:#3A2723;animation:fbpop .35s cubic-bezier(.3,1.6,.5,1),fbshake .35s ease .35s}
   @keyframes fbpop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
   @keyframes fbshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
   /* ═══ LEÇON 7 « Lire des mots » v3 (11/08) — glisser le signe · bulles-mots · le tri ═══ */
@@ -902,6 +925,22 @@
      jamais le signe seul : voir le commentaire de `tachRouge()` (trois pistes fausses avant
      celle-ci, chacune reproduite et prouvée au harnais). */
   .tach{color:var(--tach)}
+  /* ══ LE CALQUE DE LA HARAKAT (17/08) ═══════════════════════════════════════════
+     Myriam : « seule la harakat reste bleue, la lettre garde sa couleur initiale ».
+     ⚠️ MESURÉ AU PIXEL, et c'est contre-intuitif : envelopper la marque seule dans un
+     span ne change PAS sa couleur RENDUE (0 pixel bleu, 2 778 dorés sur la sonde).
+     Chrome façonne lettre+marque comme UN SEUL cluster et le peint avec la couleur de
+     la lettre — le style calculé dit bleu, le moteur l'ignore. C'est très exactement ce
+     mur qu'annonçaient les « trois pistes fausses » du 14/08, et l'unité 8 avait fait le
+     même constat (« 0 pixel bleu sur cinq sondes », previews/_u8/01-outils.js).
+     LA SOLUTION : deux couches superposées. Dessous le cluster ENTIER coloré ; dessus la
+     LETTRE SEULE, opaque, qui recouvre pile sa jumelle. Il ne reste que la marque colorée.
+     Elles se superposent au pixel parce qu'une marque combinante ne change pas la largeur
+     d'avance de sa lettre. `.hkb` prend `inherit` : la lettre garde la couleur de SA case
+     (or dans .mimC, crème dans .dm-target) — ne jamais y écrire une couleur en dur. */
+  .hkw{position:relative;display:inline-block}
+  .hkw .hkm{position:absolute;left:0;top:0;z-index:0;color:var(--tach);white-space:pre}
+  .hkw .hkb{position:relative;z-index:1;color:inherit;white-space:pre}
   .dm-target.over{border-color:var(--gold2);background:#3a312b}
   .dm-target.done{border-style:solid;border-color:var(--green);background:var(--green-bg)}
   .dm-target .dm-res{color:var(--green)}
@@ -1085,8 +1124,14 @@
 .wlist{display:flex;flex-direction:column;margin-top:16px}
 .wrow{display:flex;align-items:center;gap:14px;padding:11px 2px;border-top:1px solid var(--line)}
 .wrow:first-child{border-top:none}
-.wspk{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:rgba(220,144,46,.13);color:var(--gold);font-size:19px;cursor:pointer;display:grid;place-items:center}
+.wspk{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:none;background:rgba(220,144,46,.13);color:var(--gold);font-size:19px;cursor:pointer;display:grid;place-items:center;
+  transition:background .18s,box-shadow .18s,transform .18s}
 .wspk:active{transform:scale(.92)}
+/* ⚠️ 17/08 — « on doit le voir s'animer ET s'illuminer » (Myriam). Les ondes bougent déjà
+   par `.spk.on` ; ici c'est le DISQUE qui s'allume, pour que le geste se voie de loin dans
+   une longue liste. Halo doré, jamais de couleur neuve : c'est le même or que le contenu.
+   `.on` est retiré par spkOff() à la fin du son. */
+.wspk.on{background:rgba(220,144,46,.30);box-shadow:0 0 0 2px var(--gold-d),0 0 14px rgba(232,169,79,.45)}
   .wspk .spk{width:23px;height:16px;color:var(--gold)}
   .grow .gspk .spk{width:24px;height:17px;color:var(--gold)}
 .wtx{flex:1;min-width:0}
@@ -1411,6 +1456,11 @@
 .acc .acc-h .cno{width:30px;height:30px;border-radius:9px;background:var(--gold);color:#1a1410;font-family:var(--ui);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
 .acc .acc-h .acc-tt{font-family:var(--ui);font-size:16px;font-weight:900;color:var(--cream)}
 .acc .acc-h .clet{margin-left:auto;font-family:var(--ar);font-size:24px;color:var(--gold)}
+/* 17/08 (Myriam : « c'est quoi la police attribuée à Article ? ») — le sujet d'une unité
+   sans lettres est un texte MIXTE : « L'article » composait en police ARABE. Le conteneur
+   passe en police d'interface, chaque segment arabe garde la sienne. */
+.acc .acc-h .clet.csujet,.ccard .ctt .clet.csujet{font-family:var(--ui);font-size:14px;font-weight:800}
+.clet .csar{font-family:var(--ar);font-size:20px;vertical-align:-1px}
 .acc .acc-h .acc-chev{margin-left:12px;color:var(--muted);font-size:13px;width:14px;text-align:center;flex:0 0 auto}
 .acc .acc-b{display:none;margin-top:12px}
 .acc.open .acc-b{display:block}
@@ -1849,7 +1899,8 @@ html.clair{
   --coral:#B3411F; --coral-d:#8C3117; --coral-bg:#FAE2DA;
   --info:#12607F; --info-d:#D6EAF3;
   --lock:#8E8071;
-  --tach:#A8300B;       /* 6,9:1 sur blanc — la tachkīl doit se lire, pas se deviner */
+  --tach:#12607F;       /* 17/08 : le bleu de la tachkīl, version claire (le `--info` du mode
+                           clair) — 6,93:1 sur blanc, MESURÉ. Remplace le rouge #A8300B. */
   --ar:'Noto Naskh Arabic',serif;
   /* tokens NEUFS, créés pour ce thème (les 154 règles en dur s'y branchent) */
   --surf-hi:#F3E4CB;    /* la surface « allumée / choisie » (ex-#3a312b) */
@@ -2227,12 +2278,29 @@ html.gtexte .onb-body{ zoom:1.22 }
    Un bandeau BAS plutôt qu'une bulle ancrée au mot : une bulle couvrirait le verset
    qu'on est en train de lire, et il faut de la place pour écrire gros. Posé AU-DESSUS
    de la barre de navigation, pas dessus. */
+/* ⚠️ 17/08 — LE « POP-UP FANTÔME » DE MYRIAM (capture du 15/08, écran d'ordinateur).
+   L'état fermé se cachait par le SEUL `translateY(140%)`. Or 140 % ne sort de l'écran que
+   si la bulle est plus haute que 165 px (il faut 0,4 × hauteur ≥ 66 px de `bottom`) : vide,
+   elle ne l'est pas, et un liseré avec sa croix restait posé en bas. Sur TÉLÉPHONE personne
+   ne l'a jamais vu — la barre du bas (`z-index:40`) recouvrait ce liseré (`z-index:38`).
+   Sur ORDINATEUR la barre part en rail vertical à gauche : plus rien ne couvre, le liseré
+   apparaît. Et il était « infermable » parce qu'il était DÉJÀ fermé : `pointer-events:none`
+   rendait sa croix inerte. `visibility` ferme pour de bon, quelle que soit la hauteur —
+   décalée de .22s pour ne pas escamoter l'animation de sortie. */
 .motbulle{position:fixed;left:0;right:0;bottom:66px;   /* recalculé à l'ouverture */
   z-index:38;background:var(--panel);border-top:2px solid var(--gold-d);
   box-shadow:0 -10px 30px rgba(0,0,0,.28);padding:14px 18px 16px;
-  max-width:560px;margin:0 auto;transform:translateY(140%);transition:transform .22s ease-out;
-  pointer-events:none}
-.motbulle.on{transform:none;pointer-events:auto}
+  max-width:560px;margin:0 auto;transform:translateY(140%);
+  transition:transform .22s ease-out,visibility 0s linear .22s;
+  visibility:hidden;pointer-events:none}
+.motbulle.on{transform:none;pointer-events:auto;visibility:visible;
+  transition:transform .22s ease-out,visibility 0s}
+/* Sur ordinateur elle se centre entre les DEUX RAILS, pas dans la fenêtre : `left:0;right:0`
+   la centrait sur toute la largeur, donc décalée par rapport à la colonne qu'on est en train
+   de lire. Mêmes variables que la mise en page bureau — elles suivent les deux paliers. */
+@media (min-width:700px){
+  .motbulle{left:var(--rail-l);right:var(--rail-r)}
+}
 .motbulle .mb-h{display:flex;align-items:center;gap:12px}
 .motbulle .mb-ar{font-family:var(--quran);font-size:40px;color:var(--gold);line-height:1.5;flex:1;
   direction:rtl;text-align:right}
@@ -3113,6 +3181,23 @@ html.clair #player.u8 .obj2 .o-jour{display:block}
 #player.u8 .vart{transition:color .18s}
 
 
+/* ── LA LOUPE (17/08) : la rangée .vtools de la leçon 4, reprise sous cloche ──
+   Redéclarée en entier : la preview n'a pas le CSS de l'app, et une fois
+   préfixées #player.u8 ces règles priment sur les .vtools/.vloupe globales.
+   var(--gold) SANS repli hexa : le token existe des deux côtés, et une couleur
+   en dur de plus déclencherait le compteur DURS_ADMIS du générateur. */
+#player.u8 .vtools{display:flex;align-items:center;justify-content:center;margin:0 0 4px}
+
+#player.u8 .vloupe{background:none;border:none;padding:2px;color:var(--gold);cursor:pointer}
+
+#player.u8 .vloupe img,#player.u8 .vloupe svg{height:30px;width:30px;display:block;transition:transform .2s}
+
+#player.u8 .vloupe.zoomed img,#player.u8 .vloupe.zoomed svg{transform:scale(1.18)}
+
+/* le verset s'agrandit : 27 → 38 px — le même geste que .verse.zoomed (52 px) */
+#player.u8 .u8mushaf.zoomed .vmot{font-size:38px;line-height:2.2}
+
+
 /* ── ecrire.css : seulement ce que l'app n'a pas ── */
 #player.u8 .asm-cible{text-align:center;margin:2px 0 12px;font-size:22px;color:var(--cream);font-weight:800}
 
@@ -3445,7 +3530,7 @@ html.clair #player.u8 .scene svg{ filter:sepia(.85) saturate(2.6) hue-rotate(-12
   </svg>
   <h2 style="margin:10px 0 14px">Content de te revoir !</h2>
   <div id="obLoginCard" style="width:100%;max-width:320px"></div>
-  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obLoginClose()">Retour</button>
+  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" id="obLoginBack" onclick="obLoginClose()">Retour</button>
 </div>
 
 <div class="sig-voile" id="sigVoile" onclick="sigFermer()"></div>
@@ -3798,7 +3883,7 @@ var LETTRES=[{"L":"ق","tr":"qaf","sol":false},{"L":"ب","tr":"ba","sol":false},
 var ALPHABET=["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
 var VERSETS=["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ","الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ","الرَّحْمَٰنِ الرَّحِيمِ","مَالِكِ يَوْمِ الدِّينِ","إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ","اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ","صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ"];
 var SONS_VERSET={"الْحَمْدُ":"alhamdu","الرَّحْمَٰنِ":"arrahmani","الرَّحِيمِ":"arrahimi","الدِّينِ":"addini","الصِّرَاطَ":"assirata","الْمُسْتَقِيمَ":"almustaqima","الْمَغْضُوبِ":"almaghdub","الضَّالِّينَ":"addallin","الَّذِينَ":"alladhina","الْعَالَمِينَ":"alamin"};
-var DISQ={"D1":{"titre":"Découverte (الـ), lecture lunaire 1/2","quels":"LUNAIRES","ordre":["qalam","qamar","bab","yad","bayt","habl","himar"],"steps":[{"t":"un","obj":"stylo","w":"qalam","nom":"Touche un stylo"},{"t":"le","obj":"stylo","w":"qalam","nom":"Retrouve le stylo"},{"t":"un","obj":"lune","w":"qamar","nom":"Touche une lune"},{"t":"le","obj":"lune","w":"qamar","nom":"Retrouve la lune"},{"t":"puzzle","w":"qalam","nom":"Puzzle : الـ + قلم"},{"t":"puzzle","w":"qamar","nom":"Puzzle : الـ + قمر"},{"t":"bul","avec":true,"nom":"Bulles : commencent par الـ"},{"t":"bul","avec":false,"nom":"Bulles : sans الـ"},{"t":"tri","nom":"Trie les 14 mots"},{"t":"fin","w":"qalam","def":true,"nom":"Terminaison 1/6"},{"t":"fin","w":"qamar","def":false,"nom":"Terminaison 2/6"},{"t":"fin","w":"bayt","def":true,"nom":"Terminaison 3/6"},{"t":"fin","w":"bab","def":false,"nom":"Terminaison 4/6"},{"t":"fin","w":"himar","def":true,"nom":"Terminaison 5/6"},{"t":"fin","w":"yad","def":false,"nom":"Terminaison 6/6"}]},"D2":{"titre":"Écrire les 7 mots, nus et définis","quels":"LUNAIRES","ordre":["qalam","qamar","bab","yad","bayt","habl","himar"],"steps":[{"t":"ecrire","w":"qalam","def":false,"nom":"Écris : un stylo (1/7)"},{"t":"ecrire","w":"qalam","def":true,"nom":"Écris : le stylo (1/7)"},{"t":"ecrire","w":"qamar","def":false,"nom":"Écris : une lune (2/7)"},{"t":"ecrire","w":"qamar","def":true,"nom":"Écris : la lune (2/7)"},{"t":"ecrire","w":"bab","def":false,"nom":"Écris : une porte (3/7)"},{"t":"ecrire","w":"bab","def":true,"nom":"Écris : la porte (3/7)"},{"t":"ecrire","w":"yad","def":false,"nom":"Écris : une main (4/7)"},{"t":"ecrire","w":"yad","def":true,"nom":"Écris : la main (4/7)"},{"t":"ecrire","w":"bayt","def":false,"nom":"Écris : une maison (5/7)"},{"t":"ecrire","w":"bayt","def":true,"nom":"Écris : la maison (5/7)"},{"t":"ecrire","w":"habl","def":false,"nom":"Écris : une corde (6/7)"},{"t":"ecrire","w":"habl","def":true,"nom":"Écris : la corde (6/7)"},{"t":"ecrire","w":"himar","def":false,"nom":"Écris : un âne (7/7)"},{"t":"ecrire","w":"himar","def":true,"nom":"Écris : l'âne (7/7)"}]},"D3":{"titre":"Le ل devient muet — lecture solaire 1/2","quels":"SOLAIRES","ordre":["dalw","dar","tayr","rumman","nahl","dhahab","tin"],"steps":[{"t":"un","obj":"seau","w":"dalw","nom":"Touche un seau"},{"t":"le","obj":"seau","w":"dalw","nom":"Retrouve le seau"},{"t":"sol","w":"dalw","nom":"Écoute : الدَّلْو"},{"t":"un","obj":"oiseau","w":"tayr","nom":"Touche un oiseau"},{"t":"le","obj":"oiseau","w":"tayr","nom":"Retrouve l'oiseau"},{"t":"sol","w":"tayr","nom":"Écoute : الطَّيْر"},{"t":"puzzle","w":"dalw","nom":"Puzzle : الـ + دلو"},{"t":"puzzle","w":"nahl","nom":"Puzzle : الـ + نحل"},{"t":"bul","avec":true,"cibles":["dalw","tayr","tin"],"leurres":["dar","nahl","rumman"],"nom":"Bulles : commencent par الـ"},{"t":"bul","avec":false,"cibles":["dar","nahl","rumman"],"leurres":["dalw","tayr","tin"],"nom":"Bulles : sans الـ"},{"t":"tri","nom":"Trie les 14 mots"},{"t":"fin","w":"dalw","def":true,"nom":"Terminaison 1/4"},{"t":"fin","w":"rumman","def":false,"nom":"Terminaison 2/4"},{"t":"fin","w":"dhahab","def":true,"nom":"Terminaison 3/4"},{"t":"fin","w":"tin","def":false,"nom":"Terminaison 4/4"}]},"D4":{"titre":"Écrire les 7 mots solaires","quels":"SOLAIRES","ordre":["dalw","dar","tayr","rumman","nahl","dhahab","tin"],"steps":[{"t":"ecrire","w":"dalw","def":false,"nom":"Écris : un seau (1/7)"},{"t":"ecrire","w":"dalw","def":true,"nom":"Écris : le seau (1/7)"},{"t":"ecrire","w":"dar","def":false,"nom":"Écris : une maison (2/7)"},{"t":"ecrire","w":"dar","def":true,"nom":"Écris : la maison (2/7)"},{"t":"ecrire","w":"tayr","def":false,"nom":"Écris : un oiseau (3/7)"},{"t":"ecrire","w":"tayr","def":true,"nom":"Écris : l'oiseau (3/7)"},{"t":"ecrire","w":"rumman","def":false,"nom":"Écris : une grenade (4/7)"},{"t":"ecrire","w":"rumman","def":true,"nom":"Écris : la grenade (4/7)"},{"t":"ecrire","w":"nahl","def":false,"nom":"Écris : une abeille (5/7)"},{"t":"ecrire","w":"nahl","def":true,"nom":"Écris : l'abeille (5/7)"},{"t":"ecrire","w":"tin","def":false,"nom":"Écris : une figue (6/7)"},{"t":"ecrire","w":"tin","def":true,"nom":"Écris : la figue (6/7)"}]},"D5":{"titre":"Poser l'article : soukoun ou chedda","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"article","w":"qalam","nom":"Article 1/14 — le stylo"},{"t":"article","w":"dalw","nom":"Article 2/14 — le seau"},{"t":"article","w":"qamar","nom":"Article 3/14 — la lune"},{"t":"article","w":"dar","nom":"Article 4/14 — la maison"},{"t":"article","w":"tayr","nom":"Article 5/14 — l'oiseau"},{"t":"article","w":"bab","nom":"Article 6/14 — la porte"},{"t":"article","w":"yad","nom":"Article 7/14 — la main"},{"t":"article","w":"rumman","nom":"Article 8/14 — la grenade"},{"t":"article","w":"bayt","nom":"Article 9/14 — la maison"},{"t":"article","w":"nahl","nom":"Article 10/14 — l'abeille"},{"t":"article","w":"dhahab","nom":"Article 11/14 — l'or"},{"t":"article","w":"habl","nom":"Article 12/14 — la corde"},{"t":"article","w":"himar","nom":"Article 13/14 — l'âne"},{"t":"article","w":"tin","nom":"Article 14/14 — la figue"}]},"D6":{"titre":"Reconnaître à l'oreille et à l'œil","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"deuxsons","w":"bayt","autre":"dar","cible":"bayt","nom":"Prononciation 1/7 — الْبَيْتُ"},{"t":"deuxecrits","w":"bayt","autre":"dar","cible":"bayt","nom":"Écriture 1/7 — الْبَيْتُ"},{"t":"deuxsons","w":"qalam","autre":"dalw","cible":"dalw","nom":"Prononciation 2/7 — الدَّلْوُ"},{"t":"deuxecrits","w":"qalam","autre":"dalw","cible":"dalw","nom":"Écriture 2/7 — الدَّلْوُ"},{"t":"deuxsons","w":"qamar","autre":"tayr","cible":"qamar","nom":"Prononciation 3/7 — الْقَمَرُ"},{"t":"deuxecrits","w":"qamar","autre":"tayr","cible":"qamar","nom":"Écriture 3/7 — الْقَمَرُ"},{"t":"deuxsons","w":"bab","autre":"rumman","cible":"rumman","nom":"Prononciation 4/7 — الرُّمَّانُ"},{"t":"deuxecrits","w":"bab","autre":"rumman","cible":"rumman","nom":"Écriture 4/7 — الرُّمَّانُ"},{"t":"deuxsons","w":"yad","autre":"nahl","cible":"yad","nom":"Prononciation 5/7 — الْيَدُ"},{"t":"deuxecrits","w":"yad","autre":"nahl","cible":"yad","nom":"Écriture 5/7 — الْيَدُ"},{"t":"deuxsons","w":"habl","autre":"dhahab","cible":"dhahab","nom":"Prononciation 6/7 — الذَّهَبُ"},{"t":"deuxecrits","w":"habl","autre":"dhahab","cible":"dhahab","nom":"Écriture 6/7 — الذَّهَبُ"},{"t":"deuxsons","w":"himar","autre":"tin","cible":"himar","nom":"Prononciation 7/7 — الْحِمَارُ"},{"t":"deuxecrits","w":"himar","autre":"tin","cible":"himar","nom":"Écriture 7/7 — الْحِمَارُ"}]},"D7":{"titre":"Trier les lettres : soleil et lune","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"suite","nom":"Un mot par lettre : la lettre après الـ","mots":["qalam","dalw","tayr","bab","yad","rumman","nahl","dhahab","habl","tin"]},{"t":"trigen","nom":"Range les 14 mots","titre":"Range chaque mot dans sa colonne","items":[{"txt":"الْقَلَمُ","sol":false,"son":"alqalam"},{"txt":"الدَّلْوُ","sol":true,"son":"aldalw"},{"txt":"الْقَمَرُ","sol":false,"son":"alqamar"},{"txt":"الدَّارُ","sol":true,"son":"aldar"},{"txt":"الطَّيْرُ","sol":true,"son":"altayr"},{"txt":"الْبَابُ","sol":false,"son":"albab"},{"txt":"الْيَدُ","sol":false,"son":"alyad"},{"txt":"الرُّمَّانُ","sol":true,"son":"alrumman"},{"txt":"الْبَيْتُ","sol":false,"son":"albayt"},{"txt":"النَّحْلُ","sol":true,"son":"alnahl"},{"txt":"الذَّهَبُ","sol":true,"son":"aldhahab"},{"txt":"الْحَبْلُ","sol":false,"son":"alhabl"},{"txt":"الْحِمَارُ","sol":false,"son":"alhimar"},{"txt":"التِّينُ","sol":true,"son":"altin"}]},{"t":"alphabet","nom":"L'alphabet : clique les 10 lettres vues","sons":["qaf","ba","ya","hha","dal","tta","ra","nun","dhal","ta"]},{"t":"trigen","nom":"Range les 10 lettres","titre":"Range chaque lettre dans sa colonne","gros":true,"items":[{"txt":"ق","sol":false,"son":"qaf"},{"txt":"ب","sol":false,"son":"ba"},{"txt":"ي","sol":false,"son":"ya"},{"txt":"ح","sol":false,"son":"hha"},{"txt":"د","sol":true,"son":"dal"},{"txt":"ط","sol":true,"son":"tta"},{"txt":"ر","sol":true,"son":"ra"},{"txt":"ن","sol":true,"son":"nun"},{"txt":"ذ","sol":true,"son":"dhal"},{"txt":"ت","sol":true,"son":"ta"}]},{"t":"bul","titre":"Éclate les lettres <b>solaires</b>","sac":[{"w":"ق","s":"qaf","ok":0},{"w":"ب","s":"ba","ok":0},{"w":"ي","s":"ya","ok":0},{"w":"ح","s":"hha","ok":0},{"w":"د","s":"dal","ok":1},{"w":"ط","s":"tta","ok":1},{"w":"ر","s":"ra","ok":1},{"w":"ن","s":"nun","ok":1},{"w":"ذ","s":"dhal","ok":1},{"w":"ت","s":"ta","ok":1}],"nom":"Bulles : les solaires","sons":["qaf","ba","ya","hha","dal","tta","ra","nun","dhal","ta"]},{"t":"bul","titre":"Éclate les lettres <b>lunaires</b>","sac":[{"w":"ق","s":"qaf","ok":1},{"w":"ب","s":"ba","ok":1},{"w":"ي","s":"ya","ok":1},{"w":"ح","s":"hha","ok":1},{"w":"د","s":"dal","ok":0},{"w":"ط","s":"tta","ok":0},{"w":"ر","s":"ra","ok":0},{"w":"ن","s":"nun","ok":0},{"w":"ذ","s":"dhal","ok":0},{"w":"ت","s":"ta","ok":0}],"nom":"Bulles : les lunaires","sons":["qaf","ba","ya","hha","dal","tta","ra","nun","dhal","ta"]},{"t":"quiz","nom":"Quiz 1/9","q":"Devant une lettre <b>solaire</b>, le <span class=\"ar\">ل</span> de l'article :","a":"devient muet","b":"se prononce","why":"Devant une solaire, le <span class=\"ar\">ل</span> devient <b>muet</b> : la lettre suivante double."},{"t":"quiz","nom":"Quiz 2/9","q":"Devant une lettre <b>lunaire</b>, le <span class=\"ar\">ل</span> de l'article :","a":"porte un soukoun <span class=\"sg\">ـْ</span>","b":"ne porte pas de soukoun","why":"Devant une lunaire le <span class=\"ar\">ل</span> se prononce : il ferme sa syllabe, donc il porte un <b>soukoun</b>."},{"t":"quiz","nom":"Quiz 3/9","q":"Après <span class=\"ar\">الـ</span>, une lettre <b>solaire</b> :","a":"porte une chedda <span class=\"sg\">ـّ</span>","b":"n'en porte pas","why":"La <b>chedda</b> écrit le doublement : c'est elle qui remplace le <span class=\"ar\">ل</span> qu'on n'entend plus."},{"t":"quiz","nom":"Quiz 4/9","q":"Un mot qui commence par <span class=\"ar\">الـ</span> finit par :","a":"une dhamma <span class=\"sg\">ـُ</span>","b":"une dhammatayn <span class=\"sg\">ـٌ</span>","why":"<span class=\"ar\">الـ</span> rend le mot <b>défini</b> : le petit « -n » de la fin tombe, la dhammatayn devient une dhamma."},{"t":"quiz","nom":"Quiz 5/9","q":"Dans <span class=\"ar\">الْقَمَرُ</span>, la lettre <span class=\"ar\">ق</span> est :","a":"lunaire","b":"solaire","why":"On entend « al-qamar » : le <span class=\"ar\">ل</span> se prononce, donc <span class=\"ar\">ق</span> est <b>lunaire</b>."},{"t":"quiz","nom":"Quiz 6/9","q":"Dans <span class=\"ar\">الْبَيْتُ</span>, la lettre <span class=\"ar\">ب</span> est :","a":"lunaire","b":"solaire","why":"On entend « al-bayt » : le <span class=\"ar\">ل</span> se prononce, donc <span class=\"ar\">ب</span> est <b>lunaire</b>."},{"t":"quiz","nom":"Quiz 7/9","q":"Dans <span class=\"ar\">الدَّارُ</span>, la lettre <span class=\"ar\">د</span> est :","a":"solaire","b":"lunaire","why":"On entend « ad-dar » : le <span class=\"ar\">ل</span> a disparu et le <span class=\"ar\">د</span> double, donc il est <b>solaire</b>."},{"t":"quiz","nom":"Quiz 8/9","q":"Dans <span class=\"ar\">الرُّمَّانُ</span>, la lettre <span class=\"ar\">ر</span> est :","a":"solaire","b":"lunaire","why":"On entend « ar-rumman » : le <span class=\"ar\">ر</span> double, donc il est <b>solaire</b>."},{"t":"quiz","nom":"Quiz 9/9","q":"Dans <span class=\"ar\">الْحِمَارُ</span>, la lettre <span class=\"ar\">ح</span> est :","a":"lunaire","b":"solaire","why":"On entend « al-himar » : le <span class=\"ar\">ل</span> se prononce, donc <span class=\"ar\">ح</span> est <b>lunaire</b>."}]},"D8":{"titre":"Les الـ de la Fātiḥa","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"verset","versets":[0],"cherche":"sol","nom":"V1 — le ل muet","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> ne s'entend pas"},{"t":"verset","versets":[2,3],"cherche":"sol","nom":"V3-V4 — le ل muet","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> ne s'entend pas"},{"t":"verset","versets":[5,6],"cherche":"sol","nom":"V6-V7 — le ل muet","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> ne s'entend pas"},{"t":"verset","versets":[1],"cherche":"lun","nom":"V2 — les الـ prononcés","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> s'entend"},{"t":"verset","versets":[5,6],"cherche":"lun","nom":"V6-V7 — les الـ prononcés","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> s'entend"},{"t":"spotmot","nom":"La sourate entière","titre":"Touche tous les <span class=\"ar\">الـ</span> de la sourate"}]},"D9":{"titre":"Bilan sans-faute 🌙🌞","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"article","w":"qalam","nom":"Bilan 1/10 — poser l'article (lunaire)"},{"t":"article","w":"dalw","nom":"Bilan 2/10 — poser l'article (solaire)"},{"t":"deuxsons","w":"bayt","autre":"dar","nom":"Bilan 3/10 — l'oreille (بيت / دار)"},{"t":"deuxecrits","w":"qamar","autre":"tayr","nom":"Bilan 4/10 — l'œil"},{"t":"ecrire","w":"habl","def":true,"nom":"Bilan 5/10 — écrire « la corde »"},{"t":"ecrire","w":"nahl","def":true,"nom":"Bilan 6/10 — écrire « l'abeille »"},{"t":"trigen","nom":"Bilan 7/10 — trier les 10 lettres","gros":true,"titre":"Range chaque lettre dans sa colonne","items":[{"txt":"ق","sol":false,"son":"qaf"},{"txt":"ب","sol":false,"son":"ba"},{"txt":"ي","sol":false,"son":"ya"},{"txt":"ح","sol":false,"son":"hha"},{"txt":"د","sol":true,"son":"dal"},{"txt":"ط","sol":true,"son":"tta"},{"txt":"ر","sol":true,"son":"ra"},{"txt":"ن","sol":true,"son":"nun"},{"txt":"ذ","sol":true,"son":"dhal"},{"txt":"ت","sol":true,"son":"ta"}]},{"t":"quiz","nom":"Bilan 8/10 — la règle solaire","q":"Après <span class=\"ar\">الـ</span>, une lettre <b>solaire</b> :","a":"porte une chedda <span class=\"sg\">ـّ</span>","b":"n'en porte pas","why":"La <b>chedda</b> écrit le doublement : c'est elle qui remplace le <span class=\"ar\">ل</span> qu'on n'entend plus."},{"t":"quiz","nom":"Bilan 9/10 — la terminaison","q":"Un mot qui commence par <span class=\"ar\">الـ</span> finit par :","a":"une dhamma <span class=\"sg\">ـُ</span>","b":"une dhammatayn <span class=\"sg\">ـٌ</span>","why":"<span class=\"ar\">الـ</span> rend le mot <b>défini</b> : le petit « -n » de la fin tombe, la dhammatayn devient une dhamma."},{"t":"spotmot","nom":"Bilan 10/10 — les الـ de la Fātiḥa","titre":"Touche tous les <span class=\"ar\">الـ</span> de la sourate"}]}};
+var DISQ={"D1":{"titre":"Découverte (الـ), lecture lunaire 1/2","quels":"LUNAIRES","ordre":["qalam","qamar","bab","yad","bayt","habl","himar"],"steps":[{"t":"un","obj":"stylo","w":"qalam","nom":"Touche un stylo"},{"t":"le","obj":"stylo","w":"qalam","nom":"Retrouve le stylo"},{"t":"un","obj":"lune","w":"qamar","nom":"Touche une lune"},{"t":"le","obj":"lune","w":"qamar","nom":"Retrouve la lune"},{"t":"puzzle","w":"qalam","nom":"Puzzle : الـ + قلم"},{"t":"puzzle","w":"qamar","nom":"Puzzle : الـ + قمر"},{"t":"bul","avec":true,"nom":"Bulles : commencent par الـ"},{"t":"bul","avec":false,"nom":"Bulles : sans الـ"},{"t":"tri","nom":"Trie les 14 mots"},{"t":"fin","w":"qalam","def":true,"nom":"Terminaison 1/6"},{"t":"fin","w":"qamar","def":false,"nom":"Terminaison 2/6"},{"t":"fin","w":"bayt","def":true,"nom":"Terminaison 3/6"},{"t":"fin","w":"bab","def":false,"nom":"Terminaison 4/6"},{"t":"fin","w":"himar","def":true,"nom":"Terminaison 5/6"},{"t":"fin","w":"yad","def":false,"nom":"Terminaison 6/6"}]},"D2":{"titre":"Écrire les 7 mots, nus et définis","quels":"LUNAIRES","ordre":["qalam","qamar","bab","yad","bayt","habl","himar"],"steps":[{"t":"ecrire","w":"qalam","def":false,"nom":"Écris : un stylo (1/7)"},{"t":"ecrire","w":"qalam","def":true,"nom":"Écris : le stylo (1/7)"},{"t":"ecrire","w":"qamar","def":false,"nom":"Écris : une lune (2/7)"},{"t":"ecrire","w":"qamar","def":true,"nom":"Écris : la lune (2/7)"},{"t":"ecrire","w":"bab","def":false,"nom":"Écris : une porte (3/7)"},{"t":"ecrire","w":"bab","def":true,"nom":"Écris : la porte (3/7)"},{"t":"ecrire","w":"yad","def":false,"nom":"Écris : une main (4/7)"},{"t":"ecrire","w":"yad","def":true,"nom":"Écris : la main (4/7)"},{"t":"ecrire","w":"bayt","def":false,"nom":"Écris : une maison (5/7)"},{"t":"ecrire","w":"bayt","def":true,"nom":"Écris : la maison (5/7)"},{"t":"ecrire","w":"habl","def":false,"nom":"Écris : une corde (6/7)"},{"t":"ecrire","w":"habl","def":true,"nom":"Écris : la corde (6/7)"},{"t":"ecrire","w":"himar","def":false,"nom":"Écris : un âne (7/7)"},{"t":"ecrire","w":"himar","def":true,"nom":"Écris : l'âne (7/7)"}]},"D3":{"titre":"Le ل devient muet — lecture solaire 1/2","quels":"SOLAIRES","ordre":["dalw","dar","tayr","rumman","nahl","dhahab","tin"],"steps":[{"t":"un","obj":"seau","w":"dalw","nom":"Touche un seau"},{"t":"le","obj":"seau","w":"dalw","nom":"Retrouve le seau"},{"t":"sol","w":"dalw","nom":"Écoute : الدَّلْو"},{"t":"un","obj":"oiseau","w":"tayr","nom":"Touche un oiseau"},{"t":"le","obj":"oiseau","w":"tayr","nom":"Retrouve l'oiseau"},{"t":"sol","w":"tayr","nom":"Écoute : الطَّيْر"},{"t":"puzzle","w":"dalw","nom":"Puzzle : الـ + دلو"},{"t":"puzzle","w":"nahl","nom":"Puzzle : الـ + نحل"},{"t":"bul","avec":true,"cibles":["dalw","tayr","tin"],"leurres":["dar","nahl","rumman"],"nom":"Bulles : commencent par الـ"},{"t":"bul","avec":false,"cibles":["dar","nahl","rumman"],"leurres":["dalw","tayr","tin"],"nom":"Bulles : sans الـ"},{"t":"tri","nom":"Trie les 14 mots"},{"t":"fin","w":"dalw","def":true,"nom":"Terminaison 1/4"},{"t":"fin","w":"rumman","def":false,"nom":"Terminaison 2/4"},{"t":"fin","w":"dhahab","def":true,"nom":"Terminaison 3/4"},{"t":"fin","w":"tin","def":false,"nom":"Terminaison 4/4"}]},"D4":{"titre":"Écrire les 7 mots solaires","quels":"SOLAIRES","ordre":["dalw","dar","tayr","rumman","nahl","dhahab","tin"],"steps":[{"t":"ecrire","w":"dalw","def":false,"nom":"Écris : un seau (1/7)"},{"t":"ecrire","w":"dalw","def":true,"nom":"Écris : le seau (1/7)"},{"t":"ecrire","w":"dar","def":false,"nom":"Écris : une maison (2/7)"},{"t":"ecrire","w":"dar","def":true,"nom":"Écris : la maison (2/7)"},{"t":"ecrire","w":"tayr","def":false,"nom":"Écris : un oiseau (3/7)"},{"t":"ecrire","w":"tayr","def":true,"nom":"Écris : l'oiseau (3/7)"},{"t":"ecrire","w":"rumman","def":false,"nom":"Écris : une grenade (4/7)"},{"t":"ecrire","w":"rumman","def":true,"nom":"Écris : la grenade (4/7)"},{"t":"ecrire","w":"nahl","def":false,"nom":"Écris : une abeille (5/7)"},{"t":"ecrire","w":"nahl","def":true,"nom":"Écris : l'abeille (5/7)"},{"t":"ecrire","w":"tin","def":false,"nom":"Écris : une figue (6/7)"},{"t":"ecrire","w":"tin","def":true,"nom":"Écris : la figue (6/7)"}]},"D5":{"titre":"Poser l'article : soukoun ou chedda","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"article","w":"qalam","nom":"Article 1/14 — le stylo"},{"t":"article","w":"dalw","nom":"Article 2/14 — le seau"},{"t":"article","w":"qamar","nom":"Article 3/14 — la lune"},{"t":"article","w":"dar","nom":"Article 4/14 — la maison"},{"t":"article","w":"tayr","nom":"Article 5/14 — l'oiseau"},{"t":"article","w":"bab","nom":"Article 6/14 — la porte"},{"t":"article","w":"yad","nom":"Article 7/14 — la main"},{"t":"article","w":"rumman","nom":"Article 8/14 — la grenade"},{"t":"article","w":"bayt","nom":"Article 9/14 — la maison"},{"t":"article","w":"nahl","nom":"Article 10/14 — l'abeille"},{"t":"article","w":"dhahab","nom":"Article 11/14 — l'or"},{"t":"article","w":"habl","nom":"Article 12/14 — la corde"},{"t":"article","w":"himar","nom":"Article 13/14 — l'âne"},{"t":"article","w":"tin","nom":"Article 14/14 — la figue"}]},"D6":{"titre":"Reconnaître à l'oreille et à l'œil","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"deuxsons","w":"bayt","autre":"dar","cible":"bayt","nom":"Prononciation 1/7 — الْبَيْتُ"},{"t":"deuxecrits","w":"bayt","autre":"dar","cible":"bayt","nom":"Écriture 1/7 — الْبَيْتُ"},{"t":"deuxsons","w":"qalam","autre":"dalw","cible":"dalw","nom":"Prononciation 2/7 — الدَّلْوُ"},{"t":"deuxecrits","w":"qalam","autre":"dalw","cible":"dalw","nom":"Écriture 2/7 — الدَّلْوُ"},{"t":"deuxsons","w":"qamar","autre":"tayr","cible":"qamar","nom":"Prononciation 3/7 — الْقَمَرُ"},{"t":"deuxecrits","w":"qamar","autre":"tayr","cible":"qamar","nom":"Écriture 3/7 — الْقَمَرُ"},{"t":"deuxsons","w":"bab","autre":"rumman","cible":"rumman","nom":"Prononciation 4/7 — الرُّمَّانُ"},{"t":"deuxecrits","w":"bab","autre":"rumman","cible":"rumman","nom":"Écriture 4/7 — الرُّمَّانُ"},{"t":"deuxsons","w":"yad","autre":"nahl","cible":"yad","nom":"Prononciation 5/7 — الْيَدُ"},{"t":"deuxecrits","w":"yad","autre":"nahl","cible":"yad","nom":"Écriture 5/7 — الْيَدُ"},{"t":"deuxsons","w":"habl","autre":"dhahab","cible":"dhahab","nom":"Prononciation 6/7 — الذَّهَبُ"},{"t":"deuxecrits","w":"habl","autre":"dhahab","cible":"dhahab","nom":"Écriture 6/7 — الذَّهَبُ"},{"t":"deuxsons","w":"himar","autre":"tin","cible":"himar","nom":"Prononciation 7/7 — الْحِمَارُ"},{"t":"deuxecrits","w":"himar","autre":"tin","cible":"himar","nom":"Écriture 7/7 — الْحِمَارُ"}]},"D7":{"titre":"Trier les lettres : soleil et lune","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"suite","nom":"Un mot par lettre : la lettre après الـ","mots":["qalam","dalw","tayr","bab","yad","rumman","nahl","dhahab","habl","tin"]},{"t":"trigen","nom":"Range les 14 mots","titre":"Range chaque mot dans sa colonne","items":[{"txt":"الْقَلَمُ","sol":false,"son":"alqalam"},{"txt":"الدَّلْوُ","sol":true,"son":"aldalw"},{"txt":"الْقَمَرُ","sol":false,"son":"alqamar"},{"txt":"الدَّارُ","sol":true,"son":"aldar"},{"txt":"الطَّيْرُ","sol":true,"son":"altayr"},{"txt":"الْبَابُ","sol":false,"son":"albab"},{"txt":"الْيَدُ","sol":false,"son":"alyad"},{"txt":"الرُّمَّانُ","sol":true,"son":"alrumman"},{"txt":"الْبَيْتُ","sol":false,"son":"albayt"},{"txt":"النَّحْلُ","sol":true,"son":"alnahl"},{"txt":"الذَّهَبُ","sol":true,"son":"aldhahab"},{"txt":"الْحَبْلُ","sol":false,"son":"alhabl"},{"txt":"الْحِمَارُ","sol":false,"son":"alhimar"},{"txt":"التِّينُ","sol":true,"son":"altin"}]},{"t":"alphabet","nom":"L'alphabet : clique les 10 lettres vues","sons":["qaf","ba","ya","hha","dal","tta","ra","nun","dhal","ta"]},{"t":"trigen","nom":"Range les 10 lettres","titre":"Range chaque lettre dans sa colonne","gros":true,"items":[{"txt":"ق","sol":false,"son":"qaf"},{"txt":"ب","sol":false,"son":"ba"},{"txt":"ي","sol":false,"son":"ya"},{"txt":"ح","sol":false,"son":"hha"},{"txt":"د","sol":true,"son":"dal"},{"txt":"ط","sol":true,"son":"tta"},{"txt":"ر","sol":true,"son":"ra"},{"txt":"ن","sol":true,"son":"nun"},{"txt":"ذ","sol":true,"son":"dhal"},{"txt":"ت","sol":true,"son":"ta"}]},{"t":"bul","titre":"Éclate les lettres <b>solaires</b>","sac":[{"w":"ق","s":"qaf","ok":0},{"w":"ب","s":"ba","ok":0},{"w":"ي","s":"ya","ok":0},{"w":"ح","s":"hha","ok":0},{"w":"د","s":"dal","ok":1},{"w":"ط","s":"tta","ok":1},{"w":"ر","s":"ra","ok":1},{"w":"ن","s":"nun","ok":1},{"w":"ذ","s":"dhal","ok":1},{"w":"ت","s":"ta","ok":1}],"nom":"Bulles : les solaires","sons":["qaf","ba","ya","hha","dal","tta","ra","nun","dhal","ta"]},{"t":"bul","titre":"Éclate les lettres <b>lunaires</b>","sac":[{"w":"ق","s":"qaf","ok":1},{"w":"ب","s":"ba","ok":1},{"w":"ي","s":"ya","ok":1},{"w":"ح","s":"hha","ok":1},{"w":"د","s":"dal","ok":0},{"w":"ط","s":"tta","ok":0},{"w":"ر","s":"ra","ok":0},{"w":"ن","s":"nun","ok":0},{"w":"ذ","s":"dhal","ok":0},{"w":"ت","s":"ta","ok":0}],"nom":"Bulles : les lunaires","sons":["qaf","ba","ya","hha","dal","tta","ra","nun","dhal","ta"]},{"t":"quiz","nom":"Quiz 1/9","q":"Devant une lettre <b>solaire</b>, le <span class=\"ar\">ل</span> de l'article :","a":"devient muet","b":"se prononce","why":"Devant une solaire, le <span class=\"ar\">ل</span> devient <b>muet</b> : la lettre suivante double."},{"t":"quiz","nom":"Quiz 2/9","q":"Devant une lettre <b>lunaire</b>, le <span class=\"ar\">ل</span> de l'article :","a":"porte un soukoun <span class=\"sg\">ـْ</span>","b":"ne porte pas de soukoun","why":"Devant une lunaire le <span class=\"ar\">ل</span> se prononce : il ferme sa syllabe, donc il porte un <b>soukoun</b>."},{"t":"quiz","nom":"Quiz 3/9","q":"Après <span class=\"ar\">الـ</span>, une lettre <b>solaire</b> :","a":"porte une chedda <span class=\"sg\">ـّ</span>","b":"ne porte pas de chedda","why":"La <b>chedda</b> écrit le doublement : c'est elle qui remplace le <span class=\"ar\">ل</span> qu'on n'entend plus."},{"t":"quiz","nom":"Quiz 4/9","q":"Un mot qui commence par <span class=\"ar\">الـ</span> finit par :","a":"une dhamma <span class=\"sg\">ـُ</span>","b":"une dhammatayn <span class=\"sg\">ـٌ</span>","why":"<span class=\"ar\">الـ</span> rend le mot <b>défini</b> : le petit « -n » de la fin tombe, la dhammatayn devient une dhamma."},{"t":"quiz","nom":"Quiz 5/9","q":"Dans <span class=\"ar\">الْقَمَرُ</span>, la lettre <span class=\"ar\">ق</span> est :","a":"lunaire","b":"solaire","why":"On entend « al-qamar » : le <span class=\"ar\">ل</span> se prononce, donc <span class=\"ar\">ق</span> est <b>lunaire</b>."},{"t":"quiz","nom":"Quiz 6/9","q":"Dans <span class=\"ar\">الْبَيْتُ</span>, la lettre <span class=\"ar\">ب</span> est :","a":"lunaire","b":"solaire","why":"On entend « al-bayt » : le <span class=\"ar\">ل</span> se prononce, donc <span class=\"ar\">ب</span> est <b>lunaire</b>."},{"t":"quiz","nom":"Quiz 7/9","q":"Dans <span class=\"ar\">الدَّارُ</span>, la lettre <span class=\"ar\">د</span> est :","a":"solaire","b":"lunaire","why":"On entend « ad-dar » : le <span class=\"ar\">ل</span> a disparu et le <span class=\"ar\">د</span> double, donc il est <b>solaire</b>."},{"t":"quiz","nom":"Quiz 8/9","q":"Dans <span class=\"ar\">الرُّمَّانُ</span>, la lettre <span class=\"ar\">ر</span> est :","a":"solaire","b":"lunaire","why":"On entend « ar-rumman » : le <span class=\"ar\">ر</span> double, donc il est <b>solaire</b>."},{"t":"quiz","nom":"Quiz 9/9","q":"Dans <span class=\"ar\">الْحِمَارُ</span>, la lettre <span class=\"ar\">ح</span> est :","a":"lunaire","b":"solaire","why":"On entend « al-himar » : le <span class=\"ar\">ل</span> se prononce, donc <span class=\"ar\">ح</span> est <b>lunaire</b>."}]},"D8":{"titre":"Les الـ de la Fātiḥa","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"verset","versets":[0],"cherche":"sol","nom":"V1 — le ل muet","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> ne s'entend pas"},{"t":"verset","versets":[2,3],"cherche":"sol","nom":"V3-V4 — le ل muet","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> ne s'entend pas"},{"t":"verset","versets":[5,6],"cherche":"sol","nom":"V6-V7 — le ل muet","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> ne s'entend pas"},{"t":"verset","versets":[1],"cherche":"lun","nom":"V2 — les الـ prononcés","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> s'entend"},{"t":"verset","versets":[5,6],"cherche":"lun","nom":"V6-V7 — les الـ prononcés","titre":"Touche les <span class=\"ar\">الـ</span> où le <span class=\"ar\">ل</span> s'entend"},{"t":"spotmot","nom":"La sourate entière","titre":"Touche tous les <span class=\"ar\">الـ</span> de la sourate"}]},"D9":{"titre":"Bilan sans-faute 🌙🌞","quels":"TOUS","ordre":["qalam","dalw","qamar","dar","tayr","bab","yad","rumman","bayt","nahl","dhahab","habl","himar","tin"],"steps":[{"t":"article","w":"qalam","nom":"Bilan 1/10 — poser l'article (lunaire)"},{"t":"article","w":"dalw","nom":"Bilan 2/10 — poser l'article (solaire)"},{"t":"deuxsons","w":"bayt","autre":"dar","nom":"Bilan 3/10 — l'oreille (بيت / دار)"},{"t":"deuxecrits","w":"qamar","autre":"tayr","nom":"Bilan 4/10 — l'œil"},{"t":"ecrire","w":"habl","def":true,"nom":"Bilan 5/10 — écrire « la corde »"},{"t":"ecrire","w":"nahl","def":true,"nom":"Bilan 6/10 — écrire « l'abeille »"},{"t":"trigen","nom":"Bilan 7/10 — trier les 10 lettres","gros":true,"titre":"Range chaque lettre dans sa colonne","items":[{"txt":"ق","sol":false,"son":"qaf"},{"txt":"ب","sol":false,"son":"ba"},{"txt":"ي","sol":false,"son":"ya"},{"txt":"ح","sol":false,"son":"hha"},{"txt":"د","sol":true,"son":"dal"},{"txt":"ط","sol":true,"son":"tta"},{"txt":"ر","sol":true,"son":"ra"},{"txt":"ن","sol":true,"son":"nun"},{"txt":"ذ","sol":true,"son":"dhal"},{"txt":"ت","sol":true,"son":"ta"}]},{"t":"quiz","nom":"Bilan 8/10 — la règle solaire","q":"Après <span class=\"ar\">الـ</span>, une lettre <b>solaire</b> :","a":"porte une chedda <span class=\"sg\">ـّ</span>","b":"ne porte pas de chedda","why":"La <b>chedda</b> écrit le doublement : c'est elle qui remplace le <span class=\"ar\">ل</span> qu'on n'entend plus."},{"t":"quiz","nom":"Bilan 9/10 — la terminaison","q":"Un mot qui commence par <span class=\"ar\">الـ</span> finit par :","a":"une dhamma <span class=\"sg\">ـُ</span>","b":"une dhammatayn <span class=\"sg\">ـٌ</span>","why":"<span class=\"ar\">الـ</span> rend le mot <b>défini</b> : le petit « -n » de la fin tombe, la dhammatayn devient une dhamma."},{"t":"spotmot","nom":"Bilan 10/10 — les الـ de la Fātiḥa","titre":"Touche tous les <span class=\"ar\">الـ</span> de la sourate"}]}};
 /* W · MOTS · ORDRE changent de disque en disque : posés à chaque écran, jamais gardés. */
 var W=TOUS, MOTS=TOUS, ORDRE=[];
 
@@ -3861,6 +3946,18 @@ function coeur() {
   var a = document.getElementById('p-hearts'), b = document.getElementById('st-hearts');
   if (a) a.textContent = S.hearts;
   if (b) b.textContent = S.hearts;
+  /* 🔴 17/08 — le dernier cœur perdu reroute le bouton du bas vers goNoHearts : la règle
+     de l'app (fsTap, tileTap). Huit sites du noyau perdent un cœur SANS rate() (objets,
+     bulles, tri, écriture, écoute solaire, lettres ×2, piège du verset) : rien ne
+     reroutait CONTINUER — reussi() passe par objectifAtteint/ctaOn2 qui ne touchent
+     jamais onclick — et la leçon continuait à zéro vie (Myriam : « je continue de
+     pouvoir faire des exercices bien que mes vies soient à zéro »). DIFFÉRÉ d'un tour :
+     le piège du verset écrit `c.onclick = pierreReprise` APRÈS coeur(), dans le même
+     geste — une assignation synchrone serait écrasée. */
+  if (S.hearts <= 0) setTimeout(function () {
+    var c = document.getElementById('cta');
+    if (c && !REVIEW && !RECHARGE && S.hearts <= 0) c.onclick = goNoHearts;
+  }, 0);
 }
 
 function next() { advance(); }
@@ -3903,6 +4000,14 @@ function reussi(compte) {
     if (k >= 0) MISSED.splice(k, 1);
   }
   objectifAtteint();
+  /* ⚠️ 17/08 (trouvé par l'enquête vies-à-zéro, en passant) — LE BOUTON POUVAIT MOURIR :
+     le piège du verset, après « J'AI COMPRIS », pose `c.onclick = null` (pierreReprise) ;
+     quand l'écran se termine ensuite, objectifAtteint→ctaOn2 RÉACTIVE le bouton sans
+     jamais réécrire onclick → CONTINUER cliquable et inerte. Dans la preview, le reussi
+     du noyau reposait onclick=next ; l'adaptateur ne le faisait pas. On ne réarme QUE si
+     le bouton est nu : un onclick déjà posé (goNoHearts à zéro cœur) reste roi. */
+  var c = document.getElementById('cta');
+  if (c && !c.onclick) c.onclick = _suite();
 }
 
 function rate(court, longue) {
@@ -5838,6 +5943,22 @@ function motVerset(m){
   return '<span class="vart">' + m.slice(0, i) + ZWJ + '</span>' + ZWJ + m.slice(i);
 }
 
+/* ── LA LOUPE (manque signalé par Myriam, 17/08) — reprise de la leçon 4 ──────
+   L'app la sert par le REGISTRE des icônes (icoImg, jamais de chemin en dur) ;
+   la preview, qui n'a pas le registre, la DESSINE en SVG. `zoomVerse` de l'app
+   n'est pas réutilisable : il vise #verseBox, l'écran spot des unités 1-7. */
+function loupeHTML(){
+  if (typeof icoImg === 'function') return icoImg('loupe');
+  return '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="3">' +
+    '<circle cx="13" cy="13" r="8"/><path d="M19 19l8 8" stroke-linecap="round"/></svg>';
+}
+/* même contrat que zoomVerse : l'état vit dans la classe, sur la boîte ET la loupe */
+function vsZoom(btn){
+  var v = document.getElementById('vs-box'); if(!v) return;
+  var grand = v.classList.toggle('zoomed');
+  if(btn && btn.classList) btn.classList.toggle('zoomed', grand);
+}
+
 function ecranVerset(st,b){
   var vs = st.versets.map(function(i){ return { i:i, mots:VERSETS[i].split(' ') }; });
   var cherche = st.cherche;                        // 'sol' | 'lun' | 'tous'
@@ -5855,8 +5976,11 @@ function ecranVerset(st,b){
   b.className = 'p-body';
   b.innerHTML =
     '<div class="q-title">' + st.titre + '</div>' +
+    '<div class="vtools">' +
+      '<button class="vloupe" onclick="vsZoom(this)" aria-label="Agrandir">' + loupeHTML() + '</button>' +
+    '</div>' +
     '<div id="bul-c">' + n + '</div>' +
-    '<div class="u8mushaf">' + html + '</div>';
+    '<div class="u8mushaf" id="vs-box">' + html + '</div>';
   window._vs = { reste:n };
 }
 function vmTap(el){
@@ -6586,7 +6710,12 @@ function fixOrdreFormes(){
 
 /* ================= ÉTAT ================= */
 const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
-const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qari:'ar.aymanswoaid'};
+/* ⚠️ 17/08 — `qari` PASSE À al-Ḥuṣarī. C'est ICI que se jouait le « pas de surlignage » signalé
+   par Myriam : le défaut était Ayman Suwayd, la SEULE voix de tête sans repères `HOROV`, donc
+   la fonction phare était morte pour qui n'ouvre jamais le sélecteur. al-Ḥuṣarī : 6,1 s de
+   tempo (le plus lent des voix segmentées), 7/7 versets complets, fichiers hébergés — et c'est
+   le muṣḥaf muʿallim, la récitation enregistrée POUR enseigner. Voir QARI_DEFAUT. */
+const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qari:'ar.husary'};
 function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
 function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} cloudSaveSoon();}
 
@@ -6609,12 +6738,49 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
   try{ if(!SB||!CLOUD.user)return;
     const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
     const remote=r&&r.data&&r.data.state;
-    // Appareil fraîchement déconnecté (_fresh) : le NUAGE fait foi quel que soit son âge —
-    // sinon l'état vide (horodaté « maintenant ») écraserait la progression du compte.
-    const takeRemote=remote&&(S._fresh?true:(remote._ts||0)>(S._ts||0));
+    /* ═══ 🔴 17/08 — LA FUSION POUVAIT DÉTRUIRE LA PROGRESSION DU COMPTE ═══════════════
+       Myriam : « je ne retrouve pas ma progression faite sur l'app sur mon ordinateur quand
+       je me connecte avec mon mail. C'est très problématique pour le user. » C'était pire que
+       ça : la règle « le plus récent gagne » comparait deux horodatages SANS regarder à QUI
+       appartient l'état local. Or sur un appareil qu'on vient d'utiliser, `S._ts` vaut
+       « maintenant » — donc le local gagnait, ET la branche `else` renvoyait cet état pauvre
+       vers le nuage (`cloudSaveNow`). **La progression du téléphone était écrasée dans le
+       cloud**, pas seulement ignorée sur l'ordinateur.
+       Le garde-fou `_fresh` existait mais n'était posé qu'à la DÉCONNEXION ou via « j'ai déjà
+       un compte » à l'inscription — jamais quand on se connecte depuis Profil, le chemin normal.
+       LA RÈGLE JUSTE : un horodatage ne vaut que si l'état local appartient DÉJÀ à ce compte.
+       On retient donc l'identifiant du dernier compte vu (`_uid`). S'il diffère — ou s'il est
+       absent, cas d'un appareil jamais connecté — le local n'appartient à personne ou à
+       QUELQU'UN D'AUTRE : le nuage fait foi, quel que soit son âge. Comparer des dates n'a de
+       sens qu'entre deux états du MÊME compte.
+       ⚠️ Corollaire : la branche `else` n'écrit plus dans le nuage que quand on est certain
+       que le local est bien celui de ce compte. C'est elle qui faisait les dégâts. */
+    const memeCompte = S._uid && CLOUD.user && S._uid===CLOUD.user.id;
+    /* ⚠️ 17/08 soir — LA FENÊTRE DE MIGRATION, attrapée par la question de Myriam (« c'est
+       réglé ou non ? »). Avant ce build, AUCUN état ne portait `_uid` : son téléphone —
+       riche et légitime — est indistinguable d'un appareil étranger. Trancher à la DATE
+       rejouerait le bug du matin ; trancher « nuage d'office » aurait DÉTRUIT la progression
+       du téléphone à sa première reconnexion (le nuage peut porter l'état pauvre poussé par
+       l'ordinateur). Pour un état SANS _uid on garde donc le plus RICHE — le nombre de
+       leçons cochées, la seule mesure qui ne mente pas — et l'état écarté est mis de côté
+       dans `alaq2_ecarte`, jamais détruit. Dès que `_uid` est posé (ce build le pose
+       partout), la règle stricte reprend : les dates ne se comparent qu'au sein d'un même
+       compte. Risque assumé et documenté : pendant cette fenêtre, un appareil jamais
+       déconnecté par son ancien propriétaire peut imposer son état plus riche — le cas
+       normal reste couvert par le nettoyage de cloudLogout. */
+    const richesse=function(x){ return x?Object.keys(x.done||{}).length:0; };
+    let takeRemote;
+    if(!remote) takeRemote=false;
+    else if(S._fresh) takeRemote=true;
+    else if(memeCompte) takeRemote=(remote._ts||0)>(S._ts||0);
+    else if(!S._uid) takeRemote=richesse(remote)>=richesse(S);  // fenêtre de migration : propriété INCONNUE
+    else takeRemote=true;  // _uid d'un AUTRE compte : la propriété est PROUVÉE, le nuage fait foi — sans heuristique
+    /* rien ne s'écrase en silence : l'état perdant est gardé sous une clé de côté */
+    try{ var _perdant=takeRemote?S:remote; if(richesse(_perdant)>0)localStorage.setItem('alaq2_ecarte',JSON.stringify(_perdant)); }catch(e){}
     delete S._fresh;
     if(takeRemote){
       S=Object.assign({},DEF,remote); delete S._fresh;
+      S._uid=CLOUD.user.id;                           // désormais cet appareil sait à qui est cet état
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
       fixOrdreFormes(); // l'état du nuage peut venir d'un appareil resté sur l'ancien ordre
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
@@ -6623,6 +6789,13 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
       _homeFocusPending=true; // et on recentre sur son disque courant
       try{refreshStats();renderHome();}catch(e){}
     } else {
+      /* On n'arrive ici que dans DEUX cas sûrs : ① même compte, et l'état local est le plus
+         récent — c'est la vraie fusion ; ② le compte n'a AUCUNE ligne dans le nuage (première
+         inscription), et l'état local devient légitimement le sien. Dans les deux cas on peut
+         écrire dans le nuage sans rien détruire. ⚠️ Avant le 17/08, on y arrivait AUSSI quand
+         un autre compte se connectait sur un appareil déjà utilisé — et on y écrasait sa
+         progression. C'est exactement ce que `_uid` ferme. */
+      if(CLOUD.user)S._uid=CLOUD.user.id;
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
       cloudSaveNow();
     }
@@ -6634,7 +6807,13 @@ async function cloudInit(){
     const g=await SB.auth.getSession();
     const sess=g&&g.data&&g.data.session;
     if(sess&&sess.user){ CLOUD.user=sess.user; cloudPull(); }
-    SB.auth.onAuthStateChange((ev,se)=>{ CLOUD.user=(se&&se.user)||null; if(_progVisible())renderProg(); });
+    else { verrouConnexion(); }   /* 17/08 : aucune session ET cet appareil connaissait un compte */
+    SB.auth.onAuthStateChange((ev,se)=>{ CLOUD.user=(se&&se.user)||null;
+      if(_progVisible())renderProg();
+      /* une session qui EXPIRE en cours de route doit verrouiller elle aussi : c'est
+         exactement ce qui est arrivé à Myriam après la mise à jour. */
+      if(!CLOUD.user)verrouConnexion(); else verrouLibere();
+    });
   }catch(e){}
 }
 async function cloudSendCode(btn){
@@ -6698,6 +6877,7 @@ async function cloudVerify(){
   try{ await cloudPull(); }catch(_){}          // une erreur ici ne doit PAS faire croire que le code est faux
   if(_mk!==null){ S.mktOk=_mk; S.mktTs=Date.now(); save(); }  // consentement newsletter, HORODATÉ (preuve RGPD)
   try{ renderProg(); }catch(_){}
+  verrouLibere();                                 // 17/08 : la connexion lève le verrou
   const lg=document.getElementById('obLogin');    // « J'ai déjà un compte » : on rejoint l'accueil
   if(lg&&lg.classList.contains('on')){ lg.classList.remove('on'); var lc=document.getElementById('obLoginCard'); if(lc)lc.innerHTML='';
     try{showTab('home');}catch(_){} try{maybeGhufranPrompt();}catch(_){} return; }
@@ -6887,6 +7067,41 @@ function onbExistingAccount(){ // élève existante sur un appareil neuf : le nu
    Avant, ce bouton menait à Progrès, où l'élève voyait « Choisis ta kunya » et un
    champ e-mail : elle croyait devoir se réinscrire. Ici, e-mail puis code, rien d'autre.
    Mode 'login' : pas de case RGPD — le consentement date de l'inscription. */
+/* ═══ LE VERROU DE DÉCONNEXION (17/08, décision de Myriam) ═══════════════════════════
+   « normalement quand je suis déconnectée, je ne devrais plus avoir accès à l'écran
+   d'accueil mais à une page de connexion. » Sa mise à jour l'avait déconnectée en silence,
+   et elle a continué à jouer en croyant sa progression sauvegardée.
+   ⚠️ TROIS GARDES, et chacune évite d'enfermer quelqu'un à tort :
+   ① `!SB` — le client Supabase vient d'un CDN. S'il n'a pas chargé (réseau coupé, CDN en
+      panne), l'app NE PEUT PAS SAVOIR si l'élève est connectée. Verrouiller sur une
+      ignorance enfermerait dehors des élèves parfaitement connectées, sur un hoquet réseau.
+      « Impossible de savoir » vaut « on n'enferme pas ». C'est la réserve annoncée à Myriam.
+   ② `!S._uid` — cet appareil n'a JAMAIS connu de compte : c'est une nouvelle élève, elle doit
+      pouvoir faire son inscription. Le verrou ne vise que celles qui AVAIENT un compte.
+   ③ une déconnexion VOLONTAIRE vide le localStorage (`cloudLogout`), donc `_uid` disparaît et
+      l'appareil repart en inscription — comportement voulu, inchangé.
+   L'app reste par ailleurs utilisable hors ligne : c'est la session gardée par Supabase
+   (`persistSession`) qui compte, pas la présence du réseau. */
+var VERROU_CONNEXION=false;
+function verrouConnexion(){
+  try{
+    if(!SB)return;              // ① on ne peut pas savoir → on n'enferme pas
+    if(CLOUD.user)return;       // connectée : rien à faire
+    if(!S._uid)return;          // ② appareil qui n'a jamais eu de compte : inscription libre
+    VERROU_CONNEXION=true;
+    try{ document.getElementById('player').classList.remove('on'); }catch(e){}
+    try{ document.getElementById('finish').classList.remove('on'); }catch(e){}
+    var t=document.querySelector('#obLogin h2');
+    if(t)t.textContent='Reconnecte-toi pour continuer';
+    var b=document.getElementById('obLoginBack'); if(b)b.style.display='none';
+    obLoginOpen();
+  }catch(e){}
+}
+function verrouLibere(){
+  VERROU_CONNEXION=false;
+  var t=document.querySelector('#obLogin h2'); if(t)t.textContent='Content de te revoir !';
+  var b=document.getElementById('obLoginBack'); if(b)b.style.display='';
+}
 function obLoginOpen(){
   /* Une seule carte de connexion vivante à la fois : sinon deux #cloudEmail (et deux
      #cloudRgpd) coexistent dans le DOM et getElementById rend le MAUVAIS — la case
@@ -6899,6 +7114,7 @@ function obLoginOpen(){
   var i=document.getElementById('cloudEmail'); if(i)setTimeout(function(){try{i.focus();}catch(_){}} ,120);
 }
 function obLoginClose(){
+  if(VERROU_CONNEXION)return;   // 17/08 : déconnectée, on ne sort pas de la page de connexion
   document.getElementById('obLogin').classList.remove('on');
   var c=document.getElementById('obLoginCard'); if(c)c.innerHTML=''; // pas de #cloudEmail en double avec Progrès
   if(!S.onboarded){ try{onbStart();}catch(_){} } else { try{showTab('home');}catch(_){} }
@@ -7462,7 +7678,13 @@ function refreshStats(){
   updRankBadge();
   document.getElementById('st-hearts').textContent=S.hearts;
 }
-function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧'][n]||n;}
+/* ⚠️ 17/08 — la table s'arrêtait à ٧ (écrite au temps des 7 unités) : l'unité 8 affichait
+   un « 8 » LATIN dans le Cours (capture de Myriam). Portée aux 12 unités du programme. */
+function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧','٨','٩','١٠','١١','١٢'][n]||n;}
+/* le sujet d'une unité sans lettres, prêt pour le HTML : segments arabes enveloppés */
+function sujetCours(U){
+  return String(U.court||'Grammaire').replace(/[\u0600-\u06FF]+/g,function(m){return '<span class="csar">'+m+'</span>';});
+}
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
 /* Deux fichiers par disque (choix de Myriam 09/08) : variante A (remplissage brun moyen) sur les
@@ -7501,7 +7723,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='unite8-grammaire-v16 \u00b7 CORRECTIF BLOQUANT : le rattrapage de l unite 8 ne boucle plus';
+const BUILD='correctifs5-17aout \u00b7 synchro par compte, harakat bleues en calque, voix de Myriam en tete, coeurs U8, verrou connexion';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -8097,7 +8319,8 @@ function renderStep(){
     const tiles=shuffle(['ا','و','ي']).map(ch=>'<div class="dm-tile" data-ch="'+ch+'">'+ch+'</div>').join('');
     body.innerHTML='<div class="q-title">Fais glisser la bonne prolongation</div>'+
       '<div class="dm-wrap" id="dm-wrap">'+
-        '<div class="dm-target" id="dm-target">'+tachRouge(st.base+st.hk)+'</div>'+
+        /* 17/08 — calque ici aussi : `st.base+st.hk` est un cluster lettre+signe. */
+        '<div class="dm-target" id="dm-target">'+tachCalque(st.base+st.hk)+'</div>'+
         '<div class="dm-tray">'+tiles+'</div>'+
       '</div>';
     setTimeout(()=>setupDragMad(st),50);
@@ -8409,8 +8632,15 @@ function closeFinish(){
 function buildExam(U){
   const W=U.words||[], L3=U.letters||[];
   // LECTURE — lire le mot, toucher le bon son (options audibles et distinctes)
+  /* ⚠️ 17/08 — `spkOpts:true` MANQUAIT (Myriam : « quand on veut sauter une unité et qu'on
+     fait l'exercice de test, les audios ne se déclenchent pas automatiquement »). Les trois
+     haut-parleurs s'affichaient bien — ils viennent du champ `snd` des options — mais c'est
+     `spkOpts` SEUL qui arme la séquence sonore automatique (l. ~8306). Sans lui, l'élève
+     doit deviner qu'il faut toucher chaque bouton, alors que les mêmes écrans en leçon
+     sonnent tout seuls. `rtl3` s'ajoute pour la même raison : dans les leçons la séquence
+     part de la DROITE, dans le sens de l'arabe — l'exercice de test suit maintenant. */
   const reading=shuffle(W).map(w=>mcq({prompt:'Lis le mot, puis touche le bon son',
-    glyph:w.w,glyphLinear:true,fr:w.fr,graded:true,grid:'grid3',answer:w.w,options:wordSoundOptions(U,w)}));
+    glyph:w.w,glyphLinear:true,fr:w.fr,graded:true,spkOpts:true,grid:'grid3 rtl3',answer:w.w,options:wordSoundOptions(U,w)}));
   // ÉCRITURE — composer le mot avec les lettres
   const writing=shuffle(W).map(w=>({type:'assemble',w,graded:true}));
   // POSITIONS — forme déguisée (début/milieu/fin) → quelle lettre ? (visuel, jamais isolée)
@@ -8536,6 +8766,7 @@ function toc(){ // l'erreur : deux frappes du timbre Bayātī, +1,5 puis −1,5 
   if(_SFXB['erreur']){ playSfx('erreur'); return; }
   try{
     _tocCtx=_tocCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(_tocCtx.state!=='running')_tocCtx.resume(); // iOS : ce contexte n'avait AUCUN resume
     const o=_tocCtx.createOscillator(),g=_tocCtx.createGain();
     o.frequency.setValueAtTime(170,_tocCtx.currentTime);
     o.frequency.exponentialRampToValueAtTime(110,_tocCtx.currentTime+.12);
@@ -8726,7 +8957,10 @@ function setupFuse(st){
       const c=cells.find(c2=>{const r=c2.getBoundingClientRect();
         return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom&&!c2.classList.contains('done');});
       if(!c)return;
-      c.classList.add('done');c.innerHTML=tachRouge(j.fus);popIt(c);   // le signe posé garde son rouge (14/08)
+      /* 17/08 — `tachCalque` et non `tachRouge` : le signe est POSÉ SUR SA LETTRE, donc
+         seul le calque peut le colorer sans emporter la lettre avec lui (Myriam : « seule
+         la harakat reste bleue, la lettre garde sa couleur initiale »). */
+      c.classList.add('done');c.innerHTML=tachCalque(j.fus);popIt(c);
       chip.classList.add('gone');
       const fl=chip.parentNode.querySelector('.farr');if(fl)fl.classList.add('gone');
       window._fu.n++;
@@ -9121,7 +9355,7 @@ function errorBeep(){
   try{
     const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
     const ac=window._ac||(window._ac=new Ctx());
-    if(ac.state==='suspended')ac.resume();
+    if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
     const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
     o.type='square'; o.frequency.setValueAtTime(200,t);
     o.frequency.exponentialRampToValueAtTime(110,t+0.18);
@@ -9243,7 +9477,7 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
   try{
     const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
     const ac=window._ac||(window._ac=new Ctx());
-    if(ac.state==='suspended')ac.resume();
+    if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
     const t=ac.currentTime;
     const notes=kind==='final'?[[523,0],[659,.09],[784,.18]]:kind==='dot'?[[880,0]]:[[587,0],[880,.08]];
     notes.forEach(n=>{
@@ -9272,7 +9506,8 @@ function prechargerNoms(){
   if(_LNg===VOIX_G)return; _LNg=VOIX_G; _LN={};
   try{
     ALPHABET.forEach(function(a){ var tr=LTRANS[letterKey(a[0])]; if(!tr)return;
-      var el=new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3'); el.preload='auto'; _LN[tr]=el; });
+      /* 17/08 — ON PRÉCHARGE SA PRISE (nom PLAT), plus la variante IA. */
+      var el=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'); el.preload='auto'; _LN[tr]=el; });
   }catch(e){}
 }
 /* `fin` : rappelé quand CE son est terminé. `el` : le haut-parleur dont les ondes bougent
@@ -9306,7 +9541,9 @@ function jouerSyl(base,ar,fin,el){
   spkOff(); spkOn(el);
   var gen=_sndGen, fini=false;
   var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
-  var essais=['audios-app-alaq/'+base+'-'+VOIX_G+'.mp3','audios-app-alaq/'+base+'.mp3'];
+  /* 17/08 — SA PRISE D'ABORD (nom plat), la variante de voix en repli. Même motif que
+     sayLetterName : elle a réenregistré 72 syllabes, elles étaient toutes derrière l'IA. */
+  var essais=['audios-app-alaq/'+base+'.mp3','audios-app-alaq/'+base+'-'+VOIX_G+'.mp3'];
   var tente=function(i){
     if(gen!==_sndGen)return;
     if(i>=essais.length){ try{_speakSynth(ar);}catch(_){ } setTimeout(termine,900); return; }
@@ -9335,13 +9572,22 @@ function jouerSyl(base,ar,fin,el){
    ⚠️ Ce n'est PAS une liste à tenir à la main : chaque entrée doit citer le retour qui l'a
    créée, et disparaître le jour où une prise neuve arrive SOUS UN NOM NEUF. */
 const MOTS_SANS_IA={'أَمَانٌ':'Myriam 14/08 — la prise Habibah dit « anāmun »'};
+/* ⚠️ 17/08 — UNE LISTE DE SES PRISES A EXISTÉ ICI, ET ELLE ÉTAIT FAUSSE. Elle était
+   dérivée de `audios-app-alaq/_remplaces/` et manquait alif et waw — enregistrés le 07/08,
+   AVANT que ce dossier existe. Myriam les entendait donc encore en voix IA. Remplacée par
+   une règle d'ORDRE dans `jouerMot`/`jouerSyl`/`sayLetterName` : SA prise (nom plat) d'abord,
+   la variante de voix en repli. Une règle d'ordre ne peut pas avoir de trou ; une liste,
+   toujours. NE PAS réintroduire de liste ici. */
 function jouerMot(ar,fin,el){ // un MOT enregistré : voix choisie (-f/-h) d'abord, l'enregistrement historique ensuite, synthèse en dernier
   stopAudio();
   spkOff(); spkOn(el);
   var gen=_sndGen, fini=false;
   var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
   var base=AUDIO[ar];
-  var essais=base?(MOTS_SANS_IA[ar]?[base]:[base.replace(/\.mp3$/,'-'+VOIX_G+'.mp3'),base]):[];
+  /* 17/08 — SA PRISE D'ABORD, l'IA en repli. La liste `PRISES_MYRIAM` que j'avais posée
+     est ABANDONNÉE : elle ratait alif et waw (enregistrés avant que `_remplaces` existe).
+     Une règle d'ordre n'a pas de trou ; une liste en a toujours un. */
+  var essais=base?(MOTS_SANS_IA[ar]?[base]:[base,base.replace(/\.mp3$/,'-'+VOIX_G+'.mp3')]):[];
   var tente=function(i){
     if(gen!==_sndGen)return;
     if(i>=essais.length){ try{_speakSynth(ar);}catch(_){ } setTimeout(termine,900); return; }
@@ -9368,18 +9614,29 @@ function sayLetterName(L,fin,el){
   var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
   var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); setTimeout(termine,900); return; }
   try{
-    var a=(_LNg===VOIX_G&&_LN[tr])||new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3');
+    /* ═══ 🔴 17/08 — « VIRE MOI LES SONS DE L'IA ! » (Myriam) ═══════════════════════════
+       Elle entendait encore l'IA sur alif et waw dans l'alphabet, alors qu'elle a TOUT
+       réenregistré. La cause : l'app essayait `-VOIX_G` (la prise IA) EN PREMIER, et la
+       variante IA existe toujours EN PRODUCTION — le déploiement copie le dossier audio,
+       et une copie n'efface pas ce qu'on a retiré en local. Mesuré : 65 de ses 210 prises
+       étaient masquées, dont les 23 noms de lettres.
+       ⚠️ J'avais d'abord posé une LISTE des fichiers qu'elle a remplacés. Elle avait un
+       TROU : alif et waw, enregistrés le 07/08, AVANT que le dossier `_remplaces` existe —
+       donc absents de la liste, donc encore masqués. **Toute liste aura un trou.**
+       LA RÈGLE, sans liste : SA PRISE D'ABORD (nom plat), l'IA seulement si son fichier
+       manque. Là où seul le `-f` existe, rien ne change : le nom plat rend 404 et on
+       retombe dessus. Et le jour où elle enregistre un son de plus, il est pris SANS que
+       personne ait à penser à une liste. */
+    var a=(_LNg===VOIX_G&&_LN[tr])||new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3');
     try{ a.currentTime=0; }catch(_){}
     _curAudio=a; var settled=false;
-    /* 10/08 tard — LA VOIX DE MYRIAM D'ABORD EN REPLI : quand le fichier de voix (-f)
-       n'existe pas ou est retiré, on tente le nom PLAT (son enregistrement à elle)
-       AVANT la synthèse. Sans ce maillon, ses noms de lettres n'étaient jamais joués :
-       sayLetterName ne connaissait que le nom suffixé. */
-    var essaiPlat=false;
+    /* 17/08 — L'ORDRE EST INVERSÉ (voir le pavé ci-dessus). Le premier essai est SA prise ;
+       ce repli tente la variante de voix, et la synthèse ne vient qu'en tout dernier. */
+    var essaiIA=false;
     var fb=function(){
       if(settled||gen!==_sndGen)return;
-      if(!essaiPlat){ essaiPlat=true;
-        try{ var b=new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3'); _curAudio=b;
+      if(!essaiIA){ essaiIA=true;
+        try{ var b=new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3'); _curAudio=b;
           b.onplaying=function(){settled=true;}; b.onended=termine;
           b.onerror=function(){ if(!settled&&gen===_sndGen){settled=true;try{_speakSynth(L);}catch(_){ }} };
           var q=b.play(); if(q&&q.catch)q.catch(function(){ if(!settled&&gen===_sndGen){settled=true;try{_speakSynth(L);}catch(_){ }} });
@@ -9419,7 +9676,11 @@ function spkOn(el){
   var s=el.querySelector('.spk'); if(s)s.classList.add('on');
 }
 function spkOff(){
-  var l=document.querySelectorAll('.spk.on,.spkbtn.on,.opt.on');
+  /* ⚠️ 17/08 — `.wspk` AJOUTÉ. Sans lui, le haut-parleur d'une ligne de vocabulaire
+     s'allumait et ne s'éteignait plus jamais : spkOn() pose `on` sur l'élément ET sur son
+     `.spk`, mais spkOff() ne balayait que trois classes. Toute nouvelle sorte de bouton
+     sonore DOIT rejoindre cette liste. */
+  var l=document.querySelectorAll('.spk.on,.spkbtn.on,.opt.on,.wspk.on');
   for(var i=0;i<l.length;i++)l[i].classList.remove('on');
 }
 function spkRejouer(L){ sayLetterName(L,null,document.getElementById('spkBig')); }
@@ -9427,8 +9688,11 @@ function spkRejouer(L){ sayLetterName(L,null,document.getElementById('spkBig'));
    le ROUTAGE ne change pas (speak garde son repli synthèse), seules les ondes s'animent.
    ⚠️ On allume APRÈS avoir lancé le son : speak() commence par stopAudio() → spkOff(),
    qui éteindrait la box qu'on vient d'allumer (piège gravé le 10/08). */
-function spkAudio(t){
-  var el=document.getElementById('spkBig');
+/* `el` (17/08) : le haut-parleur À ALLUMER. Omis, c'est le gros bouton des leçons, comme
+   avant — tous les appels existants sont donc inchangés. La liste du vocabulaire, elle, a
+   un haut-parleur PAR LIGNE et lui passe le sien. */
+function spkAudio(t,el){
+  el=el||document.getElementById('spkBig');
   /* Aiguillage IDENTIQUE à celui des options sonores : une syllabe ou un mot enregistré
      passe par sayLetterName (essai `-VOIX_G` puis fichier plat) — la révision du vocabulaire
      jouait sinon le fichier historique pendant que la leçon jouait la voix choisie.
@@ -9589,7 +9853,7 @@ function plop(){
   try{
     var Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
     var ac=window._ac||(window._ac=new Ctx());
-    if(ac.state==='suspended')ac.resume();
+    if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
     var t=ac.currentTime;
     var n=ac.createBufferSource(), buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.02),ac.sampleRate);
     var dd=buf.getChannelData(0);
@@ -9652,19 +9916,38 @@ function bulPop(b){
   },80);
 }
 
-function sayLetterSound(L){
+/* ═══ LES LETTRES QUI N'ONT PAS DE SON PROPRE (17/08, décision de Myriam) ═══════════
+   « alif fait un son bizarre. Silence cet audio car alif n'a pas de son. »
+   Elle a raison sur le fond : le alif nu ne porte aucune valeur sonore — c'est un support
+   de voyelle (et de hamza). Lui faire dire quelque chose enseigne une fausseté à une
+   primo-lectrice. Il se TAIT donc, et son NOM (الِفْ) reste disponible, lui.
+   ⚠️ `letterKey` normalise toute la famille (ا أ إ آ ٱ) : une seule entrée suffit. */
+var SANS_SON={ 'alif':'Myriam 17/08 — un alif nu n\'a pas de son, il porte la voyelle' };
+function aUnSon(L){ var tr=LTRANS[letterKey(L)]; return !!tr && !SANS_SON[tr]; }
+/* `fin` (17/08) : rappelé quand CE son est fini — indispensable depuis que la fin du tracé
+   joue le SON et non plus le nom, sinon CONTINUER resterait gris (piège gravé le 09/08 :
+   allumer le bouton après le son passe TOUJOURS par un rappel de fin). */
+function sayLetterSound(L,fin){
   stopAudio();
   var gen=_sndGen;
+  var fini=false;
+  var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; if(fin)fin(); };
   var tr=LTRANS[letterKey(L)];
-  if(!tr){ speak(L); return; }
+  if(!tr){ speak(L); setTimeout(termine,900); return; }
+  /* ⚠️ PAS DE REPLI SYNTHÈSE ICI (17/08). Une lettre NUE lue par un synthétiseur produit
+     exactement le « son bizarre » signalé : le moteur complète en syllabe (« ab » pour le
+     alif). Un son absent devient un SILENCE — même doctrine que l'unité 8. */
+  if(SANS_SON[tr]){ setTimeout(termine,120); return; }
   try{
     var a=new Audio('audios-app-alaq/lettre-'+tr+'-son.mp3'); _curAudio=a; var settled=false;
-    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; try{_speakSynth(L);}catch(_){ } };
+    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; termine(); };
+    a.onended=termine;
     a.addEventListener('playing',function(){settled=true;},{once:true});
     a.addEventListener('error',fb,{once:true});
     var p=a.play(); if(p&&p.catch)p.catch(fb);
     setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
-  }catch(e){ try{_speakSynth(L);}catch(_){ } }
+    setTimeout(termine,2600);   // filet : le rappel finit toujours par venir
+  }catch(e){ termine(); }
 }
 /* ===== Réviser « Les lettres » : la grille des 28, sélectionnable ===== */
 var LETSEL=new Set();
@@ -9719,7 +10002,11 @@ function hamzaTap(el,s){
   var t=HAMZA_SON[s]||s;
   if(s==='ء')sayLetterName('ء'); else speak(t);
 }
-function letToggle(k){ if(LETSEL.has(k))LETSEL.delete(k); else{ LETSEL.add(k); sayLetterSound(k); } renderReviser('lettres'); }
+/* ⚠️ 17/08 — LE NOM, PAS LE SON (Myriam) : « il serait préférable ici d'avoir le nom des
+   lettres. Ce n'est que quand l'élève a tracé la lettre qu'il faut avoir le son de la
+   lettre, comme pour la pédagogie Montessori. » On nomme ce qu'on montre ; on ne donne le
+   son qu'une fois le geste accompli. */
+function letToggle(k){ if(LETSEL.has(k))LETSEL.delete(k); else{ LETSEL.add(k); sayLetterName(k); } renderReviser('lettres'); }
 function letSelAll(){ knownLetterSet().forEach(function(k){LETSEL.add(k);}); renderReviser('lettres'); }
 function letSelClear(){ LETSEL.clear(); renderReviser('lettres'); }
 function startSelectedLetters(){
@@ -9834,12 +10121,18 @@ function letterGridHTML(){
      ⚠️ Ces cases ne se SÉLECTIONNENT pas : réviser la hamza, ce serait tracer le alif, qui
      a déjà sa case. Ici on touche pour ENTENDRE — le geste le plus universel de l'app. */
   if(unlocked.has('ا')){
-    // le siège est écrit EN ARABE (14/08) : aucune translittération sous un glyphe arabe
-    var SIEGES=[['ء','seule',1],['أ','ا',1],['إ','ا',1],['ؤ','و',0],['ئ','ي',0]];
+    /* ⚠️ 17/08 — LES ÉTIQUETTES SONT RETIRÉES (Myriam : « l'alphabet du bas apparaît encore
+       avec des annotations sur les box sous la ligne pointillée »). Le CSS plus haut (l. ~772)
+       affirmait déjà ce retrait depuis le 14/08 : il n'avait vécu que dans une preview, jamais
+       reporté ici — le code continuait de les écrire. Le nom du siège s'ÉCOUTE au toucher,
+       il ne s'écrit pas, comme le nom des lettres depuis le 14/08.
+       ⚠️ Ne pas remettre `<span class="hzl">` : le `min-height:44px` posé le 14/08 tient la
+       hauteur des cases sans étiquette — c'est lui qui garde la zone de touche réglementaire. */
+    var SIEGES=[['ء',1],['أ',1],['إ',1],['ؤ',0],['ئ',0]];
     h+='<div class="lg-hamza">'+SIEGES.map(function(s){
-      return s[2]
-        ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>'
-        : '<div class="hz locked">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>';
+      return s[1]
+        ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'</div>'
+        : '<div class="hz locked">'+s[0]+'</div>';
     }).join('')+'</div>';
   }
   if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
@@ -9985,7 +10278,11 @@ function setupTrace(L,u,posN){
   function finishAll(){
     doneAll=true;draw();okBeep('final');
   {const rb=document.getElementById('traceReco');if(rb)rb.disabled=true;} // réussite affichée : on ne retrace plus (le filet rallumerait CONTINUER en plein tracé)
-    setTimeout(function(){ sayLetterName(L,objectifAtteint); },260);
+    /* ⚠️ 17/08 — LE SON, PAS LE NOM (ordre Montessori demandé par Myriam) : le geste est
+       accompli, c'est le moment où la lettre livre sa valeur sonore. Pour le alif, qui n'a
+       pas de son, `sayLetterSound` se tait mais rappelle quand même `fin` — CONTINUER
+       s'allume, et l'accord de réussite (okBeep) a déjà sonné juste avant. */
+    setTimeout(function(){ sayLetterSound(L,objectifAtteint); },260);
     objectifFilet();
   }
   function nextStroke(){
@@ -10444,6 +10741,28 @@ function tachRouge(s){
   RE_TACHKIL.lastIndex=0;
   return RE_TACHKIL.test(s) ? ('<span class="tach">'+esc+'</span>') : esc;
 }
+/* ═══ LA HARAKAT COLORÉE, LA LETTRE INTACTE (17/08) ═══════════════════════════════
+   À utiliser dès qu'un signe est POSÉ SUR SA LETTRE. `tachRouge` reste bon pour un signe
+   SEUL (le jeton, où la harakat est portée par un tatweel) : là, un simple span suffit,
+   vérifié à 158 pixels bleus. Mais sur un cluster lettre+signe il ne marche pas — voir
+   le pavé du CSS `.hkw` : le rendu peint la marque avec la couleur de sa lettre.
+   Ici, deux couches : le cluster entier dessous (coloré), la lettre nue dessus (opaque).
+   ⚠️ Ne PAS ajouter d'espace ni de retour à la ligne entre les deux spans : ils sont en
+   `white-space:pre` et le moindre blanc décalerait la couche du dessus. */
+function tachCalque(s){
+  s=String(s==null?'':s);
+  if(!s)return '';
+  var ech=function(x){ return x.replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
+  RE_TACHKIL.lastIndex=0;
+  if(!RE_TACHKIL.test(s))return ech(s);          // aucun signe : rien à superposer
+  var nue=s.replace(RE_TACHKIL,'');              // la lettre (ou les lettres) sans un seul signe
+  /* ⚠️ `aria-hidden` sur la couche du DESSUS, et c'est important : les deux couches portent le
+     même texte, donc sans lui un lecteur d'écran annoncerait la lettre DEUX FOIS. On garde
+     accessible la couche complète (lettre + signe) — c'est elle qui dit la vérité du mot ;
+     celle du dessus n'est là que pour peindre. */
+  return '<span class="hkw"><span class="hkm">'+ech(s)+'</span>'+
+         '<span class="hkb" aria-hidden="true">'+ech(nue)+'</span></span>';
+}
 /* Repli audio SANS voix arabe : on lit la romanisation PROPRE du mot (w.say) au lieu de
    translittérer l'arabe vocalisé (qui donnait « samakoune »). Voix latine -> son compréhensible. */
 const WSAY={}; try{UNITS.forEach(function(U){(U.words||[]).forEach(function(w){if(w&&w.w&&w.say)WSAY[w.w]=w.say;});});}catch(e){}
@@ -10584,7 +10903,7 @@ const _SFXB={};let _sfxCtx=null,_curSrc=null;
 function chargerSfx(){ // réveille le moteur à chaque geste, décode les 2 sons courts une seule fois
   try{
     _sfxCtx=_sfxCtx||new (window.AudioContext||window.webkitAudioContext)();
-    if(_sfxCtx.state==='suspended')_sfxCtx.resume();
+    if(_sfxCtx.state!=='running')_sfxCtx.resume(); // iOS : couvre aussi l'état « interrupted »
     ['bonne-reponse','erreur'].forEach(n=>{
       if(_SFXB[n]||_SFXB['_'+n])return;
       _SFXB['_'+n]=1; // verrou : un seul téléchargement par son
@@ -10602,16 +10921,35 @@ function chargerSfx(){ // réveille le moteur à chaque geste, décode les 2 son
 try{
   ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,chargerSfx,true));
 }catch(e){}
+/* ═══ 17/08 — « PARFOIS LE SON DU BOUTON CONTINUER DISPARAÎT » (Myriam) ═══════════════
+   Sur iOS, un AudioContext passé « interrupted » (appel, Siri, verrouillage, bascule
+   d'app) ne repart JAMAIS tout seul — resume() doit être rappelé. Tous les gardes du
+   fichier ne testaient que 'suspended' : ils rataient cet état WebKit hors standard, et
+   comme le tampon sfx est décodé, playSfx prenait toujours la branche WebAudio gelée —
+   le repli <audio> était inatteignable. D'où « je dois fermer l'application ».
+   `state!=='running'` couvre les deux états, et au retour au premier plan on réveille
+   TOUS les contextes du fichier d'un coup. */
+function reveilAudio(){
+  [window._ac,_sfxCtx,_tocCtx,chime._ac].forEach(function(c){
+    try{ if(c&&c.state!=='running')c.resume(); }catch(e){}
+  });
+}
+try{ document.addEventListener('visibilitychange',function(){ if(!document.hidden)reveilAudio(); }); }catch(e){}
 function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jamais bloqué), sinon <audio> béni, sinon SILENCE
   if(!SND)return; // « Effets sonores » coupe la récompense À L'INSTANT (Myriam 10/08) — avant, seul okBeep/plop obéissait, d'où l'impression qu'il fallait relancer l'app
   try{
-    stopAudio();
     const b=_SFXB[name];
     if(b&&_sfxCtx){
-      if(_sfxCtx.state==='suspended')_sfxCtx.resume();
+      /* ⚠️ 17/08 — Myriam : « le son du dernier mot choisi est tu par l'apparition du
+         bouton continuer ». Le sfx WebAudio se SUPERPOSE : plus de stopAudio() ici —
+         le mot (`_curAudio`) et la synthèse finissent de sonner, seul le sfx précédent
+         s'arrête. Le repli <audio> du bas garde l'ancienne coupe (un seul _curAudio). */
+      try{ if(_curSrc){ _curSrc.stop(); _curSrc=null; } }catch(_){}
+      if(_sfxCtx.state!=='running')_sfxCtx.resume(); // iOS : couvre aussi l'état « interrupted »
       const s=_sfxCtx.createBufferSource();s.buffer=b;s.connect(_sfxCtx.destination);_curSrc=s;s.start();
       return;
     }
+    stopAudio(); // repli <audio> seulement : il écrase _curAudio, l'ancien contrat reste
     const a=audioBeni('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{});
   }catch(e){}
 }
@@ -10711,7 +11049,37 @@ const VOIX=[
  {id:'ar.mahermuaiqly', loc:1,       kb:128, sec:3.7, fr:'Māhir al-Muʿayqilī',    ar:'ماهر المعيقلي',        st:'m'},
  {id:'ar.husarymujawwad',     kb:128, sec:11.1,fr:'al-Ḥuṣarī',             ar:'محمود خليل الحصري',    st:'j'}
 ];
-function qariCur(){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===S.qari)return VOIX[i]; return VOIX[0]; }
+/* ═══ LA VOIX PAR DÉFAUT (17/08) ═══════════════════════════════════════════════════
+   Myriam : « il n'y a pas la barre qui surligne le verset lu ». La cause n'était pas
+   l'écran mais LA VOIX : `qariCur()` retombait sur `VOIX[0]`, et comme la liste est
+   ordonnée PAR TEMPO (le plus lent d'abord, pour les débutantes), c'est Ayman Suwayd qui
+   se trouvait là — **la seule voix de tête sans repères `HOROV`**. Sans repères,
+   `suivreVerset` sort avant d'allumer quoi que ce soit : la fonction phare était donc
+   invisible pour qui ne touche jamais au sélecteur. Sur téléphone comme sur ordinateur.
+   MESURÉ sur les 7 versets de la Fātiḥa, voix par voix : al-Ḥuṣarī et al-ʿAfāsī sont les
+   plus lents (6,1 s) avec une segmentation COMPLÈTE (7/7) et des fichiers hébergés.
+   Retenu : **al-Ḥuṣarī** — c'est lui qui a enregistré le muṣḥaf muʿallim, la récitation
+   faite POUR enseigner. Le tempo lent et l'articulation d'un maître d'école : exactement
+   ce que cherche une primo-lectrice.
+   ⚠️ On ne RÉORDONNE PAS `VOIX` : son ordre par tempo porte un sens, et Ayman Suwayd reste
+   en tête de liste comme maître du tajwīd. On pose un défaut EXPLICITE, c'est tout.
+   ⚠️ Celle qui a déjà choisi sa voix la garde : `S.qari` est renseigné, on n'y touche pas. */
+const QARI_DEFAUT='ar.husary';
+/* ⚠️ POSÉ ICI, JAMAIS PLUS HAUT. `QARI_DEFAUT` est un `const` : avant sa déclaration il vit
+   dans la zone morte temporelle, et y toucher lève un ReferenceError qui tue TOUT le script
+   (l'incident de l'apostrophe du 13/08, en une ligne). `node --check` ne voit rien : il
+   vérifie la syntaxe, pas l'exécution. Écrire la voix dans l'état sert au SÉLECTEUR (épingler
+   la bonne ligne) ; les repères, eux, passent par `qariCur().id` et n'en dépendent pas. */
+if(!S.qari)S.qari=QARI_DEFAUT;
+/* ⚠️ LES ÉLÈVES DÉJÀ INSCRITES ont l'ANCIEN défaut ÉCRIT dans leur état (`DEF` le posait) : ça
+   ressemble à un choix sans en être un. On ne bascule que celles qui n'ont JAMAIS ouvert le
+   sélecteur (`qariChoisi` absent) — un vrai choix d'Ayman Suwayd est respecté. Une seule fois. */
+if(!S.qariMigr0817){ S.qariMigr0817=1;
+  if(!S.qariChoisi && S.qari==='ar.aymanswoaid') S.qari=QARI_DEFAUT;
+  try{ save(); }catch(e){} }
+function qariCur(){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===S.qari)return VOIX[i];
+  for(var j=0;j<VOIX.length;j++)if(VOIX[j].id===QARI_DEFAUT)return VOIX[j];
+  return VOIX[0]; }
 function qariById(id){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===id)return VOIX[i]; return VOIX[0]; }
 /* 10 voix HÉBERGÉES (Myriam 10/08 : « le Qorān ne se monnaie pas » — provisoire tant que
    l'app est gratuite ; un récitateur sera payé plus tard pour des sons libres de droits).
@@ -10729,7 +11097,7 @@ function qariBulleTog(){ var b=document.getElementById('qbulle'),i=document.getE
 function qariBulleOff(){ var b=document.getElementById('qbulle'),i=document.getElementById('qbi');
   if(b)b.classList.remove('on'); if(i)i.classList.remove('on'); }
 
-function qariPick(id){ S.qari=id; save(); qariRender();
+function qariPick(id){ S.qari=id; S.qariChoisi=1; save();   /* 17/08 : trace du choix EXPLICITE */ qariRender();
   { var s=document.querySelector('.mushaf-sous'); if(s)s.textContent=qariCur().fr+' · touche un verset ou un mot'; }
   try{ renderReviser(curReviserTab); }catch(e){} // la ligne « Récitateur » se met à jour
   try{ renderParams(); }catch(e){}               // et la carte « Récitateur » des Paramètres (11/08)
@@ -10823,7 +11191,7 @@ function suivreVerset(vi,a){
     var box=document.querySelector('[data-suivre="'+vi+'"]'); if(!box)return;
     box.classList.add('en');                       // l'ayah en cours se distingue dans le flux
     var mots=box.querySelectorAll('.vw'); if(!mots.length)return;
-    var h=(HOROV[S.qari]||{})[vi+1];
+    var h=(HOROV[qariCur().id]||{})[vi+1];
     if(!h||h.length!==mots.length)return;                           // segmentation absente ou partielle
     var gen=_sndGen, jeton=_suiviJeton;
     var pas=function(){
@@ -10872,7 +11240,7 @@ function numAyatHTML(vi){ return '<span class="ayano">\u06DD'+numArabe(vi+1)+'</
 function joueMotVerset(vi,wi){
   try{
     var SRv=SOURATES[(typeof curSourate!=='undefined'?curSourate:0)]||SOURATES[0];
-    var h=(HOROV[S.qari]||{})[vi+1];
+    var h=(HOROV[qariCur().id]||{})[vi+1];
     if(!h||h.length!==SRv.verses[vi].split(' ').length)return playVerse(vi);
     _lireTout=false; majLireTout();
     stopAudio(); var gen=_sndGen;
@@ -10930,9 +11298,21 @@ function motBulle(vi,wi){
   /* ⚠️ `offsetParent` est TOUJOURS null pour un élément `position:fixed` — et la barre
      du bas en est un. Le test « la barre est-elle visible ? » passe donc par le style
      calculé, sinon le bandeau se reposait à 0 et la masquait (harnais 13/08). */
-  try{ var nav=document.querySelector('.botnav');
-       var vu=nav&&getComputedStyle(nav).display!=='none';
-       b.style.bottom=(vu?Math.ceil(nav.getBoundingClientRect().height):0)+'px'; }catch(e){}
+  /* ⚠️ 17/08 — SUR ORDINATEUR, `.botnav` N'EST PLUS UNE BARRE DU BAS. Dès 700px de large
+     elle devient le rail GAUCHE (`top:0;bottom:0`) : sa hauteur mesurée vaut TOUT l'écran.
+     La bulle recevait donc `bottom:~1000px` et sortait par le HAUT de la fenêtre — elle
+     s'ouvrait bel et bien, on ne la voyait jamais (Myriam, 17/08 : « il n'y a pas la popup
+     de traduction qui s'affiche en bas »). La mesure ne vaut que tant que la barre est
+     horizontale : on se cale sur la MÊME largeur de bascule que la feuille de style. */
+  try{
+    if(window.matchMedia&&window.matchMedia('(min-width:700px)').matches){
+      b.style.bottom='24px';                       // pas de barre du bas : on respire du bord
+    }else{
+      var nav=document.querySelector('.botnav');
+      var vu=nav&&getComputedStyle(nav).display!=='none';
+      b.style.bottom=(vu?Math.ceil(nav.getBoundingClientRect().height):0)+'px';
+    }
+  }catch(e){}
   b.classList.add('on');
 }
 function motTap(vi,wi){ joueMotVerset(vi,wi); motBulle(vi,wi); }
@@ -11296,7 +11676,7 @@ function accCard(sub,U,inner){ const open=!!coursOpen[sub][U.no];
   return '<div class="ccard acc'+(open?' open':'')+'">'+
     '<button class="acc-h" onclick="accToggle(\''+sub+'\','+U.no+')">'+
       '<span class="cno">'+toAr(U.no)+'</span><span class="acc-tt">Unité</span>'+
-      '<span class="clet">'+U.letters.join(' ')+'</span><span class="acc-chev">'+(open?'▾':'▸')+'</span></button>'+
+      ((U.letters||[]).length?'<span class="clet">'+U.letters.join(' ')+'</span>':'<span class="clet csujet">'+sujetCours(U)+'</span>')+'<span class="acc-chev">'+(open?'▾':'▸')+'</span></button>'+
     '<div class="acc-b">'+inner+'</div></div>'; }
 function accToggle(sub,no){ coursOpen[sub][no]=!coursOpen[sub][no]; renderCours(sub); }
 function accAll(sub){ const nos=unlockedNos(); const allOpen=nos.length>0&&nos.every(n=>coursOpen[sub][n]); nos.forEach(n=>coursOpen[sub][n]=!allOpen); renderCours(sub); }
@@ -11356,7 +11736,10 @@ function renderCours(sub){
   let h='<h1 class="vh">Cours</h1><p class="vsub">Le contenu s\u2019ajoute à mesure que tu débloques les unités.</p>';
   h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderCours(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
   if(!unlocked.length){ h+='<div class="cempty"><div class="ce-ic">🔒</div>Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
-  const head=U=>'<div class="ctt"><div class="cno">'+toAr(U.no)+'</div><h3>Unité</h3><div class="clet">'+U.letters.join(' ')+'</div></div>';
+  /* 17/08 — la règle du ciel appliquée au Cours : une unité dit son sujet — ses lettres,
+     ou son champ `court` (« L'article الـ ») quand elle n'en a pas (l'U8 rendait « ٨ Unité »
+     suivi de rien). */
+  const head=U=>'<div class="ctt"><div class="cno">'+toAr(U.no)+'</div><h3>Unité</h3>'+((U.letters||[]).length?'<div class="clet">'+U.letters.join(' ')+'</div>':'<div class="clet csujet">'+sujetCours(U)+'</div>')+'</div>';
 
   if(sub==='video'){
     h+=unlocked.map(i=>{ const U=UNITS[i]; const emb=ytEmbed(UNIT_VIDEOS[U.no]);
@@ -11366,14 +11749,21 @@ function renderCours(sub){
   }
   else if(sub==='resume'){
     h+=accAllBtn('resume')+coursSignsHTML();
-    h+=unlocked.map(function(i){ const U=UNITS[i];
+    /* 17/08 — le Résumé est bâti sur les LETTRES : une unité qui n'en a pas (U8+) rendait
+       une carte VIDE (en-tête « ٨ Unité » suivi de rien — le signalement de Myriam). On ne
+       l'affiche pas : son résumé de GRAMMAIRE sera conçu avec elle, jamais inventé ici. */
+    h+=unlocked.filter(function(i){ return (UNITS[i].letters||[]).length; }).map(function(i){ const U=UNITS[i];
       const rows=U.letters.map(function(L){ const d=U.alpha[L]; var ex=fatihaWordFor(L);
         return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
           /* ⚠️ 14/08 — RÈGLE ABSOLUE DE MYRIAM : « pas de transcription ». Le nom translittéré
              (yāʾ, mīm…) quitte AUSSI la fiche du Cours, dernier endroit où il survivait. Le nom
              ne s'écrit plus nulle part : il s'ÉCOUTE. Le bouton dit donc ce qu'il joue. */
           '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">🔊</button> <span class="lcap">son nom</span></div>'+
-          '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button> '+d.son+'</div>'+
+          /* 17/08 : une lettre sans son propre (le alif) n'offre pas de bouton muet — on
+             dit ce qu'elle est, sans promettre un son qui ne viendra pas. */
+          (aUnSon(L)
+            ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button> '+d.son+'</div>'
+            : '<div class="ls"><span class="lcap">porte la voyelle, sans son propre</span></div>')+
           (ex?'<div class="lex">📖 <span class="lex-w" onclick="speak(\''+ex+'\')">'+ex+'</span> <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button></div>':'')+
           '<div class="lanim"><button class="la-btn" onclick="playLetterAnim(this,\''+L+'\',\''+(U.lat[L]||'')+'\')">▶ voir la prolongation</button><div class="la-stage" style="display:none"><div class="la-word">'+L+'</div><div class="la-track"><div class="la-bar"></div></div><div class="la-ro"></div></div></div>'+
           '</div></div>';
@@ -11468,7 +11858,7 @@ function renderProg(){
 function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, sans fichier
   try{
     var AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
-    var ac=chime._ac||(chime._ac=new AC()); if(ac.state==='suspended')ac.resume();
+    var ac=chime._ac||(chime._ac=new AC()); if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
     var t=ac.currentTime;
     [[880,0],[1174.66,0.09],[1567.98,0.18]].forEach(function(p){
       var o=ac.createOscillator(), g=ac.createGain();
@@ -12088,7 +12478,12 @@ function renderReviser(sub){
           return '<div class="srow lock"><span class="sar">'+x[0]+'</span> '+x[1]+' <span class="pct">🔒 0 %</span></div>';}).join('')+
         '<div class="shint">Une sourate se déverrouille dès que tu peux lire ses premiers mots</div>'+
       '</div></div>'+
-      '<div style="display:flex;align-items:center;gap:10px;margin:0 0 12px"><div class="ubar" style="flex:1;margin:0"><i style="width:'+pc+'%"></i></div>'+
+      /* ⚠️ 17/08 — `margin:0 0 12px` posait margin-left:0 EN LIGNE, ce qui battait le
+         `margin-left:auto` du centrage bureau (l. ~1467) : la barre gardait sa largeur de
+         560 px mais se collait au bord gauche de la colonne pendant que ses voisines se
+         centraient (Myriam, capture du 17/08). `auto` rétablit le centrage ; sur téléphone
+         l'élément occupe toute la largeur, `auto` n'y change rien. */
+      '<div style="display:flex;align-items:center;gap:10px;margin:0 auto 12px"><div class="ubar" style="flex:1;margin:0"><i style="width:'+pc+'%"></i></div>'+
       '<b style="color:var(--gold2);font-family:var(--ui)">'+pc+' %</b></div>'+
       accSec('ill','<img class="acc-ic" src="'+ico('tab2-lire')+'" alt="">','La sourate illuminée',versesHtml)+
       accSec('ordre','<img class="acc-ic" src="'+ico('tab-puzzle')+'" alt="">','Remettre les mots dans l\u2019ordre',ordre)+
@@ -12111,7 +12506,12 @@ function renderReviser(sub){
       // (écouter / écrire), chaque icône doit dire ce qu'elle FAIT — une fourmi à gauche et un
       // crayon à droite se lisent « une image, un bouton ». Le point passe AVANT le crayon et
       // sa place est toujours réservée, pour que tous les ✏️ tombent sur la même colonne.
-      return '<div class="wrow" style="cursor:pointer" role="button" aria-label="Écouter '+w.fr.replace(/"/g,'')+'" onclick="speak(\''+w.w+'\')">'+
+      /* ⚠️ 17/08 — `speak()` REMPLACÉ par `spkAudio(…, le haut-parleur de CETTE ligne)`.
+         Myriam : « lorsqu'on clique sur un haut-parleur on doit le voir s'animer et
+         s'illuminer ». `speak()` n'allume rien ; `spkAudio` fait le bon aiguillage (syllabe
+         ou mot enregistré → sayLetterName, sinon la carte AUDIO), anime les ondes et éteint
+         à la fin — filet compris pour la voix de synthèse, qui ne prévient pas. */
+      return '<div class="wrow" style="cursor:pointer" role="button" aria-label="Écouter '+w.fr.replace(/"/g,'')+'" onclick="spkAudio(\''+w.w+'\',this.querySelector(\'.wspk\'))">'+
         '<span class="wspk">'+spkSVG()+'</span>'+
         '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
         '<span class="wdot'+(dueSet.has(w.w)?'':' off')+'" title="à réviser aujourd\u2019hui"></span>'+
