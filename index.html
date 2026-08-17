@@ -3887,6 +3887,21 @@ function reussi(compte) {
   if (window._objDone) return;
   if (compte !== false) bon++;
   _obj = true;
+  /* 🔴 LA BOUCLE INFINIE DU RATTRAPAGE (Myriam, 17/08, EN PRODUCTION : « je suis
+     bloquée à la leçon 3 de l'unité 8 : j'ai fait une erreur et il me demande de la
+     corriger en boucle »). L'app retire une question ratée de MISSED dans SON
+     gestionnaire de réponse (`pick`) — mais les écrans de l'unité 8 ne passent pas
+     par `pick`, ils ont leur propre verdict. `rate()` les AJOUTAIT donc à MISSED
+     sans que rien ne les en retire jamais : `finishDisque` retrouvait la liste
+     pleine, relançait le rattrapage, indéfiniment. La leçon devenait impossible à
+     terminer — la seule sortie était de quitter le disque.
+     ⚠️ On retire quel que soit `compte` : un écran non noté peut se retrouver dans
+     MISSED (il y est entré par rate(), pas par sa note), et l'y laisser rouvrirait
+     la même boucle. */
+  if (typeof inRetry !== 'undefined' && inRetry) {
+    var st = QUEUE[qi], k = MISSED.indexOf(st);
+    if (k >= 0) MISSED.splice(k, 1);
+  }
   objectifAtteint();
 }
 
@@ -7486,7 +7501,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='unite8-grammaire-v15 \u00b7 carte du rang lisible (variante 2, choisie par Myriam)';
+const BUILD='unite8-grammaire-v16 \u00b7 CORRECTIF BLOQUANT : le rattrapage de l unite 8 ne boucle plus';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
