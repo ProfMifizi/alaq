@@ -4833,7 +4833,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='accueil-derniere-unite \u00b7 l accueil s ouvre desormais sur la 1re lecon de la derniere unite en cours ou terminee';
+const BUILD='accueil-derniere-unite-b \u00b7 le bandeau et le scroll sont enfin sur la bonne unite, epingles sous le bandeau sticky mesure en vrai';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4849,9 +4849,30 @@ function focusCurrentDisc(){
   for(let k=0;k<UNITS.length;k++){ if(S.done&&S.done[dkey(k,0)])u=k; }
   if(u<0)return; // rien commencé : l'écran reste au sommet, sur l'unité 1
   const sec=document.querySelector('#home .unit-sec[data-u="'+u+'"]');
-  const n=sec&&sec.querySelector('.node');
-  if(!n)return;
-  setTimeout(function(){ try{ n.scrollIntoView({block:'center'}); }catch(e){} },80);
+  if(!sec)return;
+  // { block:'center' } CENTRAIT le 1er disque de l'unité — puisque c'est le tout premier
+  // élément de sa section, centrer le fait REMONTER la fin de l'unité PRÉCÉDENTE dans la
+  // moitié haute de l'écran (constaté par Myriam le 23/08 : « le disque 8 de l'unité 7 en
+  // haut »). On cale plutôt le HAUT de la section juste sous le bandeau sticky, mesuré en
+  // vrai (sa hauteur varie avec le sujet de l'unité) plutôt que deviné en dur.
+  setTimeout(function(){
+    try{
+      const bn=document.getElementById('unitBanner');
+      setBanner(u); // AVANT de mesurer : sa hauteur dépend du texte de CETTE unité
+      // ⚠️ Mesurer bn.getBoundingClientRect() ICI serait FAUX : tant que la page n'a
+      // pas encore défilé, le bandeau `position:sticky` n'est pas encore ÉPINGLÉ — son
+      // rectangle reflète sa position NON accrochée (plus bas), écart mesuré : 22px sur
+      // ce poste. On calcule donc sa position épinglée directement depuis son `top` CSS
+      // (`calc(54px + safe-area)`, résolu par getComputedStyle) + sa propre hauteur —
+      // stable quel que soit le défilement en cours.
+      const pinnedTop=bn?parseFloat(getComputedStyle(bn).top)||0:0;
+      const pinnedBottom=bn?pinnedTop+bn.offsetHeight:0;
+      const gap=2; // onHomeScroll tolère 6px (l.~4952) : rester nettement en dessous
+      const delta=sec.getBoundingClientRect().top-pinnedBottom-gap;
+      window.scrollBy({top:delta});
+      setBanner(u); // filet : si un évènement scroll asynchrone a déjà tout recalculé
+    }catch(e){}
+  },80);
 }
 function renderHome(){
   const h=document.getElementById('home');
