@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v150-2026-08-17g';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v151-2026-08-19';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -30,7 +30,7 @@ const MEDIA='alaq-medias';
    moi-même oubliée trois fois de suite ici. */
 const IMGV=6;
 const IMGCACHE='alaq-images-v'+IMGV;
-const CORE=['.','index.html','confidentialite.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-tb-lanterne-v1.png",
 "images-app-alaq/icone-porte-v1.png",
