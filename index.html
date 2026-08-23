@@ -4833,16 +4833,24 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='polices-locales-et-pile-ui \u00b7 Naskh et Times dans --ui : l arabe et les dingbats tiennent sur iOS, 0 appel au CDN';
+const BUILD='accueil-derniere-unite \u00b7 l accueil s ouvre desormais sur la 1re lecon de la derniere unite en cours ou terminee';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
-// L'accueil s'ouvre centré sur le DERNIER disque débloqué (choix Myriam 13/07) — à l'arrivée,
-// au retour d'une leçon et après restauration du nuage ; jamais pendant que l'élève fait défiler.
+// L'accueil s'ouvre sur la PREMIÈRE LEÇON de la DERNIÈRE UNITÉ EN COURS OU TERMINÉE
+// (demande Myriam 23/08 — remplace le ciblage du 13/07) — à l'arrivée, au retour
+// d'une leçon et après restauration du nuage ; jamais pendant que l'élève fait défiler.
+// ⚠️ Pas le disque « courant » (frontier) : une unité ENTIÈREMENT terminée n'a plus
+// AUCUN .node.current (frontier=-1 dans renderHome), donc l'ancien ciblage laissait
+// l'écran au sommet — unité 1 — dès que la dernière unité jouable était bouclée.
 let _homeFocusPending=true;
 function focusCurrentDisc(){
-  const nodes=document.querySelectorAll('.node.current');
-  const n=nodes[nodes.length-1]; if(!n)return;
+  let u=-1;
+  for(let k=0;k<UNITS.length;k++){ if(S.done&&S.done[dkey(k,0)])u=k; }
+  if(u<0)return; // rien commencé : l'écran reste au sommet, sur l'unité 1
+  const sec=document.querySelector('#home .unit-sec[data-u="'+u+'"]');
+  const n=sec&&sec.querySelector('.node');
+  if(!n)return;
   setTimeout(function(){ try{ n.scrollIntoView({block:'center'}); }catch(e){} },80);
 }
 function renderHome(){
