@@ -222,7 +222,7 @@ VOIX.filter(v => v.loc).forEach(v => { for (let n = 1; n <= 7; n++)
 
 /* 3c · LES SONS DE L'UNITÉ 8 — elle n'est pas encore dans l'app, donc invisible à
    la lecture d'index.html. La liste est produite par  DEPUIS
-   previews/_u8/ (la source des previews), jamais tenue à la main ; sur Vercel elle
+   src/units/unit-8/ (la source de l'unité), jamais tenue à la main ; sur Vercel elle
    arrive embarquée, comme noms-lettres.json.
    ⚠️ Elle contient les 7 lectures VOLONTAIREMENT FAUSSES du disque 6 : Myriam les
    enregistre elle-même (aucune IA ne sait prononcer faux à la demande). */
@@ -230,6 +230,20 @@ const U8JSON = premier(path.join(__dirname, 'sons-u8.json'),
                        path.join(RACINE, 'outils', 'sons-u8.json'));
 if (fs.existsSync(U8JSON))
   JSON.parse(fs.readFileSync(U8JSON, 'utf8')).forEach(l => pousse(l));
+
+/* 3d · LES SONS DE L'UNITÉ 9 — même motif, même raison que l'unité 8 ci-dessus :
+   ils vivent dans src/units/unit-9/donnees/disque-1.js (sous la forme
+   `son('almaktab')`), invisibles à la lecture d'index.html. Produits par
+   `outils/table-sons-u9.js` DEPUIS la source, jamais tenus à la main.
+   🔴 Sans ce bloc le studio ne réclamait AUCUN son de l'unité 9 : le 26/08 les
+   12 prises manquaient toutes alors que le disque 1 était prêt à s'ouvrir aux
+   élèves — l'écran 6 (« écoute et choisis le bon mot ») aurait été muet, donc
+   injouable, et rien n'aurait signalé le trou. Toute unité future qui vit en
+   module ES doit ajouter son bloc ICI, sinon ses sons sont invisibles au studio. */
+const U9JSON = premier(path.join(__dirname, 'sons-u9.json'),
+                       path.join(RACINE, 'outils', 'sons-u9.json'));
+if (fs.existsSync(U9JSON))
+  JSON.parse(fs.readFileSync(U9JSON, 'utf8')).forEach(l => pousse(l));
 
 /* 4 · ce qui reste dans le dossier sans que rien ne l'appelle : les ORPHELINS.
    Les versets sont diffusés depuis la source du récitateur (playVerse → qariUrl) :
