@@ -505,6 +505,13 @@
   .p-body.p-asm{display:flex;flex-direction:column}
   .p-body.p-asm .spkbtn{align-self:center}
   .asm-fr{flex:1;display:grid;place-items:center;font-size:22px;font-weight:700;color:var(--cream);padding:10px 0}
+  /* la traduction du mcq « Lis le mot », révélée à la réussite (24/08) — CENTRÉE dans
+     l'espace restant entre les choix et le bandeau du bas (retour de Myriam : elle
+     collait sous les choix, loin de CONTINUER). Même patron que .p-asm/.asm-fr :
+     .p-body devient une colonne flex pour CET écran, .exam-fr en occupe le reste. */
+  #p-body.p-examfr{display:flex;flex-direction:column}
+  .exam-fr{flex:1;display:grid;place-items:center;text-align:center;font-size:22px;font-weight:700;color:var(--cream);padding:10px 0}
+  .exam-fr img{display:block;max-width:160px;max-height:160px;margin:0 auto 10px;object-fit:contain}
   .undo{display:block;margin:14px auto 0;background:none;border:none;color:var(--muted);font-weight:800;font-size:14px}
 
   .trow{display:flex;gap:10px;justify-content:center;margin-top:14px}
@@ -2223,9 +2230,14 @@ html.clair .locked .bimg{ filter:sepia(.55) saturate(1.5) brightness(.5) }
      Recette des disques verrouillés (13/08) : le sépia AVANT l'assombrissement,
      sinon `brightness` désature et le crème vire au gris. */
   /* la bascule par THÈME, comme les illustrations de l'unité 8 : deux fichiers, on
-     montre celui qui va avec le fond. Le filtre qui les rendait olive est retiré. */
-  .ic2 .o-jour{display:none} .ic2 .o-nuit{display:inline-block}
-  html.clair .ic2 .o-nuit{display:none} html.clair .ic2 .o-jour{display:inline-block}
+     montre celui qui va avec le fond. Le filtre qui les rendait olive est retiré.
+     ⚠️ `!important` OBLIGATOIRE sur les deux display:none (Myriam, 23/08 : les DEUX
+     stylos empilés sur « On corrige tes erreurs ») : l'appelant passe
+     `display:block` en style INLINE aux deux <img>, et un style inline bat toute
+     règle de feuille — le piège documenté de RÉINITIALISER (13/08). Sans !important,
+     la variante masquée redevient visible partout où icoEcran reçoit un display. */
+  .ic2 .o-jour{display:none!important} .ic2 .o-nuit{display:inline-block}
+  html.clair .ic2 .o-nuit{display:none!important} html.clair .ic2 .o-jour{display:inline-block!important}
 /* ⚠️ MÊME CAUSE, TROUVÉE À L'ŒIL ET NON AU CALCUL : sur le ciel, `--accent` est forcé
    à --gold2, qui devient un brun en clair. Le disque « AVANCER ICI ? » et l'auréole du
    disque courant viraient donc au brun sur la nuit — un contraste correct (l'encre est
@@ -2668,7 +2680,10 @@ html.gtexte .onb-body{ zoom:1.22 }
 </div>
 
 <div class="finish" id="obAccount">
-  <img data-ico="ecran-compte" src="images-app-alaq/icone-ecran-compte.png" alt="" style="width:88px;height:auto">
+  <!-- ⚠️ le motif .ic2 deux-fichiers, comme les autres icônes d'écran : la variante
+       -clair existait sur le disque depuis le 20/08 mais n'était branchée nulle part —
+       l'icône crème s'effaçait sur le parchemin du mode clair (contre-expertise 23/08) -->
+  <span class="ic2"><img class="o-nuit" data-ico="ecran-compte" src="images-app-alaq/icone-ecran-compte.png" alt="" style="width:88px;height:auto"><img class="o-jour" src="images-app-alaq/icone-ecran-compte-clair.png" alt="" style="width:88px;height:auto"></span>
   <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
   <p id="obQuote" style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
   <div id="obAccountCard" style="width:100%;max-width:320px"></div>
@@ -3049,7 +3064,16 @@ const UNITS=[
  { no:8,  ready:true,  ph:'GRAMMAIRE', u8:true, letters:[], words:[],
    court:'L’article الـ',                       // ce que le ciel annonce, à la place des lettres
    sub:'L’article الـ · lettres solaires et lunaires — 9 leçons' },
- { no:9,  ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
+ /* ═══ UNITÉ 9 — بِ ﻭ عَلَى ﻭ لِ : LA GRAMMAIRE PAR LA MANIPULATION ═══
+    Disque 1 SEUL est ouvert (GO de Myriam, 23/08 : « je valide »). `u9:true`
+    dit à `discsFor` de lire `u9Disques()` — pas de moteur à soi comme U8, les
+    écrans sont des exercices ORDINAIRES du registre (voir u9Disques() plus
+    haut et src/units/unit-9/donnees/disque-1.js). `words:[]` : les deux mots
+    neufs (بِنْتٌ/وَلَدٌ) ne rejoignent PAS encore la révision espacée — décision
+    délibérément non prise ici, à trancher avec Myriam si elle le souhaite. */
+ { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
+   court:'بِ · عَلَى · لِ',
+   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 1 leçon' },
  { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
@@ -3114,6 +3138,24 @@ window.__alaqHoteU8 = {
   /* les deux ÉCRITURES : un module ne peut pas affecter une variable d'ici */
   compterFaute(){ wrongCount++; },
   poserSonCourant(a){ _curAudio = a; },
+  /* ── PERDRE UN CŒUR (unité 9, 23/08) ──────────────────────────────────────
+     Même idiome qu'aux 3 sites classiques (l. ~5717, ~6288, ~6506) : ni la
+     révision ni la reprise « recharge » ne coûtent de cœur, et les deux
+     affichages suivent. Une primitive à part plutôt qu'un doublon du bloc
+     `graded` classique : les exercices du registre tiennent leur PROPRE
+     verdict (comme l'unité 8), le lecteur ne fait qu'exposer le geste.
+     ⚠️ NE PAS toucher `cta.onclick` ici — ce cœur peut se perdre en PLEIN
+     MILIEU d'un exercice à plusieurs manches, bien avant que CONTINUER ne
+     s'allume : river le bouton sur `goNoHearts` à cet instant figerait une
+     décision PÉRIMÉE (l'écran se termine quand même, et devient injouable
+     à sa propre réussite). La bascule à 0 cœur se décide dans
+     `objectifAtteint()`, au moment où le bouton s'allume — jamais avant. */
+  coeur(){
+    if(!REVIEW&&!RECHARGE) S.hearts=Math.max(0,S.hearts-1);
+    document.getElementById('p-hearts').textContent=S.hearts;
+    document.getElementById('st-hearts').textContent=S.hearts;
+    save();
+  },
 };
 
 /* ── L'ENREGISTREMENT ─────────────────────────────────────────────────────
@@ -3768,8 +3810,46 @@ function u8Disques(){
   return _u8Disques;
 }
 
+/* ── LE DISQUE DE L'UNITÉ 9 ──────────────────────────────────────────────────
+   Contrairement à U8_PLAN, il n'y a ici NI moteur à soi NI branche `build:
+   function(){ return U8.disque(k); }` par disque : chaque écran de
+   `src/units/unit-9/donnees/disque-1.js` EST un `st.type` que le registre des
+   exercices sait déjà monter (association-mots, glisser-scene, classer-harf,
+   rappel-images) — « registre d'exercices », pas moteur parallèle. Le lecteur
+   n'a donc besoin que d'une chose : le TABLEAU des `st` que `build()` retourne.
+
+   ⚠️ La métadonnée d'accueil (icône, libellé) et la LONGUEUR du tableau — un
+   seul disque pour l'instant — sont fixées ICI, dans le script classique,
+   jamais dérivées du module : `discsFor(8).length` doit être juste dès le tout
+   premier rendu de l'accueil, qu'il précède ou suive l'arrivée du module
+   (même prudence qu'U8_TALON). Seul le CONTENU de `build()` est différé, et
+   il ne l'est que jusqu'au premier appel — au plus tôt quand une élève ouvre
+   le disque, donc toujours après que `entree.js` a fini de s'exécuter. */
+/* ⚠️ 8 DISQUES « À VENIR » (24/08, Myriam : « il devrait y avoir 9 dont 8
+   grisées ») — la même silhouette que les unités à 9 disques, pour que
+   l'accueil ne dise pas « cette unité s'arrête là » avant l'heure. `aVenir:true`
+   les garde grisés À VIE (voir renderHome, le garde posé sur `unlocked`) — ce
+   ne sont PAS des disques qui se débloqueront un jour tout seuls au fil de la
+   progression : le jour où l'un d'eux aura un vrai contenu, cette entrée sera
+   remplacée par un disque normal, comme le disque 1 l'a été avant lui. */
+function u9DisqueAVenir(){
+  return { icon:'🌙', img:'decouvrir', label:'À venir', aVenir:true,
+    build:function(){ return [{type:'slide',nobadge:true,center:true,title:'Bientôt disponible',html:''}]; } };
+}
+function u9Disques(){
+  return [
+    { icon:'🌙', img:'decouvrir', label:'بِ · عَلَى · لِ',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque1==='function') return window.__alaqU9.disque1();
+        console.error('unité 9 : module non chargé (disque 1)'); return [];
+      } },
+    ...Array.from({length:8},u9DisqueAVenir),
+  ];
+}
+
 function discsFor(u){
   if(UNITS[u]&&UNITS[u].u8) return u8Disques();               // unité 8 : la grammaire, 9 disques à elle
+  if(UNITS[u]&&UNITS[u].u9) return u9Disques();               // unité 9 : la grammaire, registre d'exercices
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
     // Révision · Mémoriser · Lettres vs prolongations · Formes · Fātiḥa · Harakats · Lire · Écrire · Bilan
@@ -4833,7 +4913,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='accueil-derniere-unite-b \u00b7 le bandeau et le scroll sont enfin sur la bonne unite, epingles sous le bandeau sticky mesure en vrai';
+const BUILD='u9-disque1-ouvert-26aout \u00b7 liseres 2px derives des versions claires (U8+U9), 12 prises u9, sw hors localhost';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4844,9 +4924,21 @@ function iconFallback(im,ic){try{var s=document.createElement('span');s.textCont
 // AUCUN .node.current (frontier=-1 dans renderHome), donc l'ancien ciblage laissait
 // l'écran au sommet — unité 1 — dès que la dernière unité jouable était bouclée.
 let _homeFocusPending=true;
+/* ⚠️ TROUVÉ PAR MYRIAM (24/08) — L'UNITÉ 9 (un SEUL disque) a révélé un angle mort de
+   la boucle ci-dessous : « disque 0 fait » sert de repère de « unité EN COURS », mais
+   pour une unité à un seul disque, « disque 0 fait » = « unité ENTIÈREMENT finie ».
+   La boucle prend alors le DERNIER indice qui matche, même si c'est une unité déjà
+   bouclée dépassant une unité PRÉCÉDENTE encore incomplète (ex.: unité 8 pas finie,
+   unité 9 finie → l'ancien code pointait sur l'unité 9, pas sur le vrai travail en
+   cours). `currentLesson()` (l.~4134) donne LE VRAI repère : la première leçon non
+   terminée d'une unité débloquée. On ne retombe sur l'ancienne heuristique QUE si
+   `currentLesson()` ne trouve plus rien à faire (tout est fini) — c'est exactement
+   le cas que ce fix visait à l'origine (le 23/08) : montrer la dernière unité bouclée
+   plutôt que de laisser l'écran au sommet. */
 function focusCurrentDisc(){
-  let u=-1;
-  for(let k=0;k<UNITS.length;k++){ if(S.done&&S.done[dkey(k,0)])u=k; }
+  const L=currentLesson();
+  let u=L?L.u:-1;
+  if(u<0) for(let k=0;k<UNITS.length;k++){ if(S.done&&S.done[dkey(k,0)])u=k; }
   if(u<0)return; // rien commencé : l'écran reste au sommet, sur l'unité 1
   const sec=document.querySelector('#home .unit-sec[data-u="'+u+'"]');
   if(!sec)return;
@@ -4924,13 +5016,18 @@ function renderHome(){
     const discs=discsFor(u);
     // Un seul disque « courant » par unité : le premier débloqué non terminé (porte l'anneau doré).
     let frontier=-1;
-    for(let k=0;k<discs.length;k++){ if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)]){frontier=k;break;} }
+    for(let k=0;k<discs.length;k++){ if(discs[k].aVenir)continue; if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)]){frontier=k;break;} }
     discs.forEach((d,i)=>{
       const node=document.createElement('div');
       node.style.transform='translateX('+OFFS[i%OFFS.length]+'px)';
       if(playable){
         const done=!!S.done[dkey(u,i)];
-        const unlocked=i===0||!!S.done[dkey(u,i-1)];
+        // ⚠️ `aVenir` (unité 9, 24/08) : un disque SANS contenu construit reste grisé pour
+        // toujours, quel que soit S.done — la place existe (Myriam : « 9 dont 8 grisées »,
+        // même silhouette que les unités à 9 disques), mais rien derrière tant que ce n'est
+        // pas écrit. Sans ce garde, il se déverrouillerait normalement dès le disque 0 fini,
+        // et un toucher ouvrirait un disque sans contenu réel.
+        const unlocked=(i===0||!!S.done[dkey(u,i-1)])&&!d.aVenir;
         const current=(i===frontier);
         node.className='node '+(done?'done':current?'current':'locked');
         node.innerHTML='<div class="bwrap"><div class="ring"></div>'+
@@ -5037,6 +5134,7 @@ function renderStep(){
   body.classList.toggle('p-center',!!st.center);
   body.classList.toggle('p-bulles',st.type==='bulles'||st.type==='bulmots'); // pleine hauteur (Myriam 10/08) — se retire seule à l'écran suivant
   body.classList.toggle('p-asm',st.type==='assemble');  // écriture : colonne flex, la traduction se centre tuiles↔bandeau
+  body.classList.toggle('p-examfr',!!st.fr);            // « Lis le mot » : colonne flex, la traduction révélée se centre choix↔bandeau (Myriam 24/08)
   /* ── LE REGISTRE DES EXERCICES — LE LECTEUR NE NOMME PLUS PERSONNE ──────
      🔴 CE QU'IL Y AVAIT ICI, ET POURQUOI C'EST PARTI (POC-2, 18/08/2026). Une
      branche écrite à la main : `if(st.type==='u8') return U8.dessine(st,body)`.
@@ -5611,7 +5709,13 @@ function renderStep(){
   // le haut-parleur DESSINÉ, sans boîte, dont les ondes bougent pendant le son (Myriam 08/08)
   if(st.spk)html+='<button class="spkbtn" id="spkBig" onclick="spkRejouer(\''+st.spk+'\')" aria-label="Écouter">'+spkSVG()+'</button>';
   if(st.glyph){html+='<div class="glyph-big'+(st.glyphLinear?' linear-ar':'')+'">'+st.glyph+'</div>';}
-  if(st.fr)html+='<div class="fr" style="text-align:center;margin:2px 0 10px">'+st.fr+'</div>';
+  /* ⚠️ st.fr NE S'AFFICHE PLUS ICI (trouvé par Myriam 24/08, sur « Lis le mot, puis
+     touche le bon son » — le seul mcq du fichier à porter fr ET glyph ensemble,
+     vérifié : aucun autre appel mcq() ne combine les deux) — la traduction française
+     à côté du mot arabe rendait la LECTURE inutile, il suffisait de lire le français.
+     Elle se révèle désormais à la réussite, dans ctaClick(), même doctrine que
+     `asmFini()` pour l'écriture (« la traduction se révèle à la réussite »,
+     10/08) : jamais avant, pour ne jamais souffler la réponse. */
   html+='<div class="opts'+(st.flip?' flipcol':st.grid?' '+st.grid:'')+'" id="opts"></div>';
   st.options=balancePos(st.options,st.answer);
   body.innerHTML=html;
@@ -5671,7 +5775,19 @@ function ctaClick(){
       if(st.flip)o.classList.add('vu'); // toutes les cartes se révèlent à la vérification
       if(st.options[k].key===st.answer)o.classList.add('ok');
       else if(k===picked)o.classList.add('bad');});
-    if(ok){fb.className='fb ok';fb.innerHTML=elogeHTML();comboBonneReponse();}
+    if(ok){
+      fb.className='fb ok';fb.innerHTML=elogeHTML();comboBonneReponse();
+      // la traduction (et l'image, quand le mot en porte une) se révèlent à la
+      // réussite — jamais avant (règle du 24/08, même doctrine que asmFini()
+      // pour l'écriture). ⚠️ Aucun mot classique ne porte `img` aujourd'hui
+      // (le vocabulaire des unités 1-8 n'a pas ce champ) — posé pour le jour
+      // où l'un en aura une, sans qu'on ait à revenir ici.
+      if(st.fr){
+        const dv=document.createElement('div'); dv.className='exam-fr';
+        dv.innerHTML=(st.img?'<img src="'+st.img+'" alt="">':'')+'<span>'+st.fr+'</span>';
+        document.getElementById('p-body').appendChild(dv);
+      }
+    }
     else{
       comboReset();      // le combo doit rester mérité : une erreur remet le compteur à zéro
       const good=st.options.find(o=>o.key===st.answer);
@@ -5800,7 +5916,7 @@ function buildExam(U){
      sonnent tout seuls. `rtl3` s'ajoute pour la même raison : dans les leçons la séquence
      part de la DROITE, dans le sens de l'arabe — l'exercice de test suit maintenant. */
   const reading=shuffle(W).map(w=>mcq({prompt:'Lis le mot, puis touche le bon son',
-    glyph:w.w,glyphLinear:true,fr:w.fr,graded:true,spkOpts:true,grid:'grid3 rtl3',answer:w.w,options:wordSoundOptions(U,w)}));
+    glyph:w.w,glyphLinear:true,fr:w.fr,img:w.img,graded:true,spkOpts:true,grid:'grid3 rtl3',answer:w.w,options:wordSoundOptions(U,w)}));
   // ÉCRITURE — composer le mot avec les lettres
   const writing=shuffle(W).map(w=>({type:'assemble',w,graded:true}));
   // POSITIONS — forme déguisée (début/milieu/fin) → quelle lettre ? (visuel, jamais isolée)
@@ -5828,6 +5944,7 @@ function finishExam(){
   EXAM=false;
   const u=curU, pass=wrongCount<=2;
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
+  let graines=0;
   if(pass){
     if(!S.tests)S.tests={};
     // « Avancer ici » = raccourci test-out : valide les unités JUSQU'À CELLE-CI INCLUSE (k <= u), en terminant leurs disques.
@@ -5837,26 +5954,29 @@ function finishExam(){
       discsFor(k).forEach((d,i)=>{ S.done[dkey(k,i)]=true; });
     }
     S.xp+=30;
+    graines=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));
     validerJour(); pendingStreak=feteJourPending; feteJourPending=false;
     save();
   }
   document.getElementById('player').classList.remove('on');
-  document.querySelector('#finish .fin-score').style.display=''; // idem examen : le % revient
-  document.getElementById('fin-icon').textContent=pass?'🎉':'🔁';
+  document.getElementById('fin-icon').textContent='';
   document.getElementById('fin-title').textContent=pass
-    ?('Unités validées jusqu’ici ! 🎉')
-    :('Presque ! '+wrongCount+' erreurs (2 max)');
+    ?'Unités validées jusqu’ici !'
+    :('Presque ! '+wrongCount+' erreurs (2 max)');
   document.getElementById('fin-xp').textContent=pass?'+30':'+0';
   document.getElementById('fin-acc').textContent=acc+'%';
   const extra=document.getElementById('fin-extra');
   if(pass){
-    extra.innerHTML='<p style="color:var(--gold2);font-weight:800;margin:-6px 0 18px">🕋 Tu peux maintenant lire <b>'+fatihaPct()+' %</b> de la Fātiḥa !</p>';
+    extra.innerHTML='';
+    fillFinishCases(acc,graines);
     confettiBurst();
+    playSfx('fin-lecon');
+    mascotteDanse();
     checkBadges({noMistake:wrongCount===0});
   }else{
-    extra.innerHTML='<p style="max-width:320px;color:var(--cream);opacity:.85;margin:-6px auto 18px;font-size:14px">'+
-      'Le test n\u2019est pas validé : l\u2019unité suivante reste verrouillée. Réessaie quand tu veux</p>'+
-      '<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="startExam('+u+')">🔁 Refaire le test</button>';
+    // Échec : rien à montrer comme réussi — le titre suffit, un seul geste pour réessayer.
+    document.querySelector('#finish .fin-score').style.display='none';
+    extra.innerHTML='<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="startExam('+u+')">Refaire le test</button>';
   }
   fillFinishConstance();
   document.getElementById('finish').classList.add('on');
@@ -5945,6 +6065,26 @@ function objectifAtteint(){ // signature + éloge écrit + le bouton s'allume �
     fb.className='fb ok';fb.innerHTML=elogeHTML();
     foot.classList.remove('bad');foot.classList.add('ok');
   }catch(e){}
+  /* ── À 0 CŒUR, CONTINUER RIVE SUR « PLUS DE CŒURS » (unité 9, 23/08) ──────
+     Même règle que la cascade classique (l. ~5724), posée ICI et pas dans
+     `ctaOn2` (qui allume aussi le bouton pour des écrans sans le moindre
+     risque de cœur — spot, taprow, lecture de mot — où la question ne se
+     pose jamais). Un exercice du REGISTRE peut perdre un cœur PENDANT qu'il
+     est affiché (retry en place, plusieurs manches) — contrairement à un QCM
+     classique, qui résout et ferme sa question en un seul geste. Sans cette
+     ligne, le cœur se perdait pour de vrai mais CONTINUER envoyait quand
+     même à l'écran suivant : la décision doit se prendre ICI, au moment où
+     le bouton s'allume, jamais au moment où le cœur est perdu (un cœur perdu
+     tôt dans un exercice à plusieurs manches serait sinon une décision
+     PÉRIMÉE, agie bien après que l'exercice a été terminé avec succès).
+     ⚠️ SAUF sur le TOUT DERNIER écran de la file (trouvé à l'audit du 23/08,
+     avant qu'aucun disque ne l'atteigne) : `goNoHearts()` ne fait QUE fermer
+     le lecteur, il n'appelle jamais `finishDisque()` — router vers lui à ce
+     moment précis perdrait `S.done`, alors que l'exercice vient RÉUSSIR pour
+     de vrai. La leçon finie doit compter, même à 0 cœur ; c'est la PROCHAINE
+     leçon que `startDisque` bloquera normalement. */
+  const cta=document.getElementById('cta');
+  if(cta) cta.onclick=(!REVIEW&&!RECHARGE&&S.hearts<=0&&qi<QUEUE.length-1)?goNoHearts:advance;
   setTimeout(ctaOn2,150);
 }
 function quandSonFini(cb){ // rappelle cb à la fin du son EN COURS (filet 2,5 s : synthèse, silence)
@@ -10043,9 +10183,31 @@ document.addEventListener('click',function(e){
   const m=document.getElementById('smenu');
   if(m&&!e.target.closest('.spick'))m.classList.remove('open');
 });
-/* PWA : service worker (fonctionnement hors ligne, audios en cache) */
+/* PWA : service worker (fonctionnement hors ligne, audios en cache)
+
+   🔴 JAMAIS EN LOCAL (26/08) — ce sw a coûté TROIS JOURS de tests faussés à
+   Myriam. Son cache d'images ressert les octets vus la PREMIÈRE fois sous un
+   nom donné : les `*-clair.png` de l'unité 9 ayant d'abord été de simples
+   COPIES des versions sombres, le navigateur a gardé l'image sombre sous le
+   nom `-clair` et la reservait à chaque test, quoi qu'il y ait sur le disque.
+   Le piège est SILENCIEUX : « vider le cache du navigateur » n'y touche pas
+   (le Cache Storage du sw n'est pas le cache HTTP — il faut cocher « cookies
+   et autres données de site »), et rien à l'écran ne dit que l'image affichée
+   n'est pas celle du fichier. En local on veut TOUJOURS le disque ; le
+   hors-ligne ne sert qu'aux élèves, donc uniquement en production.
+
+   ⚠️ ET ON DÉSINSCRIT CE QUI TRAÎNE : ne plus appeler `register()` ne suffit
+   pas — un sw déjà enregistré sur localhost continue de contrôler la page pour
+   toujours. On le retire et on vide ses caches, sinon le correctif ne répare
+   que les machines qui n'ont jamais ouvert l'app. Sans effet en prod. */
 if('serviceWorker'in navigator&&location.protocol!=='file:'){
-  try{navigator.serviceWorker.register('sw.js');}catch(e){}
+  const enLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname==='[::1]';
+  if(enLocal){
+    navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
+    if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{});
+  }else{
+    try{navigator.serviceWorker.register('sw.js');}catch(e){}
+  }
 }
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';})();
 /* Les minutes de l'objectif : 15 s de leçon visible = 15 s comptées. Le lecteur fermé
@@ -10073,6 +10235,30 @@ showTab('home');
 if(location.hash==='#connexion'){
   try{history.replaceState(null,'',location.pathname);}catch(e){}
   setTimeout(function(){ try{ if(CLOUD.user){showTab('home');toast('Bon retour ✨');} else obLoginOpen(); }catch(e){} },200);
+} else if(location.hash==='#u9'){
+  /* raccourci de TEST pour Myriam (24/08) : ouvre directement U9-D1 sans passer par
+     l'accueil ni la progression des 8 unités précédentes — startDisque() n'a AUCUN
+     verrou de progression (seul renderHome() grise un disque non atteint), donc
+     appeler startDisque(8,0) est déjà sûr en soi. Ne touche jamais S.done : la
+     progression réelle du compte reste intacte, c'est un pur raccourci d'écran.
+     ⚠️ BUG VÉCU ET CORRIGÉ le jour même : un délai FIXE (200ms, comme #connexion)
+     appelait startDisque AVANT que le module ES de l'unité 9 (`src/entree.js`,
+     chargé en `<script type="module">`, async par nature) ait publié
+     `window.__alaqU9` — `discsFor(8)[0].build()` rendait alors un tableau VIDE
+     (u9Disques() l'avale silencieusement, cf. son propre garde-fou), et
+     `renderStep()` sur une QUEUE vide saute tout droit à `finishDisque()` :
+     l'élève atterrissait sur « Leçon terminée ! 100 % » sans avoir vu un seul
+     écran. On ATTEND donc que le module soit réellement là, sans borne de
+     temps arbitraire — le module est petit, l'attente réelle est de l'ordre
+     de quelques dizaines de ms, jamais des 200ms qui suffisaient par chance
+     pour #connexion (qui ne dépend d'aucun module). */
+  try{history.replaceState(null,'',location.pathname);}catch(e){}
+  (function attendreModuleU9(essai){
+    if(window.__alaqU9&&typeof window.__alaqU9.disque1==='function'){
+      try{startDisque(8,0);}catch(e){}
+    } else if(essai<100){ setTimeout(function(){attendreModuleU9(essai+1);},50); }
+    else{ try{toast('Module unité 9 introuvable');}catch(e){} }
+  })(0);
 } else if(!S.onboarded){ setTimeout(function(){try{onbStart();}catch(e){}},120); } // 1er lancement : parcours de bienvenue
 </script>
 <script>

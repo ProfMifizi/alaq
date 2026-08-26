@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v153-2026-08-23';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v155-2026-08-26';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -28,7 +28,7 @@ const MEDIA='alaq-medias';
    à rien, `activate` le jette, et chaque image repart chercher le réseau. C'est la
    règle que ce projet a déjà pour toute image retouchée sous le même nom — je l'ai
    moi-même oubliée trois fois de suite ici. */
-const IMGV=6;
+const IMGV=16;
 const IMGCACHE='alaq-images-v'+IMGV;
 const CORE=['.','index.html','u8/u8.js','u8/u8.css','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
@@ -282,6 +282,18 @@ const AUDIOS=[
 "audios-app-alaq/mot-audhu.mp3",
 "audios-app-alaq/mot-ayn.mp3",
 "audios-app-alaq/mot-bab.mp3",
+"audios-app-alaq/mot-tayralalbayt.mp3",
+"audios-app-alaq/mot-almaktab.mp3",
+"audios-app-alaq/mot-qalamalalmaktab.mp3",
+"audios-app-alaq/mot-hablilhimar.mp3",
+"audios-app-alaq/mot-aktub.mp3",
+"audios-app-alaq/mot-annabat.mp3",
+"audios-app-alaq/mot-nahlaalanabat.mp3",
+"audios-app-alaq/mot-bint.mp3",
+"audios-app-alaq/mot-qalamlilbint.mp3",
+"audios-app-alaq/mot-walad.mp3",
+"audios-app-alaq/mot-tinlilwalad.mp3",
+"audios-app-alaq/mot-hablalalmaktab.mp3",
 "audios-app-alaq/mot-arrahmani.mp3",
 "audios-app-alaq/mot-arrahimi.mp3",
 "audios-app-alaq/mot-addini.mp3",
@@ -1003,6 +1015,15 @@ self.addEventListener('activate',e=>{
       'mot-bab-f.mp3',
     ]
       .map(f=>m.delete('audios-app-alaq/'+f,{ignoreSearch:true})));
+    /* 24/08 — les 4 mp4 de l'écriture guidée U9 (écran 6/7, disque 1), réécrits
+       SOUS LE MÊME NOM plusieurs fois dans la même journée pendant la mise au
+       point (fond vert non détouré, puis mauvais recadrage/zoom, puis liseré
+       résiduel en bas de cadre) : exactement le cas que cette purge ciblée
+       existe pour couvrir — un appareil qui a ouvert le disque 1 CE jour-là a
+       pu mettre en cache une version cassée, `MEDIA` ne l'aurait jamais lâchée. */
+    await Promise.all(['ecrire-sombre-bg.mp4','ecrire-clair-bg.mp4',
+      'ecrire-sombre-panel.mp4','ecrire-clair-panel.mp4']
+      .map(f=>m.delete('images-app-alaq/u9/'+f,{ignoreSearch:true})));
     self.clients.claim();
   })());
 });
