@@ -20,7 +20,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 2 — بِ, le moyen"
   ]
  },
  {
@@ -92,7 +93,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 2 — بِ, le moyen"
   ]
  },
  {
@@ -116,7 +118,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 2 — بِ, le moyen"
   ]
  },
  {
@@ -141,6 +144,78 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ"
+  ]
+ },
+ {
+  "fichier": "mot-waladyaktubbilqalam.mp3",
+  "arabe": "الْوَلَدُ يَكْتُبُ بِالْقَلَمِ",
+  "sens": "le garçon écrit avec le stylo",
+  "translit": "al-waladou yaktoubou bi-l-qalami",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-almaa.mp3",
+  "arabe": "الْمَاءُ",
+  "sens": "l’eau",
+  "translit": "al-mâ’ou",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-waladyatawaddabilmaa.mp3",
+  "arabe": "الْوَلَدُ يَتَوَضَّأُ بِالْمَاءِ",
+  "sens": "le garçon fait ses ablutions avec l’eau",
+  "translit": "al-waladou yatawaddha’ou bi-l-mâ’i",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-atturab.mp3",
+  "arabe": "التُّرَابُ",
+  "sens": "la terre, la poussière propre",
+  "translit": "at-tourâbou",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-waladyatayammambitturab.mp3",
+  "arabe": "الْوَلَدُ يَتَيَمَّمُ بِالتُّرَابِ",
+  "sens": "le garçon fait le tayammum avec la terre",
+  "translit": "al-waladou yatayammamou bi-t-tourâbi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-binttatasallaqbilhabl.mp3",
+  "arabe": "الْبِنْتُ تَتَسَلَّقُ بِالْحَبْلِ",
+  "sens": "la fille grimpe avec la corde",
+  "translit": "al-bintou tatasallaqou bi-l-habli",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
   ]
  }
 ]
