@@ -4913,7 +4913,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-disque1-ouvert-26aout \u00b7 liseres 2px derives des versions claires (U8+U9), 12 prises u9, sw hors localhost';
+const BUILD='u9-chemins-images-26aout \u00b7 correctif URGENT : les images u9 pointaient un chemin local, mortes en prod';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
