@@ -9,11 +9,11 @@
 <meta property="og:description" content="Une méthode gratuite et progressive pour lire l’arabe et le Qorān, du son à la lecture, à ton rythme.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#252120">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="shortcut icon" href="icon-192.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="shortcut icon" href="./icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2412,7 +2412,6 @@ html.gtexte .onb-body{ zoom:1.22 }
    FERME l'élément à cette chaîne. Le reste du commentaire devient alors du texte
    dans la page — et les harnais qui mesurent le rendu ne le voient pas forcément. */
 </style>
-<link rel="stylesheet" href="../src/units/unit-8/styles/u8.css">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ⚠️ AVANT TOUT AFFICHAGE : sans ça l'app apparaît en sombre puis bascule — un
@@ -2423,6 +2422,8 @@ html.gtexte .onb-body{ zoom:1.22 }
   h.classList.add('gros');   // les écrans de glisser sont EN GRAND pour tout le monde
 }catch(e){}})();
 </script>
+  <script type="module" crossorigin src="./u8/u8.js"></script>
+  <link rel="stylesheet" crossorigin href="./u8/u8.css">
 </head>
 <body>
 <!-- ===== LE CIEL DE LA JOURNÉE (ciel-v1) — derrière toute l'app, sur l'accueil seul ===== -->
@@ -2561,7 +2562,7 @@ html.gtexte .onb-body{ zoom:1.22 }
 
     <section class="obs on" data-obs="0">
       <div style="flex:1"></div>
-      <img class="ob-logo" src="icon-512.png" alt="ALAQ">
+      <img class="ob-logo" src="./icon-512.png" alt="ALAQ">
       <p class="ob-lead">Méthode francophone pour apprendre à lire l'arabe, comprendre et mémoriser le Qor'an.</p>
       <div style="flex:1"></div>
       <button class="cta" onclick="onbNext()">COMMENCER</button>
@@ -2728,7 +2729,7 @@ html.gtexte .onb-body{ zoom:1.22 }
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
-  <div class="deskbrand"><img class="dlg" src="icon-192.png" alt="ALAQ"></div>
+  <div class="deskbrand"><img class="dlg" src="./icon-192.png" alt="ALAQ"></div>
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi"><img class="bni" data-ico="menu-apprendre" src="images-app-alaq/icone-menu-apprendre.png" alt=""></span><span class="bn-lab">Apprendre</span></button>
   <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi"><img class="bni" data-ico="menu-cours" src="images-app-alaq/icone-menu-cours.png" alt=""></span><span class="bn-lab">Cours</span></button>
   <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi"><img class="bni" data-ico="menu-reviser" src="images-app-alaq/icone-menu-reviser.png" alt=""></span><span class="bn-lab">Réviser</span></button>
@@ -4923,7 +4924,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='epi-streak-video \u00b7 l\u2019\u00e9cran d\u2019assiduit\u00e9 affiche l\u2019\u00e9pi anim\u00e9 (Artlist, fond d\u00e9tour\u00e9) au lieu des 7 ic\u00f4nes, valid\u00e9 par Myriam le 27/08';
+const BUILD='dist-entree-js \u00b7 correctif : le deploiement repasse par dist/ (src/entree.js ne se chargeait plus en prod, 404 -- les lecons de unite 9 finissaient sans se jouer)';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -10722,6 +10723,5 @@ try{ poserLanterne(); refaireBandeaux(); poserPortail(); }catch(e){}
      servi depuis la racine (app.alaq.fr) que depuis /alaq-vercel-static/ en
      local et dans les harnais.
      ══════════════════════════════════════════════════════════════════════ -->
-<script type="module" src="../src/entree.js"></script>
 </body>
 </html>
