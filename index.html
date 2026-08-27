@@ -9,11 +9,11 @@
 <meta property="og:description" content="Une méthode gratuite et progressive pour lire l’arabe et le Qorān, du son à la lecture, à ton rythme.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#252120">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-<link rel="shortcut icon" href="./icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="shortcut icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -582,12 +582,9 @@
   .ob-cta{margin-top:18px}
   .ob-in{width:100%;box-sizing:border-box;background:var(--panel2);border:2px solid var(--line);border-radius:14px;padding:14px;color:var(--cream);font-family:var(--ui);font-size:17px;text-align:center;margin-top:10px}
   .ob-in:focus{border-color:var(--gold);outline:none}
-  .ears{display:flex;gap:9px;justify-content:center;margin:12px 0 8px}
-  .ob-ear{font-size:28px;line-height:1}
-  /* Les épis de l'assiduité : DESSINS du registre, plus d'emoji (Myriam 14/08). L'épi du jour
-     à venir garde la même image, éteinte — on voit d'un coup d'œil combien il en reste. */
-  .ob-ear img{height:26px;width:auto;display:block}
-  .ob-ear.off img{filter:grayscale(1);opacity:.3}
+  /* L'écran d'assiduité (27/08) : la rangée de 7 épis (.ears/.ob-ear) est remplacée par
+     l'épi animé qui pousse du tas de terre — voir .streak-plant, showStreak(). */
+  .streak-plant{width:210px;height:210px;object-fit:contain;margin:6px auto 4px;display:block;background:transparent}
   /* Le verset de l'assiduité, en entier : il ne peut plus tenir en 36 px sur un iPhone. */
   #streak .verse{font-size:21px;line-height:2.05;max-width:340px;margin:6px 0 8px}
   .stk-tr{max-width:340px;color:var(--cream);font-size:13px;line-height:1.6;margin:0 0 4px}
@@ -2415,6 +2412,7 @@ html.gtexte .onb-body{ zoom:1.22 }
    FERME l'élément à cette chaîne. Le reste du commentaire devient alors du texte
    dans la page — et les harnais qui mesurent le rendu ne le voient pas forcément. */
 </style>
+<link rel="stylesheet" href="../src/units/unit-8/styles/u8.css">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ⚠️ AVANT TOUT AFFICHAGE : sans ça l'app apparaît en sombre puis bascule — un
@@ -2425,8 +2423,6 @@ html.gtexte .onb-body{ zoom:1.22 }
   h.classList.add('gros');   // les écrans de glisser sont EN GRAND pour tout le monde
 }catch(e){}})();
 </script>
-  <script type="module" crossorigin src="./u8/u8.js"></script>
-  <link rel="stylesheet" crossorigin href="./u8/u8.css">
 </head>
 <body>
 <!-- ===== LE CIEL DE LA JOURNÉE (ciel-v1) — derrière toute l'app, sur l'accueil seul ===== -->
@@ -2565,7 +2561,7 @@ html.gtexte .onb-body{ zoom:1.22 }
 
     <section class="obs on" data-obs="0">
       <div style="flex:1"></div>
-      <img class="ob-logo" src="./icon-512.png" alt="ALAQ">
+      <img class="ob-logo" src="icon-512.png" alt="ALAQ">
       <p class="ob-lead">Méthode francophone pour apprendre à lire l'arabe, comprendre et mémoriser le Qor'an.</p>
       <div style="flex:1"></div>
       <button class="cta" onclick="onbNext()">COMMENCER</button>
@@ -2671,7 +2667,7 @@ html.gtexte .onb-body{ zoom:1.22 }
      registre (icone-tb-epi) — jamais 🌾/🌱, qui se peignent tout seuls et ignorent le thème. -->
 <div class="finish" id="streak">
   <div style="font-weight:900;color:var(--gold2);margin-top:6px"><span id="streakNum" style="font-size:46px">1</span> <span id="streakUnit" style="font-size:18px">jour</span></div>
-  <div class="ears" id="streakEars"></div>
+  <img class="streak-plant" src="images-app-alaq/epi-pousse-anime-v1.webp" alt="" width="210" height="210">
   <button class="stk-spk" id="streakSpk" onclick="streakRecite()" aria-label="Écouter le verset"></button>
   <p class="verse" id="streakVerse">مَّثَلُ الَّذِينَ يُنْفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنْبَتَتْ سَبْعَ سَنَابِلَ فِي كُلِّ سُنْبُلَةٍ مِائَةُ حَبَّةٍ ۗ وَاللَّهُ يُضَاعِفُ لِمَنْ يَشَاءُ ۗ وَاللَّهُ وَاسِعٌ عَلِيمٌ</p>
   <p class="stk-tr">« Ceux qui dépensent leurs biens dans le chemin d’Allah sont à l’image d’un grain qui fait pousser sept épis, à cent grains chacun. Et Allah multiplie la récompense à qui Il veut. Allah est Immense et Savant. »</p>
@@ -2732,7 +2728,7 @@ html.gtexte .onb-body{ zoom:1.22 }
 <div class="toast" id="toast"></div>
 
 <nav class="botnav" id="botnav">
-  <div class="deskbrand"><img class="dlg" src="./icon-192.png" alt="ALAQ"></div>
+  <div class="deskbrand"><img class="dlg" src="icon-192.png" alt="ALAQ"></div>
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi"><img class="bni" data-ico="menu-apprendre" src="images-app-alaq/icone-menu-apprendre.png" alt=""></span><span class="bn-lab">Apprendre</span></button>
   <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi"><img class="bni" data-ico="menu-cours" src="images-app-alaq/icone-menu-cours.png" alt=""></span><span class="bn-lab">Cours</span></button>
   <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi"><img class="bni" data-ico="menu-reviser" src="images-app-alaq/icone-menu-reviser.png" alt=""></span><span class="bn-lab">Réviser</span></button>
@@ -2770,7 +2766,8 @@ var ICONES={
   'tab2-lire':'icone-tab2-lire.png','tab2-qoran':'icone-tab2-qoran.png',
   'tab2-ecrire':'icone-tab2-ecrire.png',
   'disq-or':'icone-disq8-a-',      /* préfixe des disques dorés : + id + .png */
-  'disq-verrou':'icone-disq7-c-'   /* préfixe des verrouillés — TOUJOURS changer les deux familles ensemble */
+  'disq-verrou':'icone-disq7-c-',  /* préfixe des verrouillés — TOUJOURS changer les deux familles ensemble */
+  'streak-epi':'epi-pousse-anime-v1.webp' /* l'écran d'assiduité (27/08) : tas de terre + épi animé, Artlist détouré */
 };
 function ico(n){ var f=ICONES[n]; return f?'images-app-alaq/'+f:''; }
 /* ⚠️ DEUX FICHIERS, PAS UN FILTRE (20/08). Le mode clair appliquait
@@ -4336,10 +4333,12 @@ document.addEventListener('click',function(e){
     b.classList.add('sel');
   }
 });
-function showStreak(){ // 7 épis = 7 jours ; l'épi du jour s'allume, ceux à venir restent éteints
-  var n=S.streak||1, inCycle=((n-1)%7)+1, h='';
-  for(var i=1;i<=7;i++)h+='<span class="ob-ear'+(i<=inCycle?'':' off')+'">'+icoImg('tb-epi')+'</span>';
-  document.getElementById('streakEars').innerHTML=h;
+function showStreak(){ // l'épi pousse du tas de terre (27/08) ; le chiffre reste le titre au-dessus
+  var n=S.streak||1;
+  /* l'animation ne se rejoue jamais toute seule (loop=1) : on force le redémarrage à
+     chaque ouverture de l'écran, sans repasser par le réseau (même URL, servie par le sw). */
+  var pl=document.querySelector('.streak-plant');
+  if(pl){ var src=pl.getAttribute('src'); pl.src=''; pl.src=src; }
   document.getElementById('streakNum').textContent=n;
   document.getElementById('streakUnit').textContent=(n>1?'jours':'jour');
   var s=document.getElementById('streakSpk'); if(s&&!s.innerHTML)s.innerHTML=spkSVG();
@@ -4924,7 +4923,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-disque2-bi-le-moyen \u00b7 le disque 2 de l\u2019unit\u00e9 9 (\u0628\u0650, le moyen) entre en production, GO de Myriam le 27/08';
+const BUILD='epi-streak-video \u00b7 l\u2019\u00e9cran d\u2019assiduit\u00e9 affiche l\u2019\u00e9pi anim\u00e9 (Artlist, fond d\u00e9tour\u00e9) au lieu des 7 ic\u00f4nes, valid\u00e9 par Myriam le 27/08';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -10723,5 +10722,6 @@ try{ poserLanterne(); refaireBandeaux(); poserPortail(); }catch(e){}
      servi depuis la racine (app.alaq.fr) que depuis /alaq-vercel-static/ en
      local et dans les harnais.
      ══════════════════════════════════════════════════════════════════════ -->
+<script type="module" src="../src/entree.js"></script>
 </body>
 </html>

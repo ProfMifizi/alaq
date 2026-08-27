@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v158-2026-08-27';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v159-2026-08-27';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -30,13 +30,14 @@ const MEDIA='alaq-medias';
    moi-même oubliée trois fois de suite ici. */
 const IMGV=16;
 const IMGCACHE='alaq-images-v'+IMGV;
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const CORE=['.','index.html','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-tb-lanterne-v1.png",
 "images-app-alaq/icone-porte-v1.png",
 "images-app-alaq/icone-main-glisse-v2.png",
 "images-app-alaq/icone-ciel-dromadaire-v1.png",
 "images-app-alaq/icone-tb-epi-v1.png",
+"images-app-alaq/epi-pousse-anime-v1.webp",
 "images-app-alaq/icone-tb-coeur-v1.png",
 "images-app-alaq/icone-loupe-v1.png",
 "images-app-alaq/icone-tab-video.png",
@@ -1050,7 +1051,7 @@ self.addEventListener('fetch',e=>{
   const cacheFirst=url.pathname.indexOf('/audios-app-alaq/')>=0
     ||url.hostname==='fonts.googleapis.com'||url.hostname==='fonts.gstatic.com'||url.hostname==='cdn.jsdelivr.net'
     ||url.hostname==='cdn.islamic.network'  // la récitation streamée : mise en cache côté client, comme leurs conditions le demandent
-    ||/\.(png|jpe?g|mp3|mp4|woff2?)$/.test(url.pathname);
+    ||/\.(png|jpe?g|webp|mp3|mp4|woff2?)$/.test(url.pathname); // webp ajouté le 27/08 (épi animé) — un oubli du régime cache-d'abord, corrigé au passage
   if(cacheFirst){
     e.respondWith((async()=>{
       const hit=await caches.match(e.request);
