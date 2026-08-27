@@ -32,7 +32,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 3 — عَلَى, sur"
   ]
  },
  {
@@ -80,7 +81,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 3 — عَلَى, sur"
   ]
  },
  {
@@ -142,7 +144,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 3 — عَلَى, sur"
   ]
  },
  {
@@ -154,7 +157,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 3 — عَلَى, sur"
   ]
  },
  {
@@ -263,6 +267,30 @@
   "unite": 9,
   "lecons": [
    "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-nabat.mp3",
+  "arabe": "نَبَاتٌ",
+  "sens": "la plante, la végétation (indéfini)",
+  "translit": "nabâtoun",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 3 — عَلَى, sur"
+  ]
+ },
+ {
+  "fichier": "mot-attayralalbayt.mp3",
+  "arabe": "الطَّيْرُ عَلَى الْبَيْتِ",
+  "sens": "l’oiseau est sur la maison",
+  "translit": "at-tayrou ‘alâ l-bayti",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 3 — عَلَى, sur"
   ]
  }
 ]
