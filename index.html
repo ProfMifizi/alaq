@@ -3065,16 +3065,16 @@ const UNITS=[
    court:'L’article الـ',                       // ce que le ciel annonce, à la place des lettres
    sub:'L’article الـ · lettres solaires et lunaires — 9 leçons' },
  /* ═══ UNITÉ 9 — بِ ﻭ عَلَى ﻭ لِ : LA GRAMMAIRE PAR LA MANIPULATION ═══
-    Disques 1 ET 2 ouverts (GO de Myriam sur le disque 2, 27/08 : « oui je
-    valide »). `u9:true` dit à `discsFor` de lire `u9Disques()` — pas de
-    moteur à soi comme U8, les écrans sont des exercices ORDINAIRES du
-    registre (voir u9Disques() plus haut et src/units/unit-9/donnees/
-    disque-1.js et disque-2.js). `words:[]` : les mots neufs des deux disques
-    ne rejoignent PAS encore la révision espacée — décision délibérément non
-    prise ici, à trancher avec Myriam si elle le souhaite. */
+    Disques 1, 2 ET 3 ouverts (GO de Myriam sur le disque 3, 27/08). `u9:true`
+    dit à `discsFor` de lire `u9Disques()` — pas de moteur à soi comme U8, les
+    écrans sont des exercices ORDINAIRES du registre (voir u9Disques() plus
+    haut et src/units/unit-9/donnees/disque-1.js, disque-2.js, disque-3.js).
+    `words:[]` : les mots neufs des trois disques ne rejoignent PAS encore la
+    révision espacée — décision délibérément non prise ici, à trancher avec
+    Myriam si elle le souhaite. */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
    court:'بِ · عَلَى · لِ',
-   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 2 leçons' },
+   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 3 leçons' },
  { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
@@ -3849,7 +3849,12 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque2==='function') return window.__alaqU9.disque2();
         console.error('unité 9 : module non chargé (disque 2)'); return [];
       } },
-    ...Array.from({length:7},u9DisqueAVenir),
+    { icon:'🌙', img:'decouvrir', label:'عَلَى — sur',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque3==='function') return window.__alaqU9.disque3();
+        console.error('unité 9 : module non chargé (disque 3)'); return [];
+      } },
+    ...Array.from({length:6},u9DisqueAVenir),
   ];
 }
 
