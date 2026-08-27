@@ -228,5 +228,41 @@
   "lecons": [
    "Disque 2 — بِ, le moyen"
   ]
+ },
+ {
+  "fichier": "mot-waladyaktub.mp3",
+  "arabe": "الْوَلَدُ يَكْتُبُ",
+  "sens": "le garçon écrit",
+  "translit": "al-waladou yaktoubou",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-waladyatawadda.mp3",
+  "arabe": "الْوَلَدُ يَتَوَضَّأُ",
+  "sens": "le garçon fait ses ablutions",
+  "translit": "al-waladou yatawaddha’ou",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
+ },
+ {
+  "fichier": "mot-waladyatayammam.mp3",
+  "arabe": "الْوَلَدُ يَتَيَمَّمُ",
+  "sens": "le garçon fait le tayammum",
+  "translit": "al-waladou yatayammamou",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
+  ]
  }
 ]
