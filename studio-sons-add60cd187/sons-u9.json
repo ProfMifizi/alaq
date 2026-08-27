@@ -20,8 +20,7 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ",
-   "Disque 2 — بِ, le moyen"
+   "Disque 1 — بِ · عَلَى · لِ"
   ]
  },
  {
@@ -144,6 +143,18 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ"
+  ]
+ },
+ {
+  "fichier": "mot-maktab.mp3",
+  "arabe": "مَكْتَبٌ",
+  "sens": "un bureau (indéfini)",
+  "translit": "maktaboun",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 2 — بِ, le moyen"
   ]
  },
  {
