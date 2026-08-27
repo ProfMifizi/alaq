@@ -3065,15 +3065,16 @@ const UNITS=[
    court:'L’article الـ',                       // ce que le ciel annonce, à la place des lettres
    sub:'L’article الـ · lettres solaires et lunaires — 9 leçons' },
  /* ═══ UNITÉ 9 — بِ ﻭ عَلَى ﻭ لِ : LA GRAMMAIRE PAR LA MANIPULATION ═══
-    Disque 1 SEUL est ouvert (GO de Myriam, 23/08 : « je valide »). `u9:true`
-    dit à `discsFor` de lire `u9Disques()` — pas de moteur à soi comme U8, les
-    écrans sont des exercices ORDINAIRES du registre (voir u9Disques() plus
-    haut et src/units/unit-9/donnees/disque-1.js). `words:[]` : les deux mots
-    neufs (بِنْتٌ/وَلَدٌ) ne rejoignent PAS encore la révision espacée — décision
-    délibérément non prise ici, à trancher avec Myriam si elle le souhaite. */
+    Disques 1 ET 2 ouverts (GO de Myriam sur le disque 2, 27/08 : « oui je
+    valide »). `u9:true` dit à `discsFor` de lire `u9Disques()` — pas de
+    moteur à soi comme U8, les écrans sont des exercices ORDINAIRES du
+    registre (voir u9Disques() plus haut et src/units/unit-9/donnees/
+    disque-1.js et disque-2.js). `words:[]` : les mots neufs des deux disques
+    ne rejoignent PAS encore la révision espacée — décision délibérément non
+    prise ici, à trancher avec Myriam si elle le souhaite. */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
    court:'بِ · عَلَى · لِ',
-   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 1 leçon' },
+   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 2 leçons' },
  { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
@@ -3843,7 +3844,12 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque1==='function') return window.__alaqU9.disque1();
         console.error('unité 9 : module non chargé (disque 1)'); return [];
       } },
-    ...Array.from({length:8},u9DisqueAVenir),
+    { icon:'🌙', img:'decouvrir', label:'بِ — le moyen',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque2==='function') return window.__alaqU9.disque2();
+        console.error('unité 9 : module non chargé (disque 2)'); return [];
+      } },
+    ...Array.from({length:7},u9DisqueAVenir),
   ];
 }
 
@@ -4913,7 +4919,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-chemins-images-26aout \u00b7 correctif URGENT : les images u9 pointaient un chemin local, mortes en prod';
+const BUILD='u9-disque2-bi-le-moyen \u00b7 le disque 2 de l\u2019unit\u00e9 9 (\u0628\u0650, le moyen) entre en production, GO de Myriam le 27/08';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
