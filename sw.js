@@ -28,7 +28,7 @@ const MEDIA='alaq-medias';
    à rien, `activate` le jette, et chaque image repart chercher le réseau. C'est la
    règle que ce projet a déjà pour toute image retouchée sous le même nom — je l'ai
    moi-même oubliée trois fois de suite ici. */
-const IMGV=16;
+const IMGV=17;
 const IMGCACHE='alaq-images-v'+IMGV;
 const CORE=['.','index.html','u8/u8.js','u8/u8.css','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
