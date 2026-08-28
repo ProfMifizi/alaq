@@ -45,7 +45,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 4 — لِ, pour/à qui"
   ]
  },
  {
@@ -95,7 +96,8 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ",
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 4 — لِ, pour/à qui"
   ]
  },
  {
@@ -107,7 +109,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 4 — لِ, pour/à qui"
   ]
  },
  {
@@ -120,7 +123,8 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ",
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 4 — لِ, pour/à qui"
   ]
  },
  {
@@ -132,7 +136,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 4 — لِ, pour/à qui"
   ]
  },
  {
@@ -158,7 +163,8 @@
   "unite": 9,
   "lecons": [
    "Disque 2 — بِ, le moyen",
-   "Disque 3 — عَلَى, sur"
+   "Disque 3 — عَلَى, sur",
+   "Disque 4 — لِ, pour/à qui"
   ]
  },
  {
@@ -291,6 +297,102 @@
   "unite": 9,
   "lecons": [
    "Disque 3 — عَلَى, sur"
+  ]
+ },
+ {
+  "fichier": "mot-umm.mp3",
+  "arabe": "أُمٌّ",
+  "sens": "la mère",
+  "translit": "oummoun",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-rummanlilbint.mp3",
+  "arabe": "الرُّمَّانُ لِلْبِنْتِ",
+  "sens": "la grenade est pour la fille",
+  "translit": "ar-roummânou li-l-binti",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-rummanlilwalad.mp3",
+  "arabe": "الرُّمَّانُ لِلْوَلَدِ",
+  "sens": "la grenade est pour le garçon",
+  "translit": "ar-roummânou li-l-waladi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-qalamlilwalad.mp3",
+  "arabe": "الْقَلَمُ لِلْوَلَدِ",
+  "sens": "le stylo est pour le garçon",
+  "translit": "al-qalamou li-l-waladi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-tinlilhimar.mp3",
+  "arabe": "التِّينُ لِلْحِمَارِ",
+  "sens": "la figue est pour l’âne",
+  "translit": "at-tînou li-l-himâri",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-rummanlilumm.mp3",
+  "arabe": "الرُّمَّانُ لِلْأُمِّ",
+  "sens": "la grenade est pour la mère",
+  "translit": "ar-roummânou li-l-oummi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-qalamlilumm.mp3",
+  "arabe": "الْقَلَمُ لِلْأُمِّ",
+  "sens": "le stylo est pour la mère",
+  "translit": "al-qalamou li-l-oummi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-tinlilumm.mp3",
+  "arabe": "التِّينُ لِلْأُمِّ",
+  "sens": "la figue est pour la mère",
+  "translit": "at-tînou li-l-oummi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 4 — لِ, pour/à qui"
   ]
  }
 ]
