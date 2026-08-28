@@ -3907,9 +3907,38 @@ let _syncT=null;
 function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
 async function cloudSaveNow(){
   try{ if(!SB||!CLOUD.user)return;
+    /* ⚠️ 28/08 — LE VRAI COUPABLE : PAS UN ENVOI QUI ÉCHOUE, UN ENVOI TROP GÉNÉREUX.
+       Les journaux Supabase le montrent noir sur blanc : chaque POST vers profiles
+       réussit (200), y compris ceux du téléphone de Myriam pendant tout un après-midi
+       de test de l'unité 9. Le trou vient d'ailleurs : un onglet (ou l'app) resté
+       ouvert des heures pousse le `S` figé au moment de SON chargement — `cloudPull`
+       n'est jamais rejoué en cours de session. Si un AUTRE appareil a progressé
+       entre-temps (le téléphone), cet onglet périmé écrase en silence, plus tard,
+       la progression la plus récente avec la sienne, plus pauvre. Reproduit sur son
+       compte : la dernière écriture (03h35) venait d'un Mac resté ouvert depuis
+       avant les 3 leçons faites sur téléphone (21h11-21h14) — elle les a effacées.
+       Parade minimale et sûre : ne JAMAIS pousser un état plus vieux que ce que le
+       nuage porte déjà. Ne corrige pas l'onglet périmé (il reste affiché tel quel),
+       mais l'empêche de faire des dégâts — cloudPull, lui, le rattrapera au
+       prochain chargement. */
+    const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
+    const remote=r&&r.data&&r.data.state;
+    if(remote&&(remote._ts||0)>(S._ts||0))return;
     await SB.from('profiles').upsert({user_id:CLOUD.user.id, prenom:S.prenom||null, state:S, updated_at:new Date().toISOString()});
   }catch(e){}
 }
+/* ⚠️ 28/08 — LA FENÊTRE DE 2 S POUVAIT AVALER UNE LEÇON ENTIÈRE. `cloudSaveSoon`
+   attend 2 s avant de pousser (pour ne pas marteler Supabase à chaque `save()`) —
+   mais une élève qui ferme l'app ou change d'onglet JUSTE après avoir fini une
+   leçon coupe ce délai : la progression reste correcte en local, mais ne
+   rejoint JAMAIS le nuage. Signalé par Myriam (28/08) : une leçon d'unité 9
+   terminée sur un appareil restait invisible sur un autre, même après
+   déconnexion/reconnexion — la reconnexion ne peut pas retrouver ce que le
+   nuage n'a jamais reçu. On pousse donc IMMÉDIATEMENT dès que l'app passe en
+   arrière-plan, tant qu'un envoi est encore en attente. */
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden&&_syncT){ clearTimeout(_syncT); _syncT=null; cloudSaveNow(); }
+});
 async function cloudPull(){ // fusion : le plus récent gagne ; premier login = on pousse l'état local
   try{ if(!SB||!CLOUD.user)return;
     const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
@@ -4867,6 +4896,22 @@ function majJour(){
 majJour();
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)majJour(); });
 window.addEventListener('focus',majJour);
+/* ⚠️ 28/08 — SANS CE RAFRAÎCHISSEMENT, UN ONGLET RESTÉ OUVERT DÉRIVE. Sa copie
+   locale de S date du chargement de la page et ne voit plus rien de ce qui a
+   progressé entre-temps sur un autre appareil — jusqu'à ce qu'elle finisse,
+   PLUS TARD, par ÉCRASER cette progression au prochain envoi (le garde-fou de
+   cloudSaveNow protège l'écrasement, mais un onglet qui ne se resynchronise
+   jamais reste aveugle indéfiniment). On rejoue donc cloudPull() à chaque
+   retour sur l'app, comme majJour() juste au-dessus — SAUF en pleine leçon,
+   où remplacer S sous les pieds de l'élève casserait l'écran en cours. */
+function cloudResync(){
+  if(document.hidden)return;
+  var pl=document.getElementById('player');
+  if(pl&&pl.classList.contains('on'))return; // leçon en cours : on ne touche à rien
+  try{cloudPull();}catch(e){}
+}
+document.addEventListener('visibilitychange',function(){ if(!document.hidden)cloudResync(); });
+window.addEventListener('focus',cloudResync);
 setInterval(majJour,60000);
 try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
@@ -4924,7 +4969,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='dist-entree-js \u00b7 correctif : le deploiement repasse par dist/ (src/entree.js ne se chargeait plus en prod, 404 -- les lecons de unite 9 finissaient sans se jouer)';
+const BUILD='sync-nuage-onglet-perime -- 4 correctifs : lecon vide qui se marquait fausse-terminee, envoi cloud immediat en arriere-plan, cloudSaveNow refuse d ecraser plus recent, resynchronisation au retour sur l app';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5100,6 +5145,18 @@ function startDisque(u,i,recharge){
   if(!recharge&&S.hearts<=0){showNoHearts();return;}
   RECHARGE=!!recharge; // reprise depuis « Plus de cœurs » : aucune vie perdue, +3 à la fin
   EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
+  /* ⚠️ 28/08 — GARDE-FOU CONTRE UN build() QUI RATE. Sans lui, un module non chargé
+     (l'incident src/entree.js du 27/08 : window.__alaqU9 undefined) renvoie un
+     tableau VIDE, renderStep() lit `!QUEUE[0]` dès le premier écran et appelle
+     finishDisque() — qui marque alors la leçon FAITE, verse XP et graines, avance
+     la série ET le score de constance, pour une leçon jamais jouée. Un incident
+     technique se traduisait en fausse récompense. Ici, on ne rentre même pas dans
+     le lecteur : ni progression ni cœur consommé, juste un message honnête. */
+  if(!QUEUE||!QUEUE.length){
+    console.error('leçon vide : build() n’a rendu aucun écran (unité '+u+', disque '+i+')');
+    toast('Cette leçon n’a pas pu se charger — réessaie dans un instant');
+    return;
+  }
   comboReset();
   prechargerNoms(); // les 28 noms en mémoire avant le 1er toucher (latence, 07/08)
   document.getElementById('player').classList.add('on');
