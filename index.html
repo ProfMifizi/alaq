@@ -8287,8 +8287,20 @@ function audioBeni(url){ // un lecteur du pool si béni, le même lecteur de sec
     _secours.onended=null;_secours.onerror=null;_secours.muted=false;_secours.src=url;
     return _secours;
   }
+  /* 🔴 UN DEUXIÈME SON FAIT TAIRE LE PREMIER (Myriam, 28/08 : « quand je fais glisser
+     l'objet sur la maman avant que l'audio ne soit terminé, les deux audios se jouent
+     en même temps »). LA CAUSE EST ICI, pas dans l'exercice : le pool sert QUATRE
+     lecteurs à tour de rôle, et on ne mettait en pause que celui qu'on rendait — le
+     précédent, un autre élément du pool, continuait tranquillement de sonner. Un
+     exercice qui énonce sa phrase puis la répète à la réussite en superposait donc
+     jusqu'à quatre. On fait taire TOUT le pool (et le lecteur de secours) avant de
+     servir : la règle vaut pour tous les appelants, pas seulement pour le registre.
+     ⚠️ Le sfx récompense/erreur ne passe PAS par ici quand son tampon est décodé
+     (branche WebAudio de playSfx) — la superposition VOULUE du 17/08, « le mot finit
+     de sonner sous le ding », reste donc intacte. */
+  _POOL.forEach(function(p){try{p.pause();}catch(e){}});
+  try{if(_secours)_secours.pause();}catch(e){}
   const a=_POOL[_poolI++%_POOL.length];
-  try{a.pause();}catch(e){}
   a.onended=null;a.onerror=null;a.muted=false;a.src=url;
   return a;
 }
