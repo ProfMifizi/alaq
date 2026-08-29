@@ -176,7 +176,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 5 — بِ, la fin du nom"
   ]
  },
  {
@@ -188,7 +189,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 5 — بِ, la fin du nom"
   ]
  },
  {
@@ -200,7 +202,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 5 — بِ, la fin du nom"
   ]
  },
  {
@@ -212,7 +215,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 5 — بِ, la fin du nom"
   ]
  },
  {
@@ -224,7 +228,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 5 — بِ, la fin du nom"
   ]
  },
  {
@@ -236,7 +241,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 2 — بِ, le moyen"
+   "Disque 2 — بِ, le moyen",
+   "Disque 5 — بِ, la fin du nom"
   ]
  },
  {
@@ -393,6 +399,66 @@
   "unite": 9,
   "lecons": [
    "Disque 4 — لِ, pour/à qui"
+  ]
+ },
+ {
+  "fichier": "mot-bilqalam.mp3",
+  "arabe": "بِالْقَلَمِ",
+  "sens": "avec le stylo",
+  "translit": "bi-l-qalami",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 5 — بِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-bilmaa.mp3",
+  "arabe": "بِالْمَاءِ",
+  "sens": "avec l’eau",
+  "translit": "bi-l-mâ’i",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 5 — بِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-bitturab.mp3",
+  "arabe": "بِالتُّرَابِ",
+  "sens": "avec la terre",
+  "translit": "bi-t-tourâbi",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 5 — بِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-bilhabl.mp3",
+  "arabe": "بِالْحَبْلِ",
+  "sens": "avec la corde",
+  "translit": "bi-l-habli",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 5 — بِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-bilyad.mp3",
+  "arabe": "بِالْيَدِ",
+  "sens": "avec la main",
+  "translit": "bi-l-yadi",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 5 — بِ, la fin du nom"
   ]
  }
 ]
