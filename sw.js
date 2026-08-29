@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v163-2026-08-28';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v164-2026-08-29';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -283,6 +283,30 @@ const AUDIOS=[
 "audios-app-alaq/mot-audhu.mp3",
 "audios-app-alaq/mot-ayn.mp3",
 "audios-app-alaq/mot-bab.mp3",
+"audios-app-alaq/mot-maktab.mp3",
+"audios-app-alaq/mot-waladyaktubbilqalam.mp3",
+"audios-app-alaq/mot-almaa.mp3",
+"audios-app-alaq/mot-waladyatawaddabilmaa.mp3",
+"audios-app-alaq/mot-atturab.mp3",
+"audios-app-alaq/mot-waladyatayammambitturab.mp3",
+"audios-app-alaq/mot-binttatasallaqbilhabl.mp3",
+"audios-app-alaq/mot-waladyaktub.mp3",
+"audios-app-alaq/mot-waladyatawadda.mp3",
+"audios-app-alaq/mot-waladyatayammam.mp3",
+"audios-app-alaq/mot-nabat.mp3",
+"audios-app-alaq/mot-attayralalbayt.mp3",
+"audios-app-alaq/mot-rummanlilbint.mp3",
+"audios-app-alaq/mot-rummanlilwalad.mp3",
+"audios-app-alaq/mot-qalamlilwalad.mp3",
+"audios-app-alaq/mot-tinlilhimar.mp3",
+"audios-app-alaq/mot-rummanlilumm.mp3",
+"audios-app-alaq/mot-qalamlilumm.mp3",
+"audios-app-alaq/mot-tinlilumm.mp3",
+"audios-app-alaq/mot-bilqalam.mp3",
+"audios-app-alaq/mot-bilmaa.mp3",
+"audios-app-alaq/mot-bitturab.mp3",
+"audios-app-alaq/mot-bilhabl.mp3",
+"audios-app-alaq/mot-bilyad.mp3",
 "audios-app-alaq/mot-tayralalbayt.mp3",
 "audios-app-alaq/mot-almaktab.mp3",
 "audios-app-alaq/mot-qalamalalmaktab.mp3",

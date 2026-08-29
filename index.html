@@ -3063,16 +3063,21 @@ const UNITS=[
    court:'L’article الـ',                       // ce que le ciel annonce, à la place des lettres
    sub:'L’article الـ · lettres solaires et lunaires — 9 leçons' },
  /* ═══ UNITÉ 9 — بِ ﻭ عَلَى ﻭ لِ : LA GRAMMAIRE PAR LA MANIPULATION ═══
-    Disques 1, 2, 3 ET 4 ouverts (GO de Myriam sur le disque 4, 28/08). `u9:true`
+    Disques 1 à 5 ouverts (GO de Myriam sur le disque 5, 29/08). `u9:true`
     dit à `discsFor` de lire `u9Disques()` — pas de moteur à soi comme U8, les
     écrans sont des exercices ORDINAIRES du registre (voir u9Disques() plus
-    haut et src/units/unit-9/donnees/disque-1.js … disque-4.js).
-    `words:[]` : les mots neufs des quatre disques ne rejoignent PAS encore la
+    haut et src/units/unit-9/donnees/disque-1.js … disque-5.js).
+    ⚠️ LE DISQUE 5 CHANGE DE NATURE : les quatre premiers enseignent un SENS
+    (quel harf pour quelle relation), le cinquième une FORME — la terminaison
+    du nom qui passe de ـُ à ـِ derrière بِ. Ses écrans manipulent donc des
+    fragments de mot arabe, pas des images, d'où les six exercices neufs qu'il
+    apporte au registre (voir src/exercises/_mot-colore.js).
+    `words:[]` : les mots neufs des cinq disques ne rejoignent PAS encore la
     révision espacée — décision délibérément non prise ici, à trancher avec
     Myriam si elle le souhaite. */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
    court:'بِ · عَلَى · لِ',
-   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 4 leçons' },
+   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 5 leçons' },
  { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
@@ -3857,7 +3862,16 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque4==='function') return window.__alaqU9.disque4();
         console.error('unité 9 : module non chargé (disque 4)'); return [];
       } },
-    ...Array.from({length:5},u9DisqueAVenir),
+    /* ⚠️ CES DEUX LIGNES SONT SOLIDAIRES : un disque réel ajouté = un grisé
+       retiré. `_verif_u8_app` et `_verif_u8_dist` vérifient l'INVARIANT — neuf
+       disques, les réels d'abord, les « à venir » ensuite, aucun trou — et
+       toucher l'une sans l'autre les fait rougir toutes les deux. */
+    { icon:'🌙', img:'decouvrir', label:'بِ — la fin du nom',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque5==='function') return window.__alaqU9.disque5();
+        console.error('unité 9 : module non chargé (disque 5)'); return [];
+      } },
+    ...Array.from({length:4},u9DisqueAVenir),
   ];
 }
 
@@ -4974,7 +4988,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-disque4-li-pour-a-qui';
+const BUILD='u9-disque5-bi-la-fin-du-nom';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
