@@ -3077,7 +3077,7 @@ const UNITS=[
     Myriam si elle le souhaite. */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
    court:'بِ · عَلَى · لِ',
-   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 5 leçons' },
+   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 7 leçons' },
  { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
@@ -3871,7 +3871,17 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque5==='function') return window.__alaqU9.disque5();
         console.error('unité 9 : module non chargé (disque 5)'); return [];
       } },
-    ...Array.from({length:4},u9DisqueAVenir),
+    { icon:'🌙', img:'decouvrir', label:'لِ — la fin du nom',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque6==='function') return window.__alaqU9.disque6();
+        console.error('unité 9 : module non chargé (disque 6)'); return [];
+      } },
+    { icon:'🌙', img:'decouvrir', label:'عَلَى — la fin du nom',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque7==='function') return window.__alaqU9.disque7();
+        console.error('unité 9 : module non chargé (disque 7)'); return [];
+      } },
+    ...Array.from({length:2},u9DisqueAVenir),
   ];
 }
 
@@ -4988,7 +4998,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-disque5-bi-la-fin-du-nom';
+const BUILD='u9-disques6-7-li-et-ala';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}

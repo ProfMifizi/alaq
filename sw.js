@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v164-2026-08-29';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v166-2026-08-30';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -283,6 +283,18 @@ const AUDIOS=[
 "audios-app-alaq/mot-audhu.mp3",
 "audios-app-alaq/mot-ayn.mp3",
 "audios-app-alaq/mot-bab.mp3",
+"audios-app-alaq/mot-lilbint.mp3",
+"audios-app-alaq/mot-lilwalad.mp3",
+"audios-app-alaq/mot-lilhimar.mp3",
+"audios-app-alaq/mot-lilumm.mp3",
+"audios-app-alaq/mot-albint.mp3",
+"audios-app-alaq/mot-alwalad.mp3",
+"audios-app-alaq/mot-alumm.mp3",
+"audios-app-alaq/mot-alalbayt.mp3",
+"audios-app-alaq/mot-alalmaktab.mp3",
+"audios-app-alaq/mot-alannabat.mp3",
+"audios-app-alaq/mot-alalhimar.mp3",
+"audios-app-alaq/mot-alalbab.mp3",
 "audios-app-alaq/mot-maktab.mp3",
 "audios-app-alaq/mot-waladyaktubbilqalam.mp3",
 "audios-app-alaq/mot-almaa.mp3",
