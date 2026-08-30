@@ -20,7 +20,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 7 — عَلَى, la fin du nom"
   ]
  },
  {
@@ -33,7 +34,8 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ",
-   "Disque 3 — عَلَى, sur"
+   "Disque 3 — عَلَى, sur",
+   "Disque 7 — عَلَى, la fin du nom"
   ]
  },
  {
@@ -46,7 +48,8 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ",
-   "Disque 4 — لِ, pour/à qui"
+   "Disque 4 — لِ, pour/à qui",
+   "Disque 6 — لِ, la fin du nom"
   ]
  },
  {
@@ -70,7 +73,8 @@
   "famille": "Unité 9 — mots",
   "unite": 9,
   "lecons": [
-   "Disque 1 — بِ · عَلَى · لِ"
+   "Disque 1 — بِ · عَلَى · لِ",
+   "Disque 7 — عَلَى, la fin du nom"
   ]
  },
  {
@@ -83,7 +87,8 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ",
-   "Disque 3 — عَلَى, sur"
+   "Disque 3 — عَلَى, sur",
+   "Disque 7 — عَلَى, la fin du nom"
   ]
  },
  {
@@ -150,7 +155,8 @@
   "unite": 9,
   "lecons": [
    "Disque 1 — بِ · عَلَى · لِ",
-   "Disque 3 — عَلَى, sur"
+   "Disque 3 — عَلَى, sur",
+   "Disque 7 — عَلَى, la fin du nom"
   ]
  },
  {
@@ -302,7 +308,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 3 — عَلَى, sur"
+   "Disque 3 — عَلَى, sur",
+   "Disque 7 — عَلَى, la fin du nom"
   ]
  },
  {
@@ -326,7 +333,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 4 — لِ, pour/à qui"
+   "Disque 4 — لِ, pour/à qui",
+   "Disque 6 — لِ, la fin du nom"
   ]
  },
  {
@@ -338,7 +346,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 4 — لِ, pour/à qui"
+   "Disque 4 — لِ, pour/à qui",
+   "Disque 6 — لِ, la fin du nom"
   ]
  },
  {
@@ -386,7 +395,8 @@
   "famille": "Unité 9 — phrases",
   "unite": 9,
   "lecons": [
-   "Disque 4 — لِ, pour/à qui"
+   "Disque 4 — لِ, pour/à qui",
+   "Disque 6 — لِ, la fin du nom"
   ]
  },
  {
@@ -459,6 +469,150 @@
   "unite": 9,
   "lecons": [
    "Disque 5 — بِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-lilbint.mp3",
+  "arabe": "لِلْبِنْتِ",
+  "sens": "pour la fille",
+  "translit": "li-l-binti",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 6 — لِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-lilwalad.mp3",
+  "arabe": "لِلْوَلَدِ",
+  "sens": "pour le garçon",
+  "translit": "li-l-waladi",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 6 — لِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-lilhimar.mp3",
+  "arabe": "لِلْحِمَارِ",
+  "sens": "pour l’âne",
+  "translit": "li-l-himâri",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 6 — لِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-lilumm.mp3",
+  "arabe": "لِلْأُمِّ",
+  "sens": "pour la mère",
+  "translit": "li-l-oummi",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 6 — لِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-albint.mp3",
+  "arabe": "الْبِنْتُ",
+  "sens": "la fille (défini)",
+  "translit": "al-bintou",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 6 — لِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-alwalad.mp3",
+  "arabe": "الْوَلَدُ",
+  "sens": "le garçon (défini)",
+  "translit": "al-waladou",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 6 — لِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-alumm.mp3",
+  "arabe": "الْأُمُّ",
+  "sens": "la mère (définie)",
+  "translit": "al-oummou",
+  "emoji": "",
+  "famille": "Unité 9 — mots",
+  "unite": 9,
+  "lecons": [
+   "Disque 6 — لِ, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-alalbayt.mp3",
+  "arabe": "عَلَى الْبَيْتِ",
+  "sens": "sur la maison",
+  "translit": "‘alâ l-bayti",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 7 — عَلَى, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-alalmaktab.mp3",
+  "arabe": "عَلَى الْمَكْتَبِ",
+  "sens": "sur le bureau",
+  "translit": "‘alâ l-maktabi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 7 — عَلَى, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-alannabat.mp3",
+  "arabe": "عَلَى النَّبَاتِ",
+  "sens": "sur la plante",
+  "translit": "‘alâ n-nabâti",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 7 — عَلَى, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-alalhimar.mp3",
+  "arabe": "عَلَى الْحِمَارِ",
+  "sens": "sur l’âne",
+  "translit": "‘alâ l-himâri",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 7 — عَلَى, la fin du nom"
+  ]
+ },
+ {
+  "fichier": "mot-alalbab.mp3",
+  "arabe": "عَلَى الْبَابِ",
+  "sens": "sur la porte",
+  "translit": "‘alâ l-bâbi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 7 — عَلَى, la fin du nom"
   ]
  }
 ]
