@@ -3077,7 +3077,7 @@ const UNITS=[
     Myriam si elle le souhaite. */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
    court:'بِ · عَلَى · لِ',
-   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 7 leçons' },
+   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 8 leçons' },
  { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
@@ -3881,7 +3881,12 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque7==='function') return window.__alaqU9.disque7();
         console.error('unité 9 : module non chargé (disque 7)'); return [];
       } },
-    ...Array.from({length:2},u9DisqueAVenir),
+    { icon:'🌙', img:'decouvrir', label:'Le Coran — Al-Fātiḥa',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque8==='function') return window.__alaqU9.disque8();
+        console.error('unité 9 : module non chargé (disque 8)'); return [];
+      } },
+    ...Array.from({length:1},u9DisqueAVenir),
   ];
 }
 
@@ -5075,7 +5080,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u8-secousse-couleur';
+const BUILD='u9-disque8-fatiha';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5337,6 +5342,41 @@ function renderStep(){
         fb.className='fb bad'; fb.innerHTML='<span>✕</span> '+court;
         document.getElementById('why').innerHTML=longue||'';
         ft.classList.remove('ok'); ft.classList.add('bad');
+      },
+      /* ── LE CONTRAT `cta` : UN SEUL BOUTON, VALIDER PUIS CONTINUER ────────
+         🔴 DEMANDE DE MYRIAM (31/08, disque 8, écrans 5/9/14) : « il ne doit
+         pas y avoir deux boutons. Le bouton continuer est dans un premier
+         temps le bouton VALIDER puis […] se transforme en CONTINUER. »
+         Le bouton du pied appartient au LECTEUR, pas à l'exercice : un
+         exercice qui a besoin d'une validation explicite le DEMANDE ici, au
+         lieu d'en poser un second dans son corps (deux boutons à l'écran).
+         ⚠️ ON RECÂBLE `cta.onclick` DIRECTEMENT, jamais `ctaClick` — c'est
+         déjà ce que fait `objectifAtteint` pour les exercices du registre :
+         leur `st.type` ne correspond à aucune branche de la cascade, et l'y
+         faire passer les ferait tomber dans son `else` final, c'est-à-dire
+         compter une ERREUR sur un écran réussi.
+         ⚠️ ET `finir()` REPOSE LE GARDE DES 0 CŒUR, exactement comme
+         `objectifAtteint` : il sert le chemin FAUX (validation refusée), qui
+         vient justement de coûter un cœur — c'est le cas où il peut tomber à
+         zéro. Sans lui, CONTINUER enverrait à l'écran suivant alors que
+         l'élève n'a plus de cœur.
+         ⚠️ Rien à défaire à la sortie de l'écran : `renderStep` remet le
+         bouton à zéro (className/disabled/textContent/onclick) avant chaque
+         montage — vérifié quelques lignes plus haut. */
+      cta:{
+        valider:function(cb){
+          var c=document.getElementById('cta'); if(!c)return;
+          c.className='cta'; c.textContent='VALIDER'; c.disabled=false;
+          c.onclick=function(){
+            c.disabled=true; c.textContent='CONTINUER'; c.onclick=null;
+            try{cb()}catch(e){}   /* l'exercice décide ensuite : reussir() ou finir() */
+          };
+        },
+        finir:function(){
+          var c=document.getElementById('cta'); if(!c)return;
+          c.className='cta'; c.textContent='CONTINUER'; c.disabled=false;
+          c.onclick=(!REVIEW&&!RECHARGE&&S.hearts<=0&&qi<QUEUE.length-1)?goNoHearts:advance;
+        }
       }})) return;
   if(st.type==='slide'){
     body.innerHTML='<div class="learn">'+(st.nobadge?'':'<div class="badge-new">À DÉCOUVRIR</div>')+
