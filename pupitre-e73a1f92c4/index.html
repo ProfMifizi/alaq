@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ALAQ — le pupitre</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.0/dist/umd/supabase.js" integrity="sha384-3lSoufGjgosjqp3JDr/NReX3PjMd3SlC8wJ23CWFjB6DSFNf71I0DhcRTUm9MwgO" crossorigin="anonymous"></script>
+<style>
+:root{--gold:#e8c887;--gold2:#f0d79e;--cream:#f5ecdc;--panel:#241c15;--line:#3a312b;
+ --muted:#a99781;--coral:#e8926d;--green:#7ec87e;--bg:#1B1510;--info:#5BA3C4}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--cream);font:14.5px/1.6 system-ui,sans-serif}
+.page{max-width:900px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:21px;margin:0}
+.chapo{color:var(--muted);font-size:13px;margin:4px 0 18px}
+/* les explications pour l'apprentie codeuse — demande de Myriam (31/08) */
+.apprend{font-style:italic;color:var(--muted);font-size:12.5px;margin:6px 0 0}
+.apprend b{color:var(--gold);font-style:normal}
+/* ── connexion ── */
+.porte{max-width:420px;margin:40px auto;background:var(--panel);border:1px solid var(--line);
+ border-radius:16px;padding:22px 20px;text-align:center}
+.porte input{width:100%;font:15px system-ui;background:#15100b;color:var(--cream);
+ border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+.porte .err{color:var(--coral);font-size:13px;min-height:1.4em}
+button.cta{font:800 12.5px system-ui;text-transform:uppercase;background:var(--gold);color:#241c15;
+ border:2px solid #b8935f;border-bottom-width:4px;border-radius:10px;padding:9px 18px;cursor:pointer}
+button.cta:disabled{opacity:.5;cursor:default}
+button.cta.sec{background:none;color:var(--muted);border-color:var(--line)}
+/* ── onglets / filtres ── */
+.tabs{display:flex;gap:8px;margin:0 0 6px;flex-wrap:wrap;align-items:center}
+.tab{font:800 13px system-ui;background:var(--panel);color:var(--muted);border:2px solid var(--line);
+ border-radius:99px;padding:7px 16px;cursor:pointer}
+.tab.on{color:#241c15;background:var(--gold);border-color:#b8935f}
+.tab .n{display:inline-block;min-width:20px;text-align:center;background:rgba(0,0,0,.25);
+ border-radius:99px;font-size:11.5px;padding:0 6px;margin-left:6px}
+.tab.on .n{background:rgba(0,0,0,.14)}
+.filtres{display:flex;gap:8px;align-items:center;margin:10px 0 12px;flex-wrap:wrap}
+.f{font:700 12px system-ui;background:none;color:var(--muted);border:1.5px solid var(--line);
+ border-radius:8px;padding:4px 10px;cursor:pointer}
+.f.on{color:var(--gold);border-color:var(--gold)}
+.maj{margin-left:auto;font-size:12px;color:var(--muted)}
+/* ── tickets ── */
+.tk{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:0 0 10px;overflow:hidden}
+.tk.traite{opacity:.55}
+.tk-tete{display:flex;gap:12px;align-items:center;padding:12px 14px;cursor:pointer}
+.tk-tete:hover{background:rgba(255,255,255,.02)}
+.badge{flex:none;font:800 10.5px system-ui;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:99px}
+.b-js{background:rgba(216,70,58,.22);color:#f2a196}
+.b-promesse{background:rgba(216,70,58,.22);color:#f2a196}
+.b-image-morte,.b-son-absent{background:rgba(232,146,109,.16);color:var(--coral)}
+.b-sw,.b-suspect{background:rgba(91,163,196,.16);color:var(--info)}
+.b-flag{background:rgba(232,200,135,.14);color:var(--gold)}
+.tk-quoi{flex:1;min-width:0}
+.tk-msg{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk-sous{font-size:12px;color:var(--muted)}
+.tk-sous b{color:var(--gold2);font-weight:800}
+.tk-compte{flex:none;text-align:right;font-size:12px;color:var(--muted)}
+.tk-compte .gros{display:block;font:900 19px system-ui;color:var(--gold)}
+.tk-detail{display:none;border-top:1px solid var(--line);padding:14px 16px;background:rgba(0,0,0,.14)}
+.tk.ouvert .tk-detail{display:block}
+.d-ligne{font-size:12.5px;color:var(--muted);margin:2px 0}
+.d-ligne b{color:var(--cream)}
+h4{font:800 11.5px system-ui;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin:14px 0 6px}
+.jb{font:12px ui-monospace,Menlo,monospace;background:#15100b;border:1px solid var(--line);
+ border-radius:10px;padding:10px 12px;max-height:240px;overflow:auto}
+.jb .l{display:flex;gap:10px;padding:1.5px 0}
+.jb .t{flex:none;color:#6d5c48;width:58px}
+.jb .e{color:var(--cream);word-break:break-word}
+.jb .e.err{color:var(--coral);font-weight:700}
+.occ{font-size:12px;color:var(--muted);border-bottom:1px dashed var(--line);padding:5px 0;display:flex;gap:12px;flex-wrap:wrap}
+.actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+.vide{color:var(--muted);text-align:center;padding:30px 0}
+.doc{margin-top:34px;border-top:1px solid var(--line);padding-top:16px;font-size:13px;color:var(--muted)}
+.doc b{color:var(--gold)}
+code{font:12px ui-monospace,Menlo,monospace;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:5px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--gold);
+ color:#241c15;font:800 13px system-ui;padding:9px 18px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none}
+#toast.on{opacity:1}
+</style></head>
+<body><div class="page">
+
+<h1>Le pupitre</h1>
+<p class="chapo">Ce que l'app signale — les drapeaux ⚑ des élèves et ce qu'elle détecte toute seule.</p>
+
+<!-- ═══ LA PORTE ═══ -->
+<div class="porte" id="porte">
+  <p style="margin:0 0 4px;font-weight:800">Connexion</p>
+  <p class="apprend">La <b>serrure n'est pas cette page</b> : c'est la RLS de Supabase (« Row Level
+  Security » — des règles écrites dans la base elle-même). Quiconque trouve cette adresse verra la
+  porte, mais la base ne rend les tickets qu'à ton adresse e-mail vérifiée. Le code arrive sur
+  prof.mifizi@gmail.com — la même mécanique que le studio des sons.</p>
+  <input id="pMail" type="email" placeholder="ton e-mail" value="prof.mifizi@gmail.com">
+  <button class="cta" id="pEnvoi" onclick="envoyerCode()">Recevoir un code</button>
+  <div id="pSuite" style="display:none">
+    <input id="pCode" inputmode="numeric" placeholder="le code reçu par e-mail">
+    <button class="cta" onclick="verifierCode()">Entrer</button>
+  </div>
+  <div class="err" id="pErr"></div>
+</div>
+
+<!-- ═══ LE PUPITRE ═══ -->
+<div id="pupitre" style="display:none">
+  <div class="tabs">
+    <button class="tab on" data-t="auto" onclick="onglet(this)">Tickets automatiques <span class="n" id="nAuto">…</span></button>
+    <button class="tab" data-t="flags" onclick="onglet(this)">Signalements ⚑ <span class="n" id="nFlags">…</span></button>
+    <span class="maj"><button class="cta sec" onclick="charger()">↻ actualiser</button>
+    <button class="cta sec" onclick="sortir()">se déconnecter</button></span>
+  </div>
+  <p class="apprend" id="expliqueAuto">Chaque carte regroupe <b>une signature</b> — type + message
+  (les nombres remplacés par N) + écran. C'est le dédoublonnage : mille élèves qui rencontrent le
+  même bug font UNE carte avec un compteur, pas mille lignes. Et côté app, une même signature ne
+  part qu'une fois par jour et par appareil.</p>
+  <p class="apprend" id="expliqueFlags" style="display:none">Les drapeaux ⚑ : une élève a coché un
+  motif dans l'app, qui a capturé toute seule l'écran, la version et l'appareil — on ne demande
+  jamais à une élève de décrire un bug. C'est la table <code>signalements</code>, la même que le
+  relevé en ligne de commande (qui reste en secours).</p>
+  <div class="filtres">
+    <button class="f on" onclick="filtrer(this,'ouverts')">À traiter</button>
+    <button class="f" onclick="filtrer(this,'tous')">Tout</button>
+    <span class="maj" id="etat"></span>
+  </div>
+  <div id="liste"><div class="vide">…</div></div>
+
+  <div class="doc">
+    <b>Pourquoi cette page n'est pas sur app.alaq.fr :</b> le service worker de l'app y détourne
+    TOUTE navigation (n'importe quelle adresse du domaine sert l'app) — c'est le même exil que le
+    studio des sons, un projet Vercel séparé. <i>L'adresse n'est pas le secret ; la RLS l'est.</i><br>
+    <b>« Copier pour Claude »</b> copie le dossier complet du ticket (occurrences, journaux, appareils)
+    — colle-le tel quel dans une session : tout le contexte y est.<br>
+    <b>« Écran bloqué »</b> n'est pas détecté en v1 (décision du 31/08 : trop de faux positifs — une
+    élève qui pose son téléphone y ressemble) ; « son absent » non plus, car l'app essaie
+    volontairement plusieurs fichiers par son — le premier 404 est normal. Les deux viendront en v2,
+    calibrés sur les vraies données.
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   LE PUPITRE — la page admin des tickets et signalements (31/08/2026).
+   Un seul fichier, aucun build : la clé publiable est PUBLIQUE par conception,
+   la RLS de Supabase est la seule serrure (lecture réservée à Myriam).
+   ═══════════════════════════════════════════════════════════════════════════ */
+const SUPA_URL='https://ykggxipgirgjwhhxmhbn.supabase.co';
+const SUPA_ANON='sb_publishable_IpnRJf3j3JfyRhQ0WWSeww_V5ctBrkh';
+const SB=window.supabase.createClient(SUPA_URL,SUPA_ANON);
+
+let TICKETS=[],FLAGS=[],ONGLET='auto',FILTRE='ouverts';
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;
+  t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ── LA PORTE ────────────────────────────────────────────────────────────── */
+async function envoyerCode(){
+  const err=document.getElementById('pErr');err.textContent='';
+  document.getElementById('pEnvoi').disabled=true;
+  const {error}=await SB.auth.signInWithOtp({email:mail()});
+  document.getElementById('pEnvoi').disabled=false;
+  if(error){err.textContent=error.message;return;}
+  document.getElementById('pSuite').style.display='block';
+  toast('Code envoyé — regarde tes mails');
+}
+async function verifierCode(){
+  const err=document.getElementById('pErr');err.textContent='';
+  const {error}=await SB.auth.verifyOtp({email:mail(),token:document.getElementById('pCode').value.trim(),type:'email'});
+  if(error){err.textContent=error.message;return;}
+  ouvrir();
+}
+function mail(){return document.getElementById('pMail').value.trim();}
+async function sortir(){await SB.auth.signOut();location.reload();}
+function ouvrir(){
+  document.getElementById('porte').style.display='none';
+  document.getElementById('pupitre').style.display='block';
+  charger();
+}
+SB.auth.getSession().then(({data})=>{if(data&&data.session)ouvrir();});
+
+/* ── LE CHARGEMENT ───────────────────────────────────────────────────────────
+   La lecture passe par la session de Myriam : la RLS filtre côté base. Une
+   session anonyme recevrait [] — pas une erreur, une base qui se tait. */
+async function charger(){
+  document.getElementById('etat').textContent='chargement…';
+  const t=await SB.from('tickets').select('*').order('cree_le',{ascending:false}).limit(800);
+  const f=await SB.from('signalements').select('*').order('cree_le',{ascending:false}).limit(300);
+  if(t.error||f.error){document.getElementById('etat').textContent='✕ '+((t.error||f.error).message);return;}
+  TICKETS=t.data||[];FLAGS=f.data||[];
+  document.getElementById('etat').textContent=TICKETS.length+' tickets · '+FLAGS.length+' ⚑';
+  rendre();
+}
+
+/* ── LE GROUPEMENT PAR SIGNATURE ─────────────────────────────────────────── */
+function groupes(){
+  const g={};
+  for(const t of TICKETS){
+    const k=t.signature||('?'+t.id);
+    (g[k]=g[k]||{sig:k,rows:[]}).rows.push(t);
+  }
+  return Object.values(g).map(x=>{
+    x.rows.sort((a,b)=>a.cree_le<b.cree_le?1:-1);
+    x.dernier=x.rows[0];
+    x.traite=x.rows.every(r=>r.traite);
+    x.appareils=new Set(x.rows.map(r=>(r.appareil||'').slice(0,60))).size;
+    x.builds=[...new Set(x.rows.map(r=>r.build||'?'))];
+    return x;
+  }).sort((a,b)=>(a.traite-b.traite)||(b.rows.length-a.rows.length));
+}
+function quand(iso){try{const d=new Date(iso);
+  return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})+' '+
+         d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}catch(e){return iso;}}
+
+/* ── LE RENDU ────────────────────────────────────────────────────────────── */
+function rendre(){
+  const L=document.getElementById('liste');L.innerHTML='';
+  document.getElementById('nAuto').textContent=groupes().filter(g=>!g.traite).length;
+  document.getElementById('nFlags').textContent=FLAGS.filter(f=>!f.traite).length;
+  document.getElementById('expliqueAuto').style.display=ONGLET==='auto'?'':'none';
+  document.getElementById('expliqueFlags').style.display=ONGLET==='flags'?'':'none';
+  const items=ONGLET==='auto'?groupes():FLAGS;
+  let n=0;
+  for(const it of items){
+    const traite=ONGLET==='auto'?it.traite:!!it.traite;
+    if(FILTRE==='ouverts'&&traite)continue;
+    n++;
+    L.appendChild(ONGLET==='auto'?carteTicket(it):carteFlag(it));
+  }
+  if(!n)L.innerHTML='<div class="vide">'+(FILTRE==='ouverts'?'Rien à traiter — tout est vert 🌿':'Rien du tout')+'</div>';
+}
+function carteTicket(g){
+  const d=g.dernier,div=document.createElement('div');
+  div.className='tk'+(g.traite?' traite':'');
+  const premier=g.rows[g.rows.length-1];
+  div.innerHTML=
+    '<div class="tk-tete">'+
+      '<span class="badge b-'+esc(d.type)+'">'+esc(d.type)+'</span>'+
+      '<div class="tk-quoi"><div class="tk-msg">'+esc(d.message||'(sans message)')+'</div>'+
+      '<div class="tk-sous"><b>'+esc(d.ecran||'?')+'</b> · du '+quand(premier.cree_le)+' au '+quand(d.cree_le)+
+      ' · '+g.builds.map(esc).join(', ')+(g.traite?' · <b style="color:var(--green)">traité</b>':'')+'</div></div>'+
+      '<div class="tk-compte"><span class="gros">'+g.rows.length+'</span>'+g.appareils+' appareil'+(g.appareils>1?'s':'')+'</div>'+
+    '</div>'+
+    '<div class="tk-detail">'+
+      '<div class="d-ligne"><b>Signature</b> · '+esc(g.sig)+'</div>'+
+      '<p class="apprend">Le <b>journal de bord</b> ci-dessous est la traîne : les ~30 derniers événements '+
+      'vécus par CET appareil avant la panne (écrans ouverts, sons joués, erreurs). C\'est lui qui donne le '+
+      'contexte sans rien demander à l\'élève.</p>'+
+      '<h4>Journal de la dernière occurrence</h4>'+journalHTML(d.journal)+
+      '<h4>Occurrences ('+Math.min(g.rows.length,5)+' dernières sur '+g.rows.length+')</h4>'+
+      g.rows.slice(0,5).map(r=>'<div class="occ"><span>'+quand(r.cree_le)+'</span><span>'+
+        esc(apparl(r.appareil))+'</span><span>'+(r.email?esc(r.email):'anonyme')+'</span><span>'+esc(r.build||'')+'</span></div>').join('')+
+      '<div class="actions">'+
+        '<button class="cta" onclick="traiterTicket(\''+encodeURIComponent(g.sig)+'\','+(g.traite?'false':'true')+')">'+
+          (g.traite?'Rouvrir':'Marquer traité')+'</button>'+
+        '<button class="cta sec" onclick="copierClaude(\''+encodeURIComponent(g.sig)+'\')">Copier pour Claude</button>'+
+      '</div>'+
+    '</div>';
+  div.querySelector('.tk-tete').onclick=()=>div.classList.toggle('ouvert');
+  return div;
+}
+function carteFlag(f){
+  const div=document.createElement('div');
+  div.className='tk'+(f.traite?' traite':'');
+  div.innerHTML=
+    '<div class="tk-tete">'+
+      '<span class="badge b-flag">⚑ élève</span>'+
+      '<div class="tk-quoi"><div class="tk-msg">'+esc(f.motif||'?')+(f.detail?' — « '+esc(f.detail)+' »':'')+'</div>'+
+      '<div class="tk-sous"><b>'+esc(f.ecran||'?')+'</b> · '+quand(f.cree_le)+' · '+esc(f.build||'')+
+      (f.email?' · '+esc(f.email):'')+(f.traite?' · <b style="color:var(--green)">traité</b>':'')+'</div></div>'+
+    '</div>'+
+    '<div class="tk-detail"><div class="d-ligne"><b>Appareil</b> · '+esc(f.appareil||'?')+'</div>'+
+      '<div class="actions"><button class="cta" onclick="traiterFlag('+f.id+','+(f.traite?'false':'true')+')">'+
+      (f.traite?'Rouvrir':'Marquer traité')+'</button></div></div>';
+  div.querySelector('.tk-tete').onclick=()=>div.classList.toggle('ouvert');
+  return div;
+}
+function apparl(ua){
+  ua=ua||'';
+  if(/iPhone/.test(ua))return 'iPhone · Safari';
+  if(/iPad/.test(ua))return 'iPad · Safari';
+  if(/Android/.test(ua))return 'Android · '+(/Chrome/.test(ua)?'Chrome':'navigateur');
+  if(/Macintosh/.test(ua))return 'Mac · '+(/Chrome/.test(ua)?'Chrome':'Safari');
+  return ua.slice(0,40)||'?';
+}
+function journalHTML(j){
+  if(!j||!j.length)return '<div class="jb"><div class="l"><span class="e">journal vide</span></div></div>';
+  return '<div class="jb">'+j.map(l=>'<div class="l"><span class="t">'+esc(l.t||'')+'</span>'+
+    '<span class="e'+(/✕/.test(l.e||'')?' err':'')+'">'+esc(l.e||'')+'</span></div>').join('')+'</div>';
+}
+
+/* ── LES ACTIONS ─────────────────────────────────────────────────────────────
+   « Traiter » = UPDATE traite (politique réservée à Myriam) sur TOUTES les
+   lignes de la signature. Pas de DELETE : un ticket ne s'efface pas. */
+async function traiterTicket(sigEnc,val){
+  const sig=decodeURIComponent(sigEnc);
+  const {error}=await SB.from('tickets').update({traite:val}).eq('signature',sig);
+  if(error){toast('✕ '+error.message);return;}
+  TICKETS.forEach(t=>{if(t.signature===sig)t.traite=val;});
+  toast(val?'Traité':'Rouvert');rendre();
+}
+async function traiterFlag(id,val){
+  const {error}=await SB.from('signalements').update({traite:val}).eq('id',id);
+  if(error){toast('✕ '+error.message);return;}
+  FLAGS.forEach(f=>{if(f.id===id)f.traite=val;});
+  toast(val?'Traité':'Rouvert');rendre();
+}
+/* « Copier pour Claude » : le dossier COMPLET, brut, prêt à coller en session. */
+async function copierClaude(sigEnc){
+  const sig=decodeURIComponent(sigEnc);
+  const g=groupes().find(x=>x.sig===sig);if(!g)return;
+  let s='TICKET ALAQ — à analyser\n'+'═'.repeat(50)+'\n';
+  s+='signature : '+g.sig+'\ntype      : '+g.dernier.type+'\nmessage   : '+(g.dernier.message||'')+'\n';
+  s+='écran     : '+(g.dernier.ecran||'?')+'\noccurrences : '+g.rows.length+' · appareils distincts : '+g.appareils+'\n';
+  s+='builds    : '+g.builds.join(', ')+'\npremière  : '+g.rows[g.rows.length-1].cree_le+'\ndernière  : '+g.dernier.cree_le+'\n';
+  g.rows.slice(0,10).forEach((r,i)=>{
+    s+='\n── occurrence '+(i+1)+' ─ '+r.cree_le+'\n';
+    s+='appareil : '+(r.appareil||'?')+'\ncompte   : '+(r.email||'anonyme')+'\nbuild    : '+(r.build||'?')+'\n';
+    s+='journal de bord :\n';
+    (r.journal||[]).forEach(l=>{s+='  '+(l.t||'')+'  '+(l.e||'')+'\n';});
+  });
+  try{await navigator.clipboard.writeText(s);toast('Copié — colle-le à Claude');}
+  catch(e){prompt('Copie manuelle :',s);}
+}
+
+/* ── onglets & filtres ── */
+function onglet(b){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  b.classList.add('on');ONGLET=b.dataset.t;rendre();}
+function filtrer(b,mode){document.querySelectorAll('.f').forEach(f=>f.classList.remove('on'));
+  b.classList.add('on');FILTRE=mode;rendre();}
+</script>
+</div></body></html>

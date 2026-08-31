@@ -27,6 +27,16 @@ function morceau(src, debut, fin, nom) {
 function contexte(src) {
   const ctx = { console, Math, JSON, Object, Array, String, Number, RegExp, Set, Map,
                 S: { err: {}, done: {}, rev: {} }, curSourate: 0, window: {}, save: () => {} };
+  /* ⚠️ LE CONTRAT D'HÔTE DE L'UNITÉ 8 VIT DANS LA TRANCHE 3 (31/08, audit).
+     Depuis le POC-1, `window.__alaqHoteU8 = { audioBeni, playSfx, … }` est posé
+     ENTRE `const UNITS=[` et le marqueur de fin — or ces fonctions sont définies
+     bien plus loin dans index.html, HORS tranche : la tranche levait
+     ReferenceError, le try/catch d'inventaire.js retombait sur les leçons
+     DEVINÉES et `bilan.lecons63` restait null — en silence, depuis le 18/08.
+     Des COQUILLES suffisent : le contrat n'a besoin que de noms qui existent,
+     personne ne joue de son dans ce bac à sable. */
+  ['audioBeni','playSfx','objectifAtteint','advance','elogeHTML','toc','goNoHearts',
+   'stopAudio','draggable','dansRectMarge','icoImg'].forEach(n => { ctx[n] = () => {}; });
   vm.createContext(ctx);
   // 1 · les briques (ZWJ, strip, formGlyph, letterKey, HK, MD, FATIHA…)
   vm.runInContext(morceau(src, 'const ZWJ=', 'const UNITS=[', 'briques'), ctx);

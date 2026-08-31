@@ -4562,6 +4562,83 @@ function sigPoster(s){
   }catch(e){}
 })();
 
+/* ===== 🤖 Tickets automatiques (31/08) — ce que l'app détecte toute seule =====
+   Le frère du drapeau ⚑ : ici PERSONNE ne coche rien — l'app capture ses propres
+   pannes (erreur JS, promesse orpheline, image morte, service worker refusé) et
+   les dépose dans la table `tickets` (outils/installer-tickets.sql), avec un
+   JOURNAL DE BORD : la traîne des ~30 derniers événements (écrans, sons, pannes),
+   celle qui avait percé le mystère du faux « Mehdi » le 08/08.
+   ⚠️ PAS de ticket « son absent » en v1, et c'est un CHOIX : l'app essaie
+   VOLONTAIREMENT plusieurs fichiers pour un même son (variante de voix, puis nom
+   plat) — le premier 404 est un fonctionnement normal, pas une panne. Un capteur
+   global inonderait le pupitre de faux tickets (le même refus que Myriam a posé
+   pour « écran bloqué », 31/08). Les erreurs audio vont donc au JOURNAL seulement.
+   ⚠️ L'AVALANCHE EST BARRÉE À DEUX ÉTAGES : une même signature (type + message
+   normalisé + écran) ne part qu'UNE fois par jour et par appareil (localStorage) ;
+   et le pupitre groupe par signature. Jamais d'UPDATE anonyme — la RLS n'accorde
+   que l'INSERT borné, comme pour les signalements. */
+let _tikJournal=[];
+function tikNote(ev){ // une ligne de la traîne — jamais bloquant, jamais d'exception
+  try{
+    _tikJournal.push({t:new Date().toISOString().slice(11,19),e:String(ev).slice(0,140)});
+    if(_tikJournal.length>30)_tikJournal.shift();
+  }catch(e){}
+}
+function tikEnvoyer(type,msg){
+  try{
+    const sig=(type+'|'+String(msg||'').replace(/\d+/g,'N').slice(0,80)+'|'+sigEcran()).slice(0,160);
+    const cle='alaq_tik_'+sig, jour=new Date().toISOString().slice(0,10);
+    try{ if(localStorage.getItem(cle)===jour)return; localStorage.setItem(cle,jour); }catch(e){}
+    const t={signature:sig,type:type,message:String(msg||'').slice(0,600),
+      ecran:sigEcran(),build:BUILD,
+      appareil:(navigator.userAgent||'').slice(0,300),
+      email:(CLOUD.user&&CLOUD.user.email)||null,
+      journal:_tikJournal.slice(-30)};
+    tikPoster(t).catch(()=>{
+      try{const q=JSON.parse(localStorage.getItem('alaq_tikq')||'[]');q.push(t);
+          localStorage.setItem('alaq_tikq',JSON.stringify(q.slice(-10)));}catch(e){}
+    });
+  }catch(e){}
+}
+function tikPoster(t){
+  return fetch(SUPA_URL+'/rest/v1/tickets',{method:'POST',
+    headers:{apikey:SUPA_ANON,Authorization:'Bearer '+SUPA_ANON,'Content-Type':'application/json',Prefer:'return=minimal'},
+    body:JSON.stringify(t)}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);});
+}
+(function tikPurgerQueue(){ // les tickets restés à quai repartent au lancement
+  try{
+    const q=JSON.parse(localStorage.getItem('alaq_tikq')||'[]');
+    if(!q.length)return;
+    localStorage.removeItem('alaq_tikq');
+    q.forEach(t=>tikPoster(t).catch(()=>{
+      try{const r=JSON.parse(localStorage.getItem('alaq_tikq')||'[]');r.push(t);
+          localStorage.setItem('alaq_tikq',JSON.stringify(r.slice(-10)));}catch(e){}
+    }));
+  }catch(e){}
+})();
+/* — les capteurs — `capture:true` est indispensable : une erreur de RESSOURCE
+   (img, audio) ne remonte pas en bulle, elle ne se voit qu'en phase de capture. */
+window.addEventListener('error',function(e){
+  try{
+    if(e&&e.target&&e.target!==window&&e.target.tagName){
+      const tg=e.target.tagName,src=(e.target.currentSrc||e.target.src||'');
+      const nom=src.split('/').slice(-2).join('/');
+      if(tg==='IMG'){ tikNote('image ✕ '+nom); tikEnvoyer('image-morte',nom); }
+      else if(tg==='AUDIO'||tg==='SOURCE'){ tikNote('son ✕ '+src.split('/').pop()); }
+      return;
+    }
+    tikNote('js ✕ '+String(e.message||'').slice(0,80));
+    tikEnvoyer('js-error',(e.message||'?')+' @'+(String(e.filename||'').split('/').pop()||'?')+':'+(e.lineno||0));
+  }catch(x){}
+},true);
+window.addEventListener('unhandledrejection',function(e){
+  try{
+    const m=(e&&e.reason&&(e.reason.message||String(e.reason)))||'?';
+    tikNote('promesse ✕ '+m.slice(0,80));
+    tikEnvoyer('promesse',m);
+  }catch(x){}
+});
+
 // ===== Consignes lues par l'appli =====
 // Dépose le .mp3 (ta voix) dans audios-app-alaq/ : il sera lu à la place de la
 // synthèse. Si le fichier manque, repli automatique sur la voix de synthèse.
@@ -4998,7 +5075,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-disques6-7-li-et-ala';
+const BUILD='audit-31aout-correctifs-tickets';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5195,12 +5272,18 @@ function startDisque(u,i,recharge){
   total=QUEUE.filter(s=>s.graded).length;
   renderStep();
 }
-function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();window._spotVi=null;vfStop();window._vf=null;REVIEW=false;REVSES=null;REVFREE=false;RECHARGE=false;returnFromPlayer();}
+function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();
+  /* 31/08 (audit) : sans ce repos(), quitter en plein écran U8/U9 laissait la boucle rAF
+     des bulles tourner à 60 fps sur des nœuds détachés + le MutationObserver branché —
+     seul renderStep appelait le nettoyage, donc jamais avant la PROCHAINE leçon. */
+  if(window.__alaqExercices){try{window.__alaqExercices.repos()}catch(e){}}
+  window._spotVi=null;vfStop();window._vf=null;REVIEW=false;REVSES=null;REVFREE=false;RECHARGE=false;returnFromPlayer();}
 function progress(){document.getElementById('pbar-i').style.width=
   (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
 function advance(){stopAudio();mascotteStop();qi++;renderStep();}
 
 function renderStep(){
+  try{tikNote('écran → '+sigEcran())}catch(e){}   // la traîne des tickets (31/08)
   answered=false;picked=null;progress();window._objDone=false;
   bulStop();spkOff();                       // on quitte proprement le jeu de bulles
   vfStop(); document.getElementById('player').classList.remove('vfmode');   // on sort proprement du vrai/faux
@@ -10315,7 +10398,10 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
     navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
     if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{});
   }else{
-    try{navigator.serviceWorker.register('sw.js');}catch(e){}
+    /* 31/08 : une installation de sw qui échoue était TOTALEMENT silencieuse —
+       l'élève restait sur l'ancienne version sans que personne le sache. */
+    try{navigator.serviceWorker.register('sw.js')
+      .catch(function(err){try{tikEnvoyer('sw',String(err&&err.message||err).slice(0,300))}catch(e){}});}catch(e){}
   }
 }
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';})();
