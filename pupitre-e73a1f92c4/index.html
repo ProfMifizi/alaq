@@ -268,7 +268,8 @@ function carteFlag(f){
     '</div>'+
     '<div class="tk-detail"><div class="d-ligne"><b>Appareil</b> · '+esc(f.appareil||'?')+'</div>'+
       '<div class="actions"><button class="cta" onclick="traiterFlag('+f.id+','+(f.traite?'false':'true')+')">'+
-      (f.traite?'Rouvrir':'Marquer traité')+'</button></div></div>';
+      (f.traite?'Rouvrir':'Marquer traité')+'</button>'+
+      '<button class="cta sec" onclick="copierClaudeFlag('+f.id+')">Copier pour Claude</button></div></div>';
   div.querySelector('.tk-tete').onclick=()=>div.classList.toggle('ouvert');
   return div;
 }
@@ -316,6 +317,19 @@ async function copierClaude(sigEnc){
     s+='journal de bord :\n';
     (r.journal||[]).forEach(l=>{s+='  '+(l.t||'')+'  '+(l.e||'')+'\n';});
   });
+  try{await navigator.clipboard.writeText(s);toast('Copié — colle-le à Claude');}
+  catch(e){prompt('Copie manuelle :',s);}
+}
+/* même chose pour un signalement ⚑ — pas de « signature » ici (une élève ne
+   se répète pas comme une erreur automatique), donc le dossier tient en UNE
+   occurrence, mais avec tout le détail qu'elle a laissé. */
+async function copierClaudeFlag(id){
+  const f=FLAGS.find(x=>x.id===id);if(!f)return;
+  let s='SIGNALEMENT ⚑ ALAQ — à analyser\n'+'═'.repeat(50)+'\n';
+  s+='motif    : '+(f.motif||'?')+'\n';
+  if(f.detail)s+='détail   : « '+f.detail+' »\n';
+  s+='écran    : '+(f.ecran||'?')+'\ndate     : '+f.cree_le+'\nbuild    : '+(f.build||'?')+'\n';
+  s+='appareil : '+(f.appareil||'?')+'\ncompte   : '+(f.email||'anonyme')+'\n';
   try{await navigator.clipboard.writeText(s);toast('Copié — colle-le à Claude');}
   catch(e){prompt('Copie manuelle :',s);}
 }
