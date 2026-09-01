@@ -84,7 +84,7 @@
     background-image:radial-gradient(circle at 50% 0%, #3a302b 0, #2c2624 38%, var(--bg) 75%);
     background-attachment:fixed;}
   button{font-family:var(--ui);cursor:pointer;color:inherit}
-  .gold{color:var(--gold);font-family:var(--ar)}
+  .gold{color:var(--gold);font-family:var(--ar);font-size:32px;font-weight:900}
 
   /* ====== Barre du haut ====== */
   .topbar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
@@ -214,16 +214,16 @@
   .p-body.p-center{display:flex;flex-direction:column;justify-content:center}
   .q-title{font-size:21px;font-weight:900;margin:14px 0 22px}
   /* la lettre nommée dans une consigne s'écrit EN ARABE, jamais en phonétique (Myriam 11/08) */
-  .q-title .ar{font-family:var(--ar);font-size:1.5em;color:var(--gold);vertical-align:-.12em;line-height:1}
+  .q-title .ar{font-family:var(--ar);font-size:32px;color:var(--gold);vertical-align:-.12em;line-height:1;font-weight:900}
   .q-note{font-size:20px;font-weight:900;color:var(--cream);line-height:1.35;margin:8px 0 22px}
   .glyph-big{font-family:var(--ar);font-size:80px;text-align:center;color:var(--gold);
-    margin:4px 0 24px;line-height:1;padding:44px 0 14px}
+    margin:4px 0 24px;line-height:1;padding:44px 0 14px;font-weight:400}
   .speak{display:block;margin:0 auto 22px;background:var(--panel);border:2px solid var(--line);
     color:var(--gold2);border-radius:14px;padding:12px 20px;font-weight:800;font-size:15px}
   .bigspeak{display:grid;place-items:center;margin:14px auto 20px;width:120px;height:120px;border-radius:28px;
     border:2px solid var(--line);border-bottom-width:5px;background:var(--panel);font-size:52px}
   .bigspeak:active{transform:translateY(2px);border-color:var(--gold)}
-  .hint{color:var(--muted);font-size:13px;font-weight:700;margin-top:16px}
+  .hint{color:var(--muted);font-size:16px;font-weight:700;margin-top:16px}
 
   .opts{display:grid;gap:12px}
   .opts.grid2{grid-template-columns:1fr 1fr}
@@ -234,9 +234,9 @@
      sort de sa boîte. Le remède est la HAUTEUR DE LIGNE de l'arabe, pas seulement le
      rembourrage — le rembourrage seul décale le mot sans lui donner de place au-dessus. */
   .opt{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;color:var(--cream);
-    border-radius:14px;padding:20px 10px 16px;font-size:17px;font-weight:800;text-align:center;transition:.08s;
+    border-radius:14px;padding:20px 10px 16px;font-size:18px;font-weight:700;text-align:center;transition:.08s;
     min-height:68px;display:grid;place-items:center}
-  .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.55}
+  .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.55;font-weight:700}
   .opt.sel{border-color:var(--gold);background:#3a312b;box-shadow:inset 0 0 0 1px var(--gold)}
   .opt.ok{border-color:var(--green);background:var(--green-bg);color:var(--green)}
   .opt.ok .ar{color:var(--green)}
@@ -254,7 +254,7 @@
   .badge-new{display:inline-block;background:var(--gold);color:var(--bg);font-weight:900;font-size:11px;
     letter-spacing:.1em;padding:4px 10px;border-radius:8px;margin-bottom:16px}
   .ar-tap{background:none;border:none;display:block;margin:0 auto;color:var(--gold);font-family:var(--ar);
-    font-size:90px;line-height:1;padding:6px 22px;border-radius:18px}
+    font-size:80px;line-height:1;padding:6px 22px;border-radius:18px;font-weight:400}
   .ar-tap:active{background:#3a312b}
   .pop{animation:pop .35s}
   @keyframes pop{40%{transform:scale(1.15)}}
@@ -275,9 +275,13 @@
   .p-body.p-bulles{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
   .p-body.p-bulles .bulzone{flex:1;height:auto;margin-bottom:42px;border-radius:16px} /* 42px : le couloir du drapeau ⚑ — les bulles ne passent plus dessous (10/08 soir) */
   /* le compteur : pastille dorée qui DÉCOMPTE les bulles restantes (Myriam 10/08) */
+  /* 🔴 LE NOMBRE À 24 px, LE TEXTE À 16 (Myriam, 01/09) : « pour le nombre c'est ok,
+     tu peux même le passer à 24px. Mais le texte écrit sous le nombre passe à 16px ».
+     Ce sont deux rôles distincts — le chiffre est ce que l'élève suit du regard, la
+     phrase en dessous n'est qu'un rappel. */
   #bul-c,#spot-c{width:max-content;margin:-6px auto 4px;background:rgba(220,144,46,.16);
     border:1.5px solid var(--gold-d);border-radius:999px;padding:4px 16px;
-    font-size:22px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums}
+    font-size:24px;font-weight:900;color:var(--gold2);font-variant-numeric:tabular-nums}
   #spot-c{margin:0 auto 10px}
   #bul-c.tick,#spot-c.tick{animation:bultick .3s cubic-bezier(.3,1.8,.5,1)}
   @keyframes bultick{45%{transform:scale(1.25)}}
@@ -387,7 +391,7 @@
      DANS sa case (jamais isolé de sa lettre porteuse : la leçon de la kasra, plus haut dans ce
      fichier, s'applique aussi ici — un span séparé casserait son rattachement). Toute la case
      grossit un peu, cible comme les autres, juste plus dure à repérer sans ce coup de pouce. */
-  .vl-madd{font-size:1.18em}
+  .vl-madd{font-size:36px;font-weight:400}
   /* leçon 4 v3 (validée 10/08) : haut-parleur dessiné + nom du récitateur SANS boîte
      (le toucher OUVRE le sélecteur) + loupe Artlist ; la loupe agrandit le verset */
   .vtools{display:flex;align-items:center;justify-content:center;gap:8px;margin:-8px 0 10px}
@@ -458,7 +462,7 @@
 
   .wordcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px;text-align:center}
   .wordcard .emo{font-size:56px}
-  .wordcard .fr{color:var(--muted);font-weight:800;margin-top:8px}
+  .wordcard .fr{color:var(--muted);font-weight:700;margin-top:8px}
   /* écriture "en ligne" : on désactive les ligatures verticales coraniques */
   .linear-ar{font-family:'Noto Naskh Arabic',serif;font-feature-settings:"calt" 0,"liga" 0,"dlig" 0,"rlig" 0;
     font-variant-ligatures:none;letter-spacing:0}
@@ -476,7 +480,7 @@
   .tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;direction:rtl}
   .tile{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
     width:64px;height:64px;font-family:var(--ar);font-size:36px;color:var(--gold);display:grid;place-items:center;
-    position:relative}
+    position:relative;font-weight:400}
   /* La zone de TOUCHE déborde la tuile de 4 px sans rien déplacer (14/08 — « la sensibilité
      des box pourrait être améliorée au toucher »). 4 et pas 6 : les tuiles sont espacées de
      10 px, deux zones élargies de 6 se chevaucheraient et voleraient le doigt à la voisine. */
@@ -489,15 +493,19 @@
      handicaps cumulés sur le seul élément qui portait l'information. Il passe à 42 px, opaque.
      Le « gras » ne peut pas venir de font-weight — Noto Naskh Arabic n'a qu'une graisse et le
      navigateur ne ferait qu'un faux gras irrégulier ; c'est le tracé qui est épaissi. */
-  .tile.htile{font-family:'Noto Naskh Arabic',serif;font-size:24px}
+  .tile.htile{font-family:'Noto Naskh Arabic',serif;font-size:36px;font-weight:400}
   /* 14/08 (correctifs 4) — Myriam : « les harakat sont pas centrées sur la hauteur de leur
      box, alors qu'avant c'était le cas ». `.tile` centre la BOÎTE de `.dc` (place-items:center),
      pas l'encre à l'intérieur : un signe posé sur un tatweel se dessine près du haut de sa
      ligne (métrique du signe, pas du glyphe complet d'une lettre), donc restait haut même
      boîte centrée. `line-height:1` resserre la ligne sur le signe ; le décalage qui reste
      est compensé à la main. */
+  /* 🔴 42px, ET ON N'Y TOUCHE PAS (correctif du 14/08, garde par un harnais qui
+     exige >= 40). Le bareme « tuile » de Myriam vaut 36 — mais CE signe-la a ete
+     agrandi expres, d'un 30 juge trop petit. Une regle generale ne defait pas une
+     decision particuliere anterieure : c'est le harnais qui a rattrape le coup. */
   .tile.htile .dc{font-size:42px;line-height:1;opacity:1;-webkit-text-stroke:.55px currentColor;
-    display:inline-block;transform:translateY(8px)}
+    display:inline-block;transform:translateY(8px);font-weight:400}
   .tile.miss{animation:tileshk .32s}
   @keyframes tileshk{25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
   .tile.hint{border-color:var(--gold);color:var(--gold2);animation:tilehint .9s ease-in-out infinite}
@@ -527,8 +535,8 @@
   .fb .ar{font-family:var(--ar)}
   .why{display:none;font-size:13.5px;line-height:1.55;color:var(--cream);background:var(--coral-bg);border-left:3px solid var(--coral);border-radius:10px;padding:9px 12px;margin:2px 0 12px;font-weight:600}
   .why:not(:empty){display:block}
-  .why .ar{font-family:var(--ar);font-size:19px;color:var(--gold)}
-  .cta{width:100%;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;
+  .why .ar{font-family:var(--ar);font-size:18px;color:var(--gold);font-weight:700}
+  .cta{width:100%;border:none;border-radius:14px;padding:12px;font-size:24px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;
     color:var(--bg);background:var(--gold);box-shadow:0 5px 0 var(--gold-d)}
   .cta:active{transform:translateY(3px);box-shadow:0 2px 0 var(--gold-d)}
   .cta[disabled]{background:var(--panel2);color:var(--muted);box-shadow:0 5px 0 #2c2521}
@@ -642,7 +650,7 @@
   .ts-card.seen{background:var(--gold);border-color:var(--gold)}
   .ts-card.seen .ar{color:var(--bg)}
   .ts-card.seen .enm{color:var(--bg)}
-  .ts-card .ar{font-family:var(--ar);font-size:40px;color:var(--gold);line-height:1.3}
+  .ts-card .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.3;font-weight:500}
   .ts-card .enm{font-size:11px;font-weight:800;color:var(--muted)}
   .cmp-row{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--panel);
     border:2px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;font-family:var(--ar);font-size:38px}
@@ -651,7 +659,7 @@
   .cmp-l{font-family:var(--ui);font-size:13px;font-weight:800;color:var(--muted);margin-inline-start:auto}
   .readbox{display:flex;justify-content:center;gap:0;font-size:54px;background:var(--panel);
     border:2px solid var(--line);border-radius:18px;padding:22px 14px;touch-action:none;user-select:none}
-  .readbox.ar{font-family:var(--ar);font-size:62px}
+  .readbox.ar{font-family:var(--ar);font-size:42px;font-weight:500}
   .rc{color:var(--cream);transition:color .12s}
   .rc.on{color:var(--gold);text-shadow:0 0 12px rgba(220,144,46,.55)}
   .readarrow{text-align:center;font-size:30px;color:var(--gold2);margin-top:14px;height:36px}
@@ -662,7 +670,7 @@
   @keyframes slidearrowR{0%,100%{transform:scaleX(-1) translateX(-8px)}50%{transform:scaleX(-1) translateX(8px)}}
   .tapset.c4{grid-template-columns:repeat(4,1fr);gap:8px}
   .tapset.c4 .ts-card{padding:12px 2px}
-  .tapset.c4 .ts-card .ar{font-size:32px}
+  .tapset.c4 .ts-card .ar{font-size:42px;font-weight:500}
   /* ===== Leçon 1 v2 (07/08) ===== */
   .ts-card.dim{opacity:.28}                                   /* estompé mais cliquable */
   .ag.dim{opacity:.25;pointer-events:none}
@@ -678,7 +686,7 @@
   .hk3.mini .hkcirc{pointer-events:none}
   .fuserow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px}
   .mimC{width:84px;height:84px;border-radius:16px;background:var(--panel);border:2px dashed var(--line);
-    display:grid;place-items:center;font-size:42px;color:var(--gold);flex:none}
+    display:grid;place-items:center;font-size:36px;color:var(--gold);flex:none;font-weight:400}
   .mimC.done{border-style:solid;border-color:var(--gold);background:#3a312b}
   .farr{font-size:24px;color:var(--muted);animation:farr 1.5s infinite;flex:none}
   @keyframes farr{0%{transform:translateX(12px);opacity:0}30%{opacity:1}100%{transform:translateX(-16px);opacity:0}}
@@ -734,12 +742,12 @@
   .gone{visibility:hidden}
   .g6{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;direction:rtl;margin-top:8px}
   .b6{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
-    padding:12px 4px;font-size:34px;color:var(--gold);transition:opacity .3s;cursor:pointer}
+    padding:12px 4px;font-size:42px;color:var(--gold);transition:opacity .3s;cursor:pointer;font-weight:700}
   .b6.sel{background:var(--gold);color:var(--bg);border-color:var(--gold)}
   .b6.dim{opacity:.28;pointer-events:none}
   .b6.wrong{border-color:var(--coral);color:var(--coral);background:var(--panel);opacity:1}
   .corr{font-size:13.5px;color:var(--coral);text-align:center;margin-top:12px;font-weight:800;min-height:18px}
-  .corr .ar{font-size:18px}
+  .corr .ar{font-size:1.5em;font-weight:900}
   .fourcells.ligne{grid-template-columns:repeat(4,1fr);gap:8px;direction:rtl}
   .readbox.reveal .rc{color:#57493e}
   .readbox.reveal .rc.on{color:var(--gold)}
@@ -783,7 +791,7 @@
      et la taille de la police ». 96 → 112 px et 25 → 30 px. ⚠️ Le plafond n'est pas
      esthétique, il est ARITHMÉTIQUE : la mise en place range les bulles par 3 en largeur
      et le lecteur fait 346 px utiles — 3 × 116 px ne tiendrait plus. */
-  .bul.mot{width:112px;height:112px;font-size:30px}   /* un mot entier dans la bulle */
+  .bul.mot{width:112px;height:112px;font-size:36px;font-weight:400}   /* un mot entier dans la bulle */
   .bul.shk{animation:bulshk .35s ease}
   /* ⚠️ la translation est reprise à CHAQUE étape (piège gravé de la leçon 2) */
   @keyframes bulshk{0%,100%{transform:translate(var(--x),var(--y))}
@@ -793,8 +801,8 @@
   /* 14/08 (correctifs 4) — Myriam, jeu de tri (écran 10 leçon 3 ET leçon 7, même moteur) :
      « augmente la taille de la police des mots à trier, et la hauteur des box pointillées ». */
   .chipmot{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;
-    border-radius:14px;padding:9px 18px;font-family:var(--ar);font-size:38px;color:var(--gold);
-    touch-action:none;cursor:grab;user-select:none}
+    border-radius:14px;padding:9px 18px;font-family:var(--ar);font-size:36px;color:var(--gold);
+    touch-action:none;cursor:grab;user-select:none;font-weight:400}
   .chipmot.gone{visibility:hidden}
   .chipmot.shake{animation:penshake .35s}
   .paniers{display:flex;gap:14px}
@@ -803,7 +811,7 @@
   /* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — « le critère de tri est
      l'élément le plus petit de l'écran » : les mots agrandis (38 px) écrasent l'étiquette du
      panier, qui reste le repère à lire en premier. */
-  .panier .psig{font-family:var(--ar);font-size:64px;color:var(--gold);line-height:1.3}
+  .panier .psig{font-family:var(--ar);font-size:80px;color:var(--gold);line-height:1.3;font-weight:400}
   .panier .pmots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;direction:rtl}
   .panier .pmots span{font-family:var(--ar);font-size:23px;color:var(--gold2);background:#3a312b;
     border:1px solid var(--gold-d);border-radius:10px;padding:2px 10px;cursor:pointer}
@@ -878,12 +886,12 @@
   .lg-hamza .hz{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
     min-height:44px;border-radius:12px;padding:7px 0 5px;text-align:center;
     border:1.5px solid var(--line);background:#2a2422;font-family:"Noto Naskh Arabic",serif;
-    font-size:23px;line-height:1.15;color:var(--gold2);cursor:pointer}
+    font-size:42px;line-height:1.15;color:var(--gold2);cursor:pointer;font-weight:500}
   /* L'étiquette nomme le SIÈGE. Depuis le 14/08 elle est écrite en arabe (règle absolue :
      aucune translittération sous un glyphe arabe) — sauf « seule », qui est un mot français
      descriptif, pas la transcription d'un nom de lettre. */
-  .lg-hamza .hz .hzl.ar{font-family:var(--ar);font-size:12px}
-  .lg-hamza .hz .hzl{display:block;font-family:var(--ui);font-size:8.5px;font-weight:800;
+  .lg-hamza .hz .hzl.ar{font-family:var(--ar);font-size:16px;font-weight:700}
+  .lg-hamza .hz .hzl{display:block;font-family:var(--ui);font-size:16px;font-weight:700;
     color:var(--muted);letter-spacing:.02em;margin-top:2px}
   .lg-hamza .hz.locked{color:#5b524c;background:#2a2624;border-color:#332e2a;opacity:.55;cursor:default}
   .lg-hamza .hz:not(.locked):active{border-color:var(--gold);color:var(--gold2)}
@@ -935,8 +943,8 @@
   .fourc{background:var(--panel);border:2px dashed var(--line);border-radius:16px;min-height:96px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
   .fourc.lit{border-style:solid;border-color:var(--gold);background:#3a312b}
-  .fourc .ar{font-family:var(--ar);font-size:38px;line-height:1.4;min-height:46px;direction:rtl}
-  .fourc .fl{font-size:12px;font-weight:900;color:var(--muted)}
+  .fourc .ar{font-family:var(--ar);font-size:36px;line-height:1.4;min-height:46px;direction:rtl;font-weight:400}
+  .fourc .fl{font-size:16px;font-weight:700;color:var(--muted)}
   /* l'invitation après 10 s d'inactivité (Myriam 10/08) : la source SAUTE doucement,
      les cases restantes pulsent — 3 fois, puis on se tait et on ré-arme */
   .srcL.invite{animation:penhint 1.1s ease-in-out 3, srcsaute 1.1s ease-in-out 3}
@@ -974,8 +982,8 @@
      les trois cartes centrent sur le MÊME repère, et « support »/« prolongation » reste juste
      en dessous, sans flotter (il n'a plus besoin de l'auto-margin pour ça). */
   .lvp-flip .ff-slot{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
-  .lvp-flip .ff-ar{font-family:var(--ar);font-size:58px;line-height:1.15}
-  .lvp-flip .ff-role{font-size:13px;font-weight:900;line-height:1.25;letter-spacing:.01em}
+  .lvp-flip .ff-ar{font-family:var(--ar);font-size:80px;line-height:1.15;font-weight:400}
+  .lvp-flip .ff-role{font-size:16px;font-weight:700;line-height:1.25;letter-spacing:.01em}
   .lvp-flip .ff-son{font-size:14px;font-weight:900}
   .lvp-flip .ff-spk{font-size:13px;opacity:.85;margin-top:2px}
   /* L'encre : la lettre et son terme prennent la couleur POSÉE SUR leur aplat, jamais
@@ -1018,7 +1026,13 @@
      d'avance de sa lettre. `.hkb` prend `inherit` : la lettre garde la couleur de SA case
      (or dans .mimC, crème dans .dm-target) — ne jamais y écrire une couleur en dur. */
   .hkw{position:relative;display:inline-block}
-  .hkw .hkm{position:absolute;left:0;top:0;z-index:0;color:var(--tach);white-space:pre}
+  .hkw .hkm{position:absolute;left:0;top:0;z-index:0;color:var(--tach);white-space:pre}  /* 🔴 AUCUNE TAILLE ICI, JAMAIS (01/09). Le mot coloré vit sur DEUX couches
+     exactement superposées : .hkm porte le cluster entier (en bleu), .hkb la
+     lettre nue par-dessus. Elles ne coïncident que si elles ont la MÊME taille,
+     donc les deux doivent HÉRITER de leur hôte. Le lot des polices a posé 80px
+     ici et le mot s'est affiché EN DOUBLE — sans une erreur en console, sans
+     rien de visible à la lecture du CSS. C'est le harnais du calque qui l'a vu.
+     La taille d'un mot coloré se règle sur son HÔTE, jamais sur une couche. */
   .hkw .hkb{position:relative;z-index:1;color:inherit;white-space:pre}
   .dm-target.over{border-color:var(--gold2);background:#3a312b}
   .dm-target.done{border-style:solid;border-color:var(--green);background:var(--green-bg)}
@@ -1041,10 +1055,10 @@
   .da-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:2px}
   .da-tops{display:flex;gap:10px;justify-content:center}
   .da-cell{width:92px;min-height:90px;border:3px dashed var(--line);border-radius:18px;display:flex;align-items:center;justify-content:center;
-    font-family:var(--ar);font-size:40px;color:var(--cream);direction:rtl;padding:4px;transition:border-color .15s,background .15s}
+    font-family:var(--ar);font-size:36px;color:var(--cream);direction:rtl;padding:4px;transition:border-color .15s,background .15s;font-weight:400}
   .da-cell.over{border-color:var(--gold2);background:#3a312b}
   .da-cell.done{border-style:solid;border-color:var(--green);background:var(--green-bg)}
-  .da-cell .da-long{color:var(--green);font-size:38px}
+  .da-cell .da-long{color:var(--green);font-size:36px;font-weight:400}
   .da-arrowrow{font-size:12px;color:var(--muted);font-weight:800;text-align:center}
   .da-bottoms{display:flex;gap:12px;justify-content:center;min-height:72px}
   .da-tile{width:68px;height:68px;border-radius:16px;background:var(--panel2);border:2px solid var(--line);
@@ -1138,7 +1152,7 @@
   border-radius:12px;padding:8px 12px;margin:0 0 7px;min-height:46px}
 .stslot.full{border-style:solid;border-color:var(--gold-d)}
 .stslot .no{font-family:var(--ui);font-weight:900;color:var(--gold2);width:20px;flex:0 0 auto}
-.stslot .txt{font-family:var(--quran);font-size:17px;color:var(--gold);direction:rtl;flex:1;text-align:right;line-height:1.7}
+.stslot .txt{font-family:var(--quran);font-size:28px;color:var(--gold);direction:rtl;flex:1;text-align:right;line-height:1.7;font-weight:400}
 .sttile.miss{animation:tileshk .32s}
 .sttile.hint{border-color:var(--gold);animation:tilehint .9s ease-in-out infinite}
 .sttile{display:block;width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:11px;
@@ -1244,8 +1258,8 @@
   border:2px solid transparent;transition:border-color .12s,background .12s}
 .vfbare.ok{border-color:var(--green);background:var(--green-bg)}
 .vfbare.ko{border-color:var(--coral);background:var(--coral-bg)}
-.vfbare .ar{font-family:var(--ar);font-size:64px;color:var(--gold);line-height:1.5;direction:rtl}
-.vfbare .fr{font-size:25px;font-weight:800;color:var(--cream);margin-top:16px;line-height:1.3}
+.vfbare .ar{font-family:var(--ar);font-size:36px;color:var(--gold);line-height:1.5;direction:rtl;font-weight:400}
+.vfbare .fr{font-size:18px;font-weight:700;color:var(--cream);margin-top:16px;line-height:1.3}
 .vf-btns{display:flex;gap:12px;padding:0 22px}
 .vfb{flex:1;border:none;border-radius:16px;padding:20px 8px;font-size:19px;font-weight:900;letter-spacing:.03em;
   font-family:var(--ui);cursor:pointer}
@@ -1301,7 +1315,7 @@
 /* Le clavier du stylo ✏️ suit la même règle que celui des leçons (14/08) : le signe est
    l'information, il ne peut pas être à la fois le plus petit et le plus pâle. */
 .pen-t.htile{font-size:26px}
-.pen-t.htile .dc{font-size:40px;opacity:1;-webkit-text-stroke:.5px currentColor}
+.pen-t.htile .dc{font-size:36px;opacity:1;-webkit-text-stroke:.5px currentColor;font-weight:400}
 .pen-t.tdel{font-family:var(--ui);font-size:20px;color:var(--muted)}
 .pen-t.shake{border-color:var(--coral);background:var(--coral-bg);color:var(--coral);animation:penshake .35s}
 .pen-t.hint{animation:penhint 1.1s ease-in-out infinite;border-color:var(--gold-d)}
@@ -1330,15 +1344,18 @@
 .opt.fopt .finner{position:absolute;inset:0;transition:transform .45s;transform-style:preserve-3d;display:block}
 .opt.fopt.vu .finner{transform:rotateY(180deg)}
 .opt.fopt .fface{position:absolute;inset:0;backface-visibility:hidden;border:1.5px solid var(--line);border-radius:14px;
-  display:grid;place-items:center;font-weight:800;padding:4px}
+  display:grid;place-items:center;font-weight:700;padding:4px}
 .opt.fopt .fdos{background:var(--panel2);color:var(--gold);font-size:26px;font-family:var(--ar)}
 .opt.fopt .fdevant{background:var(--panel);transform:rotateY(180deg)}
 .opt.fopt.sel .fdevant{border-color:var(--gold);background:#3d3120}
 .opt.fopt.ok .fdevant{border-color:#35a468;background:#26302a}
 .opt.fopt.bad .fdevant{border-color:#d8463a}
 .wtile{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
-  min-width:74px;padding:0 14px;height:56px;font-family:var(--quran);font-size:24px;color:var(--gold);
-  display:grid;place-items:center}
+  /* 🔴 LA HAUTEUR SUIT LA POLICE (01/09). La boite etait calee sur 24px ;
+     a 36px une ligne de Naskh mesure environ 65px et le mot chevaucherait
+     son cadre. Mesure, pas devine : c'est la boite de ligne qui commande. */
+  min-width:74px;padding:0 14px;height:72px;font-family:var(--quran);font-size:36px;color:var(--gold);
+  display:grid;place-items:center;font-weight:400}
 .wtile[disabled]{opacity:.25}
 .wtile.miss{animation:tileshk .32s}
 .wtile.hint{border-color:var(--gold);color:var(--gold2);animation:tilehint .9s ease-in-out infinite}
@@ -2109,6 +2126,29 @@ html.clair .lg-cell.locked{ background:var(--sunk);color:var(--lock);border-colo
 /* Les cartes à deux visages en mode clair : les MÊMES deux natures, en aplats pâles et
    encre sombre. ⚠️ Une règle de thème qui vise l'état au repos doit redéclarer l'état
    allumé (règle du 13/08) — ici l'état « retournée » a donc sa propre ligne. */
+/* 🔴 L'ARABE DANS UNE BOÎTE S'ÉCRIT EN MARRON, PAS EN NOIR (Myriam, 01/09,
+   repéré sur la preview des polices : « en mode clair, tu ne peux pas m'écrire
+   dans boîte des mots en noir mais en marron comme l'écriture des versets »).
+   En mode clair `--cream` vaut #241D14 — quasi noir : c'est l'encre du FRANÇAIS.
+   L'arabe s'écrit en `--gold` (#9A5A0B) partout ailleurs : un verset, un mot
+   révélé, une tuile. Une boîte n'avait aucune raison de faire exception, c'est
+   le même texte arabe.
+   ⚠️ C'EST UNE RÈGLE DE THÈME, PAS UN CHANGEMENT DE BASE : le mode sombre ne
+   bouge pas d'un pixel. Le fichier fait déjà exactement ça juste en dessous,
+   pour les cartes qui se retournent — on suit le modèle qui existe. */
+html.clair .slots,
+html.clair .da-cell,
+html.clair .dm-target,
+html.clair .fourc .ar{color:var(--gold)}
+/* ⚠️ DEUX D'ENTRE ELLES SONT SUR UN FOND CRÈME, PAS SUR DU BLANC — donc --gold2,
+   le brun plus foncé. Mesuré par le balayage : --gold (#9A5A0B) sur --panel2
+   (#F0E7D6) donne 4,45:1 pour un seuil de 4,50 — cinq centièmes en dessous, sur
+   DEUX éléments. La même encre passe largement sur le blanc (6,7:1).
+   C'est la leçon de la « couleur partagée par deux thèmes », re-payée : une encre
+   ne se choisit pas dans l'absolu, elle se choisit CONTRE SON FOND. */
+html.clair .sttile,
+html.clair .pen-zone,
+html.clair .pen-t{color:var(--gold2)}
 html.clair .lvp-flip-in{ background:#F6E3BE;border-color:var(--gold-d) }
 html.clair .lvp-flip.flipped .lvp-flip-in{ background:#D6EAF3;border-color:var(--info) }
 html.clair .lvp-flip:not(.flipped) .ff-ar,
@@ -5184,7 +5224,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='loupe-un-cran-plus-haut';
+const BUILD='polices-bareme-myriam';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
