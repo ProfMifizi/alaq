@@ -585,9 +585,16 @@ html.clair .lp-btn img{filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) bright
    Le facteur ne bouge pas — la loupe reste un cran au-dessus du repos, quel que
    soit ce repos. C'est ce qui garde le geste utile : une loupe qui n'agrandirait
    presque plus ne servirait a rien. */
-#p-body.p-tz{--loupe-fs:49px}
-#p-body.p-tz.loupe-on{--loupe-fs:71px}
-.tz-ligne{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,49px);line-height:1.75;
+/* 🔴 LE BAREME DE MYRIAM (01/09) : 42px au repos, 56 sous la loupe, graisse 500.
+   Ces trois porteurs etaient ABSENTS du classement automatique — c'est la
+   lentille « oublis » de la contre-expertise qui les a rattrapes. Un relevé
+   mecanique peut manquer une regle ; c'est pour ca qu'on lui oppose une
+   relecture adverse.
+   ⚠️ La valeur vit dans la VARIABLE, jamais en dur : c'est elle que la loupe
+   fait changer. Et le repli de var() suit, sinon il ment sur la vraie taille. */
+#p-body.p-tz{--loupe-fs:42px}
+#p-body.p-tz.loupe-on{--loupe-fs:56px}
+.tz-ligne{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,42px);font-weight:500;line-height:1.75;
   color:var(--gold,#e8c887);direction:rtl;text-align:center;max-width:340px;
   transition:font-size .18s}
 .tz-fixe{color:var(--gold,#e8c887)}
@@ -601,7 +608,7 @@ html.clair .lp-btn img{filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) bright
    direction:rtl sur la rangee suffit a poser les trois enfants dans cet ordre
    sans les reordonner a la main dans le DOM. */
 .tz-duo{display:flex;align-items:center;justify-content:center;gap:14px;direction:rtl;flex-wrap:wrap}
-.tz-ref{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,49px);line-height:1.75;
+.tz-ref{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,42px);font-weight:500;line-height:1.75;
   color:var(--muted,#a99781);transition:font-size .18s}
 /* 🔴 UN MOT QU'ON DOIT TOUCHER NE PEUT PAS AVOIR L'AIR ETEINT (Myriam, 30/08 :
    « le mot de depart a droite devant la fleche est encore grise »). Le ton
@@ -615,7 +622,7 @@ html.clair .lp-btn img{filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) bright
    qu'elle porte SA propre couleur au lieu d'heriter celle du mot. */
 .tz-ref.clic{color:var(--gold,#e8c887)}
 .tz-fleche{color:var(--muted,#a99781);font-size:24px;font-weight:900;flex-shrink:0}
-.tz-cible{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,49px);line-height:1.75;
+.tz-cible{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,42px);font-weight:500;line-height:1.75;
   color:var(--gold,#e8c887);direction:rtl;transition:font-size .18s}
 .tz-tete{display:flex;align-items:center;gap:10px;justify-content:center}
 /* le compteur de differences (ecrans 9-11) : il DIT combien il en reste, sinon
@@ -1034,14 +1041,21 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
    Le facteur ne bouge pas — la loupe reste un cran au-dessus du repos, quel que
    soit ce repos. C'est ce qui garde le geste utile : une loupe qui n'agrandirait
    presque plus ne servirait a rien. */
-#p-body.p-ext{--loupe-fs:49px}
-#p-body.p-ext.loupe-on{--loupe-fs:71px}
+/* 🔴 LE BAREME DE MYRIAM (01/09) : 42px au repos, 56 sous la loupe, graisse 500.
+   Ces trois porteurs etaient ABSENTS du classement automatique — c'est la
+   lentille « oublis » de la contre-expertise qui les a rattrapes. Un relevé
+   mecanique peut manquer une regle ; c'est pour ca qu'on lui oppose une
+   relecture adverse.
+   ⚠️ La valeur vit dans la VARIABLE, jamais en dur : c'est elle que la loupe
+   fait changer. Et le repli de var() suit, sinon il ment sur la vraie taille. */
+#p-body.p-ext{--loupe-fs:42px}
+#p-body.p-ext.loupe-on{--loupe-fs:56px}
 #p-body.p-ext{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:6px}
 .ext-tete{display:flex;align-items:center;gap:10px;justify-content:center}
 /* le verset : des MOTS entiers en flux rtl qui s'enroulent — jamais nowrap
    (lecon du 31/08 : une ligne forcee finit par sortir d'un iPhone SE).
    position:relative porte la bulle d'aide. */
-.ext-ligne{position:relative;font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,49px);
+.ext-ligne{position:relative;font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,42px);
   line-height:2.05;color:var(--gold,#e8c887);direction:rtl;text-align:center;max-width:340px;
   padding-bottom:40px}
 .ext-mot{display:inline;cursor:pointer;-webkit-tap-highlight-color:transparent;
@@ -1086,7 +1100,7 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
 /* ⚠️ AUCUN BACKTICK DANS CE BLOC (litteral gabarit — un backtick de
    commentaire referme la chaine et le module ne se charge plus du tout). */
 #p-body.p-chf{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding-top:6px;
-  --chf-fs:38px}
+  --chf-fs:36px}
 /* 🔴 LE REPOS PREND LA TAILLE QU'AVAIT LA LOUPE (Myriam, 01/09) : « c'est encore
    trop petit en fait — la taille SANS loupe doit etre la taille AVEC la loupe.
    Donc avec loupe ca doit etre encore plus gros ». La regle est nette et elle se
@@ -1095,7 +1109,7 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
    Le facteur ne bouge pas — la loupe reste un cran au-dessus du repos, quel que
    soit ce repos. C'est ce qui garde le geste utile : une loupe qui n'agrandirait
    presque plus ne servirait a rien. */
-#p-body.p-chf.loupe-on{--chf-fs:55px}
+#p-body.p-chf.loupe-on{--chf-fs:56px}
 .chf-haut{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .chf-haut .q-title{flex:1;margin-bottom:0;min-height:1.4em}
 /* la consigne du round EST l'instruction principale (Myriam, 31/08) : elle
@@ -1113,7 +1127,7 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
 .chf-rangee{display:flex;align-items:flex-start;gap:8px;background:rgba(232,200,135,.05);
   border-radius:12px;padding:6px 8px}
 .chf-rangee .spk{margin-top:8px}
-.chf-verset{flex:1;font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--chf-fs,38px);
+.chf-verset{flex:1;font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--chf-fs,36px);
   line-height:1.95;color:var(--gold,#e8c887);direction:rtl;text-align:right;
   transition:font-size .18s}
 .chf-mot{display:inline;cursor:pointer;-webkit-tap-highlight-color:transparent;
