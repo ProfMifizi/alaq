@@ -4408,6 +4408,30 @@ function showStreak(){ // l'épi pousse du tas de terre (27/08) ; le chiffre res
   var s=document.getElementById('streakSpk'); if(s&&!s.innerHTML)s.innerHTML=spkSVG();
   document.getElementById('streak').classList.add('on');
   streakPrecharger();
+  /* 🔴 LA RÉCITATION PART TOUTE SEULE (Myriam, 01/09 : « l'écran d'assiduité avec
+     l'épi : je veux que l'audio du coran se déclenche automatiquement »).
+     ⚠️ CECI INVERSE UNE DÉCISION QUI ÉTAIT LA SIENNE, EN CONNAISSANCE DE
+     CAUSE : le 11/08 la condition posée était l'inverse — « le verset 2:261
+     fait 28 mots (~30 s) : trop long pour partir tout seul sur un écran de
+     fête ». Sa raison du 01/09 l'emporte sur l'objection de durée, et c'est
+     elle qu'il faut retenir : « ce sera une EXCEPTION. Je souhaite que ce
+     verset soit entendu chaque jour pour qu'il soit mémorisé. »
+     Autrement dit ces 30 s ne sont pas un coût à subir mais l'objet même de
+     l'écran : la répétition quotidienne EST le moyen de mémorisation.
+     ⛔ C'est une exception assumée, pas une règle : aucun autre écran de l'app
+     ne doit se mettre à réciter tout seul au prétexte de celui-ci.
+     Le haut-parleur RESTE : il coupe (streakRecite bascule), et il rejoue.
+     ⚠️ APRÈS le préchargement, et dans un `setTimeout` : `streakPrecharger()`
+     vient de poser un `new Audio` dont le `load()` n'a pas encore rendu la
+     main, et l'écran n'est visible que depuis une image. Partir dans le même
+     tour ferait jouer avant que la fête ne s'affiche.
+     ⚠️ L'autoplay peut être REFUSÉ par le navigateur (aucun geste utilisateur
+     sur cet écran) : `streakRecite` porte déjà son propre `catch` et laisse le
+     haut-parleur en place. Un refus est donc silencieux, jamais bloquant. */
+  setTimeout(function(){
+    if(!document.getElementById('streak').classList.contains('on'))return; // écran déjà quitté
+    try{ streakRecite(); }catch(e){}
+  },420);
 }
 /* ⚠️ LE VERSET SE MET EN FILE À L'OUVERTURE, PAS AU CLIC (Myriam, 20/08 : « le son
    ne se déclenche pas immédiatement »). `streakRecite` créait son `new Audio` au
@@ -4900,9 +4924,30 @@ function maybeGhufranPrompt(){
      Un titre et des boutons, AUCUN texte — la définition vit dans Progrès (🕊️). */
   var perdu = S.pendingMiss>GHUF_MAX_JOURS || (S.ghufLeft||0)<1;
   if(perdu){
+    /* \ud83d\udd34 LE RANG PERDU EST DIT, PAS SEULEMENT APPLIQU\u00c9 (Myriam, 01/09 : \u00ab \u00e7a
+       doit \u00eatre sp\u00e9cifi\u00e9 au user. Du genre : tu as perdu ta s\u00e9rie, tu redescends
+       de rang et te retrouves \u00e0 tel rang \u00bb). On l'annonce AVANT le bouton \u2014 la
+       cons\u00e9quence se lit, puis l'\u00e9l\u00e8ve la confirme. Une r\u00e9trogradation
+       silencieuse serait une punition qu'on n'ose pas nommer.
+       \u26a0\ufe0f On le calcule ICI, avant `acceptMiss()` : apr\u00e8s, le score a d\u00e9j\u00e0
+       chang\u00e9 et l'ancien rang n'est plus lisible nulle part. */
+    /* \u26a0\ufe0f TROIS CAS, TROIS PHRASES VRAIES. Avec une peine en POURCENTAGE, garder
+       son rang est une issue possible \u2014 celle qui avait grimp\u00e9 haut dans sa
+       fourchette a un coussin. Annoncer \u00ab tu redescends \u00bb dans ce cas serait un
+       mensonge, et annoncer \u00ab tu es au premier rang \u00bb un contresens. */
+    var r=retrogradation();
+    var P='<p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:var(--muted)">';
+    var ligne = r.perdu
+      ? P+'Tu redescends au rang<br><b style="color:var(--gold);font-size:17px">'+
+        RANKS[r.vers].tr+'</b> \u00b7 '+RANKS[r.vers].fr+'</p>'
+      : (r.avant>0
+         ? P+'Tu gardes le rang <b style="color:var(--gold)">'+RANKS[r.avant].tr+
+           '</b> \u2014 de justesse.</p>'
+         : P+'Tu es au premier rang : il n\u2019y a rien \u00e0 redescendre.</p>');
     m.innerHTML='<div style="max-width:340px;width:100%;margin:0 auto;text-align:center;position:relative">'+
       icoEcran('ecran-pousse','width:96px;height:auto;margin:0 auto')+
-      '<h2 style="margin:6px 0 18px">Ta s\u00e9rie repart \u00e0 z\u00e9ro</h2>'+
+      '<h2 style="margin:6px 0 10px">Ta s\u00e9rie repart \u00e0 z\u00e9ro</h2>'+
+      ligne+
       '<button class="cbtn" onclick="acceptMiss()">JE REPRENDS AUJOURD\u2019HUI</button>'+
       '</div>';
     document.body.appendChild(m); return;
@@ -4941,9 +4986,68 @@ function useGhufran(){
   toast('\ud83d\udd4a\ufe0f Ghufr\u0101n utilis\u00e9 — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
   if(_progVisible())renderProg();
 }
-function acceptMiss(){
+/* ══ LA RÉTROGRADATION SE COMPTE EN RANGS, PLUS EN POINTS (Myriam, 01/09) ══
+   Son constat, vérifié dans le code : « il y a 8 jours je n'avais plus de
+   ghufrān et je suis restée plus de deux jours sans utiliser l'application.
+   J'ai perdu ma série, ce qui est normal. MAIS j'ai conservé mon rang, ce qui
+   est incohérent. »
+   Elle a raison, et la cause était arithmétique : la peine valait −3 POINTS par
+   jour manqué, sur des paliers larges de 50 (Al-Muthābara va de 50 à 100).
+   Trois jours d'absence coûtaient 9 points — jamais assez pour franchir un
+   seuil vers le bas. La règle disait « rétrogradation douce » et ne
+   rétrogradait, en pratique, jamais.
+   🔴 LA PEINE EST DONC UN POURCENTAGE DU SCORE, PAR JOUR MANQUÉ — la forme
+   proposée par Myriam (« ou les jours d'absence doivent faire perdre plus de
+   points »), retenue APRÈS avoir écrit puis jeté une version « on descend d'un
+   rang d'office ». Cette première version avait un défaut qu'il faut garder en
+   mémoire : en faisant atterrir au PLANCHER du rang inférieur, la même absence
+   de 3 jours coûtait 74 points à 99 et seulement 25 à 50 — elle punissait donc
+   PLUS DUREMENT celle qui avait été la plus régulière. L'inverse du but.
+   Un pourcentage est continu : il coûte le même EFFORT de reconquête partout.
+   ⚠️ ET UN MONTANT FIXE NE MARCHERAIT PAS NON PLUS, parce que les fourchettes
+   sont très inégales (10 · 15 · 25 · 50 · 100 · 100 points) : un −12/jour
+   effacerait une débutante et gratterait à peine An-Nūr.
+   🔴 ET LA PEINE EST LINÉAIRE, PAS COMPOSÉE — LA RAISON EST DE MYRIAM, ET ELLE
+   EST DE FOND (01/09) : « pourquoi un jour coûterait moins cher en termes de
+   perte qu'un autre ? C'est pas cohérent avec notre vision. Et surtout, quand
+   Allah récompense il récompense [multiplie] quelque chose, alors que quand il
+   punit il punit à la hauteur du péché. Mais le péché n'est pas amoindri quand
+   il dure ! »
+   Une première version composait (score × 0,85 par jour) : chaque jour y
+   retirait 15 % de ce qui RESTAIT, donc le 1ᵉʳ jour coûtait 12 points et le 5ᵉ
+   seulement 6. Cela revenait à dire que l'irrégularité s'amortit — l'inverse
+   de ce que le rang mesure, et le contraire du principe qu'elle rappelle :
+   la récompense se MULTIPLIE (c'est littéralement le verset de l'écran
+   d'assiduité, 2:261 — le grain qui donne sept épis de cent grains), tandis
+   que la sanction est à la hauteur EXACTE (6:160 : مَن جَاءَ بِالسَّيِّئَةِ فَلَا
+   يُجْزَىٰ إِلَّا مِثْلَهَا — « qui apporte une mauvaise action n'est rétribué que
+   par son équivalent »). Ni plus, ni moins, et sans dégressivité.
+   Chaque jour manqué retire donc LE MÊME nombre de points : 15 % du score
+   qu'avait l'élève au moment où la série casse. Sept jours ramènent à zéro,
+   c'est-à-dire à An-Niyya — une semaine sans rien vaut de recommencer par
+   l'intention.
+   ⚠️ LES 15 % SONT MESURÉS, PAS CHOISIS. Sur le cas réel de Myriam (score ~80,
+   3 jours) : à 10 % elle tomberait à 56 et à 12,5 % à 50 — dans les DEUX cas
+   elle resterait Al-Muthābara, c'est-à-dire le défaut qu'elle signale,
+   inchangé. À 15 % elle tombe à 44 et descend à Al-Ijtihād. C'est le plus
+   petit taux qui répare vraiment ce qu'elle a observé.
+   ⚠️ Un seul jour ne fait pas toujours perdre le rang : qui a grimpé haut dans
+   sa fourchette garde un coussin — ce n'est pas une faveur, c'est la
+   proportionnalité même (hadith socle : أحبّ الأعمال إلى الله أدومها وإن قلّ). */
+const ABSENCE_TAUX = 0.15;   // du score au moment de la casse, PAR jour manqué
+function retrogradation(){
   var m=S.pendingMiss||0;
-  S.consScore=Math.max(0,(S.consScore||0)-3*m); S.streak=0; S.pendingMiss=0; save();
+  var base=Math.max(0,S.consScore||0);
+  var avant=rankFor(base).idx;
+  /* linéaire : chaque jour retire la MÊME part, jamais une part de ce qui reste */
+  var score=Math.max(0, Math.round(base*(1-ABSENCE_TAUX*m)));
+  var vers=rankFor(score).idx;
+  return {m:m, avant:avant, vers:vers, score:score, perdu:vers<avant};
+}
+function acceptMiss(){
+  var r=retrogradation();
+  S.consScore=Math.max(0,r.score);
+  S.streak=0; S.pendingMiss=0; save();
   closeGhufran(); if(_progVisible())renderProg();
 }
 /* Carte détail du rang (clic sur le rang) */
@@ -5080,7 +5184,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-disque8-fatiha';
+const BUILD='u9-disque8-fatiha-b';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}

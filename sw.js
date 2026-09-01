@@ -6,7 +6,7 @@
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v169-2026-08-31';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v170-2026-09-01';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -1057,6 +1057,16 @@ self.addEventListener('activate',e=>{
       'mot-alrumman.mp3',
       'mot-bab.mp3',
       'mot-bab-f.mp3',
+      /* 01/09 — mot-bi.mp3 RECOUPÉ sous le MÊME nom (0,78 s au lieu de 1,38 s :
+         la voix est intacte au bit près, on a retiré le silence et le clic de
+         souris que le rogneur du studio avait laissés — sa bouffée faisait
+         200 ms, au-dessus du seuil de 120 ms qu'il sait reconnaître).
+         ⚠️ IL EST PARTI EN PRODUCTION UNE HEURE PLUS TÔT, DANS LE PRÉ-CACHE DE
+         SW v169 : sans cette ligne, tout appareil ayant installé v169 garderait
+         l'ancienne prise À VIE (le cache MEDIA n'est jamais purgé). C'est
+         exactement l'incident du 08/08 — le « Mehdi » de la récompense, qui
+         était un fichier remplacé sous le même nom et embaumé par ce cache. */
+      'mot-bi.mp3',
     ]
       .map(f=>m.delete('audios-app-alaq/'+f,{ignoreSearch:true})));
     /* 24/08 — les 4 mp4 de l'écriture guidée U9 (écran 6/7, disque 1), réécrits
