@@ -593,15 +593,17 @@ html.clair .lp-btn img{filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) bright
    ⚠️ La valeur vit dans la VARIABLE, jamais en dur : c'est elle que la loupe
    fait changer. Et le repli de var() suit, sinon il ment sur la vraie taille. */
 #p-body.p-tz{--loupe-fs:42px}
-/* 🔴 76px SOUS LA LOUPE, ET C'EST UN RETOUR D'USAGE (Myriam, 01/09) :
-   « passe a 76 car 56 on ne voit pas la difference ». Elle avait fixe 56 sur
-   la preview, puis l'a essaye dans l'app : entre 42 au repos et 56, l'ecart
-   ne se lit pas — une loupe qui n'agrandit pas assez ne sert a rien, on la
-   touche et il ne se passe rien de perceptible.
-   ⚠️ C'est la limite d'une preview, meme fidele : elle montre une taille, elle
-   ne fait pas vivre le GESTE (toucher, comparer avant/apres). Le reglage fin
-   d'une interaction se decide dans l'app, pas sur une planche. */
-#p-body.p-tz.loupe-on{--loupe-fs:76px}
+/* 🔴 56px SOUS LA LOUPE, ET L'ALLER-RETOUR VAUT D'ETRE RACONTE (Myriam, 01/09).
+   Elle avait fixe 56 sur la preview, puis l'a essaye dans l'app : « 56 on ne
+   voit pas la difference » — on est monte a 76. Sauf que la difference ne se
+   voyait pas pour une AUTRE raison : les lettres qu'on touche etaient figees
+   par un defaut (leur inherit ecrase par une valeur fixe), donc la loupe
+   n'agrandissait qu'une moitie de l'ecran. Le defaut repare, elle a tranche :
+   « 76px la je vois que c'est trop, repasse a 56 ».
+   ⚠️ LA LECON : un reglage decide PENDANT qu'un defaut masque son effet est un
+   reglage fausse. Devant un « ca ne change pas grand chose », chercher d'abord
+   si le mecanisme fonctionne — avant de pousser la valeur. */
+#p-body.p-tz.loupe-on{--loupe-fs:56px}
 .tz-ligne{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,42px);font-weight:500;line-height:1.75;
   color:var(--gold,#e8c887);direction:rtl;text-align:center;max-width:340px;
   transition:font-size .18s}
@@ -1069,7 +1071,7 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
    ⚠️ La valeur vit dans la VARIABLE, jamais en dur : c'est elle que la loupe
    fait changer. Et le repli de var() suit, sinon il ment sur la vraie taille. */
 #p-body.p-ext{--loupe-fs:42px}
-#p-body.p-ext.loupe-on{--loupe-fs:76px}
+#p-body.p-ext.loupe-on{--loupe-fs:56px}
 #p-body.p-ext{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:6px}
 .ext-tete{display:flex;align-items:center;gap:10px;justify-content:center}
 /* le verset : des MOTS entiers en flux rtl qui s'enroulent — jamais nowrap
@@ -1129,7 +1131,7 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
    Le facteur ne bouge pas — la loupe reste un cran au-dessus du repos, quel que
    soit ce repos. C'est ce qui garde le geste utile : une loupe qui n'agrandirait
    presque plus ne servirait a rien. */
-#p-body.p-chf.loupe-on{--chf-fs:76px}
+#p-body.p-chf.loupe-on{--chf-fs:56px}
 .chf-haut{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .chf-haut .q-title{flex:1;margin-bottom:0;min-height:1.4em}
 /* la consigne du round EST l'instruction principale (Myriam, 31/08) : elle
