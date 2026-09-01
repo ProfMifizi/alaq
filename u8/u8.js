@@ -593,12 +593,32 @@ html.clair .lp-btn img{filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) bright
    ⚠️ La valeur vit dans la VARIABLE, jamais en dur : c'est elle que la loupe
    fait changer. Et le repli de var() suit, sinon il ment sur la vraie taille. */
 #p-body.p-tz{--loupe-fs:42px}
-#p-body.p-tz.loupe-on{--loupe-fs:56px}
+/* 🔴 76px SOUS LA LOUPE, ET C'EST UN RETOUR D'USAGE (Myriam, 01/09) :
+   « passe a 76 car 56 on ne voit pas la difference ». Elle avait fixe 56 sur
+   la preview, puis l'a essaye dans l'app : entre 42 au repos et 56, l'ecart
+   ne se lit pas — une loupe qui n'agrandit pas assez ne sert a rien, on la
+   touche et il ne se passe rien de perceptible.
+   ⚠️ C'est la limite d'une preview, meme fidele : elle montre une taille, elle
+   ne fait pas vivre le GESTE (toucher, comparer avant/apres). Le reglage fin
+   d'une interaction se decide dans l'app, pas sur une planche. */
+#p-body.p-tz.loupe-on{--loupe-fs:76px}
 .tz-ligne{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,42px);font-weight:500;line-height:1.75;
   color:var(--gold,#e8c887);direction:rtl;text-align:center;max-width:340px;
   transition:font-size .18s}
 .tz-fixe{color:var(--gold,#e8c887)}
-.tz-ligne .tz-let{font-size:42px;font-weight:500}
+/* 🔴 inherit, ET JAMAIS UNE VALEUR FIXE — SIGNALE PAR MYRIAM (01/09) : « quand
+   je clique sur la loupe ca change pas grand chose, mais une fois que j'ai
+   choisi la bonne lettre la c'est bien grossi ».
+   Le lot des polices avait remplace cet inherit par 42px : les lettres qu'on
+   TOUCHE etaient alors figees pendant que le mot d'arrivee, lui, lisait encore
+   la variable --loupe-fs. La loupe marchait donc a moitie — et exactement sur
+   la moitie qui ne sert a rien, puisque c'est AVANT de repondre qu'on a besoin
+   de mieux voir.
+   Ces lettres HERITENT de tz-ligne, qui porte la variable : c'est ce lien qui
+   fait la loupe. Une taille fixe le coupe, en silence.
+   ⚠️ LE HARNAIS NE POUVAIT PAS LE VOIR : il mesure la taille du VERSET, et le
+   verset, lui, grossissait bien. Il a fallu qu'une main touche la loupe. */
+.tz-ligne .tz-let{font-size:inherit;font-weight:inherit}
 /* la tete : le haut-parleur au centre, la loupe a sa droite — meme rangee, pour
    que l'oeil trouve les deux outils au meme endroit sur tous les ecrans. */
 .tz-outils{display:flex;align-items:center;gap:12px;justify-content:center}
@@ -1049,7 +1069,7 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
    ⚠️ La valeur vit dans la VARIABLE, jamais en dur : c'est elle que la loupe
    fait changer. Et le repli de var() suit, sinon il ment sur la vraie taille. */
 #p-body.p-ext{--loupe-fs:42px}
-#p-body.p-ext.loupe-on{--loupe-fs:56px}
+#p-body.p-ext.loupe-on{--loupe-fs:76px}
 #p-body.p-ext{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:6px}
 .ext-tete{display:flex;align-items:center;gap:10px;justify-content:center}
 /* le verset : des MOTS entiers en flux rtl qui s'enroulent — jamais nowrap
@@ -1109,7 +1129,7 @@ html.clair .chk-disque{color:var(--gold,#9A5A0B)}
    Le facteur ne bouge pas — la loupe reste un cran au-dessus du repos, quel que
    soit ce repos. C'est ce qui garde le geste utile : une loupe qui n'agrandirait
    presque plus ne servirait a rien. */
-#p-body.p-chf.loupe-on{--chf-fs:56px}
+#p-body.p-chf.loupe-on{--chf-fs:76px}
 .chf-haut{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .chf-haut .q-title{flex:1;margin-bottom:0;min-height:1.4em}
 /* la consigne du round EST l'instruction principale (Myriam, 31/08) : elle
