@@ -245,6 +245,14 @@ const U9JSON = premier(path.join(__dirname, 'sons-u9.json'),
 if (fs.existsSync(U9JSON))
   JSON.parse(fs.readFileSync(U9JSON, 'utf8')).forEach(l => pousse(l));
 
+/* 3e · LES SONS DE L'UNITÉ 10 — même motif, même raison (02/09) : ils vivent
+   dans src/units/unit-10/donnees/disque-1.js, produits par
+   `outils/table-sons-u10.js` DEPUIS la source, jamais tenus à la main. */
+const U10JSON = premier(path.join(__dirname, 'sons-u10.json'),
+                        path.join(RACINE, 'outils', 'sons-u10.json'));
+if (fs.existsSync(U10JSON))
+  JSON.parse(fs.readFileSync(U10JSON, 'utf8')).forEach(l => pousse(l));
+
 /* 4 · ce qui reste dans le dossier sans que rien ne l'appelle : les ORPHELINS.
    Les versets sont diffusés depuis la source du récitateur (playVerse → qariUrl) :
    les fatiha-*.mp3 déposés en local ne sont donc jamais joués. */
