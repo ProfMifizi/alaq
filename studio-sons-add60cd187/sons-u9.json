@@ -729,5 +729,29 @@
    "Disque 8 — بِ/لِ/عَلَى dans Al-Fātiḥa",
    "Disque 9 — bilan de l’unité"
   ]
+ },
+ {
+  "fichier": "mot-bismillah.mp3",
+  "arabe": "بِسْمِ اللَّهِ",
+  "sens": "Au nom d’Allah",
+  "translit": "bismi llâhi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 9 — bilan de l’unité"
+  ]
+ },
+ {
+  "fichier": "mot-alhamdulillah.mp3",
+  "arabe": "الْحَمْدُ لِلَّهِ",
+  "sens": "La louange est à Allah",
+  "translit": "al-ḥamdu li-llâhi",
+  "emoji": "",
+  "famille": "Unité 9 — phrases",
+  "unite": 9,
+  "lecons": [
+   "Disque 9 — bilan de l’unité"
+  ]
  }
 ]
