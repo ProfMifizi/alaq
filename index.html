@@ -3117,7 +3117,7 @@ const UNITS=[
     Myriam si elle le souhaite. */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
    court:'بِ · عَلَى · لِ',
-   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 8 leçons' },
+   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
  { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
@@ -3869,13 +3869,16 @@ function u8Disques(){
    (même prudence qu'U8_TALON). Seul le CONTENU de `build()` est différé, et
    il ne l'est que jusqu'au premier appel — au plus tôt quand une élève ouvre
    le disque, donc toujours après que `entree.js` a fini de s'exécuter. */
-/* ⚠️ 8 DISQUES « À VENIR » (24/08, Myriam : « il devrait y avoir 9 dont 8
-   grisées ») — la même silhouette que les unités à 9 disques, pour que
-   l'accueil ne dise pas « cette unité s'arrête là » avant l'heure. `aVenir:true`
-   les garde grisés À VIE (voir renderHome, le garde posé sur `unlocked`) — ce
-   ne sont PAS des disques qui se débloqueront un jour tout seuls au fil de la
-   progression : le jour où l'un d'eux aura un vrai contenu, cette entrée sera
-   remplacée par un disque normal, comme le disque 1 l'a été avant lui. */
+/* ⚠️ PLUS AUCUN DISQUE « À VENIR » DEPUIS LE 03/09 — l'unité 9 est COMPLÈTE
+   (9 disques réels, le bilan compris). Cette fabrique n'a donc plus d'appelant.
+   Elle est LAISSÉE, et pas par négligence : c'est le gabarit exact du disque
+   grisé (`aVenir:true`, gardé à vie par `renderHome` sur `unlocked`), et
+   l'unité 10 le reprendra tel quel le jour où elle s'ouvrira. Le supprimer
+   obligerait à le réinventer.
+   Historique : posée le 24/08 sur la demande de Myriam (« il devrait y avoir
+   9 dont 8 grisées »), pour que l'accueil ne dise pas « cette unité s'arrête
+   là » avant l'heure ; les huit ont été remplacées une à une par de vrais
+   disques, la dernière aujourd'hui. */
 function u9DisqueAVenir(){
   return { icon:'🌙', img:'decouvrir', label:'À venir', aVenir:true,
     build:function(){ return [{type:'slide',nobadge:true,center:true,title:'Bientôt disponible',html:''}]; } };
@@ -3926,7 +3929,23 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque8==='function') return window.__alaqU9.disque8();
         console.error('unité 9 : module non chargé (disque 8)'); return [];
       } },
-    ...Array.from({length:1},u9DisqueAVenir),
+    /* ── LE 9ᵉ ET DERNIER : LE BILAN (GO de Myriam, 03/09) ──────────────
+       🏆 `img:'bilan'` comme partout ailleurs (les unités 1 à 8 le portent) :
+       une élève reconnaît un bilan à son icône avant d'en lire le titre.
+       ⚠️ DEUX LIGNES SOLIDAIRES — ce disque réel REMPLACE le dernier « à
+       venir » ; `_verif_u8_app` et `_verif_u8_dist` gardent l'invariant
+       (9 disques, les réels d'abord, aucun trou) et rougissent si l'un bouge
+       sans l'autre.
+       ⚠️ ET IL CHANGE UNE CHOSE QUE LE LIBELLÉ NE DIT PAS : jusqu'ici le
+       dernier disque de l'unité 9 était un « à venir » grisé À VIE, donc
+       l'unité ne pouvait JAMAIS être validée. Elle le peut désormais. C'est
+       sans danger — `unitUnlocked` refuse toute unité `ready:false`, donc
+       l'unité 10 reste « À VENIR » au lieu de s'ouvrir sur du vide. */
+    { icon:'🏆', img:'bilan', label:'Bilan — بِ · لِ · عَلَى',
+      build:function(){
+        if(window.__alaqU9 && typeof window.__alaqU9.disque9==='function') return window.__alaqU9.disque9();
+        console.error('unité 9 : module non chargé (disque 9)'); return [];
+      } },
   ];
 }
 
@@ -5224,7 +5243,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='loupe-56px';
+const BUILD='u9-disque9-bilan';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
