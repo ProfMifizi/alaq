@@ -5338,7 +5338,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-vocabulaire-revision';
+const BUILD='u9-vocabulaire-revision-b';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -9767,7 +9767,32 @@ function _addDays(d,n){ return new Date((_dayNum(d)+n)*864e5).toISOString().slic
    D2/D4). Sans ce second cas, ses mots n'entreraient en révision qu'à la validation
    de toute l'unité, bien plus tard que pour les autres. */
 function _lireDone(idx){ const ds=discsFor(idx); for(let i=0;i<ds.length;i++){ if(ds[i].build===buildWords||ds[i].vocab)return !!S.done[dkey(idx,i)]; } return false; }
-function allReviewWords(){ const p=[]; UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx)&&(_lireDone(idx)||unitValidated(idx)))(U.words||[]).forEach(w=>p.push(w)); }); return p; }
+/* 🔴 UN MOT N'ENTRE QU'UNE FOIS DANS LE VIVIER (04/09, signale par Myriam : « le mot
+   porte apparait deux fois dans le vocabulaire »). بَابٌ est enseigne par DEUX unites —
+   la 3 l'introduit avec le ب, la 8 l'oppose a الْبَابُ — et les deux lecons sont
+   legitimes : on n'en retire aucune. C'est la REVISION qui ne doit le porter qu'une
+   fois. Mesure sur les 99 mots (76 Supabase + 14 de l'unite 8 + 9 de l'unite 9), un
+   seul doublon, et trois consequences :
+   ① LE QCM DE TRADUCTION POUVAIT AVOIR DEUX BONNES REPONSES, et couter un cœur sur
+      la bonne. frOptions ecarte ses leurres sur le TEXTE FRANCAIS (`x.fr!==w.fr`) :
+      « porte » et « une porte » sont deux chaines differentes, le filtre ne les voit
+      pas. Le code etait juste — c'est la DONNEE qui se contredisait, et aucun test
+      ne peut voir ca ;
+   ② une session pouvait tirer le mot deux fois, donc afficher deux cartes arabes
+      identiques dans l'association ;
+   ③ S.rev est indexe par la graphie : repondre a l'une faisait avancer l'autre.
+   ⚠️ ON GARDE LA PREMIERE RENCONTREE, donc l'unite qui l'enseigne en premier — sans
+   quoi une eleve qui n'a ouvert que l'unite 3 et une autre qui a fini l'unite 8 ne
+   reviseraient pas la meme entree.
+   ⚠️ LA COMPARAISON PASSE PAR NFC : un doublon futur qui ne differerait que par
+   l'ordre des marques combinantes serait sinon invisible — le piege NFC du projet. */
+function allReviewWords(){
+  const p=[], vus=new Set();
+  UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx)&&(_lireDone(idx)||unitValidated(idx)))(U.words||[]).forEach(w=>{
+    const k=(w.w||'').normalize('NFC'); if(vus.has(k))return; vus.add(k); p.push(w);
+  }); });
+  return p;
+}
 // Un mot est « dû » s'il n'a jamais été révisé, ou si sa date de prochaine révision est atteinte.
 function wordDue(w){ const r=S.rev[w.w]; return !r || r.next<=today(); }
 function dueReviewWords(){
