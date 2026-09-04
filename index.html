@@ -5338,7 +5338,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-vocabulaire-revision-b';
+const BUILD='clavier-ecriture-guidee';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6020,10 +6020,11 @@ function renderStep(){
     body.innerHTML='<div class="q-title">'+(st.fromFr?'Écris ce mot en arabe':'Écoute… puis écris le mot')+'</div>'+
       (st.fromFr?'<div class="fr" style="text-align:center;margin:2px 0 10px;font-size:22px;color:var(--cream)">'+(st.w.fr||'')+'</div>':
         '<button class="spkbtn" id="asmSpk" onclick="jouerMot(window._asm.w.w,null,this)" aria-label="Écouter">'+spkSVG()+'</button>')+
-      '<div class="slots linear-ar" id="slots"></div>'+
-      '<div class="tiles" id="tiles">'+shuffle(units.map((ch,i)=>({ch,i}))).map((o,k)=>
-        '<button class="tile'+(isHarakat(o.ch)?' htile':'')+'" id="tile'+k+'" data-ch="'+o.ch+'" onclick="tileTap('+k+',\''+o.ch+'\')">'+tileLabel(o.ch)+'</button>').join('')+
-        '<button class="tile tdel" onclick="asmUndo()" aria-label="Effacer">⌫</button></div>'; // ⌫ en bas à droite, comme un vrai clavier (choix Myriam 4B)
+      '<div class="slots linear-ar" id="slots"></div>'+asmSaisie(st.w.w,units);
+    /* ⚠️ LE BRANCHEMENT VIENT APRÈS L'INSERTION : brancherClavier cherche les touches
+       dans le DOM, il n'a rien à accrocher tant que le HTML n'y est pas. */
+    const _K=window.__alaqClavier;
+    if(_K)_K.brancherClavier(body,{taper:asmTaper,effacer:asmUndo,recommencer:asmReset,id:'asm'});
     renderSlots();
     if(!st.fromFr)setTimeout(()=>{ if(QUEUE[qi]===st)jouerMot(st.w.w,null,document.getElementById('asmSpk')); },350); /* le mot part tout seul */
     return;
@@ -7122,6 +7123,83 @@ function asmAttendu(a){ // les unités acceptées à cette position — harakat 
   a.ch.slice(debut).forEach(p=>{const i=reste.indexOf(p); if(i>-1)reste.splice(i,1);});
   return reste;
 }
+/* ═══ LA ZONE DE SAISIE DE L'ÉCRITURE GUIDÉE (04/09) ═══════════════════════
+   Myriam : « le clavier de révision doit être sur le même modèle qui vient
+   d'être défini pour les leçons (une ligne toujours complète avec des
+   distracteurs et les harakats en bleu sur une autre ligne) ».
+
+   🔴 CE QUE LA GRILLE DE TUILES AVAIT DE FAUX, ET CE N'ÉTAIT PAS QU'UNE ALLURE.
+   Elle offrait EXACTEMENT les unités du mot, mélangées, sans un seul leurre :
+   le nombre de touches TRAHISSAIT la réponse, et sur un mot d'une ou deux
+   unités l'écran ne pouvait tout simplement pas échouer — بِ donnait deux
+   tuiles, toutes deux justes. C'est le défaut signalé pour le harf le 04/09.
+   Le clavier, lui, complète toujours ses deux rangées (`tailleDeRangee`) avec
+   des distracteurs qui RESSEMBLENT aux lettres du mot.
+   🔴 ET UNE TOUCHE NE SE CONSOMME PLUS. Une tuile disparaissait après usage ;
+   une touche reste. C'est ce qu'il faut : بَابٌ porte DEUX ب, et un clavier
+   qui s'épuise ne saurait pas l'écrire.
+   ⚠️ REPLI ASSUMÉ SUR L'ANCIENNE GRILLE : le module ES arrive APRÈS ce script
+   classique. Un écran ouvert avant son chargement doit rester JOUABLE, jamais
+   blanc — le piège « écran blanc, console propre » que ce projet connaît bien.
+   Le repli garde donc son `onclick="tileTap(...)"` et sa consommation. */
+function asmSaisie(mot,units){
+  const K=window.__alaqClavier;
+  if(K){
+    K.poserCSSClavier();
+    /* `commandes:true` pose ⌫ Effacer et ↺ Recommencer SOUS le clavier — jamais
+       de VALIDER ici : le bouton du pied valide (règle du 31/08, un seul bouton). */
+    return K.clavierPourMot(mot,{id:'asm',commandes:true});
+  }
+  return '<div class="tiles" id="tiles">'+shuffle(units.map((ch,i)=>({ch,i}))).map((o,k)=>
+    '<button class="tile'+(isHarakat(o.ch)?' htile':'')+'" id="tile'+k+'" data-ch="'+o.ch+'" onclick="tileTap('+k+',\''+o.ch+'\')">'+tileLabel(o.ch)+'</button>').join('')+
+    '<button class="tile tdel" onclick="asmUndo()" aria-label="Effacer">⌫</button></div>';
+}
+/* La touche qui porte un caractère donné. Les signes vivent sur `data-signe`
+   (une CLÉ, 'fatha'…) et non sur le caractère : la touche AFFICHE un tatweel
+   porteur et INSÈRE la marque nue — sans quoi la saisie porterait le tatweel
+   et toutes les bonnes réponses seraient refusées, en silence. */
+function asmTouche(ch){
+  const K=window.__alaqClavier; if(!K)return null;
+  const cle=K.cleDuSigne(ch);
+  const sel=cle?'#asmHarakat .clv-touche':'#asmLettres .clv-touche';
+  return [...document.querySelectorAll(sel)].find(t=>cle?t.dataset.signe===cle:t.dataset.l===ch)||null;
+}
+/* La frappe au clavier — MÊME contrat que tileTap : une touche fausse est
+   REFUSÉE (jamais de graphie fausse à l'écran), elle coûte un cœur hors
+   révision, et au 2e refus la bonne touche s'éclaire. */
+function asmTaper(ch){
+  const a=window._asm;
+  if(!a||a.fini||answered||a.ch.length>=a.t.length)return;
+  const acceptes=asmAttendu(a);
+  const t=asmTouche(ch);
+  if(!acceptes.includes(ch)){
+    if(t){ if(t.classList.contains('miss'))return; // anti-rafale : pas 2 cœurs sur un double-tap
+      t.classList.add('miss'); setTimeout(()=>t.classList.remove('miss'),400); }
+    toc();
+    a.rate=(a.rate||0)+1;
+    if(a.rate>=2){ asmHintOff();
+      const bon=acceptes.map(asmTouche).find(Boolean); if(bon)bon.classList.add('hint'); }
+    if(!REVIEW&&!RECHARGE){
+      S.hearts=Math.max(0,S.hearts-1);save();
+      document.getElementById('p-hearts').textContent=S.hearts;
+      document.getElementById('st-hearts').textContent=S.hearts;
+      if(S.hearts<=0)document.getElementById('cta').onclick=goNoHearts;
+    }
+    return;
+  }
+  a.rate=0; asmHintOff();
+  a.ch.push(ch);          // ⚠️ la touche n'est PAS désactivée : un mot peut redemander la même lettre
+  renderSlots();
+  if(a.ch.length===a.t.length)asmFini();
+}
+/* ↺ Recommencer — le clavier en offre le bouton, l'écran doit savoir répondre. */
+function asmReset(){
+  const a=window._asm;
+  if(!a||a.fini||answered||!a.ch.length)return;
+  a.ch.length=0;a.rate=0;asmHintOff();
+  document.querySelectorAll('#tiles .tile').forEach(t=>{t.disabled=false;delete t.dataset.used;}); // le repli seul en a besoin
+  renderSlots();
+}
 function tileTap(k,ch){ // v3 (10/08 tard) : tuile fausse REFUSÉE — jamais de graphie fausse (règle du ✏️) ; harakat en ordre libre
   const a=window._asm;
   if(!a||a.fini||answered||a.ch.length>=a.t.length)return;
@@ -7151,7 +7229,7 @@ function tileTap(k,ch){ // v3 (10/08 tard) : tuile fausse REFUSÉE — jamais de
   renderSlots();
   if(a.ch.length===a.t.length)asmFini();
 }
-function asmHintOff(){document.querySelectorAll('#tiles .tile.hint').forEach(x=>x.classList.remove('hint'));}
+function asmHintOff(){document.querySelectorAll('#tiles .tile.hint,.clv-touche.hint').forEach(x=>x.classList.remove('hint'));}
 function asmFini(){ // complet — donc juste : récompense uniforme, le mot se rejoue, CONTINUER attend la fin du son
   const a=window._asm;a.fini=true;
   if(window._objDone)return;window._objDone=true;
