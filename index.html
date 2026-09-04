@@ -3118,10 +3118,39 @@ const UNITS=[
     du nom qui passe de ـُ à ـِ derrière بِ. Ses écrans manipulent donc des
     fragments de mot arabe, pas des images, d'où les six exercices neufs qu'il
     apporte au registre (voir src/exercises/_mot-colore.js).
-    `words:[]` : les mots neufs des cinq disques ne rejoignent PAS encore la
-    révision espacée — décision délibérément non prise ici, à trancher avec
-    Myriam si elle le souhaite. */
- { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
+    LE VOCABULAIRE (GO de Myriam, 04/09) — les trois harf que l'unité enseigne,
+    puis les six noms qu'elle introduit. Format {w,fr,say}, celui de l'unité 8 :
+    ni `e` ni `confus` ni `b`, trois champs que plus AUCUN code ne lit (les emoji
+    de sens sont retirés depuis le 12/08 ; le commentaire de wordSoundOptions dit
+    que le QCM n'utilise PAS `confus` — il tire ses leurres des autres mots de
+    l'unité ; `b` n'existe que sur les objets-lettres).
+    ⚠️ LES DEUX FORMES DÉFINIES NE SONT PAS UNE INCOHÉRENCE. مَكْتَبٌ · بِنْتٌ ·
+    وَلَدٌ · نَبَاتٌ se citent à l'indéfini, comme tout le vocabulaire du projet.
+    الْمَاءُ et التُّرَابُ non : l'unité ne les enseigne QUE sous cette forme, et
+    aucune source du dépôt ne porte مَاءٌ ni تُرَابٌ. Les écrire serait inventer
+    une graphie — ce que la doctrine interdit — et les prises correspondantes
+    n'existent pas (mot-maa.mp3 / mot-turab.mp3 sont absents du disque).
+    ⚠️ CETTE GRAINE NE SERT À RIEN SANS DEUX AUTRES LIGNES, posées dans le même
+    lot : le drapeau `vocab:true` sur le disque 4 de u9Disques() (sans lui,
+    _lireDone(8) rend false et ces mots n'entrent JAMAIS en révision, en silence),
+    et les entrées de la carte AUDIO plus bas (sans elles, speak() retombe sur la
+    voix de SYNTHÈSE, que la doctrine interdit pour ce qui enseigne un son).
+    ⚠️ `_adopteVocab` remplacerait cette graine s'il existait des lignes
+    unite_no=9 dans Supabase — il n'y en a pas, et sa garde « pas de lignes pour
+    cette unité : sa graine reste » la protège. Le jour où il y en aura, c'est
+    LÀ que le vocabulaire vivra, plus ici. */
+ { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[],
+   words:[
+  {w:'بِ',fr:'avec, au moyen de',say:'bi'},
+  {w:'لِ',fr:'pour, à',say:'li'},
+  {w:'عَلَى',fr:'sur',say:'ʿalā'},
+  {w:'مَكْتَبٌ',fr:'un bureau',say:'maktab'},
+  {w:'بِنْتٌ',fr:'une fille',say:'bint'},
+  {w:'وَلَدٌ',fr:'un garçon',say:'walad'},
+  {w:'نَبَاتٌ',fr:'une plante, de la végétation',say:'nabāt'},
+  {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
+  {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
+   ],
    court:'بِ · عَلَى · لِ',
    sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
  /* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS ═══
@@ -3925,7 +3954,15 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque3==='function') return window.__alaqU9.disque3();
         console.error('unité 9 : module non chargé (disque 3)'); return [];
       } },
-    { icon:'🌙', img:'decouvrir', label:'لِ — pour / à qui',
+    /* ⚠️ `vocab:true` — LA PORTE D'ENTRÉE DU VOCABULAIRE EN RÉVISION (04/09).
+       _lireDone(idx) cherche un disque dont le build est buildWords OU qui porte
+       ce drapeau ; l'unité 9 n'a pas de leçon « Lire des mots », donc sans lui
+       ses mots n'entreraient qu'à la validation de l'unité ENTIÈRE — neuf disques
+       plus tard. Motif exact de l'unité 8 (l.3871, vocab:(p.k==='D4')).
+       LE DISQUE 4, parce que c'est lui qui CLÔT le corpus : les trois harf sont
+       tous introduits (بِ au 2, عَلَى au 3, لِ ici) et les six noms aussi. Les
+       disques 5 à 9 n'enseignent plus un mot, mais une terminaison. */
+    { icon:'🌙', img:'decouvrir', label:'لِ — pour / à qui', vocab:true,
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque4==='function') return window.__alaqU9.disque4();
         console.error('unité 9 : module non chargé (disque 4)'); return [];
@@ -3988,7 +4025,14 @@ function u9Disques(){
    n'apprend pas encore son nom. */
 function u10Disques(){
   return [
-    { icon:'🌙', img:'decouvrir', label:'De qui ? de quoi ?',
+    /* ⚠️ `vocab:true` POSÉ D'AVANCE, ET IL NE FAIT RIEN AUJOURD'HUI — UNITS[9].words
+       est vide (les groupes d'annexion n'entrent pas encore en révision : leur
+       graphie porte une ESPACE, dont splitUnits() ferait une tuile VIDE dans
+       l'écriture guidée — mesuré). Le drapeau est là parce que l'unité 10 finit
+       sur un GRISÉ : unitValidated(9) ne peut JAMAIS devenir vrai, et sans ce
+       drapeau son vocabulaire serait inerte à vie, sans une ligne d'erreur. Le
+       jour où ces mots entrent, il n'y aura que words à remplir. */
+    { icon:'🌙', img:'decouvrir', label:'De qui ? de quoi ?', vocab:true,
       build:function(){
         if(window.__alaqU10 && typeof window.__alaqU10.disque1==='function') return window.__alaqU10.disque1();
         console.error('unité 10 : module non chargé (disque 1)'); return [];
@@ -5294,7 +5338,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u10-disque1-annexion';
+const BUILD='u9-vocabulaire-revision';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -8416,6 +8460,26 @@ const AUDIO={
   'إِلَٰهٌ':'audios-app-alaq/mot-ilah.mp3',
   'إِذَا':'audios-app-alaq/mot-idha.mp3',
   'ذَهَبَ':'audios-app-alaq/mot-dhahaba.mp3',
+  /* ── LE VOCABULAIRE DE L'UNITÉ 9 (04/09) ────────────────────────────────
+     speak() lit CETTE carte, directement : `const url=AUDIO[t]; if(!url){ _speakSynth(t); }`.
+     Sans ces lignes, les trois écrans de la révision (association, vrai/faux,
+     écriture) prononceraient ces mots à la voix de SYNTHÈSE alors que les prises
+     de Myriam sont sur le disque et au pré-cache. C'est le geste que l'unité 8
+     fait déjà pour ses 14 mots (l.3246). Les 7 fichiers sont vérifiés présents.
+     ⚠️ بِ et لِ NE SONT PAS ICI, ET C'EST VOULU : ils sont déjà des clés de cette
+     carte, plus haut, liées aux syllabes ba-kasra / lam-kasra des leçons
+     d'alphabet — qui disent « bi » et « li », donc exactement le harf. Les
+     re-pointer vers mot-bi.mp3 / mot-li.mp3 changerait le son des leçons 5-6 de
+     l'unité 3 pour ne rien gagner à l'oreille. عَلَى, lui, n'y était pas : sans
+     sa ligne il aurait été le SEUL des trois harf en voix de synthèse, et dans
+     un QCM qui oppose les trois, le timbre aurait désigné la réponse. */
+  'عَلَى':'audios-app-alaq/mot-ala.mp3',
+  'مَكْتَبٌ':'audios-app-alaq/mot-maktab.mp3',
+  'بِنْتٌ':'audios-app-alaq/mot-bint.mp3',
+  'وَلَدٌ':'audios-app-alaq/mot-walad.mp3',
+  'نَبَاتٌ':'audios-app-alaq/mot-nabat.mp3',
+  'الْمَاءُ':'audios-app-alaq/mot-almaa.mp3',
+  'التُّرَابُ':'audios-app-alaq/mot-atturab.mp3',
 };
 
 /* ── LES SONS DE L'UNITÉ 8 DANS LA CARTE AUDIO ──────────────────────────────
