@@ -4069,7 +4069,13 @@ function fixOrdreFormes(){
     if(i<0)return;
     if(S.done[dkey(u,i)]&&!S.done[dkey(u,i+1)])delete S.done[dkey(u,i)];
   });
-  save();
+  /* ⚠️ 04/09 — saveLocal, PAS save : une MIGRATION n'est pas une progression. Elle
+     s'exécute au chargement, AVANT que cloudPull ait pu arbitrer — avec save() elle
+     rajeunissait S._ts et faisait gagner l'état local le plus pauvre (voir saveLocal).
+     Elle est idempotente et gardée par son drapeau : elle se rejoue seule sur chaque
+     appareil, y compris sur l'état qui revient du nuage (cloudPull la rappelle). Son
+     résultat rejoindra le nuage à la première vraie progression. */
+  saveLocal();
 }
 
 /* ================= ÉTAT ================= */
@@ -4082,6 +4088,29 @@ const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
 const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qari:'ar.husary'};
 function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
 function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} cloudSaveSoon();}
+/* 🔴 04/09 — L'HORODATAGE MENTAIT, ET C'EST LA CAUSE DES TROIS INCIDENTS DE SYNCHRO.
+   Signalement de Myriam : « sur mon telephone j'ai 10 jours d'epi, sur le navigateur 1 ».
+   S._ts est censé dire QUAND LA PROGRESSION A CHANGÉ — c'est sur lui que cloudPull
+   arbitre entre deux appareils du même compte. Or save() le rajeunit à CHAQUE écriture,
+   y compris pour du pur ménage qui ne porte aucune progression : rollConstance() appelle
+   save() SANS CONDITION à chaque chargement de page, majJour() recharge les cœurs, la
+   migration v7 se réécrit. Ces trois-là sont SYNCHRONES au chargement ; cloudPull, lui,
+   part sur le réseau et répond après. Quand il arbitre, l'état local — vieux de trois
+   jours dans son CONTENU — porte une date estampillée « il y a une seconde ». Il gagne,
+   puis la branche perdante le POUSSE dans le nuage : la série et les leçons de l'autre
+   appareil sont effacées.
+   ⚠️ LA RÈGLE RÉELLE N'ÉTAIT DONC PAS « le plus récent gagne » MAIS « le dernier
+   appareil ouvert gagne », quel que soit son contenu — un ping-pong, d'où le retour
+   sans fin du symptôme. Et c'est ce qui neutralisait AUSSI le garde du 28/08 dans
+   cloudSaveNow : comparer remote._ts à un S._ts qui vaut « maintenant » ne protège rien.
+   Mesuré avec le code réel en bac à sable (previews/_verif_sync_nuage.html) : avec le
+   ménage, le navigateur garde sa série de 1 jour ET l'écrit dans le nuage ; sans lui,
+   il prend bien les 10 jours. Un seul geste sépare les deux.
+   saveLocal() enregistre sur l'appareil et RIEN D'AUTRE : ni horodatage, ni envoi.
+   ⛔ NE PAS l'utiliser pour une progression (leçon, cœur perdu, mot révisé, minutes
+   d'objectif, score de constance) : elle ne rejoindrait jamais le nuage. Il est réservé
+   à ce qui se RECALCULE tout seul sur chaque appareil à partir de la date du jour. */
+function saveLocal(){try{localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){}}
 
 /* ===== Phase A : compte & progression dans le nuage (Supabase) =====
    L'app reste 100 % fonctionnelle hors ligne et sans compte : le localStorage
@@ -4093,8 +4122,19 @@ let SB=null; try{ if(window.supabase)SB=window.supabase.createClient(SUPA_URL,SU
 const CLOUD={user:null};
 let _syncT=null;
 function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
+let _syncPret=false; // la première synchro de la session a-t-elle eu lieu ? (voir cloudSaveNow)
 async function cloudSaveNow(){
   try{ if(!SB||!CLOUD.user)return;
+    /* 🔴 04/09 — LE FILET STRUCTUREL : ON NE PARLE PAS AVANT D'AVOIR ÉCOUTÉ.
+       Le correctif de l'horodatage (voir saveLocal) rend l'arbitrage honnête, mais il
+       repose sur un recensement des écritures de ménage — et un recensement se périme :
+       il suffira d'un save() ajouté un jour dans une fonction de démarrage pour rouvrir
+       la faille, EN SILENCE. Ce verrou ferme la classe entière : quoi qu'il arrive au
+       chargement, cet appareil n'écrit dans le nuage qu'APRÈS avoir lu ce qu'il contient.
+       ⚠️ Il ne perd rien : au lieu de refuser, on va CHERCHER le nuage — cloudPull pose
+       _syncPret dès qu'il a lu, puis pousse lui-même si le local est bien le plus récent.
+       Pas de récursion : le drapeau est posé AVANT son propre appel à cloudSaveNow. */
+    if(!_syncPret){ await cloudPull(); return; }
     /* ⚠️ 28/08 — LE VRAI COUPABLE : PAS UN ENVOI QUI ÉCHOUE, UN ENVOI TROP GÉNÉREUX.
        Les journaux Supabase le montrent noir sur blanc : chaque POST vers profiles
        réussit (200), y compris ceux du téléphone de Myriam pendant tout un après-midi
@@ -4131,6 +4171,7 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
   try{ if(!SB||!CLOUD.user)return;
     const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
     const remote=r&&r.data&&r.data.state;
+    _syncPret=true;  // le nuage est LU : cet appareil a le droit de parler (voir cloudSaveNow)
     /* ═══ 🔴 17/08 — LA FUSION POUVAIT DÉTRUIRE LA PROGRESSION DU COMPTE ═══════════════
        Myriam : « je ne retrouve pas ma progression faite sur l'app sur mon ordinateur quand
        je me connecte avec mon mail. C'est très problématique pour le user. » C'était pire que
@@ -4343,7 +4384,7 @@ if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions termin�
 if(typeof S.onboarded==='undefined')S.onboarded=((S.done&&Object.keys(S.done).length>0)||S.xp>0||S.streak>0)?1:0; // élèves DÉJÀ existantes (progression présente) → pas d'onboarding
 if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {source,intention[],niveau,objectif,ts}
 if(typeof S.prenom!=='string')S.prenom='';           // prénom (personnalisation + colonne Supabase profiles.prenom)
-(function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)save();})();
+(function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)saveLocal();})();  /* migration D<n> → U1-D<n> : un RENOMMAGE de clés, pas une progression — saveLocal (voir 04/09) */
 fixOrdreFormes(); // échange formes ↔ repérage (02/08) : rattrape les progressions écrites sous l'ancien ordre
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
 let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(e){return true}})();
@@ -4999,13 +5040,18 @@ function rollConstance(){
   if(typeof S.consScore!=='number')S.consScore=0;
   if(typeof S.ghufLeft!=='number')S.ghufLeft=2;
   if(S.ghufMonth!==mk){ S.ghufMonth=mk; S.ghufLeft=2; }              // recharge mensuelle
-  if(!S.consDay){ S.consDay=t; S.consFlags={}; save(); return; }
+  if(!S.consDay){ S.consDay=t; S.consFlags={}; saveLocal(); return; }
   if(S.consDay!==t){
     var missed=daysGap(S.consDay,t)-1;                               // jours pleins sautés
     if(missed>0)S.pendingMiss=(S.pendingMiss||0)+missed;
     S.consDay=t; S.consFlags={};
   }
-  save();
+  /* ⚠️ 04/09 — saveLocal, PAS save : tout ce que cette fonction écrit (consDay, consFlags,
+     ghufLeft, pendingMiss) se REDÉDUIT de la date du jour sur n'importe quel appareil.
+     Avec save(), l'appel INCONDITIONNEL ci-dessus rajeunissait S._ts à chaque chargement
+     de page et faisait gagner l'état le plus pauvre. Le score de constance, lui, est une
+     vraie progression : il est écrit par bumpConstance(), qui garde save(). */
+  saveLocal();
 }
 /* ══ L'OBJECTIF QUOTIDIEN (preview v2 validée le 10/08) ══
    Les minutes RÉELLES d'exercice (lecteur ouvert, page visible) remplissent l'anneau du
@@ -5256,7 +5302,7 @@ function rankInfo(idx){ // popup d'un rang cliqué depuis la barre du profil (Pr
    rien tant que la date locale n'a pas changé. */
 function majJour(){
   if(S.heartDay===today())return false;
-  S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;save();
+  S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;saveLocal(); // recharge quotidienne : elle se rejoue seule sur chaque appareil, elle ne date pas la progression
   try{rollConstance();}catch(e){}
   var a=document.getElementById('st-hearts');if(a)a.textContent=S.hearts;
   var b=document.getElementById('p-hearts');if(b)b.textContent=S.hearts;
@@ -5284,7 +5330,7 @@ window.addEventListener('focus',cloudResync);
 setInterval(majJour,60000);
 try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
-(function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();save();} })();
+(function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();saveLocal();} })();
 
 /* ================= ACCUEIL ================= */
 const OFFS=[0,46,64,46,0,-46,-64,-46,0];
@@ -5338,7 +5384,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='clavier-ecriture-guidee';
+const BUILD='sync-horodatage-honnete';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -9011,7 +9057,13 @@ if(!S.qari)S.qari=QARI_DEFAUT;
    sélecteur (`qariChoisi` absent) — un vrai choix d'Ayman Suwayd est respecté. Une seule fois. */
 if(!S.qariMigr0817){ S.qariMigr0817=1;
   if(!S.qariChoisi && S.qari==='ar.aymanswoaid') S.qari=QARI_DEFAUT;
-  try{ save(); }catch(e){} }
+  /* ⚠️ 04/09 — saveLocal, PAS save. Cette migration TOP-NIVEAU est le save() de démarrage
+     que ma relecture avait manque : gardee par son drapeau, elle ne se declenche qu'UNE
+     fois par appareil — donc jamais sur la machine qu'on teste, et pile sur celle qu'on
+     ressort apres des semaines, c'est-a-dire quand la synchro compte. Avec save() elle
+     rajeunissait S._ts avant l'arbitrage de cloudPull (voir saveLocal). C'est le harnais
+     _verif_sync_nuage.html qui l'a trouvee, pas la lecture du code. */
+  try{ saveLocal(); }catch(e){} }
 function qariCur(){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===S.qari)return VOIX[i];
   for(var j=0;j<VOIX.length;j++)if(VOIX[j].id===QARI_DEFAUT)return VOIX[j];
   return VOIX[0]; }
