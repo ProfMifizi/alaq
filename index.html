@@ -1117,7 +1117,12 @@
 .itab .tip{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);
   background:#181310;color:var(--cream);font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:9px;
   border:1px solid var(--line);white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;z-index:20;font-family:var(--ui)}
-.itab:hover .tip{opacity:1}
+/* 🔴 L'INFOBULLE S'AFFICHAIT AU SURVOL, ET UN TAP SUR MOBILE LAISSE LE :hover
+   COLLÉ — elle ne partait donc jamais (04/09, Myriam). La bascule passe par
+   une CLASSE, posée par tipMontre() au changement d'onglet et retirée par un
+   setTimeout de 3 s. Le survol reste pour qui a vraiment une souris. */
+.itab .tip.on{opacity:1}
+@media (hover:hover){ .itab:hover .tip{opacity:1} }
 .tablabel{text-align:center;font-family:var(--ui);font-size:12px;font-weight:800;color:var(--gold2);margin:0 0 14px}
 .spick{position:relative;margin:8px 0 10px}
 .spick .sbtn{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--gold);
@@ -1138,22 +1143,67 @@
   font-size:13px;font-weight:800;color:var(--cream);text-align:left;cursor:pointer;font-family:var(--ui)}
 .rex .re:active{border-color:var(--gold)}
 
-/* ===== Réviser>Qorān : accordéons + ordre des versets ===== */
-.racc{background:var(--panel);border:1px solid var(--line);border-radius:16px;margin:0 0 10px;overflow:hidden}
-.racc-h{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--cream);
-  padding:14px;font-family:var(--ui);font-weight:900;font-size:14.5px;cursor:pointer;text-align:left}
-.racc-h .aic{font-size:22px;line-height:1}
-.racc-h .chev{margin-left:auto;color:var(--gold2);font-weight:900;transition:.2s}
-.racc.open .racc-h .chev{transform:rotate(180deg)}
-.racc-b{display:none;padding:0 12px 12px}
-.racc.open .racc-b{display:block}
-.ritem{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);
-  border-radius:11px;padding:10px 12px;margin:0 0 7px;font-size:13px;font-weight:800;cursor:pointer;
-  width:100%;color:var(--cream);font-family:var(--ui);text-align:left}
-.ritem:active{border-color:var(--gold)}
-.ritem .var{font-family:var(--quran);font-size:16px;color:var(--gold);direction:rtl;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;max-width:150px;margin-left:auto}
-.ritem.all{border-color:var(--gold-d);color:var(--gold2)}
+/* ===== Réviser>Qorān : la grille de 5 boîtes + la popup modale (04/09) =====
+   Remplace les 5 accordéons (.racc/.ritem, retirés). Le motif visuel de la
+   popup reprend .disc-tip (l. ~173, la bulle de la page d'accueil) : titre
+   blanc, gros bouton blanc, fond = --accent de l'unité — MAIS centrée et
+   fermable, jamais ancrée sur une boîte (une bulle de 300 px centrée sur une
+   boîte de ~90 px sortirait de l'écran sur les boîtes des bords). */
+.rq-grille{position:relative;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:14px 0 0}
+.rq-boite{flex:0 0 calc((100% - 20px)/3);aspect-ratio:1/1;background:var(--panel);
+  border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px 4px;
+  transition:border-color .15s, transform .12s}
+.rq-boite:active{transform:scale(.96)}
+.rq-boite.ouverte{border-color:var(--gold);background:var(--surf-hi,var(--panel2))}
+.rq-boite.lock{opacity:.5;cursor:default}
+.rq-boite.lock:active{transform:none}
+.rq-boite img{width:40%;max-width:44px;height:auto;display:block}
+.rq-lab{font-family:var(--ui);font-size:9.5px;font-weight:900;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.15}
+.rq-boite.ouverte .rq-lab{color:var(--gold2)}
+.rq-voile{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;padding:20px;animation:rqpin .16s ease}
+@keyframes rqpin{from{opacity:0}to{opacity:1}}
+.rq-pop{--accent:var(--gold2);position:relative;width:100%;max-width:300px;max-height:100%;
+  display:flex;flex-direction:column;overflow-y:auto;background:var(--accent,var(--gold));
+  border-radius:18px;padding:16px 14px 14px;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.55)}
+/* ⚠️ SEULE la popup « Les noms d'Allah » a besoin de toute la hauteur — sa liste
+   peut monter à plusieurs dizaines de lignes (mesuré : 64 noms lisibles à 100 %).
+   Les quatre autres (deux lignes de texte, au plus 4 pastilles de partie)
+   restent COMPACTES : une popup géante pour « Réciter » serait un aplat
+   presque vide (défaut signalé et corrigé le 04/09). */
+.rq-pop.rq-pop-full{height:100%;overflow-y:hidden}
+.rq-pop .dt-x-btn{position:absolute;top:6px;right:8px;background:none;border:none;font-family:serif;
+  font-size:20px;line-height:1;color:#fff;opacity:.8;cursor:pointer;padding:4px 6px;z-index:2}
+.rq-pop .dt-t{flex:none;color:#fff;font-weight:900;font-size:16px;line-height:1.3;margin:2px 18px 5px}
+.rq-pop .dt-x{flex:none;color:#fff;opacity:.9;font-weight:700;font-size:12.5px;line-height:1.45;margin-bottom:10px}
+.rq-pop .dt-go{flex:none;width:100%;background:#fff;border:none;border-radius:12px;padding:13px;
+  font-family:var(--ui);font-weight:900;letter-spacing:.05em;color:var(--accent,var(--gold-d));
+  cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.22);text-transform:uppercase;font-size:14px;margin-top:2px}
+.rq-pop .dt-go:disabled{opacity:.5;cursor:default;box-shadow:none}
+.rq-parts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.rq-parts .rq-part:last-child:nth-child(odd){grid-column:1/-1}
+.rq-part{background:rgba(0,0,0,.18);border:1.5px solid transparent;border-radius:10px;padding:7px 10px;
+  font-family:var(--ui);font-weight:900;font-size:11.5px;color:#fff;cursor:pointer;line-height:1.25}
+.rq-part.on{border-color:#fff;background:rgba(0,0,0,.34)}
+.rq-part small{display:block;font-weight:700;opacity:.82;font-size:10px}
+.rq-noms-compte{flex:none;color:#fff;opacity:.78;font-size:11px;font-weight:800;margin-bottom:6px}
+.rq-noms{flex:1 1 auto;min-height:0;overflow-y:auto;margin-bottom:10px;
+  border-top:1px solid rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.25);padding:8px 0}
+.rq-nom{display:flex;align-items:center;gap:8px;background:var(--panel);border:1.5px solid transparent;
+  border-radius:10px;padding:5px 9px;margin-bottom:5px;cursor:pointer;min-height:34px}
+.rq-nom.on{border-color:var(--gold)}
+.rq-nom .ww{flex:0 0 auto;font-family:var(--ar);font-size:18px;color:var(--gold);line-height:1.55;
+  direction:rtl;white-space:nowrap}
+.rq-nom .wfr{flex:1 1 auto;min-width:0;font-size:10.5px;color:var(--muted);font-weight:700;
+  text-align:left;line-height:1.25;direction:ltr}
+.rq-nom .ck{flex:0 0 12px;color:var(--gold);font-weight:900;font-size:14px;text-align:center}
+/* la sourate illuminée, en plein écran (ex-accordéon « ill »), gabarit .finish
+   (comme #surahMenu : class="finish" + un id distinct, m.classList.toggle('on')) */
+#lireSourate .fin-x{position:absolute;top:14px;right:14px;background:none;border:none;
+  font-family:serif;font-size:24px;color:var(--muted);cursor:pointer;line-height:1;z-index:5}
+#lireSourate .lsbody{padding:52px 16px 24px;max-width:560px;margin:0 auto;overflow-y:auto;height:100%}
 .stslot{display:flex;align-items:center;gap:10px;background:var(--panel);border:2px dashed var(--line);
   border-radius:12px;padding:8px 12px;margin:0 0 7px;min-height:46px}
 .stslot.full{border-style:solid;border-color:var(--gold-d)}
@@ -1676,12 +1726,9 @@
   .botnav .bn{ padding:9px var(--nav-pad); }
   .onb{ padding-top:calc(8px + env(safe-area-inset-top,0px)); padding-bottom:14px; }
 }
-  /* ── Récitateur : la ligne d'accès et son sélecteur plein écran ── */
-  .qari{display:flex;align-items:center;gap:8px;width:100%;background:var(--panel);
-    border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px;
-    font-family:var(--ui);font-size:12.5px;font-weight:800;color:var(--muted);text-align:left;cursor:pointer}
-  .qari b{margin-left:auto;color:var(--gold2);font-size:13px;font-weight:900}
-  .qari .chev{color:var(--gold2);font-weight:900;font-size:14px}
+  /* ── Récitateur : le sélecteur plein écran (le bouton d'accès vit désormais
+     UNIQUEMENT dans Paramètres, .prm-row — retiré d'ici le 04/09, il faisait
+     doublon) ── */
   .qsel{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column;
     padding-top:env(safe-area-inset-top,0px)}
   .qsel.on{display:flex}
@@ -2238,6 +2285,7 @@ html.clair .qbulle:before{ background:var(--info-d);border-color:var(--info);col
    un beige chaud, le brun un brun profond, et le dessin garde son relief. */
 html.clair .itab-ic,
 html.clair .acc-ic,
+html.clair .rq-boite img,
 html.clair .bn .bi img,
 html.clair .ic-inline,
 html.clair .case .ic img{ filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) brightness(.62) }
@@ -2311,9 +2359,6 @@ html.clair .wtile.tdel{ color:var(--coral);border-color:var(--coral) }
 /* les petites italiques du récitateur, posées sur du blanc : --lock n'y vaut que 3,8:1 */
 html.clair .qsec em,
 html.clair .qgrp em{ color:var(--muted) }
-/* l'aperçu du verset dans la liste : --gold sur --panel2 tombait à 4,45:1 */
-html.clair .ritem .var{ color:var(--gold2) }
-
 html.clair .prm-sw.on i{ background:var(--on-gold) }
 html.clair .dm-tile.drag,
 html.clair .da-tile.drag{ box-shadow:0 10px 22px rgba(90,70,40,.28) }
@@ -4375,6 +4420,7 @@ if(typeof S.bigNext==='undefined')S.bigNext=0;          // prochaine révision =
 if(typeof S.tutLetters==='undefined')S.tutLetters=0;    // tuto grille des lettres déjà vu ?
 if(typeof S.tutHome==='undefined')S.tutHome=0;          // tuto page d’accueil déjà vu ?
 if(typeof S.tutVocab==='undefined')S.tutVocab=0;        // tuto de la liste de vocabulaire déjà vu ?
+if(typeof S.tutCours==='undefined')S.tutCours=0;        // tuto de l’onglet Cours déjà vu ?
 if(typeof S.vfBest==='undefined')S.vfBest=0;            // record au « vrai ou faux » (§3.2)
 if(typeof S.consScore!=='number')S.consScore=0;        // score de constance (rang)
 if(typeof S.ghufLeft!=='number')S.ghufLeft=2;          // Ghufrān restants ce mois (max 2, jamais à vendre)
@@ -5384,7 +5430,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='sync-horodatage-honnete';
+const BUILD='reviser-qoran-boites-clavier';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6135,15 +6181,20 @@ function renderStep(){
   }
 
   if(st.type==='vwrite'){
+    /* 🔴 LE CLAVIER DE _clavier.js REMPLACE LA GRILLE DE TUILES (04/09, Myriam :
+       « le clavier de révision doit être sur le même modèle qui vient d'être
+       défini pour les leçons »). ⚠️ REPLI ASSUMÉ sur l'ancienne grille si le
+       module ES n'est pas encore chargé — voir vwSaisie() plus bas, même
+       doctrine que asmSaisie(). */
     const SR=SOURATES[curSourate]||SOURATES[0];
     const words=SR.verses[st.vi].split(' ');
-    window._vw={vi:st.vi,words:words,wi:0,units:splitUnits(words[0]),ch:[],err:false,tilesFor:-1};
+    window._vw={vi:st.vi,words:words,wi:0,units:splitUnits(words[0]),ch:[],err:false,tilesFor:-1,claviePour:-1,refus:0};
     body.innerHTML='<div class="q-title">Réécris le verset '+(st.vi+1)+'</div>'+
       '<div class="vtools"><button class="vspk" onclick="playVerse('+st.vi+')" aria-label="Écouter le verset">'+spkSVG()+'</button>'+
         '<span class="qari-nom">'+qariCur().fr+'</span></div>'+
       '<div class="slots linear-ar" id="vwVerse" style="font-size:34px;line-height:2"></div>'+
       '<div class="hint" id="vwMsg" style="text-align:center;margin:6px 0;min-height:18px"></div>'+
-      '<div class="tiles" id="vwTiles"></div>';
+      '<div id="vwClavier"></div>';
     cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=true;
     renderVw();
     setTimeout(function(){ if(QUEUE[qi]===st&&document.getElementById('player').classList.contains('on'))playVerse(st.vi); },350);
@@ -9720,8 +9771,7 @@ function renderCours(sub){
   sub=sub||'video';
   const tabs=[['video','<img class="itab-ic" src="'+ico('tab-video')+'" alt="">','Vidéos'],['resume','<img class="itab-ic" src="'+ico('tab2-lire')+'" alt="">','Résumé'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Vocabulaire']];
   const unlocked=UNITS.map((U,i)=>i).filter(i=>unitUnlocked(i));
-  let h='<h1 class="vh">Cours</h1><p class="vsub">Le contenu s\u2019ajoute à mesure que tu débloques les unités.</p>';
-  h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderCours(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
+  let h='<div style="display:flex;justify-content:flex-end;margin:0 0 4px">'+'<button class="lg-help" onclick="coursTut()" aria-label="À quoi servent ces onglets ?">?</button></div>';h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="coursTabTap(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
   if(!unlocked.length){ h+='<div class="cempty"><div class="ce-ic">🔒</div>Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
   /* 17/08 — la règle du ciel appliquée au Cours : une unité dit son sujet — ses lettres,
      ou son champ `court` (« L'article الـ ») quand elle n'en a pas (l'U8 rendait « ٨ Unité »
@@ -9765,6 +9815,7 @@ function renderCours(sub){
   }
 
   document.getElementById('view-cours').innerHTML=h;
+  maybeShowCoursTut();
 }
 
 function renderProg(){
@@ -10214,6 +10265,26 @@ function maybeShowVocabTut(){
   S.tutVocab=1; save();
   setTimeout(vocabTut,320);
 }
+/* ═══════════ Tuto de l'onglet Cours (04/09) ═══════════
+   Même moteur (letterTut) : ce que le sous-titre retiré disait EN PERMANENCE
+   — « le contenu s'ajoute à mesure que tu débloques les unités » — un tuto ne
+   le dit qu'UNE fois (S.tutCours) ; le « ? » le rejoue. */
+function coursTut(){ letterTut([
+  {t:function(){return document.querySelectorAll('#view-cours .itab')[0];},ti:'Les vidéos 🎬',
+   tx:'La leçon filmée de chaque unité.'},
+  {t:function(){return document.querySelectorAll('#view-cours .itab')[1];},ti:'Le résumé 📖',
+   tx:'Tes lettres, leurs sons, leur mot du Qorān.'},
+  {t:function(){return document.querySelectorAll('#view-cours .itab')[2];},ti:'Le vocabulaire',
+   tx:'Tous les mots que tu sais lire.'},
+  {t:function(){return document.querySelector('#view-cours .ccard');},ti:'Une carte par unité',
+   tx:'Elle s\u2019ajoute quand tu débloques l\u2019unité.'}
+]); }
+function maybeShowCoursTut(){
+  if(S.tutCours)return;
+  if(!document.querySelector('#view-cours .ccard'))return;   // aucune unité débloquée : pas de tuto
+  S.tutCours=1; save();
+  setTimeout(coursTut,320);
+}
 
 /* ===== HUB « RÉVISER » : Qorān · vocabulaire · grammaire ===== */
 let curSourate=0;
@@ -10297,7 +10368,8 @@ const NASEL=new Set(); // les 3 noms choisis pour la leçon
 function nomTog(ar){
   if(NASEL.has(ar))NASEL.delete(ar);
   else if(NASEL.size<3)NASEL.add(ar);
-  renderReviser('quran');
+  majPopNoms();   // 04/09 : le choix vit dans la POPUP, plus dans l'accordéon —
+                   // repeindre toute la vue de fond n'aurait ici aucun sens.
 }
 function startNoms(){
   if(NASEL.size!==3){toast('Choisis 3 noms à apprendre');return;}
@@ -10316,18 +10388,6 @@ function startNoms(){
 function lumTap(k){
   document.querySelectorAll('.lum').forEach((el,i)=>el.classList.toggle('on',i===k)); // un seul nom illuminé
   const n=window._lum&&window._lum[k]; if(n)speak(n.ar);                              // seul son son joue
-}
-function nomsListHtml(set){ // liste façon vocabulaire : seuls les noms LISIBLES avec les lettres apprises
-  const lisibles=NOMS_ALLAH.filter(function(n){return wordReadable(n.ar,set);});
-  if(!lisibles.length)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;text-align:center;margin:8px 0">Apprends encore quelques lettres pour lire les premiers noms 🌱</p>';
-  return lisibles.map(function(n){
-    const on=NASEL.has(n.ar);
-    return '<div class="wrow nrow'+(on?' nsel':'')+'" onclick="nomTog(\''+n.ar+'\')">'+
-      '<button class="wspk" onclick="event.stopPropagation();speak(\''+n.ar+'\')" aria-label="Écouter">'+spkSVG()+'</button>'+
-      '<div class="wtx"><div class="ww">'+n.ar+'</div><div class="wfr">'+n.fr+'</div></div>'+
-      '<span class="ncoche">'+(on?'✓':'')+'</span></div>';
-  }).join('')+
-  '<button class="cbtn revbtn'+(NASEL.size===3?'':' noff')+'" style="margin-top:10px" onclick="startNoms()">APPRENDRE ('+NASEL.size+'/3)</button>';
 }
 let QCTX=null; // exercice mono-verset en cours : {kind:'ordre'|'ecrire'|'reciter', vi}
 function glossOf(SR,vi,k){ return (SR.tr&&SR.tr[vi]&&SR.tr[vi][k])?SR.tr[vi][k]:''; }
@@ -10425,62 +10485,248 @@ function qNext(){
   else if(c.kind==='ecrire')startQuranWriteV(v);
   else startQuranReciteV(v);
 }
+/* 🔴 LE TITRE « RÉVISER » EST RETIRÉ (04/09, Myriam) — l'orientation passe
+   désormais par l'infobulle des onglets (.tip.on, 3 s), armée par
+   reviserTabTap() au CHANGEMENT d'onglet, jamais par un simple re-rendu (sinon
+   contentPull()/qariPick() la déclencheraient au hasard). */
+/* ═══════════════════════════════════════════════════════════════════════════
+   LES 5 BOÎTES DE « RÉVISER › LE QORĀN » (04/09/2026)
+
+   Remplacent les 5 accordéons. Chaque boîte ouvre une POPUP MODALE (gabarit
+   .disc-tip de l'accueil : titre blanc, gros bouton blanc, fond = accent de
+   l'unité) qui dit ce qu'on va faire ; COMMENCER ferme la popup et lance le
+   VRAI lecteur (#player), sur le modèle exact de discTip()/startDisque().
+
+   LE DÉCOUPAGE — deux règles, parce que le coût des trois exercices n'a pas
+   la même unité :
+   ① Construire et Réciter suivent la table de Myriam, EN VERSETS :
+      1 partie jusqu'à 10 versets, puis ceil(n/10) parties, approximativement
+      égales.
+   ② Réécrire suit le coût réel de l'écriture guidée, EN FRAPPES (splitUnits
+      compte CHAQUE caractère, harakat comprise) : sur Al-Fātiḥa, la table par
+      versets rendait UNE SEULE partie de 262 frappes — ~9 minutes sans point
+      de reprise, l'objectif quotidien entier. Mesuré, pas supposé (04/09).
+      On choisit d'abord le NOMBRE de parties (le total divisé par un budget
+      de 70 frappes), puis on répartit en minimisant la SOMME DES CARRÉS des
+      tailles — un remplissage glouton donne des parties pleines et un fond de
+      sac (32 puis 81 frappes sur le même budget) ; minimiser les carrés
+      équilibre. On ne coupe JAMAIS un verset en deux : c'est l'unité
+      indivisible de la partition. */
+function nbParties(n){ return Math.max(1,Math.ceil(n/10)); }
+function partiesParVersets(n){
+  const p=nbParties(n), base=Math.floor(n/p), reste=n%p, out=[]; let de=0;
+  for(let k=0;k<p;k++){ const t=base+(k<reste?1:0); out.push({de:de,a:de+t}); de+=t; }
+  return out;
+}
+function frappesDuVerset(v){ return v.split(' ').reduce((a,m)=>a+[...m].length,0); }
+function partiesParFrappes(versets,budget){
+  const f=versets.map(frappesDuVerset), n=f.length, tot=f.reduce((a,b)=>a+b,0);
+  const k=Math.max(1,Math.min(n,Math.ceil(tot/budget)));
+  const cum=[0]; f.forEach((x,i)=>cum.push(cum[i]+x));
+  const somme=(i,j)=>cum[j]-cum[i], INF=Infinity;
+  const best=Array.from({length:n+1},()=>new Array(k+1).fill(INF));
+  const coupe=Array.from({length:n+1},()=>new Array(k+1).fill(-1));
+  best[0][0]=0;
+  for(let q=1;q<=k;q++)for(let j=q;j<=n;j++)for(let i=q-1;i<j;i++){
+    if(best[i][q-1]===INF)continue;
+    const c=best[i][q-1]+Math.pow(somme(i,j),2);
+    if(c<best[j][q]){ best[j][q]=c; coupe[j][q]=i; }
+  }
+  const out=[]; let j=n;
+  for(let q=k;q>=1;q--){ const i=coupe[j][q]; out.unshift({de:i,a:j,n:somme(i,j)}); j=i; }
+  return out;
+}
+
+/* Les 5 boîtes : icône (déjà pré-cachée par le sw, aucun asset neuf), libellé
+   COURT sous l'icône, titre + phrase de la popup, verbe du bouton, et le TYPE
+   de découpage à appliquer ('vers'/'frap'/null). */
+const BOITES=[
+ {k:'lire', ic:'tab2-lire',  lab:'Lire',      t:'Lire la sourate',
+  x:'Touche un verset pour l’entendre, un mot pour sa traduction.', go:'LIRE',       parts:null},
+ {k:'ord',  ic:'tab-puzzle', lab:'Construire',t:'Construire la sourate',
+  x:'Écoute chaque verset, puis touche ses mots dans l’ordre.',      go:'COMMENCER', parts:'vers'},
+ {k:'ecr',  ic:'tab2-ecrire',lab:'Réécrire',  t:'Réécrire les versets',
+  x:'Écris chaque verset au clavier, lettre après lettre.',          go:'COMMENCER', parts:'frap'},
+ {k:'rec',  ic:'tab-micro',  lab:'Réciter',   t:'Réciter',
+  x:'Enregistre ta récitation, puis compare-la au modèle.',          go:'COMMENCER', parts:'vers'},
+ {k:'noms', ic:'tab-etoiles',lab:'Les noms',  t:'Les noms d’Allah',
+  x:'Choisis 3 noms, puis apprends-les.',                            go:'APPRENDRE', parts:null},
+];
+
+/* ── L'INFOBULLE 3 s (demande 3) ─────────────────────────────────────────
+   Un seul jeton pour toute la rangée d'onglets : sans lui, deux changements
+   rapprochés laisseraient la PREMIÈRE minuterie éteindre la SECONDE bulle. */
+let _tipT=null;
+function tipMontre(el){
+  document.querySelectorAll('.itab .tip.on').forEach(function(t){t.classList.remove('on');});
+  clearTimeout(_tipT);
+  const t=el&&el.querySelector('.tip'); if(!t)return;
+  t.classList.add('on');
+  _tipT=setTimeout(function(){t.classList.remove('on');},3000);
+}
+/* Armée seulement sur un vrai CHANGEMENT d'onglet (clic), jamais sur un
+   re-rendu de fond (contentPull, qariPick…) qui appellerait renderReviser
+   sans que l'élève ait touché quoi que ce soit. */
+function reviserTabTap(k){ renderReviser(k); tipMontre(document.querySelector('#view-reviser .itab.active')); }
+function coursTabTap(k){ renderCours(k); tipMontre(document.querySelector('#view-cours .itab.active')); }
+
+/* ── LA POPUP ─────────────────────────────────────────────────────────── */
+let boiteOuverte=-1, partChoisie=0;
+function boiteTap(i){
+  boiteOuverte=i; partChoisie=0;
+  document.querySelectorAll('.rq-boite').forEach(function(b){b.classList.remove('ouverte');});
+  const bx=document.getElementById('rqBx'+i); if(bx)bx.classList.add('ouverte');
+  const b=BOITES[i];
+  const v=document.createElement('div'); v.className='rq-voile'; v.id='rqVoile';
+  v.onclick=function(e){ if(e.target===v)fermerPop(); };
+  v.innerHTML='<div class="rq-pop'+(b.k==='noms'?' rq-pop-full':'')+'">'+
+    '<button class="dt-x-btn" onclick="fermerPop()" aria-label="Fermer">✕</button>'+
+    '<div class="dt-t">'+b.t+'</div><div class="dt-x">'+b.x+'</div>'+
+    (b.parts?'<div class="rq-parts" id="rqParts"></div>':'')+
+    (b.k==='noms'?'<div class="rq-noms-compte" id="rqNomsCompte"></div><div class="rq-noms" id="rqPopNoms"></div>':'')+
+    '<button class="dt-go" id="rqPopGo">'+b.go+'</button></div>';
+  document.body.appendChild(v);
+  if(b.parts)majParts(b);
+  if(b.k==='noms'){ majPopNoms(); return; }   // majPopNoms pose SON PROPRE onclick sur rqPopGo
+  document.getElementById('rqPopGo').onclick=function(){
+    fermerPop();
+    if(b.k==='lire'){ ouvrirLireSourate(); return; }
+    const SR=SOURATES[curSourate]||SOURATES[0];
+    const P=(b.parts==='frap')?partiesParFrappes(SR.verses,70):partiesParVersets(SR.verses.length);
+    const p=P[partChoisie]||P[0];
+    if(b.k==='ord')startConstruireSourate(p.de,p.a);
+    else if(b.k==='ecr')startReecrireSourate(p.de,p.a);
+    else if(b.k==='rec')startReciterSourate(p.de,p.a);
+  };
+}
+function fermerPop(){
+  const v=document.getElementById('rqVoile'); if(v)v.remove();
+  document.querySelectorAll('.rq-boite').forEach(function(b){b.classList.remove('ouverte');});
+  boiteOuverte=-1;
+}
+/* Le sélecteur de partie — il n'apparaît QUE s'il y a plus d'une partie : un
+   sélecteur à un seul choix n'est pas un choix (Construire/Réciter sur
+   Al-Fātiḥa n'en montrent aucun ; Réécrire en montre quatre). */
+function majParts(b){
+  const box=document.getElementById('rqParts'); if(!box)return;
+  const SR=SOURATES[curSourate]||SOURATES[0];
+  const P=(b.parts==='frap')?partiesParFrappes(SR.verses,70):partiesParVersets(SR.verses.length);
+  if(P.length<2){ box.remove(); return; }
+  /* 🔴 « N frappes » est du vocabulaire de développeur (revue qa-visuel-alaq du 04/09) :
+     une élève ne sait pas ce qu'est une frappe, et le mot tombait seul en bout de
+     ligne sur la plupart des cartes. Une DURÉE se lit d'un coup d'œil — ~2 s par
+     frappe (mesuré sur l'écriture guidée), arrondie à la demi-minute la plus
+     proche, jamais à zéro. */
+  box.innerHTML=P.map(function(p,k){
+    const det=(b.parts==='frap')?('~'+Math.max(1,Math.round((p.n/30)*2)/2)+' min'):((p.a-p.de)+' écrans');
+    return '<button class="rq-part'+(k===partChoisie?' on':'')+'" onclick="partTap('+k+')">'+
+      'Partie '+(k+1)+'<small>versets '+(p.de+1)+(p.a>p.de+1?'–'+p.a:'')+' · '+det+'</small></button>';
+  }).join('');
+}
+function partTap(k){ partChoisie=k; const b=BOITES[boiteOuverte]; if(b)majParts(b); }
+/* Le choix des 3 noms d'Allah, DANS la popup (avant : accordéon inline).
+   ⚠️ NE repeint QUE sa propre liste — nomTog() a été corrigé en ce sens le
+   04/09, sinon chaque coche referait toute la vue de fond. */
+function majPopNoms(){
+  const box=document.getElementById('rqPopNoms'); if(!box)return;
+  const set=knownLetterSet();
+  const lisibles=NOMS_ALLAH.filter(function(n){return wordReadable(n.ar,set);});
+  const compte=document.getElementById('rqNomsCompte');
+  if(compte)compte.textContent=lisibles.length+(lisibles.length>1?' noms lisibles':' nom lisible')+' avec tes lettres';
+  box.innerHTML=lisibles.length
+    ? lisibles.map(function(n){
+        const on=NASEL.has(n.ar);
+        return '<div class="rq-nom'+(on?' on':'')+'" onclick="nomTog(\''+n.ar+'\')">'+
+          '<span class="ww">'+n.ar+'</span><span class="wfr">'+n.fr+'</span>'+
+          '<span class="ck">'+(on?'✓':'')+'</span></div>';
+      }).join('')
+    : '<p style="color:#fff;opacity:.85;font-family:var(--ui);font-size:12.5px;text-align:center;margin:8px 0">Apprends encore quelques lettres pour lire les premiers noms 🌱</p>';
+  const go=document.getElementById('rqPopGo');
+  if(go){
+    go.disabled=(NASEL.size!==3);
+    go.textContent='Apprendre ('+NASEL.size+'/3)';
+    go.onclick=function(){ if(NASEL.size!==3)return; fermerPop(); startNoms(); };
+  }
+}
+
+/* ── « LIRE LA SOURATE », EN PLEIN ÉCRAN ─────────────────────────────────
+   Même markup .mushaf/.ayat[data-suivre]/.vw[data-w] que l'ex-accordéon
+   « ill », déplacé ICI au caractère près : motTap/playVerse/lireToutQoran/
+   suivreVerset le retrouvent sans rien savoir de son conteneur. Gabarit
+   .finish (comme #surahMenu) : class="finish", id distinct, .on bascule. */
+function ouvrirLireSourate(){
+  let m=document.getElementById('lireSourate');
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='lireSourate'; document.body.appendChild(m); }
+  const SR=SOURATES[curSourate]||SOURATES[0], set=knownLetterSet();
+  const mot=function(w,wi,vi){
+    return '<span class="vw '+(wordReadable(w,set)?'dispo':'absent')+'" data-w="'+wi+'"'+
+           ' onclick="motTap('+vi+','+wi+')">'+w+'</span>';
+  };
+  const versesHtml=SR.verses.map(function(v,vi){
+    const tab=v.split(' ');
+    return '<span class="ayat" data-suivre="'+vi+'">'+
+      '<span class="tete"><button class="vspk-in" onclick="playVerse('+vi+')" aria-label="Écouter le verset '+(vi+1)+'">'+
+        spkSVG()+'</button>'+mot(tab[0],0,vi)+'</span> '+
+      tab.slice(1).map(function(w,j){ return mot(w,j+1,vi); }).join(' ')+
+      numAyatHTML(vi)+'</span> ';
+  }).join('');
+  m.innerHTML='<button class="fin-x" onclick="fermerLireSourate()" aria-label="Fermer">✕</button>'+
+    '<div class="lsbody">'+
+      '<button class="lire-tout" id="btLireTout" onclick="lireToutQoran()">'+
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>'+
+        '<span id="btLireToutT">LIRE TOUT</span></button>'+
+      '<div class="mushaf-sous">touche un verset ou un mot</div>'+
+      '<div class="mushaf">'+versesHtml+'</div>'+
+    '</div>';
+  m.classList.add('on');
+}
+function fermerLireSourate(){ const m=document.getElementById('lireSourate'); if(m)m.classList.remove('on'); }
+
+/* ── LES TROIS LANCEURS DE PARTIE ────────────────────────────────────────
+   `deb`/`fin` sont les BORNES DE LA PARTIE choisie (indices de verset,
+   fin EXCLUE) — celles que rendent partiesParVersets/partiesParFrappes. */
+function startConstruireSourate(deb,fin){
+  QCTX=null;
+  const qs=[];
+  for(let v=deb;v<fin;v++){ const st=buildVerseTiles(v); if(st)qs.push(st); }
+  if(!qs.length){toast('Apprends encore quelques lettres pour débloquer cet exercice');return;}
+  launchQuranReview(qs);   // dans l'ORDRE des versets — on construit la sourate, on ne la brasse pas
+}
+function startReecrireSourate(deb,fin){
+  QCTX=null;
+  const qs=[];
+  for(let v=deb;v<fin;v++){ if(verseFullyReadable(v))qs.push({type:'vwrite',vi:v,graded:true}); }
+  if(!qs.length){toast('Apprends encore quelques lettres pour débloquer cet exercice');return;}
+  launchQuranReview(qs);
+}
+function startReciterSourate(deb,fin){
+  QCTX=null;
+  const qs=[];
+  for(let v=deb;v<fin;v++)qs.push({type:'recite',vi:v});
+  launchQuranReview(qs);
+}
+
 function renderReviser(sub){
   sub=sub||curReviserTab||'quran';curReviserTab=sub;
   const tabs=[['quran','<img class="itab-ic" src="'+ico('tab2-qoran')+'" alt="">','Le Qorān'],['lettres','<img class="itab-ic" src="'+ico('tab-crayon')+'" alt="">','Les lettres'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Le vocabulaire'],['grammaire','<img class="itab-ic" src="'+ico('tab-parchemin')+'" alt="">','La grammaire']];
   const SR=SOURATES[curSourate]||SOURATES[0];
   const set=knownLetterSet(), pc=fatihaPct();
-  let h='<h1 class="vh">Réviser</h1>';
-  h+='<div class="icontabs">'+tabs.map(function(t){
-    return '<button class="itab'+(t[0]===sub?' active':'')+'" onclick="renderReviser(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>';
+  let h='<div class="icontabs">'+tabs.map(function(t){
+    return '<button class="itab'+(t[0]===sub?' active':'')+'" onclick="reviserTabTap(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>';
   }).join('')+'</div>';
 
   if(sub==='quran'){
-    const ord2=SR.verses.map(function(v,i){return {i:i,n:v.split(' ').filter(function(w){return wordReadable(w,set);}).length};}).filter(function(x){return x.n>=2;});
-    const ord1=SR.verses.map(function(v,i){return {i:i,n:v.split(' ').filter(function(w){return wordReadable(w,set);}).length};}).filter(function(x){return x.n>=1;});
-    /* 13/08 — REFONTE VALIDÉE PAR MYRIAM : une page de mushaf, pas une liste de boîtes.
-       ⚠️ `data-suivre` et les `.vw` par mot sont CONSERVÉS : c'est ce que lit suivreVerset
-       pour illuminer la récitation mot à mot. */
-    const versesHtml='<button class="lire-tout" id="btLireTout" onclick="lireToutQoran()">'+
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>'+
-        '<span id="btLireToutT">LIRE TOUT</span></button>'+
-      '<div class="mushaf-sous">'+qariCur().fr+' · touche un verset ou un mot</div>'+
-      '<div class="mushaf">'+SR.verses.map(function(v,vi){
-        const tab=v.split(' ');
-        const mot=function(w,wi){
-          /* la couleur passe par une CLASSE : un style inline battrait .lu/.en et le mot
-             récité ne s'illuminerait jamais (11/08) */
-          return '<span class="vw '+(wordReadable(w,set)?'dispo':'absent')+'" data-w="'+wi+'"'+
-                 ' onclick="motTap('+vi+','+wi+')">'+w+'</span>';
-        };
-        return '<span class="ayat" data-suivre="'+vi+'">'+
-          '<span class="tete"><button class="vspk-in" onclick="playVerse('+vi+')" aria-label="Écouter le verset '+(vi+1)+'">'+
-            spkSVG()+'</button>'+mot(tab[0],0)+'</span> '+
-          tab.slice(1).map(function(w,j){ return mot(w,j+1); }).join(' ')+
-          numAyatHTML(vi)+'</span> ';
-      }).join('')+'</div>';
-    function accSec(key,ic,titre,inner){
-      return '<div class="racc'+(accQ[key]?' open':'')+'">'+
-        '<button class="racc-h" onclick="accQTog(\''+key+'\')"><span class="aic">'+ic+'</span> '+titre+' <span class="chev">▾</span></button>'+
-        '<div class="racc-b">'+inner+'</div></div>';
-    }
-    const ordre='<button class="ritem all" onclick="startSourateOrder()">La sourate entière : remets les versets dans l\u2019ordre</button>'+
-      '<button class="ritem all" onclick="startQuranOrder()">Tous les versets disponibles ('+ord2.length+')</button>'+
-      ord2.map(function(x){return '<button class="ritem" onclick="startQuranOrderV('+x.i+')">Verset '+(x.i+1)+
-        ' <span style="color:var(--muted);font-weight:700">· '+x.n+' mots</span><span class="var">'+SR.verses[x.i]+'</span></button>';}).join('');
-    const ecrire='<button class="ritem all" onclick="startQuranWrite()">Tous les mots lisibles</button>'+
-      (pc>=100?'<button class="ritem all" onclick="startSourateWrite()">La sourate entière, mot après mot</button>':'')+
-      ord1.map(function(x){
-        const full=verseFullyReadable(x.i);
-        return '<button class="ritem'+(full?' all':'')+'" onclick="startQuranWriteV('+x.i+')">'+
-          (full?'Verset '+(x.i+1)+' en entier':'Verset '+(x.i+1))+
-          '<span class="var">'+(full?SR.verses[x.i]:SR.verses[x.i].split(' ').filter(function(w){return wordReadable(w,set);}).join(' · '))+'</span></button>';
-      }).join('');
-    const reciter='<button class="ritem all" onclick="startQuranRecite()">Toute la sourate</button>'+
-      SR.verses.map(function(v,i){return '<button class="ritem" onclick="startQuranReciteV('+i+')">Verset '+(i+1)+
-        '<span class="var">'+v+'</span></button>';}).join('');
-    h+='<button class="qari" onclick="openQari()">Récitateur <b>'+qariCur().fr+'</b><span class="chev">›</span></button>'+
-      '<div class="spick">'+
+    /* 🔴 LES 5 BOÎTES REMPLACENT LES 5 ACCORDÉONS (04/09, cahier des charges de
+       Myriam). La sourate illuminée part dans un PLEIN ÉCRAN dédié
+       (ouvrirLireSourate(), plus bas) — même markup .mushaf/.ayat/.vw que
+       l'ancien accordéon « ill », déplacé au caractère près : les harnais qui
+       mesuraient cette zone n'ont qu'à changer leur POINT D'ENTRÉE, jamais
+       leurs sélecteurs.
+       ⚠️ LE BOUTON « RÉCITATEUR » EST RETIRÉ D'ICI — il fait double emploi
+       avec la carte « Récitateur » de Paramètres (.prm-row, openQari()).
+       L'INDICATION « touche un verset ou un mot », elle, RESTE : c'est elle
+       qui apprend le geste, pas le nom de la voix. */
+    h+='<div class="spick">'+
       '<div class="sbtn" onclick="event.stopPropagation();var m=document.getElementById(\'smenu\');if(m)m.classList.toggle(\'open\')">'+
         '<span style="font-family:var(--quran);font-size:19px;color:var(--gold)">'+SR.ar+'</span> '+SR.nom+
         '<span class="pct">lisible à '+pc+' %</span><span style="color:var(--gold2);font-weight:900">▾</span></div>'+
@@ -10497,11 +10743,10 @@ function renderReviser(sub){
          l'élément occupe toute la largeur, `auto` n'y change rien. */
       '<div style="display:flex;align-items:center;gap:10px;margin:0 auto 12px"><div class="ubar" style="flex:1;margin:0"><i style="width:'+pc+'%"></i></div>'+
       '<b style="color:var(--gold2);font-family:var(--ui)">'+pc+' %</b></div>'+
-      accSec('ill','<img class="acc-ic" src="'+ico('tab2-lire')+'" alt="">','La sourate illuminée',versesHtml)+
-      accSec('ordre','<img class="acc-ic" src="'+ico('tab-puzzle')+'" alt="">','Remettre les mots dans l\u2019ordre',ordre)+
-      accSec('ecrire','<img class="acc-ic" src="'+ico('tab2-ecrire')+'" alt="">','Réécrire les mots',ecrire)+
-      accSec('reciter','<img class="acc-ic" src="'+ico('tab-micro')+'" alt="">','Réciter',reciter)+
-      accSec('noms','<img class="acc-ic" src="'+ico('tab-etoiles')+'" alt="">','Les noms d’Allah',nomsListHtml(set));
+      '<div class="rq-grille" id="rqGrille">'+BOITES.map(function(b,i){
+        return '<button class="rq-boite" id="rqBx'+i+'" onclick="boiteTap('+i+')" aria-label="'+b.t+'">'+
+          '<img src="'+ico(b.ic)+'" alt=""><span class="rq-lab">'+b.lab+'</span></button>';
+      }).join('')+'</div>';
   }
   else if(sub==='lettres'){
     h+='<div class="ccard">'+letterGridHTML()+'</div>';
@@ -10651,7 +10896,13 @@ function renderVt(){
     k++;return html;
   }).join(' ');
 }
-function renderVw(){
+/* renderVw() reste le point d'entrée unique (appelé par vwTap, vwUndo, le mount) —
+   il délègue désormais à deux moitiés : l'affichage du verset (majVwVerse,
+   change à chaque frappe) et la saisie (vwSaisie, ne se reconstruit qu'au
+   changement de MOT). Séparer les deux évite de rebâtir le clavier — et de
+   perdre le focus/l'animation d'une touche — à chaque caractère tapé. */
+function renderVw(){ majVwVerse(); vwSaisie(); }
+function majVwVerse(){
   const M=window._vw;if(!M)return;
   const box=document.getElementById('vwVerse');if(!box)return;
   // le verset : mots écrits en doré · mot en cours (progression + points) · mots à venir estompés
@@ -10664,17 +10915,94 @@ function renderVw(){
     }
     return '<span style="color:var(--lock);opacity:.45">'+w+'</span>';
   }).join(' ');
-  const tiles=document.getElementById('vwTiles');if(!tiles)return;
-  /* ⚠️ 13/08 — le test était `!M.tilesFor||M.tilesFor!==M.wi` : pour le PREMIER mot,
-     `M.tilesFor` vaut 0, donc `!M.tilesFor` est VRAI et les tuiles étaient remélangées
-     à CHAQUE clic (bug signalé par Myriam : « les lettres changeaient de place »), ce qui
-     réinitialisait aussi leur état `disabled` et cassait le ⌫. Un seul test suffit. */
-  if(M.tilesFor!==M.wi){                // renouvelle les tuiles pour le mot en cours
-    M.tilesFor=M.wi;M.shuffled=shuffle(M.units.slice());
-    tiles.innerHTML=M.shuffled.map(function(ch,k){
-      return '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="vwt'+k+'" onclick="vwTap('+k+')">'+tileLabel(ch)+'</button>';
-    }).join('')+'<button class="tile tdel" onclick="vwUndo()" aria-label="Effacer">⌫</button>'; // ⌫ dans le clavier (choix Myriam 4B)
+}
+/* La saisie — le clavier de _clavier.js, reconstruit UNIQUEMENT quand le mot
+   change (M.claviePour!==M.wi) : entre deux frappes du même mot, les touches
+   restent en place, exactement comme sur un vrai clavier. */
+function vwSaisie(){
+  const M=window._vw;if(!M)return;
+  const box=document.getElementById('vwClavier');if(!box)return;
+  const K=window.__alaqClavier;
+  if(K){
+    if(M.claviePour!==M.wi){
+      M.claviePour=M.wi; K.poserCSSClavier();
+      box.innerHTML=K.clavierPourMot(M.words[M.wi],{id:'vw',commandes:true});
+      K.brancherClavier(box,{taper:vwTaperCle,effacer:vwUndo,recommencer:vwResetMot,id:'vw'});
+    }
+    return;
   }
+  /* ⚠️ REPLI — l'ancienne grille de tuiles, verbatim (module ES pas encore
+     chargé). Un écran ouvert avant son chargement doit rester JOUABLE, jamais
+     blanc — le piège « écran blanc, console propre » du projet.
+     ⚠️ 13/08 — le test était `!M.tilesFor||M.tilesFor!==M.wi` : pour le PREMIER
+     mot, `M.tilesFor` vaut 0, donc `!M.tilesFor` est VRAI et les tuiles étaient
+     remélangées à CHAQUE clic. Un seul test suffit. */
+  if(M.tilesFor!==M.wi){
+    M.tilesFor=M.wi;M.shuffled=shuffle(M.units.slice());
+    box.innerHTML='<div class="tiles" id="vwTiles">'+M.shuffled.map(function(ch,k){
+      return '<button class="tile linear-ar'+(isHarakat(ch)?' htile':'')+'" id="vwt'+k+'" onclick="vwTap('+k+')">'+tileLabel(ch)+'</button>';
+    }).join('')+'<button class="tile tdel" onclick="vwUndo()" aria-label="Effacer">⌫</button></div>';
+  }
+}
+/* La touche qui porte un caractère donné, sur le clavier 'vw' — jumelle
+   d'asmTouche(), scopée sur #vwLettres/#vwHarakat (asmTouche vise #asm*). */
+function vwToucheCle(ch){
+  const K=window.__alaqClavier; if(!K)return null;
+  const cle=K.cleDuSigne(ch);
+  const sel=cle?'#vwHarakat .clv-touche':'#vwLettres .clv-touche';
+  return [...document.querySelectorAll(sel)].find(t=>cle?t.dataset.signe===cle:t.dataset.l===ch)||null;
+}
+/* La frappe au clavier — même contrat que vwTap (fallback) et asmTaper
+   (assemble) : une touche fausse est REFUSÉE, indice au 2e refus. ⚠️ AUCUN
+   CŒUR N'EST PERDU ICI, jamais : lancée par launchQuranReview(), toute cette
+   session tourne sous REVIEW=true — c'est déjà le comportement de vwTap
+   (fallback) et de vtTap (« Construire »), qui n'ont jamais coûté de cœur
+   non plus. */
+function vwTaperCle(ch){
+  const M=window._vw; if(!M||M.wi>=M.words.length)return;
+  const acceptes=asmAttendu({t:M.units,ch:M.ch});
+  const t=vwToucheCle(ch);
+  if(!acceptes.includes(ch)){
+    if(t){ if(t.classList.contains('miss'))return;
+      t.classList.add('miss'); setTimeout(()=>t.classList.remove('miss'),400); }
+    toc();
+    M.refus=(M.refus||0)+1;
+    if(M.refus>=2){ asmHintOff();
+      const bon=acceptes.map(vwToucheCle).find(Boolean); if(bon)bon.classList.add('hint'); }
+    return;
+  }
+  M.refus=0; asmHintOff();
+  M.ch.push(ch);
+  vwFiniMot();
+}
+/* Le mot est-il complet ? Et si oui, le verset ? — migré depuis la queue de
+   vwTap, factorisé pour servir AUSSI la voie clavier. */
+function vwFiniMot(){
+  const M=window._vw; if(!M)return;
+  majVwVerse();
+  if(M.ch.length<M.units.length)return;
+  const msg=document.getElementById('vwMsg');
+  okBeep();M.wi++;M.ch=[];M.refus=0;
+  if(M.wi>=M.words.length){            // verset terminé
+    majVwVerse();
+    if(msg)msg.textContent='';
+    okBeep('final');
+    const a=playVerse(M.vi); if(a)a.addEventListener('ended',ctaOn,{once:true});
+    const box=document.getElementById('vwClavier'); if(box)box.innerHTML='';
+    setTimeout(ctaOn,9000);            // filet : CONTINUER ne reste jamais gris
+  } else {
+    M.units=splitUnits(M.words[M.wi]);
+    if(msg)msg.textContent='';
+    majVwVerse();
+    vwSaisie();                        // reconstruit le clavier pour le mot suivant
+  }
+}
+/* ↺ Recommencer, côté clavier : efface le mot EN COURS (le clavier ne
+   consomme pas de touche, il n'y a donc rien d'autre à réarmer). */
+function vwResetMot(){
+  const M=window._vw; if(!M||!M.ch.length)return;
+  M.ch.length=0; M.refus=0; asmHintOff();
+  renderVw();
 }
 /* ÉCRITURE GUIDÉE (13/08) — la tuile fausse est REFUSÉE, indice au 2e refus. Le mot ne
    peut donc plus être faux : la branche « Pas tout à fait » et le remélange du mot sont
@@ -10713,7 +11041,7 @@ function vwTap(k){
 }
 function vwUndo(){
   const M=window._vw;if(!M||!M.ch.length)return;
-  const n=M.ch.length;M.ch.pop();M.refus=0;
+  const n=M.ch.length;M.ch.pop();M.refus=0;asmHintOff();  // efface aussi .clv-touche.hint
   [...document.querySelectorAll('#vwTiles .tile')].forEach(function(t){
     if(t.dataset.used==n){t.disabled=false;delete t.dataset.used;}
     t.classList.remove('hint');});
