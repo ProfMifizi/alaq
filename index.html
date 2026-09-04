@@ -124,7 +124,13 @@
   .unit-head .uh-main{min-width:0;flex:1}
   .unit-head .uh-top{font-size:10.5px;font-weight:900;letter-spacing:.09em;color:#fff;opacity:.85}
   .unit-head h2{font-size:13px;font-weight:900;color:#fff;line-height:1.3;margin:1px 0 0}
-  .unit-head .uh-l1{display:block;white-space:nowrap}
+  /* ⚠️ `nowrap` A ÉTÉ RETIRÉ (03/09) : mesuré, « Unité 10 : L’annexion — الإِضَافَة »
+     réclame 240 px pour les 196 disponibles d'un iPhone SE — il DÉBORDAIT de 44 px,
+     hors du bandeau, sans un pixel de défilement pour le rattraper. Le titre se coupe
+     désormais après les deux-points, un endroit qui se lit. `balance` répartit les deux
+     lignes au lieu d'en laisser une orpheline, et le bandeau MESURE déjà sa hauteur au
+     texte de chaque unité (voir setBanner) : rien à recalculer. */
+  .unit-head .uh-l1{display:block;text-wrap:balance}
   .unit-head .uh-let{font-family:var(--ar);font-size:17px}
   .unit-head .uh-ar{font-family:var(--quran);font-size:16px}
   .unit-head .uh-sub2{display:block;font-weight:400;font-size:12px;margin-top:3px;opacity:.92}
@@ -3118,7 +3124,22 @@ const UNITS=[
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[], words:[],
    court:'بِ · عَلَى · لِ',
    sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
- { no:10, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
+ /* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS ═══
+    Ouverte le 02/09 (GO de Myriam : « okay pour le cablage »). `u10:true` dit
+    à `discsFor` de lire `u10Disques()` — même dispositif que l'unité 9 : pas
+    de moteur à soi, les écrans sont des exercices ORDINAIRES du registre
+    (`scene-relation`, voir src/units/unit-10/donnees/disque-1.js).
+    ⚠️ `sub` COMPTE LES DISQUES RÉELS, pas les neuf de l'accueil : l'unité 9 a
+    dit « 5 leçons » puis 6, puis 7, à mesure que ses grisés devenaient réels.
+    Une seule leçon ici, et le mot est au singulier.
+    ⚠️ `court` NE NOMME PAS LA RÈGLE : les directives validées interdisent
+    مُضَاف / إِضَافَة au disque 1. Le ciel annonce donc ce que l'élève va
+    FAIRE — reconnaître de qui, de quoi on parle — pas ce qu'elle apprendra.
+    `words:[]` : comme l'unité 9, les groupes nominaux ne rejoignent pas encore
+    la révision espacée — à trancher avec Myriam. */
+ { no:10, ready:true,  ph:'GRAMMAIRE', u10:true, letters:[], words:[],
+   court:'L’annexion — الإِضَافَة',   // graphie relevée dans le document d'architecture, jamais retapée
+   sub:'« X de Y » — de qui ? de quoi ? · 1 leçon' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
 ];
@@ -3878,8 +3899,12 @@ function u8Disques(){
    Historique : posée le 24/08 sur la demande de Myriam (« il devrait y avoir
    9 dont 8 grisées »), pour que l'accueil ne dise pas « cette unité s'arrête
    là » avant l'heure ; les huit ont été remplacées une à une par de vrais
-   disques, la dernière aujourd'hui. */
-function u9DisqueAVenir(){
+   disques, la dernière le 03/09.
+   ✅ ET L'UNITÉ 10 LA REPREND, LE JOUR MÊME (02/09) : elle s'ouvre avec UN
+   disque réel et huit grisés. La fabrique perd donc son préfixe `u9` — elle
+   sert deux unités, et un nom qui ment sur sa portée finit par faire écrire
+   un doublon. Elle n'avait aucun appelant : le renommage ne peut rien casser. */
+function disqueAVenir(){
   return { icon:'🌙', img:'decouvrir', label:'À venir', aVenir:true,
     build:function(){ return [{type:'slide',nobadge:true,center:true,title:'Bientôt disponible',html:''}]; } };
 }
@@ -3949,9 +3974,35 @@ function u9Disques(){
   ];
 }
 
+/* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS (GO de Myriam, 02/09) ═══
+   L'unité s'ouvre avec UN disque réel et huit grisés, exactement comme
+   l'unité 9 le 24/08 (« il devrait y avoir 9 dont 8 grisées ») : l'accueil ne
+   doit pas laisser croire que l'unité s'arrête au premier disque.
+   Même mécanique que `u9Disques()` — le contenu vient du module ES
+   (`window.__alaqU10`, publié par src/entree.js), la MÉTADONNÉE d'accueil
+   (icône, libellé, longueur de la liste) reste ici, dans le script classique.
+   ⚠️ ET C'EST VOULU : si la longueur dépendait du module, l'accueil
+   afficherait « 0/0 » le temps que le module charge (la prudence d'U8_TALON).
+   ⚠️ LE LIBELLÉ NE DIT PAS « مُضَاف » — les directives validées par Myriam
+   l'interdisent explicitement au disque 1 : l'élève comprend le LIEN, elle
+   n'apprend pas encore son nom. */
+function u10Disques(){
+  return [
+    { icon:'🌙', img:'decouvrir', label:'De qui ? de quoi ?',
+      build:function(){
+        if(window.__alaqU10 && typeof window.__alaqU10.disque1==='function') return window.__alaqU10.disque1();
+        console.error('unité 10 : module non chargé (disque 1)'); return [];
+      } },
+    /* ⚠️ DEUX LIGNES SOLIDAIRES, comme dans l'unité 9 : un disque réel ajouté
+       ici = un grisé retiré là. Le compte doit rester à NEUF. */
+    ...Array.from({length:8}, disqueAVenir),
+  ];
+}
+
 function discsFor(u){
   if(UNITS[u]&&UNITS[u].u8) return u8Disques();               // unité 8 : la grammaire, 9 disques à elle
   if(UNITS[u]&&UNITS[u].u9) return u9Disques();               // unité 9 : la grammaire, registre d'exercices
+  if(UNITS[u]&&UNITS[u].u10) return u10Disques();             // unité 10 : « X de Y », même registre
   if(u===0) return DISQUES;                                  // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
     // Révision · Mémoriser · Lettres vs prolongations · Formes · Fātiḥa · Harakats · Lire · Écrire · Bilan
@@ -5243,7 +5294,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='u9-disque9-bilan';
+const BUILD='u10-disque1-annexion';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5328,10 +5379,10 @@ function renderHome(){
        sans lettres, h\u00e9riteront de la m\u00eame r\u00e8gle sans qu'on y revienne. */
     const sujet=lettersAr
       ? 'Lettres <span class="uh-let">'+lettersAr+'</span>'
-      : (U.court||'Grammaire');
+      : arEnveloppe(insecables(U.court||'Grammaire'),'uh-let');
     const sujetSep=lettersAr
       ? 'Les lettres <span class="us-let">'+lettersAr+'</span>'
-      : (U.court||'Grammaire');
+      : arEnveloppe(insecables(U.court||'Grammaire'),'us-let');
     BANNERS.push({
       top:'CHAPITRE '+toAr(SR.no||1)+' \u00b7 UNIT\u00c9 '+toAr(U.no),
       title:'<span class="uh-l1">'+sujet+' \u2014 '+arReveal('sourate','\u0633\u0648\u0631\u0629')+' '+arReveal(SR.nom,SR.ar)+'</span><span class="uh-sub2"><span class="uh-ar">'+SR.ar+'</span> \u00b7 '+vN+' versets</span>'
@@ -5390,6 +5441,30 @@ function renderHome(){
   if(_homeFocusPending){_homeFocusPending=false;focusCurrentDisc();} // centre sur le disque courant
 }
 // Remplit le bandeau du haut avec le titre de l'unite u (sans re-render inutile).
+/* ⚠️ UN SEGMENT ARABE GLISSÉ DANS UNE PHRASE FRANÇAISE NE SE REND PAS TOUT SEUL.
+   Deux pièges, et ils sont différents selon l'endroit :
+   · dans le BANDEAU, l'arabe hérite de la taille du français (13 px) — illisible
+     pour du Naskh, d'où `.uh-let` (17 px, police `--ar`) ;
+   · dans le SÉPARATEUR, `.unit-sep` porte `letter-spacing:.07em` — et un
+     inter-lettrage DÉSOUDE les ligatures arabes. `.us-let` le remet à 0.
+   Les `court` sont écrits SANS balise (« L’annexion — الإِضَافَة ») : la donnée ne
+   peut donc pas oublier la classe, c'est le rendu qui la pose. Même parade que
+   l'`enrichir()` des exercices de l'unité 9, portée ici au ciel.
+   Le `·` reste DEHORS : il sépare, il ne se prononce pas. */
+function insecables(txt){
+  /* ⚠️ MESURÉ SUR UN IPHONE SE : « Unité 10 : L’annexion — الإِضَافَة » se replie sur
+     deux lignes, et la coupure tombait ENTRE « L’annexion » et le tiret — la 2ᵈᵉ ligne
+     s'ouvrait donc sur un tiret orphelin. C'est aussi, tout simplement, la règle
+     typographique française : un tiret cadratin ne se sépare pas de ce qui le précède.
+     Les espaces qui l'entourent deviennent insécables, la coupure remonte après les
+     deux-points — un endroit qui se lit. */
+  return String(txt||'').replace(/ (—|–) /g, '\u00A0$1\u00A0');
+}
+function arEnveloppe(txt, cls){
+  return String(txt||'').replace(
+    /[\u0600-\u06FF\uFB50-\uFEFF]+(?:\s+[\u0600-\u06FF\uFB50-\uFEFF]+)*/g,
+    function(m){ return '<span class="'+cls+'">'+m+'</span>'; });
+}
 function setBanner(u){
   const B=window._homeBanners&&window._homeBanners[u];if(!B)return;
   const bn=document.getElementById('unitBanner');if(!bn)return;
@@ -10934,10 +11009,23 @@ function refaireBandeaux(){
   for(var u=0;u<B.length;u++){
     var U=UNITS[u]; if(!U) continue;
     var lettres=(U.letters||[]).join(' ');
+    /* ⚠️ IL AFFICHAIT LA PHASE, PAS LE SUJET — et il annulait donc en silence la
+       règle du 17/08 (« une unité dit son sujet : ses lettres si elle en a, son
+       `court` sinon »), que `renderHome` applique pourtant deux mille lignes plus
+       haut. Résultat : CINQ unités de suite annonçaient « Grammaire », un mot qui
+       n'apprend rien à personne, pendant que `court` portait déjà « L’article الـ »
+       et « بِ · عَلَى · لِ ». La phase ne sert plus que de dernier recours, pour les
+       unités non construites qui n'ont pas encore de sujet à annoncer. */
+    var sujet = lettres
+      ? 'Lettres <span class="uh-let">'+lettres+'</span>'
+      : (U.court ? arEnveloppe(insecables(U.court),'uh-let')
+                 : phaseDe(U).charAt(0)+phaseDe(U).slice(1).toLowerCase());
     B[u]={ top:titre,
-      title:'<span class="uh-l1">Unité '+U.no+' : '+
-            (lettres ? 'Lettres <span class="uh-let">'+lettres+'</span>'
-                     : phaseDe(U).charAt(0)+phaseDe(U).slice(1).toLowerCase())+'</span>' };
+      /* ⚠️ ESPACE INSÉCABLE AVANT LE DEUX-POINTS — la règle française, et ici elle
+         règle un vrai défaut : sans elle la coupure du titre replié tombait AVANT le
+         signe, et la 2ᵈᵉ ligne s'ouvrait sur « : L’annexion ». L'espace qui SUIT reste
+         sécable : c'est là, et là seulement, que le titre a le droit de se plier. */
+      title:'<span class="uh-l1">Unité '+U.no+'\u00A0: '+sujet+'</span>' };
   }
   var bn=document.getElementById('unitBanner');
   if(bn){ bn._filled=0; if(typeof setBanner==='function') setBanner(+bn.dataset.u||0); }
