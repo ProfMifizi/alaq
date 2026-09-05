@@ -1177,18 +1177,15 @@
 .rq-pop{--accent:var(--gold2);position:relative;width:100%;max-width:300px;max-height:100%;
   display:flex;flex-direction:column;overflow-y:auto;background:var(--accent,var(--gold));
   border-radius:18px;padding:18px 16px 16px;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.55)}
-/* 🔴 05/09 — Myriam : « diminue encore la popup des noms d'Allah, d'environ 80% ».
-   `height:100%` occupait tout l'écran pour ne montrer que quelques lignes à la
-   fois — la liste défile déjà DANS `.rq-noms` (overflow-y:auto), la carte n'a
-   jamais eu besoin de toute la hauteur pour rester utilisable.
-   ⚠️ MESURÉ, PAS DEVINÉ : à 20% pile (la demande littérale), le bouton APPRENDRE
-   déborde de 6px sous la carte (title+compteur+bouton+paddings dépassent déjà le
-   budget avant même une ligne de la liste). 32% est le premier palier où RIEN ne
-   déborde, sur 390×844 ET 375×667 (iPhone SE) — mesuré aux deux tailles, pas
-   supposé. Toujours une réduction de ~68%, proche de sa demande. Hauteur en %
-   de `.rq-voile`, qui a une hauteur RÉSOLUE (`inset:0`) — pas un vh brut, donc
-   pas le piège habituel de la barre d'adresse iOS. */
-.rq-pop.rq-pop-full{height:32%;overflow-y:hidden}
+/* 🔴 05/09 — Myriam, correction de son propre chiffre : « je voulais dire
+   diminue la hauteur de 20%, une hauteur égale à 80% de celle d'avant » —
+   PAS diminuer de 80%. `height:100%` → `height:80%` : la vraie réduction
+   demandée, ni le 20% littéral du premier message (mesuré : y faisait
+   déborder le bouton APPRENDRE de 6px) ni le 32% choisi entre-temps pour
+   compenser. Hauteur en % de `.rq-voile`, qui a une hauteur RÉSOLUE
+   (`inset:0`) — pas un vh brut, donc pas le piège habituel de la barre
+   d'adresse iOS. */
+.rq-pop.rq-pop-full{height:80%;overflow-y:hidden}
 .rq-pop .dt-x-btn{position:absolute;top:8px;right:10px;background:none;border:none;font-family:serif;
   font-size:24px;line-height:1;color:#fff;opacity:.85;cursor:pointer;padding:6px 8px;z-index:2}
 /* 🔴 05/09 — « les textes sur les popup sont trop petits » ET « pas besoin de
@@ -5462,7 +5459,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='popup-noms-allah-reduite';
+const BUILD='popup-noms-allah-80pc';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
