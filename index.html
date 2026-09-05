@@ -1162,42 +1162,56 @@
 .rq-lab{font-family:var(--ui);font-size:9.5px;font-weight:900;letter-spacing:.04em;
   text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.15}
 .rq-boite.ouverte .rq-lab{color:var(--gold2)}
+/* 🔴 05/09 — Myriam, EN PRODUCTION sur son iPhone : « la hauteur de la popup
+   avec les noms d'Allah est trop grande, je n'arrive plus à cliquer sur la
+   croix ». Cause mesurée : `padding:20px` FIXE ne connaît pas l'encoche / l'île
+   dynamique — sur `.rq-pop-full` (hauteur 100%), le haut de la popup se pose
+   SOUS la zone sûre, et la croix (posée à 6px du haut de la popup) tombe dans
+   la même zone. Même piège que `.qsel` (déjà corrigé le 13/08) : le haut doit
+   suivre `env(safe-area-inset-top)`, jamais une valeur fixe. */
 .rq-voile{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.55);
-  display:flex;align-items:center;justify-content:center;padding:20px;animation:rqpin .16s ease}
+  display:flex;align-items:center;justify-content:center;
+  padding:max(20px,env(safe-area-inset-top,0px)) 20px max(20px,env(safe-area-inset-bottom,0px));
+  animation:rqpin .16s ease}
 @keyframes rqpin{from{opacity:0}to{opacity:1}}
 .rq-pop{--accent:var(--gold2);position:relative;width:100%;max-width:300px;max-height:100%;
   display:flex;flex-direction:column;overflow-y:auto;background:var(--accent,var(--gold));
-  border-radius:18px;padding:16px 14px 14px;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.55)}
+  border-radius:18px;padding:18px 16px 16px;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.55)}
 /* ⚠️ SEULE la popup « Les noms d'Allah » a besoin de toute la hauteur — sa liste
    peut monter à plusieurs dizaines de lignes (mesuré : 64 noms lisibles à 100 %).
-   Les quatre autres (deux lignes de texte, au plus 4 pastilles de partie)
-   restent COMPACTES : une popup géante pour « Réciter » serait un aplat
-   presque vide (défaut signalé et corrigé le 04/09). */
+   Les quatre autres (au plus 4 pastilles de partie) restent COMPACTES : une
+   popup géante pour « Réciter » serait un aplat presque vide. */
 .rq-pop.rq-pop-full{height:100%;overflow-y:hidden}
-.rq-pop .dt-x-btn{position:absolute;top:6px;right:8px;background:none;border:none;font-family:serif;
-  font-size:20px;line-height:1;color:#fff;opacity:.8;cursor:pointer;padding:4px 6px;z-index:2}
-.rq-pop .dt-t{flex:none;color:#fff;font-weight:900;font-size:16px;line-height:1.3;margin:2px 18px 5px}
+.rq-pop .dt-x-btn{position:absolute;top:8px;right:10px;background:none;border:none;font-family:serif;
+  font-size:24px;line-height:1;color:#fff;opacity:.85;cursor:pointer;padding:6px 8px;z-index:2}
+/* 🔴 05/09 — « les textes sur les popup sont trop petits » ET « pas besoin de
+   textes sous les titres ni de préciser la durée : trop de texte tue
+   l'information, Duolingo l'a bien compris » (Myriam). `.dt-x` (la phrase
+   d'explication) n'est PLUS ÉMISE par boiteTap() — le titre seul suffit,
+   il est agrandi en conséquence. La règle CSS reste ici, mais rien ne la
+   déclenche plus dans le HTML. */
+.rq-pop .dt-t{flex:none;color:#fff;font-weight:900;font-size:20px;line-height:1.3;margin:4px 22px 14px}
 .rq-pop .dt-x{flex:none;color:#fff;opacity:.9;font-weight:700;font-size:12.5px;line-height:1.45;margin-bottom:10px}
-.rq-pop .dt-go{flex:none;width:100%;background:#fff;border:none;border-radius:12px;padding:13px;
+.rq-pop .dt-go{flex:none;width:100%;background:#fff;border:none;border-radius:12px;padding:14px;
   font-family:var(--ui);font-weight:900;letter-spacing:.05em;color:var(--accent,var(--gold-d));
-  cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.22);text-transform:uppercase;font-size:14px;margin-top:2px}
+  cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.22);text-transform:uppercase;font-size:15px;margin-top:2px}
 .rq-pop .dt-go:disabled{opacity:.5;cursor:default;box-shadow:none}
-.rq-parts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.rq-parts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .rq-parts .rq-part:last-child:nth-child(odd){grid-column:1/-1}
-.rq-part{background:rgba(0,0,0,.18);border:1.5px solid transparent;border-radius:10px;padding:7px 10px;
-  font-family:var(--ui);font-weight:900;font-size:11.5px;color:#fff;cursor:pointer;line-height:1.25}
+.rq-part{background:rgba(0,0,0,.18);border:1.5px solid transparent;border-radius:10px;padding:9px 10px;
+  font-family:var(--ui);font-weight:900;font-size:13.5px;color:#fff;cursor:pointer;line-height:1.3}
 .rq-part.on{border-color:#fff;background:rgba(0,0,0,.34)}
-.rq-part small{display:block;font-weight:700;opacity:.82;font-size:10px}
-.rq-noms-compte{flex:none;color:#fff;opacity:.78;font-size:11px;font-weight:800;margin-bottom:6px}
+.rq-part small{display:block;font-weight:700;opacity:.85;font-size:12px;margin-top:2px}
+.rq-noms-compte{flex:none;color:#fff;opacity:.8;font-size:13px;font-weight:800;margin-bottom:8px}
 .rq-noms{flex:1 1 auto;min-height:0;overflow-y:auto;margin-bottom:10px;
   border-top:1px solid rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.25);padding:8px 0}
-.rq-nom{display:flex;align-items:center;gap:8px;background:var(--panel);border:1.5px solid transparent;
-  border-radius:10px;padding:5px 9px;margin-bottom:5px;cursor:pointer;min-height:34px}
+.rq-nom{display:flex;align-items:center;gap:10px;background:var(--panel);border:1.5px solid transparent;
+  border-radius:10px;padding:8px 10px;margin-bottom:6px;cursor:pointer;min-height:40px}
 .rq-nom.on{border-color:var(--gold)}
-.rq-nom .ww{flex:0 0 auto;font-family:var(--ar);font-size:18px;color:var(--gold);line-height:1.55;
+.rq-nom .ww{flex:0 0 auto;font-family:var(--ar);font-size:21px;color:var(--gold);line-height:1.5;
   direction:rtl;white-space:nowrap}
-.rq-nom .wfr{flex:1 1 auto;min-width:0;font-size:10.5px;color:var(--muted);font-weight:700;
-  text-align:left;line-height:1.25;direction:ltr}
+.rq-nom .wfr{flex:1 1 auto;min-width:0;font-size:13px;color:var(--muted);font-weight:700;
+  text-align:left;line-height:1.3;direction:ltr}
 .rq-nom .ck{flex:0 0 12px;color:var(--gold);font-weight:900;font-size:14px;text-align:center}
 /* la sourate illuminée, en plein écran (ex-accordéon « ill »), gabarit .finish
    (comme #surahMenu : class="finish" + un id distinct, m.classList.toggle('on')) */
@@ -3982,6 +3996,17 @@ function disqueAVenir(){
   return { icon:'🌙', img:'decouvrir', label:'À venir', aVenir:true,
     build:function(){ return [{type:'slide',nobadge:true,center:true,title:'Bientôt disponible',html:''}]; } };
 }
+/* 🔴 LES 9 DISQUES PORTAIENT TOUS L'AMPOULE — signalé par Myriam le 05/09
+   (« les disques n'ont eu des lampe, bug majeur »). `img:` n'avait jamais suivi
+   le contenu réel : chaque disque copiait 'decouvrir' au moment de sa naissance,
+   disque après disque, sans qu'aucun n'y revienne une fois le suivant écrit.
+   La règle, DÉJÀ posée par les unités 1-8 (DISQUES l.3853 et suivantes) : l'icône
+   dit la NATURE du disque, pas son rang — 💡decouvrir (une notion s'introduit) ·
+   📌memoriser (une FORME/terminaison se travaille, sans notion neuve) ·
+   🕋qoran (le texte coranique réel) · 🏆bilan (la synthèse finale). Les disques
+   1-4 restent decouvrir (sens de بِ/عَلَى/لِ) ; 5-7 passent à memoriser (ils
+   « n'enseignent plus un sens mais une terminaison », note du 29/08 sur D5) ;
+   8 passe à qoran (transfert au VRAI texte de la Fātiḥa) ; 9 était déjà bilan. */
 function u9Disques(){
   return [
     { icon:'🌙', img:'decouvrir', label:'بِ · عَلَى · لِ',
@@ -4016,22 +4041,22 @@ function u9Disques(){
        retiré. `_verif_u8_app` et `_verif_u8_dist` vérifient l'INVARIANT — neuf
        disques, les réels d'abord, les « à venir » ensuite, aucun trou — et
        toucher l'une sans l'autre les fait rougir toutes les deux. */
-    { icon:'🌙', img:'decouvrir', label:'بِ — la fin du nom',
+    { icon:'🌙', img:'memoriser', label:'بِ — la fin du nom',
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque5==='function') return window.__alaqU9.disque5();
         console.error('unité 9 : module non chargé (disque 5)'); return [];
       } },
-    { icon:'🌙', img:'decouvrir', label:'لِ — la fin du nom',
+    { icon:'🌙', img:'memoriser', label:'لِ — la fin du nom',
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque6==='function') return window.__alaqU9.disque6();
         console.error('unité 9 : module non chargé (disque 6)'); return [];
       } },
-    { icon:'🌙', img:'decouvrir', label:'عَلَى — la fin du nom',
+    { icon:'🌙', img:'memoriser', label:'عَلَى — la fin du nom',
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque7==='function') return window.__alaqU9.disque7();
         console.error('unité 9 : module non chargé (disque 7)'); return [];
       } },
-    { icon:'🌙', img:'decouvrir', label:'Le Coran — Al-Fātiḥa',
+    { icon:'🌙', img:'qoran', label:'Le Coran — Al-Fātiḥa',
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque8==='function') return window.__alaqU9.disque8();
         console.error('unité 9 : module non chargé (disque 8)'); return [];
@@ -5430,7 +5455,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='reviser-qoran-boites-clavier';
+const BUILD='correctifs-05sept-popup-u8-u9';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -10540,17 +10565,17 @@ function partiesParFrappes(versets,budget){
 /* Les 5 boîtes : icône (déjà pré-cachée par le sw, aucun asset neuf), libellé
    COURT sous l'icône, titre + phrase de la popup, verbe du bouton, et le TYPE
    de découpage à appliquer ('vers'/'frap'/null). */
+/* 🔴 05/09 — Myriam, sur son iPhone : « pas besoin de textes sous les titres…
+   trop de texte tue l'information, Duolingo l'a bien compris ». Le champ `x`
+   (la phrase d'explication) est retiré : le TITRE seul seul suffit, une popup
+   qui montre 5 boîtes déjà libellées + un titre net n'a pas besoin d'une
+   deuxième ligne pour redire la même chose. */
 const BOITES=[
- {k:'lire', ic:'tab2-lire',  lab:'Lire',      t:'Lire la sourate',
-  x:'Touche un verset pour l’entendre, un mot pour sa traduction.', go:'LIRE',       parts:null},
- {k:'ord',  ic:'tab-puzzle', lab:'Construire',t:'Construire la sourate',
-  x:'Écoute chaque verset, puis touche ses mots dans l’ordre.',      go:'COMMENCER', parts:'vers'},
- {k:'ecr',  ic:'tab2-ecrire',lab:'Réécrire',  t:'Réécrire les versets',
-  x:'Écris chaque verset au clavier, lettre après lettre.',          go:'COMMENCER', parts:'frap'},
- {k:'rec',  ic:'tab-micro',  lab:'Réciter',   t:'Réciter',
-  x:'Enregistre ta récitation, puis compare-la au modèle.',          go:'COMMENCER', parts:'vers'},
- {k:'noms', ic:'tab-etoiles',lab:'Les noms',  t:'Les noms d’Allah',
-  x:'Choisis 3 noms, puis apprends-les.',                            go:'APPRENDRE', parts:null},
+ {k:'lire', ic:'tab2-lire',  lab:'Lire',      t:'Lire la sourate',      go:'LIRE',       parts:null},
+ {k:'ord',  ic:'tab-puzzle', lab:'Construire',t:'Construire la sourate',go:'COMMENCER', parts:'vers'},
+ {k:'ecr',  ic:'tab2-ecrire',lab:'Réécrire',  t:'Réécrire les versets', go:'COMMENCER', parts:'frap'},
+ {k:'rec',  ic:'tab-micro',  lab:'Réciter',   t:'Réciter',              go:'COMMENCER', parts:'vers'},
+ {k:'noms', ic:'tab-etoiles',lab:'Les noms',  t:'Les noms d’Allah',     go:'APPRENDRE', parts:null},
 ];
 
 /* ── L'INFOBULLE 3 s (demande 3) ─────────────────────────────────────────
@@ -10581,7 +10606,7 @@ function boiteTap(i){
   v.onclick=function(e){ if(e.target===v)fermerPop(); };
   v.innerHTML='<div class="rq-pop'+(b.k==='noms'?' rq-pop-full':'')+'">'+
     '<button class="dt-x-btn" onclick="fermerPop()" aria-label="Fermer">✕</button>'+
-    '<div class="dt-t">'+b.t+'</div><div class="dt-x">'+b.x+'</div>'+
+    '<div class="dt-t">'+b.t+'</div>'+
     (b.parts?'<div class="rq-parts" id="rqParts"></div>':'')+
     (b.k==='noms'?'<div class="rq-noms-compte" id="rqNomsCompte"></div><div class="rq-noms" id="rqPopNoms"></div>':'')+
     '<button class="dt-go" id="rqPopGo">'+b.go+'</button></div>';
@@ -10612,15 +10637,13 @@ function majParts(b){
   const SR=SOURATES[curSourate]||SOURATES[0];
   const P=(b.parts==='frap')?partiesParFrappes(SR.verses,70):partiesParVersets(SR.verses.length);
   if(P.length<2){ box.remove(); return; }
-  /* 🔴 « N frappes » est du vocabulaire de développeur (revue qa-visuel-alaq du 04/09) :
-     une élève ne sait pas ce qu'est une frappe, et le mot tombait seul en bout de
-     ligne sur la plupart des cartes. Une DURÉE se lit d'un coup d'œil — ~2 s par
-     frappe (mesuré sur l'écriture guidée), arrondie à la demi-minute la plus
-     proche, jamais à zéro. */
+  /* 🔴 05/09 — « N frappes » (04/09) puis une durée estimée (04/09 soir) étaient
+     encore du texte en trop : Myriam, sur son iPhone, « pas besoin de préciser
+     la durée approximative par révision, trop de texte tue l'information ».
+     Chaque pastille ne montre plus que ce qu'elle contient : les versets. */
   box.innerHTML=P.map(function(p,k){
-    const det=(b.parts==='frap')?('~'+Math.max(1,Math.round((p.n/30)*2)/2)+' min'):((p.a-p.de)+' écrans');
     return '<button class="rq-part'+(k===partChoisie?' on':'')+'" onclick="partTap('+k+')">'+
-      'Partie '+(k+1)+'<small>versets '+(p.de+1)+(p.a>p.de+1?'–'+p.a:'')+' · '+det+'</small></button>';
+      'Partie '+(k+1)+'<small>versets '+(p.de+1)+(p.a>p.de+1?'–'+p.a:'')+'</small></button>';
   }).join('');
 }
 function partTap(k){ partChoisie=k; const b=BOITES[boiteOuverte]; if(b)majParts(b); }
