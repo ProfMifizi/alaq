@@ -912,6 +912,9 @@
   .lg-cell .bd{position:absolute;top:3px;right:5px;font-size:11px}
   .lg-cell .rv{position:absolute;bottom:4px;right:6px;font-size:9px}
   .lg-cell .ck{position:absolute;top:4px;left:7px;font-size:11px;font-family:var(--ui);font-weight:900;color:var(--gold2)}
+  /* 05/09 — déplacé en haut-DROIT (spec §2.3), possible depuis que ✨ (qui y
+   vivait) est retiré. Coin bas-gauche laissé aux futurs repères, si besoin. */
+.lg-cell .sm{position:absolute;top:3px;right:5px;font-size:10px;line-height:1;opacity:.9}
   .lg-rev{width:100%;margin-top:16px;padding:14px;border-radius:14px;border:none;cursor:pointer;font-family:var(--ui);font-weight:900;font-size:16px;background:var(--gold);color:#1a1410}
   .lg-rev:disabled{background:#3a332e;color:#6f665f;cursor:not-allowed}
   .lg-replay{background:transparent;border:1.5px solid var(--line);color:var(--muted);border-radius:10px;padding:8px 14px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
@@ -1466,6 +1469,29 @@
 .chip.pulse{animation:chippulse .46s ease}
 @keyframes chippulse{0%{transform:scale(1)}40%{transform:scale(1.14);background:rgba(220,144,46,.28);border-color:var(--gold2)}100%{transform:scale(1)}}
 .sgn-desc{font-family:var(--ui);font-size:13px;color:var(--muted);line-height:1.45}
+.gsec-fl{align-self:center;font-family:var(--ui);font-size:19px;font-weight:900;color:var(--muted)}
+.gsec-let{font-family:var(--ar);font-size:22px;color:var(--muted);direction:rtl;text-align:center;
+  word-spacing:6px;line-height:1.75;background:var(--sunk);border:1px solid var(--line);
+  border-radius:12px;padding:9px 10px;margin-bottom:9px}
+.gsec-let b{color:var(--gold);font-weight:400}
+.gsec-cells{display:flex;gap:6px;justify-content:center;margin-bottom:9px}
+.gsec-cells .lg-cell{width:46px;padding:9px 0}
+/* La pastille du numéro d'unité dans le hub de grammaire : le calque exact de
+   celle des cartes du Cours (.acc .acc-h .cno), qui est ancrée sur son accordéon
+   et ne peut donc pas être réemployée telle quelle. */
+/* ⚠️ L’ENCRE EST UN TOKEN, JAMAIS UNE COULEUR EN DUR — mon premier jet copiait
+   le #1a1410 de .cno et le balayage l’a mesuré à 3,34:1 en mode CLAIR (seuil 4,5) :
+   --gold y devient un ambre FONCÉ, et une encre brune posée dessus disparaît.
+   --on-gold bascule avec le thème (crème en clair) ; son repli rend le sombre
+   identique au pixel près. C’est le piège du token à double rôle, gravé le 13/08. */
+.gnum{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:var(--gold);color:var(--on-gold,#1a1410);
+  font-family:var(--ui);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:15px}
+.gtt{font-family:var(--ui);font-weight:900;font-size:14.5px;color:var(--cream)}
+/* ⚠️ UN SEGMENT ARABE DANS UNE PHRASE FRANÇAISE HÉRITE DES 13 px DU LATIN, et
+   le Naskh y devient illisible : c'est le piège du bandeau du ciel (04/09),
+   payé ici dans une carte de Cours. La pile --ui porte bien la police arabe
+   depuis le 19/08 — c'est la TAILLE qui manque, pas la fonte. */
+.sgn-head .ar,.sgn-desc .ar{font-family:var(--ar);font-size:1.32em;color:var(--gold2);line-height:1;vertical-align:-.08em}
 .lanim{margin-top:8px}
 .la-btn{background:rgba(220,144,46,.12);border:1px solid var(--gold-d);color:var(--gold2);border-radius:9px;padding:5px 12px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
 .la-btn:active{transform:scale(.96)}
@@ -3214,7 +3240,12 @@ const UNITS=[
   {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
   {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
    ],
-   court:'بِ · عَلَى · لِ',
+   /* ⚠️ « LES HARFS » PRÉFIXÉ (Myriam, 05/09) : les trois lettres seules ne
+      disaient pas QUOI elles étaient — le mot les nomme, comme « L'article
+      الـ » le fait déjà pour l'unité 8. Alimente tout ce qui lit `court`
+      (bandeau du ciel, Cours › Résumé, le hub de grammaire) depuis CETTE
+      seule source — rien à répéter ailleurs. */
+   court:'LES HARFS بِ · عَلَى · لِ',
    sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
  /* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS ═══
     Ouverte le 02/09 (GO de Myriam : « okay pour le cablage »). `u10:true` dit
@@ -3293,7 +3324,7 @@ window.__alaqHoteU8 = {
   get REVIEW(){ return REVIEW; },  get RECHARGE(){ return RECHARGE; },
   get EXAM(){ return EXAM; },      get inRetry(){ return inRetry; },
   /* les deux ÉCRITURES : un module ne peut pas affecter une variable d'ici */
-  compterFaute(){ wrongCount++; },
+  compterFaute(){ wrongCount++; gramFaute(); },
   poserSonCourant(a){ _curAudio = a; },
   /* ── PERDRE UN CŒUR (unité 9, 23/08) ──────────────────────────────────────
      Même idiome qu'aux 3 sites classiques (l. ~5717, ~6288, ~6506) : ni la
@@ -3339,6 +3370,17 @@ window.__alaqEnregistrerU8 = function(api){
     AUDIO[m[k].nu ]='audios-app-alaq/mot-'+m[k].an+'.mp3';
     AUDIO[m[k].def]='audios-app-alaq/mot-'+m[k].ad+'.mp3';
   });
+  /* ── ET LES 10 MOTS DE LA FĀTIḤA QUE LE DISQUE 8 FAIT REPÉRER (05/09) ────
+     Le résumé de Cours les fait entendre. Sans cette ligne, `speak()` ne
+     trouve aucune entrée et part en voix de SYNTHÈSE — interdit pour ce qui
+     enseigne une prononciation, et le timbre robotique désignerait à lui seul
+     les mots « du Qorān » parmi les autres.
+     ⚠️ ON N'ÉCRASE JAMAIS UNE PRISE DÉJÀ EN PLACE : ces graphies portent la
+     finale de leur POSITION dans le verset, et si un vocabulaire venait un jour
+     à citer la même, c'est SA prise qui doit rester (règle « un fichier, un
+     mot »). Le garde coûte trois caractères et ferme la question d'avance. */
+  const mv=U8.versets||{};
+  Object.keys(mv).forEach(function(w){ if(!AUDIO[w])AUDIO[w]='audios-app-alaq/mot-'+mv[w]+'.mp3'; });
 };
 /* @U8-FIN */
 
@@ -3947,7 +3989,12 @@ const LETTREVSPRO_DISC={icon:'💡',img:'decouvrir',label:'Lettres vs prolongati
 const U8_PLAN=[
   {k:'D1', img:'decouvrir', label:'L’article الـ'},
   {k:'D2', img:'ecrire',    label:'Écrire avec الـ'},
-  {k:'D3', img:'decouvrir', label:'Le ل qui s’avale'},
+  /* ⚠️ « Le ل qui s’avale » est BANNI (Myriam, 05/09) : l'expression est
+     familière et décrit un geste de gorge, là où la règle décrit une LETTRE.
+     La terminologie officielle du projet est « lettre muette » — elle dit ce
+     que l'élève doit retenir, et c'est elle qu'emploient le Cours et la
+     révision de grammaire. */
+  {k:'D3', img:'decouvrir', label:'Le ل, lettre muette'},
   {k:'D4', img:'ecrire',    label:'Écrire les solaires'},
   {k:'D5', img:'memoriser', label:'Poser l’article'},
   {k:'D6', img:'lire',      label:'L’oreille et l’œil'},
@@ -4290,6 +4337,12 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
       S=Object.assign({},DEF,remote); delete S._fresh;
       S._uid=CLOUD.user.id;                           // désormais cet appareil sait à qui est cet état
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
+      /* ⛔ `S.rev` EST RÉSERVÉ AU VOCABULAIRE — un mot y porte son palier et sa
+         prochaine date. Une notion de grammaire n'est pas un mot : elle ne s'oublie
+         pas de la même façon et ne se « rappelle » pas à une date. Elle vit donc à
+         part, et l'ancienne progression d'une élève traverse la mise à jour sans
+         migration (spec §3.2). */
+      S.revGram=S.revGram||{};
       fixOrdreFormes(); // l'état du nuage peut venir d'un appareil resté sur l'ancien ordre
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
       // élève reconnue (session encore vivante) : on referme l'onboarding qui aurait pu s'ouvrir
@@ -5459,7 +5512,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='popup-noms-allah-80pc';
+const BUILD='grammaire-cours-et-revisions';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6447,7 +6500,7 @@ function ctaClick(){
   else{
     foot.classList.add('bad');cta.className='cta bad';toc();
     if(st.graded){
-      wrongCount++;
+      wrongCount++; gramFaute();       // la maîtrise de la notion, si l'écran en porte une
       if(!EXAM&&!REVIEW)S.uerr[curU]=1; // l'unité n'est plus « sans erreur »
       // on mémorise la question ratée pour la rejouer en fin de leçon
       // §3.3 : un mot raté au vrai/faux ET à l'écriture ne produit QU'UN seul item de rattrapage
@@ -8052,7 +8105,12 @@ function startSelectedLetters(){
 function letterTut(customSteps){
   var steps=(customSteps||[
     {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
-    {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées ✨',tx:'Celles-ci sont prêtes ! Touche-les pour les choisir.<br>✨ tout juste débloquée<br>🔸 à revoir'},
+    /* 05/09 — ✨ retiré du titre ET du corps (Myriam : « trop chargé en
+       émojis, surtout pas utile »). Le texte reprend son mot exact.
+       ⚠️ 🔸 RESTE EXPLIQUÉ : elle n'a demandé le retrait que de ✨, et sans
+       cette ligne le badge resterait sans explication nulle part ailleurs
+       dans l'app. */
+    {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées',tx:'Ce sont les lettres que tu as débloquées dans tes leçons.<br>🔸 à revoir'},
     {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Touche une lettre dorée : elle passe en JAUNE FONCÉ, avec un ✓. Tu peux en prendre plusieurs.',enter:function(){var a=document.querySelectorAll('.lg-cell.avail');var c=a[Math.min(3,a.length-1)]||a[0];if(c&&!c.querySelector('.ck')){c.classList.remove('avail');c.classList.add('sel','coachdemo');c.insertAdjacentHTML('afterbegin','<span class="ck">✓</span>');}},leave:function(){var c=document.querySelector('.lg-cell.coachdemo');if(c){c.classList.remove('sel','coachdemo');c.classList.add('avail');var k=c.querySelector('.ck');if(k)k.remove();}}},
     /* Le SEUL endroit où la hamza s'explique — Myriam a tranché : pas de texte permanent
        à l'écran, la ligne se montre, le guide raconte. */
@@ -8082,8 +8140,18 @@ function letterTut(customSteps){
       ov.querySelector('#ltNext').textContent=(ov._si===ov._steps.length-1)?'C’est parti !':'Suivant →';
       var bub=ov.querySelector('#ltBubble'),arrow=ov.querySelector('#ltArrow');
       var bw=Math.min(290,window.innerWidth-24);bub.style.width=bw+'px';
-      var below=r.bottom+170<window.innerHeight,bh=bub.offsetHeight||160;
+      /* 🔴 DÉBORDEMENT DU TUTO 4/5 (Myriam, 05/09, capture à l'appui) —
+         « en dessous » se décidait sur un SEUIL DEVINÉ (170 px), pas sur la
+         hauteur RÉELLE de la bulle. Ça tenait tant que le texte était court ;
+         la hamza (l'étape la plus longue) dépasse 170 px et la bulle, posée
+         « en dessous » d'une ligne déjà basse dans la grille, sortait de
+         l'écran. La hauteur est mesurée AVANT la décision, jamais après. */
+      var bh=bub.offsetHeight||160, below=r.bottom+bh+12<window.innerHeight;
       var top=below?(r.bottom+pad+12):(r.top-pad-12-bh);
+      /* ⚠️ GARDE DURABLE : même si `bh` est un jour mal estimé (police pas
+         encore chargée, texte allongé…), la bulle reste DANS l'écran — elle
+         perd un peu de précision sur la flèche plutôt que de sortir du cadre. */
+      top=Math.max(8,Math.min(top,window.innerHeight-bh-8));
       var left=Math.max(12,Math.min(window.innerWidth-bw-12,r.left+r.width/2-bw/2));
       bub.style.top=top+'px';bub.style.left=left+'px';
       var ax=Math.max(16,Math.min(bw-28,r.left+r.width/2-left-8));arrow.style.left=ax+'px';
@@ -8121,6 +8189,25 @@ function openSurahMenu(){
 }
 function closeSurahMenu(){var m=document.getElementById('surahMenu');if(m)m.classList.remove('on');}
 function pickSurah(i){if(typeof curSourate!=='undefined')curSourate=i;closeSurahMenu();renderHome();}
+/* ═══ LES 28 LETTRES, RANGÉES EN DEUX FAMILLES DE 14 (unité 8) ═════════════
+   Un fait de la langue, pas une donnée de leçon : il ne dépend d'aucune unité
+   et ne bougera jamais. `LETTRES` (unit-8/donnees/mots.js) ne porte QUE les dix
+   lettres que l'unité travaille — le Cours, lui, montre les deux listes
+   ENTIÈRES (spec §1.2), et la grille badge toute lettre débloquée.
+   ☀️ solaire : le ل de l'article est MUET, la lettre double (chedda).
+   🌙 lunaire : le ل se prononce, il porte un soukoun. */
+const SOLAIRES_14='تثدذرزسشصضطظلن';
+const LUNAIRES_14=ALPHABET.map(function(e){return e[0];})
+  .filter(function(L){return SOLAIRES_14.indexOf(L)<0;}).join('');
+function estSolaire(L){ return SOLAIRES_14.indexOf(letterKey(L))>=0; }
+/* Le badge n'apparaît qu'une fois l'unité 8 ouverte : avant, il désignerait une
+   distinction que l'élève n'a pas apprise — et un repère qu'on ne sait pas lire
+   est du bruit. */
+function badgeSolaire(k){
+  if(!unitUnlocked(7))return '';
+  if(SOLAIRES_14.indexOf(k)<0&&LUNAIRES_14.indexOf(k)<0)return '';   /* la hamza, hors des 28 */
+  return '<span class="sm" aria-hidden="true">'+(estSolaire(k)?'☀️':'🌙')+'</span>';
+}
 function letterGridHTML(){
   var order=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
   var unlocked=knownLetterSet(), seen=S.letSeen||{};
@@ -8142,7 +8229,12 @@ function letterGridHTML(){
     if(!unlocked.has(k)) return '<div class="lg-cell locked"><span class="lk">🔒</span>'+g+'</div>';
     var sel=LETSEL.has(k);
     var cls='lg-cell '+(sel?'sel':'avail')+(nouv.has(k)?' nouv':'');
-    var mk=(sel?'<span class="ck">✓</span>':'')+(nouv.has(k)?'<span class="bd">✨</span>':'')+(revoir.has(k)?'<span class="rv">🔸</span>':'');
+    /* 🔴 ✨ ("tout juste débloquée") RETIRÉ (Myriam, 05/09 : « ça fait trop
+       chargé en émojis et surtout pas utile ») — le tuto 2/5 est réécrit en
+       conséquence. Le halo doré (.nouv, le pulse discret) reste : elle n'a
+       objecté qu'à L'EMOJI, jamais au repère lui-même. Le coin haut-droit se
+       libère du même coup pour le repère ☀️/🌙 (voir badgeSolaire ci-dessus). */
+    var mk=(sel?'<span class="ck">✓</span>':'')+(revoir.has(k)?'<span class="rv">🔸</span>':'')+badgeSolaire(k);
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
   /* ═══ LA HAMZA — hors des 28, et c'est TOUT l'enseignement ═══
@@ -9777,7 +9869,13 @@ function coursSignsHTML(){
     {t:'Les prolongations ('+arReveal('madd','مَدّ')+')', d:'Une lettre (ا ي و) étire la voyelle, deux fois plus longue.', c:[['مَا','â'],['مِي','î'],['مُو','û']]},
     {t:'Le '+arReveal('soukoun','سُكُون'), d:'La lettre sans voyelle : consonne seule.', c:[['مْ','m']]},
     {t:'La '+arReveal('chedda','شَدَّة'), d:'La lettre est doublée : on insiste.', c:[['مّ','m·m']]},
-    {t:'Le '+arReveal('tanwīn','تَنْوِين'), d:'Un « n » à la fin (indéfini) : dhammatayn, kasratayn, fathatayn.', c:[['مٌ','oun'],['مٍ','in'],['مً','an']]},
+    /* 🔴 مًا, PAS مً (Myriam, 05/09 : « je préfère la rigueur grammaticale »).
+       Un fatḥatayn s'écrit TOUJOURS avec un alif final (sauf ة، ء sur alif، ى) —
+       muet, mais obligatoire à l'écrit dès qu'un vrai mot se termine ainsi
+       (كِتَابًا). مٌ et مٍ, eux, n'en portent jamais : ce n'est pas une question
+       de symétrie entre les trois signes, c'est la règle qui diffère.
+       ⏳ Pourquoi l'alif ne se prononce pas : à expliquer plus tard (son mot). */
+    {t:'Le '+arReveal('tanwīn','تَنْوِين'), d:'Un « n » à la fin (indéfini) : dhammatayn, kasratayn, fathatayn.', c:[['مٌ','oun'],['مٍ','in'],['مًا','an']]},
   ];
   return '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('menu-cours')+'" alt=""> '+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</h3></div>'+
     SIGNS.map(function(g){
@@ -9796,6 +9894,186 @@ function fatihaWordFor(L){
       for(var c=0;c<word.length;c++){ if(letterKey(word[c])===k) return word; } } }
   return '';
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   LE RÉSUMÉ DE GRAMMAIRE — l'unité 8, l'article الـ            (05/09/2026)
+
+   Le sous-onglet « Résumé » était bâti sur les LETTRES : une unité qui n'en a
+   pas rendait une carte VIDE, et depuis le 17/08 on ne l'affichait plus du tout,
+   avec ce commentaire — « son résumé de GRAMMAIRE sera conçu avec elle, jamais
+   inventé ici ». Il l'a été : spec du 05/09, cinq sections validées par Myriam.
+
+   ⚠️ TOUT RÉEMPLOIE LES GABARITS DU COURS, rien n'est recréé : `.sgn-card` /
+   `.sgn-head` / `.sgn-chips` / `.chip` / `.sgn-desc` sont ceux des cartes de
+   tachkīl juste au-dessus, et `.lg-cell` celui de la grille des lettres. Ils
+   sont validés dans les DEUX thèmes et déjà couverts par le balayage de
+   contraste — une carte inventée aurait dû y entrer, et personne n'y aurait
+   pensé avant que le portillon ne rougisse.
+
+   ⚠️ ET RIEN N'EST RETAPÉ EN ARABE. Les mots viennent de `U8.mots`
+   (unit-8/donnees/mots.js), les mots de verset de `U8.versets`, et les dix
+   lettres travaillées sont DÉRIVÉES du champ `L` de chaque mot. Retaper une
+   graphie vocalisée, c'est inventer une voyelle — le projet l'a payé trois fois.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* La table dit QUI a un résumé de grammaire. Elle en porte une seule aujourd'hui :
+   une unité listée ici sans contenu rendrait exactement la carte vide de l'U8
+   d'avant le 17/08. Les unités 9 et 10 y entreront quand leur résumé aura été
+   écrit AVEC Myriam. */
+const RESUME_GRAM={7:function(){ return resumeGramU8(); }, 8:function(){ return resumeGramU9(); }};
+
+function gramChip(ar,ro){
+  return '<button class="chip" onclick="playSyl(\''+ar+'\',this)">'+
+    '<span class="chip-ar">'+ar+'</span><span class="chip-ro">'+ro+'</span></button>';
+}
+/* La bande des 14 : les lettres que l'unité a TRAVAILLÉES sont en or, les autres
+   en gris — l'élève voit d'un coup ce qu'elle connaît et ce qui reste (spec §1.2). */
+function gramBande(fam,vues){
+  return '<div class="gsec-let">'+fam.split('').map(function(L){
+    var g=(L==='\u0647')?'\uFEE9':L;                 /* le ه isolé s'écrit rond, comme dans la grille */
+    return vues.indexOf(L)>=0?'<b>'+g+'</b>':g;
+  }).join(' ')+'</div>';
+}
+function gramSection(titre,inner,desc){
+  return '<div class="sgn-card"><div class="sgn-head">'+titre+'</div>'+inner+
+    '<div class="sgn-desc">'+desc+'</div></div>';
+}
+/* La lettre qui suit l'article — CALCULÉE, jamais écrite dans une donnée.
+   On saute le ا et le ل, puis les marques que le ل porte : un soukoun devant une
+   lunaire (الْحَمْدُ → ح), rien du tout devant une solaire (الرَّحْمَٰنِ → ر). C'est le
+   geste de `versets.js` l.51, « on avale les marques du ل ». */
+function lettreApresArticle(mot){
+  var i=2; while(i<mot.length&&isHarakat(mot.charAt(i)))i++;
+  return mot.charAt(i)||'';
+}
+function resumeGramU8(){
+  var m=U8.mots||{}, cles=Object.keys(m);
+  /* Le module ES arrive APRÈS ce script. Sans lui, le talon rend {} : on le DIT
+     au lieu d'afficher une carte vide — la panne muette que ce projet connaît. */
+  if(!cles.length) return '<div class="sgn-desc">Le résumé s\u2019affiche dès que la leçon est chargée. Rouvre cet onglet dans un instant.</div>';
+  var vues=cles.map(function(k){return m[k].L;});   /* les 10 lettres travaillées, dérivées des mots */
+  function mot(k,quoi){ var w=m[k]; return gramChip(w[quoi==='def'?'def':'nu'], quoi==='def'?w.le:w.un); }
+
+  /* ── 1 · L'ARTICLE ET LE TANWĪN ─────────────────────────────────────────── */
+  var s1=gramSection(
+    'L\u2019article <span class="ar">الـ</span> \u00b7 un mot devient LE mot',
+    '<div class="sgn-chips">'+mot('qalam','nu')+'<span class="gsec-fl">\u2794</span>'+mot('qalam','def')+'</div>',
+    'L\u2019article <span class="ar">الـ</span> et le tanwīn <span class="ar">ـٌ</span> ne cohabitent JAMAIS : '+
+    'dès que l\u2019article arrive, le petit « -n » de la fin tombe et la dhammatayn devient une dhamma <span class="ar">ـُ</span>.');
+
+  /* ── 2 · LES 14 LUNAIRES ────────────────────────────────────────────────── */
+  var s2=gramSection(
+    '\ud83c\udf19 Les 14 lettres lunaires \u00b7 <span class="ar">الْقَمَرِيَّة</span>',
+    gramBande(LUNAIRES_14,vues)+
+    '<div class="sgn-chips">'+['qamar','bab','yad','bayt'].map(function(k){return mot(k,'def');}).join('')+'</div>',
+    'Devant ces 14 lettres, le <span class="ar">ل</span> porte un soukoun <span class="ar">الْـ</span> et s\u2019entend clairement.');
+
+  /* ── 3 · LES 14 SOLAIRES ────────────────────────────────────────────────── */
+  var s3=gramSection(
+    '\u2600\ufe0f Les 14 lettres solaires \u00b7 <span class="ar">الشَّمْسِيَّة</span>',
+    gramBande(SOLAIRES_14,vues)+
+    '<div class="sgn-chips">'+['dar','dalw','tayr','tin'].map(function(k){return mot(k,'def');}).join('')+'</div>',
+    /* ⚠️ « LETTRE MUETTE », et jamais « le ل s\u2019avale » : terminologie tranchée par
+       Myriam le 05/09. L\u2019expression familière décrivait un geste de gorge là où la
+       règle décrit une lettre. */
+    'Le <span class="ar">ل</span> est une <b>lettre muette</b> : il ne se prononce pas, et la lettre qui suit est '+
+    'doublée par une chedda <span class="ar">ـّ</span>.');
+
+  /* ── 4 · LE REPÈRE DANS L'ALPHABET ──────────────────────────────────────── */
+  var ex=[['\u0642',0],['\u062f',1],['\u0628',0],['\u062a',1]];   /* ق د ب ت — deux lunaires, deux solaires */
+  var s4=gramSection(
+    'Le repère dans l\u2019alphabet',
+    '<div class="gsec-cells">'+ex.map(function(e){
+      return '<div class="lg-cell avail"><span class="sm">'+(e[1]?'\u2600\ufe0f':'\ud83c\udf19')+'</span>'+e[0]+'</div>';
+    }).join('')+'</div>',
+    'Chaque lettre de la grille porte maintenant son repère : \u2600\ufe0f solaire (le <span class="ar">ل</span> est muet) '+
+    'ou \ud83c\udf19 lunaire (le <span class="ar">ل</span> s\u2019entend). Tu le retrouves dans <b>Réviser \u203a Les lettres</b>.');
+
+  /* ── 5 · DANS LE QORĀN ──────────────────────────────────────────────────── */
+  /* ⚠️ LES MOTS SONT CHOISIS PAR LEUR CLÉ LATINE, jamais par leur graphie : une
+     regex arabe tapée de mémoire ne correspond à aucune graphie du fichier (piège
+     re-payé le 04/09). La graphie vient de la table, toujours. */
+  var V=U8.versets||{};
+  function versetChips(cles){
+    return '<div class="sgn-chips">'+Object.keys(V).filter(function(w){return cles.indexOf(V[w])>=0;})
+      .sort(function(a,b){return cles.indexOf(V[a])-cles.indexOf(V[b]);})
+      .map(function(w){
+        var L=lettreApresArticle(w);
+        return gramChip(w,(estSolaire(L)?'\u2600\ufe0f ':'\ud83c\udf19 ')+L);
+      }).join('')+'</div>';
+  }
+  var s5=gramSection(
+    'Dans la Fātiḥa',
+    versetChips(['alhamdu','alamin','almustaqima'])+versetChips(['arrahmani','arrahimi','addini','assirata']),
+    'Touche un mot pour l\u2019entendre. C\u2019est la lettre écrite sous le mot \u2014 celle qui suit '+
+    '<span class="ar">الـ</span> \u2014 qui décide si le <span class="ar">ل</span> s\u2019entend ou reste muet.');
+
+  return s1+s2+s3+s4+s5;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LE RÉSUMÉ DE GRAMMAIRE — l'unité 9, بِ · عَلَى · لِ            (05/09/2026,
+   à la demande de Myriam : « l'unité étant complète, tu dois pouvoir
+   construire le résumé de cours » — DRAFT, ses retours suivront)
+
+   ⚠️ Contrairement à l'U8 (14 mots + un module dédié), l'unité 9 n'expose
+   AUCUNE table centralisée de ses phrases/sons : chaque disque les porte en
+   ligne, dans son propre `st.son`. Retaper une graphie à la main serait le
+   piège NFC déjà gravé — les CINQ exemples ci-dessous sont donc recopiés
+   OCTET POUR OCTET depuis `donnees/disque-5.js` (بِالْقَلَمِ), `disque-6.js`
+   (لِلْبِنْتِ), `disque-7.js` (عَلَى الْبَيْتِ) et `disque-9.js` (بِسْمِ اللَّهِ,
+   الْحَمْدُ لِلَّهِ) — jamais inventés.
+   ⚠️ Leurs sons ne passent PAS par `speak()`/AUDIO[] dans leur disque d'origine
+   (les exercices du registre jouent un chemin direct via `_haut-parleur.js`) :
+   les cinq clés ci-dessous les y raccrochent, exprès pour ce résumé — les
+   cinq mp3 existent déjà (vérifié sur le disque), aucune prise neuve. */
+AUDIO['بِالْقَلَمِ']=AUDIO['بِالْقَلَمِ']||'audios-app-alaq/mot-bilqalam.mp3';
+AUDIO['لِلْبِنْتِ']=AUDIO['لِلْبِنْتِ']||'audios-app-alaq/mot-lilbint.mp3';
+AUDIO['عَلَى الْبَيْتِ']=AUDIO['عَلَى الْبَيْتِ']||'audios-app-alaq/mot-alalbayt.mp3';
+AUDIO['بِسْمِ اللَّهِ']=AUDIO['بِسْمِ اللَّهِ']||'audios-app-alaq/mot-bismillah.mp3';
+AUDIO['الْحَمْدُ لِلَّهِ']=AUDIO['الْحَمْدُ لِلَّهِ']||'audios-app-alaq/mot-alhamdulillah.mp3';
+
+function resumeGramU9(){
+  /* ── 1 · بِ — LE MOYEN ──────────────────────────────────────────────────── */
+  var s1=gramSection(
+    '<span class="ar">بِ</span> — le moyen',
+    '<div class="sgn-chips">'+gramChip('بِالْقَلَمِ','avec le stylo')+'</div>',
+    '<span class="ar">بِ</span> veut dire « avec, au moyen de ». Il ne se détache JAMAIS du nom qui '+
+    'le suit — pas d’espace, comme un préfixe.');
+
+  /* ── 2 · لِ — POUR, À QUI ───────────────────────────────────────────────── */
+  var s2=gramSection(
+    '<span class="ar">لِ</span> — pour, à qui',
+    '<div class="sgn-chips">'+gramChip('لِلْبِنْتِ','pour la fille')+'</div>',
+    '<span class="ar">لِ</span> veut dire « pour, à ». Lui aussi s’attache SANS espace — et devant '+
+    '<span class="ar">الـ</span>, son alif disparaît à l’écrit (<span class="ar">لِ+الْبِنْتُ→لِلْبِنْتِ</span>).');
+
+  /* ── 3 · عَلَى — SUR ────────────────────────────────────────────────────── */
+  var s3=gramSection(
+    '<span class="ar">عَلَى</span> — sur',
+    '<div class="sgn-chips">'+gramChip('عَلَى الْبَيْتِ','sur la maison')+'</div>',
+    '<span class="ar">عَلَى</span> veut dire « sur ». Contrairement à <span class="ar">بِ</span> et '+
+    '<span class="ar">لِ</span>, il reste toujours SÉPARÉ — l’espace et le <span class="ar">الـ</span> '+
+    'du mot suivant ne bougent pas.');
+
+  /* ── 4 · LA RÈGLE COMMUNE : LA KASRA ─────────────────────────────────────
+     Source : les 9 questions de règle des disques 5-7 (D5/D6/D7 question-regle,
+     « bonne »=2 dans les trois, verbatim « se termine par une kasra »). */
+  var s4=gramSection(
+    'Ce que les trois ont en commun',
+    '<div class="sgn-chips">'+gramChip('الْقَلَمِ','ـِ (kasra)')+gramChip('الْبِنْتِ','ـِ (kasra)')+gramChip('الْبَيْتِ','ـِ (kasra)')+'</div>',
+    'Après <span class="ar">بِ</span>, <span class="ar">لِ</span> ou <span class="ar">عَلَى</span>, le nom qui '+
+    'suit se termine TOUJOURS par une kasra <span class="ar">ـِ</span> — qu’il s’attache (بِ، لِ) ou '+
+    'qu’il reste séparé (عَلَى).');
+
+  /* ── 5 · DANS LE QORĀN ──────────────────────────────────────────────────── */
+  var s5=gramSection(
+    'Dans le Qorān',
+    '<div class="sgn-chips">'+gramChip('بِسْمِ اللَّهِ','au nom d’Allah')+gramChip('الْحَمْدُ لِلَّهِ','la louange est à Allah')+'</div>',
+    'Les deux premiers mots de la Fātiḥa portent déjà <span class="ar">بِ</span> et <span class="ar">لِ</span> — '+
+    'la règle que tu viens d’apprendre est celle du Qorān lui-même.');
+
+  return s1+s2+s3+s4+s5;
+}
+
 function renderCours(sub){
   sub=sub||'video';
   const tabs=[['video','<img class="itab-ic" src="'+ico('tab-video')+'" alt="">','Vidéos'],['resume','<img class="itab-ic" src="'+ico('tab2-lire')+'" alt="">','Résumé'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Vocabulaire']];
@@ -9818,7 +10096,12 @@ function renderCours(sub){
     /* 17/08 — le Résumé est bâti sur les LETTRES : une unité qui n'en a pas (U8+) rendait
        une carte VIDE (en-tête « ٨ Unité » suivi de rien — le signalement de Myriam). On ne
        l'affiche pas : son résumé de GRAMMAIRE sera conçu avec elle, jamais inventé ici. */
-    h+=unlocked.filter(function(i){ return (UNITS[i].letters||[]).length; }).map(function(i){ const U=UNITS[i];
+    /* 05/09 — LE FILTRE S'ÉLARGIT AUX UNITÉS DE GRAMMAIRE, mais PAS à toute
+       unité sans lettres : seules celles qui ont un résumé ÉCRIT y entrent
+       (RESUME_GRAM). Élargir sur `U.court` seul rendrait des cartes vides pour
+       les unités 9 et 10 — exactement le défaut signalé par Myriam le 17/08. */
+    h+=unlocked.filter(function(i){ return (UNITS[i].letters||[]).length||RESUME_GRAM[i]; }).map(function(i){ const U=UNITS[i];
+      if(!(U.letters||[]).length) return accCard('resume',U,RESUME_GRAM[i]());
       const rows=U.letters.map(function(L){ const d=U.alpha[L]; var ex=fatihaWordFor(L);
         return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
           /* ⚠️ 14/08 — RÈGLE ABSOLUE DE MYRIAM : « pas de transcription ». Le nom translittéré
@@ -10015,6 +10298,150 @@ function dueReviewWords(){
   });
 }
 function reviewSessionWords(){ return dueReviewWords().slice(0,REVIEW_CAP); }
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA RÉVISION DE GRAMMAIRE — un hub, une session panachée      (05/09/2026)
+
+   🔴 CE QU'ON NE FAIT PAS, ET POURQUOI (spec §1.4, décision de Myriam). Pas de
+   boîtes d'ateliers par unité : à l'unité 12 l'écran en porterait cinq, et une
+   élève choisirait tous les jours la même. Le modèle est celui du VOCABULAIRE —
+   un bouton unique en haut, la liste des notions en bas — et la session panache
+   les notions au lieu de les enchaîner par blocs.
+
+   🔴 ET ON NE RÉINVENTE AUCUN EXERCICE. Les écrans viennent tous de la
+   production : ceux de l'unité 8 par `U8.disque(k)` (ses 9 quiz de règle, son tri
+   soleil/lune, son « pose l'article », son repérage dans la Fātiḥa — validés
+   écran par écran le 15/08, sonorisés), ceux de l'unité 9 par son BILAN, qui
+   porte le clavier arabe. Un bilan est par nature conçu pour être rejoué hors
+   contexte : c'est le seul vivier d'écrans vraiment autonomes du dépôt, et
+   c'est ce qui rend la chose sûre.
+
+   ⚠️ UNE SEULE EXCEPTION, ET ELLE EST DEMANDÉE PAR LA SPEC (§4.1) : l'écriture.
+   L'écran `ecrire` de l'unité 8 porte encore l'ANCIENNE grille de tuiles, alors
+   que toute l'app est passée au clavier le 04/09. La révision écrit donc avec
+   `{type:'assemble'}`, le gabarit du lecteur — celui qui appelle window.__alaqClavier,
+   avec ses deux rangées toujours complètes et ses harakat en bleu.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const GRAM_CAP=15;                 /* la taille d'une session, comme REVIEW_CAP au vocabulaire */
+let GRAMSES=null;                  /* les fautes de LA session en cours, par notion */
+
+/* Les notions, dans l'ordre où elles s'apprennent. Une notion n'apparaît que si
+   son unité est OUVERTE **et** qu'elle sait fournir des écrans : un module non
+   chargé rend une liste vide, et une notion vide ne doit pas s'afficher — elle
+   promettrait un entraînement qui rendrait un écran blanc. */
+const NOTIONS_GRAM=[
+  { u:7, titre:'L\u2019article <span class="ar">الـ</span>',
+    sous:'Défini ou indéfini \u00b7 lettres solaires et lunaires', ecrans:gramEcransU8 },
+  /* même ordre et même mot que sur l'accueil (UNITS[8].court, 05/09) — une
+     seule façon de nommer l'unité, jamais deux formulations qui divergent. */
+  { u:8, titre:'Les harf <span class="ar">بِ \u00b7 عَلَى \u00b7 لِ</span>',
+    sous:'Le harf change la fin du nom', ecrans:gramEcransU9 },
+];
+function notionsGram(){ return NOTIONS_GRAM.filter(function(N){ return unitUnlocked(N.u); }); }
+
+/* ── LE VIVIER DE L'UNITÉ 8 ────────────────────────────────────────────────
+   `U8.disque(k)` rend des `st` PRÊTS pour le lecteur ({type:'u8', d:k, u8:…}) :
+   `dessine()` relit `st.d` pour reposer le vivier de mots du disque, donc un écran
+   sorti de sa file se dessine exactement comme dans sa leçon. Rien à fabriquer. */
+function gramEcransU8(){
+  var qs=[];
+  try{
+    /* D7 : les 9 questions de règle et le tri des 10 lettres ☀️/🌙.
+       D9 (le bilan) : poser l'article, l'oreille, l'œil, les الـ de la Fātiḥa. */
+    U8.disque('D7').forEach(function(st){
+      if(st.u8.t==='quiz'||st.u8.t==='trigen')qs.push(st); });
+    U8.disque('D9').forEach(function(st){
+      if(['article','deuxsons','deuxecrits','spotmot'].indexOf(st.u8.t)>=0)qs.push(st); });
+  }catch(e){ return []; }            /* module non chargé : la notion ne s'affiche pas */
+  /* L'écriture, au CLAVIER (voir l'en-tête). Deux mots seulement : la session est
+     panachée, et l'écriture est le geste le plus long — en mettre plus la ferait
+     basculer en séance d'écriture. */
+  var m=U8.mots||{};
+  ['habl','nahl'].forEach(function(k){
+    if(m[k])qs.push({type:'assemble', w:{w:m[k].def, fr:m[k].le}, fromFr:true, graded:true});
+  });
+  return qs;
+}
+/* ── LE VIVIER DE L'UNITÉ 9 : SON BILAN ────────────────────────────────────
+   Ses 15 écrans sont AUTONOMES — chacun porte sa consigne, son image, son son,
+   ses touches de clavier et sa cible ; aucun ne suppose l'écran d'avant. C'est
+   ce qui les rend rejouables, et c'est pour ça qu'on prend le bilan plutôt que
+   de piocher dans les huit disques d'apprentissage, dont les écrans se lisent
+   en séquence. */
+function gramEcransU9(){
+  if(!(window.__alaqU9&&typeof window.__alaqU9.disque9==='function'))return [];
+  try{
+    /* 🔴 LE DERNIER ÉCRAN PORTE `bilan` — la bannière « Tu as terminé l'unité 9 ! »
+       (Myriam, 05/09 : « un des écrans […] n'a pas sa place dans les révisions »).
+       Elle célèbre la FIN d'un parcours qu'on n'a pas fait ici : mêlée à neuf
+       autres écrans panachés, elle sonne faux. L'écran d'écriture lui-même
+       (عَلَيْهِمْ) reste un bon exercice de révision — seul le CHAMP disparaît,
+       via un clone (jamais de mutation de la donnée du disque en place). */
+    return window.__alaqU9.disque9().map(function(st){
+      if(!st.bilan)return st;
+      var c=Object.assign({},st); delete c.bilan; return c;
+    });
+  }catch(e){ return []; }
+}
+
+/* ⚠️ ON CLONE, ON NE MARQUE JAMAIS LA DONNÉE EN PLACE. `U8.disque()` et
+   `disque9()` reconstruisent leur tableau à chaque appel — mais les OBJETS
+   qu'ils portent peuvent être partagés avec la leçon. Un `graded` posé chez eux
+   suivrait l'élève jusque dans son disque. */
+function gramMarquer(st,u){ return Object.assign({},st,{graded:true, revGram:u}); }
+
+/* 🔴 LE PANACHAGE EST LE CŒUR DE LA DEMANDE (spec §1.4). On prend à TOUR DE RÔLE
+   dans chaque notion au lieu de les enchaîner : réviser الـ pendant dix écrans
+   puis بِ pendant dix, ce sont deux petites leçons — les ALTERNER oblige à
+   reconnaître de quelle règle il s'agit avant de répondre, et c'est là que la
+   révision travaille vraiment. */
+function gramPanacher(paquets,cap){
+  var out=[], i=0, encore=true;
+  while(out.length<cap&&encore){
+    encore=false;
+    for(var p=0;p<paquets.length&&out.length<cap;p++){
+      if(i<paquets[p].length){ out.push(paquets[p][i]); encore=true; }
+    }
+    i++;
+  }
+  return out;
+}
+/* Le taux de maîtrise d'une notion — ce que la jauge du hub montre. Sans aucune
+   session jouée, il n'y a rien à montrer : on rend -1 et le hub le DIT, au lieu
+   d'afficher un 0 % qui se lirait « tu ne sais rien ». */
+function gramMaitrise(u){
+  var g=S.revGram&&S.revGram[u];
+  if(!g||!g.n)return -1;
+  return Math.max(0,Math.min(1,(g.n-g.ko)/g.n));
+}
+/* La file d'une session : les notions demandées, panachées, plafonnées. */
+function gramFile(unites){
+  var paquets=notionsGram()
+    .filter(function(N){ return !unites||unites.indexOf(N.u)>=0; })
+    .map(function(N){ return shuffle(N.ecrans()).map(function(st){ return gramMarquer(st,N.u); }); })
+    .filter(function(p){ return p.length; });
+  return gramPanacher(paquets,GRAM_CAP);
+}
+function startGrammarReview(){ lancerGrammaire(null); }
+function startGrammarTargeted(u){ lancerGrammaire([u]); }
+function lancerGrammaire(unites){
+  var qs=gramFile(unites);
+  if(!qs.length){ toast('La grammaire se charge — réessaie dans un instant'); return; }
+  GRAMSES={};
+  QCTX=null;               /* sinon un « ▶ Verset suivant » fantôme s'invite à la fin */
+  launchQuranReview(qs);   /* le lanceur générique de session : il sert déjà les lettres */
+}
+/* La maîtrise se mesure sur les ERREURS — le seul signal que TOUS les écrans
+   donnent de la même façon, qu'ils viennent du moteur de l'unité 8, du registre
+   des exercices ou de la cascade du lecteur (chacun tient son propre verdict).
+   Le nombre d'écrans JOUÉS, lui, se lit dans la file à la fin : il n'a pas à
+   être compté en chemin. */
+function gramFaute(){
+  if(!GRAMSES)return;
+  var st=QUEUE[qi];
+  if(!st||st.revGram===undefined)return;
+  GRAMSES[st.revGram]=(GRAMSES[st.revGram]||0)+1;
+}
+
 function startReview(){
   const pool=allReviewWords();
   if(!pool.length){ toast('Termine d\u2019abord la leçon « Lire des mots » pour débloquer la révision'); return; }
@@ -10733,6 +11160,48 @@ function startReciterSourate(deb,fin){
   launchQuranReview(qs);
 }
 
+/* ═══ LE HUB DE LA GRAMMAIRE — le modèle est celui du VOCABULAIRE ═══════════
+   Un bouton unique en haut, la liste des notions en bas, un crayon ✏️ par notion
+   pour s'entraîner dessus seule. Pas de boîtes d'ateliers par unité : à l'unité
+   12 l'écran en porterait cinq et on choisirait tous les jours la même (spec §1.4).
+   ⚠️ Tout réemploie les gabarits de la liste du vocabulaire — .wrow, .wtx, .wfr,
+   .wpen, .revbtn, .revcount — plus .ubar pour la jauge. Ils sont validés dans les
+   deux thèmes et déjà couverts par le balayage de contraste. */
+function grammaireHubHTML(){
+  var N=notionsGram();
+  if(!N.length) return '<div class="ccard" style="opacity:.7;text-align:center">'+
+    '<h3 style="font-family:var(--ui);font-size:17px;margin:0 0 8px">La grammaire</h3>'+
+    '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0">'+
+    'Elle s\u2019ouvre avec l\u2019unité 8, quand les lettres sont sues et qu\u2019on peut enfin regarder ce qu\u2019elles FONT.</p></div>';
+
+  var nb=gramFile(null).length;
+  var lignes=N.map(function(x){
+    var m=gramMaitrise(x.u), pc=Math.round(Math.max(0,m)*100);
+    /* ⚠️ SANS AUCUNE SESSION JOUÉE, ON NE MONTRE PAS 0 % : ce chiffre se lirait
+       « tu ne sais rien » alors qu\u2019il veut dire « on n\u2019a pas encore mesuré ».
+       La leçon du projet sur les chiffres qui se contredisent, appliquée au vide. */
+    var jauge=(m<0)
+      ? '<div class="wfr" style="margin-top:5px">pas encore révisée</div>'
+      : '<div class="ubar" title="'+pc+' % de réussite"><i style="width:'+pc+'%"></i></div>';
+    return '<div class="wrow">'+
+      '<span class="gnum">'+toAr(UNITS[x.u].no)+'</span>'+
+      '<div class="wtx"><div class="gtt">'+x.titre+'</div>'+
+        '<div class="wfr">'+x.sous+(m<0?'':' \u00b7 '+pc+' %')+'</div>'+jauge+'</div>'+
+      '<button class="wpen" onclick="startGrammarTargeted('+x.u+')" '+
+        'aria-label="S\u2019entraîner sur cette notion">\u270f\ufe0f</button>'+
+    '</div>';
+  }).join('');
+
+  return '<div class="ccard">'+
+    '<div style="display:flex;gap:10px;align-items:center;max-width:340px;margin:0 auto">'+
+      '<button class="cbtn revbtn" style="flex:1;margin:0" onclick="startGrammarReview()">'+
+        'Réviser'+(nb?'<span class="revcount">'+nb+'</span>':'')+'</button>'+
+    '</div>'+
+    '<p style="color:var(--muted);font-family:var(--ui);font-size:12.5px;text-align:center;margin:9px 0 2px">'+
+      'Une séance qui mêle toutes tes notions</p>'+
+    '<div class="wlist">'+lignes+'</div></div>';
+}
+
 function renderReviser(sub){
   sub=sub||curReviserTab||'quran';curReviserTab=sub;
   const tabs=[['quran','<img class="itab-ic" src="'+ico('tab2-qoran')+'" alt="">','Le Qorān'],['lettres','<img class="itab-ic" src="'+ico('tab-crayon')+'" alt="">','Les lettres'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Le vocabulaire'],['grammaire','<img class="itab-ic" src="'+ico('tab-parchemin')+'" alt="">','La grammaire']];
@@ -10811,9 +11280,7 @@ function renderReviser(sub){
       '<div class="wlist">'+vlist+'</div></div>';
   }
   else{
-    h+='<div class="ccard" style="opacity:.7;text-align:center">'+
-      '<h3 style="font-family:var(--ui);font-size:17px;margin:0 0 8px">La grammaire — bientôt</h3>'+
-      '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0">S\u2019entraîner au-delà du Qorān : former des phrases, conjuguer les verbes, maîtriser la langue du Qorān, in shā\u2019 Allah.</p></div>';
+    h+=grammaireHubHTML();
   }
   document.getElementById('view-reviser').innerHTML=h;
   if(sub==='lettres')setTimeout(maybeShowLetterTut,80);
@@ -11157,6 +11624,18 @@ function vtUndo(){
 }
 function finishReview(){
   if(REVFREE)REVSES=null;
+  /* La grammaire tient ses comptes à part (spec §3.2). Les écrans JOUÉS se lisent
+     dans la file — inutile de les compter en chemin ; les fautes viennent de
+     GRAMSES. Le cumul est honnête : il monte à mesure qu'on révise juste. */
+  if(GRAMSES){
+    var vus={};
+    QUEUE.forEach(function(st){ if(st.revGram!==undefined)vus[st.revGram]=(vus[st.revGram]||0)+1; });
+    Object.keys(vus).forEach(function(u){
+      var g=S.revGram[u]||{n:0,ko:0};
+      S.revGram[u]={n:g.n+vus[u], ko:g.ko+(GRAMSES[u]||0), maj:today()};
+    });
+    GRAMSES=null;
+  }
   _grainesSession=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
   if(REVSES){ // répétition espacée : chaque mot touché par un écran noté reçoit sa prochaine date
     const t=today();
