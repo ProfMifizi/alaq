@@ -4562,8 +4562,9 @@ function currentLesson(){ // 1re leçon non terminée d'une unité débloquée =
 }
 function showNoHearts(){
   const hasRev=allReviewWords().length>0, L=currentLesson();
-  // Le titre suffit (Myriam 09/08). Les deux paragraphes disaient ce que les boutons font déjà ;
-  // le sens des 7 cœurs (les sept versets de la Fātiḥa) DISPARAÎT de l'app — décision assumée.
+  // 05/09 : le titre seul (Myriam 09/08) cède la place à la phrase du puits Zamzam (static,
+  // voir #noHearts) — le sens des sept versets ne se dit plus ici, mais la métaphore de l'eau
+  // qui se recharge par la révision, elle, revient explicitement (Myriam, 05/09).
   let h='';
   var co=icoImg('tb-coeur','','height:18px;vertical-align:-3px'); // le MÊME cœur que la navbar — registre ICONES, jamais d'emoji (Myriam 10/08)
   if(hasRev)h+='<button class="cta" style="max-width:300px" onclick="noHeartsReview()">RÉVISER +3 '+co+'</button>';
@@ -5519,7 +5520,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='cours-recitateur-lettres-05sept';
+const BUILD='coeur-devient-goutte-qataraat-05sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6560,7 +6561,7 @@ function finishDisque(){
     const before=S.hearts, g=S.bigNext?3:1;
     S.hearts=Math.min(HEARTS_MAX,S.hearts+g); S.bigNext=0; S.heartDay=today(); RECHARGE=false;
     document.getElementById('st-hearts').textContent=S.hearts;
-    if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+g+' cœur'+(g>1?'s':'')+', ماشاء الله !'),700);
+    if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+g+' '+(g>1?'Qatarāt':'Qatra')+', ماشاء الله !'),700);
   }
   save();
   document.getElementById('player').classList.remove('on');
@@ -11674,7 +11675,7 @@ function finishReview(){
   const before=S.hearts;
   const gain=S.bigNext?3:1;               // 1re révision après blocage = +3 ; les suivantes = +1
   S.hearts=Math.min(HEARTS_MAX,S.hearts+gain);S.bigNext=0;S.heartDay=today();
-  if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+gain+' cœur'+(gain>1?'s':'')+', ماشاء الله !'),600);
+  if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+gain+' '+(gain>1?'Qatarāt':'Qatra')+', ماشاء الله !'),600);
   checkBadges({review:true});
   validerJour();                                     // une révision terminée valide AUSSI le jour (règle adoucie)
   pendingStreak=feteJourPending; feteJourPending=false;
@@ -11831,7 +11832,7 @@ if(location.hash==='#connexion'){
     var hearts=(typeof HEARTS_MAX!=='undefined')?HEARTS_MAX:7;
     var h='';
     h+='<div class="dr-card dr-rank" onclick="try{showRank()}catch(e){}"><span class="lamp lant-wrap" style="--rangc:'+col+'">'+lamp+'</span><div style="flex:1"><div class="dr-rank-ar">'+rank.ar+'</div><div class="dr-rank-fr">'+rank.fr+'</div><div class="dr-prog"><i style="width:'+Math.round((r.prog||0)*100)+'%"></i></div></div></div>';
-    h+='<div class="dr-stats"><div><span class="dr-stx">'+icoImg('tb-epi','tbic')+' '+(S.streak||0)+'</span><small>série</small></div><div><span class="dr-stx">'+icoImg('tb-coeur','tbic')+' '+(S.hearts!=null?S.hearts:hearts)+'/'+hearts+'</span><small>cœurs</small></div></div>';
+    h+='<div class="dr-stats"><div><span class="dr-stx">'+icoImg('tb-epi','tbic')+' '+(S.streak||0)+'</span><small>série</small></div><div><span class="dr-stx">'+icoImg('tb-coeur','tbic')+' '+(S.hearts!=null?S.hearts:hearts)+'/'+hearts+'</span><small>Qatarāt</small></div></div>';
     if(nom) h+='<div class="dr-card"><div class="dr-h">Nom d’Allah</div><div class="dr-nom-ar">'+nom.ar+'</div><div class="dr-nom-fr">'+nom.fr+'</div></div>';
     h+='<div class="dr-card"><div class="dr-h">Parole du jour</div><div class="dr-parole-ar">'+par.ar+'</div><div class="dr-parole-fr">'+par.fr+'</div></div>';
     h+='<div class="dr-card"><div class="dr-h">À réviser</div><div class="dr-rev-n">'+due+' mot'+(due>1?'s':'')+'</div><button class="dr-rev-btn" onclick="showTab(\'reviser\')">Réviser</button></div>';
