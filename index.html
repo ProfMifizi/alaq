@@ -910,7 +910,6 @@
   @keyframes lgglow{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 2px rgba(232,169,79,.45)}}
   .lg-cell .lk{position:absolute;top:5px;left:7px;font-size:10px;opacity:.6}
   .lg-cell .bd{position:absolute;top:3px;right:5px;font-size:11px}
-  .lg-cell .rv{position:absolute;bottom:4px;right:6px;font-size:9px}
   .lg-cell .ck{position:absolute;top:4px;left:7px;font-size:11px;font-family:var(--ui);font-weight:900;color:var(--gold2)}
   /* 05/09 — déplacé en haut-DROIT (spec §2.3), possible depuis que ✨ (qui y
    vivait) est retiré. Coin bas-gauche laissé aux futurs repères, si besoin. */
@@ -1110,7 +1109,7 @@
 /* ===== Hub Réviser + onglets icônes (validés 02/07) ===== */
 .heartline{background:var(--green-bg);border:1px solid var(--green);border-radius:12px;padding:9px 12px;
   font-size:12.5px;font-weight:800;color:var(--green);margin:0 0 14px;text-align:center;font-family:var(--ui)}
-.icontabs{display:flex;gap:6px;margin:0 0 6px}
+.icontabs{display:flex;gap:6px;margin:0 0 36px} /* 05/09 : la .tip (infobulle, top:calc(100% + 7px)) a besoin de sa place sous les onglets, sinon elle se pose sur le contenu du dessous (Myriam) */
 .itab{flex:1;position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;
   padding:10px 0;text-align:center;cursor:pointer;font-size:21px;line-height:1}
 .itab .itab-ic{height:28px;width:auto;display:block;margin:0 auto}
@@ -1808,10 +1807,13 @@
   .qsec{flex:none;font-size:12.5px;font-weight:900;color:var(--muted);font-variant-numeric:tabular-nums}
   .qsec em{font-style:normal;font-size:9.5px;font-weight:800;margin-left:1px;color:var(--muted)}
   .qrow.on .qsec{color:var(--gold2)}
-  .qhear{flex:none;display:flex;align-items:center;gap:5px;border:2px solid var(--line);border-radius:11px;
-    padding:6px 9px;font-size:11px;font-weight:900;color:var(--muted)}
-  .qrow.play .qhear{border-color:var(--gold-d);color:var(--gold2)}
-  .qrow.load .qhear{border-color:var(--info);color:var(--info)}
+  /* 05/09 (retour de Myriam) : la box bordée (émoji ▶ + texte « écouter ») cède la
+     place au haut-parleur dessiné, comme partout ailleurs dans l'app (spkSVG) — les
+     ondes s'animent pendant la lecture au lieu d'un simple changement de texte. */
+  .qhear{flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:36px}
+  .qhear .spk{width:26px;height:17px;color:var(--muted)}
+  .qrow.play .qhear .spk{color:var(--gold2)}
+  .qrow.load .qhear .spk{color:var(--info)}
   .qpin .qrow{background:transparent;border:none;padding:0;margin:0}
   /* la voix choisie est épinglée en haut : elle ne se répète pas dans la liste */
   .qlist .qrow.on{display:none}
@@ -2595,7 +2597,7 @@ html.gtexte .onb-body{ zoom:1.22 }
   <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ"></div>
   <div class="stats">
     <div class="stat"><img class="tbic" data-ico="tb-epi" src="images-app-alaq/icone-tb-epi-v1.png" alt=""> <span id="st-streak">0</span></div>
-    <div class="stat" onclick="showHearts()" style="cursor:pointer" role="button" tabindex="0" aria-label="Tes cœurs"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-coeur-v1.png" alt=""> <span id="st-hearts">7</span></div>
+    <div class="stat" onclick="showHearts()" style="cursor:pointer" role="button" tabindex="0" aria-label="Tes Qatarāt"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-goutte-v1.png" alt=""> <span id="st-hearts">7</span></div>
     <div class="stat" onclick="showRank()" style="cursor:pointer;display:flex;align-items:center"><span id="st-lamp" style="display:flex"></span></div>
   </div>
 </div>
@@ -2611,7 +2613,7 @@ html.gtexte .onb-body{ zoom:1.22 }
   <div class="p-top">
     <button class="p-close" onclick="quitDisque()">✕</button>
     <div class="pbar"><i id="pbar-i"></i></div>
-    <div class="hearts"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-coeur-v1.png" alt=""> <span id="p-hearts">5</span></div>
+    <div class="hearts"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-goutte-v1.png" alt=""> <span id="p-hearts">5</span></div>
   </div>
   <div class="p-body" id="p-body"></div>
   <div class="p-foot" id="p-foot">
@@ -2686,8 +2688,9 @@ html.gtexte .onb-body{ zoom:1.22 }
 </div>
 
 <div class="finish" id="noHearts">
-  <div class="big"><img src="images-app-alaq/icone-tb-coeur-v1.png" data-ico="tb-coeur" alt="" style="height:64px;filter:grayscale(1) opacity(.55)"></div>
-  <h2>Plus de cœurs !</h2>
+  <div class="big"><img src="images-app-alaq/icone-tb-goutte-v1.png" data-ico="tb-coeur" alt="" style="height:64px;filter:grayscale(1) opacity(.55)"></div>
+  <h2>Ton eau est épuisée !</h2>
+  <p class="succ-desc" style="margin:0 0 14px">Recharge tes Qatarāt en révisant au puits Zamzam du savoir.</p>
   <div id="nh-actions" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>
 </div>
 
@@ -2867,7 +2870,7 @@ html.gtexte .onb-body{ zoom:1.22 }
   <div class="deskbrand"><img class="dlg" src="./icon-192.png" alt="ALAQ"></div>
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi"><img class="bni" data-ico="menu-apprendre" src="images-app-alaq/icone-menu-apprendre.png" alt=""></span><span class="bn-lab">Apprendre</span></button>
   <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi"><img class="bni" data-ico="menu-cours" src="images-app-alaq/icone-menu-cours.png" alt=""></span><span class="bn-lab">Cours</span></button>
-  <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi"><img class="bni" data-ico="menu-reviser" src="images-app-alaq/icone-menu-reviser.png" alt=""></span><span class="bn-lab">Réviser</span></button>
+  <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi"><img class="bni" data-ico="menu-reviser" src="images-app-alaq/icone-menu-puits-v1.png" alt=""></span><span class="bn-lab">Réviser</span></button>
   <button class="bn" id="bn-prog" onclick="showTab('prog')"><span class="bi"><img class="bni" data-ico="menu-profil" src="images-app-alaq/icone-menu-profil.png" alt=""></span><span class="bn-lab">Profil</span></button>
   <button class="bn" id="bn-params" onclick="showTab('params')"><span class="bi"><img class="bni" data-ico="menu-parametres" src="images-app-alaq/icone-menu-parametres.png" alt=""></span><span class="bn-lab">Paramètres</span></button>
 </nav>
@@ -2882,14 +2885,14 @@ const LOGO='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAYGBgYHBgcIC
    s'incrémente dans sw.js pour que les appareils jettent leurs vieilles images. */
 var ICONES={
   'tb-epi':'icone-tb-epi-v1.png',
-  'tb-coeur':'icone-tb-coeur-v1.png',
+  'tb-coeur':'icone-tb-goutte-v1.png', /* 05/09 : le cœur devient la goutte (Qatarāt) — Myriam, symbole de vie et de l'encre de la mer du Qorān ; la clé du registre ne change pas (convention ci-dessus) */
   'loupe':'icone-loupe-v1.png',
   'tb-lanterne':'icone-tb-lanterne-v1.png',
   'dromadaire':'icone-ciel-dromadaire-v1.png',
   'porte':'icone-porte-v1.png',
   'main-glisse':'icone-main-glisse-v2.png',
   'menu-apprendre':'icone-menu-apprendre.png','menu-cours':'icone-menu-cours.png',
-  'menu-reviser':'icone-menu-reviser.png','menu-profil':'icone-menu-profil.png',
+  'menu-reviser':'icone-menu-puits-v1.png' /* 05/09 : le puits Zamzam du savoir (Myriam) */,'menu-profil':'icone-menu-profil.png',
   'menu-parametres':'icone-menu-parametres.png',
   'ecran-compte':'icone-ecran-compte.png','ecran-pousse':'icone-ecran-pousse.png',
   'ecran-ghufran':'icone-ecran-ghufran.png','ecran-corriger':'icone-ecran-corriger.png',
@@ -3240,12 +3243,16 @@ const UNITS=[
   {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
   {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
    ],
-   /* ⚠️ « LES HARFS » PRÉFIXÉ (Myriam, 05/09) : les trois lettres seules ne
+   /* ⚠️ « Les harfs » PRÉFIXÉ (Myriam, 05/09) : les trois lettres seules ne
       disaient pas QUOI elles étaient — le mot les nomme, comme « L'article
       الـ » le fait déjà pour l'unité 8. Alimente tout ce qui lit `court`
       (bandeau du ciel, Cours › Résumé, le hub de grammaire) depuis CETTE
-      seule source — rien à répéter ailleurs. */
-   court:'LES HARFS بِ · عَلَى · لِ',
+      seule source — rien à répéter ailleurs.
+      ⚠️ CASSE corrigée le 05/09 (retour de Myriam) : `court` s'écrit en
+      MINUSCULE avec une majuscule de début, jamais en capitales — le figeage
+      en capitales de la transition d'unité sur l'accueil (`.unit-sep`) est un
+      CSS (`text-transform:uppercase`), pas une convention à recopier ici. */
+   court:'Les harfs بِ · عَلَى · لِ',
    sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
  /* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS ═══
     Ouverte le 02/09 (GO de Myriam : « okay pour le cablage »). `u10:true` dit
@@ -5512,7 +5519,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='grammaire-cours-et-revisions';
+const BUILD='cours-recitateur-lettres-05sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -8107,10 +8114,10 @@ function letterTut(customSteps){
     {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
     /* 05/09 — ✨ retiré du titre ET du corps (Myriam : « trop chargé en
        émojis, surtout pas utile »). Le texte reprend son mot exact.
-       ⚠️ 🔸 RESTE EXPLIQUÉ : elle n'a demandé le retrait que de ✨, et sans
-       cette ligne le badge resterait sans explication nulle part ailleurs
-       dans l'app. */
-    {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées',tx:'Ce sont les lettres que tu as débloquées dans tes leçons.<br>🔸 à revoir'},
+       ⚠️ 🔸 RETIRÉ À SON TOUR (05/09, 2e retour) : « devenait inutile ».
+       Le badge « à revoir » et son Set `revoir` sont supprimés de
+       `letterGridHTML` — cette étape du tuto n'a donc plus rien à en dire. */
+    {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées',tx:'Ce sont les lettres que tu as débloquées dans tes leçons.'},
     {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Touche une lettre dorée : elle passe en JAUNE FONCÉ, avec un ✓. Tu peux en prendre plusieurs.',enter:function(){var a=document.querySelectorAll('.lg-cell.avail');var c=a[Math.min(3,a.length-1)]||a[0];if(c&&!c.querySelector('.ck')){c.classList.remove('avail');c.classList.add('sel','coachdemo');c.insertAdjacentHTML('afterbegin','<span class="ck">✓</span>');}},leave:function(){var c=document.querySelector('.lg-cell.coachdemo');if(c){c.classList.remove('sel','coachdemo');c.classList.add('avail');var k=c.querySelector('.ck');if(k)k.remove();}}},
     /* Le SEUL endroit où la hamza s'explique — Myriam a tranché : pas de texte permanent
        à l'écran, la ligne se montre, le guide raconte. */
@@ -8213,7 +8220,6 @@ function letterGridHTML(){
   var unlocked=knownLetterSet(), seen=S.letSeen||{};
   var order0=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
   var uCount=order0.filter(function(L){return unlocked.has(letterKey(L));}).length;
-  var revoir=new Set(); Object.keys(S.err||{}).forEach(function(kk){ if((S.err[kk]||0)>0){ for(var i=0;i<kk.length;i++){ var lk=letterKey(kk[i]); if(unlocked.has(lk))revoir.add(lk); } } });
   var latestU=-1; UNITS.forEach(function(U,i){ if(U.alpha && (S.done[dkey(i,1)]||unitValidated(i))) latestU=i; });
   var nouv=new Set(); if(latestU>=0) UNITS[latestU].letters.forEach(function(L){ if(!seen[letterKey(L)]) nouv.add(letterKey(L)); });
   var any=uCount>0;
@@ -8232,9 +8238,12 @@ function letterGridHTML(){
     /* 🔴 ✨ ("tout juste débloquée") RETIRÉ (Myriam, 05/09 : « ça fait trop
        chargé en émojis et surtout pas utile ») — le tuto 2/5 est réécrit en
        conséquence. Le halo doré (.nouv, le pulse discret) reste : elle n'a
-       objecté qu'à L'EMOJI, jamais au repère lui-même. Le coin haut-droit se
-       libère du même coup pour le repère ☀️/🌙 (voir badgeSolaire ci-dessus). */
-    var mk=(sel?'<span class="ck">✓</span>':'')+(revoir.has(k)?'<span class="rv">🔸</span>':'')+badgeSolaire(k);
+       objecté qu'à L'EMOJI, jamais au repère lui-même.
+       🔴 🔸 ("à revoir", coin bas-droit) RETIRÉ à son tour (05/09, 2e retour :
+       « devenait inutile ») — avec le Set `revoir` qui ne servait qu'à lui.
+       Le coin haut-droit garde le repère ☀️/🌙 (voir badgeSolaire ci-dessus),
+       et le coin bas-droit est maintenant libre. */
+    var mk=(sel?'<span class="ck">✓</span>':'')+badgeSolaire(k);
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
   /* ═══ LA HAMZA — hors des 28, et c'est TOUT l'enseignement ═══
@@ -9305,9 +9314,12 @@ function qariRow(v,etat){
       (qariSuivi(v.id)?'<span class="qhoro">'+qariSuivi(v.id)+'</span>':'')+
       '</span>'+
     '<span class="qsec">'+Math.round(v.sec)+'<em>s</em></span>'+
-    /* deux actions sur une ligne : le bouton DIT ce qu'il fait, l'icône seule ne suffirait pas */
-    '<span class="qhear" onclick="qariHear(\''+v.id+'\',event)">'+
-      (pl?(etat==='load'?'⋯ chargement':'⏸ stop'):'▶ écouter')+'</span></button>';
+    /* 05/09 — le texte (« ▶ écouter » / « ⏸ stop » / « ⋯ chargement ») cède la place
+       au haut-parleur animé (spkSVG, comme partout ailleurs) ; l'aria-label garde les
+       trois états pour qui n'y voit pas les ondes s'animer. */
+    '<span class="qhear" onclick="qariHear(\''+v.id+'\',event)" role="button" '+
+      'aria-label="'+(pl?(etat==='load'?'Chargement de l’extrait':'Arrêter l’extrait'):'Écouter un extrait')+'">'+
+      spkSVG(pl?'on':'')+'</span></button>';
 }
 function qariRender(etat){
   var h='';
@@ -9828,6 +9840,12 @@ function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.obje
 function ytEmbed(v){ if(!v)return''; v=String(v).trim(); let id='',m=v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); if(m)id=m[1]; else if(/^[\w-]{11}$/.test(v))id=v; return id?('https://www.youtube.com/embed/'+id):''; }
 
 let coursOpen={resume:{},vocab:{}};
+/* La carte des signes de lecture (tachkīl) passe en section dépliable (05/09,
+   retour de Myriam) : repliée par défaut, même mécanique que les accordéons
+   d'unité (accCard) juste au-dessus, sans les réutiliser tels quels — elle n'a
+   ni numéro d'unité ni lettres, un simple booléen suffit. */
+let tachkilOpen=false;
+function tachkilToggle(){ tachkilOpen=!tachkilOpen; renderCours('resume'); }
 function unlockedNos(){ return UNITS.filter((U,i)=>unitUnlocked(i)).map(U=>U.no); }
 function accAllBtn(sub){ const nos=unlockedNos(); const allOpen=nos.length>0&&nos.every(n=>coursOpen[sub][n]);
   return '<button class="acc-all" onclick="accAll(\''+sub+'\')">'+(allOpen?'▾ Tout replier':'▸ Tout déplier')+'</button>'; }
@@ -9877,14 +9895,18 @@ function coursSignsHTML(){
        ⏳ Pourquoi l'alif ne se prononce pas : à expliquer plus tard (son mot). */
     {t:'Le '+arReveal('tanwīn','تَنْوِين'), d:'Un « n » à la fin (indéfini) : dhammatayn, kasratayn, fathatayn.', c:[['مٌ','oun'],['مٍ','in'],['مًا','an']]},
   ];
-  return '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('menu-cours')+'" alt=""> '+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</h3></div>'+
-    SIGNS.map(function(g){
+  return '<div class="ccard acc'+(tachkilOpen?' open':'')+'">'+
+    '<button class="acc-h" onclick="tachkilToggle()">'+
+      '<span style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">'+
+        '<img class="prm-ic" src="'+ico('menu-cours')+'" alt=""> <span class="acc-tt">'+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</span>'+
+      '</span><span class="acc-chev">'+(tachkilOpen?'▾':'▸')+'</span></button>'+
+    '<div class="acc-b">'+SIGNS.map(function(g){
       return '<div class="sgn-card"><div class="sgn-head">'+g.t+'</div>'+
         '<div class="sgn-chips">'+g.c.map(function(x){
           return '<button class="chip" onclick="playSyl(\''+x[0]+'\',this)"><span class="chip-ar">'+x[0]+'</span><span class="chip-ro">'+x[1]+'</span></button>';
         }).join('')+'</div>'+
         '<div class="sgn-desc">'+g.d+'</div></div>';
-    }).join('')+'</div>';
+    }).join('')+'</div></div>';
 }
 // A : un mot de la Fātiḥa contenant la lettre
 function fatihaWordFor(L){
