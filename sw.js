@@ -1,12 +1,15 @@
 /* ALAQ service worker — hors ligne complet
    Stratégie :
-   - index.html / navigation : réseau d'abord (toujours la dernière version en ligne),
-     cache en secours (avion, mosquée sans réseau…)
+   - index.html / navigation : cache VERSIONNÉ d'abord (l'app s'ouvre tout de suite, même en
+     avion), réseau seulement si le cache est vide. La nouvelle version arrive par le NOUVEAU
+     sw (skipWaiting), jamais par une réécriture de l'ancien cache (06/09)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
+   - le cœur (app.css, content/unites.js, polices.css, moteur U8 — la liste CORE) : cache
+     versionné d'abord, réseau en secours (06/09 : avant, pré-caché mais jamais SERVI)
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v193-2026-09-06';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v194-2026-09-06';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -30,7 +33,13 @@ const MEDIA='alaq-medias';
    moi-même oubliée trois fois de suite ici. */
 const IMGV=17;
 const IMGCACHE='alaq-images-v'+IMGV;
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+/* LES CHEMINS DU CŒUR, pour la branche du fetch plus bas : résolus contre l'URL de ce script
+   (la racine du site en prod, /dist/ ou /alaq-vercel-static/ en local), pour que la liste
+   CORE reste écrite en relatif. Dérivé À L'EXÉCUTION : ce que le build ajoute à CORE
+   (u8/u8.js, u8/u8.css) y entre tout seul. */
+const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
+const RACINE_SW=new URL('.',self.location.href).pathname;   // '/' en prod, '/dist/' ou '/alaq-vercel-static/' en local
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
 "images-app-alaq/icone-tb-lanterne-v1.png",
 "images-app-alaq/icone-porte-v1.png",
@@ -1097,15 +1106,55 @@ self.addEventListener('fetch',e=>{
      alors que le CDN répond 200 partout. On laisse ces requêtes filer au réseau. */
   if(e.request.headers.get('range'))return;
   const url=new URL(e.request.url);
-  // navigation / index : réseau d'abord, cache en secours
-  if(e.request.mode==='navigate'||url.pathname.endsWith('/index.html')||url.pathname==='/'){
+  /* NAVIGATION / INDEX : cache VERSIONNÉ d'abord (l'app s'ouvre tout de suite), réseau si le
+     cache est vide.
+     🔴 06/09 — DEUX CHOSES ONT CHANGÉ ICI, TOUTES DEUX PROUVÉES AU BAC (outils/verifier-sw-horsligne.mjs).
+     ① Seules la racine et index.html sont « l'index ». Avant, TOUTE navigation du scope recevait
+        index.html, ET la réponse de la page demandée était rangée SOUS LA CLÉ index.html : ouvrir
+        confidentialite.html (target=_blank) affichait l'app à sa place, puis l'ouverture SUIVANTE
+        de l'app servait… la page de confidentialité. Préexistant. Les pages de CORE passent
+        désormais par la branche COEUR ; une navigation inconnue reçoit toujours index.html (repli
+        d'app), mais rien de ce qu'elle rapporte n'est jamais écrit.
+     ② L'ancien cache n'est plus réécrit en douce. Le « rafraîchissement silencieux » rangeait
+        l'index.html NEUF dans l'ANCIEN cache pendant que la nouvelle version s'installait : la
+        feuille étant désormais externe et servie du MÊME cache, ça donnait un index.html neuf
+        habillé de l'app.css d'avant. La nouvelle livraison arrive par le NOUVEAU sw, dont addAll
+        apporte index.html ET app.css du même lot — c'est le « recharger deux fois » de la doctrine.
+        On n'écrit dans le cache qu'en cas de TROU (cache vidé par le navigateur), pour se réparer. */
+  const versIndex=url.pathname===RACINE_SW||url.pathname.endsWith('/index.html');
+  if(versIndex||(e.request.mode==='navigate'&&!COEUR.has(url.pathname))){
     e.respondWith((async()=>{
       const c=await caches.open(CACHE);
       const hit=await c.match('index.html');
-      // rafraîchissement SILENCIEUX en arrière-plan : la prochaine ouverture aura la nouvelle version
-      const frais=fetch(e.request).then(r=>{if(r&&r.ok)c.put('index.html',r.clone());return r;}).catch(()=>null); // jamais un 500/portail captif en cache (audit 10/08)
-      // le cache d'abord : l'app s'ouvre TOUT DE SUITE, même si le réseau traîne
-      return hit || (await frais) || (await caches.match('.')) || Response.error();
+      if(hit)return hit;   // le cache d'abord : l'app s'ouvre TOUT DE SUITE, même si le réseau traîne
+      try{
+        const r=await fetch(e.request);
+        if(r&&r.ok&&versIndex)c.put('index.html',r.clone());   // jamais un 500/portail captif (audit 10/08), jamais une autre page
+        return r;
+      }catch(_){return (await caches.match('.'))||Response.error();}
+    })());
+    return;
+  }
+  /* LE CŒUR DE L'APP — app.css, content/unites.js, polices.css, le moteur U8 (la liste CORE) :
+     cache VERSIONNÉ d'abord, réseau en secours.
+     🔴 06/09 — AVANT CETTE BRANCHE, PRÉ-CACHER NE SERVAIT À RIEN. addAll(CORE) rangeait ces
+     fichiers dans le cache à l'installation, mais AUCUNE branche de ce gestionnaire ne les
+     en ressortait : la requête filait au réseau. En avion, index.html s'ouvrait (lui, il a
+     sa branche) mais SANS police, SANS les données des unités 1 à 7, SANS l'unité 8. Et le
+     harnais hors ligne était vert : il vérifiait le CONTENU du cache, jamais qu'on le SERT.
+     Servir depuis le cache versionné garde index.html et sa feuille de la MÊME livraison — à
+     la condition que l'ancien cache ne soit JAMAIS réécrit (voir la branche navigation) ; la
+     purge à l'activation fait le reste. Preuve : outils/verifier-sw-horsligne.mjs. */
+  if(url.origin===self.location.origin&&COEUR.has(url.pathname)){
+    e.respondWith((async()=>{
+      const c=await caches.open(CACHE);
+      const hit=await c.match(e.request,{ignoreSearch:true});
+      if(hit)return hit;
+      try{
+        const r=await fetch(e.request);
+        if(r&&r.ok)c.put(e.request,r.clone());
+        return r;
+      }catch(_){return (await caches.match(e.request,{ignoreSearch:true}))||Response.error();}
     })());
     return;
   }
