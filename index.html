@@ -1599,6 +1599,11 @@
   border-top:1px solid var(--line);padding:13px 4px;color:var(--cream);font-family:var(--ui);font-size:14.5px;
   font-weight:700;cursor:pointer;text-align:left}
 .ccard .prm-row:first-of-type{border-top:none}
+/* Une ligne de LECTURE dans une carte de Paramètres (« Version de l’app », 06/09) : le gabarit
+   de .prm-row, mais rien ne s'y presse — pas de main, pas de marge de <p>, la valeur en retrait
+   et libre de se couper (un nom de BUILD peut être long). */
+.prm-row.prm-lit{cursor:default;margin:0}
+.prm-row.prm-lit span{color:var(--muted);font-weight:600;font-size:13px;text-align:right;margin-left:12px;overflow-wrap:anywhere}
 .prm-sw{width:44px;height:26px;border-radius:13px;background:var(--panel2);border:1px solid var(--line);
   position:relative;transition:background .15s;flex:0 0 auto}
 .prm-sw i{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:left .15s,background .15s}
@@ -5354,8 +5359,14 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='unites-1-7-en-json-06sept';
+const BUILD='version-dans-parametres-06sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
+/* La DATE de la livraison, affichée dans Paramètres › « Version de l’app » (Myriam, 06/09).
+   ISO, jamais un texte : c'est dateFr() qui la met en français au rendu. Elle doit dire la
+   même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) — le portillon l'exige
+   (outils/verifier-version.mjs) : sinon l'écran mentirait au premier BUILD bumpé sans elle. */
+const BUILD_DATE='2026-09-06';
+window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
 // L'accueil s'ouvre sur la PREMIÈRE LEÇON de la DERNIÈRE UNITÉ EN COURS OU TERMINÉE
@@ -9640,6 +9651,16 @@ function setGrosTexte(on){
 const ICO_AFFICHAGE='<svg class="prm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
   'stroke-width="1.9" stroke-linecap="round" style="color:var(--gold2)">'+
   '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17" /><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor" stroke="none"/></svg>';
+/* L'étiquette de version — même format que ICO_AFFICHAGE : un SVG en ligne, classe .prm-ic,
+   couleur --gold2 ; il n'existe pas de PNG pour ce titre et un trait suffit. */
+const ICO_VERSION='<svg class="prm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+  'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold2)">'+
+  '<path d="M4 4h7.2l8.8 8.8-7.2 7.2L4 11.2z"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>';
+/* « 2026-09-06 » → « 6 septembre 2026 ». Une table plutôt que toLocaleDateString : le même
+   texte sur tout moteur (un harnais peut le comparer), et le « 1er » du français. */
+const MOIS_FR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+function dateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); if(!m)return String(iso||'');
+  var j=+m[3]; return (j===1?'1er':j)+' '+(MOIS_FR[+m[2]-1]||'?')+' '+m[1]; }
 function prmSw(on){ return '<span class="prm-sw'+(on?' on':'')+'"><i></i></span>'; }
 function renderParams(){
   var v=document.getElementById('view-params'); if(!v)return;
@@ -9675,9 +9696,15 @@ function renderParams(){
     '</div>'+
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-apropos')+'" alt=""> À propos</h3></div>'+
       '<a class="prm-row" href="confidentialite.html" target="_blank" rel="noopener" style="text-decoration:none">Politique de confidentialité<span style="color:var(--muted)">›</span></a>'+
+    '</div>'+
+    /* La version REVIENT à l'écran, dans sa propre carte (Myriam 06/09) — la ligne « Version »
+       avait quitté « À propos » le 10/08. window.BUILD reste LA source, celle que lit aussi la
+       page de diagnostic : un seul nom de version, jamais deux. Des <p>, pas des <div> : la
+       règle .prm-row:first-of-type compte par TYPE, et le premier div de la carte est l'en-tête. */
+    '<div class="ccard"><div class="ctt"><h3>'+ICO_VERSION+' Version de l’app</h3></div>'+
+      '<p class="prm-row prm-lit">Version<span>'+escHTML(window.BUILD)+'</span></p>'+
+      '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateFr(BUILD_DATE))+'</span></p>'+
     '</div>';
-    /* La ligne « Version » est retirée de l'écran (Myriam 10/08) — le BUILD reste lisible
-       dans window.BUILD pour la page de diagnostic. */
 }
 function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.objectif=m; save();
   // abaisser l'objectif APRÈS avoir déjà dépassé le nouveau seuil doit valider le jour (audit 10/08)
