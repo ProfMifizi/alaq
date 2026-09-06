@@ -2829,13 +2829,16 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='css-externe-06sept';
+const BUILD='heure-de-livraison-06sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
-/* La DATE de la livraison, affichée dans Paramètres › « Version de l’app » (Myriam, 06/09).
-   ISO, jamais un texte : c'est dateFr() qui la met en français au rendu. Elle doit dire la
-   même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) — le portillon l'exige
-   (outils/verifier-version.mjs) : sinon l'écran mentirait au premier BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-06';
+/* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
+   (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
+   heure de Paris, jamais un texte : c'est dateHeureFr() qui la met en français au rendu.
+   ⚠️ ELLE SE POSE AU MOMENT DE LIVRER, avec le BUILD — c'est l'instant que l'élève lira. Sa
+   partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
+   le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
+   BUILD bumpé sans elle. */
+const BUILD_DATE='2026-09-06T23:32';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -7131,6 +7134,9 @@ const ICO_VERSION='<svg class="prm-ic" viewBox="0 0 24 24" fill="none" stroke="c
 const MOIS_FR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 function dateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); if(!m)return String(iso||'');
   var j=+m[3]; return (j===1?'1er':j)+' '+(MOIS_FR[+m[2]-1]||'?')+' '+m[1]; }
+/* « 6 septembre 2026 à 23h26 » — la date seule si l'heure manque (06/09, carte « Version de l’app ») */
+function dateHeureFr(iso){ var m=/^(\d{4}-\d{2}-\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(String(iso||'')); if(!m)return String(iso||'');
+  return dateFr(m[1])+(m[2]?' à '+m[2]+'h'+m[3]:''); }
 function prmSw(on){ return '<span class="prm-sw'+(on?' on':'')+'"><i></i></span>'; }
 function renderParams(){
   var v=document.getElementById('view-params'); if(!v)return;
@@ -7173,7 +7179,7 @@ function renderParams(){
        règle .prm-row:first-of-type compte par TYPE, et le premier div de la carte est l'en-tête. */
     '<div class="ccard"><div class="ctt"><h3>'+ICO_VERSION+' Version de l’app</h3></div>'+
       '<p class="prm-row prm-lit">Version<span>'+escHTML(window.BUILD)+'</span></p>'+
-      '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateFr(BUILD_DATE))+'</span></p>'+
+      '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateHeureFr(BUILD_DATE))+'</span></p>'+
     '</div>';
 }
 function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.objectif=m; save();
