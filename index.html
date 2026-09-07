@@ -2380,11 +2380,20 @@ function caseHTML(cl,ic,lab,val){
 function fillFinishCases(pct,graines){
   var e=document.getElementById('fin-cases'); if(!e)return;
   var j=S.streak||0;
-  e.innerHTML='<div class="cases">'+
-    caseHTML('c-reus',ICO_COCHE_FIN,'Réussite',pct+' %')+
-    caseHTML('c-grain',ICO_GRAIN_FIN,'Graines','+'+(graines||0))+
-    caseHTML('c-assid',ICO_EPI_FIN,'Assiduité',j+' j')+
-    '</div>';
+  /* 🔴 07/09 — GAIN NUL : PAS DE BOÎTE (décision de Myriam). « Graines +0 » serait
+     frustrant pour l'élève qui vient d'écouter un verset. La case ne se rend donc que
+     s'il y a quelque chose à annoncer.
+     ⚠️ La règle est GÉNÉRALE, pas réservée à la récitation : un examen raté (finishExam
+     laisse `graines` à 0 quand l'unité n'est pas validée) n'affiche plus « +0 » non plus.
+     C'est cohérent — on ne félicite pas d'un gain qui n'a pas eu lieu.
+     ⚠️ La disposition tient à deux cases sans retouche CSS : `.cases` est un flex et
+     `.case` porte `flex:1` (app.css:1342-1343), donc les deux restantes s'élargissent
+     pour remplir les 400 px. La cascade d'apparition suit (`nth-child(1)` .55 s,
+     `nth-child(2)` .95 s) : aucune case orpheline, aucun trou. */
+  var boites=[caseHTML('c-reus',ICO_COCHE_FIN,'Réussite',pct+' %')];
+  if(graines>0)boites.push(caseHTML('c-grain',ICO_GRAIN_FIN,'Graines','+'+graines));
+  boites.push(caseHTML('c-assid',ICO_EPI_FIN,'Assiduité',j+' j'));
+  e.innerHTML='<div class="cases">'+boites.join('')+'</div>';
   // Le grand pourcentage seul ne coexiste pas avec la case qui dit la même chose.
   var fs=document.querySelector('#finish .fin-score'); if(fs)fs.style.display='none';
 }
@@ -2739,7 +2748,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='progression-locale-07sept';
+const BUILD='reparations-graines-07sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2748,7 +2757,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-07T12:05';
+const BUILD_DATE='2026-09-07T21:29';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2759,8 +2768,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.7';
-const BUILD_NUM=199;
+const VERSION='3.7.1';
+const BUILD_NUM=200;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -5411,7 +5420,12 @@ function letterTut(customSteps){
 function maybeShowLetterTut(){
   if(S.tutLetters)return;
   if(!document.querySelector('.lg-cell.avail'))return; // rien de débloqué : pas de tuto
-  S.tutLetters=1;save();
+  /* 🔴 07/09 — saveLocal, PAS save : AFFICHER un tuto n'est pas une progression.
+     save() rajeunit S._ts, et c'est le mécanisme même de l'incident du 04/09 — dans
+     une branche que le recensement d'alors n'avait pas couverte. Ce drapeau se repose
+     seul sur chaque appareil ; il rejoindra le nuage à la première vraie progression.
+     (La règle complète vit dans progression.js, au-dessus de saveLocal.) */
+  S.tutLetters=1;saveLocal();
   letterTut();
 }
 function homeTut(){ letterTut([
@@ -5419,7 +5433,11 @@ function homeTut(){ letterTut([
   {t:function(){return document.querySelector('.node .bubble')||document.querySelector('.bubble');},ti:'Les leçons ✍️',tx:'Chaque bulle est une leçon. Touche la première pour commencer, bismillah !'},
   {t:function(){return document.getElementById('botnav');},ti:'Le menu 🧭',tx:'En bas : 🏠 Apprendre · 📕 Cours · 🕋 Réviser · 📊 Progrès.'}
 ]); }
-function maybeShowHomeTut(){ if(!S.onboarded)return; if(S.tutHome)return; if(!document.querySelector('.unit-head'))return; S.tutHome=1;save(); homeTut(); }
+/* 🔴 07/09 — saveLocal : LE PLUS DANGEREUX DES QUATRE. Il se déclenche au simple RENDU
+   DE L'ACCUEIL. Avec save(), ouvrir l'app suffisait à redater la progression AVANT que
+   cloudPull ait pu arbitrer — c'est l'incident du 04/09, à la lettre, par une porte que
+   le recensement d'alors n'avait pas ouverte. */
+function maybeShowHomeTut(){ if(!S.onboarded)return; if(S.tutHome)return; if(!document.querySelector('.unit-head'))return; S.tutHome=1;saveLocal(); homeTut(); }
 function openSurahMenu(){
   var m=document.getElementById('surahMenu');
   if(!m){m=document.createElement('div');m.className='finish';m.id='surahMenu';document.body.appendChild(m);}
@@ -7688,7 +7706,17 @@ function vfEnd(){
      Le jeu ne rend donc plus qu'UN résultat, mis de côté ; l'unique écran de félicitations est
      celui de `finishReview`, une fois les mots à revoir corrigés. La barre du haut y est à 100 %
      — c'était l'autre reproche (« la barre n'est qu'à la moitié du parcours »). */
-  window._vfGraines=gagnerGraines(GRAINES.lecon+(rates.length?0:GRAINES.sansFaute));
+  /* 🔴 07/09 — LE JEU NE CRÉDITE PLUS : IL VERSAIT EN DOUBLE, ET C'ÉTAIT INVISIBLE.
+     Le vrai/faux créditait ici, puis `advance()` menait à finishDisque → finishReview,
+     qui créditait UNE SECONDE FOIS : 20 à 30 graines par session au lieu de 10 ou 15.
+     L'écran de fin n'en montrait qu'un seul (`_vfGraines || _grainesSession`) : l'écart
+     ne pouvait pas se voir à l'œil, et personne ne l'a signalé en un mois.
+     ⚠️ C'est le versement de finishReview qu'on garde, et ce n'est pas indifférent : la
+     ligne 7664 fait `wrongCount += rates.length`, donc LUI SEUL connaît les fautes du jeu
+     ET celles des corrections — son bonus « sans faute » ne ment pas, l'autre si.
+     `_vfGraines` reste à 0 : l'écran de fin retombe sur `_grainesSession`, c'est-à-dire
+     le montant RÉELLEMENT crédité. */
+  window._vfGraines=0;
   window._vfRecord=record; window._vfAncien=V.ancienBest||0;
   window._vfPct=pct;
   window._vf=null;
@@ -7784,7 +7812,7 @@ function vocabTut(){ letterTut([
 function maybeShowVocabTut(){
   if(S.tutVocab)return;
   if(!document.querySelector('#view-reviser .wpen'))return;   // liste vide : pas de tuto
-  S.tutVocab=1; save();
+  S.tutVocab=1; saveLocal();   /* 07/09 : afficher un tuto n'est pas une progression — voir maybeShowHomeTut */
   setTimeout(vocabTut,320);
 }
 /* ═══════════ Tuto de l'onglet Cours (04/09) ═══════════
@@ -7804,7 +7832,7 @@ function coursTut(){ letterTut([
 function maybeShowCoursTut(){
   if(S.tutCours)return;
   if(!document.querySelector('#view-cours .ccard'))return;   // aucune unité débloquée : pas de tuto
-  S.tutCours=1; save();
+  S.tutCours=1; saveLocal();   /* 07/09 : afficher un tuto n'est pas une progression — voir maybeShowHomeTut */
   setTimeout(coursTut,320);
 }
 
@@ -8695,7 +8723,28 @@ function finishReview(){
     });
     GRAMSES=null;
   }
-  _grainesSession=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
+  /* 🔴 07/09 — ON NE PAIE QUE SI L'ÉLÈVE A FAIT QUELQUE CHOSE.
+     Le défaut fermé : `startQuranRecite` / `startQuranReciteV` posent REVIEW=true avec une
+     file qui ne contient QUE des écrans `{type:'recite'}` — on écoute, on ne répond à rien.
+     Cette ligne créditait quand même 10 + 5, le bonus « sans faute » COMPRIS, puisque
+     wrongCount était resté à zéro faute d'avoir jamais été interrogée.
+
+     ⚠️ LE PREMIER GARDE ÉCRIT ICI ÉTAIT `total > 0`, ET IL ÉTAIT FAUX. `total` ne compte que
+     les écrans `graded` — or `formsOf()` (7976) ne produit que des `{type:'trace'}` SANS
+     `graded`. « Réviser N lettres » (bouton .lg-rev → startSelectedLetters → formsOf →
+     launchQuranReview) donnait donc total = 0 : une élève qui trace cinq lettres, du vrai
+     travail, n'aurait plus rien touché. J'avais vérifié que les quatre entrées POSENT
+     `total` ; je n'avais pas vérifié qu'elles le posent NON NUL — ce n'est pas la même
+     affirmation. Trouvé par la revue adversariale du 07/09, avant livraison.
+
+     LE BON PRÉDICAT est « la file demandait-elle autre chose qu'écouter ? ». `recite` est le
+     SEUL type d'écran passif de l'app ; tous les autres attendent un geste. Donc : une file
+     de tracé paie, une récitation ne paie pas, une file mixte paie, une file vide ne paie
+     pas non plus (rien ne s'est passé). */
+  var _aTravaille = QUEUE.some(function(st){ return st && st.type!=='recite'; });
+  _grainesSession = _aTravaille
+    ? gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute))   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
+    : 0;
   if(REVSES){ // répétition espacée : chaque mot touché par un écran noté reçoit sa prochaine date
     const t=today();
     Object.keys(REVSES).forEach(function(w){
@@ -8729,9 +8778,14 @@ function finishReview(){
   document.getElementById('fin-title').textContent='Révision terminée !';
   document.getElementById('fin-xp').textContent='+10';
   document.getElementById('fin-acc').textContent=acc+'%';
-  /* Les graines du vrai/faux ont été gagnées à la fin du jeu ; c'est ICI, une fois les mots à
-     revoir corrigés, qu'on les MONTRE — l'écran de félicitations ne peut pas précéder le
-     travail qu'il félicite (Myriam, 14/08). `_vfGraines` vaut 0 pour une révision ordinaire. */
+  /* L'écran de félicitations ne peut pas précéder le travail qu'il félicite (Myriam, 14/08).
+     ⚠️ 07/09 — `_vfGraines` VAUT DÉSORMAIS TOUJOURS 0 : le vrai/faux ne crédite plus (il
+     versait en double — voir vfEnd). C'est `_grainesSession`, posé plus haut, qui porte le
+     montant réellement crédité. L'expression ci-dessous ne peut donc plus retomber que sur
+     sa seconde branche ; elle est gardée telle quelle pour qu'un `_vfGraines` ressuscité un
+     jour ne passe pas inaperçu. ⛔ NE PAS « réparer » le double versement dans l'autre sens :
+     c'est finishReview qui doit payer, lui seul connaît wrongCount — le jeu le lui donne par
+     `wrongCount += rates.length`. */
   fillFinishCases(acc,(window._vfGraines||0)||_grainesSession);
   if(window._vfRecord)document.getElementById('fin-extra').innerHTML+=
     '<div class="vf-rec">RECORD BATTU — ancien : '+(window._vfAncien||0)+'</div>';
