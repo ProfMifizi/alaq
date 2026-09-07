@@ -2776,7 +2776,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='assets-externes-07sept';
+const BUILD='version-3-5-1-07sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2785,8 +2785,20 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-07T05:13';
+const BUILD_DATE='2026-09-07T08:12';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
+/* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
+   pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
+   (3.5.1) = une réparation, majeur (4) = une autre app — c'est Myriam qui le dit au GO.
+   BUILD_NUM est pour nous et monte à CHAQUE livraison : c'est le compteur du cache de sw.js
+   (alaq-vNNN), et le portillon exige qu'ils soient égaux (outils/verifier-version.mjs) — comme
+   il exige que package.json, le projet iOS (MARKETING_VERSION / CURRENT_PROJECT_VERSION) et
+   le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
+   les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
+   dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
+const VERSION='3.5.1';
+const BUILD_NUM=197;
+window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
 // L'accueil s'ouvre sur la PREMIÈRE LEÇON de la DERNIÈRE UNITÉ EN COURS OU TERMINÉE
@@ -7121,11 +7133,12 @@ function renderParams(){
       '<a class="prm-row" href="confidentialite.html" target="_blank" rel="noopener" style="text-decoration:none">Politique de confidentialité<span style="color:var(--muted)">›</span></a>'+
     '</div>'+
     /* La version REVIENT à l'écran, dans sa propre carte (Myriam 06/09) — la ligne « Version »
-       avait quitté « À propos » le 10/08. window.BUILD reste LA source, celle que lit aussi la
-       page de diagnostic : un seul nom de version, jamais deux. Des <p>, pas des <div> : la
+       avait quitté « À propos » le 10/08. Depuis le 07/09 (V1, Myriam) l'écran dit le NUMÉRO —
+       VERSION (BUILD_NUM), « 3.5.1 (197) » — et le libellé BUILD a quitté l'écran : il reste
+       pour les commits et la page de diagnostic (window.BUILD). Des <p>, pas des <div> : la
        règle .prm-row:first-of-type compte par TYPE, et le premier div de la carte est l'en-tête. */
     '<div class="ccard"><div class="ctt"><h3>'+ICO_VERSION+' Version de l’app</h3></div>'+
-      '<p class="prm-row prm-lit">Version<span>'+escHTML(window.BUILD)+'</span></p>'+
+      '<p class="prm-row prm-lit">Version<span>'+escHTML(VERSION+' ('+BUILD_NUM+')')+'</span></p>'+
       '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateHeureFr(BUILD_DATE))+'</span></p>'+
     '</div>';
 }
