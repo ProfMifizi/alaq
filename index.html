@@ -379,6 +379,14 @@
      Un tracé se corrige dans trace-lettres.js (table LT), jamais ici.
      ═════════════════════════════════════════════════════════════════ -->
 <script src="trace-lettres.js"></script>
+<!-- ═════════════════════════════════════════════════════════════════
+     LA PERSISTANCE ET L'ÉTAT LOCAL — progression.js (07/09/2026), MÊME RÈGLE :
+     script classique chargé ICI, avant le grand script qui lit S et appelle
+     save()/saveLocal()/dkey()/unitUnlocked() partout, dès le premier rendu.
+     ⛔ NI `defer`, NI `type="module"`.
+     Une clé de progression se corrige dans progression.js, jamais ici.
+     ═════════════════════════════════════════════════════════════════ -->
+<script src="progression.js"></script>
 <script>
 
 /* ================= OUTILS ARABES ================= */
@@ -1445,62 +1453,10 @@ function discsFor(u){
   return [REVISION_DISC, ...DISQUES.slice(1)];               // unités-consonnes : révision en tête
 }
 
-/* Ordre corrigé le 02/08 : « Les formes » passe AVANT « Dans la Fātiḥa ». La progression est
-   enregistrée par NUMÉRO de disque (dkey), donc la case du repérage devient celle des formes.
-   On la décoche pour la SEULE élève concernée — repérage fait, formes pas faites — sinon elle
-   sauterait « Les formes » sans jamais l'apprendre. Les deux autres cas (rien fait / tout fait)
-   restent justes tels quels. ⚠️ Le drapeau doit être ÉCRIT même quand rien ne change : sans lui,
-   une élève arrivée NORMALEMENT à « formes faites, repérage pas fait » serait décochée à tort. */
-function fixOrdreFormes(){
-  if(S.fixFormes0208)return;
-  S.fixFormes0208=1;
-  UNITS.forEach(function(U,u){
-    const i=discsFor(u).findIndex(function(d){return d.build===buildForms;});
-    if(i<0)return;
-    if(S.done[dkey(u,i)]&&!S.done[dkey(u,i+1)])delete S.done[dkey(u,i)];
-  });
-  /* ⚠️ 04/09 — saveLocal, PAS save : une MIGRATION n'est pas une progression. Elle
-     s'exécute au chargement, AVANT que cloudPull ait pu arbitrer — avec save() elle
-     rajeunissait S._ts et faisait gagner l'état local le plus pauvre (voir saveLocal).
-     Elle est idempotente et gardée par son drapeau : elle se rejoue seule sur chaque
-     appareil, y compris sur l'état qui revient du nuage (cloudPull la rappelle). Son
-     résultat rejoindra le nuage à la première vraie progression. */
-  saveLocal();
-}
-
-/* ================= ÉTAT ================= */
-const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
-/* ⚠️ 17/08 — `qari` PASSE À al-Ḥuṣarī. C'est ICI que se jouait le « pas de surlignage » signalé
-   par Myriam : le défaut était Ayman Suwayd, la SEULE voix de tête sans repères `HOROV`, donc
-   la fonction phare était morte pour qui n'ouvre jamais le sélecteur. al-Ḥuṣarī : 6,1 s de
-   tempo (le plus lent des voix segmentées), 7/7 versets complets, fichiers hébergés — et c'est
-   le muṣḥaf muʿallim, la récitation enregistrée POUR enseigner. Voir QARI_DEFAUT. */
-const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qari:'ar.husary'};
-function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
-function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} cloudSaveSoon();}
-/* 🔴 04/09 — L'HORODATAGE MENTAIT, ET C'EST LA CAUSE DES TROIS INCIDENTS DE SYNCHRO.
-   Signalement de Myriam : « sur mon telephone j'ai 10 jours d'epi, sur le navigateur 1 ».
-   S._ts est censé dire QUAND LA PROGRESSION A CHANGÉ — c'est sur lui que cloudPull
-   arbitre entre deux appareils du même compte. Or save() le rajeunit à CHAQUE écriture,
-   y compris pour du pur ménage qui ne porte aucune progression : rollConstance() appelle
-   save() SANS CONDITION à chaque chargement de page, majJour() recharge les cœurs, la
-   migration v7 se réécrit. Ces trois-là sont SYNCHRONES au chargement ; cloudPull, lui,
-   part sur le réseau et répond après. Quand il arbitre, l'état local — vieux de trois
-   jours dans son CONTENU — porte une date estampillée « il y a une seconde ». Il gagne,
-   puis la branche perdante le POUSSE dans le nuage : la série et les leçons de l'autre
-   appareil sont effacées.
-   ⚠️ LA RÈGLE RÉELLE N'ÉTAIT DONC PAS « le plus récent gagne » MAIS « le dernier
-   appareil ouvert gagne », quel que soit son contenu — un ping-pong, d'où le retour
-   sans fin du symptôme. Et c'est ce qui neutralisait AUSSI le garde du 28/08 dans
-   cloudSaveNow : comparer remote._ts à un S._ts qui vaut « maintenant » ne protège rien.
-   Mesuré avec le code réel en bac à sable (previews/_verif_sync_nuage.html) : avec le
-   ménage, le navigateur garde sa série de 1 jour ET l'écrit dans le nuage ; sans lui,
-   il prend bien les 10 jours. Un seul geste sépare les deux.
-   saveLocal() enregistre sur l'appareil et RIEN D'AUTRE : ni horodatage, ni envoi.
-   ⛔ NE PAS l'utiliser pour une progression (leçon, cœur perdu, mot révisé, minutes
-   d'objectif, score de constance) : elle ne rejoindrait jamais le nuage. Il est réservé
-   à ce qui se RECALCULE tout seul sur chaque appareil à partir de la date du jour. */
-function saveLocal(){try{localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){}}
+/* HEARTS_MAX, DEF, load()/save()/saveLocal(), fixOrdreFormes(), S, dkey() et unitValidated()/
+   unitUnlocked() vivent désormais dans progression.js (07/09/2026) — un script classique chargé
+   AVANT celui-ci (voir progression.js pour le contrat : S sur window via un accesseur, les
+   fonctions déjà des propriétés de window du simple fait d'être des `function`). */
 
 /* ===== Phase A : compte & progression dans le nuage (Supabase) =====
    L'app reste 100 % fonctionnelle hors ligne et sans compte : le localStorage
@@ -1761,7 +1717,7 @@ function cloudCodeInput(){
   var c=document.getElementById('cloudCode'), b=document.getElementById('cloudVerifyBtn');
   if(b)b.disabled=(((c||{}).value||'').replace(/\D/g,'').length<6);
 }
-let S=load();
+// S — l'objet de progression — est déclaré dans progression.js (07/09/2026), chargé avant ce script.
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
 if(!S.rev||typeof S.rev!=='object')S.rev={};         // répétition espacée du vocabulaire : { mot:{n,next} }
@@ -2745,7 +2701,7 @@ function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧','٨','٩','١٠',
 function sujetCours(U){
   return String(U.court||'Grammaire').replace(/[\u0600-\u06FF]+/g,function(m){return '<span class="csar">'+m+'</span>';});
 }
-function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
+// dkey(u,i) vit désormais dans progression.js (07/09/2026) — déjà une propriété de window, comme avant.
 function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
 /* Deux fichiers par disque (choix de Myriam 09/08) : variante A (remplissage brun moyen) sur les
    disques dorés, variante C (sable) sur les verrouillés, plus sombres. AUCUN filtre d'inversion :
@@ -2783,7 +2739,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='trace-lettres-07sept';
+const BUILD='progression-locale-07sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2792,7 +2748,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-07T09:52';
+const BUILD_DATE='2026-09-07T12:05';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2803,8 +2759,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.6';
-const BUILD_NUM=198;
+const VERSION='3.7';
+const BUILD_NUM=199;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6822,8 +6778,7 @@ const UNIT_VIDEOS={1:'',2:'',3:''}; // ← colle ici l'ID ou le lien YouTube de 
 let REVIEW=false, backTo=null, REVSES=null, RECHARGE=false, REVFREE=false; // REVFREE = §3.5 : session d'entraînement libre (rien n'était dû) — cœurs oui, paliers NON
 // REVSES = résultats de la session de révision en cours { mot: true|false } ; RECHARGE = reprise « recharge cœurs » d'une leçon
 
-function unitValidated(idx){ if(idx<0||idx>=UNITS.length)return false; const ds=discsFor(idx); return !!(S.done&&S.done[dkey(idx,ds.length-1)]); }
-function unitUnlocked(idx){ const U=UNITS[idx]; if(!U||!U.ready)return false; if(U.no===1)return true; return unitValidated(idx-1); }
+// unitValidated(idx) et unitUnlocked(idx) vivent désormais dans progression.js (07/09/2026).
 function lastUnlockedIndex(){ let last=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))last=i; }); return last; }
 function unitVocabCount(){ let n=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))n+=(U.words||[]).length; }); return n; }
 
