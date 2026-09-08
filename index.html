@@ -799,15 +799,15 @@ function buildAlphabet(U){
    {type:'tapset',title:'Touche 3 des 28 lettres de l\u2019alphabet',items:[],alphabet:true,cols:4},
    {type:'harakat3',title:'Révèle les harakat'},
    {type:'fuse',title:'Associe lettres et harakat',L:'م',jeux:[
-     {chip:'\u064E',fus:'مَ',son:'mim-fatha-son-court-f.mp3'},
-     {chip:'\u0650',fus:'مِ',son:'mim-kasra-son-court-f.mp3'},
-     {chip:'\u064F',fus:'مُ',son:'mim-damma-son-court-f.mp3'}]},
+     {chip:'\u064E',fus:'مَ',son:'mim-fatha-son-court.mp3'},
+     {chip:'\u0650',fus:'مِ',son:'mim-kasra-son-court.mp3'},
+     {chip:'\u064F',fus:'مُ',son:'mim-damma-son-court.mp3'}]},
    {type:'tapset',title:'Touche les 3 lettres de prolongation',items:[['ا'],['و'],['ي']],cols:3,nolabel:true},
    {type:'findset',title:'Retrouve les 3 prolongations',targets:['ا','و','ي'],highlight:false},
    {type:'fuse',title:'Associe lettres et prolongations',L:'م',jeux:[
-     {chip:'ا',fus:'مَا',son:'mim-alif-son-prolonge-f.mp3'},
-     {chip:'ي',fus:'مِي',son:'mim-ya-son-prolonge-f.mp3'},
-     {chip:'و',fus:'مُو',son:'mim-waw-son-prolonge-f.mp3'}]},
+     {chip:'ا',fus:'مَا',son:'mim-alif-son-prolonge.mp3'},
+     {chip:'ي',fus:'مِي',son:'mim-ya-son-prolonge.mp3'},
+     {chip:'و',fus:'مُو',son:'mim-waw-son-prolonge.mp3'}]},
    {type:'selson',title:'Sélectionne les sons courts',bons:['مَ','مِ','مُ'],
      tous:['مَا','مَ','مِي','مُو','مِ','مُ'],
      corr:'Les sons courts : <span class="ar">مَ · مِ · مُ</span>'},
@@ -1461,147 +1461,22 @@ function discsFor(u){
 /* ===== Phase A : compte & progression dans le nuage (Supabase) =====
    L'app reste 100 % fonctionnelle hors ligne et sans compte : le localStorage
    est la source immédiate, le nuage est une copie synchronisée en arrière-plan. */
-const SUPA_URL='https://ykggxipgirgjwhhxmhbn.supabase.co';
-const SUPA_ANON='sb_publishable_IpnRJf3j3JfyRhQ0WWSeww_V5ctBrkh'; // clé PUBLIQUE (la RLS protège les données)
-let SB=null; try{ if(window.supabase)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
-  {auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){} // la connexion SURVIT aux visites : jeton gardé et renouvelé tout seul (Myriam 13/07)
-const CLOUD={user:null};
-let _syncT=null;
-function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
-let _syncPret=false; // la première synchro de la session a-t-elle eu lieu ? (voir cloudSaveNow)
-async function cloudSaveNow(){
-  try{ if(!SB||!CLOUD.user)return;
-    /* 🔴 04/09 — LE FILET STRUCTUREL : ON NE PARLE PAS AVANT D'AVOIR ÉCOUTÉ.
-       Le correctif de l'horodatage (voir saveLocal) rend l'arbitrage honnête, mais il
-       repose sur un recensement des écritures de ménage — et un recensement se périme :
-       il suffira d'un save() ajouté un jour dans une fonction de démarrage pour rouvrir
-       la faille, EN SILENCE. Ce verrou ferme la classe entière : quoi qu'il arrive au
-       chargement, cet appareil n'écrit dans le nuage qu'APRÈS avoir lu ce qu'il contient.
-       ⚠️ Il ne perd rien : au lieu de refuser, on va CHERCHER le nuage — cloudPull pose
-       _syncPret dès qu'il a lu, puis pousse lui-même si le local est bien le plus récent.
-       Pas de récursion : le drapeau est posé AVANT son propre appel à cloudSaveNow. */
-    if(!_syncPret){ await cloudPull(); return; }
-    /* ⚠️ 28/08 — LE VRAI COUPABLE : PAS UN ENVOI QUI ÉCHOUE, UN ENVOI TROP GÉNÉREUX.
-       Les journaux Supabase le montrent noir sur blanc : chaque POST vers profiles
-       réussit (200), y compris ceux du téléphone de Myriam pendant tout un après-midi
-       de test de l'unité 9. Le trou vient d'ailleurs : un onglet (ou l'app) resté
-       ouvert des heures pousse le `S` figé au moment de SON chargement — `cloudPull`
-       n'est jamais rejoué en cours de session. Si un AUTRE appareil a progressé
-       entre-temps (le téléphone), cet onglet périmé écrase en silence, plus tard,
-       la progression la plus récente avec la sienne, plus pauvre. Reproduit sur son
-       compte : la dernière écriture (03h35) venait d'un Mac resté ouvert depuis
-       avant les 3 leçons faites sur téléphone (21h11-21h14) — elle les a effacées.
-       Parade minimale et sûre : ne JAMAIS pousser un état plus vieux que ce que le
-       nuage porte déjà. Ne corrige pas l'onglet périmé (il reste affiché tel quel),
-       mais l'empêche de faire des dégâts — cloudPull, lui, le rattrapera au
-       prochain chargement. */
-    const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
-    const remote=r&&r.data&&r.data.state;
-    if(remote&&(remote._ts||0)>(S._ts||0))return;
-    await SB.from('profiles').upsert({user_id:CLOUD.user.id, prenom:S.prenom||null, state:S, updated_at:new Date().toISOString()});
-  }catch(e){}
-}
-/* ⚠️ 28/08 — LA FENÊTRE DE 2 S POUVAIT AVALER UNE LEÇON ENTIÈRE. `cloudSaveSoon`
-   attend 2 s avant de pousser (pour ne pas marteler Supabase à chaque `save()`) —
-   mais une élève qui ferme l'app ou change d'onglet JUSTE après avoir fini une
-   leçon coupe ce délai : la progression reste correcte en local, mais ne
-   rejoint JAMAIS le nuage. Signalé par Myriam (28/08) : une leçon d'unité 9
-   terminée sur un appareil restait invisible sur un autre, même après
-   déconnexion/reconnexion — la reconnexion ne peut pas retrouver ce que le
-   nuage n'a jamais reçu. On pousse donc IMMÉDIATEMENT dès que l'app passe en
-   arrière-plan, tant qu'un envoi est encore en attente. */
-document.addEventListener('visibilitychange',function(){
-  if(document.hidden&&_syncT){ clearTimeout(_syncT); _syncT=null; cloudSaveNow(); }
-});
-async function cloudPull(){ // fusion : le plus récent gagne ; premier login = on pousse l'état local
-  try{ if(!SB||!CLOUD.user)return;
-    const r=await SB.from('profiles').select('state').eq('user_id',CLOUD.user.id).maybeSingle();
-    const remote=r&&r.data&&r.data.state;
-    _syncPret=true;  // le nuage est LU : cet appareil a le droit de parler (voir cloudSaveNow)
-    /* ═══ 🔴 17/08 — LA FUSION POUVAIT DÉTRUIRE LA PROGRESSION DU COMPTE ═══════════════
-       Myriam : « je ne retrouve pas ma progression faite sur l'app sur mon ordinateur quand
-       je me connecte avec mon mail. C'est très problématique pour le user. » C'était pire que
-       ça : la règle « le plus récent gagne » comparait deux horodatages SANS regarder à QUI
-       appartient l'état local. Or sur un appareil qu'on vient d'utiliser, `S._ts` vaut
-       « maintenant » — donc le local gagnait, ET la branche `else` renvoyait cet état pauvre
-       vers le nuage (`cloudSaveNow`). **La progression du téléphone était écrasée dans le
-       cloud**, pas seulement ignorée sur l'ordinateur.
-       Le garde-fou `_fresh` existait mais n'était posé qu'à la DÉCONNEXION ou via « j'ai déjà
-       un compte » à l'inscription — jamais quand on se connecte depuis Profil, le chemin normal.
-       LA RÈGLE JUSTE : un horodatage ne vaut que si l'état local appartient DÉJÀ à ce compte.
-       On retient donc l'identifiant du dernier compte vu (`_uid`). S'il diffère — ou s'il est
-       absent, cas d'un appareil jamais connecté — le local n'appartient à personne ou à
-       QUELQU'UN D'AUTRE : le nuage fait foi, quel que soit son âge. Comparer des dates n'a de
-       sens qu'entre deux états du MÊME compte.
-       ⚠️ Corollaire : la branche `else` n'écrit plus dans le nuage que quand on est certain
-       que le local est bien celui de ce compte. C'est elle qui faisait les dégâts. */
-    const memeCompte = S._uid && CLOUD.user && S._uid===CLOUD.user.id;
-    /* ⚠️ 17/08 soir — LA FENÊTRE DE MIGRATION, attrapée par la question de Myriam (« c'est
-       réglé ou non ? »). Avant ce build, AUCUN état ne portait `_uid` : son téléphone —
-       riche et légitime — est indistinguable d'un appareil étranger. Trancher à la DATE
-       rejouerait le bug du matin ; trancher « nuage d'office » aurait DÉTRUIT la progression
-       du téléphone à sa première reconnexion (le nuage peut porter l'état pauvre poussé par
-       l'ordinateur). Pour un état SANS _uid on garde donc le plus RICHE — le nombre de
-       leçons cochées, la seule mesure qui ne mente pas — et l'état écarté est mis de côté
-       dans `alaq2_ecarte`, jamais détruit. Dès que `_uid` est posé (ce build le pose
-       partout), la règle stricte reprend : les dates ne se comparent qu'au sein d'un même
-       compte. Risque assumé et documenté : pendant cette fenêtre, un appareil jamais
-       déconnecté par son ancien propriétaire peut imposer son état plus riche — le cas
-       normal reste couvert par le nettoyage de cloudLogout. */
-    const richesse=function(x){ return x?Object.keys(x.done||{}).length:0; };
-    let takeRemote;
-    if(!remote) takeRemote=false;
-    else if(S._fresh) takeRemote=true;
-    else if(memeCompte) takeRemote=(remote._ts||0)>(S._ts||0);
-    else if(!S._uid) takeRemote=richesse(remote)>=richesse(S);  // fenêtre de migration : propriété INCONNUE
-    else takeRemote=true;  // _uid d'un AUTRE compte : la propriété est PROUVÉE, le nuage fait foi — sans heuristique
-    /* rien ne s'écrase en silence : l'état perdant est gardé sous une clé de côté */
-    try{ var _perdant=takeRemote?S:remote; if(richesse(_perdant)>0)localStorage.setItem('alaq2_ecarte',JSON.stringify(_perdant)); }catch(e){}
-    delete S._fresh;
-    if(takeRemote){
-      S=Object.assign({},DEF,remote); delete S._fresh;
-      S._uid=CLOUD.user.id;                           // désormais cet appareil sait à qui est cet état
-      S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
-      /* ⛔ `S.rev` EST RÉSERVÉ AU VOCABULAIRE — un mot y porte son palier et sa
-         prochaine date. Une notion de grammaire n'est pas un mot : elle ne s'oublie
-         pas de la même façon et ne se « rappelle » pas à une date. Elle vit donc à
-         part, et l'ancienne progression d'une élève traverse la mise à jour sans
-         migration (spec §3.2). */
-      S.revGram=S.revGram||{};
-      fixOrdreFormes(); // l'état du nuage peut venir d'un appareil resté sur l'ancien ordre
-      try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
-      // élève reconnue (session encore vivante) : on referme l'onboarding qui aurait pu s'ouvrir
-      if(S.onboarded){try{document.getElementById('onb').classList.remove('on');}catch(e){}}
-      _homeFocusPending=true; // et on recentre sur son disque courant
-      try{refreshStats();renderHome();}catch(e){}
-    } else {
-      /* On n'arrive ici que dans DEUX cas sûrs : ① même compte, et l'état local est le plus
-         récent — c'est la vraie fusion ; ② le compte n'a AUCUNE ligne dans le nuage (première
-         inscription), et l'état local devient légitimement le sien. Dans les deux cas on peut
-         écrire dans le nuage sans rien détruire. ⚠️ Avant le 17/08, on y arrivait AUSSI quand
-         un autre compte se connectait sur un appareil déjà utilisé — et on y écrasait sa
-         progression. C'est exactement ce que `_uid` ferme. */
-      if(CLOUD.user)S._uid=CLOUD.user.id;
-      try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
-      cloudSaveNow();
-    }
-  }catch(e){}
-}
-async function cloudInit(){
-  if(!SB)return;
-  try{
-    const g=await SB.auth.getSession();
-    const sess=g&&g.data&&g.data.session;
-    if(sess&&sess.user){ CLOUD.user=sess.user; cloudPull(); }
-    else { verrouConnexion(); }   /* 17/08 : aucune session ET cet appareil connaissait un compte */
-    SB.auth.onAuthStateChange((ev,se)=>{ CLOUD.user=(se&&se.user)||null;
-      if(_progVisible())renderProg();
-      /* une session qui EXPIRE en cours de route doit verrouiller elle aussi : c'est
-         exactement ce qui est arrivé à Myriam après la mise à jour. */
-      if(!CLOUD.user)verrouConnexion(); else verrouLibere();
-    });
-  }catch(e){}
-}
+/* ═══ LE MOTEUR DE SYNCHRONISATION A DÉMÉNAGÉ (08/09/2026, POC-5 sous-lot 2) ═══
+   SUPA_URL, SUPA_ANON, SB, CLOUD, cloudSaveSoon, cloudSaveNow, cloudPull, cloudInit,
+   cloudResync et les verrous _syncT / _syncPret vivent désormais dans
+   alaq-vercel-static/progression.js — chargé AVANT ce script, comme lui en script
+   classique. Le déplacement est VERBATIM : pas une ligne réécrite, les commentaires
+   des trois incidents (17/08, 28/08, 04/09) compris.
+   ⚠️ CE FICHIER CONTINUE DE LES UTILISER, et il en a le droit : les scripts
+   classiques partagent la même portée lexicale globale. Mesuré dans un vrai
+   navigateur avant le déménagement — ce script LIT `SB`, `CLOUD`, `SUPA_URL`,
+   `SUPA_ANON`, et il ÉCRIT dans `SB` (la ligne du DOMContentLoaded qui recrée le
+   client quand le CDN Supabase est enfin arrivé). C'est la même liaison, pas une copie.
+   ⚠️ `SB` et `CLOUD` sont des `let`/`const` : ils ne sont donc PAS des propriétés de
+   `window`. `cloudPull` et les autres `function`, si. Même règle que pour `S` dans
+   progression.js.
+   Le banc outils/verifier-sync-nuage.mjs suit le bloc dans son nouveau fichier : il le
+   localise par son CONTENU, et rend les mêmes 28 verdicts des deux côtés. */
 async function cloudSendCode(btn){
   const em=((document.getElementById('cloudEmail')||{}).value||'').trim();
   if(!SB){toast('Connexion indisponible hors ligne');return;}
@@ -2697,22 +2572,10 @@ function majJour(){
 majJour();
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)majJour(); });
 window.addEventListener('focus',majJour);
-/* ⚠️ 28/08 — SANS CE RAFRAÎCHISSEMENT, UN ONGLET RESTÉ OUVERT DÉRIVE. Sa copie
-   locale de S date du chargement de la page et ne voit plus rien de ce qui a
-   progressé entre-temps sur un autre appareil — jusqu'à ce qu'elle finisse,
-   PLUS TARD, par ÉCRASER cette progression au prochain envoi (le garde-fou de
-   cloudSaveNow protège l'écrasement, mais un onglet qui ne se resynchronise
-   jamais reste aveugle indéfiniment). On rejoue donc cloudPull() à chaque
-   retour sur l'app, comme majJour() juste au-dessus — SAUF en pleine leçon,
-   où remplacer S sous les pieds de l'élève casserait l'écran en cours. */
-function cloudResync(){
-  if(document.hidden)return;
-  var pl=document.getElementById('player');
-  if(pl&&pl.classList.contains('on'))return; // leçon en cours : on ne touche à rien
-  try{cloudPull();}catch(e){}
-}
-document.addEventListener('visibilitychange',function(){ if(!document.hidden)cloudResync(); });
-window.addEventListener('focus',cloudResync);
+/* cloudResync et ses deux écouteurs ont déménagé dans progression.js le 08/09
+   (POC-5 sous-lot 2), avec le reste du moteur de synchronisation. Le
+   `setInterval(majJour,60000)` ci-dessous n'en fait PAS partie : il appartient au
+   roulement du jour, pas au nuage. */
 setInterval(majJour,60000);
 try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
@@ -2770,7 +2633,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='revgram-et-pupitre-08sept';
+const BUILD='sureties-nuage-et-voix-08sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2779,7 +2642,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-08T16:34';
+const BUILD_DATE='2026-09-08T23:26';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2790,8 +2653,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.7.2';
-const BUILD_NUM=201;
+const VERSION='3.7.3';
+const BUILD_NUM=202;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -4078,8 +3941,23 @@ function jouerF(f,fallback,fin){ // un mp3 précis (voix IA), repli synthèse, r
   }catch(e){if(fin)fin();}
 }
 /* — écrans 7 / 7 bis : sélection libre, 3 max, VALIDER juge — */
-const SYLF={'مَ':'mim-fatha-son-court-f.mp3','مِ':'mim-kasra-son-court-f.mp3','مُ':'mim-damma-son-court-f.mp3',
- 'مَا':'mim-alif-son-prolonge-f.mp3','مِي':'mim-ya-son-prolonge-f.mp3','مُو':'mim-waw-son-prolonge-f.mp3'};
+/* 🔴 08/09 — CES SIX SYLLABES JOUAIENT LA VOIX DE L'IA, ET C'EST LA RÈGLE LA PLUS
+   ABSOLUE DU PROJET QUI ÉTAIT ENFREINTE : une syllabe ne se génère JAMAIS par IA,
+   sous aucune forme de repli — seule la voix de Myriam enseigne une prononciation.
+   Signalé par elle le 08/09 : « j'y entends des sons qui ne sont pas de moi », sur
+   ma · mi · mou et les prolongés maa · mii · mouu du disque 1 de l'unité 1.
+   ⚠️ CE N'ÉTAIT PAS UNE RÉGRESSION NI UN CACHE : les données du disque et cette table
+   NOMMAIENT les fichiers « -f » (les prises ElevenLabs) en dur. Or ces noms partent
+   dans jouerF, qui — contrairement à jouerSyl — n'essaie JAMAIS le nom nu : son
+   unique repli est la synthèse. Le chemin qui aurait retrouvé la voix de Myriam
+   n'était donc jamais emprunté. Ses six prises existaient pourtant dans le dépôt ET
+   en production (vérifié : servies en 200, empreintes distinctes des -f) : elles
+   n'étaient simplement jamais demandées.
+   MESURÉ : 12 références en dur, 6 ici et 6 dans les données du disque (l'audit n'en
+   a trouvé aucune autre dans tout index.html). Le nom NU est la prise de Myriam ;
+   le suffixe -f est la variante générée. */
+const SYLF={'مَ':'mim-fatha-son-court.mp3','مِ':'mim-kasra-son-court.mp3','مُ':'mim-damma-son-court.mp3',
+ 'مَا':'mim-alif-son-prolonge.mp3','مِي':'mim-ya-son-prolonge.mp3','مُو':'mim-waw-son-prolonge.mp3'};
 function ssSel(){return[...document.querySelectorAll('#g6 .b6.sel')];}
 function ssTap(el){
   const w=window._ss;if(!w||w.fini)return;
