@@ -53,7 +53,13 @@ const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
    le muṣḥaf muʿallim, la récitation enregistrée POUR enseigner. Voir QARI_DEFAUT. */
 const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qari:'ar.husary'};
 function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
-function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} cloudSaveSoon();}
+/* 🔴 08/09 (POC-5 sous-lot 4) — LA RÈGLE save/saveLocal PREND UN TROISIÈME SENS.
+   Elle disait « save() date et envoie, saveLocal() ne date rien et n'envoie rien ».
+   Elle dit désormais AUSSI : save() DÉCLARE au serveur, saveLocal() ne déclare rien.
+   C'est ce qui rend muettes PAR CONSTRUCTION les deux migrations destructrices et
+   fixOrdreFormes — elles s'exécutent au chargement, avant tout arbitrage, et ne
+   doivent surtout pas remplir la file d'un état dont on ignore encore le propriétaire. */
+function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} _semerLeDiff(); cloudSaveSoon();}
 /* 🔴 04/09 — L'HORODATAGE MENTAIT, ET C'EST LA CAUSE DES TROIS INCIDENTS DE SYNCHRO.
    Signalement de Myriam : « sur mon telephone j'ai 10 jours d'epi, sur le navigateur 1 ».
    S._ts est censé dire QUAND LA PROGRESSION A CHANGÉ — c'est sur lui que cloudPull
@@ -336,6 +342,13 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
     delete S._fresh;
     if(takeRemote){
       S=Object.assign({},DEF,remote); delete S._fresh;
+      /* 🔴 08/09 (sous-lot 4) — LE MARQUEUR SUIT S. cloudPull est l'un des trois points
+         de réaffectation CONNUS : sans cette ligne, le diff se désarmerait à la première
+         synchro descendante et ne déclarerait plus jamais rien. Trouvé par le banc, qui
+         semait S de la même façon. Les deux autres points (doReset, importSave) vivent
+         dans index.html : doReset laisse volontairement le diff désarmé jusqu'au
+         sous-lot 5 (échouer fermé), importSave passe par SYNC.importe(). */
+      try{ if(typeof _poserTag==='function')_poserTag(S); }catch(e){}
       S._uid=CLOUD.user.id;                           // désormais cet appareil sait à qui est cet état
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
       /* ⛔ `S.rev` EST RÉSERVÉ AU VOCABULAIRE — un mot y porte son palier et sa
@@ -395,3 +408,255 @@ function cloudResync(){
 }
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)cloudResync(); });
 window.addEventListener('focus',cloudResync);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA FILE D'ENVOI ET LE DIFF — EN OBSERVATION (POC-5 sous-lot 4, 08/09/2026)
+   ───────────────────────────────────────────────────────────────────────────
+   ⛔ RIEN NE PART. La constante ENVOI vaut false : la file s'écrit, le diff
+   tourne, les intentions s'empilent — et aucun appel serveur neuf n'est émis.
+   C'est délibéré, et c'est le point le plus utile du découpage : on mesure sur
+   onze comptes réels ce que la file CONTIENDRAIT, avant qu'un seul octet ne
+   parte. `SYNC.etat()` se lit dans la console pour voir ce qui s'y accumule.
+
+   POURQUOI UN DIFF PLUTÔT QUE DES APPELS PARTOUT. Une leçon est un ÉTAT : elle
+   est encore dans S demain, donc une déclaration ratée se répare toute seule au
+   prochain save(). Une graine est un ÉVÈNEMENT : S.graines ne porte aucune
+   histoire, une graine manquée ne revient jamais. Ce qui s'auto-répare prend le
+   diff (zéro ligne à ajouter dans index.html) ; ce qui ne s'auto-répare pas
+   prend l'appel explicite, avec son identifiant tiré UNE SEULE FOIS.
+
+   LES TROIS DÉCISIONS DE MYRIAM, GRAVÉES ICI :
+   ② une entrée fautive s'ISOLE — compteur d'échecs PAR ENTRÉE, jamais par file.
+      Une seule leçon abîmée ne doit pas condamner les vingt autres.
+   ③ le solde se corrige EN SILENCE — pas de bandeau, pas de message.
+   ④ à l'inscription, la progression sans compte est LIVRÉE au serveur.
+
+   ⚠️ AUCUNE DATE ABSOLUE N'ENTRE DANS UNE DÉCISION DU MOTEUR. Les horodatages
+   écrits dans la file sont là pour se LIRE à froid, jamais pour décider : une
+   horloge d'appareil fausse ne doit rien pouvoir geler.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═════════════════════ §3 · LA FILE ═════════════════════ */
+const ENVOI = false;      /* ⛔ sous-lot 4 : on observe, on n'envoie pas. */
+const OB_CLE='alaq_outbox_v1', CONNU_CLE='alaq_connu_v1', IGNORE_CLE='alaq_ignore_v1';
+const OB_MAX=300;         // borne dure de la file
+const OB_REBUT_MAX=50;    // les refusées, gardées AVEC leur motif
+const OB_REFUS_MAX=3;     // refus explicites tolérés — PAR ENTRÉE (décision ②)
+const GRAM_PLAFOND=40;    // filet : une session de grammaire n'émet pas plus que ça
+
+function _estTableau(x){ return Object.prototype.toString.call(x)==='[object Array]'; }
+function _lire(cle,dflt){ try{ var t=localStorage.getItem(cle); return t?JSON.parse(t):dflt; }catch(e){ return dflt; } }
+
+/* ⛔ ON RELIT CE QU'ON VIENT D'ÉCRIRE. Les six écritures d'alaq2 avalent leur échec
+   dans un try/catch nu ; pour la file c'est interdit, le principe étant « la file est
+   sur le disque AVANT toute tentative ». Et une exception n'est pas la seule façon
+   d'échouer : Safari en navigation privée a déjà accepté un setItem sans rien garder.
+   ⛔ ET ON NE FAIT JAMAIS DE PLACE EN PURGEANT alaq2_ecarte : c'est l'unique copie de
+   l'état perdant de chaque arbitrage, « jamais détruit » dit le commentaire du 17/08.
+   On sacrifie d'abord le rebut (purement informatif), qui ne coûte rien à perdre. */
+let _disqueKO=0, _disqueTicket=false;
+function _ecrire(cle,txt){
+  try{ localStorage.setItem(cle,txt); if(localStorage.getItem(cle)===txt)return true; }catch(e){}
+  try{ if(_OB&&_OB.r&&_OB.r.length){ _OB.r=[]; localStorage.setItem(cle,txt);
+         if(localStorage.getItem(cle)===txt)return true; } }catch(e){}
+  _disqueKO++;
+  if(!_disqueTicket){ _disqueTicket=true;
+    try{ if(typeof tikEnvoyer==='function')
+      tikEnvoyer('suspect','outbox — ecriture '+cle+' refusee ou non conservee'); }catch(e){} }
+  return false;
+}
+
+/* La file : { f: [entrées en attente], r: [rebut, avec motif] }.
+   Une entrée : { id, k, d, uid, n } — n = nombre de refus explicites subis.
+   ⚠️ `uid` EST DANS CHAQUE ENTRÉE, et c'est ce qui empêche le pire scénario : verser
+   les graines d'une élève sur le compte d'une autre. Une entrée dont l'uid ne
+   correspond pas au compte connecté DORT — elle n'est ni envoyée, ni jetée. */
+let _OB=_lire(OB_CLE,{f:[],r:[]});
+if(!_OB||!_estTableau(_OB.f))_OB={f:[],r:[]};
+if(!_estTableau(_OB.r))_OB.r=[];
+
+function _obEcrire(){
+  /* Deux onglets peuvent écrire la même file. On relit-fusionne-écrit par identifiant :
+     une leçon perdue se retrouverait au prochain diff, mais une GRAINE non — elle est un
+     évènement, pas un état. C'est l'incident du 28/08 transposé à la file. */
+  var d=_lire(OB_CLE,{f:[],r:[]});
+  if(d&&_estTableau(d.f)&&d.f.length){
+    var vus={}; var i;
+    for(i=0;i<_OB.f.length;i++)vus[_OB.f[i].id]=1;
+    for(i=0;i<d.f.length;i++)if(d.f[i]&&!vus[d.f[i].id]&&!_acquittees[d.f[i].id])_OB.f.push(d.f[i]);
+  }
+  if(_OB.f.length>OB_MAX)_OB.f=_OB.f.slice(-OB_MAX);
+  if(_OB.r.length>OB_REBUT_MAX)_OB.r=_OB.r.slice(-OB_REBUT_MAX);
+  return _ecrire(OB_CLE,JSON.stringify(_OB));
+}
+var _acquittees={};   // ce que CETTE session a déjà fait acquitter (cimetière court)
+
+/* Le propriétaire de l'état courant. Tant que l'arbitrage n'a pas tranché, on ne sait
+   pas à qui appartient S : on se tait plutôt que de déclarer au nom de quelqu'un. */
+function _proprio(){
+  if(S&&S._uid)return S._uid;
+  if(typeof CLOUD!=='undefined'&&CLOUD&&CLOUD.user)return CLOUD.user.id;
+  return null;
+}
+
+function _enfiler(id,k,d,uid){
+  if(!id||!uid)return false;
+  if(_acquittees[id])return false;
+  for(var i=0;i<_OB.f.length;i++)if(_OB.f[i].id===id)return false;
+  for(var j=0;j<_OB.r.length;j++)if(_OB.r[j].id===id)return false;   // déjà au rebut : on n'insiste pas
+  _OB.f.push({id:id,k:k,d:d,uid:uid,n:0,le:new Date().toISOString()});
+  return true;
+}
+
+/* ═════════════════════ §4 · LE DIFF ═════════════════════
+   Ce que le serveur sait déjà, par compte : { l:{}, t:{}, w:{}, g:{}, gk:{} }.
+   Tant que ENVOI vaut false, rien n'y entre jamais — donc le diff redéclare à chaque
+   save() ce qui n'a pas encore été acquitté. C'est voulu : on mesure le VOLUME que la
+   file porterait, pas la convergence. */
+let _CONNU=_lire(CONNU_CLE,{});
+let _IGN=_lire(IGNORE_CLE,{});
+function _connuPour(uid){
+  var c=_CONNU[uid];
+  if(!c||typeof c!=='object')c=_CONNU[uid]={l:{},t:{},w:{},g:{},gk:{}};
+  if(!c.l)c.l={}; if(!c.t)c.t={}; if(!c.w)c.w={}; if(!c.g)c.g={}; if(!c.gk)c.gk={};
+  return c;
+}
+
+/* ⚠️ LE MARQUEUR SUR S. `S` est réaffecté à TROIS endroits connus (cloudPull, doReset,
+   importSave). Une QUATRIÈME réaffectation ajoutée un jour par quelqu'un qui ne connaît
+   pas ce fichier ferait redéclarer l'intégralité d'un état étranger. On pose donc une
+   propriété NON ÉNUMÉRABLE sur S : invisible de JSON.stringify (alaq2 ne bouge pas d'un
+   bit), mais absente d'un S qu'on n'a pas vu naître. Si elle manque, on DÉSARME le diff
+   et on le dit — plutôt que de déclarer n'importe quoi. */
+const _tag=('t'+Math.random()).slice(0,12);
+let _diffArme=true;
+function _poserTag(o){
+  try{ Object.defineProperty(o,'_projTag',{value:_tag,enumerable:false,configurable:true,writable:true}); }catch(e){}
+}
+_poserTag(S);
+
+const GRAM_SLUG={};   // rempli par index.html quand la grammaire aura ses slugs stables
+
+function _semerLeDiff(){
+  if(!_diffArme)return false;
+  var uid=_proprio(); if(!uid)return false;
+  if(!S||S._projTag!==_tag){
+    _diffArme=false; _poserTag(S);
+    try{ if(typeof tikEnvoyer==='function')
+      tikEnvoyer('suspect','sync — S remplace hors des trois points connus : diff desarme'); }catch(e){}
+    return false;
+  }
+  var c=_connuPour(uid), bouge=false;
+
+  /* ① LES LEÇONS. dkey() écrit 'U<no>-D<i>' où <no> est UNITS[u].no — le NUMÉRO
+     d'unité, jamais l'index. La clé porte donc déjà ce qu'attend le serveur. Une clé
+     hors format n'est pas devinée : elle est ignorée, elle apparaîtra au rapport. */
+  try{
+    Object.keys(S.done||{}).forEach(function(k){
+      if(!S.done[k]||c.l[k]||_IGN['l:'+k])return;
+      var m=/^U(\d{1,2})-D(\d{1,2})$/.exec(k); if(!m)return;
+      if(_enfiler('l.'+m[1]+'.'+m[2],'lecon',{unit_no:+m[1],disc_no:+m[2]},uid))bouge=true;
+    });
+  }catch(e){}
+
+  /* ② LES TEST-OUT. S.tests est indexé par NUMÉRO d'unité. */
+  try{
+    Object.keys(S.tests||{}).forEach(function(n){
+      if(!S.tests[n]||c.t[n]||_IGN['t:'+n])return;
+      if(!/^\d{1,2}$/.test(n))return;
+      if(_enfiler('t.'+n,'test',{unit_no:+n},uid))bouge=true;
+    });
+  }catch(e){}
+
+  /* ③ LES PALIERS DU VOCABULAIRE. On n'émet QUE si le palier a bougé : sans ça, chaque
+     save() redéclarerait les 261 mots d'un compte chargé. L'identifiant porte le palier,
+     donc deux montées successives font deux intentions distinctes. */
+  try{
+    Object.keys(S.rev||{}).forEach(function(w){
+      var r=S.rev[w]; if(!r||!(r.n>0))return;
+      if(c.w[w]===r.n||_IGN['w:'+w])return;
+      if(_enfiler('w.'+w+'.'+r.n,'rev',
+        {type:'word',item_id:w,step:r.n,next_due:r.next,success:true,maj:new Date().toISOString()},uid))bouge=true;
+    });
+  }catch(e){}
+
+  /* ④ LA GRAMMAIRE. S.revGram[u]={n,ko} n'est pas un palier mais un CUMUL d'écrans vus
+     et ratés. Tant que les slugs stables ne sont pas posés, on ne devine pas : on se
+     tait. Le plafond évite qu'un compteur aberrant n'émette mille intentions. */
+  try{
+    Object.keys(S.revGram||{}).forEach(function(u){
+      var g=S.revGram[u], slug=GRAM_SLUG[String(u)];
+      if(!g||!slug||_IGN['g:'+slug])return;
+      var dn=(g.n||0)-(c.g[slug]||0); if(dn<=0)return;
+      if(dn>GRAM_PLAFOND)dn=GRAM_PLAFOND;
+      var dko=Math.max(0,Math.min(dn,(g.ko||0)-(c.gk[slug]||0)));
+      for(var i=1;i<=dn;i++){
+        if(_enfiler('g.'+slug+'.'+((c.g[slug]||0)+i),'rev',
+          {type:'grammar',item_id:slug,step:1,success:(i>dko),maj:new Date().toISOString()},uid))bouge=true;
+      }
+    });
+  }catch(e){}
+
+  if(bouge)_obEcrire();
+  return bouge;
+}
+
+/* ═════════════════════ §5 · LES GRAINES ═════════════════════
+   Elles se DÉCLARENT, à l'instant du versement : c'est le seul moment où lesson_id et
+   sans_faute existent comme variables vivantes. L'identifiant est tiré UNE FOIS et
+   conservé : c'est lui qui porte l'idempotence côté serveur.
+   ⚠️ Sans compte, il n'y a pas de propriétaire — donc pas d'entrée. C'est la règle que
+   Myriam a validée : la progression rejoint le compte à l'inscription (alaq_livrer_blob),
+   les graines gagnées avant lui, non. Une règle qui tient dans une phrase. */
+let _opSeq=0;
+function _declarerGraines(lesson_id,sans_faute,is_daily_goal){
+  var uid=_proprio(); if(!uid)return null;
+  var l=String(lesson_id||'').toUpperCase();
+  if(!/^(U\d{1,2}-D\d{1,2}|EXAM-U\d{1,2}|REV-[A-Z0-9-]{1,32}|DAILY)$/.test(l))return null;
+  var id='p.'+l+'.'+Date.now().toString(36)+'.'+(++_opSeq);
+  if(_enfiler(id,'graines',{lesson_id:l,sans_faute:!!sans_faute,is_daily_goal:!!is_daily_goal},uid)){
+    _obEcrire(); return id;
+  }
+  return null;
+}
+
+/* ═════════════════════ §6 · LE DÉPILAGE — DÉSARMÉ ═════════════════════
+   Le code du dépilage n'entre PAS dans ce sous-lot : ENVOI vaut false, et cette
+   fonction est le seul point par lequel un octet pourrait partir. Elle existe pour que
+   le contrat soit visible, et pour que le sous-lot 5 n'ait qu'un mot à changer. */
+function _depiler(){
+  if(!ENVOI)return Promise.resolve({envoye:0,motif:'observation'});
+  return Promise.resolve({envoye:0,motif:'non implemente'});   // sous-lot 5
+}
+
+/* ═════════════════════ §7 · SYNC — ce qu'index.html appelle ═════════════════════ */
+var SYNC={
+  /* Déclaré au versement des graines (les quatre sites de gagnerGraines). */
+  graines:function(lesson_id,sans_faute,is_daily_goal){
+    try{ return _declarerGraines(lesson_id,sans_faute,is_daily_goal); }catch(e){ return null; }
+  },
+  /* Le type de session courante, pour construire un lesson_id 'REV-…' honnête. */
+  poseKind:function(k){ try{ SYNC._kind=(typeof k==='string')?k:null; }catch(e){} },
+  /* Un code de sauvegarde importé est un texte que l'élève peut éditer : tout son
+     contenu est marqué « à ne jamais déclarer », sinon on certifierait du texte saisi. */
+  importe:function(){
+    try{
+      _diffArme=false;
+      var c=_connuPour(_proprio()||'?');
+      Object.keys(S.done||{}).forEach(function(k){ _IGN['l:'+k]=1; });
+      Object.keys(S.tests||{}).forEach(function(n){ _IGN['t:'+n]=1; });
+      Object.keys(S.rev||{}).forEach(function(w){ _IGN['w:'+w]=1; });
+      _ecrire(IGNORE_CLE,JSON.stringify(_IGN));
+      _poserTag(S); _diffArme=true;
+    }catch(e){}
+  },
+  /* Ce que la file contient — à lire dans la console pendant l'observation. */
+  etat:function(){
+    var parK={};
+    for(var i=0;i<_OB.f.length;i++)parK[_OB.f[i].k]=(parK[_OB.f[i].k]||0)+1;
+    return {envoi:ENVOI, enAttente:_OB.f.length, parType:parK, rebut:_OB.r.length,
+            diffArme:_diffArme, proprio:_proprio(), disqueKO:_disqueKO,
+            premieres:_OB.f.slice(0,5).map(function(e){return e.k+' '+e.id;})};
+  },
+};
+try{ window.SYNC=SYNC; }catch(e){}
