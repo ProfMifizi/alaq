@@ -2633,7 +2633,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='file-en-observation-09sept';
+const BUILD='geste-lecture-file-09sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2642,7 +2642,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-09T08:35';
+const BUILD_DATE='2026-09-09T10:10';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2653,8 +2653,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.7.4';
-const BUILD_NUM=203;
+const VERSION='3.7.5';
+const BUILD_NUM=204;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -6790,9 +6790,72 @@ function renderParams(){
        pour les commits et la page de diagnostic (window.BUILD). Des <p>, pas des <div> : la
        règle .prm-row:first-of-type compte par TYPE, et le premier div de la carte est l'en-tête. */
     '<div class="ccard"><div class="ctt"><h3>'+ICO_VERSION+' Version de l’app</h3></div>'+
-      '<p class="prm-row prm-lit">Version<span>'+escHTML(VERSION+' ('+BUILD_NUM+')')+'</span></p>'+
+      '<p class="prm-row prm-lit">Version<span id="prm-ver">'+escHTML(VERSION+' ('+BUILD_NUM+')')+'</span></p>'+
       '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateHeureFr(BUILD_DATE))+'</span></p>'+
     '</div>';
+    _armerLectureFile();
+  }
+
+/* ═══ LIRE LA FILE D'ENVOI, SANS QU'UNE ÉLÈVE LE SACHE (09/09, POC-5) ═══════════
+   Myriam : « garde ça totalement invisible pour les élèves normaux ». La carte
+   « Version de l'app » ne change donc PAS d'un pixel : ni point, ni flèche, ni
+   couleur. Sept tapotements sur le NUMÉRO ouvrent une feuille qui dit ce que la
+   file contiendrait. C'est le geste du mode développeur d'Android, et ce choix
+   n'est pas arbitraire : sept touchers volontaires en moins de deux secondes ne se
+   produisent JAMAIS par accident, là où un appui long s'obtient avec un doigt qui
+   traîne sur un écran posé — c'est ce qui a écarté la variante B en preview.
+   Variante retenue par Myriam le 09/09 (previews/_preview-etat-file-v1.html).
+   ⚠️ PROVISOIRE, ET PENSÉ POUR PARTIR. Tout tient dans ce bloc et dans .filesheet
+   d'app.css : le jour où elle n'en veut plus, on retire l'appel ci-dessus et ces
+   deux blocs — aucune trace ailleurs.
+   ⚠️ Aucun onclick en ligne : le harnais du 15/08 exige qu'après rendu il n'en
+   reste plus un seul (« un harnais doit CLIQUER »). */
+var _verTaps=0, _verT=null;
+function _armerLectureFile(){
+  var el=document.getElementById('prm-ver'); if(!el)return;
+  el.addEventListener('click',function(){
+    _verTaps++; clearTimeout(_verT);
+    _verT=setTimeout(function(){_verTaps=0;},2000);   // deux secondes d'arret et tout retombe
+    if(_verTaps>=7){ _verTaps=0; _ouvrirLectureFile(); }
+  });
+}
+function _ligneFile(l,v,cl){
+  return '<div class="fs-l"><span>'+escHTML(l)+'</span><span class="v '+(cl||'')+'">'+escHTML(String(v))+'</span></div>';
+}
+function _ouvrirLectureFile(){
+  var e=null;
+  try{ if(typeof SYNC!=='undefined'&&SYNC&&SYNC.etat)e=SYNC.etat(); }catch(_){ e=null; }
+  var f=document.getElementById('filesheet');
+  if(!f){
+    var voile=document.createElement('div'); voile.id='filevoile'; voile.className='filevoile';
+    f=document.createElement('div'); f.id='filesheet'; f.className='filesheet';
+    document.body.appendChild(voile); document.body.appendChild(f);
+    voile.addEventListener('click',_fermerLectureFile);
+  }
+  var corps;
+  if(!e){ corps='<div class="fs-l"><span>Le moteur de file n\u2019est pas charge</span></div>'; }
+  else{
+    var t=e.parType||{}, pp=[];
+    if(t.lecon)pp.push(t.lecon+' lecons');
+    if(t.test)pp.push(t.test+' tests');
+    if(t.rev)pp.push(t.rev+' revisions');
+    if(t.graines)pp.push(t.graines+' graines');
+    corps=_ligneFile('En attente', e.enAttente, e.enAttente?'att':'nul')+
+          _ligneFile('Detail', pp.join(' \u00b7 ')||'\u2014')+
+          _ligneFile('Refusees', e.rebut, e.rebut?'att':'nul')+
+          _ligneFile('Diff actif', e.diffArme?'oui':'NON', e.diffArme?'ok':'att')+
+          _ligneFile('Envoi', e.envoi?'ACTIF':'desarme', e.envoi?'att':'ok')+
+          _ligneFile('Compte', e.proprio?String(e.proprio).slice(0,8)+'\u2026':'aucun')+
+          _ligneFile('Disque', e.disqueKO?e.disqueKO+' refus':'ok', e.disqueKO?'att':'ok');
+  }
+  f.innerHTML='<h3>La file d\u2019envoi</h3><p class="fs-q">Vol a blanc \u2014 rien n\u2019est envoye</p>'+
+    corps+'<button class="fs-x" id="fs-x">Fermer</button>';
+  document.getElementById('fs-x').addEventListener('click',_fermerLectureFile);
+  f.classList.add('on'); document.getElementById('filevoile').classList.add('on');
+}
+function _fermerLectureFile(){
+  var f=document.getElementById('filesheet'), v=document.getElementById('filevoile');
+  if(f)f.classList.remove('on'); if(v)v.classList.remove('on');
 }
 function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.objectif=m; save();
   // abaisser l'objectif APRÈS avoir déjà dépassé le nouveau seuil doit valider le jour (audit 10/08)
