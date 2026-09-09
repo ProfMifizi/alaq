@@ -535,7 +535,22 @@ function _poserTag(o){
 }
 _poserTag(S);
 
-const GRAM_SLUG={};   // rempli par index.html quand la grammaire aura ses slugs stables
+/* LES ÉTIQUETTES DES NOTIONS DE GRAMMAIRE (choisies par Myriam le 09/09).
+   ⚠️ LA CLÉ EST L'INDEX D'UNITÉ, pas son numéro : S.revGram est rangé sous l'index
+   que porte NOTIONS_GRAM (u:7 = l'unité 8, u:8 = l'unité 9). Même piège que dkey(),
+   dans l'autre sens.
+   ⚠️ UNE ÉTIQUETTE NOMME LA NOTION, JAMAIS SON CONTENU DU MOMENT. Myriam : « on va
+   rajouter des lettres de l'alphabet pas encore vues dans les prochaines sourates »,
+   et de nouveaux harf viendront. J'avais d'abord proposé « harf-bi-li-ala » : cette
+   étiquette aurait MENTI dès le quatrième harf. Elle nomme donc la notion, qui peut
+   grossir sans changer d'identité — et la maîtrise accumulée lui reste attachée.
+   ⚠️ L'unité 8 porte UNE seule notion pour deux idées liées (l'article défini/indéfini
+   ET les lettres solaires/lunaires) : c'est ainsi que NOTIONS_GRAM la définit, et
+   S.revGram étant rangé par unité, deux notions dans la même unité se marcheraient
+   dessus. Le nom choisi par Myriam le dit honnêtement. Les séparer un jour exigera de
+   re-clé S.revGram et de migrer l'existant — décision rouverte le jour où l'on
+   OBSERVERA des élèves réussir l'une et rater l'autre. */
+const GRAM_SLUG={ '7':'article-solaire-lunaire', '8':'harf' };
 
 function _semerLeDiff(){
   if(!_diffArme)return false;
@@ -586,7 +601,14 @@ function _semerLeDiff(){
   try{
     Object.keys(S.revGram||{}).forEach(function(u){
       var g=S.revGram[u], slug=GRAM_SLUG[String(u)];
-      if(!g||!slug||_IGN['g:'+slug])return;
+      if(!g)return;
+      /* ⛔ UNE NOTION SANS ÉTIQUETTE NE DISPARAÎT PAS EN SILENCE. Le jour où une unité
+         apportera une notion neuve, GRAM_SLUG sera périmé : on se tait (on n'invente
+         pas un identifiant qui vivra pour toujours dans la base) MAIS on le DIT. */
+      if(!slug){ try{ if(typeof tikEnvoyer==='function')
+        tikEnvoyer('suspect','sync — notion de grammaire sans etiquette (unite index '+u+') : GRAM_SLUG a completer'); }catch(_){}
+        return; }
+      if(_IGN['g:'+slug])return;
       var dn=(g.n||0)-(c.g[slug]||0); if(dn<=0)return;
       if(dn>GRAM_PLAFOND)dn=GRAM_PLAFOND;
       var dko=Math.max(0,Math.min(dn,(g.ko||0)-(c.gk[slug]||0)));

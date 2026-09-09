@@ -2633,7 +2633,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='geste-lecture-file-09sept';
+const BUILD='badge-grammaire-09sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2642,7 +2642,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-09T10:10';
+const BUILD_DATE='2026-09-09T15:43';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2653,8 +2653,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.7.5';
-const BUILD_NUM=204;
+const VERSION='3.7.6';
+const BUILD_NUM=205;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -8224,7 +8224,26 @@ function grammaireHubHTML(){
     '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0">'+
     'Elle s\u2019ouvre avec l\u2019unité 8, quand les lettres sont sues et qu\u2019on peut enfin regarder ce qu\u2019elles FONT.</p></div>';
 
-  var nb=gramFile(null).length;
+  /* 🔴 09/09 — LE BADGE MENTAIT, ET MYRIAM L'A VU EN L'UTILISANT. Il affichait
+     `gramFile(null).length`, c'est-à-dire la TAILLE DE LA PROCHAINE SÉANCE (plafonnée à
+     GRAM_CAP = 15) : un nombre constant, qui ne bougeait jamais quoi qu'on révise. Elle :
+     « le compteur de révision en grammaire (15) ne changeait pas même après avoir
+     révisé » — avec ses deux notions affichées à 100 % juste en dessous.
+     ⚠️ LE VRAI DÉFAUT ÉTAIT DE RESSEMBLANCE. Le badge du vocabulaire (.revcount, même
+     classe, même place, même forme) compte les mots DUS et descend — et le tutoriel de
+     l'app l'enseigne mot pour mot : « Il descend à mesure que tu révises. » Deux badges
+     identiques, deux sens contraires : l'écran contredisait ce que l'app venait
+     d'apprendre à l'élève. Aucun de nos contrôles ne pouvait le voir — ils mesurent des
+     valeurs, pas des promesses tenues.
+     Il compte désormais les NOTIONS PAS ENCORE RÉVISÉES AUJOURD'HUI (g.maj porte la date
+     de la dernière séance, posée par finishReview). Il descend, et quand tout est fait il
+     disparaît : le bouton dit « S'entraîner », exactement comme celui du vocabulaire.
+     ⚠️ La SÉANCE ne change pas : elle reste gramFile(null), panachée et plafonnée à 15.
+     On corrige ce que l'écran ANNONCE, pas ce qu'il fait. */
+  var nb=notionsGram().filter(function(x){
+    var g=S.revGram&&S.revGram[x.u];
+    return !g||g.maj!==today();
+  }).length;
   var lignes=N.map(function(x){
     var m=gramMaitrise(x.u), pc=Math.round(Math.max(0,m)*100);
     /* ⚠️ SANS AUCUNE SESSION JOUÉE, ON NE MONTRE PAS 0 % : ce chiffre se lirait
@@ -8236,7 +8255,15 @@ function grammaireHubHTML(){
     return '<div class="wrow">'+
       '<span class="gnum">'+toAr(UNITS[x.u].no)+'</span>'+
       '<div class="wtx"><div class="gtt">'+x.titre+'</div>'+
-        '<div class="wfr">'+x.sous+(m<0?'':' \u00b7 '+pc+' %')+'</div>'+jauge+'</div>'+
+        /* 🔴 09/09 — « 100 % » TOUT NU SE LIT « J'AI TOUT », et c'est faux : le calcul
+           est (écrans vus − fautes) / écrans vus, un TAUX DE RÉUSSITE sur ce qu'on a
+           rencontré, jamais une couverture de la notion. L'infobulle de la jauge le
+           disait déjà (« X % de réussite ») — mais une infobulle ne se lit pas au doigt
+           sur un téléphone. Myriam, en découvrant que de nouveaux harf viendront : « je
+           n'aurais pas mis la notion acquise à 100 % ». Elle avait raison de douter du
+           mot, pas du chiffre. Deux mots contre une lecture fausse : le seul texte que
+           la règle d'épuration accepte est celui qui empêche un contresens. */
+        '<div class="wfr">'+x.sous+(m<0?'':' \u00b7 '+pc+' % de réussite')+'</div>'+jauge+'</div>'+
       '<button class="wpen" onclick="startGrammarTargeted('+x.u+')" '+
         'aria-label="S\u2019entraîner sur cette notion">\u270f\ufe0f</button>'+
     '</div>';
@@ -8244,8 +8271,8 @@ function grammaireHubHTML(){
 
   return '<div class="ccard">'+
     '<div style="display:flex;gap:10px;align-items:center;max-width:340px;margin:0 auto">'+
-      '<button class="cbtn revbtn" style="flex:1;margin:0" onclick="startGrammarReview()">'+
-        '<span>Réviser</span>'+(nb?'<span class="revcount"><i>'+nb+'</i></span>':'')+'</button>'+
+        '<button class="cbtn revbtn" style="flex:1;margin:0" onclick="startGrammarReview()">'+
+          (nb?'<span>Réviser</span><span class="revcount"><i>'+nb+'</i></span>':'S\u2019entraîner')+'</button>'+
     '</div>'+
     '<p style="color:var(--muted);font-family:var(--ui);font-size:12.5px;text-align:center;margin:9px 0 2px">'+
       'Une séance qui mêle toutes tes notions</p>'+
