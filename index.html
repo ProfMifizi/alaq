@@ -1550,6 +1550,11 @@ async function cloudLogout(){
   // par le prochain compte connecté sur le même appareil. On vide la mémoire
   // locale puis on RECHARGE l'app : tout repart par le circuit normal de
   // démarrage (état neuf, structures internes réinitialisées, tutos compris).
+  /* 🔓 SOUS-LOT 5 — APRÈS LE signOut IL N'Y A PLUS DE JETON : tout ce qui reste en
+     file partirait en 401. On court une fois, brièvement. La course est bornée à
+     1,5 s et, hors ligne, le feu vert rend la main immédiatement : on ne fait
+     jamais attendre l'élève devant un bouton « se déconnecter ». */
+  try{ if(typeof SYNC!=='undefined'&&SYNC&&SYNC.avantDeconnexion)await SYNC.avantDeconnexion(); }catch(e){}
   try{ if(SB)await SB.auth.signOut(); }catch(e){}
   CLOUD.user=null;
   try{ clearTimeout(_syncT); }catch(e){}
@@ -1957,8 +1962,31 @@ function obAccountClose(){ var o=document.getElementById('obAccount'); o.classLi
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
 function doReset(){
+  /* 🔓 SOUS-LOT 5 — EN PREMIÈRE LIGNE, ET L'ORDRE EST TOUT LE SUJET. Les entrées en
+     attente décrivent EXACTEMENT la progression que l'élève vient d'effacer : les
+     laisser partir la reconstruirait au serveur une seconde après qu'elle a demandé
+     sa disparition. SYNC.reset() vide la file, oublie ce que le serveur savait, pose
+     l'intention de purge distante — et ANNONCE la réaffectation de S qui suit, pour
+     que le garde du diff ne la prenne pas pour une quatrième, inconnue. */
+  try{ SYNC.reset(); }catch(e){}
   try{localStorage.removeItem('alaq2');}catch(e){}
   S=Object.assign({},DEF,{done:{},tests:{}});
+  /* 🔴 09/09 — SANS CETTE LIGNE, « EFFACER MA PROGRESSION » LA RENDAIT.
+     DEF ne porte pas `_uid` (progression.js:54) : l'état neuf ne savait donc plus à
+     qui appartient cet appareil, et deux mécanismes s'écroulaient d'un coup —
+     ① le dépilage entier gelait (`_peutDepiler` exige la propriété PROUVÉE), donc
+        l'intention de purge distante ne partait JAMAIS ;
+     ② au prochain cloudPull, un S sans `_uid` retombe dans la « fenêtre de
+        migration » du 17/08, où le plus RICHE gagne : 82 leçons contre 0, le nuage
+        RESSUSCITAIT la progression que l'élève venait d'effacer — et la purge ne
+        partait qu'ensuite, vidant le portefeuille sur une progression restaurée.
+     Net : le geste rendait la progression et détruisait les graines. Le défaut ②
+     préexistait au sous-lot 5 ; le ① et la perte des graines sont nés avec lui.
+     Trouvé par la revue adversariale, par quatre angles indépendants, et reproduit
+     dans outils/verifier-sync-nuage.mjs (essai ㊱bis, qui rejoue ces lignes VERBATIM
+     — l'ancien essai ㊱ réinjectait `_uid` de sa propre main, et son vert ne prouvait
+     rien). L'état neuf appartient à l'élève connectée : on le DIT. */
+  try{ if(typeof CLOUD!=='undefined'&&CLOUD&&CLOUD.user)S._uid=CLOUD.user.id; }catch(e){}
   save();
   document.getElementById('confirmReset').classList.remove('on');
   renderHome();
@@ -2633,7 +2661,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='badge-grammaire-09sept';
+const BUILD='depilage-reel-10sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2642,7 +2670,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-09T15:43';
+const BUILD_DATE='2026-09-10T09:19';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2653,8 +2681,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.7.6';
-const BUILD_NUM=205;
+const VERSION='3.7.7';
+const BUILD_NUM=206;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -3700,6 +3728,13 @@ function finishDisque(){
   save();
   document.getElementById('player').classList.remove('on');
   _grainesSession=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));
+  /* 🔓 SOUS-LOT 5 — C'EST LE SEUL INSTANT où lesson_id et « sans faute » existent
+     comme variables vivantes. La déclaration est COLLÉE au versement local, sans
+     rien entre les deux : le dépilage ne peut donc jamais partir avec un solde qui
+     ignore ces graines-là (JS est mono-thread, rien ne s'intercale entre deux
+     instructions synchrones). `wrongCount` inclut volontairement les erreurs du
+     rattrapage — c'est le MÊME booléen que celui qui vient de payer la prime. */
+  try{ SYNC.graines(dkey(curU,curD), !wrongCount, false); }catch(_){}
   const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
   const isBilan=(curD===discsFor(curU).length-1);
   /* ⚠️ 14/08 — LE BILAN NE PROMET PLUS CE QU'IL NE SAIT PAS. Myriam : « à la leçon 2 on ne
@@ -3779,6 +3814,11 @@ function finishExam(){
     }
     S.xp+=30;
     graines=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));
+    /* L'unité testée est celle de startExam(u-1), pas celle de la bulle touchée :
+       d'où UNITS[u].no et non curU+1. Le raccourci valide 0..u, mais il n'est PAYÉ
+       qu'une fois — le versement local est unique, il n'y a pas à en fabriquer
+       plusieurs. */
+    try{ SYNC.graines('EXAM-U'+UNITS[u].no, !wrongCount, false); }catch(_){}
     validerJour(); pendingStreak=feteJourPending; feteJourPending=false;
     save();
   }
@@ -6686,6 +6726,12 @@ function importSave(){
     if(!obj||typeof obj.done!=='object'){toast('Code incomplet');return;}
     S=Object.assign({},DEF,obj);
     if(!S.err)S.err={};if(!S.badges)S.badges={};if(!S.tests)S.tests={};if(!S.letSeen)S.letSeen={};
+    /* 🔓 SOUS-LOT 5 — UN CODE ALAQ1. EST UN TEXTE QUE L'ÉLÈVE PEUT ÉDITER. C'est
+       ici le TROISIÈME point de réaffectation de S : SYNC.importe() repose le
+       marqueur du diff (sinon il se désarmerait pour le reste de la session) ET
+       marque tout le contenu importé « à ne jamais déclarer » — on ne certifie pas
+       au serveur une progression saisie au clavier. */
+    try{ SYNC.importe(); }catch(_){}
     save();refreshStats();renderProg();
     toast('✅ Progression restaurée, ماشاء الله !');
   }catch(e){toast('Code invalide — vérifie la copie');}
@@ -6844,11 +6890,15 @@ function _ouvrirLectureFile(){
           _ligneFile('Detail', pp.join(' \u00b7 ')||'\u2014')+
           _ligneFile('Refusees', e.rebut, e.rebut?'att':'nul')+
           _ligneFile('Diff actif', e.diffArme?'oui':'NON', e.diffArme?'ok':'att')+
-          _ligneFile('Envoi', e.envoi?'ACTIF':'desarme', e.envoi?'att':'ok')+
+          _ligneFile('Envoi', e.envoi?'ACTIF':'desarme', e.envoi?'ok':'att')+
+          _ligneFile('Feu', e.feu||'vert', e.feu?'att':'ok')+
+          _ligneFile('Dernier', e.motif||'\u2014')+
+          _ligneFile('Metronome', e.metronome?'arme':'au repos')+
+          (e.purgeDue?_ligneFile('Purge due','OUI','att'):'')+
           _ligneFile('Compte', e.proprio?String(e.proprio).slice(0,8)+'\u2026':'aucun')+
           _ligneFile('Disque', e.disqueKO?e.disqueKO+' refus':'ok', e.disqueKO?'att':'ok');
   }
-  f.innerHTML='<h3>La file d\u2019envoi</h3><p class="fs-q">Vol a blanc \u2014 rien n\u2019est envoye</p>'+
+  f.innerHTML='<h3>La file d\u2019envoi</h3><p class="fs-q">Envoi actif \u2014 la file part au nuage</p>'+
     corps+'<button class="fs-x" id="fs-x">Fermer</button>';
   document.getElementById('fs-x').addEventListener('click',_fermerLectureFile);
   f.classList.add('on'); document.getElementById('filevoile').classList.add('on');
@@ -7511,6 +7561,10 @@ function startReview(){
   // 4) écriture — palier ≥ 4 seulement : elle GRAVE un mot déjà solide, elle ne sert pas à le découvrir
   shuffle(bag.slice()).filter(w=>revPalier(w)>=REV_ECRIT_DES).forEach(w=>qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w}));
   QUEUE=qs; // on attaque directement l'exercice (règle Myriam : pas d'écran d'annonce)
+  /* VÉRIFIÉ : startReview ne traverse PAS launchQuranReview — c'est le seul départ
+     qui pose QUEUE lui-même. Sans cette ligne, la révision de vocabulaire hériterait
+     du type de la session précédente. */
+  try{ SYNC.poseKind('vocab'); }catch(_){}
   QCTX=null; // sinon un « ▶ Verset suivant » fantôme, hérité d'un exercice mono-verset, s'invite en fin de vocabulaire
   REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
@@ -8384,6 +8438,19 @@ function buildVerseTiles(vi){
                              tuiles:shuffle(tuiles)}, graded:true};
 }
 function launchQuranReview(queue){
+  /* 🔓 SOUS-LOT 5 — LE TYPE SE DÉDUIT DE LA FILE INTACTE, avant que le lecteur y
+     touche. Dix-sept départs passent par ici (lettres, grammaire, Qorān sous toutes
+     ses formes) : les instrumenter un par un serait dix-sept occasions d'en oublier
+     un. `revGram` est posé sur CHAQUE écran par gramMarquer() — c'est le seul
+     signal certain ; les autres se lisent au type d'écran.
+     ⚠️ La taxonomie est GROSSIÈRE, et c'est assumé : elle ne sert qu'à distinguer
+     les sessions pour la garde « un lesson_id ne paie qu'une fois par jour ». */
+  try{ SYNC.poseKind(
+    (!queue||!queue.length) ? 'mixte'
+    : queue.some(function(s){return s&&s.revGram!=null;}) ? 'gram'
+    : queue.every(function(s){return s&&s.type==='trace';}) ? 'lettres'
+    : queue.every(function(s){return s&&s.type==='recite';}) ? 'reciter'
+    : 'qoran'); }catch(_){}
   QUEUE=queue;
   REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
@@ -8735,6 +8802,14 @@ function finishReview(){
   _grainesSession = _aTravaille
     ? gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute))   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
     : 0;
+  /* 🔓 SOUS-LOT 5 — on ne déclare QUE ce qui a réellement été versé. Une file de
+     récitation seule ne paie rien en local : elle ne doit rien déclarer non plus.
+     Le type de session vient de SYNC.poseKind(), posé par les deux entonnoirs de
+     départ — sans lui, toutes les révisions porteraient le même lesson_id et le
+     serveur n'en paierait qu'UNE par jour (claim_reward, garde v_deja_lecon). */
+  if(_grainesSession){ try{
+    SYNC.graines('REV-'+String(SYNC._kind||'mixte').toUpperCase(), !wrongCount, false);
+  }catch(_){} }
   if(REVSES){ // répétition espacée : chaque mot touché par un écran noté reçoit sa prochaine date
     const t=today();
     Object.keys(REVSES).forEach(function(w){

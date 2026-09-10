@@ -374,6 +374,13 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
       cloudSaveNow();
     }
+    /* 🔓 SOUS-LOT 5 — LE SEUL ENDROIT OÙ GREFFER LE DÉPILAGE, et il a fallu le
+       chercher. Surtout PAS après `_syncPret=true` (plus haut) : à cet instant
+       l'arbitrage n'a pas eu lieu, S._uid peut encore être celui d'un AUTRE compte,
+       et la branche takeRemote va remplacer S. On serait exactement dans l'erreur de
+       destinataire que tout ce moteur combat. Ici, les deux branches sont fermées et
+       S._uid est posé dans les deux cas : la propriété est PROUVÉE. */
+    _depiler();
   }catch(e){}
 }
 async function cloudInit(){
@@ -402,6 +409,12 @@ async function cloudInit(){
    où remplacer S sous les pieds de l'élève casserait l'écran en cours. */
 function cloudResync(){
   if(document.hidden)return;
+  /* 🔓 SOUS-LOT 5 — LE DÉPILAGE PASSE AVANT LA GARDE DU LECTEUR, délibérément.
+     La garde du 28/08 protège S : remplacer l'état sous les pieds de l'élève
+     casserait l'écran en cours. Le dépilage, lui, ne touche JAMAIS à S — il ne fait
+     que vider une file. L'en exclure priverait d'envoi la seule période où l'élève
+     produit de la progression. */
+  _depiler();
   var pl=document.getElementById('player');
   if(pl&&pl.classList.contains('on'))return; // leçon en cours : on ne touche à rien
   try{cloudPull();}catch(e){}
@@ -437,7 +450,14 @@ window.addEventListener('focus',cloudResync);
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ═════════════════════ §3 · LA FILE ═════════════════════ */
-const ENVOI = false;      /* ⛔ sous-lot 4 : on observe, on n'envoie pas. */
+/* 🔓 SOUS-LOT 5, 09/09/2026 — LE VERROU S'OUVRE. Il a valu ce qu'il devait valoir :
+   pendant l'observation, onze comptes réels ont montré ce que la file CONTIENDRAIT
+   avant qu'un seul octet ne parte. Le voici armé. Le remettre à false suffit à
+   revenir en arrière — sans perdre la file, qui reste sur le disque. */
+const ENVOI = true;
+const OB_LOT=50;          // la taille d'un lot — voir la règle ⑤ du §6
+const OB_TOURS=6;         // 6 × 50 = 300 = OB_MAX : un tour vide la file entière
+const PURGE_CLE='alaq_purge_v1';   // l'intention d'effacement distant, posée avant le réseau
 const OB_CLE='alaq_outbox_v1', CONNU_CLE='alaq_connu_v1', IGNORE_CLE='alaq_ignore_v1';
 const OB_MAX=300;         // borne dure de la file
 const OB_REBUT_MAX=50;    // les refusées, gardées AVEC leur motif
@@ -457,8 +477,15 @@ function _lire(cle,dflt){ try{ var t=localStorage.getItem(cle); return t?JSON.pa
 let _disqueKO=0, _disqueTicket=false;
 function _ecrire(cle,txt){
   try{ localStorage.setItem(cle,txt); if(localStorage.getItem(cle)===txt)return true; }catch(e){}
-  try{ if(_OB&&_OB.r&&_OB.r.length){ _OB.r=[]; localStorage.setItem(cle,txt);
-         if(localStorage.getItem(cle)===txt)return true; } }catch(e){}
+  /* 🔴 09/09 — CE REPLI NE LIBÉRAIT RIEN. Il vidait bien le rebut, puis réécrivait
+     `txt` — la chaîne calculée AVANT, rebut compris. Exactement les mêmes octets :
+     le disque refusait de nouveau, et on avait détruit les motifs des entrées
+     refusées pour rien. On resérialise, et seulement pour la file (les deux autres
+     clés ne portent pas de rebut). */
+  try{ if(cle===OB_CLE&&_OB&&_OB.r&&_OB.r.length){
+         _OB.r=[]; var court=JSON.stringify(_OB);
+         localStorage.setItem(cle,court);
+         if(localStorage.getItem(cle)===court)return true; } }catch(e){}
   _disqueKO++;
   if(!_disqueTicket){ _disqueTicket=true;
     try{ if(typeof tikEnvoyer==='function')
@@ -482,12 +509,19 @@ function _obEcrire(){
   var d=_lire(OB_CLE,{f:[],r:[]});
   if(d&&_estTableau(d.f)&&d.f.length){
     var vus={}; var i;
-    for(i=0;i<_OB.f.length;i++)vus[_OB.f[i].id]=1;
-    for(i=0;i<d.f.length;i++)if(d.f[i]&&!vus[d.f[i].id]&&!_acquittees[d.f[i].id])_OB.f.push(d.f[i]);
+    for(i=0;i<_OB.f.length;i++)vus[_cle(_OB.f[i].uid,_OB.f[i].id)]=1;
+    for(i=0;i<d.f.length;i++){ if(!d.f[i])continue;
+      var k=_cle(d.f[i].uid,d.f[i].id);
+      if(!vus[k]&&!_acquittees[k])_OB.f.push(d.f[i]); }
   }
   if(_OB.f.length>OB_MAX)_OB.f=_OB.f.slice(-OB_MAX);
   if(_OB.r.length>OB_REBUT_MAX)_OB.r=_OB.r.slice(-OB_REBUT_MAX);
-  return _ecrire(OB_CLE,JSON.stringify(_OB));
+  var ok=_ecrire(OB_CLE,JSON.stringify(_OB));
+  /* La reprise s'arme ICI, au moment où la file cesse d'être vide — et pas seulement
+     en fin de dépilage. Une file qui se remplit hors ligne, ou avant que la propriété
+     du compte soit prouvée, doit repartir toute seule quand les conditions reviennent. */
+  _reglerMetronome();
+  return ok;
 }
 var _acquittees={};   // ce que CETTE session a déjà fait acquitter (cimetière court)
 
@@ -499,11 +533,19 @@ function _proprio(){
   return null;
 }
 
+/* 🔴 09/09 — UN IDENTIFIANT D'ENTRÉE N'EST UNIQUE QU'AU SEIN D'UN COMPTE.
+   'l.1.0' veut dire « la leçon U1-D0 », pas « la leçon U1-D0 de telle élève ». Sur un
+   appareil partagé — le téléphone de Myriam prêté, son compte puis celui de Mohamed —
+   une entrée en attente du compte A faisait donc TAIRE À JAMAIS la même leçon chez B :
+   _enfiler la voyait « déjà en file » et refusait. Pire avec le rebut, qui survit aux
+   sessions : une leçon abîmée chez A rendait cette leçon indéclarable chez B, pour
+   toujours. La clé du cimetière porte désormais le compte. */
+function _cle(uid,id){ return String(uid)+'|'+String(id); }
 function _enfiler(id,k,d,uid){
   if(!id||!uid)return false;
-  if(_acquittees[id])return false;
-  for(var i=0;i<_OB.f.length;i++)if(_OB.f[i].id===id)return false;
-  for(var j=0;j<_OB.r.length;j++)if(_OB.r[j].id===id)return false;   // déjà au rebut : on n'insiste pas
+  if(_acquittees[_cle(uid,id)])return false;
+  for(var i=0;i<_OB.f.length;i++)if(_OB.f[i].id===id&&_OB.f[i].uid===uid)return false;
+  for(var j=0;j<_OB.r.length;j++)if(_OB.r[j].id===id&&_OB.r[j].uid===uid)return false;   // déjà au rebut : on n'insiste pas
   _OB.f.push({id:id,k:k,d:d,uid:uid,n:0,le:new Date().toISOString()});
   return true;
 }
@@ -530,6 +572,7 @@ function _connuPour(uid){
    et on le dit — plutôt que de déclarer n'importe quoi. */
 const _tag=('t'+Math.random()).slice(0,12);
 let _diffArme=true;
+let _resetAnnonce=false;   // SYNC.reset() l'arme : la prochaine réaffectation de S est ATTENDUE
 function _poserTag(o){
   try{ Object.defineProperty(o,'_projTag',{value:_tag,enumerable:false,configurable:true,writable:true}); }catch(e){}
 }
@@ -556,11 +599,28 @@ function _semerLeDiff(){
   if(!_diffArme)return false;
   var uid=_proprio(); if(!uid)return false;
   if(!S||S._projTag!==_tag){
-    _diffArme=false; _poserTag(S);
-    try{ if(typeof tikEnvoyer==='function')
-      tikEnvoyer('suspect','sync — S remplace hors des trois points connus : diff desarme'); }catch(e){}
-    return false;
+    /* 🔴 SOUS-LOT 5 — UNE RÉAFFECTATION ANNONCÉE N'EST PLUS UNE RÉAFFECTATION INCONNUE.
+       doReset remplace S une ligne après SYNC.reset() : ce garde est là pour la
+       QUATRIÈME réaffectation, celle que personne n'a déclarée, pas pour celle-ci.
+       Jusqu'ici le diff se désarmait à chaque effacement et n'était plus jamais rearmé
+       de la session — « échouer fermé », disait le sous-lot 4. Il peut désormais
+       distinguer, et c'est SYNC.reset() seul qui pose l'annonce. */
+    if(_resetAnnonce){ _resetAnnonce=false; _poserTag(S); }
+    else{
+      _diffArme=false; _poserTag(S);
+      try{ if(typeof tikEnvoyer==='function')
+        tikEnvoyer('suspect','sync — S remplace hors des trois points connus : diff desarme'); }catch(e){}
+      return false;
+    }
   }
+  /* 🔴 09/09 — UNE ANNONCE QUI NE SERT PAS DOIT S'ÉTEINDRE. SYNC.reset() arme
+     _resetAnnonce pour la réaffectation de S qui suit IMMÉDIATEMENT. Si elle
+     n'arrive jamais (effacement sans compte, geste interrompu), le drapeau restait
+     armé pour la session : la PROCHAINE réaffectation inconnue — celle que ce garde
+     existe pour attraper — aurait été accueillie comme légitime. On le consomme donc
+     ici : arrivé jusqu'à cette ligne, le marqueur correspond, aucune réaffectation
+     n'a eu lieu, l'annonce est périmée. */
+  _resetAnnonce=false;
   var c=_connuPour(uid), bouge=false;
 
   /* ① LES LEÇONS. dkey() écrit 'U<no>-D<i>' où <no> est UNITS[u].no — le NUMÉRO
@@ -642,20 +702,331 @@ function _declarerGraines(lesson_id,sans_faute,is_daily_goal){
   return null;
 }
 
-/* ═════════════════════ §6 · LE DÉPILAGE — DÉSARMÉ ═════════════════════
-   Le code du dépilage n'entre PAS dans ce sous-lot : ENVOI vaut false, et cette
-   fonction est le seul point par lequel un octet pourrait partir. Elle existe pour que
-   le contrat soit visible, et pour que le sous-lot 5 n'ait qu'un mot à changer. */
-function _depiler(){
-  if(!ENVOI)return Promise.resolve({envoye:0,motif:'observation'});
-  return Promise.resolve({envoye:0,motif:'non implemente'});   // sous-lot 5
+/* ═════════════════════ §6 · LE DÉPILAGE ═════════════════════
+   ───────────────────────────────────────────────────────────────────────────
+   ⚠️ C'EST LE SEUL POINT PAR LEQUEL UN OCTET PART. Tout ce que le client
+   déclare au serveur passe par ici, et par `alaq_pousser` — l'unique porte
+   d'écriture accordée au client (schéma §6.2).
+
+   LES SIX RÈGLES DE CE DÉPILAGE, chacune payée par une mesure ou un incident :
+
+   ① ON NE PARLE QU'UNE FOIS LE PROPRIÉTAIRE PROUVÉ. `_syncPret` ne suffit PAS :
+      il n'est jamais remis à false (posé une seule fois, cloudPull), et une
+      session qui expire puis revient sur un AUTRE compte traverse
+      `onAuthStateChange` sans repasser par cloudPull. Le feu vert exige donc
+      aussi `S._uid === CLOUD.user.id` — la propriété PROUVÉE par l'arbitrage,
+      pas seulement « un nuage a été lu une fois ».
+      Ce n'est pas une précaution contre les doublons (tout est idempotent) :
+      c'est la précaution contre l'ERREUR DE DESTINATAIRE. Le serveur crédite le
+      compte de la session, jamais l'`uid` que porte l'entrée.
+   ② UNE ENTRÉE D'UN AUTRE COMPTE DORT. Ni envoyée, ni jetée. C'est le pire
+      scénario du projet (téléphone partagé : les graines d'une élève versées
+      sur le compte d'une autre) et aucune sécurité serveur ne peut s'y opposer,
+      puisque c'est bien le compte connecté qui écrit.
+   ③ ÉCHEC DE TRANSPORT ≠ REFUS. Le compteur `n` d'une entrée ne monte QUE sur
+      un acquittement `refus` explicite. Un réseau qui tombe ne consomme aucune
+      vie — sinon trois tunnels suffiraient à envoyer au rebut une leçon faite
+      en avion.
+   ④ ON NE JETTE JAMAIS AVANT L'ACQUITTEMENT. Si le serveur applique le lot et
+      que la réponse se perd, on rejoue : c'est sûr, les intentions sont
+      idempotentes. L'inverse ne l'est pas.
+   ⑤ LE LOT VAUT 50, PAS 100. Le serveur refuse au-delà de 100 — et il lève
+      AVANT la boucle (erreur 22023), donc rien n'est écrit ni acquitté. Mais la
+      vraie borne est ailleurs : chaque entrée ouvre une sous-transaction, et
+      PostgreSQL déborde son cache de sous-identifiants au-delà de 64 par
+      transaction. 50 laisse la marge des deux côtés.
+   ⑥ LE MÉTRONOME S'ARME PARESSEUSEMENT. Un `setInterval` posé au chargement
+      réveillerait la page toutes les 45 s pour rien — et figerait le banc
+      `node:vm`, qui exécute ce fichier ENTIER avec le vrai `setInterval` de
+      node. Il ne tourne que tant que la file porte quelque chose.
+
+   ⛔ CE QUE CE DÉPILAGE NE SAIT PAS FAIRE, ET QU'IL FAUT SAVOIR :
+   les entrées `rev` ne sont PAS idempotentes côté serveur (aucun `on conflict`
+   sur `review_events`, et `seen_count` s'incrémente à chaque passage). Si le
+   serveur valide le lot et que la réponse se perd — métro, portail captif,
+   délai de garde qui expire —, le rejeu comptera CE MOT une seconde fois. Les
+   deux champs touchés (`seen_count`, `ko_count`) ne sont lus par RIEN
+   aujourd'hui ; `step` et `next_due`, eux, sont des écrasements idempotents et
+   ne bougent pas. On l'assume plutôt que de rejouer « au cas où » un
+   `alaq_bootstrap` de réconciliation — mais le jour où un tableau de bord se
+   fiera à `seen_count`, c'est ici qu'il faudra revenir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+let _enVol=null;        // la promesse du lot en vol — le verrou de ré-entrance
+let _metronome=null;    // la reprise périodique, ARMÉE PARESSEUSEMENT (règle ⑥)
+let _soldeAPoser=null;  // le solde certifié qui attend un instant muet
+let _soldeDe=null;      // …et À QUI il appartient (voir _appliquerSolde)
+let _soldePurge=false;  // …et s'il vient d'un effacement, où un zéro est un FAIT
+let _dernierMotif='';   // ce que SYNC.etat() montre au geste des sept tapes
+
+/* Ce qui part sur le fil : l'entrée DÉPOUILLÉE. `uid`, `n` et `le` sont notre
+   comptabilité locale — le serveur ne les lit pas, et `uid` surtout : il écrit
+   toujours sur `auth.uid()`. Les envoyer laisserait croire qu'ils protègent. */
+function _surLeFil(e){ return {id:e.id, k:e.k, d:e.d}; }
+
+/* ⛔ `build` N'EST PROTÉGÉ PAR AUCUNE REGEX CÔTÉ SERVEUR, contrairement à `xp`
+   juste au-dessus de lui : `client_build = (p_profil->>'build')::int` vit HORS
+   de tout bloc `exception`. Une valeur non entière lève, et TOUTE la
+   transaction rebrousse chemin — les acquittements compris, alors que chaque
+   entrée était bonne. On ne transmet donc que ce qui a prouvé être une suite de
+   chiffres. Même prudence pour toute clé ajoutée ici un jour : ce chemin-là
+   n'a pas de filet. */
+function _profil(){
+  var p={};
+  try{ if(typeof S.xp==='number'&&isFinite(S.xp)&&S.xp>=0&&S.xp<1e7)p.xp=Math.floor(S.xp); }catch(e){}
+  try{ if(typeof BUILD_NUM!=='undefined'&&/^[0-9]{1,9}$/.test(String(BUILD_NUM)))p.build=+BUILD_NUM; }catch(e){}
+  return p;
 }
+
+/* Le feu vert, en un seul endroit : il rend le MOTIF du refus, jamais un booléen
+   nu — c'est lui que le geste des sept tapes affiche quand rien ne part. */
+function _peutDepiler(){
+  if(!ENVOI)return 'observation';
+  if(!SB||!CLOUD.user)return 'pas de session';
+  if(!_syncPret)return 'nuage pas encore lu';
+  if(!S||S._uid!==CLOUD.user.id)return 'proprietaire pas encore prouve';  // règle ①
+  try{ if(typeof navigator!=='undefined'&&navigator&&navigator.onLine===false)return 'hors ligne'; }catch(e){}
+  return null;
+}
+
+/* Ce que le serveur SAIT désormais. Sans cette trace persistée, le diff
+   redéclarerait tout à chaque save() : le compte convergerait quand même (le
+   serveur répondrait 'doublon'), mais le trafic doublerait EN SILENCE. */
+function _noterConnu(c,e){
+  try{
+    var d=e.d||{};
+    if(e.k==='graines')c.p=1;   // ce compte a un portefeuille CERTIFIÉ : son solde mesure quelque chose
+    else if(e.k==='lecon')c.l['U'+d.unit_no+'-D'+d.disc_no]=1;
+    else if(e.k==='test')c.t[String(d.unit_no)]=1;
+    else if(e.k==='rev'){
+      if(d.type==='word')c.w[d.item_id]=d.step;
+      else if(d.type==='grammar'){
+        /* L'INDEX vit dans l'identifiant — 'g.<slug>.<n>' —, pas dans la charge.
+           On prend le MAXIMUM et non un compteur : une entrée refusée au milieu
+           ne doit pas figer la suite (elle part au rebut, elle ne revient pas). */
+        var m=/^g\.(.+)\.(\d+)$/.exec(e.id);
+        if(m){ var s=m[1], n=+m[2];
+          if(!(c.g[s]>=n))c.g[s]=n;
+          if(d.success===false)c.gk[s]=(c.gk[s]||0)+1; }
+      }
+    }
+  }catch(x){}
+}
+
+/* Le tri des acquittements. TOUTE entrée reçue est acquittée par le serveur
+   (schéma §6.2) : une entrée envoyée et jamais acquittée bloquerait la tête de
+   file pour toujours. ⚠️ Un 'ok' ne prouve PAS qu'une ligne a été écrite —
+   'lecon' et 'test' sont des `on conflict do nothing`, 'rev' peut être sauté par
+   la garde d'horloge, et 'graines' peut créditer 0 (plafond du jour). 'ok' et
+   'doublon' disent la même chose et une seule : l'entrée est TRAITÉE, sors-la. */
+function _acquitter(uid,lot,data){
+  var acks=(data&&_estTableau(data.acks))?data.acks:[];
+  var par={},i;
+  for(i=0;i<acks.length;i++)if(acks[i]&&acks[i].id)par[acks[i].id]=acks[i];
+  var c=_connuPour(uid), reste=[], sortis=0, rebut=0, refuses=[];
+  for(i=0;i<_OB.f.length;i++){
+    var e=_OB.f[i], a=(e&&e.uid===uid)?par[e.id]:null;
+    if(!a){ reste.push(e); continue; }            // pas de ce lot : intacte (règle ②)
+    if(a.etat==='ok'||a.etat==='doublon'){
+      _acquittees[_cle(uid,e.id)]=1; _noterConnu(c,e); sortis++;
+      continue;
+    }
+    /* Un refus EXPLICITE, et lui seul, consomme une vie (règle ③). Il n'est pas
+       forcément définitif : le `when others` du serveur couvre aussi des échecs
+       passagers (verrou du portefeuille, sérialisation). D'où trois essais. */
+    e.n=(e.n||0)+1; refuses.push(e.id);
+    if(e.n>=OB_REFUS_MAX){
+      e.motif=String(a.motif||'refus sans motif').slice(0,200);
+      /* ⛔ LE REBUT DOIT ENTRER AU CIMETIÈRE. Sans cette ligne, `_obEcrire`
+         relit le disque et RESSUSCITE l'entrée : elle n'est plus dans `_OB.f`,
+         et rien d'autre ne dit qu'on en a fini avec elle. */
+      _OB.r.push(e); _acquittees[_cle(uid,e.id)]=1; rebut++;
+    } else reste.push(e);
+  }
+  _OB.f=reste;
+  _obEcrire();
+  _ecrire(CONNU_CLE,JSON.stringify(_CONNU));
+  return {sortis:sortis, rebut:rebut, refuses:refuses};
+}
+
+/* ═══ LA BALANCE CERTIFIÉE — décision ③ de Myriam : EN SILENCE ═══
+   Le portefeuille du serveur fait foi, et le compteur local peut diverger pour
+   une raison parfaitement normale : `claim_reward` ne paie un `lesson_id`
+   qu'UNE FOIS PAR JOUR SERVEUR (schéma §6.1), là où `gagnerGraines` paie plein
+   tarif à chaque rejeu. Une leçon refaite le même jour vaut donc 15 en local et
+   0 au serveur.
+   ⛔ MUETTE À L'ŒIL, pas seulement dans le code. Deux conséquences :
+   — jamais pendant l'écran de fin, qui affiche justement le gain de la session ;
+   — aucun rendu forcé : si la page Progression est ouverte, son chiffre attendra
+     la prochaine ouverture. Un nombre qui change sous les yeux serait
+     exactement le bandeau que Myriam a refusé. */
+function _appliquerSolde(){
+  if(_soldeAPoser===null)return false;
+  /* 🔴 09/09 — LE SOLDE D'UNE ÉLÈVE NE S'ÉCRIT PAS DANS LE COMPTE DE LA SUIVANTE.
+     _appliquerSolde est appelée aussi sur le chemin REFUSÉ de _depiler (« pas de
+     session », « proprietaire pas encore prouve ») : sans ce contrôle, un solde
+     rendu pour A pouvait se poser sur le S de B après un changement de compte. */
+  if(_soldeDe && _soldeDe!==_proprio()){ _soldeAPoser=null; _soldeDe=null; return false; }
+  try{ var f=document.getElementById('finish');
+       if(f&&f.classList&&f.classList.contains('on'))return false; }catch(e){}
+  /* Une purge distante en attente veut dire que le serveur porte ENCORE l'ancien
+     solde : l'appliquer ressusciterait les graines que l'élève vient d'effacer. */
+  if(_purgeDue())return false;
+  var v=_soldeAPoser, pourPurge=_soldePurge; _soldeAPoser=null; _soldeDe=null; _soldePurge=false;
+  /* 🔴 09/09 — UN PORTEFEUILLE VIDE N'EST PAS UN PORTEFEUILLE À ZÉRO.
+     Une élève joue sans compte, gagne 260 graines, PUIS s'inscrit. Son portefeuille
+     serveur n'a jamais reçu une ligne (les graines d'avant le compte ne se déclarent
+     pas — c'est la règle, et Myriam l'a validée : la progression rejoint le compte à
+     l'inscription, les graines non). alaq_solde() rend donc 0 — non pas « elle n'a
+     rien », mais « je n'en sais rien ». Poser ce 0 DÉTRUISAIT ses 260 graines.
+     La règle disait qu'elles ne REJOIGNENT pas le compte, jamais qu'on les efface.
+     On n'applique donc un zéro que si le serveur a déjà certifié quelque chose pour
+     ce compte — ou si l'effacement vient d'être demandé, où le zéro est un fait. */
+  if(v===0 && !pourPurge){
+    var c0=_connuPour(_proprio()||'?');
+    if(!c0.p)return false;   // aucun versement jamais acquitté : le 0 ne mesure rien
+  }
+  if((S.graines||0)===v)return false;
+  S.graines=v;
+  saveLocal();   // ⛔ pas save() : ni redatage de la progression, ni redéclaration
+  return true;
+}
+
+/* ═══ LA PURGE DISTANTE ═══
+   `alaq_effacer_progression` est appelée à l'effacement, mais l'INTENTION est
+   posée sur le disque AVANT que le réseau soit sollicité : si l'app meurt entre
+   les deux, le prochain dépilage reprend. Sans cela, une élève qui efface hors
+   ligne garderait au serveur sa progression ET son solde — et la balance
+   certifiée les lui rendrait au retour du réseau. */
+/* 🔴 09/09 — UNE INTENTION DE PURGE APPARTIENT À UN COMPTE, PAS À L'APPAREIL.
+   Sans ce filtre, une purge posée par A et jamais aboutie (A ne se reconnecte plus)
+   GELAIT DÉFINITIVEMENT la balance certifiée de tous les comptes suivants sur cet
+   appareil : _appliquerSolde refuse tant qu'une purge est due, et celle-ci n'était
+   levée que par A. B ne voyait plus jamais son solde se corriger, sans un message. */
+function _purgeDue(){
+  try{ var du=localStorage.getItem(PURGE_CLE); return !!du && du===_proprio(); }
+  catch(e){ return false; }
+}
+async function _purgerDistant(uid){
+  var du=null; try{ du=localStorage.getItem(PURGE_CLE); }catch(e){}
+  if(!du||du!==uid)return false;
+  var r=await _avecGarde(SB.rpc('alaq_effacer_progression',{}),12000,'purge distante');
+  if(r&&r.error)throw r.error;
+  try{ localStorage.removeItem(PURGE_CLE); }catch(e){}
+  /* Le portefeuille est append-only : le serveur ne supprime pas les lignes, il
+     écrit une compensation. Le solde qu'il rend est donc déjà à zéro. */
+  var d=r&&r.data;
+  if(d&&typeof d.solde==='number'&&isFinite(d.solde)){ _soldeAPoser=d.solde; _soldeDe=uid; _soldePurge=true; }
+  return true;
+}
+
+/* Un tour de dépilage : autant de lots de 50 qu'il en faut, dans une SEULE
+   promesse. C'est délibéré — un dépilage qui rend une promesse fidèle à son
+   travail réel se mesure sans horloge, là où une chaîne de setTimeout obligerait
+   le banc à deviner combien de fois « respirer ». */
+async function _unTour(){
+  var envoye=0, rebut=0, tours=0;
+  /* 🔴 09/09 — UNE ENTRÉE NE PERD QU'UNE VIE PAR TOUR. Le garde `if(!bilan.sortis)break`
+     ferme le cas du lot ENTIÈREMENT refusé, mais pas le lot PARTIEL : si 49 entrées
+     passent et qu'une est refusée, le tour continue, reprend la refusée dans le lot
+     suivant, et lui coûte une deuxième vie — trois rounds suffisaient à envoyer au
+     rebut une graine victime d'un simple verrou de portefeuille passager. Les trois
+     essais d'OB_REFUS_MAX doivent être trois OCCASIONS distinctes, pas trois boucles
+     d'une même seconde. */
+  var refusesCeTour={};
+  var uid=CLOUD.user.id;
+  /* ⚠️ D'ABORD LA CORRECTION EN ATTENTE. Un solde certifié refusé au tour précédent
+     (l'écran de fin était ouvert, une purge distante était due) doit trouver une
+     seconde chance même quand il n'y a plus RIEN à envoyer — sinon il reste suspendu
+     jusqu'au prochain envoi, c'est-à-dire potentiellement jamais. */
+  _appliquerSolde();
+  await _purgerDistant(uid);   // la purge D'ABORD : elle vide le sens de tout le reste
+  while(tours<OB_TOURS){
+    tours++;
+    /* L'identité se REVÉRIFIE à chaque tour — même règle que cloudPull. */
+    if(!CLOUD.user||CLOUD.user.id!==uid||!S||S._uid!==uid){ _dernierMotif='le compte a change'; break; }
+    var lot=[],i;
+    for(i=0;i<_OB.f.length&&lot.length<OB_LOT;i++){
+      var e=_OB.f[i];
+      if(!e||!e.id||e.uid!==uid)continue;          // règle ② : les autres dorment
+      if(refusesCeTour[e.id])continue;             // déjà refusée dans ce tour : on n'insiste pas
+      lot.push(e);
+    }
+    if(!lot.length)break;
+    var rep=await _avecGarde(SB.rpc('alaq_pousser',{p_entrees:lot.map(_surLeFil),p_profil:_profil()}),
+                             12000,'envoi de la file ('+lot.length+' entrees)');
+    /* supabase-js ne LÈVE pas : il résout avec {error}. Une erreur de LOT (>100,
+       jeton périmé, RLS) ne touche AUCUNE entrée — elle lève ici, et la règle ③
+       veut qu'aucune vie ne soit consommée. */
+    if(rep&&rep.error)throw rep.error;
+    if(!CLOUD.user||CLOUD.user.id!==uid){ _dernierMotif='le compte a change pendant l’envoi'; break; }
+    var data=rep&&rep.data;
+    if(data&&typeof data.solde==='number'&&isFinite(data.solde)){ _soldeAPoser=data.solde; _soldeDe=uid; }
+    var bilan=_acquitter(uid,lot,data);
+    for(i=0;i<bilan.refuses.length;i++)refusesCeTour[bilan.refuses[i]]=1;
+    envoye+=bilan.sortis; rebut+=bilan.rebut;
+    _appliquerSolde();
+    if(!bilan.sortis)break;   // rien n'est sorti : on n'insiste pas dans le même souffle
+  }
+  /* ⚠️ UN TOUR SE TERMINE TOUJOURS EN POSANT CE QUI ATTEND. Après une purge distante,
+     le solde certifié vaut 0 et la boucle sort au premier tour (la file est vide) : sans
+     cette ligne, la correction resterait suspendue jusqu'au tour suivant. Même défaut
+     que celui trouvé par l'essai ㉝, dans l'autre coin de la fonction. */
+  _appliquerSolde();
+  _dernierMotif=envoye?('envoye '+envoye+(rebut?(' · rebut '+rebut):'')):(_dernierMotif||'rien a envoyer');
+  _reglerMetronome();
+  return {envoye:envoye, rebut:rebut, motif:_dernierMotif};
+}
+
+/* ⛔ `_depiler()` NE REJETTE JAMAIS. Il est appelé en oubli-et-continue depuis
+   quatre écouteurs : une promesse orpheline qui rejette ferait poser au capteur
+   'unhandledrejection' d'index.html un ticket « promesse » illisible, au lieu du
+   ticket nommé que `_ticketSync` produit ici. */
+function _depiler(){
+  if(_enVol)return _enVol;                       // ré-entrance : on rend le lot en vol
+  var motif=_peutDepiler();
+  if(motif){ _dernierMotif=motif; _appliquerSolde(); return Promise.resolve({envoye:0,motif:motif}); }
+  var p;
+  try{ p=_unTour(); }catch(e){ p=Promise.reject(e); }
+  _enVol=Promise.resolve(p).then(function(r){ _enVol=null; return r; },
+    function(e){
+      _enVol=null;
+      _ticketSync('depilage',e);
+      _dernierMotif='echec : '+((e&&e.message)||e||'?');
+      return {envoye:0, motif:_dernierMotif};
+    });
+  return _enVol;
+}
+
+/* Le métronome ne tourne que tant que la file porte quelque chose (règle ⑥). */
+function _armerMetronome(){
+  if(_metronome||!ENVOI)return;
+  try{ _metronome=setInterval(function(){ _depiler(); },45000); }catch(e){}
+}
+function _desarmerMetronome(){
+  if(!_metronome)return;
+  try{ clearInterval(_metronome); }catch(e){}
+  _metronome=null;
+}
+/* 🔴 09/09 — UN MÉTRONOME QUI NE PEUT RIEN ENVOYER EST UN RÉVEIL POUR RIEN.
+   La file peut ne porter QUE des entrées endormies d'un autre compte (règle ② : ni
+   envoyées, ni jetées). Les compter comme « il reste à faire » réveillait la page
+   toutes les 45 s, sur un téléphone, pour un dépilage qui refusait à chaque fois.
+   On ne s'arme que s'il y a quelque chose d'ENVOYABLE — et le retour du compte
+   concerné passe de toute façon par cloudPull, 'online' ou 'focus'. */
+function _aEnvoyer(){
+  var p=_proprio(); if(!p)return false;
+  for(var i=0;i<_OB.f.length;i++)if(_OB.f[i]&&_OB.f[i].uid===p)return true;
+  return false;
+}
+function _reglerMetronome(){ if(_aEnvoyer())_armerMetronome(); else _desarmerMetronome(); }
 
 /* ═════════════════════ §7 · SYNC — ce qu'index.html appelle ═════════════════════ */
 var SYNC={
-  /* Déclaré au versement des graines (les quatre sites de gagnerGraines). */
+  /* Déclaré au versement des graines (les trois sites de gagnerGraines). */
   graines:function(lesson_id,sans_faute,is_daily_goal){
-    try{ return _declarerGraines(lesson_id,sans_faute,is_daily_goal); }catch(e){ return null; }
+    try{ var id=_declarerGraines(lesson_id,sans_faute,is_daily_goal); _depiler(); return id; }
+    catch(e){ return null; }
   },
   /* Le type de session courante, pour construire un lesson_id 'REV-…' honnête. */
   poseKind:function(k){ try{ SYNC._kind=(typeof k==='string')?k:null; }catch(e){} },
@@ -668,17 +1039,81 @@ var SYNC={
       Object.keys(S.done||{}).forEach(function(k){ _IGN['l:'+k]=1; });
       Object.keys(S.tests||{}).forEach(function(n){ _IGN['t:'+n]=1; });
       Object.keys(S.rev||{}).forEach(function(w){ _IGN['w:'+w]=1; });
+      /* 🔴 09/09 — LA GRAMMAIRE MANQUAIT À L'APPEL. S.revGram porte un CUMUL d'écrans
+         vus et ratés, et le diff en tire jusqu'à 40 intentions par session. Un code
+         ALAQ1. collé — un texte que l'élève peut éditer — se faisait donc certifier au
+         serveur comme de la grammaire réellement travaillée, alors que les leçons, les
+         tests et le vocabulaire du même code étaient, eux, correctement tus. */
+      Object.keys(S.revGram||{}).forEach(function(u){
+        var g=(typeof GRAM_SLUG!=='undefined')&&GRAM_SLUG[String(u)];
+        if(g)_IGN['g:'+g]=1;
+      });
       _ecrire(IGNORE_CLE,JSON.stringify(_IGN));
       _poserTag(S); _diffArme=true;
     }catch(e){}
   },
-  /* Ce que la file contient — à lire dans la console pendant l'observation. */
+  /* ═══ L'EFFACEMENT — appelé en PREMIÈRE ligne de doReset ═══
+     L'ordre est strict, et c'est tout le sujet : on purge la file AVANT que S
+     soit remplacé. Les entrées en attente décrivent EXACTEMENT la progression
+     que l'élève vient d'effacer — les laisser partir la reconstruirait au
+     serveur, une seconde après qu'elle a demandé sa disparition. */
+  reset:function(){
+    try{
+      var uid=_proprio();
+      /* 🔴 09/09 — ON N'EFFACE QUE CE QUI EST À SOI. Vider la file entière détruisait
+         les graines en attente d'une AUTRE élève dont l'appareil porte encore les
+         entrées endormies (règle ② du §6 : elles ne sont ni envoyées, ni jetées — un
+         effacement demandé par quelqu'un d'autre ne les jette pas non plus). */
+      _OB={ f:_OB.f.filter(function(e){ return e&&e.uid&&e.uid!==uid; }),
+            r:_OB.r.filter(function(e){ return e&&e.uid&&e.uid!==uid; }) };
+      _acquittees={};
+      _ecrire(OB_CLE,JSON.stringify(_OB));
+      if(uid)delete _CONNU[uid];
+      _ecrire(CONNU_CLE,JSON.stringify(_CONNU));
+      _IGN={}; _ecrire(IGNORE_CLE,JSON.stringify(_IGN));
+      _soldeAPoser=null; _desarmerMetronome();
+      /* L'INTENTION avant le réseau : si l'app meurt ici, le prochain dépilage reprend. */
+      if(uid){ try{ localStorage.setItem(PURGE_CLE,uid); }catch(e){} }
+      /* doReset réaffecte S juste après nous. On ANNONCE la réaffectation : le garde
+         du diff est là pour les réaffectations INCONNUES, pas pour celle-ci. */
+      _resetAnnonce=true;
+      if(uid)_depiler();
+    }catch(e){}
+  },
+  /* ═══ AVANT LE signOut ═══
+     Après lui il n'y a plus de jeton : ce qui reste en file partirait en 401.
+     On court une fois, brièvement — hors ligne le feu vert rend la main tout de
+     suite, et la course de 1,5 s garantit qu'on ne fait jamais attendre l'élève. */
+  avantDeconnexion:function(){
+    try{ return Promise.race([Promise.resolve(_depiler()),
+                              new Promise(function(r){ setTimeout(r,1500); })]); }
+    catch(e){ return Promise.resolve(); }
+  },
+  /* Le dépilage à la demande — c'est aussi ce que le geste des sept tapes appelle. */
+  depiler:function(){ try{ return _depiler(); }catch(e){ return Promise.resolve({envoye:0,motif:'?'}); } },
+  /* Ce que la file contient — à lire dans la console ou par le geste secret. */
   etat:function(){
     var parK={};
     for(var i=0;i<_OB.f.length;i++)parK[_OB.f[i].k]=(parK[_OB.f[i].k]||0)+1;
     return {envoi:ENVOI, enAttente:_OB.f.length, parType:parK, rebut:_OB.r.length,
             diffArme:_diffArme, proprio:_proprio(), disqueKO:_disqueKO,
+            feu:_peutDepiler(), motif:_dernierMotif, enVol:!!_enVol,
+            metronome:!!_metronome, purgeDue:_purgeDue(),
             premieres:_OB.f.slice(0,5).map(function(e){return e.k+' '+e.id;})};
   },
 };
 try{ window.SYNC=SYNC; }catch(e){}
+
+/* ═══ LES DÉCLENCHEURS — quatre, et pas un de plus ═══
+   Le métronome (45 s, armé paresseusement) vit dans §6. Les trois autres sont
+   ici. Chacun rend la main tout de suite : `_depiler()` ne rejette jamais, et le
+   verrou de ré-entrance rend les chevauchements inoffensifs — ce qui compte, car
+   'visibilitychange' et 'focus' se déclenchent à quelques millisecondes d'écart
+   au retour dans l'app.
+   ⚠️ Le 'visibilitychange' posé ici est SÉPARÉ de celui du 28/08 (qui vide le
+   minuteur de cloudSaveSoon) : deux tâches distinctes, deux écouteurs distincts. */
+try{
+  window.addEventListener('online',function(){ _depiler(); });
+  window.addEventListener('pagehide',function(){ _depiler(); });
+  document.addEventListener('visibilitychange',function(){ if(document.hidden)_depiler(); });
+}catch(e){}
