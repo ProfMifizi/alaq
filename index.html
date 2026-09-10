@@ -594,6 +594,74 @@ let U8 = U8_TALON;
    boucle de rattrapage du 17/08. Un getter lit la variable À CHAQUE appel.
    Les FONCTIONS, elles, sont capturées : une `function` déclarée ne change pas
    d'identité. */
+/* ═══ LE VERDICT NÉGATIF DU REGISTRE — UN SEUL ENDROIT (10/09/2026) ═══════════
+   🔴 CE QUE LA MESURE A TROUVÉ, ET QUI ÉTAIT INVISIBLE. Les unités 9 et 10
+   passaient à travers TOUTE la machinerie de notation de l'app. Pas un des
+   16 exercices du registre n'appelait `compterFaute`, et aucun ne remplissait
+   `MISSED`. Conséquences, mesurées le 10/09 sur les 125 écrans des deux unités :
+     ① `wrongCount` restait à 0 → la prime « sans faute » était versée À TOUS
+        LES COUPS, même en ratant chaque écran ;
+     ② `MISSED` restait vide → AUCUN rattrapage en fin de leçon : une notion
+        ratée n'était jamais rejouée. C'est exactement ce que Myriam veut
+        empêcher (« on veut que la notion soit acquise, pas bâclée ») ;
+     ③ `S.uerr` n'était jamais posé → l'unité restait « sans erreur » ;
+     ④ 52 écrans sur 125 ne coûtaient aucune qatra — 39 parce que l'exercice
+        n'en retirait jamais, 13 parce que la donnée avait oublié `coeurs:true`
+        (huit exercices sont écrits en opt-in, trois en opt-out : deux
+        conventions opposées dans le même registre).
+
+   LA DÉCISION DE MYRIAM (10/09) : « On aligne toutes les unités sans exception.
+   Une erreur coûte une qitra. C'est ce qui limitera naturellement la progression
+   trop rapide d'un élève. On veut que la notion soit acquise. » Puis, une fois
+   mesuré que l'unité 8 tourne depuis le 17/08 sur « un écran raté = une qatra » :
+   on aligne TOUT sur ce régime-là, pas sur un troisième.
+
+   POURQUOI ICI, ET PAS DANS LES SEIZE EXERCICES. `ctx.rater()` est l'entonnoir
+   UNIVERSEL : les 16 exercices qui jugent l'appellent, y compris les trois qui
+   ne prenaient pas de cœur. Le poser une fois dans l'hôte aligne tout le monde
+   d'un coup — et surtout, tout exercice écrit DEMAIN sera correct sans que
+   personne y pense. C'est la différence entre corriger seize fichiers et fermer
+   la classe entière.
+
+   ⚠️ L'UNITÉ 8 NE PASSE PAS PAR ICI, et c'est ce qui rend l'opération sûre :
+   elle a son propre `rate()` dans src/units/unit-8/adaptateur.js, qui fait déjà
+   ces quatre gestes. Vérifié : zéro `ctx.rater` dans tout src/units/unit-8/.
+   Aucun double comptage.
+
+   ⚠️ LE VERROU EST PAR ÉCRAN, PAS PAR ERREUR. `_coeurPris` est remis à zéro par
+   renderStep, comme `_objDone`. Sans lui, `toucher-zones` peut produire jusqu'à
+   60 erreurs sur UN écran pour 7 qatarāt : une élève serait bloquée au milieu
+   d'un exercice qu'elle allait réussir.
+
+   ⚠️ ET IL SERT AUSSI DE DÉDOUBLONNEUR : treize exercices appellent DÉJÀ
+   `ctx.hote.coeur()` en plus de `ctx.rater()`. Les deux passent désormais par
+   ici ; le premier arrivé prend le verdict, le second ne fait rien.
+
+   ⛔ CE QUE CE CORRECTIF NE RÉPARE PAS, et il faut le savoir : `total` vaut
+   toujours 0 en unités 9 et 10 (aucun écran n'y porte `graded`), donc l'écran
+   de fin continue d'afficher « 100 % de réussite ». Le pourcentage devient
+   incohérent avec les qatarāt perdues — c'est un changement d'affichage, il
+   passe par une preview et par Myriam (règle absolue 0). */
+function ecranRate(){
+  if(window._coeurPris)return false;          // UN écran raté = UNE qatra
+  window._coeurPris=true;
+  var st=QUEUE[qi];
+  /* ① la note — c'est elle qui retire la prime « sans faute » */
+  wrongCount++; gramFaute();
+  if(!EXAM&&!REVIEW)S.uerr[curU]=1;           // l'unité n'est plus « sans erreur »
+  /* ② LE RATTRAPAGE. C'est le geste qui fait revenir la notion en fin de leçon —
+     le vrai instrument de « pas bâclée », bien plus que la qatra. */
+  if(st&&MISSED.indexOf(st)<0)MISSED.push(st);
+  /* ③ la qatra. `coeurs:false` reste la seule exemption, et elle s'écrit dans la
+     DONNÉE, écran par écran — jamais dans un exercice. C'est ce qui remplace les
+     deux conventions opt-in/opt-out qui se contredisaient. */
+  if(!REVIEW&&!RECHARGE&&!(st&&st.coeurs===false))S.hearts=Math.max(0,S.hearts-1);
+  try{ document.getElementById('p-hearts').textContent=S.hearts;
+       document.getElementById('st-hearts').textContent=S.hearts; }catch(e){}
+  save();
+  return true;
+}
+
 window.__alaqHoteU8 = {
   /* les primitives */
   audioBeni, playSfx, objectifAtteint, advance, elogeHTML, toc, save, goNoHearts,
@@ -619,12 +687,7 @@ window.__alaqHoteU8 = {
      décision PÉRIMÉE (l'écran se termine quand même, et devient injouable
      à sa propre réussite). La bascule à 0 cœur se décide dans
      `objectifAtteint()`, au moment où le bouton s'allume — jamais avant. */
-  coeur(){
-    if(!REVIEW&&!RECHARGE) S.hearts=Math.max(0,S.hearts-1);
-    document.getElementById('p-hearts').textContent=S.hearts;
-    document.getElementById('st-hearts').textContent=S.hearts;
-    save();
-  },
+  coeur(){ ecranRate(); },
 };
 
 /* ── L'ENREGISTREMENT ─────────────────────────────────────────────────────
@@ -1406,7 +1469,20 @@ function toggleNarr(){
 function currentLesson(){ // 1re leçon non terminée d'une unité débloquée = le disque « courant » de l'accueil
   for(let u=0;u<UNITS.length;u++){ if(!unitUnlocked(u))continue;
     const ds=discsFor(u);
-    for(let k=0;k<ds.length;k++){ if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)])return {u:u,i:k}; }
+    for(let k=0;k<ds.length;k++){
+      /* 🔴 10/09 — UN DISQUE « À VENIR » N'EST PAS UNE LEÇON. Signalé par Myriam : à
+         0 qatra elle a choisi RECOMMENCER, l'app a ouvert un écran « Bientôt
+         disponible », l'écran de fin s'est affiché, et elle a gagné +3 qatarāt SANS
+         RIEN FAIRE — le disque grisé étant au passage marqué TERMINÉ dans sa
+         progression.
+         L'accueil, lui, connaissait la règle depuis le 24/08 : renderHome saute les
+         grisés pour calculer sa frontière (l. ~2590) et ne les déverrouille jamais
+         (l. ~2601). La même règle était donc écrite DEUX FOIS, et celle-ci l'avait
+         oubliée — d'où un disque atteignable par un chemin détourné alors qu'aucun
+         doigt ne peut le toucher sur l'accueil. */
+      if(ds[k]&&ds[k].aVenir)continue;
+      if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)])return {u:u,i:k};
+    }
   }
   return null;
 }
@@ -1457,8 +1533,21 @@ function showHearts(){
 function closeHearts(){ var m=document.getElementById('heartsModal'); if(m)m.classList.remove('on'); }
 function heartsReview(){ closeHearts(); S.bigNext=1; save(); startReview(); } // même barème que « Plus de cœurs » : la 1re recharge rend +3
 function noHeartsReview(){ closeNoHearts(); startReview(); }
-function noHeartsRedo(){ const L=currentLesson(); closeNoHearts(); if(L)startDisque(L.u,L.i,true); } // reprise « sans risque » de la leçon en cours
-function goNoHearts(){ document.getElementById('player').classList.remove('on'); showNoHearts(); }
+/* 🔴 10/09 — « RECOMMENCER » NE RECOMMENÇAIT PAS. Son commentaire disait « reprise de
+   la leçon EN COURS » ; son code appelait currentLesson(), c'est-à-dire la première
+   leçon NON TERMINÉE de tout le parcours — une AUTRE leçon, dans une autre unité. Pour
+   une élève à jour, c'était un disque grisé. On retient donc la leçon qu'on vient de
+   quitter, au moment précis où on la quitte. */
+let _repriseL=null;
+function noHeartsRedo(){
+  var L=_repriseL||currentLesson();
+  closeNoHearts();
+  if(L)startDisque(L.u,L.i,true);
+}
+function goNoHearts(){
+  _repriseL={u:curU,i:curD};   // la leçon qu'on quitte : c'est ELLE qu'on reprendra
+  document.getElementById('player').classList.remove('on'); showNoHearts();
+}
 
 /* ===== Onboarding de bienvenue + écran de série « 7 épis » ===== */
 let ONB={step:0,data:{}}, obAccountPending=false, pendingStreak=false;
@@ -2401,7 +2490,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='parcours-externe-10sept';
+const BUILD='qatra-et-pourcentage-10sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2410,7 +2499,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-10T15:02';
+const BUILD_DATE='2026-09-10T18:01';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2421,8 +2510,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.8';
-const BUILD_NUM=207;
+const VERSION='3.8.1';
+const BUILD_NUM=208;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2619,6 +2708,12 @@ let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,
 
 function startDisque(u,i,recharge){
   motBulleOff();
+  /* ⛔ FILET DE DERNIÈRE LIGNE (10/09) : un disque « À venir » ne s'ouvre PAR AUCUN
+     CHEMIN. L'accueil le refusait déjà, currentLesson le saute désormais — mais ce lot
+     a montré qu'un TROISIÈME chemin existait (le bouton RECOMMENCER), et qu'il suffisait
+     à marquer le disque terminé et à verser +3 qatarāt. La règle appartient donc au
+     lanceur, pas à chacun de ses appelants. */
+  try{ var _ds=discsFor(u); if(_ds&&_ds[i]&&_ds[i].aVenir)return; }catch(e){}
   if(!recharge&&S.hearts<=0){showNoHearts();return;}
   RECHARGE=!!recharge; // reprise depuis « Plus de cœurs » : aucune vie perdue, +3 à la fin
   EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
@@ -2640,7 +2735,7 @@ function startDisque(u,i,recharge){
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
   document.getElementById('st-hearts').textContent=S.hearts;
-  total=QUEUE.filter(s=>s.graded).length;
+  total=ecransNotes(QUEUE);
   renderStep();
 }
 function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();
@@ -2651,11 +2746,44 @@ function quitDisque(){document.getElementById('player').classList.remove('on');s
   window._spotVi=null;vfStop();window._vf=null;REVIEW=false;REVSES=null;REVFREE=false;RECHARGE=false;returnFromPlayer();}
 function progress(){document.getElementById('pbar-i').style.width=
   (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
+/* ═══ COMBIEN D'ÉCRANS SONT JUGÉS DANS CETTE FILE (10/09/2026) ═════════════════
+   C'est le DÉNOMINATEUR du pourcentage de fin. Il se lisait sur le seul drapeau
+   `graded`, que posent les écrans des unités 1 à 7 (mcq…) et l'adaptateur de
+   l'unité 8 — mais AUCUN écran des unités 9 et 10. Leur dénominateur valait donc 0,
+   et `acc` retombait sur son repli : « 100 % de réussite » quelles que soient les
+   erreurs. Signalé par Myriam le 10/09, après une leçon d'unité 9 ratée.
+
+   ⚠️ CE N'EST PAS « l'écran est-il noté ? » MAIS « PEUT-ON S'Y TROMPER ? ». Quatre
+   exercices ne le peuvent pas, structurellement : un seul jeton, une seule cible,
+   aucun leurre (assembler-phrase, glisser-scene, puzzle-mot, rappel-images). Les
+   compter diluerait la note avec des écrans où l'erreur est impossible — une élève
+   qui rate 3 écrans sur les 9 qui jugent afficherait 80 % au lieu de 67 %, et le
+   même nombre d'erreurs donnerait un score différent d'un disque à l'autre selon sa
+   proportion d'écrans de manipulation. Décision de Myriam (10/09) : « seuls les
+   écrans qui jugent entrent dans la note » — c'est déjà la règle de l'unité 8.
+
+   ⚠️ ET LE LECTEUR NE NOMME TOUJOURS PERSONNE (règle d'or n°3) : il DEMANDE au
+   registre si l'exercice de cet écran juge. Un exercice écrit demain n'aura qu'à
+   se déclarer ; aucune ligne d'ici ne bougera. */
+function ecransNotes(q){
+  var n=0;
+  for(var i=0;i<(q||[]).length;i++){
+    var st=q[i]; if(!st)continue;
+    if(st.graded){ n++; continue; }
+    try{
+      var R=window.__alaqExercices;
+      var p=(R&&typeof R.pour==='function')?R.pour(st.type):null;
+      if(p&&p.juge===true)n++;
+    }catch(e){}
+  }
+  return n;
+}
+
 function advance(){stopAudio();mascotteStop();qi++;renderStep();}
 
 function renderStep(){
   try{tikNote('écran → '+sigEcran())}catch(e){}   // la traîne des tickets (31/08)
-  answered=false;picked=null;progress();window._objDone=false;
+  answered=false;picked=null;progress();window._objDone=false;window._coeurPris=false;
   bulStop();spkOff();                       // on quitte proprement le jeu de bulles
   vfStop(); document.getElementById('player').classList.remove('vfmode');   // on sort proprement du vrai/faux
   /* ── LE CYCLE DE VIE DES EXERCICES (POC-2, 18/08/2026) ──────────────────
@@ -2703,7 +2831,14 @@ function renderStep(){
   if(window.__alaqExercices && window.__alaqExercices.monter({
       pas:st, corps:body, hote:window.__alaqHoteU8,
       reussir:objectifAtteint,
+      /* 🔴 10/09 — CET ENTONNOIR NE FAISAIT QUE PEINDRE. Les 16 exercices qui
+         jugent l'appellent, et il se contentait du bandeau rouge : ni qatra, ni
+         faute comptée, ni rattrapage. Il porte désormais le verdict complet
+         (voir ecranRate, plus haut) — et les trois exercices qui ne prenaient
+         aucun cœur (classer-harf, drag-harakat, scene-relation) rentrent dans
+         le rang sans qu'une ligne de leur code ne change. */
       rater:function(court,longue){
+        ecranRate();
         var fb=document.getElementById('fb'), ft=document.getElementById('p-foot');
         fb.className='fb bad'; fb.innerHTML='<span>✕</span> '+court;
         document.getElementById('why').innerHTML=longue||'';
@@ -3536,7 +3671,7 @@ function startExam(u){
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
   document.getElementById('st-hearts').textContent=S.hearts;
-  total=QUEUE.filter(s=>s.graded).length;
+  total=ecransNotes(QUEUE);
   renderStep();
 }
 function finishExam(){
@@ -3662,6 +3797,15 @@ function toc(){ // l'erreur : deux frappes du timbre Bayātī, +1,5 puis −1,5 
 function ctaOn2(){const c=document.getElementById('cta');if(c&&c.disabled){c.disabled=false;c.className='cta ok pope';}}
 function objectifAtteint(){ // signature + éloge écrit + le bouton s'allume — une fois par écran
   if(window._objDone)return;window._objDone=true;
+  /* 🔴 10/09 — LA MOITIÉ MANQUANTE DU RATTRAPAGE. La cascade classique retire
+     l'écran de MISSED quand on le réussit EN RATTRAPAGE (ctaClick, l. ~3407) ; les
+     exercices du registre ne passent jamais par elle. Tant que MISSED restait vide
+     en unités 9 et 10, personne ne pouvait s'en apercevoir. Depuis que les écrans
+     ratés y entrent, l'absence de cette ligne rendait le rattrapage SANS FIN :
+     finishDisque rouvrait la file des ratés, encore et encore, et la leçon ne se
+     terminait jamais. Trouvé par le harnais de l'unité 10, qui a refusé de voir
+     `S.done` posé. C'est le pendant exact de ecranRate() : l'un remplit, l'autre vide. */
+  if(inRetry){ var _st=QUEUE[qi], _k=MISSED.indexOf(_st); if(_k>=0)MISSED.splice(_k,1); }
   playSfx('bonne-reponse');
   // le message de réussite sur CHAQUE écran (Myriam, 07/08 soir) — l'éloge enseigne un mot
   try{
@@ -8197,7 +8341,7 @@ function launchQuranReview(queue){
   document.getElementById('finish').classList.remove('on');
   document.getElementById('p-hearts').textContent=S.hearts;
   document.getElementById('st-hearts').textContent=S.hearts;
-  total=QUEUE.filter(s=>s.graded).length;
+  total=ecransNotes(QUEUE);
   renderStep();
 }
 function startQuranOrder(){
