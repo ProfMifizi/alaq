@@ -4,12 +4,12 @@
      avion), réseau seulement si le cache est vide. La nouvelle version arrive par le NOUVEAU
      sw (skipWaiting), jamais par une réécriture de l'ancien cache (06/09)
    - audios, polices, icônes : cache d'abord (rapide), réseau en secours
-   - le cœur (app.css, assets.js, trace-lettres.js, progression.js, content/unites.js, polices.css, moteur U8 — la liste CORE) : cache
+   - le cœur (app.css, assets.js, trace-lettres.js, progression.js, parcours.js, content/unites.js, polices.css, moteur U8 — la liste CORE) : cache
      versionné d'abord, réseau en secours (06/09 : avant, pré-caché mais jamais SERVI)
    - les audios de la voix de Myriam sont pré-chargés à l'installation
    - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
      et mise en cache au fil des versets écoutés (voir VOIX dans index.html) */
-const CACHE='alaq-v206-2026-09-10';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v207-2026-09-10';  // L'APP : versionné, purgé à chaque livraison
 /* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
    ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
    versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
@@ -33,7 +33,7 @@ const MEDIA='alaq-medias';
    moi-même oubliée trois fois de suite ici. */
 const IMGV=17;
 const IMGCACHE='alaq-images-v'+IMGV;
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','assets.js','trace-lettres.js','progression.js','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','assets.js','trace-lettres.js','progression.js','parcours.js','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 /* LES CHEMINS DU CŒUR, pour la branche du fetch plus bas : résolus contre l'URL de ce script
    (la racine du site en prod, /dist/ ou /alaq-vercel-static/ en local), pour que la liste
    CORE reste écrite en relatif. Dérivé À L'EXÉCUTION : ce que le build ajoute à CORE
