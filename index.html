@@ -642,23 +642,58 @@ let U8 = U8_TALON;
    de fin continue d'afficher « 100 % de réussite ». Le pourcentage devient
    incohérent avec les qatarāt perdues — c'est un changement d'affichage, il
    passe par une preview et par Myriam (règle absolue 0). */
+/* 🔴 10/09, SECONDE DÉCISION — PRISE EN JOUANT. Myriam avait d'abord choisi « un écran
+   raté = une qatra », le régime de l'unité 8. Après l'avoir essayé sur son téléphone :
+   « c'est une qitra par ERREUR, c'est mieux. Je m'en rends compte en faisant le test. »
+   On sépare donc DEUX comptes qui étaient confondus :
+   — LA QATRA se paie à CHAQUE erreur. C'est la monnaie, et c'est le frein qu'elle veut.
+   — LA NOTE ET LE RATTRAPAGE restent PAR ÉCRAN : un écran raté est raté, qu'on s'y
+     trompe une fois ou dix. Sans cette séparation, `wrongCount` dépasserait le nombre
+     d'écrans et le pourcentage (option C, décidée le matin même) perdrait son sens. */
+let _verdictEnCours=false;
 function ecranRate(){
-  if(window._coeurPris)return false;          // UN écran raté = UNE qatra
-  window._coeurPris=true;
+  /* ⛔ DEUX ENTONNOIRS, UNE SEULE ERREUR. Treize exercices appellent `ctx.hote.coeur()`
+     EN PLUS de `ctx.rater()`, dans le même bloc synchrone : sans ce garde, la même
+     erreur coûterait DEUX qatarāt le jour où le verrou par écran disparaît. On
+     dédoublonne donc sur le TOUR D'HORLOGE, pas sur l'écran — deux appels du même
+     geste ne font qu'un verdict, deux clics distincts en font deux. */
+  if(_verdictEnCours)return false;
+  _verdictEnCours=true;
+  setTimeout(function(){ _verdictEnCours=false; },0);
+
   var st=QUEUE[qi];
-  /* ① la note — c'est elle qui retire la prime « sans faute » */
-  wrongCount++; gramFaute();
-  if(!EXAM&&!REVIEW)S.uerr[curU]=1;           // l'unité n'est plus « sans erreur »
-  /* ② LE RATTRAPAGE. C'est le geste qui fait revenir la notion en fin de leçon —
-     le vrai instrument de « pas bâclée », bien plus que la qatra. */
-  if(st&&MISSED.indexOf(st)<0)MISSED.push(st);
-  /* ③ la qatra. `coeurs:false` reste la seule exemption, et elle s'écrit dans la
-     DONNÉE, écran par écran — jamais dans un exercice. C'est ce qui remplace les
-     deux conventions opt-in/opt-out qui se contredisaient. */
-  if(!REVIEW&&!RECHARGE&&!(st&&st.coeurs===false))S.hearts=Math.max(0,S.hearts-1);
-  try{ document.getElementById('p-hearts').textContent=S.hearts;
-       document.getElementById('st-hearts').textContent=S.hearts; }catch(e){}
+  /* ① LA QATRA — UNE PAR ERREUR. `coeurs:false` reste la seule exemption, et elle
+     s'écrit dans la DONNÉE, écran par écran — jamais dans un exercice. */
+  if(!REVIEW&&!RECHARGE&&!(st&&st.coeurs===false)){
+    S.hearts=Math.max(0,S.hearts-1);
+    try{ document.getElementById('p-hearts').textContent=S.hearts;
+         document.getElementById('st-hearts').textContent=S.hearts; }catch(e){}
+  }
+  /* ② LA NOTE ET LE RATTRAPAGE — UNE FOIS PAR ÉCRAN. C'est le rattrapage qui fait
+     ACQUÉRIR la notion ; la qatra, elle, ne fait que freiner. */
+  if(!window._coeurPris){
+    window._coeurPris=true;
+    wrongCount++; gramFaute();
+    if(!EXAM&&!REVIEW)S.uerr[curU]=1;          // l'unité n'est plus « sans erreur »
+    if(st&&MISSED.indexOf(st)<0)MISSED.push(st);
+  }
   save();
+  /* ③ À ZÉRO, ON S'ARRÊTE — ON NE FINIT PAS L'ÉCRAN. Demande de Myriam (10/09) :
+     « normalement dès que le compteur arrive à zéro, on ne finit pas l'écran et on a
+     la popup ». Sans cela, un exercice à plusieurs manches se terminait tranquillement
+     à 0 qatra — la porte ouverte que le frein est censé fermer.
+     ⚠️ ON DÉTRUIT L'EXERCICE AVANT DE FERMER LE LECTEUR : `goNoHearts()` ne fait que
+     cacher le joueur ; sans `repos()`, les minuteries et les écouteurs de l'exercice
+     survivraient à l'écran (les trois incidents que `destroy()` existe pour éviter).
+     ⚠️ ET ON LAISSE VOIR LE MESSAGE D'ABORD : fermer dans le même souffle que le
+     bandeau rouge donnerait un écran qui disparaît sans qu'on ait lu pourquoi. */
+  if(!REVIEW&&!RECHARGE&&S.hearts<=0&&!window._zeroFait){
+    window._zeroFait=true;
+    setTimeout(function(){
+      try{ if(window.__alaqExercices)window.__alaqExercices.repos(); }catch(e){}
+      try{ goNoHearts(); }catch(e){}
+    },1100);
+  }
   return true;
 }
 
@@ -1486,8 +1521,24 @@ function currentLesson(){ // 1re leçon non terminée d'une unité débloquée =
   }
   return null;
 }
+/* La leçon qu'on vient de QUITTER — posée par goNoHearts(), lue par showNoHearts() et
+   noHeartsRedo(). Déclarée ICI, au-dessus de ses deux lecteurs : un `let` reste en zone
+   morte temporelle jusqu'à sa ligne, et si un jour quelqu'un appelle showNoHearts() plus
+   haut dans le fichier, la lecture lèverait au lieu de rendre `null`. */
+let _repriseL=null;
 function showNoHearts(){
-  const hasRev=allReviewWords().length>0, L=currentLesson();
+  /* 🔴 10/09 — LE BOUTON « RECOMMENCER » AVAIT DISPARU, et c'était ma faute. En faisant
+     sauter les disques grisés à `currentLesson()` (correctif du même jour), son résultat
+     devient `null` pour une élève À JOUR : plus aucune leçon « non terminée » à désigner.
+     Or c'est LUI qui décidait de l'affichage du bouton. Signalé par Myriam : « ça ne
+     propose plus de regagner 3 qitarat en refaisant l'exercice, ça propose uniquement
+     réviser — je trouve intéressant de pouvoir regagner 3 points en retentant
+     l'exercice, c'est valoriser l'erreur. »
+     La leçon qu'on vient de QUITTER est la bonne réponse dans les deux cas : c'est elle
+     qu'on veut reprendre, et c'est elle que `noHeartsRedo()` rouvre déjà. `currentLesson()`
+     ne reste qu'un repli, pour les chemins qui n'arrivent pas d'une leçon (le cœur du
+     bandeau, ou un démarrage refusé faute de qatarāt). */
+  const hasRev=allReviewWords().length>0, L=_repriseL||currentLesson();
   // 05/09 : le titre seul (Myriam 09/08) cède la place à la phrase du puits Zamzam (static,
   // voir #noHearts) — le sens des sept versets ne se dit plus ici, mais la métaphore de l'eau
   // qui se recharge par la révision, elle, revient explicitement (Myriam, 05/09).
@@ -1538,7 +1589,6 @@ function noHeartsReview(){ closeNoHearts(); startReview(); }
    leçon NON TERMINÉE de tout le parcours — une AUTRE leçon, dans une autre unité. Pour
    une élève à jour, c'était un disque grisé. On retient donc la leçon qu'on vient de
    quitter, au moment précis où on la quitte. */
-let _repriseL=null;
 function noHeartsRedo(){
   var L=_repriseL||currentLesson();
   closeNoHearts();
@@ -2490,7 +2540,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='qatra-et-pourcentage-10sept';
+const BUILD='qatra-par-erreur-10sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2499,7 +2549,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-10T18:01';
+const BUILD_DATE='2026-09-10T19:15';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2510,8 +2560,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.8.1';
-const BUILD_NUM=208;
+const VERSION='3.8.2';
+const BUILD_NUM=209;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
@@ -2783,7 +2833,7 @@ function advance(){stopAudio();mascotteStop();qi++;renderStep();}
 
 function renderStep(){
   try{tikNote('écran → '+sigEcran())}catch(e){}   // la traîne des tickets (31/08)
-  answered=false;picked=null;progress();window._objDone=false;window._coeurPris=false;
+  answered=false;picked=null;progress();window._objDone=false;window._coeurPris=false;window._zeroFait=false;
   bulStop();spkOff();                       // on quitte proprement le jeu de bulles
   vfStop(); document.getElementById('player').classList.remove('vfmode');   // on sort proprement du vrai/faux
   /* ── LE CYCLE DE VIE DES EXERCICES (POC-2, 18/08/2026) ──────────────────
