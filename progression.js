@@ -52,7 +52,20 @@ const HEARTS_MAX=7; // 7 vies — comme les sabʿ al-mathānī de la Fātiḥa
    tempo (le plus lent des voix segmentées), 7/7 versets complets, fichiers hébergés — et c'est
    le muṣḥaf muʿallim, la récitation enregistrée POUR enseigner. Voir QARI_DEFAUT. */
 const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qari:'ar.husary'};
-function load(){try{return Object.assign({},DEF,JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return Object.assign({},DEF)}}
+/* 🔴 11/09 — `DEF.done` ET `DEF.tests` SONT PARTAGÉS PAR RÉFÉRENCE. `DEF` est un objet
+   UNIQUE du module ; `Object.assign` copie une propriété-objet par RÉFÉRENCE, jamais en
+   la clonant. Sans les littéraux frais ci-dessous, `S.done` EST `DEF.done` dès qu'un
+   état ne porte pas ses propres `done`/`tests` — un appareil neuf, un nuage vide. La
+   première leçon écrit alors DANS LA CONSTANTE DU MODULE, pour toute la vie de l'onglet,
+   et le compte SUIVANT qui se connecte sans rechargement hérite de cette leçon : elle
+   part vers `user_progress` sous SON identifiant, définitivement (aucune policy
+   UPDATE/DELETE côté client). REPRODUIT le 11/09 par la revue adversariale, de bout en
+   bout, sur l'appareil partagé que ce fichier redoute déjà ailleurs (« le téléphone de
+   Myriam prêté, son compte puis celui de Mohamed »). `doReset()` d'index.html contourne
+   ce piège depuis toujours (`Object.assign({},DEF,{done:{},tests:{}})`) — ici, non.
+   ⚠️ Le format d'alaq2 ne bouge pas d'un bit : on ne change que l'IDENTITÉ des objets. */
+function _neuf(){ return Object.assign({},DEF,{done:{},tests:{}}); }
+function load(){try{return Object.assign(_neuf(),JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return _neuf()}}
 /* 🔴 08/09 (POC-5 sous-lot 4) — LA RÈGLE save/saveLocal PREND UN TROISIÈME SENS.
    Elle disait « save() date et envoie, saveLocal() ne date rien et n'envoie rien ».
    Elle dit désormais AUSSI : save() DÉCLARE au serveur, saveLocal() ne déclare rien.
@@ -180,6 +193,7 @@ const CLOUD={user:null};
 let _syncT=null;
 function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
 let _syncPret=false; // la première synchro de la session a-t-elle eu lieu ? (voir cloudSaveNow)
+let _refonteVue=0;   // §7 : la state_migrated_at du DERNIER cloudPull réussi — jamais un défaut de 0 par ignorance
 
 /* ═══ LES DEUX OUTILS DE SÛRETÉ (08/09/2026, POC-5 sous-lot 3) ═══════════════
    ① _avecGarde — AUCUN APPEL RÉSEAU SANS DÉLAI DE GARDE. Une requête qui ne se
@@ -274,7 +288,7 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
   try{ if(!SB||!CLOUD.user)return;
     /* 08/09 — même règle qu'au-dessus : l'identité se fige avant l'attente. */
     const uid=CLOUD.user.id;
-    const r=await _avecGarde(SB.from('profiles').select('state').eq('user_id',uid).maybeSingle(),
+    const r=await _avecGarde(SB.from('profiles').select('state,state_migrated_at').eq('user_id',uid).maybeSingle(),
                              8000, 'lecture du profil au démarrage');
     /* 🔴 08/09 — ON NE POSE _syncPret QU'APRÈS UNE LECTURE RÉUSSIE. Avant, le
        drapeau était posé quoi qu'il arrive : une requête en erreur ouvrait donc
@@ -285,6 +299,21 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
     if(r&&r.error) throw r.error;
     if(!CLOUD.user||CLOUD.user.id!==uid)return;   // le compte a changé pendant l'attente
     const remote=r&&r.data&&r.data.state;
+    /* 🔓 11/09 — LE TAMPON DU DERNIER EFFACEMENT (l'idée de Myriam, reformulée en code).
+       `S._ts` est une horloge CLIENT que save() rajeunit à CHAQUE geste, même sans
+       nouvelle leçon (06/09) — elle ne peut pas dire si CE contenu est antérieur à un
+       effacement. `state_migrated_at` est posée par le SERVEUR, à la ventilation ET à
+       chaque « Effacer ma progression » (alaq_effacer_progression) — jamais par un
+       client. Comparer deux dates SERVEUR ferme un trou qui existait déjà hors de tout
+       sous-lot 6 : REPRODUIT le 11/09 sur le code de production (build 209), sans une
+       ligne de ce lot — un ordinateur non reconnecté depuis un effacement, touché par
+       un geste anodin (un cœur perdu rajeunit S._ts sans rien changer au contenu),
+       GAGNAIT l'arbitrage sur sa vieille date et REPOUSSAIT sa progression effacée
+       dans le nuage. Mesuré : 40 leçon(s) ressuscitées, à l'écran ET dans le nuage. */
+    const _refonteServeur=(function(){ try{ var d=r&&r.data&&r.data.state_migrated_at;
+      var t=d?Date.parse(d):0; return isFinite(t)?t:0; }catch(e){ return 0; } })();
+    const _refonteConnue=+S._refonte||0;   // ce que CET appareil a déjà vu, avant tout arbitrage
+    _refonteVue=_refonteServeur;           // pour la livraison (§7) : la fraîcheur exigée d'un colis
     _syncPret=true;  // le nuage est LU : cet appareil a le droit de parler (voir cloudSaveNow)
     /* ═══ 🔴 17/08 — LA FUSION POUVAIT DÉTRUIRE LA PROGRESSION DU COMPTE ═══════════════
        Myriam : « je ne retrouve pas ma progression faite sur l'app sur mon ordinateur quand
@@ -304,6 +333,25 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
        ⚠️ Corollaire : la branche `else` n'écrit plus dans le nuage que quand on est certain
        que le local est bien celui de ce compte. C'est elle qui faisait les dégâts. */
     const memeCompte = S._uid && CLOUD.user && S._uid===CLOUD.user.id;
+    /* 🔓 11/09 — UN EFFACEMENT JAMAIS VU BAT TOUTE DATE ET TOUTE RICHESSE. Un appareil
+       qui n'a pas encore appris qu'un effacement a eu lieu doit s'effacer LUI-MÊME
+       avant même de comparer quoi que ce soit : sa richesse ET sa date sont EXACTEMENT
+       ce qu'un effacement veut faire disparaître. Ne mord que sur le MÊME compte — un
+       état étranger ou de propriété inconnue a déjà sa propre règle, plus stricte. */
+    const _reveille = memeCompte && _refonteServeur>_refonteConnue;
+    /* 🔴 11/09 (après-midi) — LA COURSE RPC/UPSERT PEUT RESSUSCITER PLUS LOIN QUE
+       L'ÉCRAN. Une deuxième revue a REPRODUIT que, dans la fenêtre où le RPC a déjà
+       daté l'effacement mais où l'upsert qui vide réellement `remote` n'est pas
+       encore arrivé, `_reveille` adoptait `remote` tel quel — encore périmé. Rien
+       dans ce fichier n'arrête ensuite ce contenu : le PROCHAIN save() ordinaire
+       (perdre un cœur suffit) le repousse via cloudSaveNow (aucun garde sur
+       state_migrated_at, seulement une comparaison de _ts client) ET via
+       _semerLeDiff→alaq_pousser (le sous-lot 5, qui écrit PERMANENMENT dans
+       user_progress, sans lire state_migrated_at non plus). Blinder ces deux tuyaux
+       un par un ne fermerait pas un troisième qu'on n'aurait pas vu. LA RÈGLE JUSTE :
+       ne JAMAIS laisser du contenu périmé ENTRER dans S. Si remote lui-même n'a pas
+       encore rattrapé CE refonte, on adopte du VIDE (DEF), jamais son contenu. */
+    const _remotePerime = _reveille && (+((remote&&remote._ts)||0))<=_refonteServeur;
     /* ⚠️ 17/08 soir — LA FENÊTRE DE MIGRATION, attrapée par la question de Myriam (« c'est
        réglé ou non ? »). Avant ce build, AUCUN état ne portait `_uid` : son téléphone —
        riche et légitime — est indistinguable d'un appareil étranger. Trancher à la DATE
@@ -334,14 +382,40 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
     if(!remote && _etranger){ takeRemote=true; }   // « prendre » un nuage vide = repartir de DEF
     else if(!remote) takeRemote=false;
     else if(S._fresh) takeRemote=true;
+    else if(_reveille) takeRemote=true;   // un effacement jamais vu bat toute date (voir plus haut)
     else if(memeCompte) takeRemote=(remote._ts||0)>(S._ts||0);
     else if(!S._uid) takeRemote=richesse(remote)>=richesse(S);  // fenêtre de migration : propriété INCONNUE
     else takeRemote=true;  // _uid d'un AUTRE compte : la propriété est PROUVÉE, le nuage fait foi — sans heuristique
     /* rien ne s'écrase en silence : l'état perdant est gardé sous une clé de côté */
     try{ var _perdant=takeRemote?S:remote; if(richesse(_perdant)>0)localStorage.setItem('alaq2_ecarte',JSON.stringify(_perdant)); }catch(e){}
+    /* 🔓 11/09 — CE QU'ON AURA LE DROIT DE LIVRER (§7), capturé ici parce que S change
+       de main deux lignes plus bas. _vuFresh : un état explicitement défié (_fresh) ne
+       se livre pas plus qu'il ne se compare — le drapeau existe pour dire « ne me fais
+       pas confiance », la livraison doit l'entendre autant que l'affichage. */
+    var _avantS=S, _vuDistant=remote, _vuMeme=memeCompte, _vuPris=takeRemote, _vuFresh=!!S._fresh;
     delete S._fresh;
     if(takeRemote){
-      S=Object.assign({},DEF,remote); delete S._fresh;
+      /* 🔴 11/09 — VOIR _remotePerime CI-DESSUS. Un remote qui n'a pas encore
+         rattrapé le refonte qui nous fait ADOPTER remote n'est pas une source sûre :
+         on repart de DEF, jamais de son contenu. DEF ne porte pas `_ts` — S._ts vaut
+         donc `undefined` s'il n'est pas posé — et c'est tout le sujet de la ligne
+         suivante.
+         🔴 11/09, LA LEÇON LA PLUS CHÈRE DE LA JOURNÉE. J'avais RETIRÉ ce `_ts` le
+         matin même, sur la foi d'une mutation qui ne faisait rougir aucun essai, en
+         concluant « redondant ». Il ne l'était pas : aucun essai ne jouait DEUX
+         cloudPull de suite dans la fenêtre de course. Au SECOND passage, `_reveille`
+         est déjà consommé (S._refonte a rattrapé), donc l'arbitrage retombe sur la
+         comparaison ordinaire `(remote._ts||0)>(S._ts||0)` — et un `S._ts` absent y
+         vaut 0, que le moindre horodatage distant écrase. Les 40 leçons effacées
+         revenaient à l'écran AU PASSAGE SUIVANT. Posé à `_refonteServeur`, `S._ts`
+         est par construction ≥ tout `remote._ts` qui a valu `_remotePerime` : le
+         distant périmé ne peut plus jamais regagner l'arbitrage, et l'appareil finit
+         même par REPOUSSER son état vide (cloudSaveNow), achevant l'effacement que
+         l'appareil disparu n'avait pas terminé. Une mutation qui ne mord pas ne
+         prouve pas qu'une ligne est morte — elle peut prouver que le banc est court. */
+      S=_remotePerime ? _neuf() : Object.assign(_neuf(),remote);
+      if(_remotePerime)S._ts=_refonteServeur;
+      delete S._fresh;
       /* 🔴 08/09 (sous-lot 4) — LE MARQUEUR SUIT S. cloudPull est l'un des trois points
          de réaffectation CONNUS : sans cette ligne, le diff se désarmerait à la première
          synchro descendante et ne déclarerait plus jamais rien. Trouvé par le banc, qui
@@ -350,6 +424,7 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
          sous-lot 5 (échouer fermé), importSave passe par SYNC.importe(). */
       try{ if(typeof _poserTag==='function')_poserTag(S); }catch(e){}
       S._uid=CLOUD.user.id;                           // désormais cet appareil sait à qui est cet état
+      S._refonte=Math.max(_refonteConnue,_refonteServeur);  // le tampon suit S, comme _uid (même contrat)
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
       /* ⛔ `S.rev` EST RÉSERVÉ AU VOCABULAIRE — un mot y porte son palier et sa
          prochaine date. Une notion de grammaire n'est pas un mot : elle ne s'oublie
@@ -371,6 +446,7 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
          un autre compte se connectait sur un appareil déjà utilisé — et on y écrasait sa
          progression. C'est exactement ce que `_uid` ferme. */
       if(CLOUD.user)S._uid=CLOUD.user.id;
+      S._refonte=Math.max(_refonteConnue,_refonteServeur);  // même tampon que dans l'autre branche
       try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
       cloudSaveNow();
     }
@@ -381,6 +457,19 @@ async function cloudPull(){ // fusion : le plus récent gagne ; premier login = 
        destinataire que tout ce moteur combat. Ici, les deux branches sont fermées et
        S._uid est posé dans les deux cas : la propriété est PROUVÉE. */
     _depiler();
+    /* 🔓 11/09 — LA LIVRAISON DU SOUS-LOT 6, REDESSINÉE APRÈS LA REVUE DU 10/09 ET LA
+       QUESTION DE MYRIAM DU 11/09. L'ÉLIGIBILITÉ DU PERDANT SE DÉCIDE ICI, où le
+       contexte de l'arbitrage vit encore : même compte prouvé (_vuMeme), pas
+       explicitement défié (_vuFresh), et — le point neuf — pas disqualifié par un
+       effacement que cet appareil vient tout juste d'apprendre (_reveille). Si
+       _reveille est vrai, le perdant EST le local périmé : c'est exactement le
+       contenu que ce garde existe pour arrêter, jamais pour livrer. Le GAGNANT (S)
+       n'a pas besoin de cette liste : il a déjà gagné l'arbitrage, donc déjà passé
+       la même épreuve — sa seule garde encore utile est la fraîcheur PAR BLOB
+       (_livrable, dans §7), qui protège contre la course entre la purge (le RPC qui
+       date l'effacement) et l'envoi (l'upsert qui vide réellement le blob). */
+    var _perdantSur = (_vuMeme && !_vuFresh && !_reveille) ? _avantS : null;
+    _livrerBlob(S, _perdantSur);
   }catch(e){}
 }
 async function cloudInit(){
@@ -913,6 +1002,33 @@ async function _purgerDistant(uid){
   var r=await _avecGarde(SB.rpc('alaq_effacer_progression',{}),12000,'purge distante');
   if(r&&r.error)throw r.error;
   try{ localStorage.removeItem(PURGE_CLE); }catch(e){}
+  /* 🔴 11/09, APRÈS QUATRE REVUES — LE TAMPON SE MET À JOUR ICI, PAS AILLEURS.
+     Une purge RÉUSSIE vient de poser un `state_migrated_at` neuf. Si cet appareil ne
+     l'apprend pas MAINTENANT, le prochain arbitrage le verra comme « un effacement que
+     je n'ai jamais vu » et révoquera l'état que l'élève s'est reconstitué depuis — la
+     leçon faite juste après son propre effacement disparaîtrait.
+     ⛔ J'AI D'ABORD ESSAYÉ UN DRAPEAU (« ce refonte, c'est moi »), et deux revues l'ont
+     démoli : posé APRÈS le RPC, il laissait une fenêtre entière où doReset avait déjà
+     remis le tampon à zéro ; et il n'était consommé que par un cloudPull menant au bout,
+     donc il survivait hors ligne, au changement de compte, à la déconnexion — jusqu'à
+     annuler l'effacement de QUELQU'UN D'AUTRE. Un drapeau a un cycle de vie ; une DATE
+     n'en a pas. On relit donc la vraie date au serveur, une fois, et on la range.
+     ⚠️ Si cette relecture échoue, on ne lève PAS : la purge, elle, a réussi. Le prochain
+     cloudPull verra `_reveille` et révoquera — sans dégât, puisque doReset a laissé
+     l'état VIDE. Le seul coût est une leçon faite dans cet intervalle, et c'est la
+     direction prudente : l'effacement gagne. */
+  try{
+    var rr=await _avecGarde(SB.from('profiles').select('state_migrated_at').eq('user_id',uid).maybeSingle(),
+                            8000,'relecture de la refonte après purge');
+    var dd=rr&&rr.data&&rr.data.state_migrated_at, tt=dd?Date.parse(dd):0;
+    /* ⚠️ `Math.max` est une ceinture, PAS un garde porteur : `state_migrated_at` ne fait
+       qu'avancer (un `now()` par effacement), et `S._uid===uid` écarte l'état d'un autre
+       compte — aucun essai ne peut donc le faire mordre, et la mutation le confirme. On
+       le garde quand même : il ne coûte rien, et le retirer serait refaire l'erreur du
+       matin (voir le commentaire de `S._ts` plus haut). L'impossibilité est DITE ici,
+       plutôt que proclamée comme une garantie. */
+    if(isFinite(tt)&&tt>0&&S&&S._uid===uid){ S._refonte=Math.max(+S._refonte||0,tt); saveLocal(); }
+  }catch(e){}
   /* Le portefeuille est append-only : le serveur ne supprime pas les lignes, il
      écrit une compensation. Le solde qu'il rend est donc déjà à zéro. */
   var d=r&&r.data;
@@ -1021,7 +1137,148 @@ function _aEnvoyer(){
 }
 function _reglerMetronome(){ if(_aEnvoyer())_armerMetronome(); else _desarmerMetronome(); }
 
-/* ═════════════════════ §7 · SYNC — ce qu'index.html appelle ═════════════════════ */
+/* ═════════════ §7 · LA LIVRAISON DU BLOB — le sous-lot 6 ═════════════
+   ┌──────────────────────────────────────────────────────────────────────────┐
+   │ POURQUOI. La file du sous-lot 5 déclare ce que l'élève produit À PARTIR   │
+   │ de maintenant. Elle est aveugle à deux choses : le blob `profiles.state`  │
+   │ qu'un vieux client continue d'écrire sans jamais rien déclarer, et l'état │
+   │ local PERDANT d'un arbitrage — les leçons faites en avion, que le serveur │
+   │ n'a jamais vues. Une union côté serveur ne peut pas unir ce qu'elle n'a   │
+   │ pas. MESURÉ le 10/09 sur la production : 4 leçons réelles vivent dans le  │
+   │ blob et dans AUCUNE table (U9-D5/6/7 et U1-D2, sur deux comptes).         │
+   │                                                                          │
+   │ CE LOT A ÉTÉ REFUSÉ UNE PREMIÈRE FOIS le 10/09 par la revue adversariale  │
+   │ (32 constats, 7 bloquants) : la version d'hier soir datait un blob par   │
+   │ SON ÉCRITURE (S._ts, une horloge client que save() rajeunit à chaque     │
+   │ geste), pas par l'âge de son contenu. Un effacement pouvait ressusciter  │
+   │ dès qu'un SEUL autre appareil était touché une fois. La correction du    │
+   │ 11/09 déplace le garde dans cloudPull lui-même (`_reveille`, voir plus   │
+   │ haut) : deux dates SERVEUR se comparent, jamais une horloge client. Ce   │
+   │ qui reste ici n'est que la LIVRAISON — l'arbitrage a déjà tranché qui a  │
+   │ le droit de parler.                                                     │
+   └──────────────────────────────────────────────────────────────────────────┘
+
+   CE QU'ON LIVRE, ET RIEN D'AUTRE : `done` et `tests`. Deux booléens monotones
+   — une leçon faite ne se défait pas, un test réussi ne se rate pas — donc une
+   union pure, rejouable sans fin sans jamais rien abîmer.
+
+   ⛔ `rev` EST VOLONTAIREMENT EXCLU. Côté serveur, la branche ③ d'alaq_livrer_blob
+   fusionne les paliers au `least()` : un blob livré ne peut que faire DESCENDRE
+   un palier — prudent pour une migration jouée UNE fois, dangereux pour une
+   livraison qui SE REJOUE (elle tirerait éternellement vers le bas ce que la
+   file vient de certifier). MESURÉ avant de trancher : aucun compte ne porte
+   dans son blob un mot que les tables ignorent, zéro mot serait rabaissé
+   aujourd'hui. Les mots continuent d'arriver par la file, qui ne descend pas.
+
+   ⛔ AUCUNE GRAINE, JAMAIS. Un blob est un texte que le client fabrique ; une
+   monnaie ne se lit pas dans un texte fabriqué par celui qu'elle enrichit.
+
+   ⛔ LA QUARANTAINE `_IGN` S'APPLIQUE ICI AUSSI — LE DEUXIÈME DÉFAUT DE LA
+   REVUE DU 10/09. `SYNC.importe()` (plus bas) met tout code ALAQ1. collé en
+   quarantaine : « on ne certifie pas au serveur une progression saisie au
+   clavier ». Le diff du sous-lot 5 la respecte en quatre points ; la version
+   d'hier soir de CE lot ne la consultait NULLE PART — 50 leçons tapées au
+   clavier entraient dans les tables, définitivement. `_moissonner` filtre
+   maintenant par `_IGN`, exactement comme `_semerLeDiff`.
+
+   LA FRAÎCHEUR PAR BLOB (`_livrable`) reste une garde SÉPARÉE de `_reveille`,
+   et les deux sont nécessaires : `_reveille` protège l'ARBITRAGE (donc l'écran)
+   contre un effacement que cet appareil ignorait encore ; `_livrable` protège
+   la LIVRAISON contre une course plus étroite — le RPC qui date l'effacement
+   (`alaq_effacer_progression`) et l'upsert qui vide réellement `profiles.state`
+   sont DEUX écritures séparées, à quelques secondes d'écart. Un blob dont le
+   `_ts` est antérieur à la dernière refonte connue n'est jamais livré, qu'il
+   soit gagnant ou perdant — c'est ce qui protège l'irréversible pendant cette
+   fenêtre, même si l'écran, lui, peut brièvement clignoter sur du périmé. */
+/* 🔴 11/09, APRÈS QUATRE REVUES — LA LIVRAISON PART DÉSARMÉE, ET C'EST UN CHOIX.
+   Tout ce qui suit est écrit, mesuré et éprouvé : 151 essais, des mutants qui mordent,
+   quatre revues adversariales. Mais ce lot est le SEUL pas IRRÉVERSIBLE du POC-5 (une
+   union dans user_progress ne se défait pas), et sa valeur MESURÉE est de 4 leçons sur
+   2 comptes — pendant que les quatre revues y ont trouvé 16 bloquants successifs.
+   Le RÉPARATION de la résurrection (le tampon `_refonte`, §cloudPull), elle, corrige un
+   défaut VIVANT en production et ne dépend en rien d'ici : elle part, la livraison non.
+   Basculer à `true` est une décision de Myriam, pas une conséquence du code qui compile.
+   ⚠️ Le banc arme l'interrupteur dans son bac pour éprouver toute la mécanique — un
+   essai vérifie séparément que la SOURCE, elle, part bien désarmée. */
+var LIVRAISON=false;      // l'interrupteur du lot, comme ENVOI pour la file
+var _livre={};            // empreinte de la dernière livraison acquittée, par compte
+var _livraisonMotif='';   // ce que SYNC.etat() montre au geste des sept tapes
+
+/* Un blob n'est livrable que s'il est POSTÉRIEUR à la dernière refonte connue du
+   SERVEUR (ventilation ou effacement) — jamais «`_syncPret` suffit», jamais un
+   défaut à 0 par ignorance : voir le fail-closed de _livrerBlob et de SYNC.livrer(). */
+function _livrable(b){
+  if(!b||typeof b!=='object')return false;
+  if(!_refonteVue)return true;   // ce compte n'a jamais connu de refonte serveur
+  return (+b._ts||0)>_refonteVue;
+}
+/* On ne moissonne que la VÉRACITÉ : l'app lit partout `!!S.done[k]`, une valeur
+   héritée qui ne serait pas le booléen `true` compte donc bien comme faite. La
+   quarantaine `_IGN` est consultée ICI, comme dans `_semerLeDiff` — même contrat. */
+function _moissonner(src,out){
+  if(!src||typeof src!=='object')return out;
+  var k,d=src.done,t=src.tests,H=Object.prototype.hasOwnProperty;
+  if(d&&typeof d==='object')for(k in d){ if(H.call(d,k)&&d[k]&&!_IGN['l:'+k])out.done[k]=true; }
+  if(t&&typeof t==='object')for(k in t){ if(H.call(t,k)&&t[k]&&!_IGN['t:'+k])out.tests[k]=true; }
+  return out;
+}
+/* Deux livraisons identiques ne repartent pas : cloudPull se rejoue à CHAQUE
+   reprise de focus, et un aller-retour par focus pour zéro insertion est un
+   réveil pour rien — la leçon que le métronome a déjà apprise (§6). */
+function _empreinteBlob(c){
+  var a=Object.keys(c.done).sort(), b=Object.keys(c.tests).sort();
+  return a.length+'·'+a.join(',')+'|'+b.length+'·'+b.join(',');
+}
+
+/* ⛔ NE REJETTE JAMAIS. Appelée en oubli-et-continue depuis cloudPull, comme
+   _depiler() : une promesse orpheline ferait poser au capteur 'unhandledrejection'
+   d'index.html un ticket illisible, au lieu du ticket nommé que _ticketSync produit
+   ici. `perdant` arrive déjà filtré par la propriété (voir la greffe dans cloudPull) :
+   cette fonction n'applique plus que la fraîcheur (_livrable), la quarantaine
+   (_moissonner) et le fail-closed (_refonteVue jamais 0 par ignorance). */
+function _livrerBlob(gagnant,perdant){
+  try{
+    if(!LIVRAISON||!SB){ _livraisonMotif='livraison eteinte'; return; }
+    if(!CLOUD.user){ _livraisonMotif='pas de session'; return; }
+    /* 🔓 11/09 — FAIL CLOSED. `_refonteVue` n'est posée QUE par un cloudPull qui a
+       RÉUSSI (voir plus haut) — jamais un défaut de 0 par ignorance. La revue du
+       10/09 a trouvé exactement l'inverse dans SYNC.livrer() : `+undefined||0`
+       éteignait le garde. `_syncPret` est la MÊME condition que celle qui autorise
+       déjà cloudSaveNow à parler (règle ① du §… historique) : on la réutilise. */
+    if(!_syncPret){ _livraisonMotif='refonte pas encore connue'; return; }
+    var uid=CLOUD.user.id;
+    /* Une purge attend son tour : livrer maintenant remettrait dans les tables ce
+       que l'élève vient de demander d'effacer. */
+    if(_purgeDue()){ _livraisonMotif='purge en attente'; return; }
+    var colis={done:{},tests:{}}, sources=0;
+    if(_livrable(gagnant)){ _moissonner(gagnant,colis); sources++; }
+    if(_livrable(perdant)){ _moissonner(perdant,colis); sources++; }
+    if(!sources){ _livraisonMotif='rien de posterieur a la derniere refonte connue'; return; }
+    var n=Object.keys(colis.done).length+Object.keys(colis.tests).length;
+    if(!n){ _livraisonMotif='rien a livrer (tout est en quarantaine ou deja connu)'; return; }
+    var emp=_empreinteBlob(colis);
+    if(_livre[uid]===emp){ _livraisonMotif='deja livre'; return; }
+    _avecGarde(SB.rpc('alaq_livrer_blob',{p_blob:colis}),12000,'livraison du blob')
+      .then(function(r){
+        if(r&&r.error)throw r.error;
+        /* ⚠️ On n'acquitte QUE si le compte n'a pas changé pendant l'attente :
+           sinon on marquerait « livré » dans le carnet de quelqu'un d'autre. */
+        if(CLOUD.user&&CLOUD.user.id===uid)_livre[uid]=emp;
+        var d=r&&r.data;
+        _livraisonMotif='livre '+((d&&d.lecons!=null)?d.lecons:'?')+' lecon(s), '
+                                +((d&&d.tests!=null)?d.tests:'?')+' test(s)';
+      })
+      .catch(function(e){
+        _ticketSync('livraison',e);
+        _livraisonMotif='echec : '+((e&&e.message)||e||'?');
+      });
+  }catch(e){
+    _ticketSync('livraison',e);
+    _livraisonMotif='echec : '+((e&&e.message)||e||'?');
+  }
+}
+
+/* ═════════════════════ §8 · SYNC — ce qu'index.html appelle ═════════════════════ */
 var SYNC={
   /* Déclaré au versement des graines (les trois sites de gagnerGraines). */
   graines:function(lesson_id,sans_faute,is_daily_goal){
@@ -1091,6 +1348,12 @@ var SYNC={
   },
   /* Le dépilage à la demande — c'est aussi ce que le geste des sept tapes appelle. */
   depiler:function(){ try{ return _depiler(); }catch(e){ return Promise.resolve({envoye:0,motif:'?'}); } },
+  /* 🔓 11/09 — SANS ARGUMENT, SANS PERDANT. La revue du 10/09 a trouvé que
+     SYNC.livrer(refonte) désarmait le garde par défaut (+undefined||0 -> 0). Le
+     rejeu manuel depuis la console ne livre donc plus QUE S, filtré par la même
+     fraîcheur que le chemin normal — jamais un « perdant », qui n'existe que le
+     temps d'un arbitrage et qu'on ne retrouve pas après coup (voir §7). */
+  livrer:function(){ try{ _livrerBlob(S,null); }catch(e){} },
   /* Ce que la file contient — à lire dans la console ou par le geste secret. */
   etat:function(){
     var parK={};
@@ -1099,6 +1362,7 @@ var SYNC={
             diffArme:_diffArme, proprio:_proprio(), disqueKO:_disqueKO,
             feu:_peutDepiler(), motif:_dernierMotif, enVol:!!_enVol,
             metronome:!!_metronome, purgeDue:_purgeDue(),
+            livraison:LIVRAISON, blobMotif:_livraisonMotif, refonteVue:_refonteVue,
             premieres:_OB.f.slice(0,5).map(function(e){return e.k+' '+e.id;})};
   },
 };

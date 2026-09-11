@@ -1849,7 +1849,19 @@ function doReset(){
      que le garde du diff ne la prenne pas pour une quatrième, inconnue. */
   try{ SYNC.reset(); }catch(e){}
   try{localStorage.removeItem('alaq2');}catch(e){}
+  /* 🔴 11/09 — LE TAMPON DE REFONTE SURVIT À L'EFFACEMENT, et c'est la racine d'un
+     bloquant trouvé par la QUATRIÈME revue. DEF ne porte pas `_refonte` : sans cette
+     ligne, `S._refonte` retombe à 0 ici, et tout cloudPull joué AVANT que la purge
+     distante n'ait abouti (elle a 12 s de délai de garde, et elle peut échouer) voit
+     « un effacement que je n'ai jamais vu » — il adopte alors le blob du nuage, QUI
+     N'EST PAS ENCORE VIDÉ, et rend à l'écran la progression qu'on vient d'effacer.
+     REPRODUIT : 40 leçons ressuscitées par un simple changement d'onglet. Le tampon ne
+     décrit pas la progression, il décrit CE QUE CET APPAREIL SAIT DU SERVEUR : un
+     effacement local n'a aucune raison de le lui faire oublier. La purge, quand elle
+     réussit, le met à jour elle-même (voir _purgerDistant dans progression.js). */
+  var _refonteAvant=+(S&&S._refonte)||0;
   S=Object.assign({},DEF,{done:{},tests:{}});
+  if(_refonteAvant)S._refonte=_refonteAvant;
   /* 🔴 09/09 — SANS CETTE LIGNE, « EFFACER MA PROGRESSION » LA RENDAIT.
      DEF ne porte pas `_uid` (progression.js:54) : l'état neuf ne savait donc plus à
      qui appartient cet appareil, et deux mécanismes s'écroulaient d'un coup —
@@ -2540,7 +2552,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='qatra-par-erreur-10sept';
+const BUILD='effacement-definitif-11sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2549,7 +2561,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-10T19:15';
+const BUILD_DATE='2026-09-11T18:05';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2560,8 +2572,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.8.2';
-const BUILD_NUM=209;
+const VERSION='3.9';
+const BUILD_NUM=210;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
