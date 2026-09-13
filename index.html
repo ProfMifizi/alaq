@@ -2263,6 +2263,27 @@ function objAddSec(sec){
 function validerJour(){
   var t=today(), y=yesterday();
   if(S.lastDay===t)return false;
+  /* 🔴 13/09 — LE FILET QUI MANQUAIT (signalé par Myriam : série de 16 jours tombée à 1,
+     EN SILENCE, sans le moindre Ghufrān proposé, rang inchangé). `S.pendingMiss` n'était
+     alimenté QUE par rollConstance() via S.consDay — qui avance dès qu'on OUVRE l'app,
+     même sans rien terminer. Une élève qui ouvre l'app tous les jours mais ne termine
+     rien un jour donné ne fait donc JAMAIS lever pendingMiss par ce biais — alors que
+     c'est EXACTEMENT le jour qui casse SA série ici, à elle, la mesure stricte. On
+     alimente donc aussi pendingMiss depuis le vrai signal de la série — S.lastDay, « le
+     dernier jour où j'ai terminé quelque chose » — avant de l'écraser : maybeGhufranPrompt()
+     (déjà câblé, déjà éprouvé) le verra au prochain rendu et proposera un Ghufrān au lieu
+     de casser en silence. La série tombe quand même à 1 ICI (zéro changement visible sur
+     l'écran de fin) — c'est useGhufran()/acceptMiss() qui tranchent le sort final, et
+     useGhufran() sait désormais la restaurer après coup (voir son en-tête).
+     ⚠️ Limite connue et acceptée : si consDay ET lastDay ont TOUS DEUX pris du retard (une
+     élève qui n'a pas ouvert l'app pendant plusieurs jours), ce filet ET rollConstance()
+     peuvent chacun ajouter leur part au même pendingMiss — un compte légèrement trop élevé,
+     jamais trop bas. Le plafond GHUF_MAX_JOURS et acceptMiss() absorbent cet écart sans
+     conséquence : l'important est qu'aucun jour manqué ne reste totalement invisible. */
+  if(S.lastDay&&S.lastDay!==y){
+    var _gJ=Math.max(0,daysGap(S.lastDay,t)-1);
+    if(_gJ>0){ S.pendingMiss=Math.max(S.pendingMiss||0,_gJ); S._streakAvantMiss=S.streak; }
+  }
   S.streak=(S.lastDay===y)?S.streak+1:1; S.lastDay=t;
   feteJourPending=true;                       // l'écran « 7 épis » se montrera à la fin de l'exercice
   try{checkBadges({});}catch(e){}             // les badges de série (3/7/30…) tombent au bon moment
@@ -2361,9 +2382,21 @@ function useGhufran(){
   if(m>GHUF_MAX_JOURS||(S.ghufLeft||0)<1){ acceptMiss(); return; }  // le plafond est une RÈGLE, pas un affichage
   S.ghufLeft-=1;               // UN Ghufrān pardonne UNE absence entière (Myriam 08/08)
   S.pendingMiss=0;
-  S.lastDay=yesterday();       // pont : la série continue comme si elle était venue
+  /* 🔴 13/09 — DEUX MOMENTS POSSIBLES POUR CE CLIC, ET ILS NE SE RÉPARENT PAS PAREIL.
+     ① Avant toute leçon du jour (S.lastDay est encore l'ANCIEN jour, pas aujourd'hui) :
+     le pont d'origine suffit — poser lastDay=hier fait que le PROCHAIN validerJour(),
+     tout à l'heure dans la même session, l'incrémentera normalement.
+     ② APRÈS une leçon déjà terminée aujourd'hui (validerJour() a DÉJÀ tranché — S.lastDay
+     vaut déjà AUJOURD'HUI, la série DÉJÀ remise à 1, exactement le cas de Myriam) : aucun
+     validerJour() ne revient avant demain, le pont d'hier ne servirait à rien. On restaure
+     alors directement depuis S._streakAvantMiss, posé par validerJour() juste avant la
+     casse — sinon « Utiliser un Ghufrān » consommerait un jeton pour rien, et la promesse
+     de l'écran (« ta série continue comme si tu étais venue ») serait fausse. */
+  if(S.lastDay===today()){ S.streak=(S._streakAvantMiss||0)+1; delete S._streakAvantMiss; }
+  else S.lastDay=yesterday();       // pont : la série continue comme si elle était venue
   save(); closeGhufran();
   toast('\ud83d\udd4a\ufe0f Ghufr\u0101n utilis\u00e9 — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
+  try{refreshStats();}catch(e){}
   if(_progVisible())renderProg();
 }
 /* ══ LA RÉTROGRADATION SE COMPTE EN RANGS, PLUS EN POINTS (Myriam, 01/09) ══
@@ -2427,7 +2460,7 @@ function retrogradation(){
 function acceptMiss(){
   var r=retrogradation();
   S.consScore=Math.max(0,r.score);
-  S.streak=0; S.pendingMiss=0; save();
+  S.streak=0; S.pendingMiss=0; delete S._streakAvantMiss; save();
   closeGhufran(); if(_progVisible())renderProg();
 }
 /* Carte détail du rang (clic sur le rang) */
@@ -2552,7 +2585,7 @@ document.addEventListener('click',function(e){
 window.addEventListener('scroll',discTipClose,{passive:true});
 window.addEventListener('wheel',discTipClose,{passive:true});
 window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='effacement-definitif-11sept';
+const BUILD='filet-serie-13sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2561,7 +2594,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-11T18:05';
+const BUILD_DATE='2026-09-13T20:00';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2572,8 +2605,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.9';
-const BUILD_NUM=210;
+const VERSION='3.9.1';
+const BUILD_NUM=211;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 // Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
 function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
