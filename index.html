@@ -589,10 +589,12 @@ const UNITS=(function(){
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── LE TALON ──────────────────────────────────────────────────────────────
-   ⚠️ `renderStep` appelle `U8.repos()` à CHAQUE écran, U8 ou non. Entre le
-   premier rendu et l'arrivée du module, `U8` doit donc déjà répondre — sinon
-   toute leçon des unités 1 à 7 ouverte dans cette fenêtre planterait. Un talon
-   inerte, jamais `null`.
+   ⚠️ `renderStep` appelle `U8.repos()` à CHAQUE écran, U8 ou non. Depuis le
+   14/09 renderStep vit dans le MÊME bundle que U8 (src/player/, importé en
+   premier par entree.js) : aucune leçon ne s'ouvre plus avant l'arrivée du
+   module (lecteurPret). Le talon reste nécessaire : le lecteur se publie à SA
+   propre évaluation, et si entree.js échouait ensuite — avant de poser U8 —
+   renderStep tournerait sur ce talon. Un talon inerte, jamais `null`.
    ⚠️ Il garde aussi vraie la garde `typeof U8!=='undefined'` dont dépend
    outils/sons-des-lecons.js, qui rejoue ce fichier PAR TRANCHES dans un bac à
    sable : sa tranche « AUDIO » ne contient pas cette déclaration. */
@@ -612,113 +614,20 @@ let U8 = U8_TALON;
    boucle de rattrapage du 17/08. Un getter lit la variable À CHAQUE appel.
    Les FONCTIONS, elles, sont capturées : une `function` déclarée ne change pas
    d'identité. */
-/* ═══ LE VERDICT NÉGATIF DU REGISTRE — UN SEUL ENDROIT (10/09/2026) ═══════════
-   🔴 CE QUE LA MESURE A TROUVÉ, ET QUI ÉTAIT INVISIBLE. Les unités 9 et 10
-   passaient à travers TOUTE la machinerie de notation de l'app. Pas un des
-   16 exercices du registre n'appelait `compterFaute`, et aucun ne remplissait
-   `MISSED`. Conséquences, mesurées le 10/09 sur les 125 écrans des deux unités :
-     ① `wrongCount` restait à 0 → la prime « sans faute » était versée À TOUS
-        LES COUPS, même en ratant chaque écran ;
-     ② `MISSED` restait vide → AUCUN rattrapage en fin de leçon : une notion
-        ratée n'était jamais rejouée. C'est exactement ce que Myriam veut
-        empêcher (« on veut que la notion soit acquise, pas bâclée ») ;
-     ③ `S.uerr` n'était jamais posé → l'unité restait « sans erreur » ;
-     ④ 52 écrans sur 125 ne coûtaient aucune qatra — 39 parce que l'exercice
-        n'en retirait jamais, 13 parce que la donnée avait oublié `coeurs:true`
-        (huit exercices sont écrits en opt-in, trois en opt-out : deux
-        conventions opposées dans le même registre).
-
-   LA DÉCISION DE MYRIAM (10/09) : « On aligne toutes les unités sans exception.
-   Une erreur coûte une qitra. C'est ce qui limitera naturellement la progression
-   trop rapide d'un élève. On veut que la notion soit acquise. » Puis, une fois
-   mesuré que l'unité 8 tourne depuis le 17/08 sur « un écran raté = une qatra » :
-   on aligne TOUT sur ce régime-là, pas sur un troisième.
-
-   POURQUOI ICI, ET PAS DANS LES SEIZE EXERCICES. `ctx.rater()` est l'entonnoir
-   UNIVERSEL : les 16 exercices qui jugent l'appellent, y compris les trois qui
-   ne prenaient pas de cœur. Le poser une fois dans l'hôte aligne tout le monde
-   d'un coup — et surtout, tout exercice écrit DEMAIN sera correct sans que
-   personne y pense. C'est la différence entre corriger seize fichiers et fermer
-   la classe entière.
-
-   ⚠️ L'UNITÉ 8 NE PASSE PAS PAR ICI, et c'est ce qui rend l'opération sûre :
-   elle a son propre `rate()` dans src/units/unit-8/adaptateur.js, qui fait déjà
-   ces quatre gestes. Vérifié : zéro `ctx.rater` dans tout src/units/unit-8/.
-   Aucun double comptage.
-
-   ⚠️ LE VERROU EST PAR ÉCRAN, PAS PAR ERREUR. `_coeurPris` est remis à zéro par
-   renderStep, comme `_objDone`. Sans lui, `toucher-zones` peut produire jusqu'à
-   60 erreurs sur UN écran pour 7 qatarāt : une élève serait bloquée au milieu
-   d'un exercice qu'elle allait réussir.
-
-   ⚠️ ET IL SERT AUSSI DE DÉDOUBLONNEUR : treize exercices appellent DÉJÀ
-   `ctx.hote.coeur()` en plus de `ctx.rater()`. Les deux passent désormais par
-   ici ; le premier arrivé prend le verdict, le second ne fait rien.
-
-   ⛔ CE QUE CE CORRECTIF NE RÉPARE PAS, et il faut le savoir : `total` vaut
-   toujours 0 en unités 9 et 10 (aucun écran n'y porte `graded`), donc l'écran
-   de fin continue d'afficher « 100 % de réussite ». Le pourcentage devient
-   incohérent avec les qatarāt perdues — c'est un changement d'affichage, il
-   passe par une preview et par Myriam (règle absolue 0). */
-/* 🔴 10/09, SECONDE DÉCISION — PRISE EN JOUANT. Myriam avait d'abord choisi « un écran
-   raté = une qatra », le régime de l'unité 8. Après l'avoir essayé sur son téléphone :
-   « c'est une qitra par ERREUR, c'est mieux. Je m'en rends compte en faisant le test. »
-   On sépare donc DEUX comptes qui étaient confondus :
-   — LA QATRA se paie à CHAQUE erreur. C'est la monnaie, et c'est le frein qu'elle veut.
-   — LA NOTE ET LE RATTRAPAGE restent PAR ÉCRAN : un écran raté est raté, qu'on s'y
-     trompe une fois ou dix. Sans cette séparation, `wrongCount` dépasserait le nombre
-     d'écrans et le pourcentage (option C, décidée le matin même) perdrait son sens. */
-let _verdictEnCours=false;
-function ecranRate(){
-  /* ⛔ DEUX ENTONNOIRS, UNE SEULE ERREUR. Treize exercices appellent `ctx.hote.coeur()`
-     EN PLUS de `ctx.rater()`, dans le même bloc synchrone : sans ce garde, la même
-     erreur coûterait DEUX qatarāt le jour où le verrou par écran disparaît. On
-     dédoublonne donc sur le TOUR D'HORLOGE, pas sur l'écran — deux appels du même
-     geste ne font qu'un verdict, deux clics distincts en font deux. */
-  if(_verdictEnCours)return false;
-  _verdictEnCours=true;
-  setTimeout(function(){ _verdictEnCours=false; },0);
-
-  var st=QUEUE[qi];
-  /* ① LA QATRA — UNE PAR ERREUR. `coeurs:false` reste la seule exemption, et elle
-     s'écrit dans la DONNÉE, écran par écran — jamais dans un exercice. */
-  if(!REVIEW&&!RECHARGE&&!(st&&st.coeurs===false)){
-    S.hearts=Math.max(0,S.hearts-1);
-    try{ document.getElementById('p-hearts').textContent=S.hearts;
-         document.getElementById('st-hearts').textContent=S.hearts; }catch(e){}
-  }
-  /* ② LA NOTE ET LE RATTRAPAGE — UNE FOIS PAR ÉCRAN. C'est le rattrapage qui fait
-     ACQUÉRIR la notion ; la qatra, elle, ne fait que freiner. */
-  if(!window._coeurPris){
-    window._coeurPris=true;
-    wrongCount++; gramFaute();
-    if(!EXAM&&!REVIEW)S.uerr[curU]=1;          // l'unité n'est plus « sans erreur »
-    if(st&&MISSED.indexOf(st)<0)MISSED.push(st);
-  }
-  save();
-  /* ③ À ZÉRO, ON S'ARRÊTE — ON NE FINIT PAS L'ÉCRAN. Demande de Myriam (10/09) :
-     « normalement dès que le compteur arrive à zéro, on ne finit pas l'écran et on a
-     la popup ». Sans cela, un exercice à plusieurs manches se terminait tranquillement
-     à 0 qatra — la porte ouverte que le frein est censé fermer.
-     ⚠️ ON DÉTRUIT L'EXERCICE AVANT DE FERMER LE LECTEUR : `goNoHearts()` ne fait que
-     cacher le joueur ; sans `repos()`, les minuteries et les écouteurs de l'exercice
-     survivraient à l'écran (les trois incidents que `destroy()` existe pour éviter).
-     ⚠️ ET ON LAISSE VOIR LE MESSAGE D'ABORD : fermer dans le même souffle que le
-     bandeau rouge donnerait un écran qui disparaît sans qu'on ait lu pourquoi. */
-  if(!REVIEW&&!RECHARGE&&S.hearts<=0&&!window._zeroFait){
-    window._zeroFait=true;
-    setTimeout(function(){
-      try{ if(window.__alaqExercices)window.__alaqExercices.repos(); }catch(e){}
-      try{ goNoHearts(); }catch(e){}
-    },1100);
-  }
-  return true;
-}
+/* ═══ LE VERDICT NÉGATIF (ecranRate, l'arbitre des seize exercices du registre et des écrans
+   classiques) vit dans src/player/index.js depuis le 14/09/2026 — un MODULE, importé en premier
+   par src/entree.js ; le module se publie LUI-MÊME sur window (sa fin de fichier). Son verrou _verdictEnCours l'a suivi. ═══ */
 
 window.__alaqHoteU8 = {
   /* les primitives */
-  audioBeni, playSfx, objectifAtteint, advance, elogeHTML, toc, save, goNoHearts,
+  audioBeni, playSfx, objectifAtteint, elogeHTML, toc, save, goNoHearts,
   stopAudio, draggable, dansRectMarge, icoImg,
+  /* 🔴 14/09 — `advance` vit dans src/player/ (un MODULE, exécuté APRÈS ce script). Écrit ici
+     en raccourci, comme les autres, il serait capturé au chargement : ReferenceError, et tout
+     ce script mourrait avant même l'accueil. Un accesseur le résout à l'appel — comme l'état
+     juste en dessous — et l'unité 8 (pont/hote.js) le lit à SON initialisation, après le lecteur
+     (src/entree.js l'importe en premier). */
+  get advance(){ return advance; },
   /* l'état, LU À CHAQUE APPEL */
   get S(){ return S; },  get QUEUE(){ return QUEUE; },  get qi(){ return qi; },
   get MISSED(){ return MISSED; },  get curU(){ return curU; },
@@ -729,7 +638,8 @@ window.__alaqHoteU8 = {
   compterFaute(){ wrongCount++; gramFaute(); },
   poserSonCourant(a){ _curAudio = a; },
   /* ── PERDRE UN CŒUR (unité 9, 23/08) ──────────────────────────────────────
-     Même idiome qu'aux 3 sites classiques (l. ~5717, ~6288, ~6506) : ni la
+     Même idiome qu'aux 3 sites classiques d'index.html (fsTap, asmTaper, tileTap)
+     et qu'à ctaClick (src/player/) : ni la
      révision ni la reprise « recharge » ne coûtent de cœur, et les deux
      affichages suivent. Une primitive à part plutôt qu'un doublon du bloc
      `graded` classique : les exercices du registre tiennent leur PROPRE
@@ -1610,7 +1520,7 @@ function noHeartsReview(){ closeNoHearts(); startReview(); }
 function noHeartsRedo(){
   var L=_repriseL||currentLesson();
   closeNoHearts();
-  if(L)startDisque(L.u,L.i,true);
+  if(L&&lecteurPret())startDisque(L.u,L.i,true);
 }
 function goNoHearts(){
   _repriseL={u:curU,i:curD};   // la leçon qu'on quitte : c'est ELLE qu'on reprendra
@@ -1719,7 +1629,7 @@ function onbLaunchLesson(){
   document.getElementById('onb').classList.remove('on');
   obAccountPending=!CLOUD.user;                       // proposer le compte après cette 1re leçon si non connectée
   var L=(typeof currentLesson==='function'&&currentLesson())||{u:0,i:0};
-  startDisque(L.u,L.i);
+  if(lecteurPret())startDisque(L.u,L.i);   // l'onboarding est consommé ; sans lecteur : l'accueil, et le toast dit de recharger
 }
 document.addEventListener('click',function(e){
   var b=e.target.closest('#onb .ob-opt'); if(!b)return;
@@ -2514,7 +2424,7 @@ try{rollConstance();}catch(e){}
 /* ═══ L'ACCUEIL a déménagé dans ui/accueil.js (12/09/2026) : OFFS, refreshStats, toAr,
    sujetCours, discLabel, discImg, discTip/discTipClose et leurs écouteurs. Script classique
    chargé plus haut, AVANT celui-ci — voir l'en-tête de ui/accueil.js. ═══ */
-const BUILD='ui-externe-14sept';
+const BUILD='lecteur-module-14sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2523,7 +2433,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-14T07:05';
+const BUILD_DATE='2026-09-14T17:50';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2534,8 +2444,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.10';
-const BUILD_NUM=212;
+const VERSION='3.11';
+const BUILD_NUM=213;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 /* ═══ … et la suite de l'accueil aussi (ui/accueil.js) : iconFallback, _homeFocusPending,
    focusCurrentDisc, renderHome, insecables, arEnveloppe, setBanner, onHomeScroll. Les
@@ -2544,1020 +2454,27 @@ window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais 
 
 /* ================= JOUEUR ================= */
 let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,MISSED=[],inRetry=false,EXAM=false;
-
-function startDisque(u,i,recharge){
-  motBulleOff();
-  /* ⛔ FILET DE DERNIÈRE LIGNE (10/09) : un disque « À venir » ne s'ouvre PAR AUCUN
-     CHEMIN. L'accueil le refusait déjà, currentLesson le saute désormais — mais ce lot
-     a montré qu'un TROISIÈME chemin existait (le bouton RECOMMENCER), et qu'il suffisait
-     à marquer le disque terminé et à verser +3 qatarāt. La règle appartient donc au
-     lanceur, pas à chacun de ses appelants. */
-  try{ var _ds=discsFor(u); if(_ds&&_ds[i]&&_ds[i].aVenir)return; }catch(e){}
-  if(!recharge&&S.hearts<=0){showNoHearts();return;}
-  RECHARGE=!!recharge; // reprise depuis « Plus de cœurs » : aucune vie perdue, +3 à la fin
-  EXAM=false;curU=u;curD=i;QUEUE=discsFor(u)[i].build(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
-  /* ⚠️ 28/08 — GARDE-FOU CONTRE UN build() QUI RATE. Sans lui, un module non chargé
-     (l'incident src/entree.js du 27/08 : window.__alaqU9 undefined) renvoie un
-     tableau VIDE, renderStep() lit `!QUEUE[0]` dès le premier écran et appelle
-     finishDisque() — qui marque alors la leçon FAITE, verse XP et graines, avance
-     la série ET le score de constance, pour une leçon jamais jouée. Un incident
-     technique se traduisait en fausse récompense. Ici, on ne rentre même pas dans
-     le lecteur : ni progression ni cœur consommé, juste un message honnête. */
-  if(!QUEUE||!QUEUE.length){
-    console.error('leçon vide : build() n’a rendu aucun écran (unité '+u+', disque '+i+')');
-    toast('Cette leçon n’a pas pu se charger — réessaie dans un instant');
-    return;
-  }
-  comboReset();
-  prechargerNoms(); // les 28 noms en mémoire avant le 1er toucher (latence, 07/08)
-  document.getElementById('player').classList.add('on');
-  document.getElementById('finish').classList.remove('on');
-  document.getElementById('p-hearts').textContent=S.hearts;
-  document.getElementById('st-hearts').textContent=S.hearts;
-  total=ecransNotes(QUEUE);
-  renderStep();
-}
-function quitDisque(){document.getElementById('player').classList.remove('on');stopAudio();
-  /* 31/08 (audit) : sans ce repos(), quitter en plein écran U8/U9 laissait la boucle rAF
-     des bulles tourner à 60 fps sur des nœuds détachés + le MutationObserver branché —
-     seul renderStep appelait le nettoyage, donc jamais avant la PROCHAINE leçon. */
-  if(window.__alaqExercices){try{window.__alaqExercices.repos()}catch(e){}}
-  window._spotVi=null;vfStop();window._vf=null;REVIEW=false;REVSES=null;REVFREE=false;RECHARGE=false;returnFromPlayer();}
-function progress(){document.getElementById('pbar-i').style.width=
-  (QUEUE.length?Math.round(qi/QUEUE.length*100):0)+'%';}
-/* ═══ COMBIEN D'ÉCRANS SONT JUGÉS DANS CETTE FILE (10/09/2026) ═════════════════
-   C'est le DÉNOMINATEUR du pourcentage de fin. Il se lisait sur le seul drapeau
-   `graded`, que posent les écrans des unités 1 à 7 (mcq…) et l'adaptateur de
-   l'unité 8 — mais AUCUN écran des unités 9 et 10. Leur dénominateur valait donc 0,
-   et `acc` retombait sur son repli : « 100 % de réussite » quelles que soient les
-   erreurs. Signalé par Myriam le 10/09, après une leçon d'unité 9 ratée.
-
-   ⚠️ CE N'EST PAS « l'écran est-il noté ? » MAIS « PEUT-ON S'Y TROMPER ? ». Quatre
-   exercices ne le peuvent pas, structurellement : un seul jeton, une seule cible,
-   aucun leurre (assembler-phrase, glisser-scene, puzzle-mot, rappel-images). Les
-   compter diluerait la note avec des écrans où l'erreur est impossible — une élève
-   qui rate 3 écrans sur les 9 qui jugent afficherait 80 % au lieu de 67 %, et le
-   même nombre d'erreurs donnerait un score différent d'un disque à l'autre selon sa
-   proportion d'écrans de manipulation. Décision de Myriam (10/09) : « seuls les
-   écrans qui jugent entrent dans la note » — c'est déjà la règle de l'unité 8.
-
-   ⚠️ ET LE LECTEUR NE NOMME TOUJOURS PERSONNE (règle d'or n°3) : il DEMANDE au
-   registre si l'exercice de cet écran juge. Un exercice écrit demain n'aura qu'à
-   se déclarer ; aucune ligne d'ici ne bougera. */
-function ecransNotes(q){
-  var n=0;
-  for(var i=0;i<(q||[]).length;i++){
-    var st=q[i]; if(!st)continue;
-    if(st.graded){ n++; continue; }
-    try{
-      var R=window.__alaqExercices;
-      var p=(R&&typeof R.pour==='function')?R.pour(st.type):null;
-      if(p&&p.juge===true)n++;
-    }catch(e){}
-  }
-  return n;
-}
-
-function advance(){stopAudio();mascotteStop();qi++;renderStep();}
-
-function renderStep(){
-  try{tikNote('écran → '+sigEcran())}catch(e){}   // la traîne des tickets (31/08)
-  answered=false;picked=null;progress();window._objDone=false;window._coeurPris=false;window._zeroFait=false;
-  bulStop();spkOff();                       // on quitte proprement le jeu de bulles
-  vfStop(); document.getElementById('player').classList.remove('vfmode');   // on sort proprement du vrai/faux
-  /* ── LE CYCLE DE VIE DES EXERCICES (POC-2, 18/08/2026) ──────────────────
-     `repos()` détruit l'exercice monté à l'écran précédent, quel qu'il soit : ses
-     minuteries, ses écouteurs de `window`, ses nœuds posés hors du conteneur, et
-     la classe qui met son CSS sous cloche. Sans lui, une invite d'aide survit à
-     son écran et fait pulser le bouton du SUIVANT (Myriam, 17/08), et les bulles
-     d'une leçon de grammaire continuent de monter derrière une leçon de lettres.
-     ⚠️ Il s'appelle à CHAQUE écran, exercice ou non — c'est ce qui garantit qu'on
-     ne laisse jamais rien derrière soi en QUITTANT un exercice. */
-  if(window.__alaqExercices) window.__alaqExercices.repos();
-  const body=document.getElementById('p-body');
-  const foot=document.getElementById('p-foot');
-  const cta=document.getElementById('cta');
-  foot.className='p-foot';document.getElementById('fb').innerHTML='';document.getElementById('why').innerHTML='';
-  cta.className='cta';cta.disabled=true;cta.textContent='CONTINUER';cta.onclick=advance;
-  const st=QUEUE[qi];
-  if(!st)return finishDisque();
-  body.scrollTop=0;
-  // Lecture auto de la CONSIGNE (une ligne par écran, demande Myriam 06/07) — jamais relue
-  // si c'est la même que l'écran précédent (séries de quiz), coupée par le toggle 🗣️/🔇.
-  if(qi===0)window._lastInstr='';
-  {const _ins=spokenInstr(st),_key=st.instr||_ins;
-   if(_ins&&_key!==window._lastInstr)setTimeout(()=>readInstr(_ins,st.instr),250);
-   window._lastInstr=_key;}
-
-  body.classList.toggle('p-center',!!st.center);
-  body.classList.toggle('p-bulles',st.type==='bulles'||st.type==='bulmots'); // pleine hauteur (Myriam 10/08) — se retire seule à l'écran suivant
-  body.classList.toggle('p-asm',st.type==='assemble');  // écriture : colonne flex, la traduction se centre tuiles↔bandeau
-  body.classList.toggle('p-examfr',!!st.fr);            // « Lis le mot » : colonne flex, la traduction révélée se centre choix↔bandeau (Myriam 24/08)
-  /* ── LE REGISTRE DES EXERCICES — LE LECTEUR NE NOMME PLUS PERSONNE ──────
-     🔴 CE QU'IL Y AVAIT ICI, ET POURQUOI C'EST PARTI (POC-2, 18/08/2026). Une
-     branche écrite à la main : `if(st.type==='u8') return U8.dessine(st,body)`.
-     Elle marchait — mais elle disait que le lecteur devait CONNAÎTRE chaque
-     unité par son nom. Ajouter un exercice voulait donc dire ouvrir cette
-     fonction, c'est-à-dire risquer les 63 leçons en production pour une leçon
-     neuve. Le lecteur DEMANDE maintenant, au lieu de savoir.
-
-     ⚠️ IL VIENT EN PREMIER, comme avant : un exercice enregistré ne partage aucun
-     gabarit avec la cascade de `st.type` qui suit, et l'y faire passer ne ferait
-     que multiplier les occasions de collision de noms.
-     ⚠️ ET LA CASCADE DES UNITÉS 1 À 7 N'A PAS BOUGÉ D'UNE LIGNE. Ces 63 leçons
-     sont en production et validées ; les migrer serait un chantier à part, avec
-     ses propres risques. Le registre est consulté AVANT, le reste continue. */
-  if(window.__alaqExercices && window.__alaqExercices.monter({
-      pas:st, corps:body, hote:window.__alaqHoteU8,
-      reussir:objectifAtteint,
-      /* 🔴 10/09 — CET ENTONNOIR NE FAISAIT QUE PEINDRE. Les 16 exercices qui
-         jugent l'appellent, et il se contentait du bandeau rouge : ni qatra, ni
-         faute comptée, ni rattrapage. Il porte désormais le verdict complet
-         (voir ecranRate, plus haut) — et les trois exercices qui ne prenaient
-         aucun cœur (classer-harf, drag-harakat, scene-relation) rentrent dans
-         le rang sans qu'une ligne de leur code ne change. */
-      rater:function(court,longue){
-        ecranRate();
-        var fb=document.getElementById('fb'), ft=document.getElementById('p-foot');
-        fb.className='fb bad'; fb.innerHTML='<span>✕</span> '+court;
-        document.getElementById('why').innerHTML=longue||'';
-        ft.classList.remove('ok'); ft.classList.add('bad');
-      },
-      /* ── LE CONTRAT `cta` : UN SEUL BOUTON, VALIDER PUIS CONTINUER ────────
-         🔴 DEMANDE DE MYRIAM (31/08, disque 8, écrans 5/9/14) : « il ne doit
-         pas y avoir deux boutons. Le bouton continuer est dans un premier
-         temps le bouton VALIDER puis […] se transforme en CONTINUER. »
-         Le bouton du pied appartient au LECTEUR, pas à l'exercice : un
-         exercice qui a besoin d'une validation explicite le DEMANDE ici, au
-         lieu d'en poser un second dans son corps (deux boutons à l'écran).
-         ⚠️ ON RECÂBLE `cta.onclick` DIRECTEMENT, jamais `ctaClick` — c'est
-         déjà ce que fait `objectifAtteint` pour les exercices du registre :
-         leur `st.type` ne correspond à aucune branche de la cascade, et l'y
-         faire passer les ferait tomber dans son `else` final, c'est-à-dire
-         compter une ERREUR sur un écran réussi.
-         ⚠️ ET `finir()` REPOSE LE GARDE DES 0 CŒUR, exactement comme
-         `objectifAtteint` : il sert le chemin FAUX (validation refusée), qui
-         vient justement de coûter un cœur — c'est le cas où il peut tomber à
-         zéro. Sans lui, CONTINUER enverrait à l'écran suivant alors que
-         l'élève n'a plus de cœur.
-         ⚠️ Rien à défaire à la sortie de l'écran : `renderStep` remet le
-         bouton à zéro (className/disabled/textContent/onclick) avant chaque
-         montage — vérifié quelques lignes plus haut. */
-      cta:{
-        valider:function(cb){
-          var c=document.getElementById('cta'); if(!c)return;
-          c.className='cta'; c.textContent='VALIDER'; c.disabled=false;
-          c.onclick=function(){
-            c.disabled=true; c.textContent='CONTINUER'; c.onclick=null;
-            try{cb()}catch(e){}   /* l'exercice décide ensuite : reussir() ou finir() */
-          };
-        },
-        finir:function(){
-          var c=document.getElementById('cta'); if(!c)return;
-          c.className='cta'; c.textContent='CONTINUER'; c.disabled=false;
-          c.onclick=(!REVIEW&&!RECHARGE&&S.hearts<=0&&qi<QUEUE.length-1)?goNoHearts:advance;
-        }
-      }})) return;
-  if(st.type==='slide'){
-    body.innerHTML='<div class="learn">'+(st.nobadge?'':'<div class="badge-new">À DÉCOUVRIR</div>')+
-      '<div class="nm">'+st.title+'</div>'+
-      (st.big?'<div class="demo" style="font-family:var(--ar);font-size:64px">'+st.big+'</div>':'')+
-      '<div class="mn" style="font-size:16px">'+st.html+'</div></div>';
-    if(st.cta)cta.textContent=st.cta;
-    cta.disabled=st.gate?true:false;return;
-  }
-
-  /* Les cartes à deux visages : consonne au recto, prolongation au verso. Le contrat du
-     bouton est celui de tous les écrans — il s'allume quand les trois cartes ont montré
-     leurs DEUX faces (gate), jamais avant. */
-  /* Une rangée de jetons qu'on touche pour entendre : le geste minimal du principe 3.
-     Le bouton s'allume quand chaque ligne a sonné au moins une fois. */
-  if(st.type==='taprow'){
-    window._tr={n:0,tot:st.lignes.length};
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="lvp">'+st.lignes.map(function(x){
-        return '<div class="lvp-row" onclick="taprowTap(this,\''+x+'\')"><span class="lr-c">'+x+'</span>'+
-               '<span class="lr-spk">'+spkSVG('spk-mini')+'</span></div>'; }).join('')+'</div>';
-    return;
-  }
-
-  /* Le type `seats` (« Compare les deux sièges ») est SUPPRIMÉ le 14/08 : Myriam l'a remplacé
-     par le jeu de tri. Il n'est pas laissé en place — un renderer sans appelant finit par
-     rendre un test vert sans rien prouver (leçon `buildMaddANCIEN`, 13/08). */
-
-  /* ═══ ÉCRAN 1 DE LA LEÇON 3 — « 3 lettres peuvent avoir 2 rôles » (Myriam, 14/08) ═══
-     L'alphabet en DEUX parties, séparées par le filet de la hamza. En haut les 28 lettres,
-     dont ا و ي sont légèrement dorées : ce sont elles qui ont un second rôle. En bas, les
-     sièges — vides au départ, sauf la hamza seule ء, qui existe sans support.
-     Toucher une des trois lettres dorées la fonce ET fait apparaître le ou les sièges
-     qu'elle permet : أ إ pour le alif, ؤ pour le wāw, ئ pour le yāʾ. C'est le principe ⑦
-     (montrer plutôt que dire) — la règle n'est écrite nulle part, elle se fabrique sous le
-     doigt. Le bouton s'allume quand les trois ont été touchées.
-     ⚠️ Un siège apparu reste touchable pour ENTENDRE (hamzaTap), comme dans le Cours : la
-     curiosité n'est jamais punie et rien ici n'est évalué. */
-  if(st.type==='roles'){
-    window._rl=new Set();
-    const SIEGES_DE={'ا':['أ','إ'],'و':['ؤ'],'ي':['ئ']};
-    const ORDRE=['ء','أ','إ','ؤ','ئ'];
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="agrid agrid-rl">'+ALPHABET.map(function(a){
-        var f=!!SIEGES_DE[a[0]];
-        return '<button class="ag'+(f?' faible':'')+'"'+(f?' onclick="roleTap(this,\''+a[0]+'\')"':' disabled')+'>'+a[0]+'</button>';
-      }).join('')+'</div>'+
-      '<div class="rl-sep"><span>support</span></div>'+
-      '<div class="lg-hamza ex-hamza rl-sieges">'+ORDRE.map(function(s){
-        return s==='ء'
-          /* 14/08 (correctifs 4, agent qa-visuel-alaq) — « seule » restait le SEUL texte
-             permanent d'un écran qui s'est délibérément débarrassé des annotations (règle
-             de Myriam) ; à 8,5 px, sans règle html.gros pour le grossir, c'est le seul mot de
-             toute l'app que son mari ne pourrait lire dans aucun réglage. Retiré comme les 4
-             autres — le ء se découvre au doigt (hamzaTap), pas à la lecture. */
-          ? '<div class="hz" data-s="ء" onclick="hamzaTap(this,\'ء\')">ء</div>'
-          : '<div class="hz vide" data-s="'+s+'"></div>';
-      }).join('')+'</div>';
-    cta.disabled=st.gate?true:false;
-    return;
-  }
-
-  if(st.type==='flipcards'){
-    body.innerHTML='<div class="q-title">Retourne les cartes 2 fois</div>'+
-      '<div class="lvp"><div class="lvp-cards" data-gate="'+(st.gate?1:0)+'">'+
-      st.cartes.map(function(c){
-        return '<div class="lvp-flip" onclick="lvpFlip(this,\''+c.cons+'\',\''+c.pro+'\')">'+
-          '<div class="lvp-flip-in">'+
-            /* 14/08 — Myriam a tranché : « support » sur les TROIS cartes. Le mot ne décrit
-               plus la nature grammaticale de la lettre (ي et و SONT des consonnes) mais son
-               RÔLE DANS CETTE LEÇON : ce sur quoi la voyelle vient s'appuyer. C'est le même
-               mot que le filet de l'écran 1 et que le titre de l'écran 9 — un seul terme,
-               d'un bout à l'autre de la leçon. */
-            '<div class="face-cons"><div class="ff-slot"><div class="ff-ar">'+c.ar+'</div></div>'+
-              '<div class="ff-role">support</div></div>'+
-            '<div class="face-pro"><div class="ff-slot"><div class="ff-ar">'+c.ar+'</div></div>'+
-              '<div class="ff-role">prolongation</div></div>'+
-          '</div></div>';
-      }).join('')+'</div></div>';
-    cta.disabled=st.gate?true:false;
-    return;
-  }
-
-  if(st.type==='info'){
-    body.innerHTML='<div class="learn"><div class="badge-new">À DÉCOUVRIR</div>'+
-      '<div class="nm">'+st.title+'</div>'+
-      '<div class="mn" style="font-size:16px">'+st.html+'</div></div>';
-    cta.disabled=false;return;
-  }
-
-  if(st.type==='combine'){
-    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="q-note">'+st.note+'</div>'+
-      '<div class="combine"><span class="cmb" id="cmbA">'+st.a+'</span>'+
-        '<span class="cmb-plus">+</span><span class="cmb" id="cmbB">'+st.b+'</span>'+
-        '<span class="cmb-eq">=</span><span class="cmb cmb-res" id="cmbR">?</span></div>'+
-      '<button class="speak" id="cmbBtn" onclick="doCombine(\''+st.res+'\')">👉 Assembler et écouter</button>';
-    return;
-  }
-
-  if(st.type==='harakat3'){
-    window._hk=new Set();
-    // Révèle les harakat (07/08) : disque ET signe gris ; au toucher, SEUL le signe
-    // s'illumine — le disque pointillé reste gris. Plus d'étiquettes françaises.
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="hk3">'+[0,1,2].map(i=>
-        '<button class="hkcirc gr" onclick="hkTap('+i+',this)">'+
-          signeHK(i)+
-          '<span class="circ"></span>'+
-        '</button>').join('')+'</div>';
-    return;
-  }
-
-  if(st.type==='assoc'){
-    const set=st.madd?MD:HK;
-    window._as={L:st.L,set};
-    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="q-note">'+st.note+'</div>'+
-      '<div class="assoc-l gold">'+st.L+'</div>'+
-      '<div class="assoc-row">'+set.map((s,i)=>
-        '<button class="assoc-c" onclick="assocTap('+i+',this)">'+
-          (st.madd?'<span class="sm">'+s[0]+'</span>':'<span class="sm sign">'+s[0]+'</span>')+
-          '<span class="res" id="ares'+i+'">?</span></button>').join('')+'</div>';
-    return;
-  }
-
-  if(st.type==='tapset'){
-    const items=st.alphabet?ALPHABET:st.items;
-    window._ts=new Set();window._tsN=st.alphabet?3:items.length;window._tsG=false;
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="tapset'+(st.cols===4?' c4':st.cols===3?' c3':'')+'">'+items.map(it=>
-        '<button class="ts-card" onclick="tsTap(\''+it[0]+'\',this)"><span class="ar">'+(it[0]==='ه'?'ﻩ':it[0])+'</span>'+
-        (st.alphabet||st.nolabel?'':'<span class="enm">'+it[1]+'</span>')+'</button>').join('')+'</div>';
-    return;
-  }
-
-  if(st.type==='findset'||st.type==='findword'){
-    window._fs={need:st.targets.length,found:0};
-    let grid;
-    if(st.type==='findset'){
-      grid='<div class="agrid">'+ALPHABET.map(a=>{
-        /* ⚠️ 13/08 — l'unité 2 enseigne **أ** (le hamza posé sur le alif) alors que
-           l'alphabet des 28 porte **ا**, la lettre. Une comparaison stricte rendait le
-           alif INTROUVABLE : chaque toucher coûtait un cœur et l'écran ne pouvait pas
-           se terminer (signalé par Myriam). `sameLetter` connaît la famille du alif
-           (ا أ إ آ ٱ) — c'est le même outil que le repérage dans le verset. */
-        const isT=st.targets.some(t=>sameLetter(t,a[0]));
-        return '<button class="ag'+(st.highlight&&isT?' hl':'')+'" onclick="fsTap(this,\''+a[0]+'\','+(isT?1:0)+')">'+a[0]+'</button>';
-      }).join('')+'</div>'+hamzaRailHTML();
-    } else {
-      const cl=splitWord(st.word);
-      // une case peut porter DEUX lettres (la ligature لا) : on cherche la cible dans les deux,
-      // et la lettre qu'on fait SONNER est celle qui est visée, pas systématiquement la première
-      const cible=c=>cellBases(c).filter(b=>st.targets.includes(b))[0]||'';
-      window._fs.need=cl.filter(c=>!!cible(c)).length;
-      grid='<div class="verse" style="font-size:88px;line-height:1.5">'+cl.map((c,i)=>{
-        // la ligature se termine par un alif : elle ne se lie JAMAIS à gauche
-        const finLettre=c.lig||c.b;
-        const jp=i>0&&joinsL(cl[i-1].lig||cl[i-1].b),jn=i<cl.length-1&&joinsL(finLettre);
-        const disp=(jp?ZWJ:'')+cellText(c)+(jn?ZWJ:'');
-        const t=cible(c);
-        return '<span class="vl" onclick="fwTap(this,'+(t?1:0)+',\''+(t||c.b)+'\')">'+disp+'</span>';
-      }).join('')+'</div>';
-    }
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+grid+
-      '<div class="hint" id="fs-c" style="text-align:center">0 / '+window._fs.need+'</div>';
-    return;
-  }
-
-  if(st.type==='compare'){
-    window._cmp=new Set();window._cmpN=st.pairs.length;
-    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="q-note">'+st.note+'</div>'+
-      st.pairs.map((p,i)=>
-        '<div class="cmp-row" onclick="cmpTap('+i+',this,\''+p[0]+'\',\''+p[1]+'\')">'+
-          '<span class="gold">'+p[0]+'</span><span class="cmp-vs">↔</span><span class="gold">'+p[1]+'</span>'+
-          '<span class="cmp-l">'+p[2]+'</span></div>').join('');
-    return;
-  }
-
-  if(st.type==='read'){
-    window._rd={done:false};
-    let inner;
-    if(st.lang==='ar'){
-      const cl=splitWord(st.word);
-      inner=cl.map((c,i)=>{
-        const jp=i>0&&joinsL(cl[i-1].lig||cl[i-1].b), jn=i<cl.length-1&&joinsL(c.lig||c.b);
-        const disp=(jp?ZWJ:'')+cellText(c)+(jn?ZWJ:'');
-        return '<span class="rc" data-i="'+i+'">'+disp+'</span>';
-      }).join('');
-    } else {
-      inner=[...st.word].map((ch,i)=>'<span class="rc" data-i="'+i+'">'+ch+'</span>').join('');
-    }
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="readbox reveal '+(st.lang==='ar'?'ar':'')+'" id="readbox" dir="'+st.dir+'">'+inner+'<img class="readhand" id="readHand" src="'+ico('main-glisse')+'" alt="">'+'</div>';
-      // la flèche d'avant est partie : la main suffit (Myriam 10/08)
-    setTimeout(()=>setupRead(st),40);
-    return;
-  }
-
-  /* ══ LEÇON 7 v3 (11/08) — GLISSER LE SIGNE sur les lettres ══
-     Gabarit du fuse : une pastille qu'on traîne, un fantôme, la cible qui se remplit et
-     SONNE. Le أَ est grisé et n'est jamais une cible : lâcher à côté ne fait rien. */
-  if(st.type==='place'){
-    window._pl={n:0,tot:st.grps.length};
-    body.innerHTML='<div class="q-title">Glisse '+st.nom+' <span class="ar">'+st.chip+'</span> sur les lettres</div>'+
-      '<div class="sigchip" id="sigchip">'+st.chip+'</div>'+
-      '<div class="grps" id="grps">'+st.grps.map(function(g,k){
-        return '<div class="grp" data-k="'+k+'"><span class="gpre">'+g.pre+'</span>'+
-               '<span class="gcib">'+g.cib+'</span></div>'; }).join('')+'</div>';
-    setTimeout(function(){ setupPlace(st); },40);
-    return;
-  }
-
-  if(st.type==='bulmots'){
-    var cibles=st.mots.filter(function(m){return m.cible;}).length;
-    body.innerHTML='<div class="q-title">Éclate les mots qui portent '+st.signe+'</div>'+
-      '<div id="bul-c">'+cibles+'</div>'+
-      '<div class="bulzone" id="bulzone"></div>';
-    setTimeout(function(){ bulStart(null,null,null,null,st.mots); },40);
-    return;
-  }
-
-  if(st.type==='tri'){
-    window._tri={reste:st.mots.length};
-    body.innerHTML='<div class="q-title">Trie les mots</div>'+
-      '<div class="trirow" id="trirow">'+shuffle(st.mots.slice()).map(function(m){
-        return '<div class="chipmot" data-w="'+m.w+'" data-cle="'+m.cle+'">'+m.w+'</div>'; }).join('')+'</div>'+
-      '<div class="paniers">'+st.paniers.map(function(pa){
-        return '<div class="panier" data-cle="'+pa.cle+'"><div class="psig">'+pa.sig+'</div>'+
-               '<div class="pmots"></div></div>'; }).join('')+'</div>';
-    setTimeout(function(){ setupTri(); },40);
-    return;
-  }
-
-  if(st.type==='bulles'){
-    // leçon 3 : chaque forme DISTINCTE apparaît deux fois (4 formes si la lettre
-    // s'attache des deux côtés, 2 sinon) — même règle que le sac de bulStart
-    var totB=st.syllabes?st.syllabes.length*2
-                      :st.formes?st.lettres.reduce(function(n,L){return n+(joinsL(L)?8:4);},0)
-                      :st.lettres.length*st.parLettre;
-    body.innerHTML='<div class="q-title">Éclate les bulles</div>'+
-      '<div id="bul-c">'+totB+'</div>'+
-      '<div class="bulzone" id="bulzone"></div>';
-    setTimeout(function(){ bulStart(st.lettres,st.parLettre,st.formes,st.syllabes); },40);
-    return;
-  }
-
-  if(st.type==='learn'){
-    // titre-instruction court ; le badge et la pastille « son » tombent (Myriam 08/08) :
-    // le SON de la lettre s'apprend au disque « Les harakats », pas ici.
-    /* ⚠️ RÈGLE POSÉE PAR MYRIAM LE 14/08, VALABLE PARTOUT : « Pas de transcription sous les
-       lettres arabes. JAMAIS. » Le nom translittéré (yāʾ, mīm…) était écrit sous le glyphe :
-       l'élève lisait le latin et n'avait plus besoin de l'arabe. Le nom de la lettre
-       s'ENTEND au toucher (principe ② : seul l'arabe parle). Il reste ÉCRIT dans le Cours,
-       qui est une fiche de référence et non un exercice. */
-    body.innerHTML='<div class="q-title">Touche la lettre</div>'+
-      '<div class="learn">'+
-      '<button class="ar-tap" onclick="lettreTap(this,\''+st.L+'\')">'+st.L+'</button>'+
-      '</div>';
-    return;
-  }
-
-  if(st.type==='explore'){
-    window._req={};st.items.forEach(it=>window._req[it.say]=0);window._reqMin=st.min;
-    body.innerHTML=(st.title?'<div class="q-title">'+st.title+'</div>':'')+
-      '<div class="hint" style="margin:-8px 0 18px">Touche chaque lettre au moins trois fois.</div>'+
-      '<div class="explore">'+st.items.map(it=>
-        // Pas de transcription sous l'arabe (règle du 14/08) : la syllabe s'ENTEND au toucher,
-        // les pastilles ○ ○ ○ disent déjà combien de fois il reste à la toucher.
-        '<button class="exp-card" onclick="reqTap(\''+it.say+'\',this)">'+
-          '<span class="ar">'+it.ar+'</span>'+
-          '<span class="dots">'+'○ '.repeat(st.min).trim()+'</span></button>').join('')+'</div>';
-    return;
-  }
-
-  if(st.type==='formslide'){
-    window._fsl=new Set();
-    // une seule ligne, lue de droite à gauche : début · milieu · fin · isolée (07/08)
-    const cells=[[1,'début'],[2,'milieu'],[3,'fin'],[0,'isolée']];
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="source"><div class="srcL" id="dragSrc">'+st.L+'</div></div>'+
-      '<div class="fourcells ligne">'+cells.map(c=>
-        '<div class="fourc" id="cell'+c[0]+'" data-pos="'+c[0]+'">'+
-          '<span class="ar" id="fc'+c[0]+'"></span><span class="fl">'+c[1]+'</span></div>').join('')+'</div>';
-    setTimeout(()=>setupDrag(st.L),40);
-    return;
-  }
-
-  if(st.type==='formsintro'){
-    const d=UNITS[curU].alpha[st.L];window._fi=0;
-    const cells=[[0,'isolée'],[1,'au début'],[2,'au milieu'],[3,'à la fin']];
-    body.innerHTML='<div class="hint" style="margin:0 0 16px">Selon sa place dans le mot, la lettre change de forme : touche ses 4 formes.</div>'+
-      '<div class="frow">'+cells.map(c=>
-        '<button class="fcell" onclick="fiTap(this,\''+st.L+'\')"><span class="ar">'+formGlyph(st.L,c[0])+'</span>'+
-        '<span class="fl">'+c[1]+'</span></button>').join('')+'</div>';
-    return;
-  }
-
-  if(st.type==='spot'){
-    const verse=FATIHA[st.vi];
-    let need=0;
-    /* ⚠️ 14/08 — C'EST ICI QUE LE لا SE CASSAIT (le retour de Myriam sur la leçon 5).
-       Cet écran avait son PROPRE découpeur, recopié à côté de `splitWord` — avec en prime
-       une condition morte (`DIA.test` sur une regex /g, dont l'état se promène). Deux
-       découpeurs pour un seul geste, c'est deux endroits où corriger et un seul qu'on
-       corrige : `splitWord` sait maintenant que لا est UNE case, et cet écran l'utilise
-       (principe ⑨ — les écrans jumeaux partagent un moteur). */
-    const words=verse.split(' ').map(splitWord);
-    /* ⚠️ 14/08 (correctifs 4) — Myriam, sur le petit alif au-dessus du mīm de الرَّحْمَٰنِ :
-       « ça reste une prolongation même si elle est cachée, et dans le Qorān il faut la lire
-       comme telle ». L'alif poignard (ٰ, U+0670) ne fait PAS sa propre case — `splitWord` le
-       range dans les marques (.m) de la lettre qui le porte (ici le mīm), donc `cellBases`
-       (qui ne lit que .b et .lig) ne le voyait jamais : chercher « tous les alif » ne
-       trouvait donc jamais celui-là, dans AUCUN verset où il apparaît (pas seulement le 3). */
-    const html=words.map(cl=>'<span class="vw">'+cl.map((c,i)=>{
-      const jp=i>0&&joinsL(cl[i-1].lig||cl[i-1].b);
-      const jn=i<cl.length-1&&joinsL(c.lig||c.b);
-      const disp=(jp?ZWJ:'')+cellText(c)+(jn?ZWJ:'');
-      const poignard=ALIF_FAM.includes(st.L)&&c.m.includes('ٰ');
-      const ok=(cellBases(c).some(b=>sameLetter(b,st.L))||poignard)?1:0; if(ok)need++;
-      return '<span class="vl'+(poignard?' vl-madd':'')+'" onclick="spotTap(this,'+ok+')">'+disp+'</span>';
-    }).join('')+'</span>').join(' ');
-    window._spot={need,found:0}; window._spotVi=st.vi;
-    const tgt=ALIF_FAM.includes(st.L)?'ا · أ · إ':st.L;
-    /* v3 validée (10/08) : consigne minimale, haut-parleur DESSINÉ, le NOM du récitateur
-       ouvre le sélecteur, loupe Artlist, décompte = la pastille dorée des bulles,
-       et la récitation part TOUTE SEULE. */
-    body.innerHTML='<div class="q-title">Verset '+(st.vi+1)+' : touche tous les <span class="gold" style="font-size:30px">'+tgt+'</span></div>'+
-      '<div class="vtools">'+
-        '<button class="vspk" onclick="playVerse('+st.vi+')" aria-label="Écouter le verset">'+spkSVG()+'</button>'+
-        /* Le CHOIX du récitateur a quitté l'exercice (Myriam 11/08 : « il doit se faire dans
-           les paramètres, pas les exercices ») — il ne reste que son NOM, pour dire qui récite. */
-        '<span class="qari-nom" id="qariNom">'+qariCur().fr+'</span>'+
-        '<button class="vloupe" onclick="zoomVerse(this)" aria-label="Agrandir">'+icoImg('loupe')+'</button>'+
-      '</div>'+
-      '<div id="spot-c">'+need+'</div>'+
-      '<div class="verse" id="verseBox">'+html+'</div>';
-    setTimeout(function(){ if(QUEUE[qi]===st&&document.getElementById('player').classList.contains('on'))playVerse(st.vi); },350);
-    return;
-  }
-
-  if(st.type==='wordcard'){
-    body.innerHTML='<div class="wordcard"><div class="badge-new">LIS À VOIX HAUTE</div>'+
-      '<div class="linear-ar" id="readword" dir="rtl" style="font-size:72px;color:var(--gold);margin:10px 0 4px">'+st.w.w+'</div>'+
-      '<div class="fr">'+st.w.fr+'</div>'+
-      '<button class="speak" style="margin:14px auto 6px" onclick="speak(\''+st.w.w+'\')">'+spkSVG('spk-mini')+' Écouter le modèle</button>'+
-      '<button class="mic-btn" id="micBtn" onclick="startReco(this)">'+icoImg('tab-micro','ic-inline')+' Lis le mot</button>'+
-      '<div class="reco-fb" id="recoFb"></div>'+
-      '<button class="narr-link" style="margin-top:6px" onclick="recoSkip()">Je ne peux pas parler — passer</button>'+
-      '</div>';
-    window._reco={w:st.w,ok:false};
-    return;
-  }
-
-  if(st.type==='assemble'){ // v2 (10/08 soir) : titre-instruction seul, haut-parleur dessiné, écriture guidée
-    const units=splitUnits(st.w.w);
-    window._asm={t:units,ch:[],w:st.w,rate:0,fini:false,fromFr:!!st.fromFr};
-    body.innerHTML='<div class="q-title">'+(st.fromFr?'Écris ce mot en arabe':'Écoute… puis écris le mot')+'</div>'+
-      (st.fromFr?'<div class="fr" style="text-align:center;margin:2px 0 10px;font-size:22px;color:var(--cream)">'+(st.w.fr||'')+'</div>':
-        '<button class="spkbtn" id="asmSpk" onclick="jouerMot(window._asm.w.w,null,this)" aria-label="Écouter">'+spkSVG()+'</button>')+
-      '<div class="slots linear-ar" id="slots"></div>'+asmSaisie(st.w.w,units);
-    /* ⚠️ LE BRANCHEMENT VIENT APRÈS L'INSERTION : brancherClavier cherche les touches
-       dans le DOM, il n'a rien à accrocher tant que le HTML n'y est pas. */
-    const _K=window.__alaqClavier;
-    if(_K)_K.brancherClavier(body,{taper:asmTaper,effacer:asmUndo,recommencer:asmReset,id:'asm'});
-    renderSlots();
-    if(!st.fromFr)setTimeout(()=>{ if(QUEUE[qi]===st)jouerMot(st.w.w,null,document.getElementById('asmSpk')); },350); /* le mot part tout seul */
-    return;
-  }
-
-  if(st.type==='vf'){                       // vrai ou faux 45 s : l'écran prend tout le lecteur
-    document.getElementById('player').classList.add('vfmode');
-    vfStart(st);
-    return;
-  }
-
-  if(st.type==='match'){
-    const _lp=shuffle(st.pairs.map((_,i)=>i));
-    window._mt={pairs:st.pairs, leftPool:_lp, rightPool:derangedOrder(_lp), done:[], sel:null};
-    body.innerHTML='<div class="q-title">Associe chaque mot à sa traduction</div>'+
-      '<div id="matchBox" style="margin-top:14px"></div>';
-    renderMatch();
-    return;
-  }
-
-  if(st.type==='trace'){
-    const uu=(typeof st.u==='number')?st.u:curU;
-    const d=UNITS[uu].alpha[st.L];
-    const posName={1:'au début',2:'au milieu',3:'à la fin'}[st.pos]||'isolée';
-    const posGlyph=(!st.pos&&st.L==='ه')?'ﻩ':(st.pos?formGlyph(st.L,st.pos):st.L);
-    // Titre court quand la lettre est isolée (leçon « Mémoriser ») ; les formes liées gardent
-    // leur précision. Les deux boutons deviennent des icônes DESSINÉES, sans texte (choix de
-    // Myriam le 08/08 : triangle dans un cercle · flèche circulaire).
-    body.innerHTML='<div class="q-title">'+(st.pos?('À toi d\u2019écrire :\u00A0'+letAr(posGlyph)+' ('+posName+')'):('Écris la lettre\u00A0'+letAr(st.L)))+'</div>'+
-      '<canvas id="trace" class="trace"></canvas>'+
-      '<div class="hint" id="traceMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
-      '<div class="tico">'+
-      '<button onclick="window._traceDemo&&window._traceDemo()" aria-label="Regarder la démo" title="Regarder la démo">'+ICO_DEMO+'</button>'+
-      '<button id="traceReco" onclick="window._traceClear&&window._traceClear()" aria-label="Recommencer" title="Recommencer">'+ICO_RECO+'</button></div>';
-    setTimeout(()=>setupTrace(st.L,uu,st.pos),50);
-    return;
-  }
-
-  if(st.type==='dragassoc'){
-    const tilesArr=shuffle(st.cells.map(c=>c.madd));
-    const tops=st.cells.map(c=>'<div class="da-cell" data-madd="'+c.madd+'" data-long="'+c.long+'" data-say="'+c.say+'">'+c.short+'</div>').join('');
-    const tiles=tilesArr.map(ch=>'<div class="da-tile" data-ch="'+ch+'">'+ch+'</div>').join('');
-    body.innerHTML='<div class="q-title">Forme la prolongation</div>'+
-      '<div class="da-wrap" id="da-wrap">'+
-        '<div class="da-tops">'+tops+'</div>'+
-        '<div class="da-bottoms">'+tiles+'</div>'+
-      '</div>';
-    setTimeout(()=>setupDragAssoc(st),50);
-    return;
-  }
-
-  if(st.type==='dragmad'){
-    const tiles=shuffle(['ا','و','ي']).map(ch=>'<div class="dm-tile" data-ch="'+ch+'">'+ch+'</div>').join('');
-    body.innerHTML='<div class="q-title">Fais glisser la bonne prolongation</div>'+
-      '<div class="dm-wrap" id="dm-wrap">'+
-        /* 17/08 — calque ici aussi : `st.base+st.hk` est un cluster lettre+signe. */
-        '<div class="dm-target" id="dm-target">'+tachCalque(st.base+st.hk)+'</div>'+
-        '<div class="dm-tray">'+tiles+'</div>'+
-      '</div>';
-    setTimeout(()=>setupDragMad(st),50);
-    return;
-  }
-
-  if(st.type==='vwrite'){
-    /* 🔴 LE CLAVIER DE _clavier.js REMPLACE LA GRILLE DE TUILES (04/09, Myriam :
-       « le clavier de révision doit être sur le même modèle qui vient d'être
-       défini pour les leçons »). ⚠️ REPLI ASSUMÉ sur l'ancienne grille si le
-       module ES n'est pas encore chargé — voir vwSaisie() plus bas, même
-       doctrine que asmSaisie(). */
-    const SR=SOURATES[curSourate]||SOURATES[0];
-    const words=SR.verses[st.vi].split(' ');
-    window._vw={vi:st.vi,words:words,wi:0,units:splitUnits(words[0]),ch:[],err:false,tilesFor:-1,claviePour:-1,refus:0};
-    body.innerHTML='<div class="q-title">Réécris le verset '+(st.vi+1)+'</div>'+
-      '<div class="vtools"><button class="vspk" onclick="playVerse('+st.vi+')" aria-label="Écouter le verset">'+spkSVG()+'</button>'+
-        '<span class="qari-nom">'+qariCur().fr+'</span></div>'+
-      '<div class="slots linear-ar" id="vwVerse" style="font-size:34px;line-height:2"></div>'+
-      '<div class="hint" id="vwMsg" style="text-align:center;margin:6px 0;min-height:18px"></div>'+
-      '<div id="vwClavier"></div>';
-    cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=true;
-    renderVw();
-    setTimeout(function(){ if(QUEUE[qi]===st&&document.getElementById('player').classList.contains('on'))playVerse(st.vi); },350);
-    return;
-  }
-
-  if(st.type==='stiles'){
-    const SR=SOURATES[curSourate]||SOURATES[0];
-    window._st={n:SR.verses.length,ch:[]};
-    const order=shuffle(SR.verses.map(function(v,i){return i;}));
-    body.innerHTML='<div class="q-title">Remets les versets dans l\u2019ordre</div>'+
-      '<div id="stSlots"></div>'+
-      '<div style="height:8px"></div>'+
-      order.map(function(vi,k){
-        return '<button class="sttile" id="stile'+k+'" data-vi="'+vi+'" onclick="stTap('+k+')">'+SR.verses[vi]+
-          ' <span onclick="event.stopPropagation();playVerse('+vi+')" style="opacity:.75">'+spkSVG('spk-mini')+'</span></button>';
-      }).join('')+
-      '<div class="tiles" style="margin-top:12px"><button class="wtile tdel" onclick="stUndo()" aria-label="Effacer">⌫</button></div>';
-    cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=true;
-    renderSt();
-    return;
-  }
-
-  if(st.type==='recite'){
-    const SR=SOURATES[curSourate]||SOURATES[0];
-    const kset=knownLetterSet();
-    const words=SR.verses[st.vi].split(' ').map(function(w){
-      return '<span class="vw" style="color:'+(wordReadable(w,kset)?'var(--gold)':'var(--cream)')+'">'+w+'</span>';
-    }).join(' ');
-    body.innerHTML='<div class="q-title">Récite le verset '+(st.vi+1)+'</div>'+
-      '<div class="verse" style="font-size:30px;line-height:2">'+words+'</div>'+
-      '<div class="trow" style="flex-wrap:wrap;gap:8px">'+
-        '<button class="speak" onclick="playVerse('+st.vi+')">'+spkSVG('spk-mini')+' Modèle</button>'+
-        '<button class="speak" id="recBtn" onclick="recToggle()">'+icoImg('tab-micro','ic-inline')+' M\u2019enregistrer</button>'+
-        '<button class="speak" id="recPlay" onclick="recPlay()" disabled style="opacity:.4">'+ICO_DEMO+' Ma récitation</button>'+
-      '</div>'+
-      '<div class="hint" id="recMsg" style="text-align:center;margin-top:10px;min-height:18px"></div>'+
-      '<button class="mic-btn" style="margin-top:14px" onclick="recValidate(this)">Je valide ma récitation</button>';
-    return;
-  }
-
-  if(st.type==='vtiles'){
-    const vt=st.vt;
-    // les anciennes sessions n'ont pas `tuiles` : on le reconstruit (sans le son du mot)
-    const tuiles=vt.tuiles||shuffle(vt.seq.concat(vt.distract||[])).map(w=>({w:w}));
-    window._vt={seq:vt.seq,ch:[],tpl:vt.tpl,vi:vt.vi,tuiles:tuiles,refus:0};
-    body.innerHTML='<div class="q-title">Appuie sur ce que tu entends</div>'+
-      '<div class="vtools"><button class="vspk" onclick="playVerse('+vt.vi+')" aria-label="Écouter le verset">'+spkSVG()+'</button>'+
-        '<span class="qari-nom">'+qariCur().fr+'</span></div>'+
-      '<div class="verse" id="vtSlots" style="font-size:30px;line-height:2"></div>'+
-      '<div class="tiles" id="vtTiles" style="margin-top:14px">'+tuiles.map((t,k)=>
-        '<button class="wtile" id="vtile'+k+'" onclick="vtTap('+k+')">'+t.w+'</button>').join('')+
-        '<button class="wtile tdel" onclick="vtUndo()" aria-label="Effacer">⌫</button></div>';
-    // écriture guidée : un verset complété est forcément juste — plus de VALIDER
-    cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=true;
-    renderVt();
-    setTimeout(function(){ if(QUEUE[qi]===st&&document.getElementById('player').classList.contains('on'))playVerse(vt.vi); },350);
-    return;
-  }
-
-  if(st.type==='lumnoms'){ // noms d'Allah ① : un seul nom illuminé à la fois, seul son son joue (Myriam 13/07)
-    window._lum=st.noms;
-    body.innerHTML='<div class="q-title">Touche un nom pour l’écouter</div>'+
-      '<div class="lumwrap">'+st.noms.map((n,k)=>
-        '<button class="lum" id="lum'+k+'" onclick="lumTap('+k+')">'+
-        '<span class="lnar">'+n.ar+'</span><span class="lnfr">'+n.fr+'</span></button>').join('')+'</div>';
-    cta.textContent='CONTINUER';cta.onclick=advance;cta.disabled=false;
-    return;
-  }
-
-  if(st.type==='fuse'){
-    // glisser-fusionner (écrans 3 et 6) : un jeton posé sur un م fusionne et sonne.
-    window._fu={n:0,tot:st.jeux.length};
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div id="fuzone">'+st.jeux.map((j,k)=>
-        '<div class="fuserow">'+
-          '<div class="mimC ar">'+st.L+'</div>'+
-          '<div class="farr">←</div>'+
-          /* ═══ 14/08 — LA TACHKĪL EN ROUGE ARRIVE ICI AUSSI (accord de Myriam) ═══
-             Cet écran enseigne exactement le même geste que les écrans 3-5 de la leçon 3 de
-             l'unité 2, dans les 7 unités. Règle §17 du cerveau : sur un écran qui ENSEIGNE un
-             signe, le signe se voit.
-             ⚠️ Le mécanisme se limite tout seul, et c'est ce qui le rend juste : `tachRouge`
-             n'enveloppe QUE les marques combinantes. Sur la leçon des harakat le jeton EST un
-             signe → il rougit ; sur la leçon des prolongations le jeton est une LETTRE
-             (ا · و · ي) → il reste doré. Le rouge ne désigne jamais qu'une chose. */
-          '<div class="fchip ar" data-k="'+k+'">'+chipHTML(j.chip)+'</div>'+
-        '</div>').join('')+'</div>';
-    setTimeout(()=>setupFuse(st),40);
-    return;
-  }
-
-  if(st.type==='selson'){
-    // sélection libre (3 max, désélection permise) ; c'est VALIDER qui juge.
-    window._ss={fini:false,st:st};
-    body.innerHTML='<div class="q-title">'+st.title+'</div>'+
-      '<div class="g6" id="g6">'+st.tous.map(t=>
-        '<button class="b6 ar" data-ok="'+(st.bons.includes(t)?1:0)+'" data-t="'+t+'" onclick="ssTap(this)">'+t+'</button>').join('')+'</div>'+
-      '<div class="corr" id="ssCorr"></div>';
-    cta.textContent='VALIDER';cta.onclick=ssValider;
-    return;
-  }
-
-  /* mcq */
-  cta.textContent='VALIDER';cta.onclick=ctaClick;
-  let html='<div class="q-title">'+st.prompt+'</div>';
-  if(st.signes)html+='<div class="hk3 mini">'+[0,1,2].map(i=>
-    '<span class="hkcirc gr lit">'+signeHK(i)+'<span class="circ"></span></span>').join('')+'</div>';
-  // le haut-parleur DESSINÉ partout : la boîte de 120 px et son emoji système sont morts
-  // (Myriam 13/08 — « pas de haut-parleur dans une box »). Le routage du son ne change pas.
-  if(st.audio)html+='<button class="spkbtn" id="spkBig" onclick="spkAudio(\''+st.audio+'\')" aria-label="Écouter">'+spkSVG()+'</button>';
-  // le haut-parleur DESSINÉ, sans boîte, dont les ondes bougent pendant le son (Myriam 08/08)
-  if(st.spk)html+='<button class="spkbtn" id="spkBig" onclick="spkRejouer(\''+st.spk+'\')" aria-label="Écouter">'+spkSVG()+'</button>';
-  if(st.glyph){html+='<div class="glyph-big'+(st.glyphLinear?' linear-ar':'')+'">'+st.glyph+'</div>';}
-  /* ⚠️ st.fr NE S'AFFICHE PLUS ICI (trouvé par Myriam 24/08, sur « Lis le mot, puis
-     touche le bon son » — le seul mcq du fichier à porter fr ET glyph ensemble,
-     vérifié : aucun autre appel mcq() ne combine les deux) — la traduction française
-     à côté du mot arabe rendait la LECTURE inutile, il suffisait de lire le français.
-     Elle se révèle désormais à la réussite, dans ctaClick(), même doctrine que
-     `asmFini()` pour l'écriture (« la traduction se révèle à la réussite »,
-     10/08) : jamais avant, pour ne jamais souffler la réponse. */
-  html+='<div class="opts'+(st.flip?' flipcol':st.grid?' '+st.grid:'')+'" id="opts"></div>';
-  st.options=balancePos(st.options,st.answer);
-  body.innerHTML=html;
-  const box=document.getElementById('opts');
-  st.options.forEach((o,k)=>{
-    const b=document.createElement('button');b.className='opt';
-    const contenu=(o.snd!==undefined)?spkSVG():
-      o.ar!==undefined?'<span class="ar">'+o.ar+'</span>':o.txt;
-    if(st.flip){ // cartes retournées : 1er toucher = retourner, 2e = choisir (choix Myriam 3B)
-      b.classList.add('fopt');
-      b.innerHTML='<span class="finner"><span class="fface fdos">؟</span><span class="fface fdevant">'+contenu+'</span></span>';
-      b.onclick=()=>{ if(!b.classList.contains('vu')){b.classList.add('vu');return;} if(o.snd)speak(o.snd);selOpt(k,b); };
-    }else{
-      b.innerHTML=contenu;
-      if(st.spkOpts)b.id='sopt'+k;
-      b.onclick=()=>{if(o.snd){st.spkOpts?sayLetterName(o.snd,null,b):speak(o.snd);}selOpt(k,b);};
-    }
-    box.appendChild(b);
-  });
-  // le son part tout seul à l'ouverture de l'écran (Myriam 08/08)
-  if(st.spk)setTimeout(()=>{ if(QUEUE[qi]===st)spkRejouer(st.spk); },320);
-  if(st.audio)setTimeout(()=>{ if(QUEUE[qi]===st)spkAudio(st.audio); },320);   // le son se déclenche seul
-  if(st.spkOpts)setTimeout(()=>{ if(QUEUE[qi]===st)spkSequence(st,0); },320);
-}
-
-function selOpt(k,el){
-  if(answered)return;
-  [...document.querySelectorAll('.opt')].forEach(o=>o.classList.remove('sel'));
-  el.classList.add('sel');picked=k;
-  document.getElementById('cta').disabled=false;
-}
-
-function ctaClick(){
-  const st=QUEUE[qi];
-  if(answered)return;
-  const foot=document.getElementById('p-foot');
-  const fb=document.getElementById('fb');
-  const cta=document.getElementById('cta');
-  let ok;
-  if(st.type==='assemble'){
-    if(window._asm.ch.length!==window._asm.t.length)return;
-    ok=window._asm.ch.join('').normalize('NFC')===window._asm.t.join('').normalize('NFC');
-    answered=true;
-    if(ok){fb.className='fb ok';fb.innerHTML='<span>✓</span> Excellent ! ماشاء الله — <span class="ar" style="font-size:24px">'+st.w.w+'</span>';}
-    else{
-      const mine=window._asm.ch.join('');
-      fb.className='fb bad';
-      fb.innerHTML='<span>✕</span> Le mot était : <span class="ar" style="font-size:26px">'+st.w.w+'</span>'+
-        '<div style="opacity:.85;font-size:14px;margin-top:6px">Toi : <span class="ar" style="font-size:24px">'+mine+'</span></div>';
-    }
-  } else {
-    if(picked===null)return;
-    answered=true;
-    ok=st.options[picked].key===st.answer;
-    const opts=[...document.querySelectorAll('.opt')];
-    opts.forEach((o,k)=>{o.disabled=true;
-      if(st.flip)o.classList.add('vu'); // toutes les cartes se révèlent à la vérification
-      if(st.options[k].key===st.answer)o.classList.add('ok');
-      else if(k===picked)o.classList.add('bad');});
-    if(ok){
-      fb.className='fb ok';fb.innerHTML=elogeHTML();comboBonneReponse();
-      // la traduction (et l'image, quand le mot en porte une) se révèlent à la
-      // réussite — jamais avant (règle du 24/08, même doctrine que asmFini()
-      // pour l'écriture). ⚠️ Aucun mot classique ne porte `img` aujourd'hui
-      // (le vocabulaire des unités 1-8 n'a pas ce champ) — posé pour le jour
-      // où l'un en aura une, sans qu'on ait à revenir ici.
-      if(st.fr){
-        const dv=document.createElement('div'); dv.className='exam-fr';
-        dv.innerHTML=(st.img?'<img src="'+st.img+'" alt="">':'')+'<span>'+st.fr+'</span>';
-        document.getElementById('p-body').appendChild(dv);
-      }
-    }
-    else{
-      comboReset();      // le combo doit rester mérité : une erreur remet le compteur à zéro
-      const good=st.options.find(o=>o.key===st.answer);
-      fb.className='fb bad';
-      const show=good.ar!==undefined?good.ar:(good.snd!==undefined?st.answer:null);
-      fb.innerHTML=st.mute&&st.explain?'<span>✕</span> Incorrect — '+st.explain:
-        '<span>✕</span> Réponse : '+(show!==null?'<span class="ar" style="font-size:26px">'+show+'</span>':good.txt);
-      if(SND&&good.snd!==undefined)speak(st.answer);
-    }
-  }
-  // mémoire des erreurs (répétition espacée) : +1 si raté, -1 si su
-  if(st.graded){
-    const ek=st.type==='assemble'?st.w.w:(typeof st.answer==='string'?st.answer:null);
-    if(ek){ if(!ok)S.err[ek]=(S.err[ek]||0)+1; else if(S.err[ek]){S.err[ek]=Math.max(0,S.err[ek]-1);} save(); }
-    // §2.3 : le mot entre dans la session au moment où un écran noté le touche.
-    // §3.3/D5 : le rattrapage n'écrit RIEN — réussir la correction fait apprendre, mais ne rachète pas l'erreur.
-    if(REVIEW&&REVSES&&st.revWord&&!inRetry){
-      if(REVSES[st.revWord]===undefined)REVSES[st.revWord]=true;
-      if(!ok)REVSES[st.revWord]=false;
-    }
-  }
-  if(!ok&&st.explain&&!st.mute){var w=document.getElementById('why');if(w)w.innerHTML='💡 '+st.explain;}
-  if(ok){
-    foot.classList.add('ok');cta.className='cta ok';
-    // si on est en mode rattrapage et qu'on réussit, on retire la question de la liste
-    if(inRetry){const k=MISSED.indexOf(st);if(k>=0)MISSED.splice(k,1);}
-  }
-  else{
-    foot.classList.add('bad');cta.className='cta bad';toc();
-    if(st.graded){
-      wrongCount++; gramFaute();       // la maîtrise de la notion, si l'écran en porte une
-      if(!EXAM&&!REVIEW)S.uerr[curU]=1; // l'unité n'est plus « sans erreur »
-      // on mémorise la question ratée pour la rejouer en fin de leçon
-      // §3.3 : un mot raté au vrai/faux ET à l'écriture ne produit QU'UN seul item de rattrapage
-      if(MISSED.indexOf(st)<0&&!(REVIEW&&st.revWord&&revMissedHas(st.revWord)))MISSED.push(st);
-      if(!REVIEW&&!RECHARGE)S.hearts=Math.max(0,S.hearts-1); // ni la révision ni la reprise « recharge » ne coûtent de cœur
-      save();
-      document.getElementById('p-hearts').textContent=S.hearts;
-      document.getElementById('st-hearts').textContent=S.hearts;
-    }
-  }
-  cta.textContent=ok?'CONTINUER':'J\u2019AI COMPRIS';cta.disabled=false;
-  cta.onclick=(!REVIEW&&!RECHARGE&&S.hearts<=0)?goNoHearts:advance; // à 0 cœur (hors révision/recharge) : blocage + invitation à réviser
-}
-
-let _grainesSession=0;
-function finishDisque(){
-  if(EXAM)return finishExam();
-  // S'il reste des questions ratées, on les rejoue (modèle Duolingo) avant de terminer
-  if(MISSED.length){
-    inRetry=true;
-    QUEUE=shuffle(MISSED.slice()); // rejoue les ratées, mélangées
-    qi=0;
-    // petit écran de transition
-    const body=document.getElementById('p-body');
-    const foot=document.getElementById('p-foot');
-    foot.className='p-foot';document.getElementById('fb').innerHTML='';document.getElementById('why').innerHTML='';
-    // centré en hauteur ET largeur, sans la boîte (Myriam 09/08) — la classe p-center existe déjà
-    body.classList.add('p-center');
-    body.innerHTML='<div style="text-align:center">'+
-      icoEcran('ecran-corriger','width:120px;height:auto;margin:0 auto;display:block')+
-      '<div class="nm" style="margin-top:14px;font-size:22px;font-weight:900">On corrige tes erreurs</div></div>';
-    const cta=document.getElementById('cta');
-    cta.className='cta';cta.disabled=false;cta.textContent='CORRIGER MES ERREURS';
-    cta.onclick=()=>renderStep();
-    document.getElementById('pbar-i').style.width='100%';
-    return;
-  }
-  if(REVIEW)return finishReview();   // révision globale : aucun disque à marquer
-  const id=dkey(curU,curD);
-  const wasDone=!!S.done[id];
-  S.done[id]=true;
-  const gain=(curD===discsFor(curU).length-1?20:10)*(wasDone?0.5:1);
-  S.xp+=gain;
-  /* L'épi du jour : objectif atteint OU leçon terminée (règle adoucie, oui de Myriam).
-     L'écran « 7 épis » se montre à la fermeture de l'écran de fin. */
-  validerJour();
-  pendingStreak=feteJourPending; feteJourPending=false;
-  bumpConstance('learn');
-  if(RECHARGE){ // reprise depuis « Plus de cœurs » : on recharge comme une révision (1re fois après blocage = +3, ensuite +1)
-    const before=S.hearts, g=S.bigNext?3:1;
-    S.hearts=Math.min(HEARTS_MAX,S.hearts+g); S.bigNext=0; S.heartDay=today(); RECHARGE=false;
-    document.getElementById('st-hearts').textContent=S.hearts;
-    if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+g+' '+(g>1?'Qatarāt':'Qatra')+', ماشاء الله !'),700);
-  }
-  save();
-  document.getElementById('player').classList.remove('on');
-  _grainesSession=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));
-  /* 🔓 SOUS-LOT 5 — C'EST LE SEUL INSTANT où lesson_id et « sans faute » existent
-     comme variables vivantes. La déclaration est COLLÉE au versement local, sans
-     rien entre les deux : le dépilage ne peut donc jamais partir avec un solde qui
-     ignore ces graines-là (JS est mono-thread, rien ne s'intercale entre deux
-     instructions synchrones). `wrongCount` inclut volontairement les erreurs du
-     rattrapage — c'est le MÊME booléen que celui qui vient de payer la prime. */
-  try{ SYNC.graines(dkey(curU,curD), !wrongCount, false); }catch(_){}
-  const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
-  const isBilan=(curD===discsFor(curU).length-1);
-  /* ⚠️ 14/08 — LE BILAN NE PROMET PLUS CE QU'IL NE SAIT PAS. Myriam : « à la leçon 2 on ne
-     peut pas écrire qu'on peut lire 100 % de la Fātiḥa… je préfère avoir les trois petites
-     box ». La phrase était fausse deux fois : elle affichait un pourcentage calculé sur TOUTES
-     les unités faites, sur l'écran d'UNE unité — et elle le faisait avec un emoji, dans une
-     app qui n'en porte plus (règle du 13/08). Les trois cases disent des chiffres vrais. */
-  document.getElementById('fin-icon').textContent='';
-  document.getElementById('fin-extra').innerHTML='';
-  document.getElementById('fin-title').textContent=isBilan?('Unité '+toAr(UNITS[curU].no)+' validée !'):'Leçon terminée !';
-  document.getElementById('fin-xp').textContent='+'+gain;
-  document.getElementById('fin-acc').textContent=acc+'%';
-  fillFinishCases(acc,_grainesSession);
-  fillFinishConstance();
-  document.getElementById('finish').classList.add('on');
-  confettiBurst();
-  playSfx('fin-lecon');   // le maqsūm
-  mascotteDanse();        // le fanous danse dessus — même partition, mêmes dates
-  checkBadges({noMistake:wrongCount===0&&total>0,unitPerfect:isBilan&&!S.uerr[curU]});
-}
-function closeFinish(){
-  mascotteStop();
-  document.getElementById('finish').classList.remove('on');
-  if(pendingStreak){ pendingStreak=false; showStreak(); return; } // l'épi vient d'être planté → les 7 épis (rebranché le 10/08, oui de Myriam) ; streakContinue reprend la chaîne compte/retour
-  if(obAccountPending){ obAccountPending=false; showObAccount(); return; } // 1re leçon d'onboarding → proposer le compte
-  returnFromPlayer();
-}
-
-/* ===== Test-out « Avancer ici ? » : 20 questions, 2 erreurs max ===== */
-function buildExam(U){
-  const W=U.words||[], L3=U.letters||[];
-  // LECTURE — lire le mot, toucher le bon son (options audibles et distinctes)
-  /* ⚠️ 17/08 — `spkOpts:true` MANQUAIT (Myriam : « quand on veut sauter une unité et qu'on
-     fait l'exercice de test, les audios ne se déclenchent pas automatiquement »). Les trois
-     haut-parleurs s'affichaient bien — ils viennent du champ `snd` des options — mais c'est
-     `spkOpts` SEUL qui arme la séquence sonore automatique (l. ~8306). Sans lui, l'élève
-     doit deviner qu'il faut toucher chaque bouton, alors que les mêmes écrans en leçon
-     sonnent tout seuls. `rtl3` s'ajoute pour la même raison : dans les leçons la séquence
-     part de la DROITE, dans le sens de l'arabe — l'exercice de test suit maintenant. */
-  const reading=shuffle(W).map(w=>mcq({prompt:'Lis le mot, puis touche le bon son',
-    glyph:w.w,glyphLinear:true,fr:w.fr,img:w.img,graded:true,spkOpts:true,grid:'grid3 rtl3',answer:w.w,options:wordSoundOptions(U,w)}));
-  // ÉCRITURE — composer le mot avec les lettres
-  const writing=shuffle(W).map(w=>({type:'assemble',w,graded:true}));
-  // POSITIONS — forme déguisée (début/milieu/fin) → quelle lettre ? (visuel, jamais isolée)
-  const pos=[];
-  [1,2,3].forEach(p=>shuffle(L3).forEach(Lt=>pos.push(mcq({
-    prompt:'Quelle lettre est-ce, même déguisée ?',glyph:formGlyph(Lt,p),graded:true,grid:'grid3',answer:Lt,
-    options:balancePos(shuffle(L3).map(x=>({ar:x,key:x})),Lt)}))));
-  const take=(a,n)=>shuffle(a).slice(0,n);
-  const q=shuffle([...take(reading,7),...take(writing,6),...take(pos,7)]).slice(0,20);
-  return [{type:'slide',nobadge:true,center:true,cta:'C’EST PARTI',
-    title:'Réussis ce test pour passer directement à cette unité !',html:''},...q];
-}
-function startExam(u){
-  if(S.hearts<=0){showNoHearts();return;}
-  EXAM=true;curU=u;curD=-1;
-  QUEUE=buildExam(UNITS[u]);qi=0;wrongCount=0;MISSED=[];inRetry=false;
-  document.getElementById('player').classList.add('on');
-  document.getElementById('finish').classList.remove('on');
-  document.getElementById('p-hearts').textContent=S.hearts;
-  document.getElementById('st-hearts').textContent=S.hearts;
-  total=ecransNotes(QUEUE);
-  renderStep();
-}
-function finishExam(){
-  EXAM=false;
-  const u=curU, pass=wrongCount<=2;
-  const acc=total?Math.round((total-Math.min(total,wrongCount))/total*100):100;
-  let graines=0;
-  if(pass){
-    if(!S.tests)S.tests={};
-    // « Avancer ici » = raccourci test-out : valide les unités JUSQU'À CELLE-CI INCLUSE (k <= u), en terminant leurs disques.
-    // On peut ainsi sauter le parcours et passer à la suite. (Le « Bilan » reste la validation NORMALE d'une unité.)
-    for(let k=0;k<=u;k++){
-      S.tests[UNITS[k].no]=true;
-      discsFor(k).forEach((d,i)=>{ S.done[dkey(k,i)]=true; });
-    }
-    S.xp+=30;
-    graines=gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute));
-    /* L'unité testée est celle de startExam(u-1), pas celle de la bulle touchée :
-       d'où UNITS[u].no et non curU+1. Le raccourci valide 0..u, mais il n'est PAYÉ
-       qu'une fois — le versement local est unique, il n'y a pas à en fabriquer
-       plusieurs. */
-    try{ SYNC.graines('EXAM-U'+UNITS[u].no, !wrongCount, false); }catch(_){}
-    validerJour(); pendingStreak=feteJourPending; feteJourPending=false;
-    save();
-  }
-  document.getElementById('player').classList.remove('on');
-  document.getElementById('fin-icon').textContent='';
-  document.getElementById('fin-title').textContent=pass
-    ?'Unités validées jusqu’ici !'
-    :('Presque ! '+wrongCount+' erreurs (2 max)');
-  document.getElementById('fin-xp').textContent=pass?'+30':'+0';
-  document.getElementById('fin-acc').textContent=acc+'%';
-  const extra=document.getElementById('fin-extra');
-  if(pass){
-    extra.innerHTML='';
-    fillFinishCases(acc,graines);
-    confettiBurst();
-    playSfx('fin-lecon');
-    mascotteDanse();
-    checkBadges({noMistake:wrongCount===0});
-  }else{
-    // Échec : rien à montrer comme réussi — le titre suffit, un seul geste pour réessayer.
-    document.querySelector('#finish .fin-score').style.display='none';
-    extra.innerHTML='<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="startExam('+u+')">Refaire le test</button>';
-  }
-  fillFinishConstance();
-  document.getElementById('finish').classList.add('on');
+let _grainesSession=0;   // les graines de la leçon en cours — RÉASSIGNÉE par finishDisque (src/player/, d'où ce `let` ici : règle ①) et par finishReview (index.html)
+/* ═══ LE LECTEUR a déménagé dans src/player/index.js (14/09/2026, sous-lot 1) : startDisque,
+   quitDisque, advance, renderStep, selOpt, ctaClick, finishDisque, closeFinish, le test-out
+   (buildExam/startExam/finishExam). C'est un MODULE ES — le premier bloc de ce fichier à en
+   devenir un : il ne sert jamais au premier rendu, il s'ouvre au doigt. L'ÉTAT ci-dessus reste
+   ICI, en `let` classiques : le module les lit et les réassigne par leur nom (liaisons
+   lexicales globales) ; ecranRate, objectifAtteint, sigEcran, le hub Réviser et l'hôte U8
+   lisent les MÊMES variables. Voir l'en-tête de src/player/index.js. ═══ */
+/* ⚠️ UN MODULE EST DIFFÉRÉ ET FETCHÉ À PART : entre l'accueil peint (synchrone, par le script
+   classique) et l'exécution du bundle (372 Ko), un doigt PEUT arriver — premier chargement,
+   réseau lent — et si le bundle manque (hors ligne à la toute première visite), il n'arrive
+   jamais. DOMContentLoaded n'empêche pas de toucher l'écran : il ATTEND le module. Chaque
+   départ classique vers le lecteur passe donc ICI avant d'ouvrir quoi que ce soit — sinon
+   startReview/launchQuranReview ouvraient #player (un voile plein écran) AVANT d'appeler
+   renderStep : voile VIDE, et la croix (quitDisque, absent lui aussi) morte. Un toast, et
+   rien ne s'ouvre. Gardé par le banc (verifier-lecteur.mjs ⑤ balaie TOUS les appelants,
+   sans liste) et par la copie SANS module du harnais _verif_lecteur.html. */
+function lecteurPret(){
+  if(typeof startDisque==='function'&&typeof renderStep==='function')return true;
+  try{toast('Le lecteur n’est pas encore chargé — recharge la page');}catch(e){}
+  return false;
 }
 
 /* ================= INTERACTIONS ================= */
@@ -3637,7 +2554,8 @@ function ctaOn2(){const c=document.getElementById('cta');if(c&&c.disabled){c.dis
 function objectifAtteint(){ // signature + éloge écrit + le bouton s'allume — une fois par écran
   if(window._objDone)return;window._objDone=true;
   /* 🔴 10/09 — LA MOITIÉ MANQUANTE DU RATTRAPAGE. La cascade classique retire
-     l'écran de MISSED quand on le réussit EN RATTRAPAGE (ctaClick, l. ~3407) ; les
+     l'écran de MISSED quand on le réussit EN RATTRAPAGE (ctaClick, src/player/ :
+     `if(inRetry){…MISSED.splice(k,1)}`) ; les
      exercices du registre ne passent jamais par elle. Tant que MISSED restait vide
      en unités 9 et 10, personne ne pouvait s'en apercevoir. Depuis que les écrans
      ratés y entrent, l'absence de cette ligne rendait le rattrapage SANS FIN :
@@ -3653,7 +2571,8 @@ function objectifAtteint(){ // signature + éloge écrit + le bouton s'allume �
     foot.classList.remove('bad');foot.classList.add('ok');
   }catch(e){}
   /* ── À 0 CŒUR, CONTINUER RIVE SUR « PLUS DE CŒURS » (unité 9, 23/08) ──────
-     Même règle que la cascade classique (l. ~5724), posée ICI et pas dans
+     Même règle que la cascade classique (ctaClick, src/player/ : `S.hearts=Math.max(0,
+     S.hearts-1)`), posée ICI et pas dans
      `ctaOn2` (qui allume aussi le bouton pour des écrans sans le moindre
      risque de cœur — spot, taprow, lecture de mot — où la question ne se
      pose jamais). Un exercice du REGISTRE peut perdre un cœur PENDANT qu'il
@@ -6716,6 +5635,7 @@ function gramFaute(){
 }
 
 function startReview(){
+  if(!lecteurPret())return;   // le lecteur est un module : sans lui, #player serait un voile vide (voir lecteurPret)
   const pool=allReviewWords();
   if(!pool.length){ toast('Termine d\u2019abord la leçon « Lire des mots » pour débloquer la révision'); return; }
   const due=reviewSessionWords();
@@ -7463,6 +6383,7 @@ function buildVerseTiles(vi){
                              tuiles:shuffle(tuiles)}, graded:true};
 }
 function launchQuranReview(queue){
+  if(!lecteurPret())return;   // idem startReview : dix-sept départs passent ici, un seul garde
   /* 🔓 SOUS-LOT 5 — LE TYPE SE DÉDUIT DE LA FILE INTACTE, avant que le lecteur y
      touche. Dix-sept départs passent par ici (lettres, grammaire, Qorān sous toutes
      ses formes) : les instrumenter un par un serait dix-sept occasions d'en oublier
@@ -7983,7 +6904,8 @@ if(location.hash==='#connexion'){
      pour #connexion (qui ne dépend d'aucun module). */
   try{history.replaceState(null,'',location.pathname);}catch(e){}
   (function attendreModuleU9(essai){
-    if(window.__alaqU9&&typeof window.__alaqU9.disque1==='function'){
+    /* 14/09 : et le LECTEUR lui-même est un module désormais — on l'attend au même titre */
+    if(window.__alaqU9&&typeof window.__alaqU9.disque1==='function'&&typeof window.startDisque==='function'){
       try{startDisque(8,0);}catch(e){}
     } else if(essai<100){ setTimeout(function(){attendreModuleU9(essai+1);},50); }
     else{ try{toast('Module unité 9 introuvable');}catch(e){} }

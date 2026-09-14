@@ -23,7 +23,8 @@
 
    ═══ LE CONTRAT AVEC index.html (résolu À L'APPEL, jamais à la définition) ═══
    UNITS, SOURATES, curSourate, S, dkey, unitValidated, discsFor, ICONES,
-   arReveal, unitAccent, currentLesson, startDisque, startExam, updRankBadge,
+   arReveal, unitAccent, currentLesson, startDisque, startExam (src/player/, un
+   module : ils peuvent manquer — lecteurPret(), d'index.html, le DIT alors), toast, updRankBadge,
    maybeShowHomeTut, maybeGhufranPrompt, openSurahMenu (en ligne). Cette liste
    EST le contrat, et le banc la garde. Dans l'autre sens, index.html et
    progression.js appellent renderHome(), refreshStats(), toAr()… et
@@ -72,7 +73,11 @@ function discTip(node,u,i,label,done){
   var tip=document.createElement('div'); tip.className='disc-tip'; tip._node=node;
   tip.innerHTML='<div class="dt-t"></div><button class="dt-go">'+(done?'REFAIRE':'COMMENCER')+'</button>';
   tip.querySelector('.dt-t').innerHTML=label;
-  tip.querySelector('.dt-go').onclick=function(ev){ev.stopPropagation();discTipClose();startDisque(u,i);};
+  tip.querySelector('.dt-go').onclick=function(ev){ev.stopPropagation();discTipClose();
+    /* 14/09 : le lecteur est un MODULE (src/player/). S'il n'est pas là — premier chargement,
+       réseau lent, bundle absent — lecteurPret() (index.html) le DIT au lieu d'un doigt qui ne fait rien. */
+    if(!lecteurPret())return;
+    startDisque(u,i);};
   tip.addEventListener('click',function(ev){ev.stopPropagation();});
   /* les .node sont positionnés : les disques SUIVANTS se peignent au-dessus de la
      popup sans ceci (vu à la capture du 08/08) — le nœud ouvert passe devant */
@@ -216,7 +221,7 @@ function renderHome(){
         node.innerHTML='<div class="bwrap"><div class="jump-tip">AVANCER ICI ?</div>'+
           '<button class="bubble" aria-label="Avancer ici : réussis un test pour passer directement à cette unité">'+
           '<svg class=\"bi\" width=\"36\" height=\"28\" viewBox=\"0 0 36 28\" aria-hidden=\"true\"><g fill=\"#fff\" stroke=\"#fff\" stroke-width=\"7\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M6.5 6.5 L16 14 L6.5 21.5 Z\"/><path d=\"M19.5 6.5 L29 14 L19.5 21.5 Z\"/></g></svg></button></div>';
-        node.querySelector('.bubble').onclick=()=>startExam(u-1);
+        node.querySelector('.bubble').onclick=()=>{ if(!lecteurPret())return; startExam(u-1); };
       } else {
         node.className='node locked';
         node.innerHTML='<div class="bwrap"><button class="bubble" disabled aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
