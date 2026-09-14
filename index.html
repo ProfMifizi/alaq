@@ -379,6 +379,20 @@
      Un tracé se corrige dans trace-lettres.js (table LT), jamais ici.
      ═════════════════════════════════════════════════════════════════ -->
 <script src="trace-lettres.js"></script>
+<!-- ══════════════════════════════════════════════════════════════════════════
+     LES DONNÉES — donnees.js (14/09/2026) : l'alphabet, les harakāt, la Fātiḥa,
+     les douze unités, les sourates et leur programme, plus les outils arabes.
+     Script CLASSIQUE chargé ICI : il lit content/unites.js et LT (trace-lettres.js)
+     AU CHARGEMENT, et le grand script lit UNITS de façon synchrone dès le premier
+     rendu. ⛔ NI `defer`, NI `type="module"`.
+     ══════════════════════════════════════════════════════════════════════════ -->
+<script src="donnees.js"></script>
+<!-- LES GÉNÉRATEURS DES DISQUES — generateurs.js (14/09/2026) : les neuf
+     constructeurs qui fabriquent la file d'écrans d'une leçon, et leurs outils de
+     tirage. Script CLASSIQUE : parcours.js les référence dans sa table des disques,
+     évaluée au premier rendu, et progression.js reconnaît un disque par IDENTITÉ de
+     fonction. ⛔ NI `defer`, NI `type="module"`. -->
+<script src="generateurs.js"></script>
 <!-- ═════════════════════════════════════════════════════════════════
      LA PERSISTANCE ET L'ÉTAT LOCAL — progression.js (07/09/2026), MÊME RÈGLE :
      script classique chargé ICI, avant le grand script qui lit S et appelle
@@ -415,156 +429,11 @@
 <script src="ui/reviser.js"></script>
 <script>
 
-/* ================= OUTILS ARABES ================= */
-const ZWJ='\u200D';
-const TAT='\u0640'; // tatweel : trait de liaison visible et fiable (iOS)
-const NONJOIN='اأإآدذرزوةىءٱ';            // ne s'attachent pas à gauche
-const DIA=/[\u064B-\u0652\u0670]/g;        // harakats, sukun, chedda, alif suscrit
-const strip=s=>s.replace(DIA,'');
-const joinsL=ch=>!NONJOIN.includes(ch);
-function formGlyph(L,pos){ // 0 isolée 1 début 2 milieu 3 fin
-  const jl=joinsL(L);                   // se lie à la lettre suivante (à gauche) ?
-  if(pos===1)return jl?L+TAT:L;         // début  : liaison à gauche (sinon = isolée)
-  if(pos===2)return jl?TAT+L+TAT:TAT+L; // milieu : liaison des 2 côtés (sinon = fin)
-  if(pos===3)return TAT+L;              // fin    : liaison à droite
-  return L;                             // isolée
-}
-// Famille du alif : le alif nu (ا) et le alif portant la hamza (أ dessus, إ dessous,
-// آ madda, ٱ wasla) sont la MÊME lettre. On les traite comme équivalents pour le repérage.
-const ALIF_FAM='اأإآٱ';
-function letterKey(ch){ return ALIF_FAM.includes(ch)?'ا':ch; }
-function sameLetter(a,b){ return letterKey(a)===letterKey(b); }
-
-/* ================= DONNÉES ================= */
-const ALPHABET=[['ا','alif'],['ب','bā’'],['ت','tā’'],['ث','thā’'],['ج','jīm'],['ح','ḥā’'],['خ','khā’'],
- ['د','dāl'],['ذ','dhāl'],['ر','rā’'],['ز','zāy'],['س','sīn'],['ش','shīn'],['ص','ṣād'],['ض','ḍād'],
- ['ط','ṭā’'],['ظ','ẓā’'],['ع','ʿayn'],['غ','ghayn'],['ف','fā’'],['ق','qāf'],['ك','kāf'],['ل','lām'],
- ['م','mīm'],['ن','nūn'],['ه','hā’'],['و','wāw'],['ي','yā’']];
-const HK=[['\u064E','a'],['\u0650','i'],['\u064F','ou']];   // fatha kasra damma
-const MD=[['ا','ā'],['ي','ī'],['و','ū']];
-const MDH={'ا':'\u064E','ي':'\u0650','و':'\u064F'};
-function maddSyl(L,m){return L+(MDH[m]||'')+m;}                    // prolongations
-const FATIHA=[
- 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
- 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
- 'الرَّحْمَٰنِ الرَّحِيمِ',
- 'مَالِكِ يَوْمِ الدِّينِ',
- 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ',
- 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
- 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ'];
-/* LT — les 100 tracés de l'alphabet (28 lettres, calqués sur Noto Naskh 190 px) — vit dans
-   trace-lettres.js depuis le 07/09/2026, avec setupTrace. Lu ICI de façon synchrone (la
-   dérivation strokes/strokesPos plus bas) : trace-lettres.js est un script classique chargé
-   AVANT celui-ci, juste sous assets.js. */
-const UNITS=(function(){
-  /* ═══ LES UNITÉS 1 À 7 VIENNENT DE content/unites.js (06/09/2026) ═══
-     Leur contenu — lettres, noms de lettres, 76 mots avec leur son — vit
-     désormais dans src/content/units/unit-0N.json, et le script classique
-     chargé plus haut le pose sur window.__ALAQ_UNITS. Corriger un mot se
-     fait LÀ-BAS, puis `node outils/semer-unites.mjs` ; le portillon compare
-     les deux et rougit si la semence a vieilli.
-     ⚠️ LES UNITÉS 8 À 12 RESTENT ICI, et c’est voulu : elles n’ont pas de
-     contenu à déclarer (leurs écrans vivent dans des modules ES), le
-     littéral n’en garde que la métadonnée d’accueil.
-     ⚠️ LE REPLI N’EST PAS UN TABLEAU VIDE. Sans les sept premières, les
-     unités 8 à 12 remonteraient aux positions 0 à 4 : `dkey(u,i)` lit
-     `UNITS[u].no`, `unitUnlocked` prend `U.no===1` pour racine, et
-     l’accueil afficherait la grammaire en première leçon. On garde donc
-     SEPT places, fermées et annoncées, plutôt qu’un décalage silencieux. */
-  var s = window.__ALAQ_UNITS;
-  if (!Array.isArray(s) || s.length !== 7) {
-    console.error('[contenu] content/unites.js absent ou incomplet — les unités 1 à 7 sont indisponibles. Vérifier le pré-cache du service worker et le déploiement de content/.');
-    s = [1,2,3,4,5,6,7].map(function(n){
-      return { no:n, ready:false, sub:'Contenu indisponible', letters:[], lat:{}, alpha:{}, words:[] };
-    });
-  }
-  return s.concat([
- /* ═══ UNITÉ 8 — LA GRAMMAIRE COMMENCE ═══
-    Première unité SANS lettre neuve : ce n'est plus l'alphabet qu'on apprend, c'est ce
-    que les lettres FONT. D'où `letters:[]` — et le soin à prendre partout où le code
-    boucle sur les lettres d'une unité (`UNITS.every`, la grille des lettres, le bilan) :
-    ces endroits filtrent déjà sur `U.letters`, l'unité 8 en sort d'elle-même.
-    `u8:true` dit que ses 9 disques ne sont pas ceux des unités-consonnes : ils vivent
-    dans le moteur U8, qui vit dans src/units/unit-8/ (modules ES, POC-1 du 18/08).
-    ⚠️ `words` est REMPLI À L'ENREGISTREMENT depuis U8.mots, jamais retapé ici : les
-    14 mots ont une seule source (src/units/unit-8/donnees/mots.js). */
- { no:8,  ready:true,  ph:'GRAMMAIRE', u8:true, letters:[], words:[],
-   court:'L’article الـ',                       // ce que le ciel annonce, à la place des lettres
-   sub:'L’article الـ · lettres solaires et lunaires — 9 leçons' },
- /* ═══ UNITÉ 9 — بِ ﻭ عَلَى ﻭ لِ : LA GRAMMAIRE PAR LA MANIPULATION ═══
-    Disques 1 à 5 ouverts (GO de Myriam sur le disque 5, 29/08). `u9:true`
-    dit à `discsFor` de lire `u9Disques()` — pas de moteur à soi comme U8, les
-    écrans sont des exercices ORDINAIRES du registre (voir u9Disques() plus
-    haut et src/units/unit-9/donnees/disque-1.js … disque-5.js).
-    ⚠️ LE DISQUE 5 CHANGE DE NATURE : les quatre premiers enseignent un SENS
-    (quel harf pour quelle relation), le cinquième une FORME — la terminaison
-    du nom qui passe de ـُ à ـِ derrière بِ. Ses écrans manipulent donc des
-    fragments de mot arabe, pas des images, d'où les six exercices neufs qu'il
-    apporte au registre (voir src/exercises/_mot-colore.js).
-    LE VOCABULAIRE (GO de Myriam, 04/09) — les trois harf que l'unité enseigne,
-    puis les six noms qu'elle introduit. Format {w,fr,say}, celui de l'unité 8 :
-    ni `e` ni `confus` ni `b`, trois champs que plus AUCUN code ne lit (les emoji
-    de sens sont retirés depuis le 12/08 ; le commentaire de wordSoundOptions dit
-    que le QCM n'utilise PAS `confus` — il tire ses leurres des autres mots de
-    l'unité ; `b` n'existe que sur les objets-lettres).
-    ⚠️ LES DEUX FORMES DÉFINIES NE SONT PAS UNE INCOHÉRENCE. مَكْتَبٌ · بِنْتٌ ·
-    وَلَدٌ · نَبَاتٌ se citent à l'indéfini, comme tout le vocabulaire du projet.
-    الْمَاءُ et التُّرَابُ non : l'unité ne les enseigne QUE sous cette forme, et
-    aucune source du dépôt ne porte مَاءٌ ni تُرَابٌ. Les écrire serait inventer
-    une graphie — ce que la doctrine interdit — et les prises correspondantes
-    n'existent pas (mot-maa.mp3 / mot-turab.mp3 sont absents du disque).
-    ⚠️ CETTE GRAINE NE SERT À RIEN SANS DEUX AUTRES LIGNES, posées dans le même
-    lot : le drapeau `vocab:true` sur le disque 4 de u9Disques() (sans lui,
-    _lireDone(8) rend false et ces mots n'entrent JAMAIS en révision, en silence),
-    et les entrées de la carte AUDIO plus bas (sans elles, speak() retombe sur la
-    voix de SYNTHÈSE, que la doctrine interdit pour ce qui enseigne un son).
-    ⚠️ `_adopteVocab` remplacerait cette graine s'il existait des lignes
-    unite_no=9 dans Supabase — il n'y en a pas, et sa garde « pas de lignes pour
-    cette unité : sa graine reste » la protège. Le jour où il y en aura, c'est
-    LÀ que le vocabulaire vivra, plus ici. */
- { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[],
-   words:[
-  {w:'بِ',fr:'avec, au moyen de',say:'bi'},
-  {w:'لِ',fr:'pour, à',say:'li'},
-  {w:'عَلَى',fr:'sur',say:'ʿalā'},
-  {w:'مَكْتَبٌ',fr:'un bureau',say:'maktab'},
-  {w:'بِنْتٌ',fr:'une fille',say:'bint'},
-  {w:'وَلَدٌ',fr:'un garçon',say:'walad'},
-  {w:'نَبَاتٌ',fr:'une plante, de la végétation',say:'nabāt'},
-  {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
-  {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
-   ],
-   /* ⚠️ « Les harfs » PRÉFIXÉ (Myriam, 05/09) : les trois lettres seules ne
-      disaient pas QUOI elles étaient — le mot les nomme, comme « L'article
-      الـ » le fait déjà pour l'unité 8. Alimente tout ce qui lit `court`
-      (bandeau du ciel, Cours › Résumé, le hub de grammaire) depuis CETTE
-      seule source — rien à répéter ailleurs.
-      ⚠️ CASSE corrigée le 05/09 (retour de Myriam) : `court` s'écrit en
-      MINUSCULE avec une majuscule de début, jamais en capitales — le figeage
-      en capitales de la transition d'unité sur l'accueil (`.unit-sep`) est un
-      CSS (`text-transform:uppercase`), pas une convention à recopier ici. */
-   court:'Les harfs بِ · عَلَى · لِ',
-   sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
- /* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS ═══
-    Ouverte le 02/09 (GO de Myriam : « okay pour le cablage »). `u10:true` dit
-    à `discsFor` de lire `u10Disques()` — même dispositif que l'unité 9 : pas
-    de moteur à soi, les écrans sont des exercices ORDINAIRES du registre
-    (`scene-relation`, voir src/units/unit-10/donnees/disque-1.js).
-    ⚠️ `sub` COMPTE LES DISQUES RÉELS, pas les neuf de l'accueil : l'unité 9 a
-    dit « 5 leçons » puis 6, puis 7, à mesure que ses grisés devenaient réels.
-    Une seule leçon ici, et le mot est au singulier.
-    ⚠️ `court` NE NOMME PAS LA RÈGLE : les directives validées interdisent
-    مُضَاف / إِضَافَة au disque 1. Le ciel annonce donc ce que l'élève va
-    FAIRE — reconnaître de qui, de quoi on parle — pas ce qu'elle apprendra.
-    `words:[]` : comme l'unité 9, les groupes nominaux ne rejoignent pas encore
-    la révision espacée — à trancher avec Myriam. */
- { no:10, ready:true,  ph:'GRAMMAIRE', u10:true, letters:[], words:[],
-   court:'L’annexion — الإِضَافَة',   // graphie relevée dans le document d'architecture, jamais retapée
-   sub:'« X de Y » — de qui ? de quoi ? · 1 leçon' },
- { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
- { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
-]);
-})();
+/* ═══ LES DONNÉES (l'alphabet, les harakāt, la Fātiḥa, les douze unités, les sourates)
+   et les OUTILS ARABES vivent dans alaq-vercel-static/donnees.js depuis le 14/09/2026 —
+   un script CLASSIQUE chargé plus haut, avant celui-ci : UNITS est lu de façon SYNCHRONE
+   dès le premier rendu. Corriger un mot des unités 1 à 7 se fait dans
+   src/content/units/unit-0N.json, puis `node outils/semer-unites.mjs`. ═══ */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    @U8 — L'UNITÉ 8 EST UN MODULE (POC-1, 18/08/2026).
@@ -706,503 +575,14 @@ window.__alaqEnregistrerU8 = function(api){
 /* (déplacé dans window.__alaqEnregistrerU8, plus haut : le module arrive après ce script) */
 /* (leurs mp3 sont branchés sur AUDIO plus bas, là où AUDIO existe) */
 
-/* les tracés viennent de LT ; chaque unité n’expose QUE ses lettres (débloquées au fil des unités) */
-UNITS.forEach(function(U){U.strokes={};U.strokesPos={};(U.letters||[]).forEach(function(L){
-  if(LT[L+'-0'])U.strokes[L]=1; var sp={}; [1,2,3].forEach(function(p){ if(LT[L+'-'+p])sp[p]=1; }); U.strokesPos[L]=sp;
-});});
 
-/* ===== ARCHITECTURE : Sourate → Unités → Disques =====
-   Statique aujourd'hui (une seule sourate) ; miroir des futures tables
-   units/lessons du backend Supabase. Ajouter une sourate = ajouter une entrée. */
-const SOURATES=[
- { no:1, first:1, nom:'Al-Fātiḥa', ar:'الفاتحة', sub:'L\u2019Ouverture · 7 versets · 7 unités',
-   verses:FATIHA, units:UNITS,
-   tr:[ // traduction mot à mot (alignée sur les mots de chaque verset)
-    ['Au nom','d\u2019Allah','le Tout-Miséricordieux','le Très-Miséricordieux'],
-    ['la louange','est à Allah','Seigneur','des mondes'],
-    ['le Tout-Miséricordieux','le Très-Miséricordieux'],
-    ['Souverain','du Jour','de la Rétribution'],
-    ['c\u2019est Toi que','nous adorons','et c\u2019est Toi que','nous implorons l\u2019aide'],
-    ['guide-nous','sur le chemin','droit'],
-    ['le chemin','de ceux que','Tu as comblés de bienfaits','envers eux','non pas','ceux qui ont encouru la colère','envers eux','ni','les égarés'],
-   ] },
-];
 
-// Enluminure arc-en-ciel : 7 unites = 7 versets d'Al-Fatiha = les 7 couleurs de la lumiere blanche.
-// Chaque unite recoit une couleur (contour du bandeau + halo du disque courant + trait du separateur).
-const UNIT_ACCENTS=['#d8463a','#e07a1e','#ecc531','#35a468','#2f74d0','#5350c8','#8a4fc4'];
-function unitAccent(u){return UNIT_ACCENTS[((u%UNIT_ACCENTS.length)+UNIT_ACCENTS.length)%UNIT_ACCENTS.length];}
-
-// Programme des sourates (ordre pedagogique, cf. CLAUDE.md) : seules celles construites ont un "idx".
-const SOURATE_PLAN=[
- {no:1,  nom:'Al-Fatiha',    ar:'الفاتحة', idx:0},
- {no:114,nom:'An-Nas',       ar:'الناس'},
- {no:113,nom:'Al-Falaq',     ar:'الفلق'},
- {no:112,nom:'Al-Ikhlas',    ar:'الإخلاص'},
- {no:111,nom:'Al-Masad',     ar:'المسد'},
- {no:110,nom:'An-Nasr',      ar:'النصر'},
- {no:109,nom:'Al-Kafirun',   ar:'الكافرون'},
- {no:108,nom:'Al-Kawthar',   ar:'الكوثر'},
- {no:107,nom:'Al-Maʻun', ar:'الماعون'},
- {no:106,nom:'Quraysh',      ar:'قريش'},
- {no:105,nom:'Al-Fil',       ar:'الفيل'},
- {no:104,nom:'Al-Humaza',    ar:'الهمزة'},
- {no:103,nom:'Al-ʻAsr',  ar:'العصر'},
- {no:102,nom:'At-Takathur',  ar:'التكاثر'},
- {no:101,nom:'Al-Qariʻa', ar:'القارعة'},
- {no:100,nom:'Al-ʻAdiyat', ar:'العاديات'},
- {no:99, nom:'Az-Zalzala',   ar:'الزلزلة'},
- {no:98, nom:'Al-Bayyina',   ar:'البينة'},
- {no:97, nom:'Al-Qadr',      ar:'القدر'},
- {no:96, nom:'Al-ʻAlaq',  ar:'العلق'},
- {no:95, nom:'At-Tin',       ar:'التين'},
- {no:94, nom:'Ash-Sharh',    ar:'الشرح'},
- {no:93, nom:'Ad-Duha',      ar:'الضحى'},
- {no:92, nom:'Al-Layl',      ar:'الليل'},
- {no:91, nom:'Ash-Shams',    ar:'الشمس'},
- {no:90, nom:'Al-Balad',     ar:'البلد'},
- {no:89, nom:'Al-Fajr',      ar:'الفجر'},
- {no:88, nom:'Al-Ghashiya',  ar:'الغاشية'},
- {no:87, nom:'Al-Aʻla',   ar:'الأعلى'},
- {no:86, nom:'At-Tariq',     ar:'الطارق'},
- {no:85, nom:'Al-Buruj',     ar:'البروج'},
- {no:84, nom:'Al-Inshiqaq',  ar:'الانشقاق'},
- {no:83, nom:'Al-Mutaffifin', ar:'المطففين'},
- {no:82, nom:'Al-Infitar',   ar:'الانفطار'},
- {no:81, nom:'At-Takwir',    ar:'التكوير'},
- {no:80, nom:'ʻAbasa',    ar:'عبس'},
- {no:79, nom:'An-Naziʻat', ar:'النازعات'},
- {no:78, nom:'An-Nabaʾ',  ar:'النبأ'},
- {no:67, nom:'Al-Mulk',      ar:'الملك'},
- {no:55, nom:'Ar-Rahman',    ar:'الرحمن'},
- {no:18, nom:'Al-Kahf',      ar:'الكهف'},
- {no:36, nom:'Ya-Sin',       ar:'يس'},
-];
-
-/* ================= GÉNÉRATEURS ================= */
-function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function rnd(a){return a[Math.floor(Math.random()*a.length)];}
-// Répétition espacée légère : plus un item a été raté, plus il ressort en révision.
-function errWeight(k){ return 1+3*Math.min(4,(S.err&&S.err[k])||0); }
-function weightedShuffle(arr,keyf){
-  return arr.map(a=>({a,r:-Math.log(Math.random())/errWeight(keyf(a))}))
-            .sort((u,v)=>u.r-v.r).map(o=>o.a);
-}
-
-function mcq(o){o.type='mcq';return o;}
-
-// Place la bonne réponse à une position tournante (0,1,2,0,1,2…) pour éviter
-// qu'elle tombe trop souvent au même endroit. opts = tableau d'options, ans = clé correcte.
-let _lastPos=-1;
-function balancePos(opts,ansKey){
-  const n=opts.length;
-  const ai=opts.findIndex(o=>o.key===ansKey);
-  if(ai<0)return opts;
-  let target=Math.floor(Math.random()*n);
-  if(n>1&&target===_lastPos)target=(target+1+Math.floor(Math.random()*(n-1)))%n;
-  _lastPos=target;
-  const arr=opts.slice();
-  const[a]=arr.splice(ai,1);
-  arr.splice(target,0,a);
-  return arr;
-}
-
-// Pour « touche le bon son », les 3 options doivent sonner DIFFÉREMMENT.
-// La voix de synthèse ne rend ni la chedda ni les nuances de longueur, donc on
-// n'utilise pas les quasi-homographes (confus) : on prend d'autres mots de l'unité,
-// en garantissant des sons mutuellement distincts (clés audio différentes).
-function audioKey(s){ return (s||'').normalize('NFC').replace(/\u0651/g,''); }
-function wordSoundOptions(U,w){
-  const used=new Set([audioKey(w.w)]);
-  const others=[];
-  for(const x of shuffle(U.words||[])){
-    const xk=audioKey(x.w);
-    if(x.w===w.w||used.has(xk))continue;
-    used.add(xk); others.push(x.w);
-    if(others.length>=2)break;
-  }
-  return balancePos(shuffle([{snd:w.w,key:w.w},...others.map(p=>({snd:p,key:p}))]),w.w);
-}
-
-const NONATTACH=['ا','د','ذ','ر','ز','و'];
-
-function buildAlphabet(U){
-  // Leçon 1 v2 (corrections Myriam 07/08) : le TITRE est l'instruction, jamais lu.
-  // Le français ne parle plus ; seul l'arabe sonne. 15 écrans (9/10/12/14/18 supprimés).
-  const q=[
-   {type:'tapset',title:'Touche 3 des 28 lettres de l\u2019alphabet',items:[],alphabet:true,cols:4},
-   {type:'harakat3',title:'Révèle les harakat'},
-   {type:'fuse',title:'Associe lettres et harakat',L:'م',jeux:[
-     {chip:'\u064E',fus:'مَ',son:'mim-fatha-son-court.mp3'},
-     {chip:'\u0650',fus:'مِ',son:'mim-kasra-son-court.mp3'},
-     {chip:'\u064F',fus:'مُ',son:'mim-damma-son-court.mp3'}]},
-   {type:'tapset',title:'Touche les 3 lettres de prolongation',items:[['ا'],['و'],['ي']],cols:3,nolabel:true},
-   {type:'findset',title:'Retrouve les 3 prolongations',targets:['ا','و','ي'],highlight:false},
-   {type:'fuse',title:'Associe lettres et prolongations',L:'م',jeux:[
-     {chip:'ا',fus:'مَا',son:'mim-alif-son-prolonge.mp3'},
-     {chip:'ي',fus:'مِي',son:'mim-ya-son-prolonge.mp3'},
-     {chip:'و',fus:'مُو',son:'mim-waw-son-prolonge.mp3'}]},
-   {type:'selson',title:'Sélectionne les sons courts',bons:['مَ','مِ','مُ'],
-     tous:['مَا','مَ','مِي','مُو','مِ','مُ'],
-     corr:'Les sons courts : <span class="ar">مَ · مِ · مُ</span>'},
-   {type:'selson',title:'Sélectionne les sons longs',bons:['مَا','مِي','مُو'],
-     tous:['مِ','مَا','مُ','مِي','مَ','مُو'],
-     corr:'Les sons longs : <span class="ar">مَا · مِي · مُو</span>'},
-   {type:'formslide',L:'م',title:'Fais glisser la lettre\u00A0<span class="ar">م</span>'},
-   {type:'read',word:'مَدْرَسَةٌ',lang:'ar',dir:'rtl',title:'Révèle le mot'},
-   mcq({prompt:'L\u2019alphabet arabe comporte :',mute:true,graded:true,grid:'grid3',answer:'28',explain:'L\u2019alphabet arabe compte 28 lettres.',
-     options:shuffle([{txt:'26 lettres',key:'26'},{txt:'28 lettres',key:'28'},{txt:'30 lettres',key:'30'}])}),
-   mcq({prompt:'Comment s\u2019appellent ces signes ?',mute:true,signes:true,graded:true,answer:'h',explain:'Les harakat sont les petits signes au-dessus ou en dessous de la lettre : fatḥa « a », kasra « i », ḍamma « ou ».',
-     options:shuffle([{txt:'Les harakat',key:'h'},{txt:'Des lettres spéciales',key:'l'},{txt:'Des accents',key:'a'}])}),
-   mcq({prompt:'Combien de lettres de prolongation ?',mute:true,graded:true,grid:'grid3',answer:'3',explain:'Il y a 3 lettres de prolongation, qui prolongent le son.',
-     options:shuffle([{txt:'3',key:'3'},{txt:'2',key:'2'},{txt:'4',key:'4'}])}),
-   mcq({prompt:'Quelles sont les prolongations ?',mute:true,graded:true,answer:'awy',explain:'L\u2019alif <span class="ar">ا</span>, le wāw <span class="ar">و</span> et le yā\u2019 <span class="ar">ي</span> étirent la voyelle qui précède.',
-     options:shuffle([{ar:'ا و ي',key:'awy'},{ar:'م ل ن',key:'mln'},{ar:'ب ت ث',key:'btt'}])}),
-   mcq({prompt:'Comment lit-on l\u2019arabe ?',mute:true,graded:true,answer:'rtl',explain:'L\u2019arabe se lit et s\u2019écrit de droite à gauche, à l\u2019inverse du français.',
-     options:shuffle([{txt:'De droite à gauche',key:'rtl'},{txt:'De gauche à droite',key:'ltr'}])}),
-  ];
-  return q;
-}
-
-/* ══ LEÇON 2 v2 — « Mémoriser » refondue avec Myriam le 08/08. 25 écrans → 14. ══
-   Retirés : l'écran « touche chaque lettre 3 fois » (doublon des 3 cartes qui précèdent)
-   et 12 des 18 quiz (six suffisent, trois par sens). Ajoutés : le jeu de bulles (la vraie
-   phase d'apprentissage) et le repérage des 3 lettres dans l'alphabet, jumeau de la leçon 1.
-   ⚠️ Cette fonction sert les 7 unités : elle ne parle jamais de م ل ن en dur. */
-function buildMemo(U){
-  const q=[];
-  U.letters.forEach(L=>q.push({type:'learn',L,mute:true}));  // le français n'est JAMAIS lu (doctrine) — le titre suffit
-  q.push({type:'bulles',lettres:U.letters.slice(),parLettre:5});
-  q.push({type:'findset',title:'Retrouve tes '+U.letters.length+' lettres',
-    targets:U.letters.slice(),highlight:false,greyEnd:true});
-  // le son → la lettre
-  shuffle(U.letters).forEach(L=>q.push(mcq({
-    prompt:'Choisis la bonne lettre',mute:true,spk:L,graded:true,grid:'grid3',answer:L,
-    options:balancePos(shuffle(U.letters).map(x=>({ar:x,key:x})),L)})));
-  // la lettre → le son : 3 haut-parleurs qui sonnent de DROITE à GAUCHE
-  shuffle(U.letters).forEach(L=>q.push(mcq({
-    prompt:'Choisis le bon nom de la lettre',mute:true,glyph:L,spkOpts:true,
-    graded:true,grid:'grid3 rtl3',answer:L,
-    options:balancePos(shuffle(U.letters).map(x=>({snd:x,key:x})),L)})));
-  U.letters.forEach(L=>q.push({type:'trace',L}));
-  return q;
-}
-
-function buildSpot(U){
-  const q=[];
-  FATIHA.forEach((v,vi)=>{
-    U.letters.forEach(L=>{ if([...strip(v)].some(ch=>sameLetter(ch,L))) q.push({type:'spot',vi,L,mute:true}); });
-  });
-  return q;
-}
-
-function buildForms(U){
-  /* Refonte du 10/08 (tâche Notion « UNITÉ 1 - LEÇON 3 », preview v3 validée par Myriam),
-     pour les 7 unités d'un coup : chaque lettre suit un arc complet — on la GLISSE dans ses
-     4 cases (l'exercice de la leçon 1), puis on l'ÉCRIT dans ses 4 formes (isolée · début ·
-     milieu · fin — « pédagogiquement on n'a pas le choix »), puis 24 bulles-formes (chaque
-     forme deux fois) et les deux quiz de la leçon 2. Titres courts jamais lus (mute). */
-  const q=[];
-  U.letters.forEach(L=>{
-    q.push({type:'formslide',L,title:'Fais glisser la lettre\u00A0'+letAr(L)});
-    q.push({type:'trace',L});
-    /* les lettres qui ne s'attachent qu'à droite (أ و ر د ذ…) n'ont que DEUX formes
-       réelles : début = isolée et milieu = fin. On n'écrit que les formes distinctes —
-       leurs tracés « début/milieu » n'existent d'ailleurs pas dans le pointage de Myriam. */
-    (joinsL(L)?[1,2,3]:[3]).forEach(p=>q.push({type:'trace',L,pos:p}));
-  });
-  q.push({type:'bulles',lettres:U.letters.slice(),formes:true});
-  let pc=Math.floor(Math.random()*3); const nextPos=()=>1+(pc++%3);
-  // le nom sonne tout seul (voix choisie), les 3 réponses sont des formes déguisées
-  shuffle(U.letters).forEach(L=>{
-    const ps=shuffle([1,2,3]);
-    q.push(mcq({prompt:'Choisis la bonne lettre',mute:true,spk:L,graded:true,grid:'grid3',answer:L,
-      options:balancePos(shuffle(U.letters).map((x,k)=>({ar:formGlyph(x,ps[k%3]),key:x})),L)}));
-  });
-  // une forme en grand, 3 haut-parleurs qui sonnent de droite à gauche (grille rtl)
-  shuffle(U.letters).forEach(L=>q.push(mcq({prompt:'Choisis le bon nom de la lettre',mute:true,
-    glyph:formGlyph(L,nextPos()),spkOpts:true,graded:true,grid:'grid3 rtl3',answer:L,
-    options:balancePos(shuffle(U.letters).map(x=>({snd:x,key:x})),L)})));
-  return q;
-}
-
-function sylHK(L,h){return L+h;}
-/* ══ LEÇONS 5 & 6 v2 — refonte du 10/08 (previews v3 validées par Myriam), MÊME moteur.
-   13 écrans pour 3 lettres, DYNAMIQUE pour les 7 unités : un « fuse » par lettre (glisser
-   les harakat/prolongations — l'exercice de la leçon 1), puis les bulles-syllabes (chaque
-   syllabe ×2, le son d'une bulle est SA syllabe), puis chaque syllabe testée UNE fois —
-   moitié haute « Choisis la bonne écriture » (son → écrit), moitié basse « Choisis le bon
-   son » (écrit → 3 haut-parleurs rtl). Distracteurs : même lettre autre signe + autre
-   lettre même signe. Le son passe par sayLetterName → jouerSyl (Habibah -f d'abord,
-   la voix de Myriam en repli). */
-function leconSyllabes(U,paires,fabrique,titreFuse){
-  const q=[];
-  U.letters.forEach(L=>q.push({type:'fuse',L,mute:true,title:titreFuse+'\u00A0'+letAr(L),
-    jeux:paires.map(p=>({chip:p[0],fus:fabrique(L,p[0])}))}));
-  const syls=[];U.letters.forEach(L=>paires.forEach(p=>syls.push(fabrique(L,p[0]))));
-  q.push({type:'bulles',syllabes:syls.slice()});
-  const ordre=shuffle(syls.slice()), nEcrit=Math.ceil(ordre.length/2);
-  ordre.forEach((s,k)=>{
-    /* retrouver (lettre, signe) en BALAYANT — jamais via s[0] : les graphies corrigées
-       du hamza (إِ, آ) ne commencent pas par la lettre de la table (audit 10/08) */
-    let L=null,pMien=null;
-    U.letters.forEach(l=>paires.forEach(p=>{ if(fabrique(l,p[0])===s){L=l;pMien=p[0];} }));
-    const pAutre=shuffle(paires.filter(p=>p[0]!==pMien))[0][0];
-    const lAutre=shuffle(U.letters.filter(x=>x!==L))[0];
-    const opts=[s,fabrique(L,pAutre),fabrique(lAutre,pMien)];
-    if(k<nEcrit)q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:s,graded:true,grid:'grid3',answer:s,
-      options:balancePos(shuffle(opts.map(x=>({ar:x,key:x}))),s)}));
-    else q.push(mcq({prompt:'Choisis le bon son',mute:true,glyph:s,spkOpts:true,graded:true,grid:'grid3 rtl3',answer:s,
-      options:balancePos(shuffle(opts.map(x=>({snd:x,key:x}))),s)}));
-  });
-  return q;
-}
-function sylHKG(L,h){ return (L==='أ'&&h==='\u0650')?'إِ':L+h; }    // la kasra porte le hamza DESSOUS : أِ n'existe pas (audit 10/08) — partagée leçon 5 + bilan
-function sylMDG(L,m){ if(L==='أ'&&m==='ا')return 'آ'; if(L==='أ'&&m==='ي')return 'إِي'; return maddSyl(L,m); } // hamza : آ (jamais أَا) et إِي (jamais أِي — attrapé par le harnais du bilan, 10/08 tard) — partagée leçon 6 + bilan
-function buildHarakat(U){ return leconSyllabes(U,HK,sylHKG,'Glisse les harakat sur la lettre'); }
-
-function buildMadd(U){ return leconSyllabes(U,MD,sylMDG,'Glisse les prolongations sur la lettre'); }
-function buildMaddANCIEN(U){ // conservé quelques jours en référence, plus appelé — à jeter avec l'accord de Myriam
-  const q=[];
-  U.letters.forEach(L=>{
-    const syls=MD.map(m=>maddSyl(L,m[0]));
-    q.push({type:'explore',items:MD.map(m=>({ar:maddSyl(L,m[0]),lab:U.lat[L]+m[1],say:maddSyl(L,m[0])})),min:3,
-      title:''});
-    for(let r=0;r<3;r++){
-      const a1=syls[r%syls.length];
-      q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',audio:a1,graded:true,grid:'grid3',answer:a1,
-        options:balancePos(shuffle(syls).map(s=>({ar:s,key:s})),a1)}));
-    }
-    for(let r=0;r<3;r++){
-      const a2=syls[r%syls.length];
-      q.push(mcq({prompt:'Comment se lit cette syllabe ?',glyph:a2,graded:true,grid:'grid3',answer:a2,
-        options:balancePos(shuffle(syls).map(s=>({snd:s,key:s})),a2)}));
-    }
-  });
-  const ALL=[];U.letters.forEach(L=>MD.forEach(m=>ALL.push(maddSyl(L,m[0]))));
-  for(let i=0;i<8;i++){
-    const a=ALL[i%ALL.length];
-    q.push(mcq({prompt:'Quiz mélangé : écoute… puis touche',audio:a,graded:true,grid:'grid3',answer:a,
-      options:balancePos(shuffle([a, ...shuffle(ALL.filter(x=>x!==a)).slice(0,2)]).map(s=>({ar:s,key:s})),a)}));
-  }
-  for(let i=0;i<4;i++){
-    const a=ALL[(i*2)%ALL.length];
-    q.push(mcq({prompt:'Comment se lit cette syllabe ?',glyph:a,graded:true,grid:'grid3',answer:a,
-      options:balancePos(shuffle([a, ...shuffle(ALL.filter(x=>x!==a)).slice(0,2)]).map(s=>({snd:s,key:s})),a)}));
-  }
-  return q;
-}
-
-/* ══ LEÇON 7 « Lire des mots » v3 — refonte du 11/08 (preview preview_lecon7_lire_v3,
-   retours de Myriam du 10/08 : plus AUCUNE traduction ni emoji, on GLISSE les signes,
-   « Touche le mot qui porte… », grosses bulles-mots, le tri final).
-   DYNAMIQUE pour les 7 unités : chaque écran se construit sur U.words / U.letters.
-   Les 4 anciens écrans `info` en paragraphes (relus à l'identique dans CHAQUE unité)
-   sont morts : les signes ne s'expliquent plus, ils se manipulent — et une seule fois,
-   en unité 1, là où ils sont NEUFS. Les unités suivantes attaquent les mots. ══ */
-function buildWords(U){
-  const SUK='ْ', CHD='ّ', TAN='ٌ', FAT='َ', TAT='ـ';
-  const ui=UNITS.indexOf(U), q=[], W=(U.words||[]).slice();
-  const porte=(m,sig)=>m.w.indexOf(sig)>-1;
-  /* les mots DÉJÀ lisibles : cette unité + les précédentes (le tri et les leurres y puisent) */
-  const dejaVus=[]; for(let k=0;k<=ui;k++)if(UNITS[k]&&UNITS[k].words)dejaVus.push(...UNITS[k].words);
-
-  /* ── A · LES SIGNES SE GLISSENT (unité 1 seulement : c'est là qu'ils sont neufs) ──
-     Le أَ est grisé et n'est JAMAIS une cible ; la chedda arrive sur une lettre qui
-     porte déjà sa fatha (design de Myriam). Le son de chaque groupe est SA syllabe. */
-  if(ui===0){
-    const SIGNES=[
-      {chip:TAT+SUK, nom:'le soukoun',    cib:L=>L,       fin:L=>L+SUK},
-      {chip:TAT+CHD, nom:'la chedda',     cib:L=>L+FAT,   fin:L=>L+CHD+FAT},
-      {chip:TAT+TAN, nom:'le dhammatayn', cib:L=>L,       fin:L=>L+TAN},
-    ];
-    SIGNES.forEach(sg=>q.push({type:'place',mute:true,chip:sg.chip,nom:sg.nom,
-      grps:U.letters.map(L=>({pre:'أَ',cib:sg.cib(L),fin:sg.fin(L)}))}));
-  }
-
-  /* ── B · ÉCOUTE → 2 ÉCRITURES : le même mot avec et sans son signe ──
-     La variante se FABRIQUE (chedda retirée · soukoun devenu fatha · tanwīn retiré) :
-     aucune liste à la main, les 7 unités sont servies. */
-  const varSansSigne=(w,sig)=>{
-    if(sig===CHD)return w.replace(CHD,'');
-    if(sig===SUK)return w.replace(SUK,FAT);
-    return w.replace(new RegExp(TAN+'$'),'');
-  };
-  const prisB={};
-  [CHD,SUK,TAN].forEach(sig=>{
-    const cands=W.filter(m=>porte(m,sig)&&!prisB[m.w]);
-    if(!cands.length)return;
-    const m=cands[0], autre=varSansSigne(m.w,sig);
-    if(autre===m.w||dejaVus.some(x=>x.w===autre))return;   // jamais un VRAI mot comme leurre
-    prisB[m.w]=1;
-    q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:m.w,graded:true,grid:'grid2',answer:m.w,
-      options:shuffle([{ar:m.w,key:m.w},{ar:autre,key:autre}])}));
-  });
-
-  /* ── C · « TOUCHE LE MOT QUI PORTE… » : reconnaître un signe DANS un mot ── */
-  [[SUK,'un soukoun'],[CHD,'une chedda'],[TAN,'un tanwīn']].forEach(pair=>{
-    const sig=pair[0];
-    const bons=W.filter(m=>porte(m,sig)), autres=W.filter(m=>!porte(m,sig));
-    if(!bons.length||autres.length<2)return;
-    const bon=rnd(bons), lot=shuffle(autres).slice(0,2);
-    q.push(mcq({prompt:'Touche le mot qui porte '+pair[1],mute:true,graded:true,grid:'grid3',answer:bon.w,
-      options:balancePos(shuffle([bon,...lot].map(x=>({ar:x.w,key:x.w}))),bon.w)}));
-  });
-
-  /* ── D · LES MOTS : « Choisis le bon mot » (écrit → 3 sons) et « la bonne écriture »
-     (son → 3 écrits). Un mot par écran, en alternance, jamais deux fois le même. ── */
-  shuffle(W).slice(0,5).forEach((m,k)=>{   // 5 mots, comme la preview validée — pas les 9
-    if(k%2===0)
-      q.push(mcq({prompt:'Choisis le bon mot',mute:true,glyph:m.w,glyphLinear:true,spkOpts:true,graded:true,
-        grid:'grid3 rtl3',answer:m.w,options:wordSoundOptions(U,m)}));
-    else
-      q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:m.w,graded:true,grid:'grid3',answer:m.w,
-        options:balancePos(shuffle([m.w,...shuffle(W.filter(x=>x.w!==m.w)).slice(0,2).map(x=>x.w)])
-          .map(x=>({ar:x,key:x})),m.w)}));
-  });
-
-  /* ── E · LES GROSSES BULLES-MOTS : seules celles qui portent le signe éclatent ──
-     Un leurre touché SECOUE et reste (erreur d'exploration : jamais de cœur perdu). */
-  {
-    const NOMS={}; NOMS[SUK]='un soukoun'; NOMS[CHD]='une chedda'; NOMS[TAN]='un tanwīn';
-    /* On choisit le signe dont les porteurs sont MINORITAIRES : chercher 8 mots sur 9
-       ne fait rien chercher du tout. 2 ou 3 cibles pour 3 ou 4 leurres, 6 bulles en tout. */
-    const cand=[SUK,CHD,TAN].map(sig=>({sig,bons:W.filter(m=>porte(m,sig))}))
-      .filter(x=>x.bons.length>=2&&x.bons.length<=Math.floor(W.length/2))
-      .sort((a,b)=>a.bons.length-b.bons.length)[0];
-    if(cand){
-      const cibles=shuffle(cand.bons).slice(0,3);
-      const leurres=shuffle(W.filter(m=>!porte(m,cand.sig))).slice(0,6-cibles.length);
-      q.push({type:'bulmots',mute:true,signe:NOMS[cand.sig],
-        mots:shuffle([...cibles.map(m=>({w:m.w,cible:true})),
-                      ...leurres.map(m=>({w:m.w,cible:false}))])});
-    }
-  }
-
-  /* ── F · LE TRI : deux paniers de SIGNES (jamais leur nom écrit — retour de Myriam) ──
-     On puise dans TOUS les mots déjà lisibles : 3 par panier dès l'unité 1. */
-  {
-    const parSigne={}; [SUK,CHD].forEach(sig=>{ parSigne[sig]=dejaVus.filter(m=>m.w.indexOf(sig)>-1); });
-    /* Unité 1 : un seul mot porte un soukoun (نَمْلٌ). Les syllabes-signes qu'on vient de
-       fabriquer à l'écran A complètent les paniers — elles ont leur son dans AUDIO.
-       Dès l'unité 2, les mots déjà lus suffisent : aucun ajout. */
-    if(ui===0)U.letters.forEach(L=>{ parSigne[SUK].push({w:'أَ'+L+SUK}); parSigne[CHD].push({w:'أَ'+L+CHD+FAT}); });
-    if(parSigne[SUK].length>=2&&parSigne[CHD].length>=2){
-      const n=Math.min(3,parSigne[SUK].length,parSigne[CHD].length);
-      /* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — un tatweel (ـ) porte très peu
-         d'encre : agrandir sa police ne change rien, le signe reste presque invisible à côté
-         d'un mot entier. Il porte maintenant une VRAIE lettre (ن, déjà l'exemple générique de
-         l'app) — toujours le signe SEUL, jamais son nom écrit (règle de Myriam), mais lisible. */
-      q.push({type:'tri',mute:true,
-        paniers:[{sig:'ن'+SUK,cle:'s'},{sig:'ن'+CHD,cle:'c'}],
-        mots:shuffle([...shuffle(parSigne[SUK]).slice(0,n).map(m=>({w:m.w,cle:'s'})),
-                      ...shuffle(parSigne[CHD]).slice(0,n).map(m=>({w:m.w,cle:'c'}))])});
-    }
-  }
-
-  // « Appuie sur ce que tu entends » : la partie du verset dont toutes les lettres sont connues
-  if(U.vtiles){ const st=buildVerseTiles(U.vtiles.vi); if(st)q.push(st); }
-  return q;
-}
-
-/* ══ LEÇON 8 « Écrire des mots » v2 (10/08 soir) — écriture GUIDÉE (tuile fausse
-   refusée + indice au 2e refus), un écran par mot, du plus court au plus long. 7 unités. ══ */
-function buildWrite(U){
-  return U.words.slice()
-    .sort((a,b)=>splitUnits(a.w).length-splitUnits(b.w).length)
-    .map(w=>({type:'assemble',w,graded:true,mute:true}));
-}
-
-/* ══ LEÇON 9 « Bilan » v2 (10/08 soir) — chaque acquis testé UNE fois, par le JUMEAU
-   de sa leçon : lettre (L1-2) → nom (L2-3) → forme déguisée (L3) → syllabe (L5) →
-   prolongation (L6) → lecture de mots (L7) → écriture guidée (L8). 10 écrans, 7 unités. ══ */
-function buildBilan(U){
-  const q=[], L=shuffle(U.letters.slice());
-  const l=i=>L[i%L.length];
-  q.push(mcq({prompt:'Choisis la bonne lettre',mute:true,spk:l(0),graded:true,grid:'grid3',answer:l(0),
-    options:balancePos(shuffle(U.letters).map(x=>({ar:x,key:x})),l(0))}));
-  q.push(mcq({prompt:'Choisis le bon nom de la lettre',mute:true,glyph:formGlyph(l(1),1+Math.floor(Math.random()*3)),
-    spkOpts:true,graded:true,grid:'grid3 rtl3',answer:l(1),
-    options:balancePos(shuffle(U.letters).map(x=>({snd:x,key:x})),l(1))}));
-  const ps=shuffle([1,2,3]);
-  q.push(mcq({prompt:'Choisis la bonne lettre',mute:true,spk:l(2),graded:true,grid:'grid3',answer:l(2),
-    options:balancePos(shuffle(U.letters).map((x,k)=>({ar:formGlyph(x,ps[k%3]),key:x})),l(2))}));
-  const s4=sylHKG(l(0),rnd(HK)[0]);
-  q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:s4,graded:true,grid:'grid3',answer:s4,
-    options:balancePos(shuffle(HK.map(h=>{const s=sylHKG(l(0),h[0]);return {ar:s,key:s};})),s4)}));
-  const s5=sylHKG(l(1),rnd(HK)[0]);
-  q.push(mcq({prompt:'Choisis le bon son',mute:true,glyph:s5,spkOpts:true,graded:true,grid:'grid3 rtl3',answer:s5,
-    options:balancePos(shuffle(HK.map(h=>{const s=sylHKG(l(1),h[0]);return {snd:s,key:s};})),s5)}));
-  const s6=sylMDG(l(2),rnd(MD)[0]);
-  q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:s6,graded:true,grid:'grid3',answer:s6,
-    options:balancePos(shuffle(MD.map(m=>{const s=sylMDG(l(2),m[0]);return {ar:s,key:s};})),s6)}));
-  const W=shuffle(U.words.slice());
-  q.push(mcq({prompt:'Choisis le bon mot',mute:true,glyph:W[0].w,glyphLinear:true,spkOpts:true,graded:true,
-    grid:'grid3 rtl3',answer:W[0].w,options:wordSoundOptions(U,W[0])}));
-  q.push(mcq({prompt:'Choisis la bonne écriture',mute:true,spk:W[1].w,graded:true,grid:'grid3',answer:W[1].w,
-    options:balancePos(shuffle([W[1],W[2],W[3]]).map(x=>({ar:x.w,key:x.w})),W[1].w)}));
-  const parTaille=U.words.slice().sort((a,b)=>splitUnits(a.w).length-splitUnits(b.w).length);
-  q.push({type:'assemble',w:parTaille[0],graded:true,mute:true});
-  q.push({type:'assemble',w:parTaille[parTaille.length-1],graded:true,mute:true});
-  return q;
-}
-
-// Révision cumulative : remplace le tour d'alphabet à partir de l'unité 2.
-// Révise les lettres des unités PRÉCÉDENTES (reconnaissance début/milieu/fin,
-// + avec un tachkīl) et fait réécrire des mots déjà vus.
-function buildReview(U){
-  const ui=UNITS.indexOf(U);
-  const letters=[],words=[];
-  for(let k=0;k<ui;k++){
-    const P=UNITS[k];
-    if(P.alpha)(P.letters||[]).forEach(L=>{ if(P.alpha[L])letters.push(L); });
-    if(P.words)words.push(...P.words);
-  }
-  const q=[]; // pas d'écran d'annonce : on attaque directement
-  const pick3=(pool,L,glyph)=>{
-    const others=shuffle(pool.filter(x=>x!==L)).slice(0,2);
-    return balancePos(shuffle([L,...others]).map(x=>({ar:glyph(x),key:x})),L);
-  };
-  /* ═══ PLAFOND 15 ET BASCULE VERS LE MOT (Myriam, 13/08) ═══
-     L'ancienne révision prenait TOUTES les lettres précédentes × 3 positions : elle enflait
-     d'unité en unité (17 · 26 · 35 · 44 · 53 · 62 écrans) et personne n'atteignait la fin.
-     Deux règles la remplacent :
-       ① jamais plus de REV_MAX écrans — la durée d'une leçon normale ;
-       ② la part du MOT (le lire, l'écrire) grandit à chaque unité, celle du glyphe fond :
-          U2 5/15 · U3 7/15 · U4 9/15 · U5 11/15 · U6 13/15 · U7 15/15.
-     En unité 7, la révision n'est donc plus QUE de la lecture et de l'écriture de mots.
-     Ce qui reste de lettres est tiré au sort PONDÉRÉ par les erreurs (weightedShuffle) :
-     plafonner ne fait pas perdre la couverture, ça la concentre là où ça a coincé. */
-  const REV_MAX=15;
-  const assezDeMots=words.length>=3;
-  const nMots=assezDeMots?Math.min(REV_MAX,5+2*Math.max(0,ui-1)):0;
-  const nLettres=REV_MAX-nMots;
-
-  // ① ce qui reste de reconnaissance : positions ET syllabes dans le MÊME tirage pondéré
-  const cands=[];
-  letters.forEach(L=>[1,2,3].forEach(p=>cands.push({k:'pos',L:L,p:p})));
-  const SYL=[];letters.forEach(L=>HK.forEach(h=>SYL.push(L+h[0])));
-  SYL.forEach(s=>cands.push({k:'syl',s:s}));
-  weightedShuffle(cands,c=>c.k==='pos'?c.L:c.s).slice(0,Math.max(0,nLettres)).forEach(c=>{
-    if(c.k==='pos')q.push(mcq({prompt:'Touche la bonne lettre',spk:c.L,mute:true,graded:true,
-      grid:'grid3',answer:c.L,options:pick3(letters,c.L,x=>formGlyph(x,c.p))}));
-    else q.push(mcq({prompt:'Écoute… puis touche la bonne syllabe',spk:c.s,mute:true,graded:true,grid:'grid3',
-      answer:c.s,options:shuffle([c.s,...shuffle(SYL.filter(x=>x!==c.s)).slice(0,2)]).map(s=>({ar:s,key:s}))}));
-  });
-
-  // ② le mot : on ALTERNE le lire (écouter puis choisir) et l'écrire (écriture guidée)
-  if(nMots){
-    const pool={words:words};
-    const wsel=weightedShuffle(words,w=>w.w);
-    for(let i=0;i<nMots;i++){
-      const w=wsel[i%wsel.length];
-      if(i%2===0)q.push(mcq({prompt:'Choisis le bon mot',mute:true,glyph:w.w,glyphLinear:true,spkOpts:true,
-        graded:true,grid:'grid3 rtl3',answer:w.w,options:wordSoundOptions(pool,w)}));
-      else q.push({type:'assemble',w:w,graded:true,mute:true});
-    }
-  }
-  return shuffle(q).slice(0,REV_MAX);
-}
+/* ═══ LES GÉNÉRATEURS DES DISQUES (buildAlphabet, buildMemo, buildSpot, buildForms,
+   buildHarakat, buildMadd, buildWords, buildWrite, buildBilan, buildReview, et leurs outils
+   shuffle/mcq/balancePos/wordSoundOptions) vivent dans alaq-vercel-static/generateurs.js
+   depuis le 14/09/2026 — un script CLASSIQUE, parce que parcours.js les RÉFÉRENCE dans sa
+   table des disques, évaluée au premier rendu. Ils résolvent letAr, splitUnits et
+   buildVerseTiles (ci-dessous) à l'appel. ═══ */
 
 /* ═══ L'ORCHESTRATION DES DISQUES A DÉMÉNAGÉ (10/09/2026) ═══════════════════
    La table des neuf disques types, REVISION_DISC / LETTREVSPRO_DISC,
@@ -2424,7 +1804,7 @@ try{rollConstance();}catch(e){}
 /* ═══ L'ACCUEIL a déménagé dans ui/accueil.js (12/09/2026) : OFFS, refreshStats, toAr,
    sujetCours, discLabel, discImg, discTip/discTipClose et leurs écouteurs. Script classique
    chargé plus haut, AVANT celui-ci — voir l'en-tête de ui/accueil.js. ═══ */
-const BUILD='lecteur-module-14sept';
+const BUILD='lecons-externes-14sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2433,7 +1813,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-14T17:50';
+const BUILD_DATE='2026-09-14T23:46';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2444,8 +1824,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.11';
-const BUILD_NUM=213;
+const VERSION='3.12';
+const BUILD_NUM=214;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 /* ═══ … et la suite de l'accueil aussi (ui/accueil.js) : iconFallback, _homeFocusPending,
    focusCurrentDisc, renderHome, insecables, arEnveloppe, setBanner, onHomeScroll. Les
