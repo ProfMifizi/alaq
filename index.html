@@ -395,6 +395,24 @@
      remontée des `function` ne franchit pas la frontière d'un script.
      Voir l'en-tête de parcours.js pour le contrat complet. -->
 <script src="parcours.js"></script>
+<!-- ═════════════════════════════════════════════════════════════════
+     LES ÉCRANS D'INTERFACE — ui/ (12/09/2026), MÊME RÈGLE : quatre scripts
+     classiques chargés ICI, sous parcours.js et AVANT le grand script, dont la
+     dernière ligne — showTab('home') → renderHome() — peint l'accueil de façon
+     SYNCHRONE. C'est ce qui le peint sans scintillement, avant tout module ES.
+     ⛔ NI `defer`, NI `type="module"`. Ils ne lisent RIEN de ce fichier au
+     chargement : tout se résout à l'appel (l'en-tête de chacun dit son contrat,
+     le banc outils/verifier-interface.mjs le garde).
+       ui/accueil.js     l'accueil : le ciel, les disques, le bandeau d'unité
+       ui/navigation.js  showTab, l'aiguillage des cinq onglets
+       ui/parametres.js  Paramètres et Profil, les modales du rang et des succès
+       ui/reviser.js     le Cours (accordéons, résumés) et le hub Réviser
+     Un écran de ces quatre familles se corrige LÀ-BAS, jamais ici.
+     ═════════════════════════════════════════════════════════════════ -->
+<script src="ui/accueil.js"></script>
+<script src="ui/navigation.js"></script>
+<script src="ui/parametres.js"></script>
+<script src="ui/reviser.js"></script>
 <script>
 
 /* ================= OUTILS ARABES ================= */
@@ -2463,48 +2481,8 @@ function acceptMiss(){
   S.streak=0; S.pendingMiss=0; delete S._streakAvantMiss; save();
   closeGhufran(); if(_progVisible())renderProg();
 }
-/* Carte détail du rang (clic sur le rang) */
-/* La croix se cale en haut à droite de l'ÉCRAN (le .finish est fixed) ; le contenu vit
-   directement sur le fond, sans boîte. Règle posée par Myriam le 09/08. */
-const CROIX_SUCCES='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="closeSucces()" aria-label="Fermer">\u2715</button>'+
-  '<div style="max-width:340px;width:100%;margin:0 auto;text-align:center">';
-const CROIX_RANG='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="closeRank()" aria-label="Fermer">\u2715</button>'+
-  '<div style="max-width:340px;width:100%;margin:0 auto;text-align:center">';
-/* Les trois chiffres du rang, avec les icônes de la charte (plus d'emoji système) */
-function rkStatsHTML(){
-  return '<div class="rk-stats">'+
-    '<span><img src="badges/serie3.png" alt=""> '+(S.streak||0)+' j</span>'+
-    '<span><img src="badges/revision.png" alt=""> '+(S.nrev||0)+'</span>'+
-    '<span>'+icoEcran('ecran-ghufran')+' '+(S.ghufLeft||0)+'</span>'+
-    '</div>';
-}
-function showRank(){
-  var R=rankFor(S.consScore); var m=document.getElementById('rankModal');
-  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='rankModal'; document.body.appendChild(m); }
-  m.innerHTML=(CROIX_RANG)+
-    '<div class="rk-big">'+R.rank.ar+'</div>'+
-    '<h2 style="margin:8px 0 2px">'+R.rank.tr+'</h2>'+
-    '<div class="succ-stat" style="color:var(--gold2)">'+R.rank.fr+'</div>'+
-    '<p class="succ-desc">'+R.rank.desc+'</p>'+
-    rkStatsHTML()+
-    '</div>';
-  m.classList.add('on');
-}
-function closeRank(){ var m=document.getElementById('rankModal'); if(m)m.classList.remove('on'); }
-function rankInfo(idx){ // popup d'un rang cliqué depuis la barre du profil (Progrès)
-  var R=RANKS[idx], cur=rankFor(S.consScore).idx;
-  var status = idx<cur?'✓ Atteint' : (idx===cur?'⭐ En cours' : '🔒 À atteindre');
-  var m=document.getElementById('rankModal');
-  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='rankModal'; document.body.appendChild(m); }
-  m.innerHTML=(CROIX_RANG)+
-    '<div class="rk-big">'+R.ar+'</div>'+
-    '<h2 style="margin:8px 0 2px">'+R.tr+'</h2>'+
-    '<div class="succ-stat" style="color:var(--gold2)">'+R.fr+' · '+(idx+1)+' / 7</div>'+
-    '<p class="succ-desc">'+R.desc+'</p>'+
-    '<div class="rk-stats">'+status+'</div>'+
-    '</div>';
-  m.classList.add('on');
-}
+/* ═══ Les modales du rang et des succès (CROIX_SUCCES, CROIX_RANG, rkStatsHTML, showRank,
+   closeRank, rankInfo) vivent dans ui/parametres.js (12/09/2026), avec le Profil. ═══ */
 /* ═══ LE PASSAGE DE MINUIT (correctif du 14/08, retour de Myriam : « les cœurs ne se remettent
    pas à 7 le matin ») ═══
    La recharge quotidienne ne tournait qu'AU CHARGEMENT. Or Alaq est une application installée :
@@ -2533,59 +2511,10 @@ try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
 (function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();saveLocal();} })();
 
-/* ================= ACCUEIL ================= */
-const OFFS=[0,46,64,46,0,-46,-64,-46,0];
-function refreshStats(){
-  document.getElementById('st-streak').textContent=S.streak;
-  updRankBadge();
-  document.getElementById('st-hearts').textContent=S.hearts;
-}
-/* ⚠️ 17/08 — la table s'arrêtait à ٧ (écrite au temps des 7 unités) : l'unité 8 affichait
-   un « 8 » LATIN dans le Cours (capture de Myriam). Portée aux 12 unités du programme. */
-function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧','٨','٩','١٠','١١','١٢'][n]||n;}
-/* le sujet d'une unité sans lettres, prêt pour le HTML : segments arabes enveloppés */
-function sujetCours(U){
-  return String(U.court||'Grammaire').replace(/[\u0600-\u06FF]+/g,function(m){return '<span class="csar">'+m+'</span>';});
-}
-// dkey(u,i) vit désormais dans progression.js (07/09/2026) — déjà une propriété de window, comme avant.
-function discLabel(d,U){return d.label.indexOf('{L}')>=0?d.label.replace('{L}',U.letters.join(' ')):d.label;}
-/* Deux fichiers par disque (choix de Myriam 09/08) : variante A (remplissage brun moyen) sur les
-   disques dorés, variante C (sable) sur les verrouillés, plus sombres. AUCUN filtre d'inversion :
-   chaque image est déjà à la bonne clarté, et les masses épaisses (tronc cérébral) sont éclaircies. */
-/* Les verrouillés gardent le calibrage disq7-c (Myriam 09/08) : leur nom est DÉRIVÉ de celui
-   du doré — renommer l'un sans l'autre ferait servir l'icône dorée à tous les verrouillés. */
-function discImg(d,unlocked){ return 'images-app-alaq/'+(unlocked?ICONES['disq-or']:ICONES['disq-verrou'])+d.img+'.png'; }
-/* Un disque touché n'ouvre plus la leçon directement : une popup annonce le titre et
-   laisse choisir (COMMENCER / REFAIRE) — même geste que Duolingo (Myriam 08/08).
-   Re-toucher le même disque referme la popup ; toucher ailleurs aussi. */
-function discTipClose(){
-  var t=document.querySelector('.disc-tip');
-  if(t){ var n=t._node; t.remove(); if(n)n.style.zIndex=''; }
-}
-function discTip(node,u,i,label,done){
-  var old=document.querySelector('.disc-tip'), same=(old&&old._node===node);
-  discTipClose(); if(same)return;
-  var tip=document.createElement('div'); tip.className='disc-tip'; tip._node=node;
-  tip.innerHTML='<div class="dt-t"></div><button class="dt-go">'+(done?'REFAIRE':'COMMENCER')+'</button>';
-  tip.querySelector('.dt-t').innerHTML=label;
-  tip.querySelector('.dt-go').onclick=function(ev){ev.stopPropagation();discTipClose();startDisque(u,i);};
-  tip.addEventListener('click',function(ev){ev.stopPropagation();});
-  /* les .node sont positionnés : les disques SUIVANTS se peignent au-dessus de la
-     popup sans ceci (vu à la capture du 08/08) — le nœud ouvert passe devant */
-  node.style.zIndex='30';
-  node.querySelector('.bwrap').appendChild(tip);
-}
-document.addEventListener('click',function(e){
-  var t=document.querySelector('.disc-tip');
-  if(t&&!e.target.closest('.disc-tip')&&!e.target.closest('.bubble'))discTipClose();
-});
-/* La popup ouverte gelait le défilement sur l'appareil de Myriam (08/08) : elle se ferme
-   maintenant au PREMIER geste de défilement — même comportement que Duolingo, et l'écran
-   n'est plus jamais retenu. Écouteurs passifs : ils n'interceptent rien. */
-window.addEventListener('scroll',discTipClose,{passive:true});
-window.addEventListener('wheel',discTipClose,{passive:true});
-window.addEventListener('touchmove',discTipClose,{passive:true});
-const BUILD='filet-serie-13sept';
+/* ═══ L'ACCUEIL a déménagé dans ui/accueil.js (12/09/2026) : OFFS, refreshStats, toAr,
+   sujetCours, discLabel, discImg, discTip/discTipClose et leurs écouteurs. Script classique
+   chargé plus haut, AVANT celui-ci — voir l'en-tête de ui/accueil.js. ═══ */
+const BUILD='ui-externe-14sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -2594,7 +2523,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-13T20:00';
+const BUILD_DATE='2026-09-14T07:05';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -2605,198 +2534,13 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.9.1';
-const BUILD_NUM=211;
+const VERSION='3.10';
+const BUILD_NUM=212;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
-// Si l'image d'un disque ne charge pas (réseau/cache), on retombe sur l'emoji d'origine — jamais un disque vide.
-function iconFallback(im,ic){try{var s=document.createElement('span');s.textContent=ic;im.replaceWith(s);}catch(e){}}
-// L'accueil s'ouvre sur la PREMIÈRE LEÇON de la DERNIÈRE UNITÉ EN COURS OU TERMINÉE
-// (demande Myriam 23/08 — remplace le ciblage du 13/07) — à l'arrivée, au retour
-// d'une leçon et après restauration du nuage ; jamais pendant que l'élève fait défiler.
-// ⚠️ Pas le disque « courant » (frontier) : une unité ENTIÈREMENT terminée n'a plus
-// AUCUN .node.current (frontier=-1 dans renderHome), donc l'ancien ciblage laissait
-// l'écran au sommet — unité 1 — dès que la dernière unité jouable était bouclée.
-let _homeFocusPending=true;
-/* ⚠️ TROUVÉ PAR MYRIAM (24/08) — L'UNITÉ 9 (un SEUL disque) a révélé un angle mort de
-   la boucle ci-dessous : « disque 0 fait » sert de repère de « unité EN COURS », mais
-   pour une unité à un seul disque, « disque 0 fait » = « unité ENTIÈREMENT finie ».
-   La boucle prend alors le DERNIER indice qui matche, même si c'est une unité déjà
-   bouclée dépassant une unité PRÉCÉDENTE encore incomplète (ex.: unité 8 pas finie,
-   unité 9 finie → l'ancien code pointait sur l'unité 9, pas sur le vrai travail en
-   cours). `currentLesson()` (l.~4134) donne LE VRAI repère : la première leçon non
-   terminée d'une unité débloquée. On ne retombe sur l'ancienne heuristique QUE si
-   `currentLesson()` ne trouve plus rien à faire (tout est fini) — c'est exactement
-   le cas que ce fix visait à l'origine (le 23/08) : montrer la dernière unité bouclée
-   plutôt que de laisser l'écran au sommet. */
-function focusCurrentDisc(){
-  const L=currentLesson();
-  let u=L?L.u:-1;
-  if(u<0) for(let k=0;k<UNITS.length;k++){ if(S.done&&S.done[dkey(k,0)])u=k; }
-  if(u<0)return; // rien commencé : l'écran reste au sommet, sur l'unité 1
-  const sec=document.querySelector('#home .unit-sec[data-u="'+u+'"]');
-  if(!sec)return;
-  // { block:'center' } CENTRAIT le 1er disque de l'unité — puisque c'est le tout premier
-  // élément de sa section, centrer le fait REMONTER la fin de l'unité PRÉCÉDENTE dans la
-  // moitié haute de l'écran (constaté par Myriam le 23/08 : « le disque 8 de l'unité 7 en
-  // haut »). On cale plutôt le HAUT de la section juste sous le bandeau sticky, mesuré en
-  // vrai (sa hauteur varie avec le sujet de l'unité) plutôt que deviné en dur.
-  setTimeout(function(){
-    try{
-      const bn=document.getElementById('unitBanner');
-      setBanner(u); // AVANT de mesurer : sa hauteur dépend du texte de CETTE unité
-      // ⚠️ Mesurer bn.getBoundingClientRect() ICI serait FAUX : tant que la page n'a
-      // pas encore défilé, le bandeau `position:sticky` n'est pas encore ÉPINGLÉ — son
-      // rectangle reflète sa position NON accrochée (plus bas), écart mesuré : 22px sur
-      // ce poste. On calcule donc sa position épinglée directement depuis son `top` CSS
-      // (`calc(54px + safe-area)`, résolu par getComputedStyle) + sa propre hauteur —
-      // stable quel que soit le défilement en cours.
-      const pinnedTop=bn?parseFloat(getComputedStyle(bn).top)||0:0;
-      const pinnedBottom=bn?pinnedTop+bn.offsetHeight:0;
-      const gap=2; // onHomeScroll tolère 6px (l.~4952) : rester nettement en dessous
-      const delta=sec.getBoundingClientRect().top-pinnedBottom-gap;
-      window.scrollBy({top:delta});
-      setBanner(u); // filet : si un évènement scroll asynchrone a déjà tout recalculé
-    }catch(e){}
-  },80);
-}
-function renderHome(){
-  const h=document.getElementById('home');
-  h.innerHTML='';
-  const SR=SOURATES[(typeof curSourate!=='undefined'?curSourate:0)]||SOURATES[0];
-  const vN=(SR.verses?SR.verses.length:7);
-  setTimeout(maybeShowHomeTut,300);
-  setTimeout(function(){try{maybeGhufranPrompt();}catch(e){}},500);
-  // ---- Bandeau UNIQUE façon Duolingo : un seul encadré collé en haut,
-  //      dont le contenu change au défilement quand un séparateur d'unité passe dessous.
-  h.insertAdjacentHTML('beforeend',
-    '<div class="unit-head" id="unitBanner" data-u="0">'+
-      '<div class="uh-main">'+
-        '<div class="uh-top" id="uhTop"></div>'+
-        '<h2 id="uhTitle"></h2>'+
-      '</div>'+
-      '<button class="uh-burger" onclick="openSurahMenu()" aria-label="Changer de sourate">☰</button>'+
-    '</div>');
-  const BANNERS=[]; window._homeBanners=BANNERS;
-  UNITS.forEach((U,u)=>{
-    // VALIDATION d'une unité = terminer son DERNIER disque, le « Bilan ».
-    // L'unité suivante se débloque dès que le « Bilan » de la précédente est terminé.
-    // « Avancer ici » (à la fin de CHAQUE unité) = RACCOURCI test-out : réussir ce test (≤ 2 erreurs) valide tout jusqu'à cette unité INCLUSE.
-    const prevValidated = U.no===1 || unitValidated(u-1);
-    const playable = !!U.ready && prevValidated;
-    const lettersAr=(U.letters||[]).join(' ');
-    /* \u26a0\ufe0f \u00ab Les lettres \u00bb \u00c9TAIT \u00c9CRIT EN DUR, pour toutes les unit\u00e9s. L'unit\u00e9 8 n'en
-       enseigne aucune (c'est la grammaire qui commence) : le ciel annon\u00e7ait
-       \u00ab UNIT\u00c9 \u0668 \u00b7 Les lettres \u00bb suivi de RIEN. Une unit\u00e9 dit d\u00e9sormais son sujet \u2014
-       ses lettres si elle en a, son `court` sinon. Les unit\u00e9s 9 \u00e0 12, elles aussi
-       sans lettres, h\u00e9riteront de la m\u00eame r\u00e8gle sans qu'on y revienne. */
-    const sujet=lettersAr
-      ? 'Lettres <span class="uh-let">'+lettersAr+'</span>'
-      : arEnveloppe(insecables(U.court||'Grammaire'),'uh-let');
-    const sujetSep=lettersAr
-      ? 'Les lettres <span class="us-let">'+lettersAr+'</span>'
-      : arEnveloppe(insecables(U.court||'Grammaire'),'us-let');
-    BANNERS.push({
-      top:'CHAPITRE '+toAr(SR.no||1)+' \u00b7 UNIT\u00c9 '+toAr(U.no),
-      title:'<span class="uh-l1">'+sujet+' \u2014 '+arReveal('sourate','\u0633\u0648\u0631\u0629')+' '+arReveal(SR.nom,SR.ar)+'</span><span class="uh-sub2"><span class="uh-ar">'+SR.ar+'</span> \u00b7 '+vN+' versets</span>'
-    });
-    const sec=document.createElement('div');sec.className='unit-sec';sec.dataset.u=u;sec.style.setProperty('--accent',unitAccent(u));
-    // S\u00e9parateur fin et gris\u00e9 avant chaque unit\u00e9 (sauf la 1re, remplac\u00e9e par le bandeau).
-    if(u>0){
-      sec.insertAdjacentHTML('beforeend',
-        '<div class="unit-sep"><span class="us-t">UNIT\u00c9 '+toAr(U.no)+' \u00b7 '+sujetSep+'</span></div>');
-    }
-    const path=document.createElement('div');path.className='path';
-    const discs=discsFor(u);
-    // Un seul disque « courant » par unité : le premier débloqué non terminé (porte l'anneau doré).
-    let frontier=-1;
-    for(let k=0;k<discs.length;k++){ if(discs[k].aVenir)continue; if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)]){frontier=k;break;} }
-    discs.forEach((d,i)=>{
-      const node=document.createElement('div');
-      node.style.transform='translateX('+OFFS[i%OFFS.length]+'px)';
-      if(playable){
-        const done=!!S.done[dkey(u,i)];
-        // ⚠️ `aVenir` (unité 9, 24/08) : un disque SANS contenu construit reste grisé pour
-        // toujours, quel que soit S.done — la place existe (Myriam : « 9 dont 8 grisées »,
-        // même silhouette que les unités à 9 disques), mais rien derrière tant que ce n'est
-        // pas écrit. Sans ce garde, il se déverrouillerait normalement dès le disque 0 fini,
-        // et un toucher ouvrirait un disque sans contenu réel.
-        const unlocked=(i===0||!!S.done[dkey(u,i-1)])&&!d.aVenir;
-        const current=(i===frontier);
-        node.className='node '+(done?'done':current?'current':'locked');
-        node.innerHTML='<div class="bwrap"><div class="ring"></div>'+
-          '<button class="bubble" '+(unlocked?'':'disabled')+' aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-            '<span class="bi"'+(unlocked?'':' style="opacity:.62"')+'>'+(d.img?'<img class="bimg" src="'+discImg(d,unlocked)+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span>'+
-          '</button></div>';
-        if(unlocked)node.querySelector('.bubble').onclick=(ev)=>{ev.stopPropagation();discTip(node,u,i,discLabel(d,U),done);};
-      } else if(U.ready && i===0){
-        // 1re leçon d'une unité future : « AVANCER ICI ? » (façon Duolingo) — test-out des unités précédentes
-        node.className='node jump';
-        node.innerHTML='<div class="bwrap"><div class="jump-tip">AVANCER ICI ?</div>'+
-          '<button class="bubble" aria-label="Avancer ici : réussis un test pour passer directement à cette unité">'+
-          '<svg class=\"bi\" width=\"36\" height=\"28\" viewBox=\"0 0 36 28\" aria-hidden=\"true\"><g fill=\"#fff\" stroke=\"#fff\" stroke-width=\"7\" stroke-linejoin=\"round\" stroke-linecap=\"round\"><path d=\"M6.5 6.5 L16 14 L6.5 21.5 Z\"/><path d=\"M19.5 6.5 L29 14 L19.5 21.5 Z\"/></g></svg></button></div>';
-        node.querySelector('.bubble').onclick=()=>startExam(u-1);
-      } else {
-        node.className='node locked';
-        node.innerHTML='<div class="bwrap"><button class="bubble" disabled aria-label="'+discLabel(d,U).replace(/"/g,'')+'">'+
-          '<span class="bi" style="opacity:.62">'+(d.img?'<img class="bimg" src="'+discImg(d,false)+'" alt="" onerror="iconFallback(this,\''+d.icon+'\')">':d.icon)+'</span></button></div>';
-      }
-      path.appendChild(node);
-    });
-    sec.appendChild(path);
-    h.appendChild(sec);
-  });
-  setBanner(0);
-  if(window._homeScroll)window.removeEventListener('scroll',window._homeScroll);
-  window._homeScroll=onHomeScroll;
-  window.addEventListener('scroll',onHomeScroll,{passive:true});
-  requestAnimationFrame(onHomeScroll);
-  if(_homeFocusPending){_homeFocusPending=false;focusCurrentDisc();} // centre sur le disque courant
-}
-// Remplit le bandeau du haut avec le titre de l'unite u (sans re-render inutile).
-/* ⚠️ UN SEGMENT ARABE GLISSÉ DANS UNE PHRASE FRANÇAISE NE SE REND PAS TOUT SEUL.
-   Deux pièges, et ils sont différents selon l'endroit :
-   · dans le BANDEAU, l'arabe hérite de la taille du français (13 px) — illisible
-     pour du Naskh, d'où `.uh-let` (17 px, police `--ar`) ;
-   · dans le SÉPARATEUR, `.unit-sep` porte `letter-spacing:.07em` — et un
-     inter-lettrage DÉSOUDE les ligatures arabes. `.us-let` le remet à 0.
-   Les `court` sont écrits SANS balise (« L’annexion — الإِضَافَة ») : la donnée ne
-   peut donc pas oublier la classe, c'est le rendu qui la pose. Même parade que
-   l'`enrichir()` des exercices de l'unité 9, portée ici au ciel.
-   Le `·` reste DEHORS : il sépare, il ne se prononce pas. */
-function insecables(txt){
-  /* ⚠️ MESURÉ SUR UN IPHONE SE : « Unité 10 : L’annexion — الإِضَافَة » se replie sur
-     deux lignes, et la coupure tombait ENTRE « L’annexion » et le tiret — la 2ᵈᵉ ligne
-     s'ouvrait donc sur un tiret orphelin. C'est aussi, tout simplement, la règle
-     typographique française : un tiret cadratin ne se sépare pas de ce qui le précède.
-     Les espaces qui l'entourent deviennent insécables, la coupure remonte après les
-     deux-points — un endroit qui se lit. */
-  return String(txt||'').replace(/ (—|–) /g, '\u00A0$1\u00A0');
-}
-function arEnveloppe(txt, cls){
-  return String(txt||'').replace(
-    /[\u0600-\u06FF\uFB50-\uFEFF]+(?:\s+[\u0600-\u06FF\uFB50-\uFEFF]+)*/g,
-    function(m){ return '<span class="'+cls+'">'+m+'</span>'; });
-}
-function setBanner(u){
-  const B=window._homeBanners&&window._homeBanners[u];if(!B)return;
-  const bn=document.getElementById('unitBanner');if(!bn)return;
-  if(bn.dataset.u===String(u)&&bn._filled)return;
-  bn.dataset.u=u;bn._filled=1;bn.style.setProperty('--accent',unitAccent(u));
-  document.getElementById('uhTop').innerHTML=B.top;
-  document.getElementById('uhTitle').innerHTML=B.title;
-}
-// Au defilement : le bandeau affiche la derniere unite dont le separateur est passe sous lui.
-function onHomeScroll(){
-  const home=document.getElementById('home');
-  if(!home||home.style.display==='none')return;
-  const bn=document.getElementById('unitBanner');if(!bn)return;
-  const bBottom=bn.getBoundingClientRect().bottom;
-  let active=0;
-  home.querySelectorAll('.unit-sec').forEach(sec=>{
-    if(sec.getBoundingClientRect().top<=bBottom+6)active=+sec.dataset.u;
-  });
-  setBanner(active);
-}
+/* ═══ … et la suite de l'accueil aussi (ui/accueil.js) : iconFallback, _homeFocusPending,
+   focusCurrentDisc, renderHome, insecables, arEnveloppe, setBanner, onHomeScroll. Les
+   constantes BUILD / BUILD_DATE / VERSION / BUILD_NUM ci-dessus RESTENT ici : le
+   portillon (verifier-version.mjs) les lit dans ce fichier. ═══ */
 
 /* ================= JOUEUR ================= */
 let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,MISSED=[],inRetry=false,EXAM=false;
@@ -6717,570 +6461,36 @@ function importSave(){
 }
 
 /* ================= MENU DU BAS · ONGLETS ================= */
-const UNIT_VIDEOS={1:'',2:'',3:''}; // ← colle ici l'ID ou le lien YouTube de chaque unité (clé = numéro d'unité)
+// UNIT_VIDEOS (les vidéos du Cours, par numéro d'unité) vit dans ui/reviser.js (12/09/2026).
 let REVIEW=false, backTo=null, REVSES=null, RECHARGE=false, REVFREE=false; // REVFREE = §3.5 : session d'entraînement libre (rien n'était dû) — cœurs oui, paliers NON
 // REVSES = résultats de la session de révision en cours { mot: true|false } ; RECHARGE = reprise « recharge cœurs » d'une leçon
 
 // unitValidated(idx) et unitUnlocked(idx) vivent désormais dans progression.js (07/09/2026).
 function lastUnlockedIndex(){ let last=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))last=i; }); return last; }
-function unitVocabCount(){ let n=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))n+=(U.words||[]).length; }); return n; }
+// unitVocabCount() vit dans ui/parametres.js (12/09/2026), avec renderProg qui seul l'appelle.
 
-function showTab(name,sub){
-  motBulleOff();                     // le bandeau ne suit pas d'un onglet à l'autre
-  refreshStats(); // la barre du haut reflète toujours l'état réel (cœurs, étoiles, série)
-  const map={home:'home',cours:'view-cours',reviser:'view-reviser',prog:'view-prog',params:'view-params'};
-  Object.keys(map).forEach(t=>{ const el=document.getElementById(map[t]); if(el)el.style.display=(t===name)?'':'none';
-    const b=document.getElementById('bn-'+t); if(b)b.classList.toggle('active',t===name); });
-  try{window.scrollTo(0,0);}catch(e){}
-  if(name==='home')renderHome();
-  else if(name==='cours')renderCours(sub||'video');
-  else if(name==='reviser')renderReviser(sub);
-  else if(name==='prog')renderProg();
-  else if(name==='params')renderParams();
-}
-/* ===== Paramètres (08/08) — dissocié du Profil à la demande de Myriam. Accueille les
-   réglages transverses ; l'espace compte complet (e-mail, export, suppression) arrivera
-   ici (tâche Notion S06). ⏳ le sélecteur de voix f/h attend toujours sa décision. */
-/* ═══ AFFICHAGE (13/08) — les deux leviers d'accessibilité, dans Paramètres ═══
-   Ils écrivent dans localStorage, PAS dans S : ce sont des réglages d'APPAREIL, pas de
-   compte. L'élève qui voit mal sur son téléphone ne veut pas imposer son réglage à la
-   tablette de la maison — et un réglage d'affichage doit survivre à une déconnexion. */
-function themeClair(){ try{ return localStorage.getItem('alaq_theme')==='clair'; }catch(e){ return false; } }
-function grosTexte(){ try{ return localStorage.getItem('alaq_gtexte')==='1'; }catch(e){ return false; } }
-function setThemeClair(on){
-  try{ localStorage.setItem('alaq_theme',on?'clair':'sombre'); }catch(e){}
-  document.documentElement.classList.toggle('clair',!!on);
-  renderParams();
-}
-function setGrosTexte(on){
-  try{ localStorage.setItem('alaq_gtexte',on?'1':'0'); }catch(e){}
-  document.documentElement.classList.toggle('gtexte',!!on);
-  renderParams();
-}
-const ICO_AFFICHAGE='<svg class="prm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
-  'stroke-width="1.9" stroke-linecap="round" style="color:var(--gold2)">'+
-  '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17" /><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor" stroke="none"/></svg>';
-/* L'étiquette de version — même format que ICO_AFFICHAGE : un SVG en ligne, classe .prm-ic,
-   couleur --gold2 ; il n'existe pas de PNG pour ce titre et un trait suffit. */
-const ICO_VERSION='<svg class="prm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
-  'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold2)">'+
-  '<path d="M4 4h7.2l8.8 8.8-7.2 7.2L4 11.2z"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>';
-/* « 2026-09-06 » → « 6 septembre 2026 ». Une table plutôt que toLocaleDateString : le même
-   texte sur tout moteur (un harnais peut le comparer), et le « 1er » du français. */
-const MOIS_FR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-function dateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); if(!m)return String(iso||'');
-  var j=+m[3]; return (j===1?'1er':j)+' '+(MOIS_FR[+m[2]-1]||'?')+' '+m[1]; }
-/* « 6 septembre 2026 à 23h26 » — la date seule si l'heure manque (06/09, carte « Version de l’app ») */
-function dateHeureFr(iso){ var m=/^(\d{4}-\d{2}-\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(String(iso||'')); if(!m)return String(iso||'');
-  return dateFr(m[1])+(m[2]?' à '+m[2]+'h'+m[3]:''); }
-function prmSw(on){ return '<span class="prm-sw'+(on?' on':'')+'"><i></i></span>'; }
-function renderParams(){
-  var v=document.getElementById('view-params'); if(!v)return;
-  var obj=(S.onb&&S.onb.objectif)||'10'; // 10 min par défaut — c'est ce que objGoal() applique
-  v.innerHTML=
-    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-sons')+'" alt=""> Sons</h3></div>'+
-      '<button class="prm-row" onclick="toggleSound();renderParams()">Effets sonores'+prmSw(SND)+'</button>'+
-    '</div>'+
-    /* Le récitateur se choisit ICI, plus dans les exercices (Myriam 11/08). La même feuille
-       basse que le Qorān — une seule liste de voix, un seul S.qari. */
-    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Récitateur</h3></div>'+
-      '<button class="prm-row" onclick="openQari()">'+escHTML(qariCur().fr)+'<span style="color:var(--muted)">›</span></button>'+
-    '</div>'+
-    (VOIX_HOMME_ACTIVE?
-    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Voix arabe</h3></div>'+
-      '<div class="prm-goals">'+
-        '<button class="prm-goal'+(VOIX_G==='f'?' sel':'')+'" onclick="setVoix(\'f\')">Habibah</button>'+
-        '<button class="prm-goal'+(VOIX_G==='h'?' sel':'')+'" onclick="setVoix(\'h\')">Mustafa</button>'+
-      '</div>'+
-      '<p style="color:var(--muted);font-size:11.5px;margin:9px 2px 0;line-height:1.45">Les voyelles et les syllabes gardent la voix de Myriam.</p>'+
-    '</div>':'')+
-    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-objectif')+'" alt=""> Objectif quotidien</h3></div>'+
-      '<div class="prm-goals">'+['5','10','15','20'].map(function(m){
-        return '<button class="prm-goal'+(obj===m?' sel':'')+'" onclick="prmObjectif(\''+m+'\')">'+m+' min</button>';
-      }).join('')+'</div>'+
-    '</div>'+
-    /* L'AFFICHAGE — posé JUSTE AVANT « À propos », donc en bas mais toujours visible.
-       Demandé le 13/08 pour une vision réduite (déchirure de la rétine). */
-    '<div class="ccard"><div class="ctt"><h3>'+ICO_AFFICHAGE+' Affichage</h3></div>'+
-      '<button class="prm-row" onclick="setThemeClair(!themeClair())">Mode clair'+prmSw(themeClair())+'</button>'+
-      '<button class="prm-row" onclick="setGrosTexte(!grosTexte())">Grands caractères'+prmSw(grosTexte())+'</button>'+
-      '<p style="color:var(--muted);font-size:11.5px;margin:9px 2px 0;line-height:1.45">Le fond clair et les grands caractères aident quand la vue baisse. Ces deux réglages restent sur cet appareil.</p>'+
-    '</div>'+
-    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-apropos')+'" alt=""> À propos</h3></div>'+
-      '<a class="prm-row" href="confidentialite.html" target="_blank" rel="noopener" style="text-decoration:none">Politique de confidentialité<span style="color:var(--muted)">›</span></a>'+
-    '</div>'+
-    /* La version REVIENT à l'écran, dans sa propre carte (Myriam 06/09) — la ligne « Version »
-       avait quitté « À propos » le 10/08. Depuis le 07/09 (V1, Myriam) l'écran dit le NUMÉRO —
-       VERSION (BUILD_NUM), « 3.5.1 (197) » — et le libellé BUILD a quitté l'écran : il reste
-       pour les commits et la page de diagnostic (window.BUILD). Des <p>, pas des <div> : la
-       règle .prm-row:first-of-type compte par TYPE, et le premier div de la carte est l'en-tête. */
-    '<div class="ccard"><div class="ctt"><h3>'+ICO_VERSION+' Version de l’app</h3></div>'+
-      '<p class="prm-row prm-lit">Version<span id="prm-ver">'+escHTML(VERSION+' ('+BUILD_NUM+')')+'</span></p>'+
-      '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateHeureFr(BUILD_DATE))+'</span></p>'+
-    '</div>';
-    _armerLectureFile();
-  }
+/* ═══ showTab (l'aiguillage des cinq onglets) vit dans ui/navigation.js (12/09/2026). ═══ */
+/* ═══ PARAMÈTRES ET AFFICHAGE — themeClair/grosTexte, setThemeClair/setGrosTexte, dateFr,
+   dateHeureFr, prmSw, renderParams, la lecture de la file (sept tapotements) et prmObjectif —
+   vivent dans ui/parametres.js (12/09/2026). ═══ */
 
-/* ═══ LIRE LA FILE D'ENVOI, SANS QU'UNE ÉLÈVE LE SACHE (09/09, POC-5) ═══════════
-   Myriam : « garde ça totalement invisible pour les élèves normaux ». La carte
-   « Version de l'app » ne change donc PAS d'un pixel : ni point, ni flèche, ni
-   couleur. Sept tapotements sur le NUMÉRO ouvrent une feuille qui dit ce que la
-   file contiendrait. C'est le geste du mode développeur d'Android, et ce choix
-   n'est pas arbitraire : sept touchers volontaires en moins de deux secondes ne se
-   produisent JAMAIS par accident, là où un appui long s'obtient avec un doigt qui
-   traîne sur un écran posé — c'est ce qui a écarté la variante B en preview.
-   Variante retenue par Myriam le 09/09 (previews/_preview-etat-file-v1.html).
-   ⚠️ PROVISOIRE, ET PENSÉ POUR PARTIR. Tout tient dans ce bloc et dans .filesheet
-   d'app.css : le jour où elle n'en veut plus, on retire l'appel ci-dessus et ces
-   deux blocs — aucune trace ailleurs.
-   ⚠️ Aucun onclick en ligne : le harnais du 15/08 exige qu'après rendu il n'en
-   reste plus un seul (« un harnais doit CLIQUER »). */
-var _verTaps=0, _verT=null;
-function _armerLectureFile(){
-  var el=document.getElementById('prm-ver'); if(!el)return;
-  el.addEventListener('click',function(){
-    _verTaps++; clearTimeout(_verT);
-    _verT=setTimeout(function(){_verTaps=0;},2000);   // deux secondes d'arret et tout retombe
-    if(_verTaps>=7){ _verTaps=0; _ouvrirLectureFile(); }
-  });
-}
-function _ligneFile(l,v,cl){
-  return '<div class="fs-l"><span>'+escHTML(l)+'</span><span class="v '+(cl||'')+'">'+escHTML(String(v))+'</span></div>';
-}
-function _ouvrirLectureFile(){
-  var e=null;
-  try{ if(typeof SYNC!=='undefined'&&SYNC&&SYNC.etat)e=SYNC.etat(); }catch(_){ e=null; }
-  var f=document.getElementById('filesheet');
-  if(!f){
-    var voile=document.createElement('div'); voile.id='filevoile'; voile.className='filevoile';
-    f=document.createElement('div'); f.id='filesheet'; f.className='filesheet';
-    document.body.appendChild(voile); document.body.appendChild(f);
-    voile.addEventListener('click',_fermerLectureFile);
-  }
-  var corps;
-  if(!e){ corps='<div class="fs-l"><span>Le moteur de file n\u2019est pas charge</span></div>'; }
-  else{
-    var t=e.parType||{}, pp=[];
-    if(t.lecon)pp.push(t.lecon+' lecons');
-    if(t.test)pp.push(t.test+' tests');
-    if(t.rev)pp.push(t.rev+' revisions');
-    if(t.graines)pp.push(t.graines+' graines');
-    corps=_ligneFile('En attente', e.enAttente, e.enAttente?'att':'nul')+
-          _ligneFile('Detail', pp.join(' \u00b7 ')||'\u2014')+
-          _ligneFile('Refusees', e.rebut, e.rebut?'att':'nul')+
-          _ligneFile('Diff actif', e.diffArme?'oui':'NON', e.diffArme?'ok':'att')+
-          _ligneFile('Envoi', e.envoi?'ACTIF':'desarme', e.envoi?'ok':'att')+
-          _ligneFile('Feu', e.feu||'vert', e.feu?'att':'ok')+
-          _ligneFile('Dernier', e.motif||'\u2014')+
-          _ligneFile('Metronome', e.metronome?'arme':'au repos')+
-          (e.purgeDue?_ligneFile('Purge due','OUI','att'):'')+
-          _ligneFile('Compte', e.proprio?String(e.proprio).slice(0,8)+'\u2026':'aucun')+
-          _ligneFile('Disque', e.disqueKO?e.disqueKO+' refus':'ok', e.disqueKO?'att':'ok');
-  }
-  f.innerHTML='<h3>La file d\u2019envoi</h3><p class="fs-q">Envoi actif \u2014 la file part au nuage</p>'+
-    corps+'<button class="fs-x" id="fs-x">Fermer</button>';
-  document.getElementById('fs-x').addEventListener('click',_fermerLectureFile);
-  f.classList.add('on'); document.getElementById('filevoile').classList.add('on');
-}
-function _fermerLectureFile(){
-  var f=document.getElementById('filesheet'), v=document.getElementById('filevoile');
-  if(f)f.classList.remove('on'); if(v)v.classList.remove('on');
-}
-function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.objectif=m; save();
-  // abaisser l'objectif APRÈS avoir déjà dépassé le nouveau seuil doit valider le jour (audit 10/08)
-  if(objMinutes()>=objGoal()&&S.lastDay!==today())objFete();
-  renderParams(); }
-
-function ytEmbed(v){ if(!v)return''; v=String(v).trim(); let id='',m=v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); if(m)id=m[1]; else if(/^[\w-]{11}$/.test(v))id=v; return id?('https://www.youtube.com/embed/'+id):''; }
-
-let coursOpen={resume:{},vocab:{}};
-/* La carte des signes de lecture (tachkīl) passe en section dépliable (05/09,
-   retour de Myriam) : repliée par défaut, même mécanique que les accordéons
-   d'unité (accCard) juste au-dessus, sans les réutiliser tels quels — elle n'a
-   ni numéro d'unité ni lettres, un simple booléen suffit. */
-let tachkilOpen=false;
-function tachkilToggle(){ tachkilOpen=!tachkilOpen; renderCours('resume'); }
-function unlockedNos(){ return UNITS.filter((U,i)=>unitUnlocked(i)).map(U=>U.no); }
-function accAllBtn(sub){ const nos=unlockedNos(); const allOpen=nos.length>0&&nos.every(n=>coursOpen[sub][n]);
-  return '<button class="acc-all" onclick="accAll(\''+sub+'\')">'+(allOpen?'▾ Tout replier':'▸ Tout déplier')+'</button>'; }
-function accCard(sub,U,inner){ const open=!!coursOpen[sub][U.no];
-  return '<div class="ccard acc'+(open?' open':'')+'">'+
-    '<button class="acc-h" onclick="accToggle(\''+sub+'\','+U.no+')">'+
-      '<span class="cno">'+toAr(U.no)+'</span><span class="acc-tt">Unité</span>'+
-      ((U.letters||[]).length?'<span class="clet">'+U.letters.join(' ')+'</span>':'<span class="clet csujet">'+sujetCours(U)+'</span>')+'<span class="acc-chev">'+(open?'▾':'▸')+'</span></button>'+
-    '<div class="acc-b">'+inner+'</div></div>'; }
-function accToggle(sub,no){ coursOpen[sub][no]=!coursOpen[sub][no]; renderCours(sub); }
-function accAll(sub){ const nos=unlockedNos(); const allOpen=nos.length>0&&nos.every(n=>coursOpen[sub][n]); nos.forEach(n=>coursOpen[sub][n]=!allOpen); renderCours(sub); }
-// Cours : signes de lecture cliquables (touche → on entend) + révélation
-function playSyl(ar,el){
-  try{ if(el){ el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); setTimeout(function(){el.classList.remove('pulse');},460); } }catch(e){}
-  try{ speak(ar); }catch(e){}
-}
-function playLetterAnim(btn,L,c){
-  var st=btn.parentNode.querySelector('.la-stage'); if(!st)return; st.style.display='flex';
-  var W=st.querySelector('.la-word'),Bar=st.querySelector('.la-bar'),Ro=st.querySelector('.la-ro');
-  var V=[{h:'\u064E',m:'ا',vs:'a',vl:'â'},{h:'\u0650',m:'ي',vs:'i',vl:'î'},{h:'\u064F',m:'و',vs:'ou',vl:'û'}];
-  if(W._t)W._t.forEach(clearTimeout); W._t=[];
-  function T(fn,ms){W._t.push(setTimeout(fn,ms));}
-  function pop(){W.classList.remove('pop');void W.offsetWidth;W.classList.add('pop');}
-  function say(t){try{speak(t);}catch(e){}}
-  var t=0;
-  V.forEach(function(v){
-    var sh=L+v.h, lg=L+v.h+v.m;
-    T(function(){W.innerHTML=L;Bar.style.width='0';Ro.textContent='';},t);
-    T(function(){W.innerHTML=sh;pop();Bar.style.width='30px';Ro.textContent='';say(sh);},t+320);      // le signe se pose (bref)
-    T(function(){W.innerHTML='<span>'+sh+'</span><span class="la-l2 away">'+v.m+'</span>';setTimeout(function(){var e=W.querySelector('.la-l2');if(e)e.classList.remove('away');},60);},t+1150); // la madd glisse
-    T(function(){W.innerHTML=lg;pop();Bar.style.width='92px';Ro.textContent='';say(lg);},t+1800);      // soudure (long)
-    t+=2600;
-  });
-  T(function(){W.innerHTML=L;Bar.style.width='0';Ro.textContent='';},t);
-}
-function coursSignsHTML(){
-  var SIGNS=[
-    {t:'Les voyelles courtes ('+arReveal('ḥarakāt','حَرَكَات')+')', d:'Un petit signe donne un son bref.', c:[['مَ','a'],['مِ','i'],['مُ','ou']]},
-    {t:'Les prolongations ('+arReveal('madd','مَدّ')+')', d:'Une lettre (ا ي و) étire la voyelle, deux fois plus longue.', c:[['مَا','â'],['مِي','î'],['مُو','û']]},
-    {t:'Le '+arReveal('soukoun','سُكُون'), d:'La lettre sans voyelle : consonne seule.', c:[['مْ','m']]},
-    {t:'La '+arReveal('chedda','شَدَّة'), d:'La lettre est doublée : on insiste.', c:[['مّ','m·m']]},
-    /* 🔴 مًا, PAS مً (Myriam, 05/09 : « je préfère la rigueur grammaticale »).
-       Un fatḥatayn s'écrit TOUJOURS avec un alif final (sauf ة، ء sur alif، ى) —
-       muet, mais obligatoire à l'écrit dès qu'un vrai mot se termine ainsi
-       (كِتَابًا). مٌ et مٍ, eux, n'en portent jamais : ce n'est pas une question
-       de symétrie entre les trois signes, c'est la règle qui diffère.
-       ⏳ Pourquoi l'alif ne se prononce pas : à expliquer plus tard (son mot). */
-    {t:'Le '+arReveal('tanwīn','تَنْوِين'), d:'Un « n » à la fin (indéfini) : dhammatayn, kasratayn, fathatayn.', c:[['مٌ','oun'],['مٍ','in'],['مًا','an']]},
-  ];
-  return '<div class="ccard acc'+(tachkilOpen?' open':'')+'">'+
-    '<button class="acc-h" onclick="tachkilToggle()">'+
-      '<span style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">'+
-        '<img class="prm-ic" src="'+ico('menu-cours')+'" alt=""> <span class="acc-tt">'+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</span>'+
-      '</span><span class="acc-chev">'+(tachkilOpen?'▾':'▸')+'</span></button>'+
-    '<div class="acc-b">'+SIGNS.map(function(g){
-      return '<div class="sgn-card"><div class="sgn-head">'+g.t+'</div>'+
-        '<div class="sgn-chips">'+g.c.map(function(x){
-          return '<button class="chip" onclick="playSyl(\''+x[0]+'\',this)"><span class="chip-ar">'+x[0]+'</span><span class="chip-ro">'+x[1]+'</span></button>';
-        }).join('')+'</div>'+
-        '<div class="sgn-desc">'+g.d+'</div></div>';
-    }).join('')+'</div></div>';
-}
-// A : un mot de la Fātiḥa contenant la lettre
-function fatihaWordFor(L){
-  var k=letterKey(L), FA=(SOURATES[0]&&SOURATES[0].verses)||[];
-  for(var v=0;v<FA.length;v++){ var ws=FA[v].split(' ');
-    for(var w=0;w<ws.length;w++){ var word=ws[w];
-      for(var c=0;c<word.length;c++){ if(letterKey(word[c])===k) return word; } } }
-  return '';
-}
-/* ═══════════════════════════════════════════════════════════════════════════
-   LE RÉSUMÉ DE GRAMMAIRE — l'unité 8, l'article الـ            (05/09/2026)
-
-   Le sous-onglet « Résumé » était bâti sur les LETTRES : une unité qui n'en a
-   pas rendait une carte VIDE, et depuis le 17/08 on ne l'affichait plus du tout,
-   avec ce commentaire — « son résumé de GRAMMAIRE sera conçu avec elle, jamais
-   inventé ici ». Il l'a été : spec du 05/09, cinq sections validées par Myriam.
-
-   ⚠️ TOUT RÉEMPLOIE LES GABARITS DU COURS, rien n'est recréé : `.sgn-card` /
-   `.sgn-head` / `.sgn-chips` / `.chip` / `.sgn-desc` sont ceux des cartes de
-   tachkīl juste au-dessus, et `.lg-cell` celui de la grille des lettres. Ils
-   sont validés dans les DEUX thèmes et déjà couverts par le balayage de
-   contraste — une carte inventée aurait dû y entrer, et personne n'y aurait
-   pensé avant que le portillon ne rougisse.
-
-   ⚠️ ET RIEN N'EST RETAPÉ EN ARABE. Les mots viennent de `U8.mots`
-   (unit-8/donnees/mots.js), les mots de verset de `U8.versets`, et les dix
-   lettres travaillées sont DÉRIVÉES du champ `L` de chaque mot. Retaper une
-   graphie vocalisée, c'est inventer une voyelle — le projet l'a payé trois fois.
-   ═══════════════════════════════════════════════════════════════════════════ */
-/* La table dit QUI a un résumé de grammaire. Elle en porte une seule aujourd'hui :
-   une unité listée ici sans contenu rendrait exactement la carte vide de l'U8
-   d'avant le 17/08. Les unités 9 et 10 y entreront quand leur résumé aura été
-   écrit AVEC Myriam. */
-const RESUME_GRAM={7:function(){ return resumeGramU8(); }, 8:function(){ return resumeGramU9(); }};
-
-function gramChip(ar,ro){
-  return '<button class="chip" onclick="playSyl(\''+ar+'\',this)">'+
-    '<span class="chip-ar">'+ar+'</span><span class="chip-ro">'+ro+'</span></button>';
-}
-/* La bande des 14 : les lettres que l'unité a TRAVAILLÉES sont en or, les autres
-   en gris — l'élève voit d'un coup ce qu'elle connaît et ce qui reste (spec §1.2). */
-function gramBande(fam,vues){
-  return '<div class="gsec-let">'+fam.split('').map(function(L){
-    var g=(L==='\u0647')?'\uFEE9':L;                 /* le ه isolé s'écrit rond, comme dans la grille */
-    return vues.indexOf(L)>=0?'<b>'+g+'</b>':g;
-  }).join(' ')+'</div>';
-}
-function gramSection(titre,inner,desc){
-  return '<div class="sgn-card"><div class="sgn-head">'+titre+'</div>'+inner+
-    '<div class="sgn-desc">'+desc+'</div></div>';
-}
-/* La lettre qui suit l'article — CALCULÉE, jamais écrite dans une donnée.
-   On saute le ا et le ل, puis les marques que le ل porte : un soukoun devant une
-   lunaire (الْحَمْدُ → ح), rien du tout devant une solaire (الرَّحْمَٰنِ → ر). C'est le
-   geste de `versets.js` l.51, « on avale les marques du ل ». */
-function lettreApresArticle(mot){
-  var i=2; while(i<mot.length&&isHarakat(mot.charAt(i)))i++;
-  return mot.charAt(i)||'';
-}
-function resumeGramU8(){
-  var m=U8.mots||{}, cles=Object.keys(m);
-  /* Le module ES arrive APRÈS ce script. Sans lui, le talon rend {} : on le DIT
-     au lieu d'afficher une carte vide — la panne muette que ce projet connaît. */
-  if(!cles.length) return '<div class="sgn-desc">Le résumé s\u2019affiche dès que la leçon est chargée. Rouvre cet onglet dans un instant.</div>';
-  var vues=cles.map(function(k){return m[k].L;});   /* les 10 lettres travaillées, dérivées des mots */
-  function mot(k,quoi){ var w=m[k]; return gramChip(w[quoi==='def'?'def':'nu'], quoi==='def'?w.le:w.un); }
-
-  /* ── 1 · L'ARTICLE ET LE TANWĪN ─────────────────────────────────────────── */
-  var s1=gramSection(
-    'L\u2019article <span class="ar">الـ</span> \u00b7 un mot devient LE mot',
-    '<div class="sgn-chips">'+mot('qalam','nu')+'<span class="gsec-fl">\u2794</span>'+mot('qalam','def')+'</div>',
-    'L\u2019article <span class="ar">الـ</span> et le tanwīn <span class="ar">ـٌ</span> ne cohabitent JAMAIS : '+
-    'dès que l\u2019article arrive, le petit « -n » de la fin tombe et la dhammatayn devient une dhamma <span class="ar">ـُ</span>.');
-
-  /* ── 2 · LES 14 LUNAIRES ────────────────────────────────────────────────── */
-  var s2=gramSection(
-    '\ud83c\udf19 Les 14 lettres lunaires \u00b7 <span class="ar">الْقَمَرِيَّة</span>',
-    gramBande(LUNAIRES_14,vues)+
-    '<div class="sgn-chips">'+['qamar','bab','yad','bayt'].map(function(k){return mot(k,'def');}).join('')+'</div>',
-    'Devant ces 14 lettres, le <span class="ar">ل</span> porte un soukoun <span class="ar">الْـ</span> et s\u2019entend clairement.');
-
-  /* ── 3 · LES 14 SOLAIRES ────────────────────────────────────────────────── */
-  var s3=gramSection(
-    '\u2600\ufe0f Les 14 lettres solaires \u00b7 <span class="ar">الشَّمْسِيَّة</span>',
-    gramBande(SOLAIRES_14,vues)+
-    '<div class="sgn-chips">'+['dar','dalw','tayr','tin'].map(function(k){return mot(k,'def');}).join('')+'</div>',
-    /* ⚠️ « LETTRE MUETTE », et jamais « le ل s\u2019avale » : terminologie tranchée par
-       Myriam le 05/09. L\u2019expression familière décrivait un geste de gorge là où la
-       règle décrit une lettre. */
-    'Le <span class="ar">ل</span> est une <b>lettre muette</b> : il ne se prononce pas, et la lettre qui suit est '+
-    'doublée par une chedda <span class="ar">ـّ</span>.');
-
-  /* ── 4 · LE REPÈRE DANS L'ALPHABET ──────────────────────────────────────── */
-  var ex=[['\u0642',0],['\u062f',1],['\u0628',0],['\u062a',1]];   /* ق د ب ت — deux lunaires, deux solaires */
-  var s4=gramSection(
-    'Le repère dans l\u2019alphabet',
-    '<div class="gsec-cells">'+ex.map(function(e){
-      return '<div class="lg-cell avail"><span class="sm">'+(e[1]?'\u2600\ufe0f':'\ud83c\udf19')+'</span>'+e[0]+'</div>';
-    }).join('')+'</div>',
-    'Chaque lettre de la grille porte maintenant son repère : \u2600\ufe0f solaire (le <span class="ar">ل</span> est muet) '+
-    'ou \ud83c\udf19 lunaire (le <span class="ar">ل</span> s\u2019entend). Tu le retrouves dans <b>Réviser \u203a Les lettres</b>.');
-
-  /* ── 5 · DANS LE QORĀN ──────────────────────────────────────────────────── */
-  /* ⚠️ LES MOTS SONT CHOISIS PAR LEUR CLÉ LATINE, jamais par leur graphie : une
-     regex arabe tapée de mémoire ne correspond à aucune graphie du fichier (piège
-     re-payé le 04/09). La graphie vient de la table, toujours. */
-  var V=U8.versets||{};
-  function versetChips(cles){
-    return '<div class="sgn-chips">'+Object.keys(V).filter(function(w){return cles.indexOf(V[w])>=0;})
-      .sort(function(a,b){return cles.indexOf(V[a])-cles.indexOf(V[b]);})
-      .map(function(w){
-        var L=lettreApresArticle(w);
-        return gramChip(w,(estSolaire(L)?'\u2600\ufe0f ':'\ud83c\udf19 ')+L);
-      }).join('')+'</div>';
-  }
-  var s5=gramSection(
-    'Dans la Fātiḥa',
-    versetChips(['alhamdu','alamin','almustaqima'])+versetChips(['arrahmani','arrahimi','addini','assirata']),
-    'Touche un mot pour l\u2019entendre. C\u2019est la lettre écrite sous le mot \u2014 celle qui suit '+
-    '<span class="ar">الـ</span> \u2014 qui décide si le <span class="ar">ل</span> s\u2019entend ou reste muet.');
-
-  return s1+s2+s3+s4+s5;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   LE RÉSUMÉ DE GRAMMAIRE — l'unité 9, بِ · عَلَى · لِ            (05/09/2026,
-   à la demande de Myriam : « l'unité étant complète, tu dois pouvoir
-   construire le résumé de cours » — DRAFT, ses retours suivront)
-
-   ⚠️ Contrairement à l'U8 (14 mots + un module dédié), l'unité 9 n'expose
-   AUCUNE table centralisée de ses phrases/sons : chaque disque les porte en
-   ligne, dans son propre `st.son`. Retaper une graphie à la main serait le
-   piège NFC déjà gravé — les CINQ exemples ci-dessous sont donc recopiés
-   OCTET POUR OCTET depuis `donnees/disque-5.js` (بِالْقَلَمِ), `disque-6.js`
-   (لِلْبِنْتِ), `disque-7.js` (عَلَى الْبَيْتِ) et `disque-9.js` (بِسْمِ اللَّهِ,
-   الْحَمْدُ لِلَّهِ) — jamais inventés.
-   ⚠️ Leurs sons ne passent PAS par `speak()`/AUDIO[] dans leur disque d'origine
-   (les exercices du registre jouent un chemin direct via `_haut-parleur.js`) :
-   les cinq clés ci-dessous les y raccrochent, exprès pour ce résumé — les
-   cinq mp3 existent déjà (vérifié sur le disque), aucune prise neuve. */
+/* ═══ LE COURS a déménagé dans ui/reviser.js (12/09/2026) : ytEmbed, coursOpen, la carte du
+   tachkīl, les accordéons (accCard/accToggle/accAll), playSyl, playLetterAnim, coursSignsHTML,
+   fatihaWordFor, RESUME_GRAM et le résumé de grammaire de l'unité 8. ═══ */
+/* Les cinq raccords AUDIO du résumé de l'unité 9 RESTENT ICI : ils lisent AUDIO au
+   chargement, or ui/reviser.js se charge AVANT ce script (il ne peut rien lire d'ici à ce
+   moment-là — c'est la règle de tous les scripts classiques externes). Le résumé lui-même,
+   resumeGramU9, vit dans ui/reviser.js. */
 AUDIO['بِالْقَلَمِ']=AUDIO['بِالْقَلَمِ']||'audios-app-alaq/mot-bilqalam.mp3';
 AUDIO['لِلْبِنْتِ']=AUDIO['لِلْبِنْتِ']||'audios-app-alaq/mot-lilbint.mp3';
 AUDIO['عَلَى الْبَيْتِ']=AUDIO['عَلَى الْبَيْتِ']||'audios-app-alaq/mot-alalbayt.mp3';
 AUDIO['بِسْمِ اللَّهِ']=AUDIO['بِسْمِ اللَّهِ']||'audios-app-alaq/mot-bismillah.mp3';
 AUDIO['الْحَمْدُ لِلَّهِ']=AUDIO['الْحَمْدُ لِلَّهِ']||'audios-app-alaq/mot-alhamdulillah.mp3';
 
-function resumeGramU9(){
-  /* ── 1 · بِ — LE MOYEN ──────────────────────────────────────────────────── */
-  var s1=gramSection(
-    '<span class="ar">بِ</span> — le moyen',
-    '<div class="sgn-chips">'+gramChip('بِالْقَلَمِ','avec le stylo')+'</div>',
-    '<span class="ar">بِ</span> veut dire « avec, au moyen de ». Il ne se détache JAMAIS du nom qui '+
-    'le suit — pas d’espace, comme un préfixe.');
+/* ═══ resumeGramU9 et renderCours vivent dans ui/reviser.js (12/09/2026). ═══ */
 
-  /* ── 2 · لِ — POUR, À QUI ───────────────────────────────────────────────── */
-  var s2=gramSection(
-    '<span class="ar">لِ</span> — pour, à qui',
-    '<div class="sgn-chips">'+gramChip('لِلْبِنْتِ','pour la fille')+'</div>',
-    '<span class="ar">لِ</span> veut dire « pour, à ». Lui aussi s’attache SANS espace — et devant '+
-    '<span class="ar">الـ</span>, son alif disparaît à l’écrit (<span class="ar">لِ+الْبِنْتُ→لِلْبِنْتِ</span>).');
-
-  /* ── 3 · عَلَى — SUR ────────────────────────────────────────────────────── */
-  var s3=gramSection(
-    '<span class="ar">عَلَى</span> — sur',
-    '<div class="sgn-chips">'+gramChip('عَلَى الْبَيْتِ','sur la maison')+'</div>',
-    '<span class="ar">عَلَى</span> veut dire « sur ». Contrairement à <span class="ar">بِ</span> et '+
-    '<span class="ar">لِ</span>, il reste toujours SÉPARÉ — l’espace et le <span class="ar">الـ</span> '+
-    'du mot suivant ne bougent pas.');
-
-  /* ── 4 · LA RÈGLE COMMUNE : LA KASRA ─────────────────────────────────────
-     Source : les 9 questions de règle des disques 5-7 (D5/D6/D7 question-regle,
-     « bonne »=2 dans les trois, verbatim « se termine par une kasra »). */
-  var s4=gramSection(
-    'Ce que les trois ont en commun',
-    '<div class="sgn-chips">'+gramChip('الْقَلَمِ','ـِ (kasra)')+gramChip('الْبِنْتِ','ـِ (kasra)')+gramChip('الْبَيْتِ','ـِ (kasra)')+'</div>',
-    'Après <span class="ar">بِ</span>, <span class="ar">لِ</span> ou <span class="ar">عَلَى</span>, le nom qui '+
-    'suit se termine TOUJOURS par une kasra <span class="ar">ـِ</span> — qu’il s’attache (بِ، لِ) ou '+
-    'qu’il reste séparé (عَلَى).');
-
-  /* ── 5 · DANS LE QORĀN ──────────────────────────────────────────────────── */
-  var s5=gramSection(
-    'Dans le Qorān',
-    '<div class="sgn-chips">'+gramChip('بِسْمِ اللَّهِ','au nom d’Allah')+gramChip('الْحَمْدُ لِلَّهِ','la louange est à Allah')+'</div>',
-    'Les deux premiers mots de la Fātiḥa portent déjà <span class="ar">بِ</span> et <span class="ar">لِ</span> — '+
-    'la règle que tu viens d’apprendre est celle du Qorān lui-même.');
-
-  return s1+s2+s3+s4+s5;
-}
-
-function renderCours(sub){
-  sub=sub||'video';
-  const tabs=[['video','<img class="itab-ic" src="'+ico('tab-video')+'" alt="">','Vidéos'],['resume','<img class="itab-ic" src="'+ico('tab2-lire')+'" alt="">','Résumé'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Vocabulaire']];
-  const unlocked=UNITS.map((U,i)=>i).filter(i=>unitUnlocked(i));
-  let h='<div style="display:flex;justify-content:flex-end;margin:0 0 4px">'+'<button class="lg-help" onclick="coursTut()" aria-label="À quoi servent ces onglets ?">?</button></div>';h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="coursTabTap(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
-  if(!unlocked.length){ h+='<div class="cempty"><div class="ce-ic">🔒</div>Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
-  /* 17/08 — la règle du ciel appliquée au Cours : une unité dit son sujet — ses lettres,
-     ou son champ `court` (« L'article الـ ») quand elle n'en a pas (l'U8 rendait « ٨ Unité »
-     suivi de rien). */
-  const head=U=>'<div class="ctt"><div class="cno">'+toAr(U.no)+'</div><h3>Unité</h3>'+((U.letters||[]).length?'<div class="clet">'+U.letters.join(' ')+'</div>':'<div class="clet csujet">'+sujetCours(U)+'</div>')+'</div>';
-
-  if(sub==='video'){
-    h+=unlocked.map(i=>{ const U=UNITS[i]; const emb=ytEmbed(UNIT_VIDEOS[U.no]);
-      return '<div class="ccard">'+head(U)+(emb
-        ?'<div class="vembed"><iframe src="'+emb+'" allowfullscreen loading="lazy"></iframe></div>'
-        :'<div class="vsoon"><div class="vic">'+icoImg('tab-video')+'</div>Vidéo bientôt disponible</div>')+'</div>'; }).join('');
-  }
-  else if(sub==='resume'){
-    h+=accAllBtn('resume')+coursSignsHTML();
-    /* 17/08 — le Résumé est bâti sur les LETTRES : une unité qui n'en a pas (U8+) rendait
-       une carte VIDE (en-tête « ٨ Unité » suivi de rien — le signalement de Myriam). On ne
-       l'affiche pas : son résumé de GRAMMAIRE sera conçu avec elle, jamais inventé ici. */
-    /* 05/09 — LE FILTRE S'ÉLARGIT AUX UNITÉS DE GRAMMAIRE, mais PAS à toute
-       unité sans lettres : seules celles qui ont un résumé ÉCRIT y entrent
-       (RESUME_GRAM). Élargir sur `U.court` seul rendrait des cartes vides pour
-       les unités 9 et 10 — exactement le défaut signalé par Myriam le 17/08. */
-    h+=unlocked.filter(function(i){ return (UNITS[i].letters||[]).length||RESUME_GRAM[i]; }).map(function(i){ const U=UNITS[i];
-      if(!(U.letters||[]).length) return accCard('resume',U,RESUME_GRAM[i]());
-      const rows=U.letters.map(function(L){ const d=U.alpha[L]; var ex=fatihaWordFor(L);
-        return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
-          /* ⚠️ 14/08 — RÈGLE ABSOLUE DE MYRIAM : « pas de transcription ». Le nom translittéré
-             (yāʾ, mīm…) quitte AUSSI la fiche du Cours, dernier endroit où il survivait. Le nom
-             ne s'écrit plus nulle part : il s'ÉCOUTE. Le bouton dit donc ce qu'il joue. */
-          '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">🔊</button> <span class="lcap">son nom</span></div>'+
-          /* 17/08 : une lettre sans son propre (le alif) n'offre pas de bouton muet — on
-             dit ce qu'elle est, sans promettre un son qui ne viendra pas. */
-          (aUnSon(L)
-            ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button> '+d.son+'</div>'
-            : '<div class="ls"><span class="lcap">porte la voyelle, sans son propre</span></div>')+
-          (ex?'<div class="lex">📖 <span class="lex-w" onclick="speak(\''+ex+'\')">'+ex+'</span> <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button></div>':'')+
-          '<div class="lanim"><button class="la-btn" onclick="playLetterAnim(this,\''+L+'\',\''+(U.lat[L]||'')+'\')">▶ voir la prolongation</button><div class="la-stage" style="display:none"><div class="la-word">'+L+'</div><div class="la-track"><div class="la-bar"></div></div><div class="la-ro"></div></div></div>'+
-          '</div></div>';
-      }).join('');
-      return accCard('resume',U,rows);
-    }).join('');
-  }
-  else if(sub==='vocab'){
-    h+=accAllBtn('vocab')+unlocked.map(i=>{ const U=UNITS[i];
-      const rows=(U.words||[]).map(w=>'<div class="grow"><div class="gar">'+w.w+'</div><div class="gtx"><span class="gfr">'+w.fr+'</span></div><button class="gspk" onclick="speak(\''+w.w+'\')" aria-label="Écouter">'+spkSVG()+'</button></div>').join('');
-      return accCard('vocab',U,'<div class="gloss">'+rows+'</div>'); }).join('');
-  }
-
-  document.getElementById('view-cours').innerHTML=h;
-  maybeShowCoursTut();
-}
-
-function renderProg(){
-  // Le compte d'abord, tout en discrétion quand on est connectée ; le titre « Ta progression »
-  // a disparu : c'est l'encadré du rang qui porte l'étiquette (choix Myriam 13/07).
-  let h='';
-  if(SB&&CLOUD.user){
-    h+='<div class="acct"><span class="acct-dot"></span><div class="acct-id">'+nomChoisiHTML()+
-       '<small>'+escHTML(CLOUD.user.email||'')+'</small></div>'+
-       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">'+icoImg('tab-crayon','ic-inline')+'</button>'+
-       '<button class="acct-out" onclick="cloudLogout()">se déconnecter</button></div>';
-  } else {
-    // Déconnectée, la bande du compte n'existe pas : le nom garde sa place, seul, au-dessus de la carte.
-    h+='<div class="acct"><div class="acct-id">'+nomChoisiHTML()+'</div>'+
-       '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">'+icoImg('tab-crayon','ic-inline')+'</button></div>';
-    h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
-  }
-  var _R=rankFor(S.consScore);
-  // Le tracé des 7 rangs est IMBRIQUÉ dans l'encadré doré (une seule boîte, choix Myriam 13/07) —
-  // rangée titre en haut, tracé en PLEINE LARGEUR dessous. div (pas button) : les points du
-  // tracé ont leur propre clic (rankInfo, stopPropagation).
-  h+='<div class="rankcard" role="button" tabindex="0" onclick="showRank()">'+
-       '<div class="rk-row">'+
-         '<div class="rk-ar">'+_R.rank.ar+'</div>'+
-         '<div class="rk-mid"><div class="rk-lbl">TON RANG</div><div class="rk-tr">'+_R.rank.tr+' · '+_R.rank.fr+'</div></div>'+
-         '<div class="rk-chev">›</div>'+
-       '</div>'+
-       rankTrackHTML()+
-     '</div>';
-  h+=objRingHTML();      // l'anneau de l'objectif quotidien — seul, rien d'autre (validé 10/08)
-  h+=parcoursCardHTML(); // « Ton parcours » remonte juste sous l'encadré du rang (choix Myriam 13/07)
-  /* ═══ LES GRAINES ENTRENT DANS LE PROFIL (Myriam, 14/08) ═══
-     « Que fait-on des graines gagnées ? Elles n'apparaissent même pas dans le profil. Je sais
-     qu'on permettra plus tard d'acheter des danses ou des skins… mais le nombre de graines
-     gagnées au total doit quand même apparaître. » Une monnaie qu'on ne peut pas compter n'est
-     pas une monnaie : elles étaient gagnées, comptées dans S.graines, et visibles nulle part
-     hors de l'écran de fin. Elles rejoignent la rangée du Profil, à côté de la série. */
-  h+='<div class="pgrid pgrid4">'+
-     '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
-     '<div class="pstat"><div class="pv">'+(S.graines||0)+'</div><div class="pl">graines</div></div>'+
-     '<div class="pstat"><div class="pv">'+unitVocabCount()+'</div><div class="pl">mots</div></div>'+
-     '<div class="pstat" role="button" tabindex="0" style="cursor:pointer" onclick="showGhufranInfo()"><div class="pv">'+(S.ghufLeft||0)+'</div><div class="pl">ghufrān</div></div></div>';
-  h+='<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="badges/lecons100.png" alt=""> Succès</h3></div>'+
-     '<div class="ecu-row">'+SOURATES.map(function(SR,i){
-        var pris=(i===0&&fatihaPct()>=100);
-        return '<div class="ecu-cell'+(pris?'':' lk')+'">'+ecussonHTML(SR.ar,58)+'<span>'+escHTML(SR.nom)+'</span></div>';
-     }).join('')+'</div>'+
-     '<div class="sgrid">'+
-     BADGES.map(function(b){var got=!!(S.badges&&S.badges[b[0]]);
-       return '<button class="scell'+(got?'':' locked')+'" onclick="showSucces(\''+b[0]+'\')" aria-label="'+b[2].replace(/"/g,'')+'">'+
-              '<img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'">'+
-              '</button>';}).join('')+
-     '</div></div>';
-  // La carte « Ton parcours » (déclaration hissée : appelée plus haut, juste sous l'encadré du rang)
-  function parcoursCardHTML(){
-    const ready=UNITS.map((U,i)=>({U,i})).filter(o=>o.U.ready);
-    const nTot=ready.length, nVal=ready.filter(o=>unitValidated(o.i)).length; // les unités PRÊTES, pas les déclarées
-    // unité en cours, sinon la dernière unité atteinte (on montre toujours où elle en est)
-    const cur=ready.find(o=>unitUnlocked(o.i)&&!unitValidated(o.i)) || ready.slice().reverse().find(o=>unitUnlocked(o.i));
-    let inner='<div class="pcs-top"><b>'+arReveal('Al-Fātiḥa','الفاتحة')+'</b><span>'+nVal+' / '+nTot+' unités validées</span></div>'+
-      '<div class="ubar"><i style="width:'+Math.round(nVal/Math.max(1,nTot)*100)+'%"></i></div>';
-    if(nVal>=nTot && nTot>0){
-      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--gold2)">🏆 Fātiḥa complétée, ma shā’ Allāh !</div>';
-    } else if(cur){
-      const i=cur.i,U=cur.U,n=discsFor(i).length; let d=0; for(let k=0;k<n;k++) if(S.done[dkey(i,k)])d++;
-      const lbl=(d>=n)?'Terminée':'En cours';
-      inner+='<div class="ucard cur" style="margin-top:12px"><div class="uno">'+toAr(U.no)+'</div>'+
-        '<div class="ub"><div class="utt">'+lbl+' · <span class="uar">'+U.letters.join(' ')+'</span></div>'+
-        '<div class="ust">'+d+' / '+n+' '+arReveal('leçons','دروس')+'</div>'+
-        '<div class="ubar"><i style="width:'+Math.round(d/Math.max(1,n)*100)+'%"></i></div></div></div>';
-    }
-    return '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('menu-profil')+'" alt=""> Ton parcours</h3></div>'+inner+'</div>';
-  }
-  // (« Mon compte » est désormais tout en haut — ancien code de sauvegarde ALAQ1 retiré le 07/07.)
-  document.getElementById('view-prog').innerHTML=h; try{maybeGhufranPrompt();}catch(e){}
-}
-// Popup détail d'un succès (clic sur une image de la grille)
+/* ═══ renderProg (le Profil) vit dans ui/parametres.js (12/09/2026). chime() reste ici : c'est
+   de l'audio, reveilAudio() le réveille avec les autres contextes. ═══ */
 function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, sans fichier
   try{
     var AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
@@ -7296,20 +6506,7 @@ function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, san
     });
   }catch(e){}
 }
-function showSucces(id){
-  var b=BADGES.find(function(x){return x[0]===id;}); if(!b)return;
-  var got=!!(S.badges&&S.badges[b[0]]);
-  var m=document.getElementById('succesModal');
-  if(!m){m=document.createElement('div');m.className='finish';m.id='succesModal';document.body.appendChild(m);}
-  /* Un badge : son image et son titre. Pas de boîte, pas de corps de texte (règle Myriam 09/08). */
-  m.innerHTML=(CROIX_SUCCES)+
-    '<div class="succ-big'+(got?' pop':' locked')+'"><img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'"></div>'+
-    '<h2 style="margin:16px 0 0;font-size:20px">'+b[2]+'</h2>'+
-    '</div>';
-  m.classList.add('on');
-  if(got){try{chime();}catch(e){}}
-}
-function closeSucces(){var m=document.getElementById('succesModal');if(m)m.classList.remove('on');}
+/* ═══ showSucces / closeSucces (la modale d'un succès) vivent dans ui/parametres.js (12/09/2026). ═══ */
 
 /* ===== Révision globale (réutilise le lecteur, ne marque aucun disque) ===== */
 function frOptions(pool,w){
@@ -8243,159 +7440,8 @@ function startReciterSourate(deb,fin){
   launchQuranReview(qs);
 }
 
-/* ═══ LE HUB DE LA GRAMMAIRE — le modèle est celui du VOCABULAIRE ═══════════
-   Un bouton unique en haut, la liste des notions en bas, un crayon ✏️ par notion
-   pour s'entraîner dessus seule. Pas de boîtes d'ateliers par unité : à l'unité
-   12 l'écran en porterait cinq et on choisirait tous les jours la même (spec §1.4).
-   ⚠️ Tout réemploie les gabarits de la liste du vocabulaire — .wrow, .wtx, .wfr,
-   .wpen, .revbtn, .revcount — plus .ubar pour la jauge. Ils sont validés dans les
-   deux thèmes et déjà couverts par le balayage de contraste. */
-function grammaireHubHTML(){
-  var N=notionsGram();
-  if(!N.length) return '<div class="ccard" style="opacity:.7;text-align:center">'+
-    '<h3 style="font-family:var(--ui);font-size:17px;margin:0 0 8px">La grammaire</h3>'+
-    '<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;margin:0">'+
-    'Elle s\u2019ouvre avec l\u2019unité 8, quand les lettres sont sues et qu\u2019on peut enfin regarder ce qu\u2019elles FONT.</p></div>';
-
-  /* 🔴 09/09 — LE BADGE MENTAIT, ET MYRIAM L'A VU EN L'UTILISANT. Il affichait
-     `gramFile(null).length`, c'est-à-dire la TAILLE DE LA PROCHAINE SÉANCE (plafonnée à
-     GRAM_CAP = 15) : un nombre constant, qui ne bougeait jamais quoi qu'on révise. Elle :
-     « le compteur de révision en grammaire (15) ne changeait pas même après avoir
-     révisé » — avec ses deux notions affichées à 100 % juste en dessous.
-     ⚠️ LE VRAI DÉFAUT ÉTAIT DE RESSEMBLANCE. Le badge du vocabulaire (.revcount, même
-     classe, même place, même forme) compte les mots DUS et descend — et le tutoriel de
-     l'app l'enseigne mot pour mot : « Il descend à mesure que tu révises. » Deux badges
-     identiques, deux sens contraires : l'écran contredisait ce que l'app venait
-     d'apprendre à l'élève. Aucun de nos contrôles ne pouvait le voir — ils mesurent des
-     valeurs, pas des promesses tenues.
-     Il compte désormais les NOTIONS PAS ENCORE RÉVISÉES AUJOURD'HUI (g.maj porte la date
-     de la dernière séance, posée par finishReview). Il descend, et quand tout est fait il
-     disparaît : le bouton dit « S'entraîner », exactement comme celui du vocabulaire.
-     ⚠️ La SÉANCE ne change pas : elle reste gramFile(null), panachée et plafonnée à 15.
-     On corrige ce que l'écran ANNONCE, pas ce qu'il fait. */
-  var nb=notionsGram().filter(function(x){
-    var g=S.revGram&&S.revGram[x.u];
-    return !g||g.maj!==today();
-  }).length;
-  var lignes=N.map(function(x){
-    var m=gramMaitrise(x.u), pc=Math.round(Math.max(0,m)*100);
-    /* ⚠️ SANS AUCUNE SESSION JOUÉE, ON NE MONTRE PAS 0 % : ce chiffre se lirait
-       « tu ne sais rien » alors qu\u2019il veut dire « on n\u2019a pas encore mesuré ».
-       La leçon du projet sur les chiffres qui se contredisent, appliquée au vide. */
-    var jauge=(m<0)
-      ? '<div class="wfr" style="margin-top:5px">pas encore révisée</div>'
-      : '<div class="ubar" title="'+pc+' % de réussite"><i style="width:'+pc+'%"></i></div>';
-    return '<div class="wrow">'+
-      '<span class="gnum">'+toAr(UNITS[x.u].no)+'</span>'+
-      '<div class="wtx"><div class="gtt">'+x.titre+'</div>'+
-        /* 🔴 09/09 — « 100 % » TOUT NU SE LIT « J'AI TOUT », et c'est faux : le calcul
-           est (écrans vus − fautes) / écrans vus, un TAUX DE RÉUSSITE sur ce qu'on a
-           rencontré, jamais une couverture de la notion. L'infobulle de la jauge le
-           disait déjà (« X % de réussite ») — mais une infobulle ne se lit pas au doigt
-           sur un téléphone. Myriam, en découvrant que de nouveaux harf viendront : « je
-           n'aurais pas mis la notion acquise à 100 % ». Elle avait raison de douter du
-           mot, pas du chiffre. Deux mots contre une lecture fausse : le seul texte que
-           la règle d'épuration accepte est celui qui empêche un contresens. */
-        '<div class="wfr">'+x.sous+(m<0?'':' \u00b7 '+pc+' % de réussite')+'</div>'+jauge+'</div>'+
-      '<button class="wpen" onclick="startGrammarTargeted('+x.u+')" '+
-        'aria-label="S\u2019entraîner sur cette notion">\u270f\ufe0f</button>'+
-    '</div>';
-  }).join('');
-
-  return '<div class="ccard">'+
-    '<div style="display:flex;gap:10px;align-items:center;max-width:340px;margin:0 auto">'+
-        '<button class="cbtn revbtn" style="flex:1;margin:0" onclick="startGrammarReview()">'+
-          (nb?'<span>Réviser</span><span class="revcount"><i>'+nb+'</i></span>':'S\u2019entraîner')+'</button>'+
-    '</div>'+
-    '<p style="color:var(--muted);font-family:var(--ui);font-size:12.5px;text-align:center;margin:9px 0 2px">'+
-      'Une séance qui mêle toutes tes notions</p>'+
-    '<div class="wlist">'+lignes+'</div></div>';
-}
-
-function renderReviser(sub){
-  sub=sub||curReviserTab||'quran';curReviserTab=sub;
-  const tabs=[['quran','<img class="itab-ic" src="'+ico('tab2-qoran')+'" alt="">','Le Qorān'],['lettres','<img class="itab-ic" src="'+ico('tab-crayon')+'" alt="">','Les lettres'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Le vocabulaire'],['grammaire','<img class="itab-ic" src="'+ico('tab-parchemin')+'" alt="">','La grammaire']];
-  const SR=SOURATES[curSourate]||SOURATES[0];
-  const set=knownLetterSet(), pc=fatihaPct();
-  let h='<div class="icontabs">'+tabs.map(function(t){
-    return '<button class="itab'+(t[0]===sub?' active':'')+'" onclick="reviserTabTap(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>';
-  }).join('')+'</div>';
-
-  if(sub==='quran'){
-    /* 🔴 LES 5 BOÎTES REMPLACENT LES 5 ACCORDÉONS (04/09, cahier des charges de
-       Myriam). La sourate illuminée part dans un PLEIN ÉCRAN dédié
-       (ouvrirLireSourate(), plus bas) — même markup .mushaf/.ayat/.vw que
-       l'ancien accordéon « ill », déplacé au caractère près : les harnais qui
-       mesuraient cette zone n'ont qu'à changer leur POINT D'ENTRÉE, jamais
-       leurs sélecteurs.
-       ⚠️ LE BOUTON « RÉCITATEUR » EST RETIRÉ D'ICI — il fait double emploi
-       avec la carte « Récitateur » de Paramètres (.prm-row, openQari()).
-       L'INDICATION « touche un verset ou un mot », elle, RESTE : c'est elle
-       qui apprend le geste, pas le nom de la voix. */
-    h+='<div class="spick">'+
-      '<div class="sbtn" onclick="event.stopPropagation();var m=document.getElementById(\'smenu\');if(m)m.classList.toggle(\'open\')">'+
-        '<span style="font-family:var(--quran);font-size:19px;color:var(--gold)">'+SR.ar+'</span> '+SR.nom+
-        '<span class="pct">lisible à '+pc+' %</span><span style="color:var(--gold2);font-weight:900">▾</span></div>'+
-      '<div class="smenu" id="smenu">'+
-        '<div class="srow cur"><span class="sar">'+SR.ar+'</span> '+SR.nom+' <span class="pct">'+pc+' %</span></div>'+
-        [['الإخلاص','Al-Ikhlāṣ'],['الفلق','Al-Falaq'],['الناس','An-Nās']].map(function(x){
-          return '<div class="srow lock"><span class="sar">'+x[0]+'</span> '+x[1]+' <span class="pct">🔒 0 %</span></div>';}).join('')+
-        '<div class="shint">Une sourate se déverrouille dès que tu peux lire ses premiers mots</div>'+
-      '</div></div>'+
-      /* ⚠️ 17/08 — `margin:0 0 12px` posait margin-left:0 EN LIGNE, ce qui battait le
-         `margin-left:auto` du centrage bureau (l. ~1467) : la barre gardait sa largeur de
-         560 px mais se collait au bord gauche de la colonne pendant que ses voisines se
-         centraient (Myriam, capture du 17/08). `auto` rétablit le centrage ; sur téléphone
-         l'élément occupe toute la largeur, `auto` n'y change rien. */
-      '<div style="display:flex;align-items:center;gap:10px;margin:0 auto 12px"><div class="ubar" style="flex:1;margin:0"><i style="width:'+pc+'%"></i></div>'+
-      '<b style="color:var(--gold2);font-family:var(--ui)">'+pc+' %</b></div>'+
-      '<div class="rq-grille" id="rqGrille">'+BOITES.map(function(b,i){
-        return '<button class="rq-boite" id="rqBx'+i+'" onclick="boiteTap('+i+')" aria-label="'+b.t+'">'+
-          '<img src="'+ico(b.ic)+'" alt=""><span class="rq-lab">'+b.lab+'</span></button>';
-      }).join('')+'</div>';
-  }
-  else if(sub==='lettres'){
-    h+='<div class="ccard">'+letterGridHTML()+'</div>';
-  }
-  else if(sub==='vocab'){
-    const vwords=allReviewWords();               // uniquement les mots APPRIS (leçon « Lire des mots » terminée)
-    // Règle Myriam : jamais deux chiffres en contradiction. Avec l'échelonnement (§2.5), un mot neuf
-    // hors quota n'est PAS dû aujourd'hui — il ne doit donc pas porter de point rouge.
-    const dueSet=new Set(dueReviewWords().map(function(w){return w.w;}));
-    const nDue=dueSet.size;                      // mots dus aujourd'hui — le chiffre DÉCRÉMENTE après chaque série
-    const ordered=vwords.slice().sort(function(a,b){return (dueSet.has(b.w)?1:0)-(dueSet.has(a.w)?1:0);});
-    const vlist=ordered.map(function(w){
-      // 02/08 : le 🔊 REMPLACE l'emoji du mot. Dès qu'il y a deux actions sur la ligne
-      // (écouter / écrire), chaque icône doit dire ce qu'elle FAIT — une fourmi à gauche et un
-      // crayon à droite se lisent « une image, un bouton ». Le point passe AVANT le crayon et
-      // sa place est toujours réservée, pour que tous les ✏️ tombent sur la même colonne.
-      /* ⚠️ 17/08 — `speak()` REMPLACÉ par `spkAudio(…, le haut-parleur de CETTE ligne)`.
-         Myriam : « lorsqu'on clique sur un haut-parleur on doit le voir s'animer et
-         s'illuminer ». `speak()` n'allume rien ; `spkAudio` fait le bon aiguillage (syllabe
-         ou mot enregistré → sayLetterName, sinon la carte AUDIO), anime les ondes et éteint
-         à la fin — filet compris pour la voix de synthèse, qui ne prévient pas. */
-      return '<div class="wrow" style="cursor:pointer" role="button" aria-label="Écouter '+w.fr.replace(/"/g,'')+'" onclick="spkAudio(\''+w.w+'\',this.querySelector(\'.wspk\'))">'+
-        '<span class="wspk">'+spkSVG()+'</span>'+
-        '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
-        '<span class="wdot'+(dueSet.has(w.w)?'':' off')+'" title="à réviser aujourd\u2019hui"></span>'+
-        '<button class="wpen" onclick="event.stopPropagation();openWrite(\''+w.w+'\')" aria-label="S\'entraîner à écrire">✏️</button>'+
-      '</div>';
-    }).join('');
-    h+='<div class="ccard">'+
-      '<div style="display:flex;gap:10px;align-items:center;max-width:340px;margin:0 auto">'+
-        '<button class="cbtn revbtn" style="flex:1;margin:0" onclick="startReview()">'+(nDue?'<span>Réviser</span><span class="revcount"><i>'+nDue+'</i></span>':'S\u2019entraîner')+'</button>'+
-        (vwords.length?'<button class="lg-help" onclick="vocabTut()" aria-label="À quoi servent ces signes ?">?</button>':'')+
-      '</div>'+
-      (vwords.length?'':'<p style="color:var(--muted);font-family:var(--ui);font-size:13.5px;text-align:center;margin:10px 0 0">Les mots apparaîtront ici après la leçon « Lire des mots ».</p>')+
-      '<div class="wlist">'+vlist+'</div></div>';
-  }
-  else{
-    h+=grammaireHubHTML();
-  }
-  document.getElementById('view-reviser').innerHTML=h;
-  if(sub==='lettres')setTimeout(maybeShowLetterTut,80);
-  if(sub==='vocab')setTimeout(maybeShowVocabTut,80);   // 1re ouverture seulement (S.tutVocab)
-}
+/* ═══ LE HUB RÉVISER (grammaireHubHTML, renderReviser) vit dans ui/reviser.js (12/09/2026). Ses
+   rouages — BOITES, boiteTap, reviserTabTap, la grille des lettres, le Qorān — restent ici. ═══ */
 // Générateur commun : reconstruire un verset (mots lisibles = tuiles, le reste posé en gris)
 function buildVerseTiles(vi){
   const set=knownLetterSet();

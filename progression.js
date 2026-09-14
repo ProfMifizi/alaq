@@ -165,11 +165,13 @@ function setDone(u,i,v){
    et le grand script le recrée à DOMContentLoaded), et trois `addEventListener`.
    Aucune de ces lignes ne touche à index.html.
 
-   LE CONTRAT AVEC index.html, dans les deux sens.
+   LE CONTRAT AVEC index.html ET ui/, dans les deux sens.
    ① Ce moteur résout À L'APPEL, jamais à la définition : verrouConnexion,
-      verrouLibere, renderHome, refreshStats, renderProg, _progVisible,
-      fixOrdreFormes, toast, _homeFocusPending. Même principe que setupTrace()
-      dans trace-lettres.js.
+      verrouLibere, _progVisible, fixOrdreFormes, toast (index.html) ;
+      renderHome, refreshStats et _homeFocusPending — un `let` de
+      ui/accueil.js, que cloudPull RÉASSIGNE ici — (ui/accueil.js, depuis le
+      12/09/2026) ; renderProg (ui/parametres.js). Même principe que
+      setupTrace() dans trace-lettres.js : rien n'est capturé au chargement.
    ② index.html LIT SB, CLOUD, SUPA_URL, SUPA_ANON, cloudPull, cloudSaveNow,
       cloudSaveSoon, cloudInit, _syncT — et il ÉCRIT dans `SB` (au
       DOMContentLoaded, quand le CDN Supabase est enfin chargé). C'est possible
