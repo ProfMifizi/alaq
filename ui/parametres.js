@@ -24,12 +24,12 @@
 
    ═══ LE CONTRAT AVEC index.html (résolu À L'APPEL) ═══
    S, UNITS, SOURATES, save, today, VERSION, BUILD_NUM, BUILD_DATE, SND,
-   VOIX_HOMME_ACTIVE, VOIX_G, qariCur, ico, icoImg, icoEcran, escHTML,
+   qariCur, ico, icoImg, icoEcran, escHTML,
    objMinutes, objGoal, objFete, SYNC (facultatif : la feuille dit s'il manque),
    SB, CLOUD, nomChoisiHTML, cloudCardHTML, rankFor, RANKS, rankTrackHTML,
    objRingHTML, ecussonHTML, BADGES, fatihaPct, discsFor, dkey, unitValidated,
    unitUnlocked, arReveal, chime, maybeGhufranPrompt — et, en ligne dans le HTML
-   produit : toggleSound, openQari, setVoix, openPrenom, cloudLogout,
+   produit : toggleSound, openQari, openPrenom, cloudLogout,
    showGhufranInfo. toAr vient de ui/accueil.js.
 
    GARDES : outils/verifier-interface.mjs (⑦ à ⑩, ⑬ — le banc CLIQUE sur les
@@ -129,14 +129,11 @@ function renderParams(){
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Récitateur</h3></div>'+
       '<button class="prm-row" onclick="openQari()">'+escHTML(qariCur().fr)+'<span style="color:var(--muted)">›</span></button>'+
     '</div>'+
-    (VOIX_HOMME_ACTIVE?
-    '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Voix arabe</h3></div>'+
-      '<div class="prm-goals">'+
-        '<button class="prm-goal'+(VOIX_G==='f'?' sel':'')+'" onclick="setVoix(\'f\')">Habibah</button>'+
-        '<button class="prm-goal'+(VOIX_G==='h'?' sel':'')+'" onclick="setVoix(\'h\')">Mustafa</button>'+
-      '</div>'+
-      '<p style="color:var(--muted);font-size:11.5px;margin:9px 2px 0;line-height:1.45">Les voyelles et les syllabes gardent la voix de Myriam.</p>'+
-    '</div>':'')+
+    /* ⛔ LA CARTE « VOIX ARABE » A ÉTÉ RETIRÉE le 15/09/2026 (décision de Myriam). Elle était
+       déjà masquée depuis le 10/08 par VOIX_HOMME_ACTIVE=false — aucune voix d'homme n'avait
+       passé son oreille — et il a été mesuré ce jour-là qu'il n'existe ZÉRO fichier de voix
+       d'homme dans le dépôt : le drapeau gardait un sélecteur posé sur du vide. Une voix
+       d'homme, un jour, sera un vrai lot avec de vraies prises. */
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-objectif')+'" alt=""> Objectif quotidien</h3></div>'+
       '<div class="prm-goals">'+['5','10','15','20'].map(function(m){
         return '<button class="prm-goal'+(obj===m?' sel':'')+'" onclick="prmObjectif(\''+m+'\')">'+m+' min</button>';

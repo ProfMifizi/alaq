@@ -393,6 +393,10 @@
      évaluée au premier rendu, et progression.js reconnaît un disque par IDENTITÉ de
      fonction. ⛔ NI `defer`, NI `type="module"`. -->
 <script src="generateurs.js"></script>
+<!-- LE SON : la table et la porte. CLASSIQUE et pas module — la table est écrite par le
+     grand script au chargement, et _sndGen est un nombre partagé par quatre fichiers.
+     Voir l'en-tête de son.js. -->
+<script src="son.js"></script>
 
 <!-- ═════════════════════════════════════════════════════════════════
      LA PERSISTANCE ET L'ÉTAT LOCAL — progression.js (07/09/2026), MÊME RÈGLE :
@@ -489,8 +493,10 @@ let U8 = U8_TALON;
    par src/entree.js ; le module se publie LUI-MÊME sur window (sa fin de fichier). Son verrou _verdictEnCours l'a suivi. ═══ */
 
 window.__alaqHoteU8 = {
-  /* les primitives */
-  audioBeni, playSfx, save, goNoHearts, stopAudio, icoImg,
+  /* les primitives — toutes déclarées par un script CLASSIQUE chargé avant celui-ci, donc
+     sûres en raccourci. `toc` les a rejointes le 15/09 en revenant de src/ecrans (module)
+     vers son.js (classique) : il n'a plus besoin de son accesseur. */
+  audioBeni, playSfx, save, goNoHearts, stopAudio, icoImg, toc,
   /* 🔴 15/09 — CINQ DE CES PRIMITIVES VIVENT DANS src/ecrans/ (un MODULE, exécuté APRÈS ce
      script). Écrites en raccourci, comme les autres, elles seraient capturées au chargement :
      ReferenceError, et tout ce script mourrait avant même l'accueil. Des accesseurs les
@@ -498,7 +504,6 @@ window.__alaqHoteU8 = {
      (pont/hote.js) les lit à SON initialisation, après les écrans. */
   get objectifAtteint(){ return objectifAtteint; },
   get elogeHTML(){ return elogeHTML; },
-  get toc(){ return toc; },
   get draggable(){ return draggable; },
   get dansRectMarge(){ return dansRectMarge; },
   /* 🔴 14/09 — `advance` vit dans src/player/ (un MODULE, exécuté APRÈS ce script). Écrit ici
@@ -553,8 +558,8 @@ window.__alaqEnregistrerU8 = function(api){
   /* et leurs deux enregistrements : le mot nu, et le mot défini.
      ⚠️ Nom SANS `-f` : `jouerMot` essaie d'abord `<nom>-f.mp3` puis celui-ci. */
   Object.keys(m).forEach(function(k){
-    AUDIO[m[k].nu ]='audios-app-alaq/mot-'+m[k].an+'.mp3';
-    AUDIO[m[k].def]='audios-app-alaq/mot-'+m[k].ad+'.mp3';
+    inscrireLeSon(m[k].nu ,'mot-'+m[k].an);
+    inscrireLeSon(m[k].def,'mot-'+m[k].ad);
   });
   /* ── ET LES 10 MOTS DE LA FĀTIḤA QUE LE DISQUE 8 FAIT REPÉRER (05/09) ────
      Le résumé de Cours les fait entendre. Sans cette ligne, `speak()` ne
@@ -566,7 +571,7 @@ window.__alaqEnregistrerU8 = function(api){
      à citer la même, c'est SA prise qui doit rester (règle « un fichier, un
      mot »). Le garde coûte trois caractères et ferme la question d'avance. */
   const mv=U8.versets||{};
-  Object.keys(mv).forEach(function(w){ if(!AUDIO[w])AUDIO[w]='audios-app-alaq/mot-'+mv[w]+'.mp3'; });
+  Object.keys(mv).forEach(function(w){ if(!SONS[w])inscrireLeSon(w,'mot-'+mv[w]); });
 };
 /* @U8-FIN */
 
@@ -787,38 +792,11 @@ if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {s
 if(typeof S.prenom!=='string')S.prenom='';           // prénom (personnalisation + colonne Supabase profiles.prenom)
 (function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)saveLocal();})();  /* migration D<n> → U1-D<n> : un RENOMMAGE de clés, pas une progression — saveLocal (voir 04/09) */
 fixOrdreFormes(); // échange formes ↔ repérage (02/08) : rattrape les progressions écrites sous l'ancien ordre
-let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
-let NARR=(function(){try{return localStorage.getItem('alaq_narr')!=='off'}catch(e){return true}})();
-/* Le GENRE de voix, pour tout ce que l'app fait dire. Le casting (05/08/2026) :
-     'f' → Marine (consignes FR) + Habibah (lettres et félicitations AR)
-     'h' → Dorian (consignes FR) + Mustafa (lettres et félicitations AR)
-   Les deux jeux complets existent ; ⏳ le sélecteur dans le profil de l'élève reste à faire. */
-/* Le sélecteur vit maintenant dans Paramètres (Myriam 09/08) : on relit donc localStorage.
-   ⚠️ Ce choix ne touche QUE ce qui existe dans les deux voix — consignes, noms de lettres,
-   félicitations. Les voyelles et syllabes (a/i/ou courts et prolongés) restent la voix de
-   Myriam : un TTS n'a jamais su les dire (décision ferme du 07/08). */
-/* ⚠️ VOIX HOMME MASQUÉE (décision de Myriam, 10/08 au soir) : aucune voix d'homme testée
-   (Mustafa, Omar, le banc de 8, Khalil) n'a passé son oreille sur les syllabes. Habibah pour
-   toutes. Les fichiers -h restent servis et toute la mécanique est intacte : remettre
-   VOIX_HOMME_ACTIVE à true rallume le sélecteur ET la relecture du choix mémorisé. */
-const VOIX_HOMME_ACTIVE=false;
-let VOIX_G=(function(){try{return (VOIX_HOMME_ACTIVE&&localStorage.getItem('alaq_voix')==='h')?'h':'f'}catch(e){return 'f'}})();
-function setVoix(g){
-  VOIX_G=(g==='h')?'h':'f';
-  try{localStorage.setItem('alaq_voix',VOIX_G)}catch(e){}
-  try{_LNg=null;_LN={};prechargerNoms();}catch(e){}   // les noms de lettres se rechargent dans la nouvelle voix
-  try{renderParams();}catch(e){}
-  try{sayLetterName('م');}catch(e){}                  // un échantillon immédiat : on ENTEND son choix
-}
-function toggleSound(){
-  SND=!SND;try{localStorage.setItem('alaq_snd',SND?'on':'off')}catch(e){}
-  const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';
-  if(!SND&&'speechSynthesis'in window)speechSynthesis.cancel();
-}
-function toggleNarr(){
-  NARR=!NARR;try{localStorage.setItem('alaq_narr',NARR?'on':'off')}catch(e){}
-  if(!NARR&&'speechSynthesis'in window)speechSynthesis.cancel();
-}
+/* ═══ SND et toggleSound (« Effets sonores ») vit dans son.js (15/09/2026). ═══ */
+/* ⛔ NARR / toggleNarr / VOIX_G / VOIX_HOMME_ACTIVE / setVoix RETIRÉS le 15/09 (Myriam) :
+   la narration des consignes ne jouait plus depuis le 13/08, et il n'existe zéro fichier
+   de voix d'homme dans le dépôt. Détail et décision : l'en-tête de son.js. */
+
 function currentLesson(){ // 1re leçon non terminée d'une unité débloquée = le disque « courant » de l'accueil
   for(let u=0;u<UNITS.length;u++){ if(!unitUnlocked(u))continue;
     const ds=discsFor(u);
@@ -1200,10 +1178,7 @@ function doReset(){
   document.getElementById('confirmReset').classList.remove('on');
   renderHome();
 }
-function _normInstr(t){ return String(t)
-  .replace(/<[^>]+>/g,' ')
-  .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu,' ')
-  .replace(/\s+/g,' ').trim(); }
+
 /* ===== ⚑ Signalements (08/08) — le drapeau du bandeau bas =====
    L'élève coche un motif, l'app capture TOUT le contexte (écran, build, appareil,
    compte) : jamais rien à décrire. Dépôt en clé publique — la RLS de la table
@@ -1352,85 +1327,23 @@ window.addEventListener('unhandledrejection',function(e){
   }catch(x){}
 });
 
-// ===== Consignes lues par l'appli =====
-// Dépose le .mp3 (ta voix) dans audios-app-alaq/ : il sera lu à la place de la
-// synthèse. Si le fichier manque, repli automatique sur la voix de synthèse.
-const INSTR_LIST=[
-  ['ecoute-reponse','Écoute, puis touche la bonne réponse'],
-  ['hp-choisis','Touche les haut-parleurs, écoute, puis choisis'],
-  ['choisis','Choisis la bonne réponse'],
-  ['lettre-nom','Touche la lettre pour écouter son nom'],
-  ['costumes','Touche les quatre costumes de la lettre'],
-  ['spot-verset','Touche toutes les lettres demandées dans le verset'],
-  ['mot-ecoute','Touche le mot et écoute-le au moins une fois'],
-  ['ecris-ecoute','Écoute, puis écris le mot avec les lettres'],
-  ['ecris-arabe','Écris ce mot en arabe avec les lettres'],
-  ['associe','Associe chaque mot arabe à sa traduction'],
-  ['trace','Pose ton doigt sur le point vert et suis le chemin de la lettre'],
-  ['vtiles','Écoute le verset, puis touche les mots dans l\u2019ordre'],
-  ['recite','Écoute le modèle, enregistre-toi, ré-écoute-toi et compare, puis valide'],
-  ['stiles','Touche les versets dans l\u2019ordre de la sourate'],
-  ['vwrite','Le verset se construit sous tes yeux : écris chaque mot avec ses harakats'],
-  ['explore-3','Touche au moins 3 lettres pour les entendre.'],
-  ['explore-cases','Touche chaque lettre au moins trois fois.'],
-  ['combine','Pour former un son, on associe souvent une consonne et une voyelle. Touche pour assembler.'],
-  ['haraka-intro','À la place, un petit signe habille la lettre : le <b>haraka</b>. Il en existe trois. Touche chaque signe pour entendre son son.'],
-  ['assoc-haraka','Associe la lettre à chaque haraka et écoute la syllabe obtenue.'],
-  ['prolong-intro','Trois lettres servent à <b>prolonger</b> le son. Touche-les pour les entendre.'],
-  ['prolong-dorees','Les trois lettres de prolongation sont légèrement dorées. Touche-les.'],
-  ['prolong-deux','Lorsqu\u2019on associe une lettre avec une lettre de prolongation, on étire le son deux fois plus. Touche pour entendre « mâââ », « mîîî », « mûûû ».'],
-  ['son-long','Écoute bien : le son long est étiré. Touche chaque case.'],
-  ['costume-glisse','Selon sa place dans le mot, la lettre change de costume. Fais glisser mim dans chaque case.'],
-  ['attache-6','Les lettres s\u2019attachent à gauche et à droite, <b>sauf 6</b> qui <b>ne s\u2019attachent qu\u2019à droite</b>. Touche-les.'],
-  ['attache-6-dorees','Les 6 lettres qui ne s\u2019attachent qu\u2019à droite sont légèrement dorées. Touche-les.'],
-  ['glisse-gd','Glisse ton doigt sur le mot, de gauche → droite.'],
-  ['madrasatoun','« madrasatoun » (l\u2019école). Glisse ton doigt sur le mot, de droite ← gauche.'],
-  ['touche-droite','Touche les lettres qui ne s\u2019attachent qu\u2019à droite.'],
-  ['dragmad','Glisse la bonne lettre de prolongation sur la lettre'],
-  ['dragassoc','Glisse chaque prolongation sur la lettre qui lui correspond'],
-  ['deux-fois-cartes','Clique deux fois sur chaque carte pour écouter les deux sons'],
-  ['intro-bienvenue','<p>Avant d’apprendre les lettres, faisons le tour de l’écriture arabe. Ici, rien à mémoriser : on observe, on touche, on écoute.</p>'],
-  ['intro-28-lettres','<p>L’alphabet arabe comporte <b>28 lettres</b>.</p>'],
-  ['intro-quiz','<p>On vérifie ce qu’on a retenu. Quelques questions, et la leçon est gagnée !</p>'],
-  ['info-soukoun','<div class="demo linear-ar">نَمْلٌ</div><p>Le petit rond <span class="gold">ـْ</span> est le <b>soukoun</b> : la lettre se prononce <b>sans voyelle</b>, elle s’arrête net. نَمْلٌ se lit « naml » — le م s’arrête : fourmi 🐜.</p>'],
-  ['info-lettres-empilees','<div class="demo">نَمْلٌ</div><p>Très souvent, l’écriture arabe <b>superpose</b> certaines lettres au début d’un mot — ici le <span class="gold">ن</span> et le <span class="gold">م</span> s’empilent. C’est le <b>même mot</b> que نَمْلٌ écrit en ligne : on apprend à reconnaître les deux.</p>'],
-  ['info-chedda','<div class="demo linear-ar">لَمَّا</div><p>Le signe <span class="gold">ـّ</span> est la <b>chedda</b> : la lettre est <b>doublée</b>, on appuie dessus. لَمَّا se lit « lam-mā » — comme dans le Qor’an.</p>'],
-  ['info-tanwin','<div class="demo linear-ar">نَمْلٌ</div><p>Les deux petits signes <span class="gold">ـٌ</span> à la fin sont un <b>tanwīn</b> (ici la <b>dammatayn</b>). On ajoute le son <b>« oun »</b> : نَمْلٌ se lit « naml-oun ». C’est du tachkīl, comme le soukoun et la chedda.</p>'],
-];
-const INSTR_AUDIO={};
-INSTR_LIST.forEach(function(e){ INSTR_AUDIO[_normInstr(e[1])]='audios-app-alaq/instr-'+e[0]+'.mp3'; });
-
-function readInstr(t,id){ // narration de l'instruction — coupée par NARR uniquement
-  if(!NARR||!t)return;
-  const plain=_normInstr(t);
-  if(!plain)return;
-  // `id` = le champ `instr` de l'écran. Il PRIME sur l'appariement par le texte, qui casse
-  // en silence dès qu'une consigne est reformulée (leçon 1, 10 écrans muets — 03/08/2026).
-  const url=id?('audios-app-alaq/instr-'+id+'-'+VOIX_G+'.mp3'):INSTR_AUDIO[plain];
-  if(!url){ speakFr(plain,true); return; }       // pas d'enregistrement -> voix de synthèse
-  try{
-    stopAudio();
-    const gen=_sndGen;
-    const a=new Audio(url); _curAudio=a; let settled=false;
-    const toTTS=()=>{ if(settled||gen!==_sndGen)return; settled=true; try{a.pause();}catch(_){ } speakFr(plain,true); };
-    a.addEventListener('playing',()=>{ settled=true; },{once:true});
-    a.addEventListener('error',toTTS,{once:true});
-    a.addEventListener('stalled',toTTS,{once:true});
-    a.addEventListener('abort',toTTS,{once:true});
-    const p=a.play(); if(p&&p.catch)p.catch(toTTS);
-    setTimeout(()=>{ if(!settled&&gen===_sndGen&&a.paused)toTTS(); },1100);
-  }catch(e){ speakFr(plain,true); }
-}
+/* ⛔ LES CONSIGNES LUES ONT ÉTÉ RETIRÉES le 15/09/2026 (Myriam : « tout retirer, dépôt
+   compris »). Elles ne jouaient plus depuis le 13/08 : `spokenInstr()` rend '' en dur,
+   donc `readInstr` n'était plus jamais atteinte. 60 fichiers instr-*.mp3 pesaient 4,6 Mo,
+   dont 2,8 Mo pré-cachés sur le téléphone de chaque élève à chaque installation.
+   `spokenInstr`, qui gardait cet appel, a disparu avec : voir le pavé ci-dessous. */
 /* ══ LE FRANÇAIS NE SE LIT JAMAIS À VOIX HAUTE — doctrine, principe 2 (13/08/2026) ══
-   Cette fonction fabriquait une phrase FRANÇAISE pour chaque type d'écran, et les leçons
+   Une fonction fabriquait ici une phrase FRANÇAISE pour chaque type d'écran, et les leçons
    refondues la faisaient taire UNE PAR UNE (`mute:true`). C'est un modèle de liste blanche :
    il fuit par construction — tout écran neuf, ou simplement oublié, se remet à parler. Myriam
    l'a retrouvé le 13/08 sur « Associe chaque mot à sa traduction » et sur le placement des
-   mots du verset, des mois après la règle. La décision remonte donc au SEUL endroit qui
-   tranche : plus rien n'est lu. `mute` devient sans effet (laissé partout, il ne coûte rien),
-   `readInstr`/`INSTR_AUDIO`/`NARR` ne sont plus atteints par ce chemin.
-   L'oreille est réservée à la langue cible ; l'œil suffit au français. */
-function spokenInstr(st){ return ''; }
+   mots du verset, des mois après la règle. La décision a donc remonté au SEUL endroit qui
+   tranche : plus rien n'est lu. L'oreille est réservée à la langue cible ; l'œil suffit au
+   français.
+   ⛔ 15/09 — `spokenInstr()` elle-même a disparu. Elle rendait '' en dur depuis le 13/08, et
+   son unique appelant (le lecteur) est parti avec la narration des consignes. Une fonction
+   qui ne rend que du vide n'est pas une garantie : c'est un reste. `mute` survit dans les
+   données, sans effet sur le son — le lecteur le lit encore pour l'écrit. */
 
 function today(){ // heure LOCALE (§2.1) : en UTC la journée basculait à 02 h à Paris — un mot révisé à 00 h 30 était daté de la veille
   const d=new Date();
@@ -1814,7 +1727,7 @@ try{rollConstance();}catch(e){}
 /* ═══ L'ACCUEIL a déménagé dans ui/accueil.js (12/09/2026) : OFFS, refreshStats, toAr,
    sujetCours, discLabel, discImg, discTip/discTipClose et leurs écouteurs. Script classique
    chargé plus haut, AVANT celui-ci — voir l'en-tête de ui/accueil.js. ═══ */
-const BUILD='ecrans-module-15sept';
+const BUILD='son-unifie-15sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
    (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
@@ -1823,7 +1736,7 @@ window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche qu
    partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
    le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
    BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-15T08:15';
+const BUILD_DATE='2026-09-15T20:53';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
    pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
@@ -1834,8 +1747,8 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
    les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
    dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.14';
-const BUILD_NUM=216;
+const VERSION='3.15';
+const BUILD_NUM=217;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 /* ═══ … et la suite de l'accueil aussi (ui/accueil.js) : iconFallback, _homeFocusPending,
    focusCurrentDisc, renderHome, insecables, arEnveloppe, setBanner, onHomeScroll. Les
@@ -1872,105 +1785,15 @@ function lecteurPret(){
    d'objectif) vivent dans
    src/ecrans/index.js depuis le 15/09/2026 — un MODULE, importé par src/entree.js juste après
    le lecteur, qui publie ses noms sur window : `renderStep` les appelle, mais aussi setupTrace, les générateurs et le
-   hub Réviser, qui sont classiques et les résolvent à l'appel sur window. Le SON (la table
-   AUDIO, jouerMot, speak, playSfx) et l'ÉTAT du joueur restent ICI.
-   ⚠️ RESTENT ICI AUSSI, et c'est facile à confondre : renderMatch, renderVt, renderVw,
-   renderSt et comboBonneReponse — ils ressemblent à des gabarits, mais ils lisent le son et
-   l'état de trop près pour être partis ce jour-là. ═══ */
-/* ═══ LES MOTS DONT LA PRISE IA EST FAUSSE (14/08) ═══
-   Myriam, leçon 7 : « la voix dit ananoun au lieu de amanoun ». Le mot أَمَانٌ a DEUX
-   enregistrements : le sien (mot-aman.mp3, 21/06 — donc antérieur au 13/07, sa voix selon la
-   règle de provenance) et celui de Habibah (mot-aman-f.mp3, 10/08, généré). L'app essaie la
-   voix choisie EN PREMIER : c'est donc la prise générée qui parlait, et le modèle a lu أَنَامٌ
-   — précisément l'un des leurres de ce mot.
-   Le remède n'est pas de régénérer sous le même nom : un fichier remplacé à nom constant
-   reste l'ANCIEN à vie sur les appareils (règle du cache MEDIA). On saute la prise fautive,
-   et l'app retombe sur l'enregistrement de Myriam, qui est juste.
-   ⚠️ Ce n'est PAS une liste à tenir à la main : chaque entrée doit citer le retour qui l'a
-   créée, et disparaître le jour où une prise neuve arrive SOUS UN NOM NEUF. */
-const MOTS_SANS_IA={'أَمَانٌ':'Myriam 14/08 — la prise Habibah dit « anāmun »'};
-/* ⚠️ 17/08 — UNE LISTE DE SES PRISES A EXISTÉ ICI, ET ELLE ÉTAIT FAUSSE. Elle était
-   dérivée de `audios-app-alaq/_remplaces/` et manquait alif et waw — enregistrés le 07/08,
-   AVANT que ce dossier existe. Myriam les entendait donc encore en voix IA. Remplacée par
-   une règle d'ORDRE dans `jouerMot`/`jouerSyl`/`sayLetterName` : SA prise (nom plat) d'abord,
-   la variante de voix en repli. Une règle d'ordre ne peut pas avoir de trou ; une liste,
-   toujours. NE PAS réintroduire de liste ici. */
-function jouerMot(ar,fin,el){ // un MOT enregistré : voix choisie (-f/-h) d'abord, l'enregistrement historique ensuite, synthèse en dernier
-  stopAudio();
-  spkOff(); spkOn(el);
-  var gen=_sndGen, fini=false;
-  var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
-  var base=AUDIO[ar];
-  /* 17/08 — SA PRISE D'ABORD, l'IA en repli. La liste `PRISES_MYRIAM` que j'avais posée
-     est ABANDONNÉE : elle ratait alif et waw (enregistrés avant que `_remplaces` existe).
-     Une règle d'ordre n'a pas de trou ; une liste en a toujours un. */
-  var essais=base?(MOTS_SANS_IA[ar]?[base]:[base,base.replace(/\.mp3$/,'-'+VOIX_G+'.mp3')]):[];
-  var tente=function(i){
-    if(gen!==_sndGen)return;
-    if(i>=essais.length){ try{_speakSynth(ar);}catch(_){ } setTimeout(termine,900); return; }
-    var a=audioBeni(essais[i]); _curAudio=a; var ok=false, passe=false;
-    var suivant=function(){ if(ok||passe||gen!==_sndGen)return; passe=true; tente(i+1); }; // verrou : 'error' ET p.catch tombent tous les deux sur un 404
-    a.addEventListener('playing',function(){ok=true;},{once:true});
-    a.onended=termine;
-    a.onerror=suivant;
-    var p=a.play(); if(p&&p.catch)p.catch(suivant);
-    setTimeout(function(){ if(!ok&&gen===_sndGen&&a.paused&&a.readyState===0)suivant(); },1400);
-  };
-  tente(0);
-  setTimeout(termine,6000);  // filet : le rappel finit toujours par venir (CONTINUER ne reste jamais gris)
-}
-function sayLetterName(L,fin,el){
-  var _sb=sylBase(L);
-  if(_sb)return jouerSyl(_sb,L,fin,el);   // une syllabe : son enregistrement, jamais un nom de lettre
-  if(typeof L==='string'&&L.length>3&&AUDIO[L])return jouerMot(L,fin,el); // un MOT connu : son enregistrement, jamais un nom de lettre (options/séquences des quiz de mots)
-  stopAudio();
-  spkOff(); // stopAudio n'éteint PAS les haut-parleurs : sans ça, deux boxes brillent quand on interrompt la séquence
-  spkOn(el);
-  var gen=_sndGen;
-  var fini=false;
-  var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(fin)fin(); };
-  var tr=LTRANS[letterKey(L)]; if(!tr){ speak(L); setTimeout(termine,900); return; }
-  try{
-    /* ═══ 🔴 17/08 — « VIRE MOI LES SONS DE L'IA ! » (Myriam) ═══════════════════════════
-       Elle entendait encore l'IA sur alif et waw dans l'alphabet, alors qu'elle a TOUT
-       réenregistré. La cause : l'app essayait `-VOIX_G` (la prise IA) EN PREMIER, et la
-       variante IA existe toujours EN PRODUCTION — le déploiement copie le dossier audio,
-       et une copie n'efface pas ce qu'on a retiré en local. Mesuré : 65 de ses 210 prises
-       étaient masquées, dont les 23 noms de lettres.
-       ⚠️ J'avais d'abord posé une LISTE des fichiers qu'elle a remplacés. Elle avait un
-       TROU : alif et waw, enregistrés le 07/08, AVANT que le dossier `_remplaces` existe —
-       donc absents de la liste, donc encore masqués. **Toute liste aura un trou.**
-       LA RÈGLE, sans liste : SA PRISE D'ABORD (nom plat), l'IA seulement si son fichier
-       manque. Là où seul le `-f` existe, rien ne change : le nom plat rend 404 et on
-       retombe dessus. Et le jour où elle enregistre un son de plus, il est pris SANS que
-       personne ait à penser à une liste. */
-    var a=(_LNg===VOIX_G&&_LN[tr])||new Audio('audios-app-alaq/lettre-'+tr+'-nom.mp3');
-    try{ a.currentTime=0; }catch(_){}
-    _curAudio=a; var settled=false;
-    /* 17/08 — L'ORDRE EST INVERSÉ (voir le pavé ci-dessus). Le premier essai est SA prise ;
-       ce repli tente la variante de voix, et la synthèse ne vient qu'en tout dernier. */
-    var essaiIA=false;
-    var fb=function(){
-      if(settled||gen!==_sndGen)return;
-      if(!essaiIA){ essaiIA=true;
-        try{ var b=new Audio('audios-app-alaq/lettre-'+tr+'-nom-'+VOIX_G+'.mp3'); _curAudio=b;
-          b.onplaying=function(){settled=true;}; b.onended=termine;
-          b.onerror=function(){ if(!settled&&gen===_sndGen){settled=true;try{_speakSynth(L);}catch(_){ }} };
-          var q=b.play(); if(q&&q.catch)q.catch(function(){ if(!settled&&gen===_sndGen){settled=true;try{_speakSynth(L);}catch(_){ }} });
-          setTimeout(function(){ if(!settled&&gen===_sndGen&&b.paused){settled=true;try{_speakSynth(L);}catch(_){ }} },1100);
-          return;
-        }catch(_){ }
-      }
-      settled=true; try{_speakSynth(L);}catch(_){ }
-    }; // Majed dit le nom de la lettre (plus la translit en voix française)
-    a.onplaying=function(){settled=true;};  // on* et pas addEventListener : l'élément préchargé est RÉUTILISÉ à chaque toucher
-    a.onerror=fb;
-    a.onended=termine;
-    var p=a.play(); if(p&&p.catch)p.catch(fb);
-    setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
-    setTimeout(termine,2200);                       // filet : le rappel finit toujours par venir
-  }catch(e){ try{_speakSynth(tr);}catch(_){ } setTimeout(termine,900); }
-}
+   hub Réviser, qui sont classiques et les résolvent à l'appel sur window.
+   Le SON est parti à son tour le 15/09 au soir, dans son.js — table et porte — avec
+   comboBonneReponse. L'ÉTAT du joueur (QUEUE, qi, curU…) reste ICI, en `let` classiques.
+   ⚠️ RESTENT ICI AUSSI, et c'est facile à confondre : renderMatch, renderVt, renderVw et
+   renderSt — ils ressemblent à des gabarits, mais ils lisent l'état de trop près. ═══ */
+/* ═══ jouerMot et sayLetterName vivent dans son.js (15/09/2026) : ce sont devenus des
+   raccourcis d'une ligne vers `jouer()`. MOTS_SANS_IA est parti avec la deuxième voix —
+   sans variante -f à écarter, il n'avait plus d'objet. ═══ */
+
 
 /* ══════════════ LEÇON 2 v2 (08/08) — bulles, haut-parleur, icônes ══════════════ */
 
@@ -1979,60 +1802,9 @@ function sayLetterName(L,fin,el){
 const ICO_DEMO='<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.5"/><path class="plein" d="M12.5 9.5v13l10.5-6.5z"/></svg>';
 const ICO_RECO='<svg viewBox="0 0 32 32"><path d="M26 16a10 10 0 11-3.4-7.5"/><path d="M26 4.5V11h-6.5"/></svg>';
 
-/* Le haut-parleur dessiné. Les trois ondes s'animent en cascade tant que le son joue. */
-function spkSVG(cls){
-  return '<svg class="spk'+(cls?' '+cls:'')+'" viewBox="0 0 52 34" aria-hidden="true">'+
-    '<path class="cone" d="M5 12.5h7l9-7.5a1.6 1.6 0 012.6 1.2v21.6a1.6 1.6 0 01-2.6 1.2l-9-7.5H5a2 2 0 01-2-2v-5a2 2 0 012-2z"/>'+
-    '<path class="w w1" d="M30 12.5a7 7 0 010 9"/>'+
-    '<path class="w w2" d="M35.5 8a13 13 0 010 18"/>'+
-    '<path class="w w3" d="M41 3.5a19 19 0 010 27"/></svg>';
-}
-function spkOn(el){
-  if(!el)return;
-  el.classList.add('on');
-  var s=el.querySelector('.spk'); if(s)s.classList.add('on');
-}
-function spkOff(){
-  /* ⚠️ 17/08 — `.wspk` AJOUTÉ. Sans lui, le haut-parleur d'une ligne de vocabulaire
-     s'allumait et ne s'éteignait plus jamais : spkOn() pose `on` sur l'élément ET sur son
-     `.spk`, mais spkOff() ne balayait que trois classes. Toute nouvelle sorte de bouton
-     sonore DOIT rejoindre cette liste. */
-  var l=document.querySelectorAll('.spk.on,.spkbtn.on,.opt.on,.wspk.on');
-  for(var i=0;i<l.length;i++)l[i].classList.remove('on');
-}
-function spkRejouer(L){ sayLetterName(L,null,document.getElementById('spkBig')); }
-/* Le même haut-parleur dessiné, pour un son de la carte AUDIO (mot, nom d'Allah, syllabe) —
-   le ROUTAGE ne change pas (speak garde son repli synthèse), seules les ondes s'animent.
-   ⚠️ On allume APRÈS avoir lancé le son : speak() commence par stopAudio() → spkOff(),
-   qui éteindrait la box qu'on vient d'allumer (piège gravé le 10/08). */
-/* `el` (17/08) : le haut-parleur À ALLUMER. Omis, c'est le gros bouton des leçons, comme
-   avant — tous les appels existants sont donc inchangés. La liste du vocabulaire, elle, a
-   un haut-parleur PAR LIGNE et lui passe le sien. */
-function spkAudio(t,el){
-  el=el||document.getElementById('spkBig');
-  /* Aiguillage IDENTIQUE à celui des options sonores : une syllabe ou un mot enregistré
-     passe par sayLetterName (essai `-VOIX_G` puis fichier plat) — la révision du vocabulaire
-     jouait sinon le fichier historique pendant que la leçon jouait la voix choisie.
-     ⚠️ On ne laisse JAMAIS sayLetterName deviner : sans entrée dans AUDIO il retomberait sur
-     le NOM d'une lettre (le hamza d'un Nom d'Allah, par exemple). D'où le garde explicite. */
-  if(sylBase(t)||(typeof t==='string'&&t.length>3&&AUDIO[t])){ sayLetterName(t,null,el); return; }
-  speak(t);                                   // repli : fichier de la carte AUDIO, puis synthèse
-  if(!el)return;
-  spkOn(el);                                  // ⚠️ APRÈS le son : speak() commence par spkOff()
-  var a=_curAudio, gen=_sndGen;
-  var off=function(){ if(gen!==_sndGen)return; spkOff(); };
-  if(a)a.addEventListener('ended',off,{once:true});
-  setTimeout(off,2600);                       // filet : la synthèse ne prévient pas de sa fin
-}
-/* Les 3 haut-parleurs sonnent l'un après l'autre. La grille est en `direction:rtl`,
-   donc l'option 0 est celle de DROITE : la séquence suit le sens de l'arabe. */
-function spkSequence(st,k){
-  if(QUEUE[qi]!==st||answered)return;
-  if(!st.options||k>=st.options.length)return;
-  var o=st.options[k];
-  sayLetterName(o.snd,function(){ setTimeout(function(){ spkSequence(st,k+1); },260); },
-                document.getElementById('sopt'+k));
-}
+/* ═══ le haut-parleur dessiné (spkSVG, spkOn, spkOff) et ses trois appels nommés
+   (spkRejouer, spkAudio, spkSequence) vit dans son.js (15/09/2026). ═══ */
+
 
 /* La carte d'une lettre nouvelle : le bouton s'allume quand le NOM est fini de sonner. */
 function lettreTap(el,L){
@@ -2239,33 +2011,8 @@ function bulPop(b){
    de voyelle (et de hamza). Lui faire dire quelque chose enseigne une fausseté à une
    primo-lectrice. Il se TAIT donc, et son NOM (الِفْ) reste disponible, lui.
    ⚠️ `letterKey` normalise toute la famille (ا أ إ آ ٱ) : une seule entrée suffit. */
-var SANS_SON={ 'alif':'Myriam 17/08 — un alif nu n\'a pas de son, il porte la voyelle' };
-function aUnSon(L){ var tr=LTRANS[letterKey(L)]; return !!tr && !SANS_SON[tr]; }
-/* `fin` (17/08) : rappelé quand CE son est fini — indispensable depuis que la fin du tracé
-   joue le SON et non plus le nom, sinon CONTINUER resterait gris (piège gravé le 09/08 :
-   allumer le bouton après le son passe TOUJOURS par un rappel de fin). */
-function sayLetterSound(L,fin){
-  stopAudio();
-  var gen=_sndGen;
-  var fini=false;
-  var termine=function(){ if(fini||gen!==_sndGen)return; fini=true; if(fin)fin(); };
-  var tr=LTRANS[letterKey(L)];
-  if(!tr){ speak(L); setTimeout(termine,900); return; }
-  /* ⚠️ PAS DE REPLI SYNTHÈSE ICI (17/08). Une lettre NUE lue par un synthétiseur produit
-     exactement le « son bizarre » signalé : le moteur complète en syllabe (« ab » pour le
-     alif). Un son absent devient un SILENCE — même doctrine que l'unité 8. */
-  if(SANS_SON[tr]){ setTimeout(termine,120); return; }
-  try{
-    var a=new Audio('audios-app-alaq/lettre-'+tr+'-son.mp3'); _curAudio=a; var settled=false;
-    var fb=function(){ if(settled||gen!==_sndGen)return; settled=true; termine(); };
-    a.onended=termine;
-    a.addEventListener('playing',function(){settled=true;},{once:true});
-    a.addEventListener('error',fb,{once:true});
-    var p=a.play(); if(p&&p.catch)p.catch(fb);
-    setTimeout(function(){ if(!settled&&gen===_sndGen&&a.paused) fb(); },1100);
-    setTimeout(termine,2600);   // filet : le rappel finit toujours par venir
-  }catch(e){ termine(); }
-}
+/* ═══ SANS_SON, aUnSon et sayLetterSound vivent dans son.js (15/09/2026). ═══ */
+
 /* ===== Réviser « Les lettres » : la grille des 28, sélectionnable ===== */
 var LETSEL=new Set();
 /* Toucher un siège : il s'allume et il SONNE. La hamza seule dit son nom, les sièges
@@ -2511,287 +2258,13 @@ function letterGridHTML(){
    UNITS, curU, formGlyph, okBeep, sayLetterSound, objectifAtteint, objectifFilet,
    sayLetterName — tous définis ici. Cette liste est gardée par outils/verifier-trace-lettres.mjs. */
 
-/* audio */
-function expandShadda(t){
-  // consonne+chedda -> consonne+soukoun+consonne : double le son à l'oral
-  return t.replace(/([^\u064B-\u0652\u0670\s])([\u064B-\u0650\u0652\u0670]*)\u0651([\u064B-\u0652\u0670]*)/g,(_,b,pre,post)=>b+'\u0652'+b+pre+post);
-}
-// Audios enregistrés (à remplir plus tard, voix type al-ʿAfāsī).
-// Clé = token EXACT passé à speak() (lettre, syllabe, ou mot vocalisé).
-// Tant qu'une clé est absente/vide, speak() retombe sur la voix de synthèse.
-// Priorité d'enregistrement (sons mal rendus par l'IA) :
-//   hamza (coup de glotte) · chedda · diphtongue vs prolongation.
-const AUDIO={
-  /* Leçon « Lire des mots » v3 (11/08) — les 9 syllabes-signes de l'unité 1.
-     ⚠️ SYLLABES : JAMAIS PAR IA. Ces 9 fichiers sont à enregistrer par Myriam (studio) ;
-     en attendant, speak() retombe proprement sur la synthèse. Ils sont dans la carte AUDIO
-     pour que l'inventaire du studio les réclame tout seul (sons-des-lecons.js lit AUDIO). */
-  'أَمْ':'audios-app-alaq/am-soukoun.mp3',
-  'أَنْ':'audios-app-alaq/an-soukoun.mp3',
-  'أَلْ':'audios-app-alaq/al-soukoun.mp3',
-  'أَمَّ':'audios-app-alaq/am-chedda.mp3',
-  'أَنَّ':'audios-app-alaq/an-chedda.mp3',
-  'أَلَّ':'audios-app-alaq/al-chedda.mp3',
-  'أَمٌ':'audios-app-alaq/am-tanwin.mp3',
-  'أَنٌ':'audios-app-alaq/an-tanwin.mp3',
-  'أَلٌ':'audios-app-alaq/al-tanwin.mp3',
-  'نَمْلٌ':'audios-app-alaq/mot-naml.mp3',
-  'مَنٌّ':'audios-app-alaq/mot-mann.mp3',
-  'مَنَالٌ':'audios-app-alaq/mot-manal.mp3',
-  'مَالٌ':'audios-app-alaq/mot-mal.mp3',
-  'مَنَامٌ':'audios-app-alaq/mot-manam.mp3',
-  'نِيلٌ':'audios-app-alaq/mot-nil.mp3',
-  'نُونٌ':'audios-app-alaq/mot-noun.mp3',
-  'لِينٌ':'audios-app-alaq/mot-lin.mp3',
-  'لَمَّا':'audios-app-alaq/mot-lamma.mp3',
-  'يَوْمٌ':'audios-app-alaq/mot-yawm.mp3',
-  'لَيْلٌ':'audios-app-alaq/mot-layl.mp3',
-  'لَوْنٌ':'audios-app-alaq/mot-lawn.mp3',
-  'لَوْمٌ':'audios-app-alaq/mot-lawm.mp3',
-  'أَلِيمٌ':'audios-app-alaq/mot-alim.mp3',
-  'إِيمَانٌ':'audios-app-alaq/mot-iman.mp3',
-  'أُمٌّ':'audios-app-alaq/mot-umm.mp3',
-  'أَمِينٌ':'audios-app-alaq/mot-amin.mp3',
-  'يَمِينٌ':'audios-app-alaq/mot-yamin.mp3',
-  'أَمَانٌ':'audios-app-alaq/mot-aman.mp3',
-  /* Les deux mots du jeu de tri de la leçon 3 (14/08). Prises Habibah, générées à la
-     demande de Myriam ; noms NEUFS, donc aucun risque de cache. */
-  'إِمَامٌ':'audios-app-alaq/mot-imam.mp3',
-  'إِلَيْنَا':'audios-app-alaq/mot-ilayna.mp3',
-  'مَمْنُونٌ':'audios-app-alaq/mot-mamnoun.mp3',
-  'يَ':'audios-app-alaq/ya-fatha-son-court.mp3',
-  'إِي':'audios-app-alaq/alif-ya-son-prolonge.mp3',
-  'وَ':'audios-app-alaq/waw-fatha-son-court.mp3',
-  'أُو':'audios-app-alaq/alif-waw-son-prolonge.mp3',
-  'أَا':'audios-app-alaq/alif-alif-son-prolonge.mp3',
-  'نِي':'audios-app-alaq/noun-ya-son-prolonge.mp3',
-  'مَا':'audios-app-alaq/mim-alif-son-prolonge.mp3',
-  'لُو':'audios-app-alaq/lam-waw-son-prolonge.mp3',
-  'يَا':'audios-app-alaq/ya-alif-son-prolonge.mp3',
-  'يِي':'audios-app-alaq/ya-ya-son-prolonge.mp3',
-  'يُو':'audios-app-alaq/ya-waw-son-prolonge.mp3',
-  'وَا':'audios-app-alaq/waw-alif-son-prolonge.mp3',
-  'وِي':'audios-app-alaq/waw-ya-son-prolonge.mp3',
-  'وُو':'audios-app-alaq/waw-waw-son-prolonge.mp3',
-  'أَ':'audios-app-alaq/alif-fatha-son-court.mp3',
-  'إِ':'audios-app-alaq/alif-kasra-son-court.mp3',
-  'أُ':'audios-app-alaq/alif-damma-son-court.mp3',
-  'م':'audios-app-alaq/lettre-mim-nom.mp3',
-  'ل':'audios-app-alaq/lettre-lam-nom.mp3',
-  'ن':'audios-app-alaq/lettre-nun-nom.mp3',
-  'ي':'audios-app-alaq/lettre-ya-nom.mp3',
-  'أ':'audios-app-alaq/lettre-alif-nom.mp3',
-  'و':'audios-app-alaq/lettre-waw-nom.mp3',
-  'ء':'audios-app-alaq/lettre-hamza-nom.mp3',
-  'ب':'audios-app-alaq/lettre-ba-nom.mp3',
-  'ر':'audios-app-alaq/lettre-ra-nom.mp3',
-  'ع':'audios-app-alaq/lettre-ayn-nom.mp3',
-  'رَبٌّ':'audios-app-alaq/mot-rabb.mp3',
-  'عَرَبِيٌّ':'audios-app-alaq/mot-arabi.mp3',
-  'عَيْنٌ':'audios-app-alaq/mot-ayn.mp3',
-  'لَبَنٌ':'audios-app-alaq/mot-laban.mp3',
-  'بَابٌ':'audios-app-alaq/mot-bab.mp3',
-  'نَبِيٌّ':'audios-app-alaq/mot-nabi.mp3',
-  'عَمَلٌ':'audios-app-alaq/mot-amal.mp3',
-  'عَالَمٌ':'audios-app-alaq/mot-alam.mp3',
-  'عَالَمُونَ':'audios-app-alaq/mot-alamoun.mp3',
-  'عَالِمٌ':'audios-app-alaq/mot-aalim.mp3',
-  'عُلَمَاءُ':'audios-app-alaq/mot-oulama.mp3',
-  'أَمْرٌ':'audios-app-alaq/mot-amr.mp3',
-  'رَبِيعٌ':'audios-app-alaq/mot-rabi.mp3',
-  'عُمْرٌ':'audios-app-alaq/mot-umr.mp3',
-  'بَ':'audios-app-alaq/ba-fatha-son-court.mp3',
-  'بِ':'audios-app-alaq/ba-kasra-son-court.mp3',
-  'بُ':'audios-app-alaq/ba-damma-son-court.mp3',
-  'رَ':'audios-app-alaq/ra-fatha-son-court.mp3',
-  'رِ':'audios-app-alaq/ra-kasra-son-court.mp3',
-  'رُ':'audios-app-alaq/ra-damma-son-court.mp3',
-  'عَ':'audios-app-alaq/ain-fatha-son-court.mp3',
-  'عِ':'audios-app-alaq/ain-kasra-son-court.mp3',
-  'عُ':'audios-app-alaq/ain-damma-son-court.mp3',
-  'بَا':'audios-app-alaq/ba-alif-son-prolonge.mp3',
-  'بِي':'audios-app-alaq/ba-ya-son-prolonge.mp3',
-  'بُو':'audios-app-alaq/ba-waw-son-prolonge.mp3',
-  'رَا':'audios-app-alaq/ra-alif-son-prolonge.mp3',
-  'رِي':'audios-app-alaq/ra-ya-son-prolonge.mp3',
-  'رُو':'audios-app-alaq/ra-waw-son-prolonge.mp3',
-  'عَا':'audios-app-alaq/ain-alif-son-prolonge.mp3',
-  'عِي':'audios-app-alaq/ain-ya-son-prolonge.mp3',
-  'عُو':'audios-app-alaq/ain-waw-son-prolonge.mp3',
-  'مَ':'audios-app-alaq/mim-fatha-son-court.mp3',
-  'مِ':'audios-app-alaq/mim-kasra-son-court.mp3',
-  'مُ':'audios-app-alaq/mim-damma-son-court.mp3',
-  'لَ':'audios-app-alaq/lam-fatha-son-court.mp3',
-  'لِ':'audios-app-alaq/lam-kasra-son-court.mp3',
-  'لُ':'audios-app-alaq/lam-damma-son-court.mp3',
-  'نَ':'audios-app-alaq/noun-fatha-son-court.mp3',
-  'نِ':'audios-app-alaq/noun-kasra-son-court.mp3',
-  'نُ':'audios-app-alaq/noun-damma-son-court.mp3',
-  'مِي':'audios-app-alaq/mim-ya-son-prolonge.mp3',
-  'مُو':'audios-app-alaq/mim-waw-son-prolonge.mp3',
-  'لَا':'audios-app-alaq/lam-alif-son-prolonge.mp3',
-  'لِي':'audios-app-alaq/lam-ya-son-prolonge.mp3',
-  'نَا':'audios-app-alaq/noun-alif-son-prolonge.mp3',
-  'نُو':'audios-app-alaq/noun-waw-son-prolonge.mp3',
-  'ا':'audios-app-alaq/lettre-alif-nom.mp3',
-  'a':'audios-app-alaq/voyelle-a.mp3',
-  'i':'audios-app-alaq/voyelle-i.mp3',
-  'ou':'audios-app-alaq/voyelle-ou.mp3',
-  'مَدْرَسَةٌ':'audios-app-alaq/mot-madrasatoun.mp3',
-  'يِ':'audios-app-alaq/ya-kasra-son-court.mp3',
-  'يُ':'audios-app-alaq/ya-damma-son-court.mp3',
-  'وِ':'audios-app-alaq/waw-kasra-son-court.mp3',
-  'وُ':'audios-app-alaq/waw-damma-son-court.mp3',
-  'أِ':'audios-app-alaq/alif-kasra-son-court.mp3',
-  'أِي':'audios-app-alaq/alif-ya-son-prolonge.mp3',
-  'س':'audios-app-alaq/lettre-sin-nom.mp3',
-  'د':'audios-app-alaq/lettre-dal-nom.mp3',
-  'ك':'audios-app-alaq/lettre-kaf-nom.mp3',
-  'ذ':'audios-app-alaq/lettre-dhal-nom.mp3',
-  'ز':'audios-app-alaq/lettre-zay-nom.mp3',
-  'سَ':'audios-app-alaq/sin-fatha-son-court.mp3',
-  'سِ':'audios-app-alaq/sin-kasra-son-court.mp3',
-  'سُ':'audios-app-alaq/sin-damma-son-court.mp3',
-  'دَ':'audios-app-alaq/dal-fatha-son-court.mp3',
-  'دِ':'audios-app-alaq/dal-kasra-son-court.mp3',
-  'دُ':'audios-app-alaq/dal-damma-son-court.mp3',
-  'كَ':'audios-app-alaq/kaf-fatha-son-court.mp3',
-  'كِ':'audios-app-alaq/kaf-kasra-son-court.mp3',
-  'كُ':'audios-app-alaq/kaf-damma-son-court.mp3',
-  'سَا':'audios-app-alaq/sin-alif-son-prolonge.mp3',
-  'سِي':'audios-app-alaq/sin-ya-son-prolonge.mp3',
-  'سُو':'audios-app-alaq/sin-waw-son-prolonge.mp3',
-  'دَا':'audios-app-alaq/dal-alif-son-prolonge.mp3',
-  'دِي':'audios-app-alaq/dal-ya-son-prolonge.mp3',
-  'دُو':'audios-app-alaq/dal-waw-son-prolonge.mp3',
-  'كَا':'audios-app-alaq/kaf-alif-son-prolonge.mp3',
-  'كِي':'audios-app-alaq/kaf-ya-son-prolonge.mp3',
-  'كُو':'audios-app-alaq/kaf-waw-son-prolonge.mp3',
-  'دَرْسٌ':'audios-app-alaq/mot-dars.mp3',
-  'كَرِيمٌ':'audios-app-alaq/mot-karim.mp3',
-  'دِينٌ':'audios-app-alaq/mot-din.mp3',
-  'إِيَّاكَ':'audios-app-alaq/mot-iyyaka.mp3',
-  'نَعْبُدُ':'audios-app-alaq/mot-naabudu.mp3',
-  'النَّاسُ':'audios-app-alaq/mot-annas.mp3',
-  'مَالِكٌ':'audios-app-alaq/mot-maalik.mp3',
-  'مَلِكٌ':'audios-app-alaq/mot-malik.mp3',
-  'كَسَبَ':'audios-app-alaq/mot-kasaba.mp3',
-  'بِسْمِ':'audios-app-alaq/mot-bismi.mp3',
-  'ح':'audios-app-alaq/lettre-hha-nom.mp3',
-  'ط':'audios-app-alaq/lettre-tta-nom.mp3',
-  'ق':'audios-app-alaq/lettre-qaf-nom.mp3',
-  'ت':'audios-app-alaq/lettre-ta-nom.mp3',
-  'ص':'audios-app-alaq/lettre-sad-nom.mp3',
-  'غ':'audios-app-alaq/lettre-ghayn-nom.mp3',
-  'ه':'audios-app-alaq/lettre-ha-nom.mp3',
-  'ض':'audios-app-alaq/lettre-dad-nom.mp3',
-  'حَ':'audios-app-alaq/hha-fatha-son-court.mp3',
-  'حِ':'audios-app-alaq/hha-kasra-son-court.mp3',
-  'حُ':'audios-app-alaq/hha-damma-son-court.mp3',
-  'حَا':'audios-app-alaq/hha-alif-son-prolonge.mp3',
-  'حِي':'audios-app-alaq/hha-ya-son-prolonge.mp3',
-  'حُو':'audios-app-alaq/hha-waw-son-prolonge.mp3',
-  'طَ':'audios-app-alaq/tta-fatha-son-court.mp3',
-  'طِ':'audios-app-alaq/tta-kasra-son-court.mp3',
-  'طُ':'audios-app-alaq/tta-damma-son-court.mp3',
-  'طَا':'audios-app-alaq/tta-alif-son-prolonge.mp3',
-  'طِي':'audios-app-alaq/tta-ya-son-prolonge.mp3',
-  'طُو':'audios-app-alaq/tta-waw-son-prolonge.mp3',
-  'قَ':'audios-app-alaq/qaf-fatha-son-court.mp3',
-  'قِ':'audios-app-alaq/qaf-kasra-son-court.mp3',
-  'قُ':'audios-app-alaq/qaf-damma-son-court.mp3',
-  'قَا':'audios-app-alaq/qaf-alif-son-prolonge.mp3',
-  'قِي':'audios-app-alaq/qaf-ya-son-prolonge.mp3',
-  'قُو':'audios-app-alaq/qaf-waw-son-prolonge.mp3',
-  'تَ':'audios-app-alaq/ta-fatha-son-court.mp3',
-  'تِ':'audios-app-alaq/ta-kasra-son-court.mp3',
-  'تُ':'audios-app-alaq/ta-damma-son-court.mp3',
-  'تَا':'audios-app-alaq/ta-alif-son-prolonge.mp3',
-  'تِي':'audios-app-alaq/ta-ya-son-prolonge.mp3',
-  'تُو':'audios-app-alaq/ta-waw-son-prolonge.mp3',
-  'صَ':'audios-app-alaq/sad-fatha-son-court.mp3',
-  'صِ':'audios-app-alaq/sad-kasra-son-court.mp3',
-  'صُ':'audios-app-alaq/sad-damma-son-court.mp3',
-  'صَا':'audios-app-alaq/sad-alif-son-prolonge.mp3',
-  'صِي':'audios-app-alaq/sad-ya-son-prolonge.mp3',
-  'صُو':'audios-app-alaq/sad-waw-son-prolonge.mp3',
-  'غَ':'audios-app-alaq/ghayn-fatha-son-court.mp3',
-  'غِ':'audios-app-alaq/ghayn-kasra-son-court.mp3',
-  'غُ':'audios-app-alaq/ghayn-damma-son-court.mp3',
-  'غَا':'audios-app-alaq/ghayn-alif-son-prolonge.mp3',
-  'غِي':'audios-app-alaq/ghayn-ya-son-prolonge.mp3',
-  'غُو':'audios-app-alaq/ghayn-waw-son-prolonge.mp3',
-  'هَ':'audios-app-alaq/ha-fatha-son-court.mp3',
-  'هِ':'audios-app-alaq/ha-kasra-son-court.mp3',
-  'هُ':'audios-app-alaq/ha-damma-son-court.mp3',
-  'هَا':'audios-app-alaq/ha-alif-son-prolonge.mp3',
-  'هِي':'audios-app-alaq/ha-ya-son-prolonge.mp3',
-  'هُو':'audios-app-alaq/ha-waw-son-prolonge.mp3',
-  'ذَ':'audios-app-alaq/dhal-fatha-son-court.mp3',
-  'ذِ':'audios-app-alaq/dhal-kasra-son-court.mp3',
-  'ذُ':'audios-app-alaq/dhal-damma-son-court.mp3',
-  'ذَا':'audios-app-alaq/dhal-alif-son-prolonge.mp3',
-  'ذِي':'audios-app-alaq/dhal-ya-son-prolonge.mp3',
-  'ذُو':'audios-app-alaq/dhal-waw-son-prolonge.mp3',
-  'ضَ':'audios-app-alaq/dad-fatha-son-court.mp3',
-  'ضِ':'audios-app-alaq/dad-kasra-son-court.mp3',
-  'ضُ':'audios-app-alaq/dad-damma-son-court.mp3',
-  'ضَا':'audios-app-alaq/dad-alif-son-prolonge.mp3',
-  'ضِي':'audios-app-alaq/dad-ya-son-prolonge.mp3',
-  'ضُو':'audios-app-alaq/dad-waw-son-prolonge.mp3',
-  'الْحَمْدُ':'audios-app-alaq/mot-alhamdu.mp3',
-  'الرَّحْمَٰنُ':'audios-app-alaq/mot-arrahman.mp3',
-  'الرَّحِيمُ':'audios-app-alaq/mot-arrahim.mp3',
-  'قُلْ':'audios-app-alaq/mot-qul.mp3',
-  'أَحَدٌ':'audios-app-alaq/mot-ahad.mp3',
-  'حَاسِدٌ':'audios-app-alaq/mot-hasid.mp3',
-  'عُقَدٌ':'audios-app-alaq/mot-uqad.mp3',
-  'وَقَبَ':'audios-app-alaq/mot-waqaba.mp3',
-  'طَرِيقٌ':'audios-app-alaq/mot-tariq.mp3',
-  'حَطَبٌ':'audios-app-alaq/mot-hatab.mp3',
-  'صِرَاطٌ':'audios-app-alaq/mot-sirat.mp3',
-  'مُسْتَقِيمٌ':'audios-app-alaq/mot-mustaqim.mp3',
-  'نَسْتَعِينُ':'audios-app-alaq/mot-nastain.mp3',
-  'أَنْعَمْتَ':'audios-app-alaq/mot-anamta.mp3',
-  'غَيْر':'audios-app-alaq/mot-ghayr.mp3',
-  'الصَّمَدُ':'audios-app-alaq/mot-assamad.mp3',
-  'صُدُورٌ':'audios-app-alaq/mot-sudur.mp3',
-  'غَاسِقٌ':'audios-app-alaq/mot-ghasiq.mp3',
-  'صَبْرٌ':'audios-app-alaq/mot-sabr.mp3',
-  'غَيْبٌ':'audios-app-alaq/mot-ghayb.mp3',
-  'تَبَّ':'audios-app-alaq/mot-tabba.mp3',
-  'اللَّهُ':'audios-app-alaq/mot-allah.mp3',
-  'اهْدِنَا':'audios-app-alaq/mot-ihdina.mp3',
-  'الَّذِينَ':'audios-app-alaq/mot-alladhina.mp3',
-  'عَلَيْهِمْ':'audios-app-alaq/mot-alayhim.mp3',
-  'الْمَغْضُوبُ':'audios-app-alaq/mot-almaghdoubou.mp3',   // NOM NEUF (11/08) : les prises mot-almaghdub(-f) disent la kasra du verset, plus la ḍamma de la forme de citation
-  'الضَّالُّونَ':'audios-app-alaq/mot-addalloun.mp3',   // NOM NEUF (11/08) : forme de citation au marfūʿ, la prise mot-addallin dit la finale du verset
-  'هُوَ':'audios-app-alaq/mot-huwa.mp3',
-  'أَعُوذُ':'audios-app-alaq/mot-audhu.mp3',
-  'إِلَٰهٌ':'audios-app-alaq/mot-ilah.mp3',
-  'إِذَا':'audios-app-alaq/mot-idha.mp3',
-  'ذَهَبَ':'audios-app-alaq/mot-dhahaba.mp3',
-  /* ── LE VOCABULAIRE DE L'UNITÉ 9 (04/09) ────────────────────────────────
-     speak() lit CETTE carte, directement : `const url=AUDIO[t]; if(!url){ _speakSynth(t); }`.
-     Sans ces lignes, les trois écrans de la révision (association, vrai/faux,
-     écriture) prononceraient ces mots à la voix de SYNTHÈSE alors que les prises
-     de Myriam sont sur le disque et au pré-cache. C'est le geste que l'unité 8
-     fait déjà pour ses 14 mots (l.3246). Les 7 fichiers sont vérifiés présents.
-     ⚠️ بِ et لِ NE SONT PAS ICI, ET C'EST VOULU : ils sont déjà des clés de cette
-     carte, plus haut, liées aux syllabes ba-kasra / lam-kasra des leçons
-     d'alphabet — qui disent « bi » et « li », donc exactement le harf. Les
-     re-pointer vers mot-bi.mp3 / mot-li.mp3 changerait le son des leçons 5-6 de
-     l'unité 3 pour ne rien gagner à l'oreille. عَلَى, lui, n'y était pas : sans
-     sa ligne il aurait été le SEUL des trois harf en voix de synthèse, et dans
-     un QCM qui oppose les trois, le timbre aurait désigné la réponse. */
-  'عَلَى':'audios-app-alaq/mot-ala.mp3',
-  'مَكْتَبٌ':'audios-app-alaq/mot-maktab.mp3',
-  'بِنْتٌ':'audios-app-alaq/mot-bint.mp3',
-  'وَلَدٌ':'audios-app-alaq/mot-walad.mp3',
-  'نَبَاتٌ':'audios-app-alaq/mot-nabat.mp3',
-  'الْمَاءُ':'audios-app-alaq/mot-almaa.mp3',
-  'التُّرَابُ':'audios-app-alaq/mot-atturab.mp3',
-};
+/* ═══ LA TABLE DES SONS vit dans son.js (15/09/2026), et elle s'appelle SONS. Sa valeur
+   est le nom NU du fichier (« mot-maktab »), plus jamais un chemin : la porte ajoute le
+   dossier et l'extension à un seul endroit. 151 de ses entrées ne sont plus écrites du
+   tout — trois règles les produisent, et il a été mesuré avant la bascule qu'elles
+   rendent EXACTEMENT ce que la carte disait, à zéro divergence.
+   Ce qui vient des DONNÉES entre toujours ici, juste en dessous, par `inscrireLeSon`.
+   `expandShadda` est parti avec la voix de synthèse : il ne servait qu'à elle. ═══ */
 
 /* ── LE SON DE CHAQUE MOT DES UNITÉS 1 À 7 (06/09/2026) ───────────────────
    🔴 IL VIENT DU PACKAGE, ET IL DOIT GAGNER SUR LA CARTE CI-DESSUS. Jusqu’ici
@@ -2802,7 +2275,7 @@ const AUDIO={
    entendent. Sans cette boucle, couper l’adoption ferait changer deux mots du
    Qorān de voix — en silence. Le `snd` de chaque mot porte la vérité. */
 UNITS.forEach(function(U){ (U.words||[]).forEach(function(w){
-  if (w && w.w && w.snd) AUDIO[w.w] = 'audios-app-alaq/' + w.snd + '.mp3';
+  if (w && w.w && w.snd) inscrireLeSon(w.w, w.snd);
 }); });
 
 /* ── LES SONS DE L'UNITÉ 8 DANS LA CARTE AUDIO ──────────────────────────────
@@ -2829,7 +2302,6 @@ function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) 
     const showProAfter=!card.classList.contains('flipped');
     card.classList.add('flipping');
     setTimeout(()=>{card.classList.toggle('flipped');card.classList.remove('flipping');},230);
-    warmVoices();
     const w=showProAfter?proWord:consWord;
     if(w)speak(w);
     const n=(parseInt(card.dataset.taps||'0',10))+1; card.dataset.taps=n;
@@ -2858,7 +2330,7 @@ function taprowTap(el,word){
 }
 function lvpHit(el,word){ // slides Lettres vs prolongations : rejoue l'anim + audio au tap
   try{ el.classList.remove('lit'); void el.offsetWidth; el.classList.add('lit'); }catch(e){}
-  warmVoices(); if(word) speak(word);
+  if(word) speak(word);
 }
 // Translittération arabe -> latin : utilisée comme repli quand AUCUNE voix arabe n'est
 // disponible (ex. aperçu sandboxé, iPhone sans voix arabe installée). Au moins audible.
@@ -2931,267 +2403,17 @@ function tachCalque(s){
   return '<span class="hkw"><span class="hkm">'+ech(s)+'</span>'+
          '<span class="hkb" aria-hidden="true">'+ech(nue)+'</span></span>';
 }
-/* Repli audio SANS voix arabe : on lit la romanisation PROPRE du mot (w.say) au lieu de
-   translittérer l'arabe vocalisé (qui donnait « samakoune »). Voix latine -> son compréhensible. */
-const WSAY={}; try{UNITS.forEach(function(U){(U.words||[]).forEach(function(w){if(w&&w.w&&w.say)WSAY[w.w]=w.say;});});}catch(e){}
-function ttsRom(x){ return (x||'').replace(/ā/g,'a').replace(/ī/g,'i').replace(/ū/g,'ou').replace(/[ʿʾ’\'`]/g,'').replace(/ḥ/g,'h').replace(/ṣ/g,'s').replace(/ṭ/g,'t').replace(/ḍ/g,'d').replace(/ẓ/g,'z').replace(/ā/g,'a').trim(); }
 
-/* ===== SYNTHÈSE — cœur réécrit à zéro le 12/07 (demande de Myriam : fin des règles de silence) =====
-   1. PLUS AUCUN SILENCE VOLONTAIRE : l'arabe est TOUJOURS lu — voix arabe (Majed…) en priorité,
-      sinon lang='ar-SA' et le système choisit. (La règle « silence plutôt que mauvaise voix » du
-      09/07 est ANNULÉE le 12/07.)
-   2. La synthèse part IMMÉDIATEMENT (plus de délai artificiel de 60 ms).
-   3. PATIENCE (12/07c — la loi de la v1) : Majed met ~2,3 s à DÉMARRER sur iPhone (mesuré au
-      test 9 du diagnostic). Toute relance rapprochée ANNULE la tentative en cours avant ce
-      démarrage : l'app s'étranglait elle-même (relances 700/1600/3200 ms supprimées).
-      → UNE prise de parole, puis UNE SEULE relance à 4 s (utterance neuve, sans objet voix).
-   4. cancel() SEULEMENT si le moteur parle : les cancel() à vide décalent WebKit (voir stopAudio). */
-function _speakSynth(t){ // lit t : voix arabe si texte arabe, française sinon — jamais de silence
-  if(!('speechSynthesis'in window))return;
-  try{
-    const gen=_sndGen;                            // annulé si un nouveau son démarre entre-temps
-    const hasAr=/[؀-ۿ]/.test(String(t));
-    const mk=(n)=>{                               // fabrique une utterance NEUVE à chaque tentative
-      let u;                                      // n>=2 : SANS objet voix (lang seule) — contourne une voix
-      if(hasAr){                                  // listée par iOS mais pas réellement installée/chargée (Majed froid)
-        u=new SpeechSynthesisUtterance(expandShadda(t));
-        const v=n<1?bestVoice('ar'):null;
-        if(v){ u.voice=v; u.lang=v.lang||'ar-SA'; } else { u.lang='ar-SA'; } // pas de voix arabe : le système route — on ne se tait plus
-        u.rate=.75;
-      }else{
-        u=new SpeechSynthesisUtterance(String(t));
-        const v=n<1?bestVoice('fr'):null;
-        if(v){ u.voice=v; u.lang=v.lang; } else { u.lang='fr-FR'; }
-        u.rate=.95;
-      }
-      u.volume=1;                                 // explicite : iOS peut hériter du volume d'une utterance précédente
-      u.onend=u.onerror=()=>{ if(_curUtter===u)_curUtter=null; };
-      return u;
-    };
-    let started=false,tries=0;
-    const fire=()=>{
-      if(started||gen!==_sndGen)return;
-      try{ if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel(); }catch(e){}
-      try{speechSynthesis.resume();}catch(e){}    // iOS : décoince un moteur resté « en pause »
-      const u=mk(tries++);
-      u.onstart=()=>{ started=true; };
-      _curUtter=u;                                // référence forte anti-GC (iOS avale les utterances orphelines)
-      try{speechSynthesis.speak(u);}catch(e){}
-      try{speechSynthesis.resume();}catch(e){}    // iOS : pousse la file si l'utterance a été mise en attente
-    };
-    const go=()=>{ fire(); setTimeout(fire,4000); }; // une parole, de la patience — voir loi n°3
-    if(!speechSynthesis.getVoices().length){      // voix pas encore chargées : on attend l'événement
-      let done=false; const once=()=>{ if(done)return; done=true; go(); };
-      try{speechSynthesis.addEventListener('voiceschanged',once,{once:true});}catch(e){}
-      setTimeout(once,350);
-    }else go();
-  }catch(e){}
-}
-let _curAudio=null,_curUtter=null,_sndGen=0; // _sndGen = jeton de génération : tout repli/minuterie d'un ancien son est annulé
-// _curUtter = référence FORTE sur l'utterance en cours : sans elle, le ramasse-miettes de Safari/iOS
-// peut détruire l'utterance AVANT qu'elle parle (silence total, ni onstart ni onerror). Bug WebKit connu.
-/* ===== La marque sonore (validée par Myriam le 05/08/2026) — trois étages =====
-   ① la SIGNATURE à chaque bonne réponse : sfx-bonne-reponse.mp3, le motif « Ṭalaʿa al-badr »
-      en trois frappes sur la seconde neutre du maqām Bayātī. Toujours le même : c'est la
-      répétition qui grave, comme le « ding » de Duolingo.
-   ② le COMBO toutes les COMBO_TOUS bonnes réponses D'AFFILÉE : un mot tiré d'un pool qui
-      tourne. Rare donc précieux, varié donc jamais lassant — et la récompense enseigne du
-      vocabulaire, ce qu'une app d'arabe peut faire et pas une app généraliste.
-   ③ la CLÔTURE en fin de leçon : confettis + sfx-fin-lecon.mp3 (voir finishDisque). */
-const COMBO_TOUS=3;
-const COMBO_POOL=['moumtaz','sahih','rai','allahumma-barik'];
-let comboSerie=0, comboDernier='';
-function comboReset(){ comboSerie=0; }
-function comboBonneReponse(){
-  playSfx('bonne-reponse');                       // la signature, toujours
-  if(++comboSerie<COMBO_TOUS)return;
-  comboSerie=0;
-  // jamais deux fois le même d'affilée : c'est la variété qui empêche la lassitude
-  const dispo=COMBO_POOL.filter(m=>m!==comboDernier);
-  comboDernier=dispo[Math.floor(Math.random()*dispo.length)];
-  const gen=_sndGen, f='audios-app-alaq/felicit-'+comboDernier+'-'+VOIX_G+'.mp3';
-  // 350 ms : la signature (les quartes de Myriam, 287 ms) finit, on enchaîne sans trou.
-  // Le jeton _sndGen est revérifié : changer d'écran entre-temps annule la félicitation.
-  setTimeout(function(){
-    if(gen!==_sndGen)return;
-    try{ const a=audioBeni(f); _curAudio=a;
-      const plat='audios-app-alaq/felicit-'+comboDernier+'.mp3';   // repli : sa voix, si elle l'enregistre
-      a.onerror=function(){ if(gen!==_sndGen)return; try{ const b=audioBeni(plat); _curAudio=b; const r=b.play(); if(r&&r.catch)r.catch(function(){}); }catch(_){ } };
-      const p=a.play(); if(p&&p.catch)p.catch(function(){ if(gen!==_sndGen)return; try{ const b=audioBeni(plat); _curAudio=b; const r=b.play(); if(r&&r.catch)r.catch(function(){}); }catch(_){ } });
-    }catch(e){}
-  },350);
-}
-/* — le pool d'éléments audio bénis (iOS, 07/08) — */
-const _POOL=[];let _poolI=0;
-/* ⚠️ Le 1er silence (v2b) était un base64 bricolé, INVALIDE : play() échouait, la
-   bénédiction ratait EN SILENCE et iOS continuait de bloquer la signature (vécu par
-   Myriam le soir même). Celui-ci est fabriqué octet par octet — 20 ms, 8 kHz. Et on
-   ne se déclare béni qu'après un play() RÉUSSI : sinon on réessaie au geste suivant. */
-const _SIL='data:audio/wav;base64,UklGRmQBAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
-function benirAudio(){
-  if(_POOL.length)return;
-  const cand=[];for(let i=0;i<4;i++)cand.push(new Audio(_SIL));
-  const fini=()=>{
-    if(_POOL.length)return;
-    cand.forEach(a=>{try{a.pause();}catch(e){}_POOL.push(a);});
-    ['touchend','pointerup','mousedown','click'].forEach(ev=>document.removeEventListener(ev,benirAudio,true));
-  };
-  const p=cand[0].play();
-  cand.slice(1).forEach(a=>{const q=a.play();if(q&&q.catch)q.catch(()=>{});});
-  if(p&&p.then)p.then(fini).catch(()=>{});else fini();
-}
-try{
-  ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,benirAudio,true));
-}catch(e){}
-/* 🔴 UN SEUL LECTEUR DE SECOURS, PAS UN NOUVEAU À CHAQUE FOIS (Myriam, 16/08 : « au
-   début j'ai eu les audios… puis ça s'est arrêté en cours de route » — un exercice
-   qui enchaîne 14 sons, exactement le nombre qui use la patience d'un tas d'<audio>
-   jamais libérés). Tant que le pool n'est pas béni, `new Audio(url)` en créait un
-   NEUF à chaque appel, sans jamais le détruire ni le réutiliser — une fuite muette
-   qui grossit à chaque son et peut finir par faire refuser les suivants. _SECOURS
-   suit exactement le geste des éléments du pool : on le met en pause, on efface ses
-   anciens écouteurs, on pose la nouvelle source — un seul élément, pour toujours. */
-let _secours=null;
-function audioBeni(url){ // un lecteur du pool si béni, le même lecteur de secours sinon (bureau)
-  if(!_POOL.length){
-    if(!_secours)_secours=new Audio();
-    try{_secours.pause();}catch(e){}
-    _secours.onended=null;_secours.onerror=null;_secours.muted=false;_secours.src=url;
-    return _secours;
-  }
-  /* 🔴 UN DEUXIÈME SON FAIT TAIRE LE PREMIER (Myriam, 28/08 : « quand je fais glisser
-     l'objet sur la maman avant que l'audio ne soit terminé, les deux audios se jouent
-     en même temps »). LA CAUSE EST ICI, pas dans l'exercice : le pool sert QUATRE
-     lecteurs à tour de rôle, et on ne mettait en pause que celui qu'on rendait — le
-     précédent, un autre élément du pool, continuait tranquillement de sonner. Un
-     exercice qui énonce sa phrase puis la répète à la réussite en superposait donc
-     jusqu'à quatre. On fait taire TOUT le pool (et le lecteur de secours) avant de
-     servir : la règle vaut pour tous les appelants, pas seulement pour le registre.
-     ⚠️ Le sfx récompense/erreur ne passe PAS par ici quand son tampon est décodé
-     (branche WebAudio de playSfx) — la superposition VOULUE du 17/08, « le mot finit
-     de sonner sous le ding », reste donc intacte. */
-  _POOL.forEach(function(p){try{p.pause();}catch(e){}});
-  try{if(_secours)_secours.pause();}catch(e){}
-  const a=_POOL[_poolI++%_POOL.length];
-  a.onended=null;a.onerror=null;a.muted=false;a.src=url;
-  return a;
-}
-/* — les sfx par WebAudio (07/08 soir) : décodés au 1er geste, un tampon décodé se joue
-   TOUJOURS, même déclenché hors geste (à la fin du nom de lettre) — exactement là où
-   iOS coupait la signature quand elle passait par un élément <audio> non béni. — */
-const _SFXB={};let _sfxCtx=null,_curSrc=null;
-function chargerSfx(){ // réveille le moteur à chaque geste, décode les 2 sons courts une seule fois
-  try{
-    _sfxCtx=_sfxCtx||new (window.AudioContext||window.webkitAudioContext)();
-    if(_sfxCtx.state!=='running')_sfxCtx.resume(); // iOS : couvre aussi l'état « interrupted »
-    ['bonne-reponse','erreur'].forEach(n=>{
-      if(_SFXB[n]||_SFXB['_'+n])return;
-      _SFXB['_'+n]=1; // verrou : un seul téléchargement par son
-      fetch('audios-app-alaq/sfx-'+n+'.mp3').then(r=>r.arrayBuffer())
-        /* ⚠️ decodeAudioData accepte DEUX rappels **et** rend une promesse. La nôtre
-           est bien rattrapée par le .catch du bas ; celle qu'il rend, elle, ne trouvait
-           personne — d'où un « EncodingError » en promesse non gérée à chaque décodage
-           qui échoue (visible dans les harnais et la console de l'élève). On la congédie
-           explicitement : elle ne nous apprend rien de plus que `rej`. */
-        .then(ab=>new Promise((res,rej)=>{const p=_sfxCtx.decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(()=>{});}))
-        .then(b=>{_SFXB[n]=b;}).catch(()=>{delete _SFXB['_'+n];});
-    });
-  }catch(e){}
-}
-try{
-  ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,chargerSfx,true));
-}catch(e){}
-/* ═══ 17/08 — « PARFOIS LE SON DU BOUTON CONTINUER DISPARAÎT » (Myriam) ═══════════════
-   Sur iOS, un AudioContext passé « interrupted » (appel, Siri, verrouillage, bascule
-   d'app) ne repart JAMAIS tout seul — resume() doit être rappelé. Tous les gardes du
-   fichier ne testaient que 'suspended' : ils rataient cet état WebKit hors standard, et
-   comme le tampon sfx est décodé, playSfx prenait toujours la branche WebAudio gelée —
-   le repli <audio> était inatteignable. D'où « je dois fermer l'application ».
-   `state!=='running'` couvre les deux états, et au retour au premier plan on réveille
-   TOUS les contextes du fichier d'un coup. */
-function reveilAudio(){
-  [window._ac,_sfxCtx,_tocCtx,chime._ac].forEach(function(c){
-    try{ if(c&&c.state!=='running')c.resume(); }catch(e){}
-  });
-}
-try{ document.addEventListener('visibilitychange',function(){ if(!document.hidden)reveilAudio(); }); }catch(e){}
-function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jamais bloqué), sinon <audio> béni, sinon SILENCE
-  if(!SND)return; // « Effets sonores » coupe la récompense À L'INSTANT (Myriam 10/08) — avant, seul okBeep/plop obéissait, d'où l'impression qu'il fallait relancer l'app
-  try{
-    const b=_SFXB[name];
-    if(b&&_sfxCtx){
-      /* ⚠️ 17/08 — Myriam : « le son du dernier mot choisi est tu par l'apparition du
-         bouton continuer ». Le sfx WebAudio se SUPERPOSE : plus de stopAudio() ici —
-         le mot (`_curAudio`) et la synthèse finissent de sonner, seul le sfx précédent
-         s'arrête. Le repli <audio> du bas garde l'ancienne coupe (un seul _curAudio). */
-      try{ if(_curSrc){ _curSrc.stop(); _curSrc=null; } }catch(_){}
-      if(_sfxCtx.state!=='running')_sfxCtx.resume(); // iOS : couvre aussi l'état « interrupted »
-      const s=_sfxCtx.createBufferSource();s.buffer=b;s.connect(_sfxCtx.destination);_curSrc=s;s.start();
-      return;
-    }
-    stopAudio(); // repli <audio> seulement : il écrase _curAudio, l'ancien contrat reste
-    const a=audioBeni('audios-app-alaq/sfx-'+name+'.mp3'); _curAudio=a; const p=a.play(); if(p&&p.catch)p.catch(()=>{});
-  }catch(e){}
-}
-function stopAudio(){ // un seul son à la fois : coupe le fichier, le tampon WebAudio ET la synthèse, et invalide les replis en attente
-  _sndGen++;
-  try{ if(typeof suivreArret==='function')suivreArret(); }catch(e){}   // et l'illumination du verset s'éteint avec lui
-  try{ if(_curSrc){ _curSrc.stop(); _curSrc=null; } }catch(e){}
-  try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
-  try{
-    // cancel() UNIQUEMENT si le moteur a quelque chose à dire : sur WebKit, un cancel() à vide
-    // décale le moteur (utterances suivantes avalées). resume() le décoince après le cancel.
-    if('speechSynthesis'in window&&(speechSynthesis.speaking||speechSynthesis.pending||_curUtter)){
-      speechSynthesis.cancel();
-      speechSynthesis.resume();
-      _curUtter=null;
-    }
-  }catch(e){}
-}
-function speak(t){
-  try{
-    stopAudio();                                    // coupe le son précédent avant d'en jouer un nouveau
-    const gen=_sndGen;                              // ce son est valable tant qu'aucun nouveau son n'a démarré
-    warmVoices();                                   // amorce le moteur vocal (repli IA fiable sur iOS)
-    const url=AUDIO[t];
-    if(!url){ _speakSynth(t); return; }            // aucun mapping -> synthèse directe
-    const a=new Audio(url); _curAudio=a;
-    let settled=false;
-    const toSynth=()=>{ if(settled||gen!==_sndGen)return; settled=true; try{a.pause();}catch(_){ } _speakSynth(t); };
-    a.addEventListener('playing',()=>{ settled=true; },{once:true}); // le fichier joue : on neutralise tout repli
-    a.addEventListener('error',toSynth,{once:true});   // fichier 404 / illisible -> synthèse
-    a.addEventListener('stalled',toSynth,{once:true}); // chargement bloqué -> synthèse
-    a.addEventListener('abort',toSynth,{once:true});
-    const p=a.play();
-    if(p&&p.catch)p.catch(toSynth);                    // lecture refusée -> synthèse (sauf si un nouveau son a coupé)
-    // filet de sécurité : si rien n'a démarré (fichier absent/lent), on bascule en voix de synthèse
-    setTimeout(()=>{ if(!settled && gen===_sndGen && a.paused) toSynth(); },1100);
-  }catch(e){ try{_speakSynth(t);}catch(_){ } }
-}
-// Réveille les moteurs vocaux ARABE et FRANÇAIS dès la 1re interaction : sur iOS, la
-// toute 1re utterance d'une voix froide est souvent AVALÉE — on sacrifie ici deux espaces.
-let _voiceReady=false;
-function warmVoices(){
-  if(_voiceReady||!('speechSynthesis'in window))return;
-  _voiceReady=true;
-  try{
-    speechSynthesis.getVoices();
-    // ⚠️ SURTOUT PAS volume=0 : sur iOS, le volume de la 1re utterance peut se COLLER à toutes
-    // les suivantes (tout devient muet). Un espace à volume plein est inaudible de toute façon.
-    const ar=new SpeechSynthesisUtterance(' ');ar.volume=1;ar.lang='ar-SA';
-    const arV=bestVoice('ar'); if(arV)ar.voice=arV;
-    speechSynthesis.speak(ar); // amorce le moteur ARABE (Majed) — le plus souvent avalé à froid
-    const fr=new SpeechSynthesisUtterance(' ');fr.volume=1;fr.lang='fr-FR';
-    speechSynthesis.speak(fr); // amorce le moteur français
-  }catch(e){}
-}
-if('speechSynthesis'in window){
-  try{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.getVoices();};}catch(e){}
-}
-if(typeof document!=='undefined'&&document.addEventListener){
-  document.addEventListener('pointerdown',warmVoices,{once:true});
-  document.addEventListener('touchstart',warmVoices,{once:true});
-}
+
+/* ⛔ LA VOIX DE SYNTHÈSE A ÉTÉ RETIRÉE LE 15/09/2026, sur décision de Myriam : « silence,
+   et le portillon rougit ». L'app ne prononce plus jamais un son qu'elle n'a pas
+   enregistré — c'est la règle d'or n°4 rendue structurelle plutôt que surveillée.
+   Rien ne s'est tu : les 520 fichiers sont là, et `outils/verifier-son.mjs` compare
+   désormais la table entière au dossier avant chaque livraison. */
+/* ═══ l'état du son (_curAudio, _sndGen), stopAudio, la marque sonore (playSfx,
+   comboBonneReponse), le pool béni d'iOS (audioBeni) et la porte `jouer` vit dans son.js (15/09/2026). ═══ */
+
+
 /* ── LES RÉCITATEURS ─────────────────────────────────────────────────────────
    17 voix, diffusées par cdn.islamic.network. RIEN n'est hébergé chez nous :
    aucun grand catalogue ne concède l'usage commercial (Quran Foundation exige un
@@ -3793,31 +3015,18 @@ function lastUnlockedIndex(){ let last=0; UNITS.forEach((U,i)=>{ if(unitUnlocked
    chargement, or ui/reviser.js se charge AVANT ce script (il ne peut rien lire d'ici à ce
    moment-là — c'est la règle de tous les scripts classiques externes). Le résumé lui-même,
    resumeGramU9, vit dans ui/reviser.js. */
-AUDIO['بِالْقَلَمِ']=AUDIO['بِالْقَلَمِ']||'audios-app-alaq/mot-bilqalam.mp3';
-AUDIO['لِلْبِنْتِ']=AUDIO['لِلْبِنْتِ']||'audios-app-alaq/mot-lilbint.mp3';
-AUDIO['عَلَى الْبَيْتِ']=AUDIO['عَلَى الْبَيْتِ']||'audios-app-alaq/mot-alalbayt.mp3';
-AUDIO['بِسْمِ اللَّهِ']=AUDIO['بِسْمِ اللَّهِ']||'audios-app-alaq/mot-bismillah.mp3';
-AUDIO['الْحَمْدُ لِلَّهِ']=AUDIO['الْحَمْدُ لِلَّهِ']||'audios-app-alaq/mot-alhamdulillah.mp3';
+if(!SONS['بِالْقَلَمِ'])inscrireLeSon('بِالْقَلَمِ','mot-bilqalam');
+if(!SONS['لِلْبِنْتِ'])inscrireLeSon('لِلْبِنْتِ','mot-lilbint');
+if(!SONS['عَلَى الْبَيْتِ'])inscrireLeSon('عَلَى الْبَيْتِ','mot-alalbayt');
+if(!SONS['بِسْمِ اللَّهِ'])inscrireLeSon('بِسْمِ اللَّهِ','mot-bismillah');
+if(!SONS['الْحَمْدُ لِلَّهِ'])inscrireLeSon('الْحَمْدُ لِلَّهِ','mot-alhamdulillah');
 
 /* ═══ resumeGramU9 et renderCours vivent dans ui/reviser.js (12/09/2026). ═══ */
 
 /* ═══ renderProg (le Profil) vit dans ui/parametres.js (12/09/2026). chime() reste ici : c'est
    de l'audio, reveilAudio() le réveille avec les autres contextes. ═══ */
-function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, sans fichier
-  try{
-    var AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
-    var ac=chime._ac||(chime._ac=new AC()); if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
-    var t=ac.currentTime;
-    [[880,0],[1174.66,0.09],[1567.98,0.18]].forEach(function(p){
-      var o=ac.createOscillator(), g=ac.createGain();
-      o.type='sine'; o.frequency.value=p[0]; var s=t+p[1];
-      g.gain.setValueAtTime(0.0001,s);
-      g.gain.exponentialRampToValueAtTime(0.16,s+0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001,s+0.55);
-      o.connect(g); g.connect(ac.destination); o.start(s); o.stop(s+0.6);
-    });
-  }catch(e){}
-}
+/* ═══ chime, le carillon vit dans son.js (15/09/2026). ═══ */
+
 /* ═══ showSucces / closeSucces (la modale d'un succès) vivent dans ui/parametres.js (12/09/2026). ═══ */
 
 /* ===== Révision globale (réutilise le lecteur, ne marque aucun disque) ===== */
@@ -4364,7 +3573,7 @@ const NOMS_ALLAH=[
  {ar:'الْمُؤْمِنُ',fr:'le Rassurant',snd:'nom-almumin'},
  {ar:'الْعَلِيمُ',fr:'l’Omniscient',snd:'nom-alalim'},
 ];
-NOMS_ALLAH.forEach(n=>{AUDIO[n.ar]='audios-app-alaq/'+n.snd+'.mp3';}); // speak(nom) joue son mp3 dédié partout
+NOMS_ALLAH.forEach(n=>{inscrireLeSon(n.ar,n.snd);}); // jouer(nom) trouve son mp3 dédié partout
 /* ---- PHASE B : LE CONTENU VIT DANS LES TABLES — le code n'est que la GRAINE ----
    Registre CONTENU : pour chaque table Supabase, un cache localStorage + une fonction
    d'adoption qui remplace les constantes EN PLACE (mêmes références : tout le code suit).
@@ -4373,7 +3582,7 @@ NOMS_ALLAH.forEach(n=>{AUDIO[n.ar]='audios-app-alaq/'+n.snd+'.mp3';}); // speak(
 function _adopteNoms(rows){
   if(!rows||!rows.length)return;
   NOMS_ALLAH.length=0;
-  rows.forEach(function(n){NOMS_ALLAH.push(n);AUDIO[n.ar]='audios-app-alaq/'+n.snd+'.mp3';});
+  rows.forEach(function(n){NOMS_ALLAH.push(n);inscrireLeSon(n.ar,n.snd);});
 }
 function _adopteVersets(rows){ // Al-Fātiḥa : FATIHA muté en place — SOURATES[0].verses EST FATIHA
   if(!rows||!rows.length)return;

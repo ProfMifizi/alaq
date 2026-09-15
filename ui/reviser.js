@@ -108,7 +108,14 @@ function coursSignsHTML(){
     '<div class="acc-b">'+SIGNS.map(function(g){
       return '<div class="sgn-card"><div class="sgn-head">'+g.t+'</div>'+
         '<div class="sgn-chips">'+g.c.map(function(x){
-          return '<button class="chip" onclick="playSyl(\''+x[0]+'\',this)"><span class="chip-ar">'+x[0]+'</span><span class="chip-ro">'+x[1]+'</span></button>';
+          /* 🔴 15/09 — LA PUCE NE PRÉTEND PLUS JOUER CE QU'ELLE N'A PAS. Cinq des onze signes
+             (مْ مّ مٌ مٍ مًا) n'ont aucune prise : avant, la voix de machine improvisait sur un
+             signe isolé — le pire cas selon la règle du 07/08, et ce que Myriam a fait cesser
+             le 15/09. La puce reste, elle enseigne le signe à l'œil ; seul le geste d'écoute
+             disparaît là où il n'y a rien à écouter. ⏳ Ces cinq prises sont à enregistrer. */
+          var jouable = aLeSon(x[0]);
+          return '<button class="chip"'+(jouable?' onclick="playSyl(\''+x[0]+'\',this)"':' disabled')+
+            '><span class="chip-ar">'+x[0]+'</span><span class="chip-ro">'+x[1]+'</span></button>';
         }).join('')+'</div>'+
         '<div class="sgn-desc">'+g.d+'</div></div>';
     }).join('')+'</div></div>';
@@ -336,7 +343,14 @@ function renderCours(sub){
           (aUnSon(L)
             ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button> '+d.son+'</div>'
             : '<div class="ls"><span class="lcap">porte la voyelle, sans son propre</span></div>')+
-          (ex?'<div class="lex">📖 <span class="lex-w" onclick="speak(\''+ex+'\')">'+ex+'</span> <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button></div>':'')+
+          /* 🔴 15/09 — LE HAUT-PARLEUR NE S'AFFICHE QUE SI LE SON EXISTE. `fatihaWordFor` rend
+             la forme du VERSET (اللَّهِ, الرَّحْمَٰنِ…), et la table ne porte que les formes de
+             CITATION : « un fichier, un mot », ce sont deux enregistrements. Avant le 15/09, une
+             voix de machine lisait ces mots du Qorān — précisément ce que Myriam ne veut pas ;
+             depuis, ils se taisent. Quinze boutons sur vingt et un seraient restés visibles et
+             morts, ce qu'un élève lit comme une panne. Le mot reste affiché, sans bouton. */
+          (ex?'<div class="lex">📖 <span class="lex-w"'+(aLeSon(ex)?' onclick="speak(\''+ex+'\')"':'')+'>'+ex+'</span>'+
+              (aLeSon(ex)?' <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button>':'')+'</div>':'')+
           '<div class="lanim"><button class="la-btn" onclick="playLetterAnim(this,\''+L+'\',\''+(U.lat[L]||'')+'\')">▶ voir la prolongation</button><div class="la-stage" style="display:none"><div class="la-word">'+L+'</div><div class="la-track"><div class="la-bar"></div></div><div class="la-ro"></div></div></div>'+
           '</div></div>';
       }).join('');
