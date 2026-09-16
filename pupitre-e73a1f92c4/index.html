@@ -50,6 +50,7 @@ button.cta.sec{background:none;color:var(--muted);border-color:var(--line)}
 .b-image-morte,.b-son-absent{background:rgba(232,146,109,.16);color:var(--coral)}
 .b-sw,.b-suspect{background:rgba(91,163,196,.16);color:var(--info)}
 .b-flag{background:rgba(232,200,135,.14);color:var(--gold)}
+.b-robot{background:rgba(169,151,129,.18);color:var(--muted)}
 .tk-quoi{flex:1;min-width:0}
 .tk-msg{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tk-sous{font-size:12px;color:var(--muted)}
@@ -117,8 +118,14 @@ code{font:12px ui-monospace,Menlo,monospace;background:rgba(255,255,255,.05);pad
   <div class="filtres">
     <button class="f on" onclick="filtrer(this,'ouverts')">À traiter</button>
     <button class="f" onclick="filtrer(this,'tous')">Tout</button>
+    <button class="f" onclick="filtrer(this,'robots')">Robots <span id="nRobots">0</span></button>
     <span class="maj" id="etat"></span>
   </div>
+  <p class="apprend">Le troisième filtre : <b>app.alaq.fr est une page publique</b>, et les robots des
+  moteurs de recherche la visitent. Ils ne chargent pas les images et n'installent pas de service worker
+  &mdash; un seul passage fabrique donc une salve de faux tickets (mesuré le 01/09 : Google-Read-Aloud
+  = <b>23 tickets en une seconde</b>, alors que les images répondaient toutes normalement en production).
+  Ils sont <b>écartés, jamais effacés</b> : leur compte reste affiché, et ce filtre les rouvre.</p>
   <div id="liste"><div class="vide">…</div></div>
 
   <div class="doc">
@@ -190,6 +197,23 @@ async function charger(){
   rendre();
 }
 
+/* ── LES ROBOTS ──────────────────────────────────────────────────────────────
+   app.alaq.fr est PUBLIQUE : les robots des moteurs la visitent. Ils ne chargent
+   PAS les images et n'installent PAS de service worker — un seul passage fabrique
+   donc une salve de faux tickets. Mesuré le 01/09 : Google-Read-Aloud = 23 tickets
+   en UNE seconde, alors que les 5 images incriminées répondaient 200 au curl.
+   ⚠️ ON N'EFFACE NI NE MASQUE EN SILENCE : les cartes partent dans un troisième
+   filtre, avec leur compte affiché — un vrai défaut qui ne toucherait QUE les
+   robots resterait donc visible. C'est la convention du projet : quarantaine,
+   jamais suppression.
+   ⚠️ PIÈGE DE MESURE : l'appareil d'une élève Android est EXACTEMENT le préfixe
+   de celui du robot (Google ajoute « (compatible; Google-Read-Aloud; …) » à la
+   FIN). Ne jamais trancher sur le DÉBUT d'un user-agent.
+   ⚠️ Un groupe qui contient ne serait-ce QU'UNE occurrence humaine reste du côté
+   humain : dans le doute, on montre. Et un appareil VIDE n'est pas un robot. */
+const ROBOTS=/bot\b|bot\/|spider|crawler|crawl\b|slurp|Google-Read-Aloud|Google-InspectionTool|Mediapartners|Applebot|facebookexternalhit|WhatsApp|Slackbot|TelegramBot|Lighthouse|HeadlessChrome|Bytespider|GPTBot|ClaudeBot|anthropic-ai|PerplexityBot|CCBot|^curl|^Wget|python-requests|node-fetch|axios|Go-http-client/i;
+function estRobot(ua){const u=String(ua==null?'':ua).trim();return u!==''&&ROBOTS.test(u);}
+
 /* ── LE GROUPEMENT PAR SIGNATURE ─────────────────────────────────────────── */
 function groupes(){
   const g={};
@@ -202,6 +226,7 @@ function groupes(){
     x.dernier=x.rows[0];
     x.traite=x.rows.every(r=>r.traite);
     x.appareils=new Set(x.rows.map(r=>(r.appareil||'').slice(0,60))).size;
+    x.robot=x.rows.every(r=>estRobot(r.appareil));
     x.builds=[...new Set(x.rows.map(r=>r.build||'?'))];
     return x;
   }).sort((a,b)=>(a.traite-b.traite)||(b.rows.length-a.rows.length));
@@ -213,19 +238,29 @@ function quand(iso){try{const d=new Date(iso);
 /* ── LE RENDU ────────────────────────────────────────────────────────────── */
 function rendre(){
   const L=document.getElementById('liste');L.innerHTML='';
-  document.getElementById('nAuto').textContent=groupes().filter(g=>!g.traite).length;
-  document.getElementById('nFlags').textContent=FLAGS.filter(f=>!f.traite).length;
+  const G=groupes();
+  /* les compteurs des ONGLETS ne comptent que les humains : c'est le travail RÉEL */
+  document.getElementById('nAuto').textContent=G.filter(g=>!g.traite&&!g.robot).length;
+  document.getElementById('nFlags').textContent=FLAGS.filter(f=>!f.traite&&!estRobot(f.appareil)).length;
+  document.getElementById('nRobots').textContent=ONGLET==='auto'
+    ? G.filter(g=>g.robot).length : FLAGS.filter(f=>estRobot(f.appareil)).length;
   document.getElementById('expliqueAuto').style.display=ONGLET==='auto'?'':'none';
   document.getElementById('expliqueFlags').style.display=ONGLET==='flags'?'':'none';
-  const items=ONGLET==='auto'?groupes():FLAGS;
+  const items=ONGLET==='auto'?G:FLAGS;
   let n=0;
   for(const it of items){
     const traite=ONGLET==='auto'?it.traite:!!it.traite;
-    if(FILTRE==='ouverts'&&traite)continue;
+    const robot =ONGLET==='auto'?it.robot :estRobot(it.appareil);
+    if(FILTRE==='robots'){ if(!robot)continue; }
+    else { if(robot)continue; if(FILTRE==='ouverts'&&traite)continue; }
     n++;
     L.appendChild(ONGLET==='auto'?carteTicket(it):carteFlag(it));
   }
-  if(!n)L.innerHTML='<div class="vide">'+(FILTRE==='ouverts'?'Rien à traiter — tout est vert 🌿':'Rien du tout')+'</div>';
+  if(!n)L.innerHTML='<div class="vide">'+rienDuTout()+'</div>';
+}
+function rienDuTout(){
+  if(FILTRE==='robots')return 'Aucun robot ici — la liste est entièrement humaine';
+  return FILTRE==='ouverts'?'Rien à traiter — tout est vert 🌿':'Rien du tout';
 }
 function carteTicket(g){
   const d=g.dernier,div=document.createElement('div');
@@ -234,6 +269,7 @@ function carteTicket(g){
   div.innerHTML=
     '<div class="tk-tete">'+
       '<span class="badge b-'+esc(d.type)+'">'+esc(d.type)+'</span>'+
+      (g.robot?'<span class="badge b-robot">robot</span>':'')+
       '<div class="tk-quoi"><div class="tk-msg">'+esc(d.message||'(sans message)')+'</div>'+
       '<div class="tk-sous"><b>'+esc(d.ecran||'?')+'</b> · du '+quand(premier.cree_le)+' au '+quand(d.cree_le)+
       ' · '+g.builds.map(esc).join(', ')+(g.traite?' · <b style="color:var(--green)">traité</b>':'')+'</div></div>'+
@@ -249,12 +285,19 @@ function carteTicket(g){
       g.rows.slice(0,5).map(r=>'<div class="occ"><span>'+quand(r.cree_le)+'</span><span>'+
         esc(apparl(r.appareil))+'</span><span>'+(r.email?esc(r.email):'anonyme')+'</span><span>'+esc(r.build||'')+'</span></div>').join('')+
       '<div class="actions">'+
-        '<button class="cta" onclick="traiterTicket(\''+encodeURIComponent(g.sig)+'\','+(g.traite?'false':'true')+')">'+
-          (g.traite?'Rouvrir':'Marquer traité')+'</button>'+
-        '<button class="cta sec" onclick="copierClaude(\''+encodeURIComponent(g.sig)+'\')">Copier pour Claude</button>'+
+        '<button class="cta" data-action="traiter">'+(g.traite?'Rouvrir':'Marquer traité')+'</button>'+
+        '<button class="cta sec" data-action="copier">Copier pour Claude</button>'+
       '</div>'+
     '</div>';
   div.querySelector('.tk-tete').onclick=()=>div.classList.toggle('ouvert');
+  /* 🔴 16/09 — AUCUNE DONNÉE DE LA BASE N'ENTRE DANS DU CODE. La signature était recopiée
+     dans un onclick="traiterTicket('…')" à travers encodeURIComponent, qui laisse passer
+     ' ( ) - : n'importe qui (la table accepte l'insertion anonyme) pouvait déposer une
+     signature qui S'EXÉCUTAIT au clic de Myriam, avec sa session. Le bouton garde désormais
+     la signature dans une fermeture JavaScript : elle ne traverse plus jamais le HTML.
+     Garde : outils/verifier-pupitre.mjs (signatures piégées cliquées, mutants mordus). */
+  div.querySelector('[data-action="traiter"]').onclick=()=>traiterTicket(g.sig,!g.traite);
+  div.querySelector('[data-action="copier"]').onclick=()=>copierClaude(g.sig);
   return div;
 }
 function carteFlag(f){
@@ -263,15 +306,19 @@ function carteFlag(f){
   div.innerHTML=
     '<div class="tk-tete">'+
       '<span class="badge b-flag">⚑ élève</span>'+
+      (estRobot(f.appareil)?'<span class="badge b-robot">robot</span>':'')+
       '<div class="tk-quoi"><div class="tk-msg">'+esc(f.motif||'?')+(f.detail?' — « '+esc(f.detail)+' »':'')+'</div>'+
       '<div class="tk-sous"><b>'+esc(f.ecran||'?')+'</b> · '+quand(f.cree_le)+' · '+esc(f.build||'')+
       (f.email?' · '+esc(f.email):'')+(f.traite?' · <b style="color:var(--green)">traité</b>':'')+'</div></div>'+
     '</div>'+
     '<div class="tk-detail"><div class="d-ligne"><b>Appareil</b> · '+esc(f.appareil||'?')+'</div>'+
-      '<div class="actions"><button class="cta" onclick="traiterFlag('+f.id+','+(f.traite?'false':'true')+')">'+
+      '<div class="actions"><button class="cta" data-action="traiter">'+
       (f.traite?'Rouvrir':'Marquer traité')+'</button>'+
-      '<button class="cta sec" onclick="copierClaudeFlag('+f.id+')">Copier pour Claude</button></div></div>';
+      '<button class="cta sec" data-action="copier">Copier pour Claude</button></div></div>';
   div.querySelector('.tk-tete').onclick=()=>div.classList.toggle('ouvert');
+  /* même règle que carteTicket : l'id vient de la base, il ne s'écrit pas dans un onclick */
+  div.querySelector('[data-action="traiter"]').onclick=()=>traiterFlag(f.id,!f.traite);
+  div.querySelector('[data-action="copier"]').onclick=()=>copierClaudeFlag(f.id);
   return div;
 }
 function apparl(ua){
@@ -291,8 +338,7 @@ function journalHTML(j){
 /* ── LES ACTIONS ─────────────────────────────────────────────────────────────
    « Traiter » = UPDATE traite (politique réservée à Myriam) sur TOUTES les
    lignes de la signature. Pas de DELETE : un ticket ne s'efface pas. */
-async function traiterTicket(sigEnc,val){
-  const sig=decodeURIComponent(sigEnc);
+async function traiterTicket(sig,val){
   const {error}=await SB.from('tickets').update({traite:val}).eq('signature',sig);
   if(error){toast('✕ '+error.message);return;}
   TICKETS.forEach(t=>{if(t.signature===sig)t.traite=val;});
@@ -305,8 +351,7 @@ async function traiterFlag(id,val){
   toast(val?'Traité':'Rouvert');rendre();
 }
 /* « Copier pour Claude » : le dossier COMPLET, brut, prêt à coller en session. */
-async function copierClaude(sigEnc){
-  const sig=decodeURIComponent(sigEnc);
+async function copierClaude(sig){
   const g=groupes().find(x=>x.sig===sig);if(!g)return;
   let s='TICKET ALAQ — à analyser\n'+'═'.repeat(50)+'\n';
   s+='signature : '+g.sig+'\ntype      : '+g.dernier.type+'\nmessage   : '+(g.dernier.message||'')+'\n';
