@@ -22,15 +22,16 @@
    d'index.html au chargement — ICO_AFFICHAGE, ICO_VERSION, MOIS_FR, CROIX_* sont
    des chaînes pures. Voir l'en-tête de ui/accueil.js pour la règle complète.
 
-   ═══ LE CONTRAT AVEC index.html (résolu À L'APPEL) ═══
-   S, UNITS, SOURATES, save, today, VERSION, BUILD_NUM, BUILD_DATE, SND,
-   qariCur, ico, icoImg, icoEcran, escHTML,
-   objMinutes, objGoal, objFete, SYNC (facultatif : la feuille dit s'il manque),
-   SB, CLOUD, nomChoisiHTML, cloudCardHTML, rankFor, RANKS, rankTrackHTML,
-   objRingHTML, ecussonHTML, BADGES, fatihaPct, discsFor, dkey, unitValidated,
-   unitUnlocked, arReveal, chime, maybeGhufranPrompt — et, en ligne dans le HTML
-   produit : toggleSound, openQari, openPrenom, cloudLogout,
-   showGhufranInfo. toAr vient de ui/accueil.js.
+   ═══ LE CONTRAT (résolu À L'APPEL) ═══
+   index.html : VERSION, BUILD_NUM, BUILD_DATE, escHTML, nomChoisiHTML, cloudCardHTML,
+   fatihaPct, arReveal, SND, SYNC (facultatif : la feuille dit s'il manque) — et, en ligne
+   dans le HTML produit : toggleSound, openQari, openPrenom, cloudLogout.
+   constance.js (depuis le 16/09) : today, objMinutes, objGoal, objFete, objRingHTML,
+   rankFor, RANKS, rankTrackHTML, ecussonHTML, BADGES, maybeGhufranPrompt — et
+   showGhufranInfo, appelée en ligne depuis la tuile 🕊️ du Profil.
+   progression.js : S, save, dkey, unitValidated, unitUnlocked, SB, CLOUD ·
+   donnees.js : UNITS, SOURATES · parcours.js : discsFor · assets.js : ico, icoImg, icoEcran ·
+   son.js : chime · revision.js : qariCur. toAr vient de ui/accueil.js.
 
    GARDES : outils/verifier-interface.mjs (⑦ à ⑩, ⑬ — le banc CLIQUE sur les
    lignes, les objectifs, le numéro), previews/_verif_interface.html.

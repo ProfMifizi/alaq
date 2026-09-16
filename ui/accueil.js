@@ -24,8 +24,9 @@
    ═══ LE CONTRAT AVEC index.html (résolu À L'APPEL, jamais à la définition) ═══
    UNITS, SOURATES, curSourate, S, dkey, unitValidated, discsFor, ICONES,
    arReveal, unitAccent, currentLesson, startDisque, startExam (src/player/, un
-   module : ils peuvent manquer — lecteurPret(), d'index.html, le DIT alors), toast, updRankBadge,
-   maybeShowHomeTut, maybeGhufranPrompt, openSurahMenu (en ligne). Cette liste
+   module : ils peuvent manquer — lecteurPret(), d'index.html, le DIT alors), toast,
+   maybeShowHomeTut, openSurahMenu (en ligne) — et, depuis constance.js (16/09) :
+   updRankBadge et maybeGhufranPrompt. Cette liste
    EST le contrat, et le banc la garde. Dans l'autre sens, index.html et
    progression.js appellent renderHome(), refreshStats(), toAr()… et
    progression.js RÉASSIGNE _homeFocusPending (un `let` de ce fichier : la

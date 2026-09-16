@@ -81,9 +81,10 @@
    index.html : toast, lecteurPret, knownLetterSet, wordReadable, SOLAIRES_14, LUNAIRES_14,
    estSolaire (lus par badgeSolaire), U8, QUEUE, qi, curU,
    curD, total, wrongCount, MISSED, inRetry, EXAM, REVIEW, REVSES, REVFREE, backTo,
-   _grainesSession, pendingStreak, feteJourPending, GRAINES, gagnerGraines,
-   bumpConstance, validerJour, checkBadges, confettiBurst, fillFinishCases,
-   fillFinishConstance, today, _addDays · progression.js : S, save, saveLocal, dkey,
+   _grainesSession, pendingStreak · constance.js (depuis le 16/09) : feteJourPending,
+   GRAINES, gagnerGraines, bumpConstance, validerJour, checkBadges, confettiBurst,
+   fillFinishCases, fillFinishConstance, today, _addDays — chargé APRÈS ce fichier,
+   donc résolu à l'appel seulement, jamais au chargement · progression.js : S, save, saveLocal, dkey,
    unitUnlocked, unitValidated, HEARTS_MAX, SB, SYNC · son.js : speak, sayLetterName,
    stopAudio, okBeep, playSfx, toc, spkSVG, inscrireLeSon, _sndGen, _curAudio ·
    donnees.js : UNITS, SOURATES, FATIHA, letterKey, strip · generateurs.js : shuffle,
