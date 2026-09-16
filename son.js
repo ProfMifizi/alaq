@@ -20,7 +20,8 @@
 
    ── POURQUOI UN SCRIPT CLASSIQUE, ET PAS UN MODULE ───────────────────────────
    Deux raisons, toutes deux MESURÉES, pas supposées :
-   ① La table est ÉCRITE par le grand script au chargement, à cinq endroits : les mots
+   ① La table est ÉCRITE au chargement par plusieurs scripts — les mots des unités 1-7 ICI
+      même, en fin de fichier (depuis le 16/09), puis par revision.js et le grand script : les mots
       des unités 1-7 (le package), les cinq raccords de l'unité 9, les Noms d'Allah,
       les mots de l'unité 8, et `_adopteNoms` quand Supabase répond. Un module, différé,
       arriverait après ces écritures.
@@ -673,3 +674,24 @@ function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, san
     });
   }catch(e){}
 }
+
+/* ── LE SON DE CHAQUE MOT DES UNITÉS 1 À 7 (06/09/2026 ; versé ICI depuis le 16/09/2026) ──
+   ⚠️ POURQUOI ICI, ET PAS DANS index.html COMME AVANT : le hub Réviser (revision.js) verse
+   les Noms d'Allah et le cache Supabase au chargement, AVANT le grand script. Deux clés sont
+   partagées avec la graine des Noms (الرَّحْمَٰنُ, الرَّحِيمُ) et, contre la TABLE réelle, deux de
+   plus divergent (الصَّمَدُ, اللَّهُ : le package dit mot-*, la table nom-*). Avant le 16/09, le
+   cache des Noms écrivait EN DERNIER et gagnait, en ligne comme en avion ; laissé dans
+   index.html, ce versement serait passé après lui et deux mots auraient changé de prise en
+   avion. Versé ici — son.js se charge avant revision.js —, l'ordre d'écriture est celui
+   d'avant, à la clé près, et le banc du hub (outils/verifier-revision.mjs ⑤) l'exige :
+   le cache des Noms gagne sur le package. UNITS vient de donnees.js, chargé avant.
+   🔴 IL VIENT DU PACKAGE, ET IL DOIT GAGNER SUR LA CARTE CI-DESSUS. Jusqu’ici
+   c’est la table Supabase `vocabulaire` qui posait ces entrées, et elle ne
+   disait pas tout à fait la même chose : pour الرَّحْمَٰنُ et الرَّحِيمُ elle sert la
+   prise des NOMS D’ALLAH (`nom-*`) là où la carte dit `mot-*`. Ce sont deux
+   enregistrements différents, et c’est la version des Noms que les élèves
+   entendent. Sans cette boucle, couper l’adoption ferait changer deux mots du
+   Qorān de voix — en silence. Le `snd` de chaque mot porte la vérité. */
+UNITS.forEach(function(U){ (U.words||[]).forEach(function(w){
+  if (w && w.w && w.snd) inscrireLeSon(w.w, w.snd);
+}); });

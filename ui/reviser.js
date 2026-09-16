@@ -12,10 +12,11 @@
      cinq boîtes), les lettres, le vocabulaire (mots dus en tête, le badge qui
      descend), la grammaire (grammaireHubHTML : le badge compte les notions pas
      encore révisées AUJOURD'HUI — 09/09).
-   ⚠️ Les rouages du hub RESTENT dans index.html : BOITES, boiteTap,
-   reviserTabTap/coursTabTap, curReviserTab (un `let` que renderReviser lit ET
-   réassigne), letterGridHTML, le Qorān, les noms d'Allah. Un autre lot, plus
-   tard, s'ils doivent sortir (voir notes/PROMPT-antigravity-sortir-le-hub-reviser.md).
+   ⚠️ Les rouages du hub vivent dans revision.js depuis le 16/09/2026 (sous-lot 5) :
+   BOITES, boiteTap, reviserTabTap/coursTabTap, curReviserTab (un `let` que
+   renderReviser lit ET réassigne — une liaison lexicale globale, partagée entre
+   scripts classiques), letterGridHTML, le Qorān, les noms d'Allah. revision.js se
+   charge juste APRÈS ce fichier ; tout s'y résout à l'appel, jamais au chargement.
    ⚠️ Les cinq raccords `AUDIO['…']=…` du résumé de l'unité 9 RESTENT dans
    index.html : ils lisent AUDIO au chargement, et ce fichier se charge AVANT.
 
@@ -448,7 +449,7 @@ function renderReviser(sub){
   if(sub==='quran'){
     /* 🔴 LES 5 BOÎTES REMPLACENT LES 5 ACCORDÉONS (04/09, cahier des charges de
        Myriam). La sourate illuminée part dans un PLEIN ÉCRAN dédié
-       (ouvrirLireSourate(), un rouage du hub resté dans index.html) — même markup .mushaf/.ayat/.vw que
+       (ouvrirLireSourate(), un rouage du hub, dans revision.js depuis le 16/09) — même markup .mushaf/.ayat/.vw que
        l'ancien accordéon « ill », déplacé au caractère près : les harnais qui
        mesuraient cette zone n'ont qu'à changer leur POINT D'ENTRÉE, jamais
        leurs sélecteurs.
