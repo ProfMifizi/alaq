@@ -1,90 +1,44 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   revision.js — LE HUB RÉVISER : le Qorān, les récitateurs, le vocabulaire, la
-   grammaire, les lettres, les Noms d'Allah (sous-lot 5 de la tâche Notion
-   « extraire le lecteur d'exercices », sorti d'index.html le 16/09/2026 —
-   167 instructions de premier niveau copiées À L'IDENTIQUE par l'arbre du fichier,
-   jamais par un marqueur de texte ; seuls des commentaires ont été retouchés).
-   ───────────────────────────────────────────────────────────────────────────
-   CE QU'IL PORTE — tout ce que l'onglet Réviser (ui/reviser.js, qui le PEINT)
-   déclenche au doigt, et les écrans que le lecteur (src/player/) lui sert :
-   · le Qorān : les 17 voix (VOIX, QARI_DEFAUT, qariCur, le sélecteur openQari…
-     qariRender), les repères mot à mot de quran.com (HOROV) et l'illumination
-     (suivreVerset, suivreArret), la lecture d'un verset ou d'un mot (playVerse,
-     joueMotVerset, lireToutQoran, motBulle, motTap, numAyatHTML), « Lire la
-     sourate » en plein écran (ouvrirLireSourate), les cinq boîtes et leur popup
-     (BOITES, boiteTap, majParts, partTap, les parties par versets et par
-     frappes), les trois lanceurs de partie et les écrans Construire (vt*),
-     Réécrire (vw*), Ordonner la sourate (st*), Réciter (_rec, recToggle…) ;
-   · le vocabulaire : le vivier (allReviewWords, dueReviewWords, les paliers
-     REV_INT…), la séance (startReview → match, vf, mcq, assemble), le stylo ✏️
-     (openWrite… closeWrite) ;
-   · la grammaire : les notions (NOTIONS_GRAM, gramEcransU8/U9), la séance
-     panachée (gramFile, lancerGrammaire), la maîtrise (gramMaitrise, gramFaute) ;
-   · les lettres : la grille des 28 (letterGridHTML, badgeSolaire), la sélection
-     (LETSEL, letToggle… startSelectedLetters), les formes (formsOf, learnedLettersList) ;
-   · les Noms d'Allah (NOMS_ALLAH, NASEL, nomTog, startNoms, lumTap, majPopNoms)
-     et l'adoption du contenu venu de Supabase (CONTENU, contentPull, _adopteNoms,
-     _adopteVersets — contentPull est rappelé à DOMContentLoaded par index.html) ;
-   · l'entonnoir de toute séance de révision, launchQuranReview, et sa fin,
-     finishReview (paliers, graines, Qatarāt, badges, le jour validé) ;
-   · l'état du hub : curSourate, curReviserTab, QCTX, GRAMSES, WPEN, VFT, accQ,
-     NASEL, LETSEL, _lireTout, _qariPlay, _suivi, boiteOuverte, partChoisie, _tipT,
-     _rec — des liaisons lexicales GLOBALES, partagées par tous les scripts
-     classiques et lisibles par les modules par leur nom nu.
+/* ═══ revision.js — les rouages du hub Réviser (ui/reviser.js le peint) ═══
+   · le Qorān : les 17 voix (VOIX, QARI_DEFAUT, qariCur, openQari… qariRender), les repères
+     mot à mot HOROV et l'illumination (suivreVerset, suivreArret), playVerse, joueMotVerset,
+     lireToutQoran, motBulle, motTap, numAyatHTML, « Lire la sourate » (ouvrirLireSourate),
+     les cinq boîtes (BOITES, boiteTap, majParts, partTap), les lanceurs de partie et les
+     écrans Construire (vt*), Réécrire (vw*), Ordonner (st*), Réciter (_rec, recToggle…) ;
+   · le vocabulaire : allReviewWords, dueReviewWords, REV_INT…, startReview (match, vf, mcq,
+     assemble), le stylo ✏️ (openWrite… closeWrite) ;
+   · la grammaire : NOTIONS_GRAM, gramEcransU8/U9, gramFile, lancerGrammaire, gramMaitrise, gramFaute ;
+   · les lettres : letterGridHTML, badgeSolaire, LETSEL, startSelectedLetters, formsOf, learnedLettersList ;
+   · les Noms d'Allah (NOMS_ALLAH, NASEL, nomTog, startNoms, lumTap, majPopNoms) et l'adoption
+     Supabase (CONTENU, contentPull — rappelé à DOMContentLoaded par index.html) ;
+   · l'entonnoir launchQuranReview et la fin finishReview ;
+   · l'état du hub, en liaisons lexicales globales : curSourate, curReviserTab, QCTX, GRAMSES,
+     WPEN, VFT, accQ, NASEL, LETSEL, _lireTout, _qariPlay, _suivi, boiteOuverte, partChoisie, _tipT, _rec.
 
-   ═══ POURQUOI UN SCRIPT CLASSIQUE, ET PAS UN MODULE — MESURÉ, PAS SUPPOSÉ ═══
-   ① LE HUB SERT AU PREMIER RENDU. `showTab('home')`, dernière ligne du grand
-      script, appelle motBulleOff() en première ligne (ui/navigation.js) — le SEUL
-      appel nu du premier rendu ; ensuite, au doigt, Paramètres lit qariCur() et
-      renderReviser lit huit noms d'ici. Mesuré en Chrome headless le 16/09 : la
-      page avec ce bloc DIFFÉRÉ rend un accueil VIDE À VIE (« motBulleOff is not
-      defined »). Garder motBulleOff seul classique suffirait au premier rendu,
-      mais ouvrirait une fenêtre « doigt avant module » sur les ~40 gestes de
-      l'onglet (tous des onclick en ligne, produits par ui/reviser.js et par ici) —
-      la classe de risque que le lecteur a dû fermer avec lecteurPret() le 14/09.
-      Un script classique, exécuté avant le grand script, n'ouvre aucune fenêtre.
-   ② curSourate est LU par ui/reviser.js, ui/accueil.js et src/player/ (nom nu) et
-      RÉASSIGNÉ par pickSurah (index.html) ; curReviserTab est lu ET réassigné par
-      renderReviser ; QCTX et GRAMSES sont posés par un harnais dans la fenêtre ;
-      `openWrite(WPEN.w.w)` lit une variable depuis un onclick. Un module LIT et
-      RÉASSIGNE un `let` classique par son nom nu (mesuré) ; ce sont les `let` qu'il
-      DÉCLARERAIT qui deviendraient privés — ces cinq-là resteraient donc dans le
-      monde classique, comme l'état du joueur : un coût, pas une impossibilité
-      (règle du 15/09 : « ce qui doit être RELU par le monde classique n'a rien à
-      faire dans un module »). Coût chiffré de l'alternative : 1 fonction à garder
-      classique, 3 gardes de rendu, ~40 gestes exposés, 5 `let` à laisser dans
-      index.html, 3 évaluations de harnais, 2 bacs du studio, ~160 noms à publier.
-   ③ Cinq instructions AGISSENT au chargement — neuf dans l'arbre, avec deux `new Set()`
-      et deux tables littérales — (la voix par défaut S.qari et sa
-      migration, les Noms d'Allah versés dans la table du son, l'adoption du
-      dernier contenu connu), et elles ne lisent que ce que les douze scripts
-      chargés AVANT déclarent : S et saveLocal (progression.js), inscrireLeSon
-      (son.js), FATIHA et SOURATES (donnees.js), localStorage. Le banc le prouve en
-      chargeant ce fichier dans un bac après ces douze scripts, dérivés des balises.
-      ⚠️ Il ne peut donc PAS être éprouvé dans un bac NU comme ui/*.js : la garde de
-      build charge ses prédécesseurs (garderLaRevision, vite.config.mjs).
+   POURQUOI UN SCRIPT CLASSIQUE (journal : revision.js · pourquoi classique)
+   ① le hub sert au premier rendu : showTab('home') appelle motBulleOff() (ui/navigation.js) ;
+      différé, l'accueil reste vide à vie. Un module ouvrirait aussi une fenêtre « doigt avant
+      module » sur les gestes en ligne de l'onglet.
+   ② curSourate, curReviserTab, QCTX, GRAMSES et WPEN sont lus ou réassignés par d'autres
+      scripts, un harnais ou un onclick : déclarés dans un module, ils deviendraient privés.
+   ③ il AGIT au chargement (S.qari et sa migration, les Noms versés dans la table du son,
+      l'adoption du dernier contenu connu) et ne lit alors que S, saveLocal (progression.js),
+      inscrireLeSon (son.js), FATIHA, SOURATES (donnees.js) et localStorage.
+      ⚠️ Pas éprouvable dans un bac nu : la garde charge ses prédécesseurs (garderLaRevision).
+   Balise nue, exactement <script src="revision.js"></script> (outils/inventaire.js la relit),
+   sous ui/reviser.js et avant le grand script. Ni defer, ni module, ni import/export.
 
-   Chargé par <script src="revision.js"></script> — la balise EXACTEMENT ainsi,
-   nue : outils/inventaire.js relit VOIX et NOMS_ALLAH par le texte des balises —
-   sous ui/reviser.js et AVANT le grand script. Ni `defer`, ni `type="module"`, ni
-   `import`, ni `export` — jamais. Il est dans CORE du service worker : hors ligne,
-   sans lui, l'accueil ne se peint pas (voir ①).
-
-   ⚠️ LA PRÉSÉANCE DANS LA TABLE DU SON EST CELLE D'AVANT, ET C'EST VOULU. Ce fichier verse
-   au chargement la graine des Noms d'Allah puis le cache Supabase ; les mots des unités 1 à 7
-   sont versés par son.js — déplacés là le 16/09 depuis index.html, pour rester AVANT.
-   Contre la table réelle (99 Noms), deux mots divergent du package (الصَّمَدُ, اللَّهُ :
-   mot-* / nom-*) : laissé dans index.html, le package aurait gagné en avion et deux mots
-   auraient changé de prise. Le banc ⑤ le mesure avec un cache pré-rempli : le cache gagne.
+   ⚠️ Préséance dans la table du son : les mots des unités 1-7 (son.js, chargé avant), puis la
+   graine des Noms, puis le cache Supabase, qui GAGNE (الصَّمَدُ, اللَّهُ divergent du package).
+   Le banc ⑤ le mesure avec un cache pré-rempli.
 
    ═══ LE CONTRAT (résolu À L'APPEL, jamais à la définition) ═══
    index.html : toast, lecteurPret, knownLetterSet, wordReadable, SOLAIRES_14, LUNAIRES_14,
    estSolaire (lus par badgeSolaire), U8, QUEUE, qi, curU,
    curD, total, wrongCount, MISSED, inRetry, EXAM, REVIEW, REVSES, REVFREE, backTo,
-   _grainesSession, pendingStreak · constance.js (depuis le 16/09) : feteJourPending,
+   _grainesSession, pendingStreak · constance.js : feteJourPending,
    GRAINES, gagnerGraines, bumpConstance, validerJour, checkBadges, confettiBurst,
    fillFinishCases, fillFinishConstance, today, _addDays — chargé APRÈS ce fichier,
-   donc résolu à l'appel seulement, jamais au chargement · progression.js : S, save, saveLocal, dkey,
+   donc résolu à l'appel seulement · progression.js : S, save, saveLocal, dkey,
    unitUnlocked, unitValidated, HEARTS_MAX, SB, SYNC · son.js : speak, sayLetterName,
    stopAudio, okBeep, playSfx, toc, spkSVG, inscrireLeSon, _sndGen, _curAudio ·
    donnees.js : UNITS, SOURATES, FATIHA, letterKey, strip · generateurs.js : shuffle,
@@ -92,34 +46,18 @@
    ui/ : renderReviser, renderCours, renderParams · src/player/ (module) : renderStep,
    advance, ecransNotes · src/ecrans/ (module) : splitUnits, asmAttendu, asmHintOff,
    tileLabel, isHarakat, ctaOn, ctaOn2, elogeHTML, mascotteStop, mascotteDanse.
-   Le banc dresse cette liste lui-même et exige que chaque nom soit déclaré quelque
-   part dans la page. Dans l'autre sens, index.html, ui/*.js, src/player/ et le pont
-   de l'unité 8 appellent ce fichier par ses noms nus — à l'appel, jamais au chargement.
+   Le banc dresse cette liste lui-même. Dans l'autre sens, index.html, ui/*.js, src/player/ et
+   le pont de l'unité 8 appellent ce fichier par ses noms nus, à l'appel.
 
-   ═══ CE QUI RESTE DANS index.html, VOLONTAIREMENT ═══
-   L'état du joueur (QUEUE, qi, REVIEW, REVSES, RECHARGE, REVFREE, backTo…) — lu et
-   réassigné par le lecteur ; knownLetterSet, wordReadable, fatihaPct, arReveal —
-   l'accueil, le Profil et la colonne de bureau les partagent ; les tutoriels
-   (letterTut, vocabTut, coursTut…) et la ligne de la hamza des leçons (hamzaRailHTML,
-   roleTap) — sous-lot 8 ; les badges, la sauvegarde, toast, _addDays, returnFromPlayer,
-   et le versement des mots des unités 1 à 7 dans la table du son.
-
-   GARDES : outils/verifier-revision.mjs (bac node:vm dans l'ordre des balises, une
-   séance jouée, les 165 noms sortis d'index.html, le contrat, des mutants),
-   previews/_verif_revision.html (la vraie page, source et dist — et la copie SANS ce
-   fichier, dont l'accueil ne se peint pas), garderLaRevision() dans vite.config.mjs,
-   CORE du sw, verifier-sw-horsligne.mjs, verifier-paquet-natif.js — et les harnais du
-   hub qui existaient déjà : _verif_reviser_qoran, _verif_grammaire, _verif_vocab_u9,
-   _verif_sync_nuage, _verif_interface, _verif_lecteur.
+   Gardes : outils/verifier-revision.mjs, previews/_verif_revision.html (source, dist, et la copie
+   sans ce fichier), garderLaRevision() (vite.config.mjs), CORE du sw, verifier-sw-horsligne.mjs,
+   verifier-paquet-natif.js — et les harnais du hub (_verif_reviser_qoran, _verif_grammaire…).
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ===== Réviser « Les lettres » : la grille des 28, sélectionnable ===== */
 var LETSEL=new Set();
 
-/* ⚠️ 17/08 — LE NOM, PAS LE SON (Myriam) : « il serait préférable ici d'avoir le nom des
-   lettres. Ce n'est que quand l'élève a tracé la lettre qu'il faut avoir le son de la
-   lettre, comme pour la pédagogie Montessori. » On nomme ce qu'on montre ; on ne donne le
-   son qu'une fois le geste accompli. */
+/* Le NOM, pas le son : le son ne vient qu'après le tracé (journal : revision.js · le nom, pas le son). */
 function letToggle(k){ if(LETSEL.has(k))LETSEL.delete(k); else{ LETSEL.add(k); sayLetterName(k); } renderReviser('lettres'); }
 function letSelAll(){ knownLetterSet().forEach(function(k){LETSEL.add(k);}); renderReviser('lettres'); }
 function letSelClear(){ LETSEL.clear(); renderReviser('lettres'); }
@@ -132,9 +70,7 @@ function startSelectedLetters(){
   save(); QCTX=null; launchQuranReview(steps);
 }
 
-/* Le badge n'apparaît qu'une fois l'unité 8 ouverte : avant, il désignerait une
-   distinction que l'élève n'a pas apprise — et un repère qu'on ne sait pas lire
-   est du bruit. */
+/* Le badge ☀️/🌙 n'apparaît qu'une fois l'unité 8 ouverte : avant, c'est du bruit. */
 function badgeSolaire(k){
   if(!unitUnlocked(7))return '';
   if(SOLAIRES_14.indexOf(k)<0&&LUNAIRES_14.indexOf(k)<0)return '';   /* la hamza, hors des 28 */
@@ -160,32 +96,15 @@ function letterGridHTML(){
     if(!unlocked.has(k)) return '<div class="lg-cell locked"><span class="lk">🔒</span>'+g+'</div>';
     var sel=LETSEL.has(k);
     var cls='lg-cell '+(sel?'sel':'avail')+(nouv.has(k)?' nouv':'');
-    /* 🔴 ✨ ("tout juste débloquée") RETIRÉ (Myriam, 05/09 : « ça fait trop
-       chargé en émojis et surtout pas utile ») — le tuto 2/5 est réécrit en
-       conséquence. Le halo doré (.nouv, le pulse discret) reste : elle n'a
-       objecté qu'à L'EMOJI, jamais au repère lui-même.
-       🔴 🔸 ("à revoir", coin bas-droit) RETIRÉ à son tour (05/09, 2e retour :
-       « devenait inutile ») — avec le Set `revoir` qui ne servait qu'à lui.
-       Le coin haut-droit garde le repère ☀️/🌙 (voir badgeSolaire ci-dessus),
-       et le coin bas-droit est maintenant libre. */
+    /* Le halo .nouv reste ; les emojis ✨ et 🔸 ont été retirés (journal : revision.js · emojis de la grille). */
     var mk=(sel?'<span class="ck">✓</span>':'')+badgeSolaire(k);
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
-  /* ═══ LA HAMZA — hors des 28, et c'est TOUT l'enseignement ═══
-     Elle apparaît dès que le alif est connu (`knownLetterSet` l'ajoute déjà : « la hamza
-     s'apprend avec le alif »). Les deux sièges que l'app n'enseigne pas encore — le wāw et
-     le yāʾ — restent VERROUILLÉS, comme les lettres d'une unité future : on montre qu'ils
-     existent sans prétendre les avoir enseignés.
-     ⚠️ Ces cases ne se SÉLECTIONNENT pas : réviser la hamza, ce serait tracer le alif, qui
-     a déjà sa case. Ici on touche pour ENTENDRE — le geste le plus universel de l'app. */
+  /* La hamza, hors des 28 : visible dès que le alif est connu ; les sièges wāw et yāʾ restent
+     verrouillés (pas encore enseignés). ⚠️ Ces cases ne se sélectionnent pas : on touche pour ENTENDRE. */
   if(unlocked.has('ا')){
-    /* ⚠️ 17/08 — LES ÉTIQUETTES SONT RETIRÉES (Myriam : « l'alphabet du bas apparaît encore
-       avec des annotations sur les box sous la ligne pointillée »). Le CSS plus haut (l. ~772)
-       affirmait déjà ce retrait depuis le 14/08 : il n'avait vécu que dans une preview, jamais
-       reporté ici — le code continuait de les écrire. Le nom du siège s'ÉCOUTE au toucher,
-       il ne s'écrit pas, comme le nom des lettres depuis le 14/08.
-       ⚠️ Ne pas remettre `<span class="hzl">` : le `min-height:44px` posé le 14/08 tient la
-       hauteur des cases sans étiquette — c'est lui qui garde la zone de touche réglementaire. */
+    /* ⚠️ Ne pas remettre d'étiquette <span class="hzl"> : le nom du siège s'écoute ; min-height:44px
+       tient seul la zone de touche (journal : revision.js · étiquettes de la hamza). */
     var SIEGES=[['ء',1],['أ',1],['إ',1],['ؤ',0],['ئ',0]];
     h+='<div class="lg-hamza">'+SIEGES.map(function(s){
       return s[1]
@@ -198,23 +117,13 @@ function letterGridHTML(){
 }
 
 /* ── LES RÉCITATEURS ─────────────────────────────────────────────────────────
-   17 voix, diffusées par cdn.islamic.network. RIEN n'est hébergé chez nous :
-   aucun grand catalogue ne concède l'usage commercial (Quran Foundation exige un
-   contrat écrit, QuranicAudio et everyayah sont non-commerciaux), mais les
-   conditions d'islamic.network autorisent explicitement le streaming et
-   demandent seulement de mettre en cache côté client — ce que sw.js fait.
-   Contrepartie assumée par Myriam le 02/08/2026 : « tant pis pour le réseau,
-   je préfère la légalité ». Les LEÇONS, elles, restent hors ligne.
-
-   kb  : le débit FAIT PARTIE de l'URL et change d'une voix à l'autre. Une valeur
-         fausse renvoie un 403, pas un son de moindre qualité.
-   sec : durée moyenne d'un verset de la Fātiḥa, mesurée sur les fichiers réels
-         (afinfo, pas la taille du mp3 : le débit réel diffère parfois de l'URL).
-         C'est le tempo, donc l'articulation — la liste s'ordonne dessus.
-
-   ÉCARTÉES APRÈS VÉRIFICATION, ne pas les remettre :
-   · ar.minshawimujawwad — fichiers identiques au MD5 près à ar.minshawi ;
-   · ar.abdulsamad — découpage décalé (67 s pour la basmala, 145 s pour الم).  */
+   17 voix. Le flux cdn.islamic.network est autorisé en streaming avec cache client (sw.js) ;
+   les grands catalogues refusent l'usage commercial (journal : revision.js · récitateurs).
+   kb  : le débit FAIT PARTIE de l'URL ; une valeur fausse renvoie un 403.
+   sec : durée moyenne d'un verset de la Fātiḥa mesurée sur les fichiers (afinfo) — le tempo,
+         qui ordonne la liste.
+   Écartées, ne pas les remettre : ar.minshawimujawwad (identique au MD5 à ar.minshawi),
+   ar.abdulsamad (découpage décalé). */
 const VOIX=[
  {id:'ar.aymanswoaid', loc:1,        kb:64,  sec:7.1, fr:'Ayman Suwayd',          ar:'أيمن سويد',            st:'m', tag:'tajwīd'},
  {id:'ar.ibrahimakhbar',      kb:32,  sec:7.2, fr:'Ibrāhīm al-Akhḍar',     ar:'إبراهيم الأخضر',       st:'m'},
@@ -234,48 +143,27 @@ const VOIX=[
  {id:'ar.mahermuaiqly', loc:1,       kb:128, sec:3.7, fr:'Māhir al-Muʿayqilī',    ar:'ماهر المعيقلي',        st:'m'},
  {id:'ar.husarymujawwad',     kb:128, sec:11.1,fr:'al-Ḥuṣarī',             ar:'محمود خليل الحصري',    st:'j'}
 ];
-/* ═══ LA VOIX PAR DÉFAUT (17/08) ═══════════════════════════════════════════════════
-   Myriam : « il n'y a pas la barre qui surligne le verset lu ». La cause n'était pas
-   l'écran mais LA VOIX : `qariCur()` retombait sur `VOIX[0]`, et comme la liste est
-   ordonnée PAR TEMPO (le plus lent d'abord, pour les débutantes), c'est Ayman Suwayd qui
-   se trouvait là — **la seule voix de tête sans repères `HOROV`**. Sans repères,
-   `suivreVerset` sort avant d'allumer quoi que ce soit : la fonction phare était donc
-   invisible pour qui ne touche jamais au sélecteur. Sur téléphone comme sur ordinateur.
-   MESURÉ sur les 7 versets de la Fātiḥa, voix par voix : al-Ḥuṣarī et al-ʿAfāsī sont les
-   plus lents (6,1 s) avec une segmentation COMPLÈTE (7/7) et des fichiers hébergés.
-   Retenu : **al-Ḥuṣarī** — c'est lui qui a enregistré le muṣḥaf muʿallim, la récitation
-   faite POUR enseigner. Le tempo lent et l'articulation d'un maître d'école : exactement
-   ce que cherche une primo-lectrice.
-   ⚠️ On ne RÉORDONNE PAS `VOIX` : son ordre par tempo porte un sens, et Ayman Suwayd reste
-   en tête de liste comme maître du tajwīd. On pose un défaut EXPLICITE, c'est tout.
-   ⚠️ Celle qui a déjà choisi sa voix la garde : `S.qari` est renseigné, on n'y touche pas. */
+/* La voix par défaut : al-Ḥuṣarī (lent, segmentation HOROV complète, hébergé). VOIX[0] n'a pas
+   de repères, donc rien ne s'illuminait (journal : revision.js · la voix par défaut).
+   ⚠️ Ne pas réordonner VOIX (l'ordre par tempo porte un sens) ; un S.qari déjà posé est respecté. */
 const QARI_DEFAUT='ar.husary';
-/* ⚠️ POSÉ ICI, JAMAIS PLUS HAUT. `QARI_DEFAUT` est un `const` : avant sa déclaration il vit
-   dans la zone morte temporelle, et y toucher lève un ReferenceError qui tue TOUT le script
-   (l'incident de l'apostrophe du 13/08, en une ligne). `node --check` ne voit rien : il
-   vérifie la syntaxe, pas l'exécution. Écrire la voix dans l'état sert au SÉLECTEUR (épingler
-   la bonne ligne) ; les repères, eux, passent par `qariCur().id` et n'en dépendent pas. */
+/* ⚠️ Posé APRÈS la déclaration de QARI_DEFAUT : avant, zone morte temporelle, et le
+   ReferenceError tue tout le script (node --check ne le voit pas). Écrire S.qari sert au
+   sélecteur (épingler la ligne) ; les repères passent par qariCur().id. */
 if(!S.qari)S.qari=QARI_DEFAUT;
-/* ⚠️ LES ÉLÈVES DÉJÀ INSCRITES ont l'ANCIEN défaut ÉCRIT dans leur état (`DEF` le posait) : ça
-   ressemble à un choix sans en être un. On ne bascule que celles qui n'ont JAMAIS ouvert le
-   sélecteur (`qariChoisi` absent) — un vrai choix d'Ayman Suwayd est respecté. Une seule fois. */
+/* Migration unique : l'ancien défaut écrit par DEF ressemble à un choix ; on ne bascule que
+   celles qui n'ont jamais ouvert le sélecteur (qariChoisi absent). */
 if(!S.qariMigr0817){ S.qariMigr0817=1;
   if(!S.qariChoisi && S.qari==='ar.aymanswoaid') S.qari=QARI_DEFAUT;
-  /* ⚠️ 04/09 — saveLocal, PAS save. Cette migration TOP-NIVEAU est le save() de démarrage
-     que ma relecture avait manque : gardee par son drapeau, elle ne se declenche qu'UNE
-     fois par appareil — donc jamais sur la machine qu'on teste, et pile sur celle qu'on
-     ressort apres des semaines, c'est-a-dire quand la synchro compte. Avec save() elle
-     rajeunissait S._ts avant l'arbitrage de cloudPull (voir saveLocal). C'est le harnais
-     _verif_sync_nuage.html qui l'a trouvee, pas la lecture du code. */
+  /* ⚠️ saveLocal, PAS save : save() rajeunirait S._ts avant l'arbitrage de cloudPull
+     (journal : revision.js · migration et saveLocal). */
   try{ saveLocal(); }catch(e){} }
 function qariCur(){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===S.qari)return VOIX[i];
   for(var j=0;j<VOIX.length;j++)if(VOIX[j].id===QARI_DEFAUT)return VOIX[j];
   return VOIX[0]; }
 function qariById(id){ for(var i=0;i<VOIX.length;i++)if(VOIX[i].id===id)return VOIX[i]; return VOIX[0]; }
-/* 10 voix HÉBERGÉES (Myriam 10/08 : « le Qorān ne se monnaie pas » — provisoire tant que
-   l'app est gratuite ; un récitateur sera payé plus tard pour des sons libres de droits).
-   Fichiers : audios-app-alaq/recit/<id>/<n°>.mp3, versets 1-7 (Fātiḥa). Le flux
-   cdn.islamic.network reste le repli et sert les 7 voix non hébergées. */
+/* 10 voix hébergées (audios-app-alaq/recit/<id>/<n°>.mp3, versets 1-7) ; le flux cdn reste
+   le repli et sert les 7 autres (journal : revision.js · voix hébergées). */
 function qariUrlCdn(v,aya){ return 'https://cdn.islamic.network/quran/audio/'+v.kb+'/'+v.id+'/'+aya+'.mp3'; }
 function qariUrl(v,aya){ return (v.loc&&aya>=1&&aya<=7)?('audios-app-alaq/recit/'+v.id+'/'+aya+'.mp3'):qariUrlCdn(v,aya); }
 var _qariPlay=null; // la voix qu'on écoute DANS le sélecteur (≠ la voix choisie)
@@ -288,13 +176,12 @@ function qariBulleTog(){ var b=document.getElementById('qbulle'),i=document.getE
 function qariBulleOff(){ var b=document.getElementById('qbulle'),i=document.getElementById('qbi');
   if(b)b.classList.remove('on'); if(i)i.classList.remove('on'); }
 
-function qariPick(id){ S.qari=id; S.qariChoisi=1; save();   /* 17/08 : trace du choix EXPLICITE */ qariRender();
+function qariPick(id){ S.qari=id; S.qariChoisi=1; save();   /* trace du choix explicite */ qariRender();
   { var s=document.querySelector('.mushaf-sous'); if(s)s.textContent=qariCur().fr+' · touche un verset ou un mot'; }
   try{ renderReviser(curReviserTab); }catch(e){} // la ligne « Récitateur » se met à jour
-  try{ renderParams(); }catch(e){}               // et la carte « Récitateur » des Paramètres (11/08)
+  try{ renderParams(); }catch(e){}               // et la carte « Récitateur » des Paramètres
   try{ var n=document.getElementById('qariNom'), pl=document.getElementById('player');
-    // ⚠️ le #qariNom du DERNIER spot survit dans le lecteur CACHÉ (audit 10/08) : la branche
-    // « choisi depuis la leçon » exige le lecteur OUVERT, sinon Réviser garde son propre flux
+    // ⚠️ le #qariNom du dernier spot survit dans le lecteur CACHÉ : cette branche exige le lecteur ouvert
     if(n&&pl&&pl.classList.contains('on')){ n.textContent=qariCur().fr; closeQari(); if(typeof window._spotVi==='number')playVerse(window._spotVi); } }catch(e){}
 }
 function qariHear(id,ev){
@@ -310,7 +197,7 @@ function qariHear(id,ev){
     x.addEventListener('ended',function(){ if(gen!==_sndGen)return; _qariPlay=null; qariRender(); },{once:true});
   };
   brancher(a);
-  var lireCdn=function(){ if(gen!==_sndGen||_curAudio!==a)return;   // le MÊME repli que playVerse (audit 10/08)
+  var lireCdn=function(){ if(gen!==_sndGen||_curAudio!==a)return;   // le même repli que playVerse
     var b=new Audio(qariUrlCdn(v,1)); _curAudio=b; brancher(b);
     b.addEventListener('error',ko,{once:true});
     var p2=b.play(); if(p2&&p2.catch)p2.catch(ko); };
@@ -337,9 +224,7 @@ function qariRow(v,etat){
       (qariSuivi(v.id)?'<span class="qhoro">'+qariSuivi(v.id)+'</span>':'')+
       '</span>'+
     '<span class="qsec">'+Math.round(v.sec)+'<em>s</em></span>'+
-    /* 05/09 — le texte (« ▶ écouter » / « ⏸ stop » / « ⋯ chargement ») cède la place
-       au haut-parleur animé (spkSVG, comme partout ailleurs) ; l'aria-label garde les
-       trois états pour qui n'y voit pas les ondes s'animer. */
+    /* le haut-parleur animé ; l'aria-label garde les trois états */
     '<span class="qhear" onclick="qariHear(\''+v.id+'\',event)" role="button" '+
       'aria-label="'+(pl?(etat==='load'?'Chargement de l’extrait':'Arrêter l’extrait'):'Écouter un extrait')+'">'+
       spkSVG(pl?'on':'')+'</span></button>';
@@ -356,17 +241,11 @@ function qariRender(etat){
   document.getElementById('qpin').innerHTML='<span class="cap">voix choisie</span>'+qariRow(qariCur(),etat);
 }
 
-/* ═══════════ SUIVRE LA RÉCITATION MOT À MOT (11/08/2026, demande de Myriam) ═══════════
-   quran.com publie, pour chaque verset, le DÉBUT et la FIN de chaque mot en millisecondes.
-   Vérifié le 11/08 : leurs fichiers et ceux qu'on diffuse (cdn.islamic.network, et nos 70
-   récitations hébergées) sont le MÊME master — 2:261 al-ʿAfāsī fait 384 231 octets et
-   23,980 s des deux côtés. Les repères s'appliquent donc tels quels, sans rien re-télécharger.
-   La Fātiḥa entière × 8 de nos 17 voix tient en 3,2 Ko : c'est EMBARQUÉ, donc HORS LIGNE.
-   ⚠️ On vérifie TOUJOURS que le nombre de segments égale le nombre de mots du verset :
-   as-Sudays fusionne des mots du verset 1, ʿAbd al-Bāsiṭ le verset 4. Quand ça ne colle pas
-   — ou quand la voix n'est pas dans la table (Ayman Suwayd, Ḥudhayfī…) — on n'illumine PAS.
-   On n'invente pas un repère : le verset s'affiche simplement comme avant.
-   Relevés bruts : donnees/horodatage-mots-fatiha.json. */
+/* ═══ SUIVRE LA RÉCITATION MOT À MOT ═══
+   Repères de quran.com (début/fin de chaque mot, en ms), sur le même master que nos fichiers ;
+   embarqués, donc hors ligne (journal : revision.js · suivre mot à mot). Relevés bruts :
+   donnees/horodatage-mots-fatiha.json.
+   ⚠️ Nombre de segments ≠ nombre de mots, ou voix absente : on n'illumine PAS, on n'invente rien. */
 const HOROV={"ar.alafasy":{"1":[[60,610],[620,1310],[1320,2450],[2460,5970]],"2":[[80,960],[970,1800],[1810,2460],[2470,5140]],"3":[[40,1230],[1240,4160]],"4":[[60,840],[850,1400],[1410,4280]],"5":[[30,970],[980,1710],[1720,2870],[2880,6290]],"6":[[30,670],[680,1630],[1640,5120]],"7":[[30,740],[750,1700],[1710,2620],[2630,3590],[3600,4210],[4220,5290],[5300,6320],[6330,6630],[6640,12320]]},"ar.husary":{"1":[[50,510],[520,1180],[1190,2340],[2350,4480]],"2":[[700,1410],[1420,2200],[2210,2880],[2890,5310]],"3":[[150,1400],[1410,3530]],"4":[[0,1040],[1050,1660],[1670,3630]],"5":[[350,1310],[1320,2210],[2220,3510],[3520,5900]],"6":[[300,870],[880,1790],[1800,4480]],"7":[[450,1200],[1210,2110],[2120,3070],[3080,4220],[4230,4940],[4950,6200],[6210,7370],[7380,7690],[7700,13830]]},"ar.minshawi":{"1":[[600,930],[940,1630],[1640,2730],[2740,4170]],"2":[[800,1710],[1720,2630],[2640,3290],[3300,4890]],"3":[[800,2080],[2090,3700]],"4":[[0,1720],[1730,2320],[2330,3570]],"5":[[1000,2040],[2050,2860],[2870,4120],[4130,5570]],"6":[[900,1490],[1500,2660],[2670,4390]],"7":[[950,1680],[1690,2760],[2770,3770],[3780,4900],[4910,5500],[5510,6780],[6790,7810],[7820,8290],[8300,10630]]},"ar.abdulbasitmurattal":{"1":[[600,970],[980,1560],[1570,2520],[2530,3920]],"2":[[1050,1700],[1710,2470],[2480,2970],[2980,4670]],"3":[[950,1920],[1930,3850]],"4":[[0,4573]],"5":[[900,1670],[1680,2340],[2350,3460],[3470,5040]],"6":[[1050,1540],[1550,2500],[2510,4480]],"7":[[1800,2340],[2350,3140],[3150,4010],[4020,4870],[4880,5470],[5480,6460],[6470,7390],[7400,7770],[7780,12350]]},"ar.shaatree":{"1":[[260,920],[930,1840],[1850,3430],[3440,6080]],"2":[[100,850],[860,1670],[1680,2320],[2330,4550]],"3":[[110,1530],[1540,4390]],"4":[[80,1050],[1060,2640],[2650,3670]],"5":[[150,1170],[1180,2200],[2210,3600],[3610,5730]],"6":[[40,870],[880,2060],[2070,5100]],"7":[[50,1080],[1090,2230],[2240,3360],[3370,5370],[5380,6270],[6280,8210],[8220,10520],[10530,11040],[11050,18510]]},"ar.abdurrahmaansudais":{"1":[["380","730"],["740","3082"]],"2":[["420","1000"],["1010","1860"],["1870","2430"],["2440","4190"]],"3":[["180","1140"],["1150","2880"]],"4":[["90","840"],["850","1620"],["1630","3010"]],"5":[["30","970"],["980","1720"],["1730","2840"],["2850","4400"]],"6":[["0","780"],["790","1620"],["1630","3850"]],"7":[["170","1030"],["1040","2050"],["2060","2910"],["2920","3930"],["3940","4580"],["4590","5660"],["5670","6650"],["6660","11140"]]},"ar.hanirifai":{"1":[[0,1810],[1820,2770],[2780,3710]],"2":[[650,1290],[1300,2300],[2310,2920],[2930,4920]],"3":[[30,1430],[1440,2960]],"4":[[80,980],[990,1610],[1620,2690]],"5":[[180,1170],[1180,1980],[1990,3260],[3270,4820]],"6":[[250,920],[930,1940],[1950,4100]],"7":[[40,740],[750,1770],[1780,2880],[2890,4330],[4340,4920],[4930,6070],[6080,7220],[7230,7530],[7540,12670]]},"ar.saoodshuraym":{"1":[[140,650],[660,1160],[1170,2110],[2120,2560]],"2":[[100,610],[620,1410],[1420,1810],[1820,3270]],"3":[[30,890],[900,2820]],"4":[[100,790],[800,1510],[1520,2560]],"5":[[50,1060],[1070,1840],[1850,3120],[3130,4410]],"6":[[200,680],[690,1690],[1700,3320]],"7":[[60,690],[700,1560],[1570,2370],[2380,3670],[3680,4170],[4180,5110],[5120,6020],[6030,6380],[6390,11650]]}};
 var _suivi=0,_suiviJeton=0;
 function suivreArret(){
@@ -389,14 +268,11 @@ function suivreVerset(vi,a){
     if(!h||h.length!==mots.length)return;                           // segmentation absente ou partielle
     var gen=_sndGen, jeton=_suiviJeton;
     var pas=function(){
-      /* ⚠️ Un tour PÉRIMÉ ne doit rien éteindre. Quand le fichier hébergé échoue,
-         `lireCdn` relance un second suivi sur le MÊME verset : l'ancienne boucle
-         survivait (`_curAudio` était juste vérifié non nul) et remettait les mots
-         à zéro une image sur deux — d'où « il n'y a que le premier mot ». */
+      /* ⚠️ Un tour périmé ne doit rien éteindre : le repli lireCdn relance un second suivi
+         sur le même verset (journal : revision.js · tour périmé du suivi). */
       if(jeton!==_suiviJeton) return;
       if(gen!==_sndGen||_curAudio!==a){ suivreArret(); return; }
-      /* le verset peut avoir été redessiné (zoom, changement d'onglet) : les nœuds
-         gardés en main ne sont alors plus dans la page et plus rien ne s'allume. */
+      /* le verset a pu être redessiné : on reprend les nœuds */
       if(!box.isConnected){ box=document.querySelector('[data-suivre="'+vi+'"]');
         if(!box){ suivreArret(); return; } mots=box.querySelectorAll('.vw');
         if(mots.length!==h.length){ suivreArret(); return; } }
@@ -408,11 +284,8 @@ function suivreVerset(vi,a){
       }
       if(a.ended){                                                  // le verset entier reste allumé un instant
         for(i=0;i<mots.length;i++){ mots[i].classList.add('lu'); mots[i].classList.remove('en'); }
-        /* ⚠️ 13/08 — CETTE minuterie était la seule du fichier sans jeton. Avec
-           « LIRE TOUT », le verset suivant démarre 120 ms après la fin du précédent :
-           l'extinction différée du verset FINI venait éteindre le verset EN COURS,
-           1,4 s plus tard, pendant que la récitation continuait. (Signalé par Myriam :
-           « ça s'arrête brutalement tout en continuant la récitation orale ».) */
+        /* ⚠️ Minuterie à jeton : sans lui, avec LIRE TOUT, elle éteint le verset SUIVANT
+           (journal : revision.js · extinction du verset suivant). */
         _suivi=0; var _j=jeton;
         setTimeout(function(){ if(_j===_suiviJeton)suivreArret(); },1400); return;
       }
@@ -421,16 +294,13 @@ function suivreVerset(vi,a){
     _suivi=requestAnimationFrame(pas);
   }catch(e){}
 }
-/* Le numéro de fin d'ayah, en chiffres arabes ORIENTAUX dans le signe ۝ (U+06DD) —
-   variante A choisie par Myriam le 13/08 : c'est le vrai signe du mushaf, et Noto Naskh
-   le compose en rosace autour du chiffre. Le chiffre est posé PAR LE CODE (jamais dessiné). */
+/* Numéro de fin d'ayah : chiffres arabes orientaux dans le signe ۝ (U+06DD) du mushaf ;
+   le chiffre est posé par le code, jamais dessiné (journal : revision.js · numéro de l'ayah). */
 const CHIF_AR=['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
 function numArabe(n){ return String(n).split('').map(function(c){ return CHIF_AR[+c]||c; }).join(''); }
 function numAyatHTML(vi){ return '<span class="ayano">\u06DD'+numArabe(vi+1)+'</span>'; }
 
-/* UN SEUL MOT : on entre dans le fichier du verset au repère du mot et on en sort au
-   suivant. Les repères (HOROV) sont ceux de quran.com, sur le MÊME master que nos
-   fichiers — donc aucun enregistrement à produire. Sans repères : le verset entier. */
+/* UN SEUL MOT : on lit le fichier du verset entre les repères HOROV du mot. Sans repères : le verset entier. */
 function joueMotVerset(vi,wi){
   try{
     var SRv=SOURATES[(typeof curSourate!=='undefined'?curSourate:0)]||SOURATES[0];
@@ -453,8 +323,7 @@ function joueMotVerset(vi,wi){
   }catch(e){}
 }
 
-/* LIRE TOUT : les versets s'enchaînent directement les uns après les autres (demande de
-   Myriam), et l'illumination mot à mot court d'un bout à l'autre. Un second appui arrête. */
+/* LIRE TOUT : les versets s'enchaînent ; un second appui arrête. */
 var _lireTout=false;
 function majLireTout(){ var b=document.getElementById('btLireTout'); if(!b)return;
   b.classList.toggle('on',_lireTout);
@@ -472,11 +341,9 @@ function lireToutQoran(){
     a.addEventListener('ended',suite,{once:true});
   })(0);
 }
-/* ═══ TOUCHER UN MOT DE LA SOURATE (13/08) ═══
-   Il s'éclaire, il se répète, ET il se traduit. Les traductions viennent du relevé
-   MOT À MOT de la Fātiḥa déjà présent (`SOURATES[n].tr`) — rien à produire.
-   ⚠️ `motTap` n'est appelé QUE depuis la sourate illuminée : dans les exercices, une
-   tuile qui sonne appelle `joueMotVerset` directement, sinon on soufflerait la réponse. */
+/* Toucher un mot de la sourate : il s'éclaire, se répète et se traduit (SOURATES[n].tr).
+   ⚠️ motTap n'est appelé que depuis la sourate illuminée : un exercice appelle joueMotVerset,
+   sinon on soufflerait la réponse. */
 function motBulleOff(){ var b=document.getElementById('motbulle'); if(b)b.classList.remove('on'); }
 function motBulle(vi,wi){
   var b=document.getElementById('motbulle'); if(!b)return;
@@ -487,17 +354,10 @@ function motBulle(vi,wi){
   document.getElementById('mbSrc').textContent=SR.nom+' · verset '+(vi+1)+' · mot '+(wi+1)+'/'+mots.length;
   var s=document.getElementById('mbSpk');
   s.innerHTML=spkSVG(); s.onclick=function(){ joueMotVerset(vi,wi); };
-  /* ⚠️ On MESURE la barre du bas : sa hauteur change avec l'encoche du téléphone ET
-     avec les « grands caractères ». Une valeur devinée la masquait (harnais 13/08). */
-  /* ⚠️ `offsetParent` est TOUJOURS null pour un élément `position:fixed` — et la barre
-     du bas en est un. Le test « la barre est-elle visible ? » passe donc par le style
-     calculé, sinon le bandeau se reposait à 0 et la masquait (harnais 13/08). */
-  /* ⚠️ 17/08 — SUR ORDINATEUR, `.botnav` N'EST PLUS UNE BARRE DU BAS. Dès 700px de large
-     elle devient le rail GAUCHE (`top:0;bottom:0`) : sa hauteur mesurée vaut TOUT l'écran.
-     La bulle recevait donc `bottom:~1000px` et sortait par le HAUT de la fenêtre — elle
-     s'ouvrait bel et bien, on ne la voyait jamais (Myriam, 17/08 : « il n'y a pas la popup
-     de traduction qui s'affiche en bas »). La mesure ne vaut que tant que la barre est
-     horizontale : on se cale sur la MÊME largeur de bascule que la feuille de style. */
+  /* ⚠️ On MESURE la barre du bas (encoche, grands caractères) ; son test de visibilité passe par
+     le style calculé (offsetParent est toujours null en position:fixed). ⚠️ Dès 700px, .botnav
+     devient le rail gauche : même largeur de bascule que la feuille de style, sinon la bulle
+     sort par le haut (journal : revision.js · la bulle de traduction). */
   try{
     if(window.matchMedia&&window.matchMedia('(min-width:700px)').matches){
       b.style.bottom='24px';                       // pas de barre du bas : on respire du bord
@@ -518,8 +378,7 @@ function playVerse(i){ // le verset : fichier HÉBERGÉ si la voix l'a, sinon le
     var v=qariCur(), aya=(SRv.first||1)+i;                       // n° GLOBAL du verset
     var u=qariUrl(v,aya);
     var a=new Audio(u); _curAudio=a;
-    // ⚠️ il y a désormais UN haut-parleur par verset : on allume celui de CE verset,
-    // sinon le premier de la page s'animait pour tout le monde.
+    // ⚠️ un haut-parleur par verset : on allume celui de CE verset
     var _ondes=function(x){ var s=document.querySelector('[data-suivre="'+i+'"] .vspk-in .spk')||
                                     document.querySelector('.vspk .spk'); if(!s)return;
       x.addEventListener('playing',function(){ if(gen===_sndGen)s.classList.add('on'); });
@@ -559,32 +418,14 @@ function revIntakeLeft(){
   return Math.max(0,REV_NEW_PER_DAY-S.revIn.n);
 }
 
-// Un mot n'entre en révision QUE lorsqu'il a été APPRIS : leçon « 🔗 Lire des mots » de son unité terminée.
-/* Le disque après lequel les mots d'une unité entrent en révision espacée. Dans les
-   unités-consonnes c'est « Lire des mots » ; l'unité 8 n'a pas ce disque — elle porte
-   le drapeau `vocab` sur celui qui achève ses 14 mots (D4 : lus en D1/D3, écrits en
-   D2/D4). Sans ce second cas, ses mots n'entreraient en révision qu'à la validation
-   de toute l'unité, bien plus tard que pour les autres. */
+/* Le disque après lequel les mots d'une unité entrent en révision : « Lire des mots »
+   (buildWords), ou le disque marqué vocab (unité 8), sinon ils n'entreraient qu'à la
+   validation de toute l'unité. */
 function _lireDone(idx){ const ds=discsFor(idx); for(let i=0;i<ds.length;i++){ if(ds[i].build===buildWords||ds[i].vocab)return !!S.done[dkey(idx,i)]; } return false; }
-/* 🔴 UN MOT N'ENTRE QU'UNE FOIS DANS LE VIVIER (04/09, signale par Myriam : « le mot
-   porte apparait deux fois dans le vocabulaire »). بَابٌ est enseigne par DEUX unites —
-   la 3 l'introduit avec le ب, la 8 l'oppose a الْبَابُ — et les deux lecons sont
-   legitimes : on n'en retire aucune. C'est la REVISION qui ne doit le porter qu'une
-   fois. Mesure sur les 99 mots (76 Supabase + 14 de l'unite 8 + 9 de l'unite 9), un
-   seul doublon, et trois consequences :
-   ① LE QCM DE TRADUCTION POUVAIT AVOIR DEUX BONNES REPONSES, et couter un cœur sur
-      la bonne. frOptions ecarte ses leurres sur le TEXTE FRANCAIS (`x.fr!==w.fr`) :
-      « porte » et « une porte » sont deux chaines differentes, le filtre ne les voit
-      pas. Le code etait juste — c'est la DONNEE qui se contredisait, et aucun test
-      ne peut voir ca ;
-   ② une session pouvait tirer le mot deux fois, donc afficher deux cartes arabes
-      identiques dans l'association ;
-   ③ S.rev est indexe par la graphie : repondre a l'une faisait avancer l'autre.
-   ⚠️ ON GARDE LA PREMIERE RENCONTREE, donc l'unite qui l'enseigne en premier — sans
-   quoi une eleve qui n'a ouvert que l'unite 3 et une autre qui a fini l'unite 8 ne
-   reviseraient pas la meme entree.
-   ⚠️ LA COMPARAISON PASSE PAR NFC : un doublon futur qui ne differerait que par
-   l'ordre des marques combinantes serait sinon invisible — le piege NFC du projet. */
+/* Un mot n'entre qu'UNE fois dans le vivier (journal : revision.js · doublon du vivier) : sinon
+   deux bonnes réponses au QCM, deux cartes identiques, S.rev partagé.
+   ⚠️ On garde la première rencontrée (l'unité qui l'enseigne en premier).
+   ⚠️ La comparaison passe par NFC. */
 function allReviewWords(){
   const p=[], vus=new Set();
   UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx)&&(_lireDone(idx)||unitValidated(idx)))(U.words||[]).forEach(w=>{
@@ -604,84 +445,48 @@ function dueReviewWords(){
   });
 }
 function reviewSessionWords(){ return dueReviewWords().slice(0,REVIEW_CAP); }
-/* ═══════════════════════════════════════════════════════════════════════════
-   LA RÉVISION DE GRAMMAIRE — un hub, une session panachée      (05/09/2026)
-
-   🔴 CE QU'ON NE FAIT PAS, ET POURQUOI (spec §1.4, décision de Myriam). Pas de
-   boîtes d'ateliers par unité : à l'unité 12 l'écran en porterait cinq, et une
-   élève choisirait tous les jours la même. Le modèle est celui du VOCABULAIRE —
-   un bouton unique en haut, la liste des notions en bas — et la session panache
-   les notions au lieu de les enchaîner par blocs.
-
-   🔴 ET ON NE RÉINVENTE AUCUN EXERCICE. Les écrans viennent tous de la
-   production : ceux de l'unité 8 par `U8.disque(k)` (ses 9 quiz de règle, son tri
-   soleil/lune, son « pose l'article », son repérage dans la Fātiḥa — validés
-   écran par écran le 15/08, sonorisés), ceux de l'unité 9 par son BILAN, qui
-   porte le clavier arabe. Un bilan est par nature conçu pour être rejoué hors
-   contexte : c'est le seul vivier d'écrans vraiment autonomes du dépôt, et
-   c'est ce qui rend la chose sûre.
-
-   ⚠️ UNE SEULE EXCEPTION, ET ELLE EST DEMANDÉE PAR LA SPEC (§4.1) : l'écriture.
-   L'écran `ecrire` de l'unité 8 porte encore l'ANCIENNE grille de tuiles, alors
-   que toute l'app est passée au clavier le 04/09. La révision écrit donc avec
-   `{type:'assemble'}`, le gabarit du lecteur — celui qui appelle window.__alaqClavier,
-   avec ses deux rangées toujours complètes et ses harakat en bleu.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ═══ LA RÉVISION DE GRAMMAIRE — un hub, une session panachée ═══
+   Modèle du vocabulaire : un bouton, la liste des notions ; pas de boîtes par unité. Aucun
+   exercice neuf : l'unité 8 par U8.disque(k), l'unité 9 par son bilan (écrans autonomes).
+   Seule exception : l'écriture passe par {type:'assemble'} (le clavier), l'écran ecrire de
+   l'unité 8 ayant encore l'ancienne grille (journal : revision.js · révision de grammaire). */
 const GRAM_CAP=15;                 /* la taille d'une session, comme REVIEW_CAP au vocabulaire */
 let GRAMSES=null;                  /* les fautes de LA session en cours, par notion */
 
-/* Les notions, dans l'ordre où elles s'apprennent. Une notion n'apparaît que si
-   son unité est OUVERTE **et** qu'elle sait fournir des écrans : un module non
-   chargé rend une liste vide, et une notion vide ne doit pas s'afficher — elle
-   promettrait un entraînement qui rendrait un écran blanc. */
+/* Une notion n'apparaît que si son unité est ouverte ET qu'elle fournit des écrans : vide
+   (module non chargé), elle promettrait un écran blanc. */
 const NOTIONS_GRAM=[
   { u:7, titre:'L\u2019article <span class="ar">الـ</span>',
     sous:'Défini ou indéfini \u00b7 lettres solaires et lunaires', ecrans:gramEcransU8 },
-  /* même ordre et même mot que sur l'accueil (UNITS[8].court, 05/09) — une
-     seule façon de nommer l'unité, jamais deux formulations qui divergent. */
+  /* même intitulé que sur l'accueil (UNITS[8].court) */
   { u:8, titre:'Les harf <span class="ar">بِ \u00b7 عَلَى \u00b7 لِ</span>',
     sous:'Le harf change la fin du nom', ecrans:gramEcransU9 },
 ];
 function notionsGram(){ return NOTIONS_GRAM.filter(function(N){ return unitUnlocked(N.u); }); }
 
-/* ── LE VIVIER DE L'UNITÉ 8 ────────────────────────────────────────────────
-   `U8.disque(k)` rend des `st` PRÊTS pour le lecteur ({type:'u8', d:k, u8:…}) :
-   `dessine()` relit `st.d` pour reposer le vivier de mots du disque, donc un écran
-   sorti de sa file se dessine exactement comme dans sa leçon. Rien à fabriquer. */
+/* L'unité 8 : U8.disque(k) rend des st prêts pour le lecteur ; dessine() relit st.d. */
 function gramEcransU8(){
   var qs=[];
   try{
-    /* D7 : les 9 questions de règle et le tri des 10 lettres ☀️/🌙.
-       D9 (le bilan) : poser l'article, l'oreille, l'œil, les الـ de la Fātiḥa. */
+    /* D7 : questions de règle et tri ☀️/🌙 · D9 (bilan) : article, oreille, œil, الـ de la Fātiḥa */
     U8.disque('D7').forEach(function(st){
       if(st.u8.t==='quiz'||st.u8.t==='trigen')qs.push(st); });
     U8.disque('D9').forEach(function(st){
       if(['article','deuxsons','deuxecrits','spotmot'].indexOf(st.u8.t)>=0)qs.push(st); });
   }catch(e){ return []; }            /* module non chargé : la notion ne s'affiche pas */
-  /* L'écriture, au CLAVIER (voir l'en-tête). Deux mots seulement : la session est
-     panachée, et l'écriture est le geste le plus long — en mettre plus la ferait
-     basculer en séance d'écriture. */
+  /* L'écriture au clavier : deux mots seulement, sinon la session devient une séance d'écriture. */
   var m=U8.mots||{};
   ['habl','nahl'].forEach(function(k){
     if(m[k])qs.push({type:'assemble', w:{w:m[k].def, fr:m[k].le}, fromFr:true, graded:true});
   });
   return qs;
 }
-/* ── LE VIVIER DE L'UNITÉ 9 : SON BILAN ────────────────────────────────────
-   Ses 15 écrans sont AUTONOMES — chacun porte sa consigne, son image, son son,
-   ses touches de clavier et sa cible ; aucun ne suppose l'écran d'avant. C'est
-   ce qui les rend rejouables, et c'est pour ça qu'on prend le bilan plutôt que
-   de piocher dans les huit disques d'apprentissage, dont les écrans se lisent
-   en séquence. */
+/* L'unité 9 : son BILAN, dont les écrans sont autonomes (ceux des disques se lisent en séquence). */
 function gramEcransU9(){
   if(!(window.__alaqU9&&typeof window.__alaqU9.disque9==='function'))return [];
   try{
-    /* 🔴 LE DERNIER ÉCRAN PORTE `bilan` — la bannière « Tu as terminé l'unité 9 ! »
-       (Myriam, 05/09 : « un des écrans […] n'a pas sa place dans les révisions »).
-       Elle célèbre la FIN d'un parcours qu'on n'a pas fait ici : mêlée à neuf
-       autres écrans panachés, elle sonne faux. L'écran d'écriture lui-même
-       (عَلَيْهِمْ) reste un bon exercice de révision — seul le CHAMP disparaît,
-       via un clone (jamais de mutation de la donnée du disque en place). */
+    /* On retire le champ bilan (la bannière de fin d'unité), par un clone, jamais en place
+       (journal : revision.js · bannière du bilan U9). */
     return window.__alaqU9.disque9().map(function(st){
       if(!st.bilan)return st;
       var c=Object.assign({},st); delete c.bilan; return c;
@@ -689,17 +494,11 @@ function gramEcransU9(){
   }catch(e){ return []; }
 }
 
-/* ⚠️ ON CLONE, ON NE MARQUE JAMAIS LA DONNÉE EN PLACE. `U8.disque()` et
-   `disque9()` reconstruisent leur tableau à chaque appel — mais les OBJETS
-   qu'ils portent peuvent être partagés avec la leçon. Un `graded` posé chez eux
-   suivrait l'élève jusque dans son disque. */
+/* ⚠️ On clone : les objets des disques peuvent être partagés avec la leçon, un graded posé
+   chez eux suivrait l'élève jusque dans son disque. */
 function gramMarquer(st,u){ return Object.assign({},st,{graded:true, revGram:u}); }
 
-/* 🔴 LE PANACHAGE EST LE CŒUR DE LA DEMANDE (spec §1.4). On prend à TOUR DE RÔLE
-   dans chaque notion au lieu de les enchaîner : réviser الـ pendant dix écrans
-   puis بِ pendant dix, ce sont deux petites leçons — les ALTERNER oblige à
-   reconnaître de quelle règle il s'agit avant de répondre, et c'est là que la
-   révision travaille vraiment. */
+/* Le panachage : à tour de rôle dans chaque notion, pour obliger à reconnaître la règle. */
 function gramPanacher(paquets,cap){
   var out=[], i=0, encore=true;
   while(out.length<cap&&encore){
@@ -711,9 +510,7 @@ function gramPanacher(paquets,cap){
   }
   return out;
 }
-/* Le taux de maîtrise d'une notion — ce que la jauge du hub montre. Sans aucune
-   session jouée, il n'y a rien à montrer : on rend -1 et le hub le DIT, au lieu
-   d'afficher un 0 % qui se lirait « tu ne sais rien ». */
+/* Le taux de maîtrise d'une notion. Sans session jouée : -1, et le hub le dit (pas un 0 %). */
 function gramMaitrise(u){
   var g=S.revGram&&S.revGram[u];
   if(!g||!g.n)return -1;
@@ -736,11 +533,8 @@ function lancerGrammaire(unites){
   QCTX=null;               /* sinon un « ▶ Verset suivant » fantôme s'invite à la fin */
   launchQuranReview(qs);   /* le lanceur générique de session : il sert déjà les lettres */
 }
-/* La maîtrise se mesure sur les ERREURS — le seul signal que TOUS les écrans
-   donnent de la même façon, qu'ils viennent du moteur de l'unité 8, du registre
-   des exercices ou de la cascade du lecteur (chacun tient son propre verdict).
-   Le nombre d'écrans JOUÉS, lui, se lit dans la file à la fin : il n'a pas à
-   être compté en chemin. */
+/* La maîtrise se mesure sur les ERREURS, seul signal commun à tous les écrans ; les écrans
+   joués se lisent dans la file à la fin. */
 function gramFaute(){
   if(!GRAMSES)return;
   var st=QUEUE[qi];
@@ -771,9 +565,8 @@ function startReview(){
   // 4) écriture — palier ≥ 4 seulement : elle GRAVE un mot déjà solide, elle ne sert pas à le découvrir
   shuffle(bag.slice()).filter(w=>revPalier(w)>=REV_ECRIT_DES).forEach(w=>qs.push({type:'assemble', w, graded:true, fromFr:true, revWord:w.w}));
   QUEUE=qs; // on attaque directement l'exercice (règle Myriam : pas d'écran d'annonce)
-  /* VÉRIFIÉ : startReview ne traverse PAS launchQuranReview — c'est le seul départ
-     qui pose QUEUE lui-même. Sans cette ligne, la révision de vocabulaire hériterait
-     du type de la session précédente. */
+  /* ⚠️ startReview ne passe pas par launchQuranReview : il pose le type lui-même, sinon la
+     révision de vocabulaire hériterait du type de la session précédente. */
   try{ SYNC.poseKind('vocab'); }catch(_){}
   QCTX=null; // sinon un « ▶ Verset suivant » fantôme, hérité d'un exercice mono-verset, s'invite en fin de vocabulaire
   REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
@@ -828,12 +621,9 @@ function matchTap(side,pi,el){
     setTimeout(renderMatch,420);
   }
 }
-/* ═══════════ §3.2 · VRAI OU FAUX, 45 SECONDES ═══════════
-   Un SEUL écran qui couvre une vingtaine de tours. DEUX COUCHES qui ne se mélangent pas :
-     · couche JEU     — le score, le record, l'urgence : TOUS les tours comptent ;
-     · couche MÉMOIRE — les paliers : seuls les VF_TOURS premiers tours de chaque mot notent.
-   (décision Myriam 02/08 : le recyclage de fin de chrono ne doit pas punir celle qui répond vite ;
-    et un mot vu une seule fois, bien répondu, monte quand même.) */
+/* ═══ §3.2 · VRAI OU FAUX, 45 SECONDES ═══
+   Un écran, deux couches : JEU (score, record : tous les tours) · MÉMOIRE (paliers : seuls les
+   VF_TOURS premiers tours de chaque mot) (journal : revision.js · vrai ou faux). */
 const VF_SECS=45, VF_TOURS=2;   // chaque mot est jugé sur exactement 2 tours : le vrai + un leurre
 let VFT=null;
 function vfStop(){ if(VFT){clearInterval(VFT);VFT=null;} }
@@ -923,45 +713,22 @@ function vfEnd(){
   document.getElementById('player').classList.remove('vfmode');   // on rend le pied de page
   // le taux de réussite du JEU : les tours joués, pas les paliers de mémoire
   const tours=V.ri||1, pct=Math.round(V.good/Math.max(1,tours)*100);
-  /* ═══ LES FÉLICITATIONS NE VIENNENT PLUS AVANT LE TRAVAIL (Myriam, 14/08) ═══
-     « L'écran de félicitations est arrivé trop tôt et m'a induit en erreur : il doit arriver
-     après les mots à revoir. » Il s'affichait à la seconde où le chrono tombait — mascotte qui
-     danse, cases, graines — alors qu'il restait les corrections. Myriam a lu « c'est fini »,
-     elle a quitté, et elle a perdu ses trois cœurs ET le compte des mots révisés : tout cela
-     n'est écrit qu'à la toute fin de la session. Un écran de fin qui n'est pas la fin coûte à
-     l'élève ce qu'elle vient de gagner.
-     Le jeu ne rend donc plus qu'UN résultat, mis de côté ; l'unique écran de félicitations est
-     celui de `finishReview`, une fois les mots à revoir corrigés. La barre du haut y est à 100 %
-     — c'était l'autre reproche (« la barre n'est qu'à la moitié du parcours »). */
-  /* 🔴 07/09 — LE JEU NE CRÉDITE PLUS : IL VERSAIT EN DOUBLE, ET C'ÉTAIT INVISIBLE.
-     Le vrai/faux créditait ici, puis `advance()` menait à finishDisque → finishReview,
-     qui créditait UNE SECONDE FOIS : 20 à 30 graines par session au lieu de 10 ou 15.
-     L'écran de fin n'en montrait qu'un seul (`_vfGraines || _grainesSession`) : l'écart
-     ne pouvait pas se voir à l'œil, et personne ne l'a signalé en un mois.
-     ⚠️ C'est le versement de finishReview qu'on garde, et ce n'est pas indifférent : la
-     ligne 7664 fait `wrongCount += rates.length`, donc LUI SEUL connaît les fautes du jeu
-     ET celles des corrections — son bonus « sans faute » ne ment pas, l'autre si.
-     `_vfGraines` reste à 0 : l'écran de fin retombe sur `_grainesSession`, c'est-à-dire
-     le montant RÉELLEMENT crédité. */
+  /* Les félicitations ne viennent qu'à la fin de la session (finishReview), après les mots
+     à revoir. ⛔ Le jeu ne crédite pas de graines : finishReview seul verse, lui seul connaît
+     toutes les fautes (journal : revision.js · félicitations et double versement). */
   window._vfGraines=0;
   window._vfRecord=record; window._vfAncien=V.ancienBest||0;
   window._vfPct=pct;
   window._vf=null;
-  /* ⚠️ `advance()` et SURTOUT PAS `finishDisque()` : le vrai/faux n'est que le 2ᵉ écran de la
-     file — le QCM (palier 3) et l'écriture (palier ≥ 4) viennent APRÈS lui. Court-circuiter
-     la file les sauterait en silence. `advance()` passe à l'écran suivant, et c'est
-     `renderStep` qui appelle `finishDisque` quand la file est réellement vide. */
+  /* ⚠️ advance(), SURTOUT PAS finishDisque : le QCM et l'écriture viennent après le vrai/faux.
+     C'est renderStep qui finit quand la file est vide. */
   advance();
 }
 function revMissedHas(w){ for(var i=0;i<MISSED.length;i++)if(MISSED[i].revWord===w)return true; return false; }
 
-/* ═══════════ §3.4 · LE STYLO ✏️ — entraînement libre ═══════════
-   Ne touche à AUCUN palier, ne coûte AUCUN cœur, n'entre PAS dans REVSES : c'est de
-   l'entraînement à la demande, pas une évaluation — sinon l'élève fabrique sa progression.
-   Correction « refus + indice » (choix Myriam 02/08) : la mauvaise tuile est REFUSÉE et ne
-   s'inscrit jamais (on n'affiche donc jamais une graphie arabe fausse, même 200 ms) ; au 2e
-   essai raté sur la MÊME lettre, la bonne tuile respire en doré. Le compteur repart à zéro
-   dès qu'elle pose la bonne lettre : l'aide arrive où elle bloque et disparaît quand ça repart. */
+/* ═══ §3.4 · LE STYLO ✏️ — entraînement libre ═══
+   Aucun palier, aucun cœur, rien dans REVSES. Tuile fausse REFUSÉE (jamais de graphie fausse
+   affichée) ; au 2e raté sur la même lettre, la bonne respire en doré (journal : revision.js · le stylo). */
 let WPEN=null;
 function openWrite(ar){
   const w=allReviewWords().filter(function(x){return x.w===ar;})[0]; if(!w)return;
@@ -1033,10 +800,9 @@ function accQTog(k){
   accQ[k]=!was; // une seule section ouverte à la fois
   renderReviser('quran');
 }
-/* ===== LES NOMS D'ALLAH — pilote de la Phase B (13/07) =====
-   Le contenu est 100 % DONNÉES : une ligne = un nom ; la leçon est une file de composants
-   génériques (lumnoms, match, mcq flip, assemble). Ajouter un nom = ajouter une ligne ici
-   + générer son mp3 (generer-noms-allah.js). Demain : cette table part dans Supabase. */
+/* ===== LES NOMS D'ALLAH =====
+   Une ligne = un nom ; la leçon est une file de composants génériques. Ajouter un nom : une
+   ligne + son mp3. La table Supabase noms_allah remplace cette graine (CONTENU). */
 const NOMS_ALLAH=[
  {ar:'الرَّحْمَٰنُ',fr:'le Tout-Miséricordieux',snd:'nom-arrahman'},
  {ar:'الرَّحِيمُ',fr:'le Très-Miséricordieux',snd:'nom-arrahim'},
@@ -1046,11 +812,9 @@ const NOMS_ALLAH=[
  {ar:'الْعَلِيمُ',fr:'l’Omniscient',snd:'nom-alalim'},
 ];
 NOMS_ALLAH.forEach(n=>{inscrireLeSon(n.ar,n.snd);}); // jouer(nom) trouve son mp3 dédié partout
-/* ---- PHASE B : LE CONTENU VIT DANS LES TABLES — le code n'est que la GRAINE ----
-   Registre CONTENU : pour chaque table Supabase, un cache localStorage + une fonction
-   d'adoption qui remplace les constantes EN PLACE (mêmes références : tout le code suit).
-   Table absente / hors-ligne : silence, la graine (ou le dernier cache) fait foi.
-   Éditer une ligne dans le Table Editor se reflète dans l'app SANS redéploiement. */
+/* ---- Le contenu adopté depuis Supabase : cette table n'est que la graine ----
+   Pour chaque table : un cache localStorage + une adoption qui mute les constantes EN PLACE
+   (mêmes références). Absente ou hors ligne : la graine ou le dernier cache fait foi. */
 function _adopteNoms(rows){
   if(!rows||!rows.length)return;
   NOMS_ALLAH.length=0;
@@ -1065,14 +829,8 @@ function _adopteVersets(rows){ // Al-Fātiḥa : FATIHA muté en place — SOURA
 }
 const CONTENU=[
   {table:'noms_allah',  cols:'ar,fr,snd',                                   ordre:'ordre', adopte:_adopteNoms},
-  /* ⛔ `vocabulaire` N'EST PLUS ADOPTÉE (06/09/2026, décision de Myriam).
-     Les 76 mots des unités 1 à 7 vivent dans src/content/units/unit-0N.json,
-     servis par content/unites.js — une seule source, éditée à un seul
-     endroit. La table Supabase reste EN PLACE, simplement plus lue : rien
-     n'y a été supprimé. Vérifié avant la coupure : la graine du code et la
-     table étaient identiques, empreinte par empreinte, sur les sept unités.
-     Les deux seuls écarts portaient sur le SON de deux mots, et le package
-     les emporte (voir la boucle « le son de chaque mot » plus haut). */
+  /* ⛔ vocabulaire n'est plus adoptée : les mots 1-7 vivent dans src/content/units/
+     (journal : revision.js · vocabulaire plus adopté). */
   {table:'versets',     cols:'sourate_no,num,ar,tr',                        ordre:'num',   adopte:_adopteVersets},
 ];
 CONTENU.forEach(function(c){ // 1) hors-ligne d'abord : le dernier contenu connu
@@ -1098,8 +856,7 @@ const NASEL=new Set(); // les 3 noms choisis pour la leçon
 function nomTog(ar){
   if(NASEL.has(ar))NASEL.delete(ar);
   else if(NASEL.size<3)NASEL.add(ar);
-  majPopNoms();   // 04/09 : le choix vit dans la POPUP, plus dans l'accordéon —
-                   // repeindre toute la vue de fond n'aurait ici aucun sens.
+  majPopNoms();   // le choix vit dans la popup : ne repeindre que sa liste
 }
 function startNoms(){
   if(NASEL.size!==3){toast('Choisis 3 noms à apprendre');return;}
@@ -1215,33 +972,12 @@ function qNext(){
   else if(c.kind==='ecrire')startQuranWriteV(v);
   else startQuranReciteV(v);
 }
-/* 🔴 LE TITRE « RÉVISER » EST RETIRÉ (04/09, Myriam) — l'orientation passe
-   désormais par l'infobulle des onglets (.tip.on, 3 s), armée par
-   reviserTabTap() au CHANGEMENT d'onglet, jamais par un simple re-rendu (sinon
-   contentPull()/qariPick() la déclencheraient au hasard). */
-/* ═══════════════════════════════════════════════════════════════════════════
-   LES 5 BOÎTES DE « RÉVISER › LE QORĀN » (04/09/2026)
-
-   Remplacent les 5 accordéons. Chaque boîte ouvre une POPUP MODALE (gabarit
-   .disc-tip de l'accueil : titre blanc, gros bouton blanc, fond = accent de
-   l'unité) qui dit ce qu'on va faire ; COMMENCER ferme la popup et lance le
-   VRAI lecteur (#player), sur le modèle exact de discTip()/startDisque().
-
-   LE DÉCOUPAGE — deux règles, parce que le coût des trois exercices n'a pas
-   la même unité :
-   ① Construire et Réciter suivent la table de Myriam, EN VERSETS :
-      1 partie jusqu'à 10 versets, puis ceil(n/10) parties, approximativement
-      égales.
-   ② Réécrire suit le coût réel de l'écriture guidée, EN FRAPPES (splitUnits
-      compte CHAQUE caractère, harakat comprise) : sur Al-Fātiḥa, la table par
-      versets rendait UNE SEULE partie de 262 frappes — ~9 minutes sans point
-      de reprise, l'objectif quotidien entier. Mesuré, pas supposé (04/09).
-      On choisit d'abord le NOMBRE de parties (le total divisé par un budget
-      de 70 frappes), puis on répartit en minimisant la SOMME DES CARRÉS des
-      tailles — un remplissage glouton donne des parties pleines et un fond de
-      sac (32 puis 81 frappes sur le même budget) ; minimiser les carrés
-      équilibre. On ne coupe JAMAIS un verset en deux : c'est l'unité
-      indivisible de la partition. */
+/* ═══ LES 5 BOÎTES DE « RÉVISER › LE QORĀN » ═══
+   Chaque boîte ouvre une popup (gabarit .disc-tip) ; COMMENCER lance le lecteur, comme discTip.
+   Découpage (journal : revision.js · les cinq boîtes) :
+   ① Construire et Réciter, EN VERSETS : une partie jusqu'à 10, puis ceil(n/10) parties égales ;
+   ② Réécrire, EN FRAPPES (splitUnits compte chaque caractère) : nombre de parties = total / 70,
+      répartition qui minimise la somme des carrés des tailles. Jamais un verset coupé en deux. */
 function nbParties(n){ return Math.max(1,Math.ceil(n/10)); }
 function partiesParVersets(n){
   const p=nbParties(n), base=Math.floor(n/p), reste=n%p, out=[]; let de=0;
@@ -1267,14 +1003,7 @@ function partiesParFrappes(versets,budget){
   return out;
 }
 
-/* Les 5 boîtes : icône (déjà pré-cachée par le sw, aucun asset neuf), libellé
-   COURT sous l'icône, titre + phrase de la popup, verbe du bouton, et le TYPE
-   de découpage à appliquer ('vers'/'frap'/null). */
-/* 🔴 05/09 — Myriam, sur son iPhone : « pas besoin de textes sous les titres…
-   trop de texte tue l'information, Duolingo l'a bien compris ». Le champ `x`
-   (la phrase d'explication) est retiré : le TITRE seul seul suffit, une popup
-   qui montre 5 boîtes déjà libellées + un titre net n'a pas besoin d'une
-   deuxième ligne pour redire la même chose. */
+/* Les 5 boîtes : icône, libellé court, titre de la popup, verbe du bouton, découpage ('vers'/'frap'/null). */
 const BOITES=[
  {k:'lire', ic:'tab2-lire',  lab:'Lire',      t:'Lire la sourate',      go:'LIRE',       parts:null},
  {k:'ord',  ic:'tab-puzzle', lab:'Construire',t:'Construire la sourate',go:'COMMENCER', parts:'vers'},
@@ -1283,9 +1012,8 @@ const BOITES=[
  {k:'noms', ic:'tab-etoiles',lab:'Les noms',  t:'Les noms d’Allah',     go:'APPRENDRE', parts:null},
 ];
 
-/* ── L'INFOBULLE 3 s (demande 3) ─────────────────────────────────────────
-   Un seul jeton pour toute la rangée d'onglets : sans lui, deux changements
-   rapprochés laisseraient la PREMIÈRE minuterie éteindre la SECONDE bulle. */
+/* ── L'INFOBULLE 3 s ─────────────────────────────────────────────────────
+   Un seul jeton pour toute la rangée : sinon la première minuterie éteint la seconde bulle. */
 let _tipT=null;
 function tipMontre(el){
   document.querySelectorAll('.itab .tip.on').forEach(function(t){t.classList.remove('on');});
@@ -1294,9 +1022,7 @@ function tipMontre(el){
   t.classList.add('on');
   _tipT=setTimeout(function(){t.classList.remove('on');},3000);
 }
-/* Armée seulement sur un vrai CHANGEMENT d'onglet (clic), jamais sur un
-   re-rendu de fond (contentPull, qariPick…) qui appellerait renderReviser
-   sans que l'élève ait touché quoi que ce soit. */
+/* Armée sur un vrai changement d'onglet, jamais sur un re-rendu de fond (contentPull, qariPick…). */
 function reviserTabTap(k){ renderReviser(k); tipMontre(document.querySelector('#view-reviser .itab.active')); }
 function coursTabTap(k){ renderCours(k); tipMontre(document.querySelector('#view-cours .itab.active')); }
 
@@ -1334,27 +1060,19 @@ function fermerPop(){
   document.querySelectorAll('.rq-boite').forEach(function(b){b.classList.remove('ouverte');});
   boiteOuverte=-1;
 }
-/* Le sélecteur de partie — il n'apparaît QUE s'il y a plus d'une partie : un
-   sélecteur à un seul choix n'est pas un choix (Construire/Réciter sur
-   Al-Fātiḥa n'en montrent aucun ; Réécrire en montre quatre). */
+/* Le sélecteur de partie n'apparaît que s'il y a plus d'une partie. */
 function majParts(b){
   const box=document.getElementById('rqParts'); if(!box)return;
   const SR=SOURATES[curSourate]||SOURATES[0];
   const P=(b.parts==='frap')?partiesParFrappes(SR.verses,70):partiesParVersets(SR.verses.length);
   if(P.length<2){ box.remove(); return; }
-  /* 🔴 05/09 — « N frappes » (04/09) puis une durée estimée (04/09 soir) étaient
-     encore du texte en trop : Myriam, sur son iPhone, « pas besoin de préciser
-     la durée approximative par révision, trop de texte tue l'information ».
-     Chaque pastille ne montre plus que ce qu'elle contient : les versets. */
   box.innerHTML=P.map(function(p,k){
     return '<button class="rq-part'+(k===partChoisie?' on':'')+'" onclick="partTap('+k+')">'+
       'Partie '+(k+1)+'<small>versets '+(p.de+1)+(p.a>p.de+1?'–'+p.a:'')+'</small></button>';
   }).join('');
 }
 function partTap(k){ partChoisie=k; const b=BOITES[boiteOuverte]; if(b)majParts(b); }
-/* Le choix des 3 noms d'Allah, DANS la popup (avant : accordéon inline).
-   ⚠️ NE repeint QUE sa propre liste — nomTog() a été corrigé en ce sens le
-   04/09, sinon chaque coche referait toute la vue de fond. */
+/* Le choix des 3 noms d'Allah, dans la popup. ⚠️ Ne repeint que sa propre liste. */
 function majPopNoms(){
   const box=document.getElementById('rqPopNoms'); if(!box)return;
   const set=knownLetterSet();
@@ -1378,10 +1096,8 @@ function majPopNoms(){
 }
 
 /* ── « LIRE LA SOURATE », EN PLEIN ÉCRAN ─────────────────────────────────
-   Même markup .mushaf/.ayat[data-suivre]/.vw[data-w] que l'ex-accordéon
-   « ill », déplacé ICI au caractère près : motTap/playVerse/lireToutQoran/
-   suivreVerset le retrouvent sans rien savoir de son conteneur. Gabarit
-   .finish (comme #surahMenu) : class="finish", id distinct, .on bascule. */
+   Même markup .mushaf/.ayat[data-suivre]/.vw[data-w] : motTap, playVerse, lireToutQoran et
+   suivreVerset le retrouvent sans connaître son conteneur. Gabarit .finish. */
 function ouvrirLireSourate(){
   let m=document.getElementById('lireSourate');
   if(!m){ m=document.createElement('div'); m.className='finish'; m.id='lireSourate'; document.body.appendChild(m); }
@@ -1410,9 +1126,7 @@ function ouvrirLireSourate(){
 }
 function fermerLireSourate(){ const m=document.getElementById('lireSourate'); if(m)m.classList.remove('on'); }
 
-/* ── LES TROIS LANCEURS DE PARTIE ────────────────────────────────────────
-   `deb`/`fin` sont les BORNES DE LA PARTIE choisie (indices de verset,
-   fin EXCLUE) — celles que rendent partiesParVersets/partiesParFrappes. */
+/* ── LES TROIS LANCEURS DE PARTIE ── deb/fin : indices de verset, fin exclue. */
 function startConstruireSourate(deb,fin){
   QCTX=null;
   const qs=[];
@@ -1434,9 +1148,6 @@ function startReciterSourate(deb,fin){
   launchQuranReview(qs);
 }
 
-/* ═══ LE HUB RÉVISER se PEINT dans ui/reviser.js (grammaireHubHTML, renderReviser — 12/09/2026).
-   Ses rouages — BOITES, boiteTap, reviserTabTap, la grille des lettres, le Qorān — vivent ICI,
-   dans revision.js, depuis le 16/09/2026. ═══ */
 // Générateur commun : reconstruire un verset (mots lisibles = tuiles, le reste posé en gris)
 function buildVerseTiles(vi){
   const set=knownLetterSet();
@@ -1445,9 +1156,7 @@ function buildVerseTiles(vi){
   const tpl=words.map(w=>({w,slot:wordReadable(w,set)}));
   const seq=tpl.filter(t=>t.slot).map(t=>t.w);
   if(seq.length<2)return null;
-  /* Chaque tuile connaît d'où vient son mot (verset, rang) : c'est ce qui lui permet de
-     SONNER au toucher — demande de Myriam du 13/08 — en découpant la récitation aux
-     repères HOROV, sans aucun enregistrement à produire. */
+  /* Chaque tuile sait d'où vient son mot (verset, rang) : elle sonne au toucher, découpée aux repères HOROV. */
   const pool=[];
   SR.verses.forEach(function(v,i){ if(i!==vi)v.split(' ').forEach(function(w,k){
     if(wordReadable(w,set)&&seq.indexOf(w)<0&&!pool.some(function(x){return x.w===w;}))pool.push({w:w,vi:i,wi:k}); }); });
@@ -1459,13 +1168,9 @@ function buildVerseTiles(vi){
 }
 function launchQuranReview(queue){
   if(!lecteurPret())return;   // idem startReview : dix-sept départs passent ici, un seul garde
-  /* 🔓 SOUS-LOT 5 — LE TYPE SE DÉDUIT DE LA FILE INTACTE, avant que le lecteur y
-     touche. Dix-sept départs passent par ici (lettres, grammaire, Qorān sous toutes
-     ses formes) : les instrumenter un par un serait dix-sept occasions d'en oublier
-     un. `revGram` est posé sur CHAQUE écran par gramMarquer() — c'est le seul
-     signal certain ; les autres se lisent au type d'écran.
-     ⚠️ La taxonomie est GROSSIÈRE, et c'est assumé : elle ne sert qu'à distinguer
-     les sessions pour la garde « un lesson_id ne paie qu'une fois par jour ». */
+  /* Le type de session se déduit de la file intacte, ici, pour les dix-sept départs. revGram
+     (posé par gramMarquer) est le seul signal certain. ⚠️ Taxonomie grossière, assumée : elle
+     ne sert qu'à la garde « un lesson_id ne paie qu'une fois par jour ». */
   try{ SYNC.poseKind(
     (!queue||!queue.length) ? 'mixte'
     : queue.some(function(s){return s&&s.revGram!=null;}) ? 'gram'
@@ -1555,11 +1260,8 @@ function renderVt(){
     k++;return html;
   }).join(' ');
 }
-/* renderVw() reste le point d'entrée unique (appelé par vwTap, vwUndo, le mount) —
-   il délègue désormais à deux moitiés : l'affichage du verset (majVwVerse,
-   change à chaque frappe) et la saisie (vwSaisie, ne se reconstruit qu'au
-   changement de MOT). Séparer les deux évite de rebâtir le clavier — et de
-   perdre le focus/l'animation d'une touche — à chaque caractère tapé. */
+/* renderVw = majVwVerse (à chaque frappe) + vwSaisie (au changement de MOT seulement) : sinon
+   le clavier serait rebâti à chaque caractère. */
 function renderVw(){ majVwVerse(); vwSaisie(); }
 function majVwVerse(){
   const M=window._vw;if(!M)return;
@@ -1575,9 +1277,7 @@ function majVwVerse(){
     return '<span style="color:var(--lock);opacity:.45">'+w+'</span>';
   }).join(' ');
 }
-/* La saisie — le clavier de _clavier.js, reconstruit UNIQUEMENT quand le mot
-   change (M.claviePour!==M.wi) : entre deux frappes du même mot, les touches
-   restent en place, exactement comme sur un vrai clavier. */
+/* Le clavier, reconstruit UNIQUEMENT quand le mot change. */
 function vwSaisie(){
   const M=window._vw;if(!M)return;
   const box=document.getElementById('vwClavier');if(!box)return;
@@ -1590,12 +1290,8 @@ function vwSaisie(){
     }
     return;
   }
-  /* ⚠️ REPLI — l'ancienne grille de tuiles, verbatim (module ES pas encore
-     chargé). Un écran ouvert avant son chargement doit rester JOUABLE, jamais
-     blanc — le piège « écran blanc, console propre » du projet.
-     ⚠️ 13/08 — le test était `!M.tilesFor||M.tilesFor!==M.wi` : pour le PREMIER
-     mot, `M.tilesFor` vaut 0, donc `!M.tilesFor` est VRAI et les tuiles étaient
-     remélangées à CHAQUE clic. Un seul test suffit. */
+  /* ⚠️ REPLI si le module du clavier n'est pas chargé : l'écran reste jouable, jamais blanc.
+     ⚠️ Un seul test : M.tilesFor vaut 0 au premier mot (journal : revision.js · tuiles remélangées). */
   if(M.tilesFor!==M.wi){
     M.tilesFor=M.wi;M.shuffled=shuffle(M.units.slice());
     box.innerHTML='<div class="tiles" id="vwTiles">'+M.shuffled.map(function(ch,k){
@@ -1603,20 +1299,15 @@ function vwSaisie(){
     }).join('')+'<button class="tile tdel" onclick="vwUndo()" aria-label="Effacer">⌫</button></div>';
   }
 }
-/* La touche qui porte un caractère donné, sur le clavier 'vw' — jumelle
-   d'asmTouche(), scopée sur #vwLettres/#vwHarakat (asmTouche vise #asm*). */
+/* La touche d'un caractère sur le clavier 'vw' — jumelle d'asmTouche, scopée sur #vwLettres/#vwHarakat. */
 function vwToucheCle(ch){
   const K=window.__alaqClavier; if(!K)return null;
   const cle=K.cleDuSigne(ch);
   const sel=cle?'#vwHarakat .clv-touche':'#vwLettres .clv-touche';
   return [...document.querySelectorAll(sel)].find(t=>cle?t.dataset.signe===cle:t.dataset.l===ch)||null;
 }
-/* La frappe au clavier — même contrat que vwTap (fallback) et asmTaper
-   (assemble) : une touche fausse est REFUSÉE, indice au 2e refus. ⚠️ AUCUN
-   CŒUR N'EST PERDU ICI, jamais : lancée par launchQuranReview(), toute cette
-   session tourne sous REVIEW=true — c'est déjà le comportement de vwTap
-   (fallback) et de vtTap (« Construire »), qui n'ont jamais coûté de cœur
-   non plus. */
+/* La frappe au clavier : touche fausse REFUSÉE, indice au 2e refus. ⚠️ Aucun cœur perdu :
+   la session tourne sous REVIEW=true, comme vwTap et vtTap. */
 function vwTaperCle(ch){
   const M=window._vw; if(!M||M.wi>=M.words.length)return;
   const acceptes=asmAttendu({t:M.units,ch:M.ch});
@@ -1634,8 +1325,7 @@ function vwTaperCle(ch){
   M.ch.push(ch);
   vwFiniMot();
 }
-/* Le mot est-il complet ? Et si oui, le verset ? — migré depuis la queue de
-   vwTap, factorisé pour servir AUSSI la voie clavier. */
+/* Le mot est-il complet ? Et le verset ? (sert la voie clavier et le repli) */
 function vwFiniMot(){
   const M=window._vw; if(!M)return;
   majVwVerse();
@@ -1656,16 +1346,13 @@ function vwFiniMot(){
     vwSaisie();                        // reconstruit le clavier pour le mot suivant
   }
 }
-/* ↺ Recommencer, côté clavier : efface le mot EN COURS (le clavier ne
-   consomme pas de touche, il n'y a donc rien d'autre à réarmer). */
+/* ↺ Recommencer au clavier : efface le mot en cours. */
 function vwResetMot(){
   const M=window._vw; if(!M||!M.ch.length)return;
   M.ch.length=0; M.refus=0; asmHintOff();
   renderVw();
 }
-/* ÉCRITURE GUIDÉE (13/08) — la tuile fausse est REFUSÉE, indice au 2e refus. Le mot ne
-   peut donc plus être faux : la branche « Pas tout à fait » et le remélange du mot sont
-   morts, et avec eux la seule raison qu'avaient les tuiles de bouger sous le doigt. */
+/* Écriture guidée (repli tuiles) : la tuile fausse est REFUSÉE, indice au 2e refus. */
 function vwTap(k){
   const M=window._vw;if(!M||M.wi>=M.words.length)return;
   const t=document.getElementById('vwt'+k);if(!t||t.disabled)return;
@@ -1748,9 +1435,7 @@ function stUndo(){
     t.classList.remove('hint');});
   renderSt();
 }
-/* ÉCRITURE GUIDÉE (13/08) — le mot faux est REFUSÉ : il tremble, un son doux, et RIEN
-   ne s'écrit. On n'affiche jamais un verset faux, même 200 ms. Au 2e refus au même
-   emplacement, le bon mot respire en doré. Et toucher un mot le fait ENTENDRE. */
+/* Écriture guidée : le mot faux est REFUSÉ, rien ne s'écrit ; indice au 2e refus ; toucher un mot le fait entendre. */
 function vtTap(k){
   const M=window._vt;if(!M)return;
   if(M.ch.length>=M.seq.length)return;
@@ -1789,9 +1474,7 @@ function vtUndo(){
 }
 function finishReview(){
   if(REVFREE)REVSES=null;
-  /* La grammaire tient ses comptes à part (spec §3.2). Les écrans JOUÉS se lisent
-     dans la file — inutile de les compter en chemin ; les fautes viennent de
-     GRAMSES. Le cumul est honnête : il monte à mesure qu'on révise juste. */
+  /* La grammaire tient ses comptes à part : écrans joués lus dans la file, fautes dans GRAMSES. */
   if(GRAMSES){
     var vus={};
     QUEUE.forEach(function(st){ if(st.revGram!==undefined)vus[st.revGram]=(vus[st.revGram]||0)+1; });
@@ -1801,33 +1484,16 @@ function finishReview(){
     });
     GRAMSES=null;
   }
-  /* 🔴 07/09 — ON NE PAIE QUE SI L'ÉLÈVE A FAIT QUELQUE CHOSE.
-     Le défaut fermé : `startQuranRecite` / `startQuranReciteV` posent REVIEW=true avec une
-     file qui ne contient QUE des écrans `{type:'recite'}` — on écoute, on ne répond à rien.
-     Cette ligne créditait quand même 10 + 5, le bonus « sans faute » COMPRIS, puisque
-     wrongCount était resté à zéro faute d'avoir jamais été interrogée.
-
-     ⚠️ LE PREMIER GARDE ÉCRIT ICI ÉTAIT `total > 0`, ET IL ÉTAIT FAUX. `total` ne compte que
-     les écrans `graded` — or `formsOf()` (7976) ne produit que des `{type:'trace'}` SANS
-     `graded`. « Réviser N lettres » (bouton .lg-rev → startSelectedLetters → formsOf →
-     launchQuranReview) donnait donc total = 0 : une élève qui trace cinq lettres, du vrai
-     travail, n'aurait plus rien touché. J'avais vérifié que les quatre entrées POSENT
-     `total` ; je n'avais pas vérifié qu'elles le posent NON NUL — ce n'est pas la même
-     affirmation. Trouvé par la revue adversariale du 07/09, avant livraison.
-
-     LE BON PRÉDICAT est « la file demandait-elle autre chose qu'écouter ? ». `recite` est le
-     SEUL type d'écran passif de l'app ; tous les autres attendent un geste. Donc : une file
-     de tracé paie, une récitation ne paie pas, une file mixte paie, une file vide ne paie
-     pas non plus (rien ne s'est passé). */
+  /* On ne paie que si la file demandait autre chose qu'écouter : recite est le seul écran passif.
+     ⚠️ Pas « total > 0 » : les écrans trace ne sont pas graded, et tracer est du travail
+     (journal : revision.js · paiement de la récitation). */
   var _aTravaille = QUEUE.some(function(st){ return st && st.type!=='recite'; });
   _grainesSession = _aTravaille
     ? gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute))   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
     : 0;
-  /* 🔓 SOUS-LOT 5 — on ne déclare QUE ce qui a réellement été versé. Une file de
-     récitation seule ne paie rien en local : elle ne doit rien déclarer non plus.
-     Le type de session vient de SYNC.poseKind(), posé par les deux entonnoirs de
-     départ — sans lui, toutes les révisions porteraient le même lesson_id et le
-     serveur n'en paierait qu'UNE par jour (claim_reward, garde v_deja_lecon). */
+  /* On ne déclare que ce qui a été versé. Le type vient de SYNC.poseKind : sans lui, toutes les
+     révisions porteraient le même lesson_id et le serveur n'en paierait qu'une par jour
+     (claim_reward, garde v_deja_lecon). */
   if(_grainesSession){ try{
     SYNC.graines('REV-'+String(SYNC._kind||'mixte').toUpperCase(), !wrongCount, false);
   }catch(_){} }
@@ -1864,14 +1530,9 @@ function finishReview(){
   document.getElementById('fin-title').textContent='Révision terminée !';
   document.getElementById('fin-xp').textContent='+10';
   document.getElementById('fin-acc').textContent=acc+'%';
-  /* L'écran de félicitations ne peut pas précéder le travail qu'il félicite (Myriam, 14/08).
-     ⚠️ 07/09 — `_vfGraines` VAUT DÉSORMAIS TOUJOURS 0 : le vrai/faux ne crédite plus (il
-     versait en double — voir vfEnd). C'est `_grainesSession`, posé plus haut, qui porte le
-     montant réellement crédité. L'expression ci-dessous ne peut donc plus retomber que sur
-     sa seconde branche ; elle est gardée telle quelle pour qu'un `_vfGraines` ressuscité un
-     jour ne passe pas inaperçu. ⛔ NE PAS « réparer » le double versement dans l'autre sens :
-     c'est finishReview qui doit payer, lui seul connaît wrongCount — le jeu le lui donne par
-     `wrongCount += rates.length`. */
+  /* _vfGraines vaut toujours 0 (le vrai/faux ne crédite plus) : c'est _grainesSession qui porte
+     le montant. Expression gardée pour qu'un _vfGraines ressuscité se voie. ⛔ Ne pas déplacer le
+     versement vers le jeu : seul finishReview connaît wrongCount. */
   fillFinishCases(acc,(window._vfGraines||0)||_grainesSession);
   if(window._vfRecord)document.getElementById('fin-extra').innerHTML+=
     '<div class="vf-rec">RECORD BATTU — ancien : '+(window._vfAncien||0)+'</div>';

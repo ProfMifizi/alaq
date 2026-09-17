@@ -1,95 +1,41 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   constance.js — LA CONSTANCE ET SES RÉCOMPENSES : les rangs, les succès, les
-   graines, l'objectif du jour, la série, le Ghufrān et le passage de minuit
-   (sous-lot 6 de la tâche Notion « extraire le lecteur d'exercices », sorti
-   d'index.html le 16/09/2026 — 56 instructions de premier niveau, 51 noms,
-   copiées À L'IDENTIQUE par l'arbre du fichier, jamais par un marqueur de texte).
-   ───────────────────────────────────────────────────────────────────────────
-   CE QU'IL PORTE — tout ce qui mesure la régularité de l'élève et la récompense.
-   Son vocabulaire est celui du code depuis le premier jour : S.consScore,
-   S.consDay, S.consFlags, rollConstance, bumpConstance. D'où son nom.
-   · LES RANGS (7 stations, النية → النور) : RANKS et leur barème
-     (50 % constance · 30 % révision · 20 % apprentissage), rankFor,
-     RANK_COLORS, lampSVG (la mishkât d'Āyat an-Nūr 24:35), updRankBadge (la
-     lampe du bandeau), rankTrackHTML / rankBarHTML (le chemin des 7 points).
-     ⚠️ Les MODALES du rang et des succès (showRank, rankInfo, showSucces) vivent
-     dans ui/parametres.js depuis le 12/09, avec le Profil qui les ouvre.
-   · LES SUCCÈS : BADGES (les 27 succès), SUCCES_DESC, ecussonHTML (l'écusson
-     doré d'une sourate), confettiBurst, award, checkBadges.
-   · LES GRAINES (la monnaie d'Alaq, verset 2:261) : GRAINES — 10 par leçon,
-     +5 sans faute, +10 à l'objectif — et gagnerGraines. ⛔ Elles n'achètent
-     JAMAIS de Qatarāt : racheter son erreur, c'est apprendre à payer pour se
-     tromper.
-   · L'OBJECTIF DU JOUR : objMinutes, objGoal, objAddSec (les minutes RÉELLES,
-     lecteur ouvert et page visible), objFete, objRingHTML (l'anneau du Profil).
-   · LA SÉRIE : today / yesterday / _dayNum / daysGap / _addDays (toute
-     l'arithmétique des jours, en heure LOCALE — en UTC la journée basculait à
-     02 h à Paris), validerJour (LE SEUL endroit qui touche S.streak) et son
-     filet du 13/09, feteJourPending, et l'écran des 7 épis : showStreak,
-     streakPrecharger / streakRecite / streakContinue et la récitation de 2:261.
-   · LE GHUFRĀN غفران (2 par mois, jamais à vendre) : GHUF_MAX_JOURS,
-     maybeGhufranPrompt, showGhufranInfo, closeGhufran, useGhufran, et la
-     rétrogradation quand il n'y en a plus — ABSENCE_TAUX (15 %, MESURÉS),
-     retrogradation, acceptMiss.
-   · L'ÉCRAN DE FIN, ses trois cases : fillFinishConstance, ICO_COCHE_FIN /
-     ICO_GRAIN_FIN / ICO_EPI_FIN, caseHTML, fillFinishCases.
-   · LE PASSAGE DE MINUIT : majJour (la recharge quotidienne des Qatarāt), ses
-     trois branchements (visibilitychange, focus, une minuterie d'une minute —
-     sur iPhone l'app n'est jamais rechargée, elle est mise en veille), le
-     rollConstance() du chargement et la migration unique vers les 7 vies.
+/* constance.js — la régularité de l'élève et ses récompenses.
+   · les rangs (7 stations, النية → النور ; 50 % constance · 30 % révision · 20 % apprentissage) :
+     RANKS, rankFor, RANK_COLORS, lampSVG, updRankBadge, rankTrackHTML / rankBarHTML
+     (leurs modales, showRank / rankInfo / showSucces, sont dans ui/parametres.js) ;
+   · les succès : BADGES, SUCCES_DESC, ecussonHTML, confettiBurst, award, checkBadges ;
+   · les graines : GRAINES, gagnerGraines ;
+   · l'objectif du jour : objMinutes, objGoal, objAddSec, objFete, objRingHTML ;
+   · la série : today / yesterday / _dayNum / daysGap / _addDays (heure locale), validerJour,
+     feteJourPending, et l'écran des 7 épis (showStreak, streakPrecharger, streakRecite, streakContinue) ;
+   · le Ghufrān : GHUF_MAX_JOURS, maybeGhufranPrompt, showGhufranInfo, closeGhufran, useGhufran,
+     ABSENCE_TAUX, retrogradation, acceptMiss ;
+   · l'écran de fin : fillFinishConstance, ICO_*_FIN, caseHTML, fillFinishCases ;
+   · le passage de minuit : majJour et ses trois branchements, rollConstance, la migration v7.
 
-   ═══ POURQUOI UN SCRIPT CLASSIQUE, ET PAS UN MODULE — MESURÉ, PAS SUPPOSÉ ═══
-   ① UNE SEULE LIGNE TRANCHE, ET ELLE EST SANS GARDE. `refreshStats()`
-      (ui/accueil.js) appelle `updRankBadge()` en clair, et le grand script
-      l'appelle au premier niveau, avant `showTab('home')` (sa dernière ligne).
-      Ce bloc différé, cette ligne lève ReferenceError et TOUT ce qui suit meurt
-      dans le même souffle — l'accueil ne se peint jamais. Exactement la panne
-      mesurée pour revision.js le 16/09, à la ligne près.
-   ② `feteJourPending` EST RÉASSIGNÉE PAR UN MODULE. src/player/ écrit
-      `pendingStreak=feteJourPending; feteJourPending=false;` et revision.js fait
-      de même à la fin d'une séance. Un module ne partage pas une valeur, il la
-      COPIE (règle du 15/09, payée par _sndGen, _tocCtx, _LN et _LNg) : la fête
-      des 7 épis ne partirait plus jamais, en silence. Idem pour _streakA et
-      _streakUrl, que streakPrecharger et streakRecite se passent de main en main.
-   ③ `majJour()` RECHARGE LES QATARĀT ET ÉCRIT `#st-hearts` AVANT LE PREMIER
-      RENDU. Différé, l'élève verrait d'abord le compte de la veille, puis un saut.
-   ④ DEUX GESTES EN LIGNE DU HTML STATIQUE (index.html:287 et 291, peints avant
-      le premier script) appellent streakRecite() et streakContinue() : un module,
-      différé ET fetché à part, ouvre une fenêtre où le doigt trouve un bouton mort.
+   Script classique, jamais un module : refreshStats() (ui/accueil.js) appelle updRankBadge() sans
+   garde au premier rendu — différé, ReferenceError et accueil vide ; feteJourPending est réassignée
+   par src/player et revision.js (un module la copierait) ; majJour() écrit #st-hearts avant le
+   premier rendu ; le HTML statique appelle streakRecite() et streakContinue().
+   ⛔ Ni defer, ni type="module", ni import, ni export.
 
-   ═══ CE QU'IL RÉSOUT CHEZ LES AUTRES, ET QUAND ═══════════════════════════
-   AU CHARGEMENT — six instructions AGISSENT (majJour(), ses deux écouteurs, la
-   minuterie, rollConstance(), la migration v7) et elles ne lisent QUE TROIS noms
-   extérieurs, tous de progression.js : S, HEARTS_MAX, saveLocal — plus le DOM
-   statique (#st-hearts, #p-hearts). ⛔ RIEN du grand script : le banc l'exige.
-   À L'APPEL seulement — 24 noms, et cette liste EST le contrat, mesurée par le banc :
+   AU CHARGEMENT : majJour(), ses deux écouteurs, la minuterie, rollConstance() et la migration v7
+   ne lisent que S, HEARTS_MAX, saveLocal (progression.js) et le DOM statique (#st-hearts, #p-hearts).
+   ⛔ Rien du grand script : le banc l'exige.
+   À L'APPEL seulement — cette liste est le contrat, mesurée par le banc :
    S, HEARTS_MAX, save, saveLocal, unitValidated (progression.js) · UNITS (donnees.js)
    · spkSVG, spkOn, spkOff, stopAudio, playSfx, _curAudio, _sndGen (son.js)
    · icoImg, icoEcran (assets.js) · qariCur, qariUrlCdn (revision.js)
    · refreshStats (ui/accueil.js) · renderProg (ui/parametres.js)
-   · toast, fatihaPct, returnFromPlayer, obAccountPending, showObAccount (index.html).
-   ⛔ NI `defer`, NI `type="module"`, ni `import`, ni `export`.
+   · toast, fatihaPct, returnFromPlayer, obAccountPending (index.html) · showObAccount (comptes.js).
 
-   ⚠️ ET LA PLACE DE CE FICHIER EST SOUS signalements.js, PAS AU-DESSUS : les
-   deux capteurs d'erreur s'installent là-bas, et ils doivent être debout avant
-   que la première ligne d'ici ne s'exécute — sinon une panne du roulement du
-   jour (celle qui toucherait les Qatarāt de tout le monde) ne laisserait aucune
-   trace. C'est l'ordre qu'index.html avait déjà, et on le garde.
+   ⚠️ Chargé après signalements.js : ses deux capteurs d'erreur doivent être debout avant le roulement du jour.
+   Gardes : outils/verifier-constance.mjs, previews/_verif_constance.html, garderLaConstance()
+   (vite.config.mjs), CORE de sw.js, outils/verifier-serie-assiduite.mjs.
+   (journal : constance.js · en-tête d'origine) */
 
-   GARDES : outils/verifier-constance.mjs (103 essais, 8 mutants mordus — bac node:vm, une série jouée jour par
-   jour, le Ghufrān, la rétrogradation, les graines, les succès, le passage de
-   minuit), previews/_verif_constance.html (la vraie page, source et dist : la
-   lampe du rang peinte, les Qatarāt à jour, l'écran des 7 épis ouvert au doigt,
-   et la copie SANS ce fichier dont l'accueil ne se peint pas),
-   garderLaConstance() dans vite.config.mjs, CORE de sw.js, hors-ligne, paquet
-   natif, et outils/verifier-serie-assiduite.mjs (le filet du 13/09, qui lit
-   désormais ce fichier-ci).
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-function showStreak(){ // l'épi pousse du tas de terre (27/08) ; le chiffre reste le titre au-dessus
+function showStreak(){ // l'épi pousse du tas de terre ; le chiffre reste le titre au-dessus
   var n=S.streak||1;
-  /* l'animation ne se rejoue jamais toute seule (loop=1) : on force le redémarrage à
-     chaque ouverture de l'écran, sans repasser par le réseau (même URL, servie par le sw). */
+  /* l'animation ne se rejoue pas seule (loop=1) : on la redémarre (même URL, servie par le sw) */
   var pl=document.querySelector('.streak-plant');
   if(pl){ var src=pl.getAttribute('src'); pl.src=''; pl.src=src; }
   document.getElementById('streakNum').textContent=n;
@@ -97,40 +43,18 @@ function showStreak(){ // l'épi pousse du tas de terre (27/08) ; le chiffre res
   var s=document.getElementById('streakSpk'); if(s&&!s.innerHTML)s.innerHTML=spkSVG();
   document.getElementById('streak').classList.add('on');
   streakPrecharger();
-  /* 🔴 LA RÉCITATION PART TOUTE SEULE (Myriam, 01/09 : « l'écran d'assiduité avec
-     l'épi : je veux que l'audio du coran se déclenche automatiquement »).
-     ⚠️ CECI INVERSE UNE DÉCISION QUI ÉTAIT LA SIENNE, EN CONNAISSANCE DE
-     CAUSE : le 11/08 la condition posée était l'inverse — « le verset 2:261
-     fait 28 mots (~30 s) : trop long pour partir tout seul sur un écran de
-     fête ». Sa raison du 01/09 l'emporte sur l'objection de durée, et c'est
-     elle qu'il faut retenir : « ce sera une EXCEPTION. Je souhaite que ce
-     verset soit entendu chaque jour pour qu'il soit mémorisé. »
-     Autrement dit ces 30 s ne sont pas un coût à subir mais l'objet même de
-     l'écran : la répétition quotidienne EST le moyen de mémorisation.
-     ⛔ C'est une exception assumée, pas une règle : aucun autre écran de l'app
-     ne doit se mettre à réciter tout seul au prétexte de celui-ci.
-     Le haut-parleur RESTE : il coupe (streakRecite bascule), et il rejoue.
-     ⚠️ APRÈS le préchargement, et dans un `setTimeout` : `streakPrecharger()`
-     vient de poser un `new Audio` dont le `load()` n'a pas encore rendu la
-     main, et l'écran n'est visible que depuis une image. Partir dans le même
-     tour ferait jouer avant que la fête ne s'affiche.
-     ⚠️ L'autoplay peut être REFUSÉ par le navigateur (aucun geste utilisateur
-     sur cet écran) : `streakRecite` porte déjà son propre `catch` et laisse le
-     haut-parleur en place. Un refus est donc silencieux, jamais bloquant. */
+  /* La récitation de 2:261 part toute seule : exception voulue par Myriam, pour que le verset soit
+     entendu chaque jour — aucun autre écran ne doit réciter seul (journal : constance.js · récitation automatique).
+     ⚠️ Après le préchargement et dans un setTimeout : dans le même tour, le son partirait avant la fête.
+     ⚠️ L'autoplay peut être refusé : streakRecite a son propre catch, le refus reste silencieux. */
   setTimeout(function(){
     if(!document.getElementById('streak').classList.contains('on'))return; // écran déjà quitté
     try{ streakRecite(); }catch(e){}
   },420);
 }
-/* ⚠️ LE VERSET SE MET EN FILE À L'OUVERTURE, PAS AU CLIC (Myriam, 20/08 : « le son
-   ne se déclenche pas immédiatement »). `streakRecite` créait son `new Audio` au
-   moment du toucher : les ~30 s d'al-Baqara 261 commençaient alors seulement à
-   descendre du CDN, et l'élève attendait devant un écran de fête.
-   ⚠️ CE FICHIER N'EST PAS MIS EN CACHE : le service worker laisse passer les
-   requêtes Range (sans quoi la récitation est muette sur Safari — panne du 10/08),
-   donc il retéléchargerait à CHAQUE fois. Le préchargement est le seul levier.
-   ⚠️ ON GARDE L'URL AVEC L'ÉLÉMENT : le récitateur peut changer entre deux écrans,
-   et rejouer l'ancienne voix serait pire qu'un délai. */
+/* Le verset se précharge à l'ouverture de l'écran, pas au clic (sinon ~30 s de téléchargement devant la fête).
+   ⚠️ Le service worker ne le met pas en cache (requêtes Range) : le préchargement est le seul levier.
+   ⚠️ L'URL est gardée avec l'élément : le récitateur peut changer entre deux écrans. */
 let _streakA=null, _streakUrl='';
 function streakPrecharger(){
   try{
@@ -140,11 +64,8 @@ function streakPrecharger(){
     try{_streakA.load();}catch(e){}
   }catch(e){ _streakA=null; _streakUrl=''; }
 }
-/* La récitation du verset 2:261 — demandée par Myriam le 14/08.
-   Le verset est joué par la voix CHOISIE par l'élève : la Fātiḥa compte 7 versets, donc
-   Al-Baqara 261 porte le numéro 268 dans le mushaf continu. ⚠️ Ce fichier-là n'est PAS
-   hébergé chez nous (`qariUrl` ne sert en local que les 7 versets de la Fātiḥa) : il passe
-   par le flux, donc il demande une connexion. On le dit au lieu de rester muet. */
+/* 2:261 dans la voix choisie : numéro 268 du mushaf continu (la Fātiḥa compte 7 versets).
+   ⚠️ Fichier non hébergé chez nous : il passe par le flux, et hors ligne on le dit. */
 function streakRecite(){
   var b=document.getElementById('streakSpk');
   if(_curAudio&&!_curAudio.paused){ stopAudio(); spkOff(b&&b.querySelector('.spk')); return; }
@@ -202,8 +123,8 @@ const BADGES=[
  ['revision120','\u{1F4D6}','120 révisions'],
  ['revision360','\u{1F4D6}','360 révisions'],
 ];
-/* Les écussons des sourates : UN gabarit doré, le nom composé par le code en Noto Naskh
-   (Amiri retiré de l'app le 10/08). L'IA ne sait pas écrire l'arabe — jamais de nom généré. */
+/* Les écussons des sourates : un gabarit doré, le nom composé par le code en Noto Naskh.
+   L'IA ne sait pas écrire l'arabe — jamais de nom généré. */
 function ecussonHTML(ar,taille){
   taille=taille||64;
   return '<span class="ecu" style="width:'+taille+'px;height:'+taille+'px">'+
@@ -291,7 +212,7 @@ function checkBadges(ctx){
 
 function _addDays(d,n){ return new Date((_dayNum(d)+n)*864e5).toISOString().slice(0,10); }
 
-function today(){ // heure LOCALE (§2.1) : en UTC la journée basculait à 02 h à Paris — un mot révisé à 00 h 30 était daté de la veille
+function today(){ // heure LOCALE : en UTC la journée basculait à 02 h à Paris
   const d=new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
@@ -314,8 +235,7 @@ function rankFor(score){
   var prog=nx?Math.max(0,Math.min(100,Math.round((score-RANKS[idx].min)/(nx.min-RANKS[idx].min)*100))):100;
   return {idx:idx, rank:RANKS[idx], next:nx, prog:prog};
 }
-/* La lampe (mishkât, Āyat an-Nūr 24:35) : l'icône du rang. Sa couleur suit les 7 stations,
-   du gris de la pierre à la lumière — au 7e rang (النور) la lampe rayonne. Choix Myriam 05/07. */
+/* La lampe (mishkât, 24:35) : l'icône du rang, du gris de la pierre à la lumière — au 7e rang elle rayonne. */
 const RANK_COLORS=['#ab9d8a','#c0673a','#c9973f','#c6d0da','#e5c25e','#f39b26','#fff0c2'];
 /* 1 pierre chaude · 2 cuivre · 3 laiton · 4 argent · 5 or pâle · 6 or vif · 7 lumière (halo) */
 function lampSVG(color,size){
@@ -338,12 +258,12 @@ function rankTrackHTML(){ // le tracé seul (points + remplissage) — réutilis
   for(var i=0;i<7;i++){
     var reached=(i<=cur), isCur=(i===cur), last=(i===6);
     var c=reached?RANK_COLORS[i]:'#4A403A';
-    var sz=last?22:15; // le rang courant garde la MÊME taille que les autres : seule sa lumière le distingue (Myriam 13/07)
+    var sz=last?22:15; // le rang courant garde la même taille : seule sa lumière le distingue
     var sh=isCur?';box-shadow:0 0 0 3px rgba(232,169,79,.3),0 0 14px 3px rgba(244,208,137,.75)':(last&&reached?';box-shadow:0 0 8px '+c:'');
     dots+='<i onclick="event.stopPropagation();rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
   }
-  // La progression FINE (au sein du rang) est fondue dans le chemin des 7 rangs : le remplissage
-  // avance en continu vers le prochain point — plus de petite barre ni de légende à part (Myriam 13/07).
+  // la progression fine au sein du rang est fondue dans le remplissage du chemin : plus de petite barre
+  // ni de légende à part (journal : constance.js · le chemin des rangs)
   var fill=Math.min(100,Math.max(4,Math.round((cur+(rf.prog||0)/100)/6*100)));
   return '<div class="rbar-track"><div class="rbar-line"></div><div class="rbar-fill" style="width:'+fill+'%"></div><div class="rbar-dots">'+dots+'</div></div>';
 }
@@ -354,15 +274,8 @@ function fillFinishConstance(){ // écran de fin fusionné : la barre des 7 rang
   var r=document.getElementById('fin-rank'); if(r)r.innerHTML=rankBarHTML();
   var v=document.getElementById('fin-verse'); if(v)v.innerHTML='';
 }
-/* ═══ LES TROIS CASES DE FIN — UN SEUL ÉCRAN POUR TOUT (Myriam, 14/08) ═══
-   Elle a vu ces cases à la fin du vrai/faux et a tranché : « ce type d'écran devrait être
-   celui de chaque fin de leçon ». Et pour le bilan d'unité : « je préfère avoir les trois
-   petites box qui donnent le nombre de graines, le pourcentage de réussite et l'assiduité ».
-   Ce sont donc les MÊMES trois partout — fin de leçon, bilan, révision (principe ⑨ : les
-   écrans jumeaux partagent un moteur). Le grand pourcentage seul disparaît : il disait déjà
-   ce que dit la case « Réussite », en prenant dix fois la place.
-   L'ordre suit la lecture : ce que j'ai réussi · ce que j'ai gagné · depuis combien de temps
-   je tiens. */
+/* Les trois cases de fin, les mêmes partout (fin de leçon, bilan, révision) :
+   réussite · graines · assiduité (journal : constance.js · les trois cases de fin). */
 const ICO_COCHE_FIN='<svg viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
 const ICO_GRAIN_FIN='<svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c0-3 2-5 5-5 0 3-2 5-5 5z"/><path d="M12 13c0-3-2-5-5-5 0 3 2 5 5 5z"/><path d="M12 15c0-3 2-5 5-5 0 3-2 5-5 5z"/></svg>';
 const ICO_EPI_FIN='<svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><path d="M12 8c0-2.6 1.6-4.6 4-5 0 2.6-1.6 4.6-4 5z"/><path d="M12 12c0-2.6-1.6-4.6-4-5 0 2.6 1.6 4.6 4 5z"/><path d="M12 16c0-2.6 1.6-4.6 4-5 0 2.6-1.6 4.6-4 5z"/><path d="M12 20c0-2.6-1.6-4.6-4-5 0 2.6 1.6 4.6 4 5z"/></svg>';
@@ -373,16 +286,8 @@ function caseHTML(cl,ic,lab,val){
 function fillFinishCases(pct,graines){
   var e=document.getElementById('fin-cases'); if(!e)return;
   var j=S.streak||0;
-  /* 🔴 07/09 — GAIN NUL : PAS DE BOÎTE (décision de Myriam). « Graines +0 » serait
-     frustrant pour l'élève qui vient d'écouter un verset. La case ne se rend donc que
-     s'il y a quelque chose à annoncer.
-     ⚠️ La règle est GÉNÉRALE, pas réservée à la récitation : un examen raté (finishExam
-     laisse `graines` à 0 quand l'unité n'est pas validée) n'affiche plus « +0 » non plus.
-     C'est cohérent — on ne félicite pas d'un gain qui n'a pas eu lieu.
-     ⚠️ La disposition tient à deux cases sans retouche CSS : `.cases` est un flex et
-     `.case` porte `flex:1` (app.css:1342-1343), donc les deux restantes s'élargissent
-     pour remplir les 400 px. La cascade d'apparition suit (`nth-child(1)` .55 s,
-     `nth-child(2)` .95 s) : aucune case orpheline, aucun trou. */
+  /* Gain nul : pas de case Graines (décision de Myriam), règle générale — un examen raté non plus.
+     Deux cases tiennent sans retouche CSS (.cases est un flex, .case porte flex:1). */
   var boites=[caseHTML('c-reus',ICO_COCHE_FIN,'Réussite',pct+' %')];
   if(graines>0)boites.push(caseHTML('c-grain',ICO_GRAIN_FIN,'Graines','+'+graines));
   boites.push(caseHTML('c-assid',ICO_EPI_FIN,'Assiduité',j+' j'));
@@ -403,26 +308,15 @@ function rollConstance(){
     if(missed>0)S.pendingMiss=(S.pendingMiss||0)+missed;
     S.consDay=t; S.consFlags={};
   }
-  /* ⚠️ 04/09 — saveLocal, PAS save : tout ce que cette fonction écrit (consDay, consFlags,
-     ghufLeft, pendingMiss) se REDÉDUIT de la date du jour sur n'importe quel appareil.
-     Avec save(), l'appel INCONDITIONNEL ci-dessus rajeunissait S._ts à chaque chargement
-     de page et faisait gagner l'état le plus pauvre. Le score de constance, lui, est une
-     vraie progression : il est écrit par bumpConstance(), qui garde save(). */
+  /* ⚠️ saveLocal, pas save : tout ce qu'écrit cette fonction se redéduit de la date ; save() rajeunirait
+     S._ts à chaque chargement et ferait gagner l'état le plus pauvre. Le score passe par bumpConstance(). */
   saveLocal();
 }
-/* ══ L'OBJECTIF QUOTIDIEN (preview v2 validée le 10/08) ══
-   Les minutes RÉELLES d'exercice (lecteur ouvert, page visible) remplissent l'anneau du
-   Profil. L'objectif atteint VALIDE l'épi du jour : c'est LUI qui fait avancer la série —
-   les fins de leçon/révision ne la bumpent plus. S.lastDay garde son sens (dernier jour
-   validé) : la casse de série et le ghufrān fonctionnent inchangés. */
+/* L'objectif quotidien : les minutes réelles (lecteur ouvert, page visible) remplissent l'anneau du
+   Profil, et l'objectif atteint valide l'épi du jour. S.lastDay = le dernier jour validé. */
 let feteJourPending=false;   // l'écran « 7 épis » se montre après la leçon où l'objectif est tombé
-/* ═══ LES GRAINES (validées par Myriam le 13/08) ═══
-   La monnaie d'Alaq. Le verset qui porte l'écran d'assiduité (2:261) décrit littéralement
-   une graine qui se multiplie — c'est de là que vient le nom. Barème de la preview
-   `preview_fin_lecon_v1` : 10 par leçon ou révision terminée, +5 sans aucune faute,
-   +10 quand l'objectif du jour tombe.
-   ⚠️ Elles n'achètent JAMAIS de cœurs : racheter son erreur, c'est apprendre à payer pour
-   se tromper. Elles n'achètent que du décor. */
+/* Les graines, monnaie d'Alaq (2:261) : 10 par leçon ou révision, +5 sans faute, +10 à l'objectif.
+   ⛔ Elles n'achètent jamais de cœurs : racheter son erreur, c'est apprendre à payer pour se tromper. */
 const GRAINES={lecon:10,sansFaute:5,objectif:10};
 function gagnerGraines(n){ if(!(n>0))return 0; S.graines=(S.graines||0)+n; save(); return n; }
 function objMinutes(){ var t=today(); if(S.objDay!==t){S.objDay=t;S.objMin=0;S.objSec=0;} return S.objMin||0; }
@@ -431,32 +325,18 @@ function objAddSec(sec){
   var avant=objMinutes()>=objGoal();          // objMinutes remet aussi les compteurs à zéro au changement de jour
   S.objSec=(S.objSec||0)+sec;
   if(S.objSec>=60){ S.objMin=(S.objMin||0)+Math.floor(S.objSec/60); S.objSec%=60;
-    save(); }                                 // on n'écrit qu'à la MINUTE pleine — pas d'upsert nuage toutes les 15 s (audit 10/08)
+    save(); }                                 // on n'écrit qu'à la minute pleine, pas d'upsert toutes les 15 s
   if(!avant&&(S.objMin||0)>=objGoal())objFete();
 }
-/* validerJour : LE SEUL endroit qui touche S.streak. Le jour se valide à l'objectif
-   atteint OU — règle ADOUCIE (oui de Myriam, 10/08 soir) — à une leçon/révision terminée.
-   Une élève qui pratique ne perd donc jamais sa série, même sous l'objectif. */
+/* validerJour : le seul endroit qui fait avancer S.streak (useGhufran la restaure, acceptMiss la remet à zéro). Le jour se valide à l'objectif atteint OU à une
+   leçon/révision terminée : qui pratique ne perd jamais sa série. */
 function validerJour(){
   var t=today(), y=yesterday();
   if(S.lastDay===t)return false;
-  /* 🔴 13/09 — LE FILET QUI MANQUAIT (signalé par Myriam : série de 16 jours tombée à 1,
-     EN SILENCE, sans le moindre Ghufrān proposé, rang inchangé). `S.pendingMiss` n'était
-     alimenté QUE par rollConstance() via S.consDay — qui avance dès qu'on OUVRE l'app,
-     même sans rien terminer. Une élève qui ouvre l'app tous les jours mais ne termine
-     rien un jour donné ne fait donc JAMAIS lever pendingMiss par ce biais — alors que
-     c'est EXACTEMENT le jour qui casse SA série ici, à elle, la mesure stricte. On
-     alimente donc aussi pendingMiss depuis le vrai signal de la série — S.lastDay, « le
-     dernier jour où j'ai terminé quelque chose » — avant de l'écraser : maybeGhufranPrompt()
-     (déjà câblé, déjà éprouvé) le verra au prochain rendu et proposera un Ghufrān au lieu
-     de casser en silence. La série tombe quand même à 1 ICI (zéro changement visible sur
-     l'écran de fin) — c'est useGhufran()/acceptMiss() qui tranchent le sort final, et
-     useGhufran() sait désormais la restaurer après coup (voir son en-tête).
-     ⚠️ Limite connue et acceptée : si consDay ET lastDay ont TOUS DEUX pris du retard (une
-     élève qui n'a pas ouvert l'app pendant plusieurs jours), ce filet ET rollConstance()
-     peuvent chacun ajouter leur part au même pendingMiss — un compte légèrement trop élevé,
-     jamais trop bas. Le plafond GHUF_MAX_JOURS et acceptMiss() absorbent cet écart sans
-     conséquence : l'important est qu'aucun jour manqué ne reste totalement invisible. */
+  /* Le filet : pendingMiss est aussi alimenté depuis S.lastDay, sinon une élève qui ouvre l'app sans rien
+     terminer perdait sa série en silence ; maybeGhufranPrompt le proposera, useGhufran sait la rendre après coup.
+     ⚠️ Si consDay et lastDay sont tous deux en retard, le compte peut être trop haut, jamais trop bas.
+     (journal : constance.js · le filet de la série) */
   if(S.lastDay&&S.lastDay!==y){
     var _gJ=Math.max(0,daysGap(S.lastDay,t)-1);
     if(_gJ>0){ S.pendingMiss=Math.max(S.pendingMiss||0,_gJ); S._streakAvantMiss=S.streak; }
@@ -492,27 +372,18 @@ function bumpConstance(kind){
   save();
 }
 /* Ghufrān غفران : gel de série activé par l’élève (2/mois, jamais à vendre) */
-const GHUF_MAX_JOURS=2; // au-delà, aucun rattrapage : c'est la régularité qui est récompensée (Myriam 08/08)
+const GHUF_MAX_JOURS=2; // au-delà, aucun rattrapage : c'est la régularité qui est récompensée
 function maybeGhufranPrompt(){
   if(!(S.pendingMiss>0)) return;
   if(document.getElementById('ghufModal')) return;
   var m=document.createElement('div'); m.className='finish on'; m.id='ghufModal';
-  /* Règle du 08/08 : UN Ghufrān couvre UNE absence entière (1 ou 2 jours), pas un par
-     jour. 2 par mois. Plus de 2 jours, ou plus de Ghufrān : la série repart à zéro.
-     Un titre et des boutons, AUCUN texte — la définition vit dans Progrès (🕊️). */
+  /* Un Ghufrān couvre UNE absence entière (1 ou 2 jours), 2 par mois ; au-delà, la série repart à zéro.
+     L’écran qui propose un Ghufrān : un titre et des boutons, pas de texte (la définition vit dans Progrès). */
   var perdu = S.pendingMiss>GHUF_MAX_JOURS || (S.ghufLeft||0)<1;
   if(perdu){
-    /* \ud83d\udd34 LE RANG PERDU EST DIT, PAS SEULEMENT APPLIQU\u00c9 (Myriam, 01/09 : \u00ab \u00e7a
-       doit \u00eatre sp\u00e9cifi\u00e9 au user. Du genre : tu as perdu ta s\u00e9rie, tu redescends
-       de rang et te retrouves \u00e0 tel rang \u00bb). On l'annonce AVANT le bouton \u2014 la
-       cons\u00e9quence se lit, puis l'\u00e9l\u00e8ve la confirme. Une r\u00e9trogradation
-       silencieuse serait une punition qu'on n'ose pas nommer.
-       \u26a0\ufe0f On le calcule ICI, avant `acceptMiss()` : apr\u00e8s, le score a d\u00e9j\u00e0
-       chang\u00e9 et l'ancien rang n'est plus lisible nulle part. */
-    /* \u26a0\ufe0f TROIS CAS, TROIS PHRASES VRAIES. Avec une peine en POURCENTAGE, garder
-       son rang est une issue possible \u2014 celle qui avait grimp\u00e9 haut dans sa
-       fourchette a un coussin. Annoncer \u00ab tu redescends \u00bb dans ce cas serait un
-       mensonge, et annoncer \u00ab tu es au premier rang \u00bb un contresens. */
+    /* Le rang perdu est annoncé avant le bouton, et calculé ici, avant acceptMiss() : après, l'ancien
+       rang n'est plus lisible. Trois cas, trois phrases vraies : on redescend, on garde son rang de
+       justesse, ou on est déjà au premier (journal : constance.js · le rang perdu est dit). */
     var r=retrogradation();
     var P='<p style="margin:0 0 18px;font-size:15px;line-height:1.6;color:var(--muted)">';
     var ligne = r.perdu
@@ -538,7 +409,7 @@ function maybeGhufranPrompt(){
     '</div>';
   document.body.appendChild(m);
 }
-/* La tuile 🕊️ de Progrès explique la règle — l'écran d'absence, lui, reste muet (08/08) */
+/* La tuile 🕊️ de Progrès explique la règle — l'écran qui propose un Ghufrān, lui, reste muet */
 function showGhufranInfo(){
   var m=document.getElementById('ghufInfoModal');
   if(!m){ m=document.createElement('div'); m.className='finish'; m.id='ghufInfoModal'; document.body.appendChild(m); }
@@ -557,18 +428,11 @@ function _progVisible(){ var v=document.getElementById('view-prog'); return v &&
 function useGhufran(){
   var m=S.pendingMiss||0; if(m<=0){ closeGhufran(); return; }
   if(m>GHUF_MAX_JOURS||(S.ghufLeft||0)<1){ acceptMiss(); return; }  // le plafond est une RÈGLE, pas un affichage
-  S.ghufLeft-=1;               // UN Ghufrān pardonne UNE absence entière (Myriam 08/08)
+  S.ghufLeft-=1;               // UN Ghufrān pardonne UNE absence entière
   S.pendingMiss=0;
-  /* 🔴 13/09 — DEUX MOMENTS POSSIBLES POUR CE CLIC, ET ILS NE SE RÉPARENT PAS PAREIL.
-     ① Avant toute leçon du jour (S.lastDay est encore l'ANCIEN jour, pas aujourd'hui) :
-     le pont d'origine suffit — poser lastDay=hier fait que le PROCHAIN validerJour(),
-     tout à l'heure dans la même session, l'incrémentera normalement.
-     ② APRÈS une leçon déjà terminée aujourd'hui (validerJour() a DÉJÀ tranché — S.lastDay
-     vaut déjà AUJOURD'HUI, la série DÉJÀ remise à 1, exactement le cas de Myriam) : aucun
-     validerJour() ne revient avant demain, le pont d'hier ne servirait à rien. On restaure
-     alors directement depuis S._streakAvantMiss, posé par validerJour() juste avant la
-     casse — sinon « Utiliser un Ghufrān » consommerait un jeton pour rien, et la promesse
-     de l'écran (« ta série continue comme si tu étais venue ») serait fausse. */
+  /* Deux moments pour ce clic : ① avant toute leçon du jour, le pont par hier suffit ;
+     ② après une leçon du jour (validerJour a déjà remis la série à 1), on restaure depuis S._streakAvantMiss.
+     (journal : constance.js · Ghufrān rendu après coup) */
   if(S.lastDay===today()){ S.streak=(S._streakAvantMiss||0)+1; delete S._streakAvantMiss; }
   else S.lastDay=yesterday();       // pont : la série continue comme si elle était venue
   save(); closeGhufran();
@@ -576,54 +440,11 @@ function useGhufran(){
   try{refreshStats();}catch(e){}
   if(_progVisible())renderProg();
 }
-/* ══ LA RÉTROGRADATION SE COMPTE EN RANGS, PLUS EN POINTS (Myriam, 01/09) ══
-   Son constat, vérifié dans le code : « il y a 8 jours je n'avais plus de
-   ghufrān et je suis restée plus de deux jours sans utiliser l'application.
-   J'ai perdu ma série, ce qui est normal. MAIS j'ai conservé mon rang, ce qui
-   est incohérent. »
-   Elle a raison, et la cause était arithmétique : la peine valait −3 POINTS par
-   jour manqué, sur des paliers larges de 50 (Al-Muthābara va de 50 à 100).
-   Trois jours d'absence coûtaient 9 points — jamais assez pour franchir un
-   seuil vers le bas. La règle disait « rétrogradation douce » et ne
-   rétrogradait, en pratique, jamais.
-   🔴 LA PEINE EST DONC UN POURCENTAGE DU SCORE, PAR JOUR MANQUÉ — la forme
-   proposée par Myriam (« ou les jours d'absence doivent faire perdre plus de
-   points »), retenue APRÈS avoir écrit puis jeté une version « on descend d'un
-   rang d'office ». Cette première version avait un défaut qu'il faut garder en
-   mémoire : en faisant atterrir au PLANCHER du rang inférieur, la même absence
-   de 3 jours coûtait 74 points à 99 et seulement 25 à 50 — elle punissait donc
-   PLUS DUREMENT celle qui avait été la plus régulière. L'inverse du but.
-   Un pourcentage est continu : il coûte le même EFFORT de reconquête partout.
-   ⚠️ ET UN MONTANT FIXE NE MARCHERAIT PAS NON PLUS, parce que les fourchettes
-   sont très inégales (10 · 15 · 25 · 50 · 100 · 100 points) : un −12/jour
-   effacerait une débutante et gratterait à peine An-Nūr.
-   🔴 ET LA PEINE EST LINÉAIRE, PAS COMPOSÉE — LA RAISON EST DE MYRIAM, ET ELLE
-   EST DE FOND (01/09) : « pourquoi un jour coûterait moins cher en termes de
-   perte qu'un autre ? C'est pas cohérent avec notre vision. Et surtout, quand
-   Allah récompense il récompense [multiplie] quelque chose, alors que quand il
-   punit il punit à la hauteur du péché. Mais le péché n'est pas amoindri quand
-   il dure ! »
-   Une première version composait (score × 0,85 par jour) : chaque jour y
-   retirait 15 % de ce qui RESTAIT, donc le 1ᵉʳ jour coûtait 12 points et le 5ᵉ
-   seulement 6. Cela revenait à dire que l'irrégularité s'amortit — l'inverse
-   de ce que le rang mesure, et le contraire du principe qu'elle rappelle :
-   la récompense se MULTIPLIE (c'est littéralement le verset de l'écran
-   d'assiduité, 2:261 — le grain qui donne sept épis de cent grains), tandis
-   que la sanction est à la hauteur EXACTE (6:160 : مَن جَاءَ بِالسَّيِّئَةِ فَلَا
-   يُجْزَىٰ إِلَّا مِثْلَهَا — « qui apporte une mauvaise action n'est rétribué que
-   par son équivalent »). Ni plus, ni moins, et sans dégressivité.
-   Chaque jour manqué retire donc LE MÊME nombre de points : 15 % du score
-   qu'avait l'élève au moment où la série casse. Sept jours ramènent à zéro,
-   c'est-à-dire à An-Niyya — une semaine sans rien vaut de recommencer par
-   l'intention.
-   ⚠️ LES 15 % SONT MESURÉS, PAS CHOISIS. Sur le cas réel de Myriam (score ~80,
-   3 jours) : à 10 % elle tomberait à 56 et à 12,5 % à 50 — dans les DEUX cas
-   elle resterait Al-Muthābara, c'est-à-dire le défaut qu'elle signale,
-   inchangé. À 15 % elle tombe à 44 et descend à Al-Ijtihād. C'est le plus
-   petit taux qui répare vraiment ce qu'elle a observé.
-   ⚠️ Un seul jour ne fait pas toujours perdre le rang : qui a grimpé haut dans
-   sa fourchette garde un coussin — ce n'est pas une faveur, c'est la
-   proportionnalité même (hadith socle : أحبّ الأعمال إلى الله أدومها وإن قلّ). */
+/* La rétrogradation : chaque jour manqué retire 15 % du score qu'avait l'élève à la casse.
+   Linéaire, jamais composé (la sanction est à la hauteur exacte, 6:160) ; un pourcentage et pas un
+   montant fixe, car les fourchettes des rangs sont très inégales. Sept jours ramènent à An-Niyya.
+   ⚠️ 15 % est mesuré : le plus petit taux qui fait vraiment descendre de rang sur le cas réel de Myriam.
+   (journal : constance.js · la rétrogradation en rangs) */
 const ABSENCE_TAUX = 0.15;   // du score au moment de la casse, PAR jour manqué
 function retrogradation(){
   var m=S.pendingMiss||0;
@@ -640,19 +461,11 @@ function acceptMiss(){
   S.streak=0; S.pendingMiss=0; delete S._streakAvantMiss; save();
   closeGhufran(); if(_progVisible())renderProg();
 }
-/* ═══ Les modales du rang et des succès (CROIX_SUCCES, CROIX_RANG, rkStatsHTML, showRank,
-   closeRank, rankInfo) vivent dans ui/parametres.js (12/09/2026), avec le Profil. ═══ */
-/* ═══ LE PASSAGE DE MINUIT (correctif du 14/08, retour de Myriam : « les cœurs ne se remettent
-   pas à 7 le matin ») ═══
-   La recharge quotidienne ne tournait qu'AU CHARGEMENT. Or Alaq est une application installée :
-   sur iPhone elle n'est jamais rechargée, elle est mise en veille puis reprise — l'élève qui la
-   laisse ouverte la nuit rouvre le lendemain avec les cœurs de la veille. Le jour est donc
-   revérifié à CHAQUE reprise (retour à l'écran, focus de la fenêtre) et par une minuterie d'une
-   minute pour celle qui la laisse ouverte à minuit. La fonction est idempotente : elle ne fait
-   rien tant que la date locale n'a pas changé. */
+/* Le passage de minuit : sur iPhone l'app n'est jamais rechargée, elle est mise en veille. Le jour est
+   revérifié à chaque reprise (visibilitychange, focus) et chaque minute ; idempotent tant que la date locale ne change pas. */
 function majJour(){
   if(S.heartDay===today())return false;
-  S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;saveLocal(); // recharge quotidienne : elle se rejoue seule sur chaque appareil, elle ne date pas la progression
+  S.hearts=HEARTS_MAX;S.heartDay=today();S.bigNext=0;saveLocal(); // recharge quotidienne : elle se rejoue sur chaque appareil, elle ne date pas la progression
   try{rollConstance();}catch(e){}
   var a=document.getElementById('st-hearts');if(a)a.textContent=S.hearts;
   var b=document.getElementById('p-hearts');if(b)b.textContent=S.hearts;
@@ -661,10 +474,6 @@ function majJour(){
 majJour();
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)majJour(); });
 window.addEventListener('focus',majJour);
-/* cloudResync et ses deux écouteurs ont déménagé dans progression.js le 08/09
-   (POC-5 sous-lot 2), avec le reste du moteur de synchronisation. Le
-   `setInterval(majJour,60000)` ci-dessous n'en fait PAS partie : il appartient au
-   roulement du jour, pas au nuage. */
 setInterval(majJour,60000);
 try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7

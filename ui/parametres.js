@@ -1,45 +1,24 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ui/parametres.js — PARAMÈTRES ET PROFIL (12/09/2026)
-   ───────────────────────────────────────────────────────────────────────────
-   CE QU'IL PORTE :
-   · les Paramètres (08/08, dissociés du Profil à la demande de Myriam) :
-     renderParams et ses cartes — Sons, Récitateur, Objectif quotidien
-     (prmObjectif), Affichage (themeClair/grosTexte, setThemeClair/setGrosTexte :
-     des réglages d'APPAREIL écrits dans localStorage, jamais dans S), À propos,
-     et « Version de l'app » (VERSION (BUILD_NUM) + dateHeureFr(BUILD_DATE)) ;
-   · la lecture de la file d'envoi (09/09, POC-5) : sept tapotements sur le
-     numéro ouvrent la feuille (_armerLectureFile, _ouvrirLectureFile…) ;
-   · le Profil (renderProg) : le compte, le rang et son tracé, l'anneau de
-     l'objectif, « Ton parcours », les quatre chiffres, les succès ;
-   · les modales du rang (showRank, rankInfo, closeRank, CROIX_RANG, rkStatsHTML)
-     et des succès (showSucces, closeSucces, CROIX_SUCCES), et unitVocabCount.
-   ⚠️ chime() (le carillon) RESTE dans index.html : c'est de l'audio, réveillé
-   par reveilAudio() avec les autres contextes.
+/* ui/parametres.js — Paramètres et Profil :
+   · renderParams et ses cartes (Sons, Récitateur, Objectif quotidien avec prmObjectif,
+     Affichage avec themeClair/grosTexte, À propos, Version de l'app) ;
+   · la lecture cachée de la file d'envoi (_armerLectureFile, _ouvrirLectureFile…) ;
+   · le Profil (renderProg) et les modales du rang (showRank, rankInfo) et des succès
+     (showSucces), plus unitVocabCount.
+   Script classique, chargé sous ui/navigation.js et avant le grand script ; il ne lit rien
+   d'un autre script au chargement (voir l'en-tête de ui/accueil.js).
+   À L'APPEL :
+   · VERSION, BUILD_NUM, BUILD_DATE, escHTML, fatihaPct, arReveal (index.html)
+   · nomChoisiHTML, cloudCardHTML, et en ligne openPrenom, cloudLogout (comptes.js)
+   · today, objMinutes, objGoal, objFete, objRingHTML, rankFor, RANKS, rankTrackHTML,
+     ecussonHTML, BADGES, maybeGhufranPrompt, et en ligne showGhufranInfo (constance.js)
+   · S, save, dkey, unitValidated, unitUnlocked, SB, CLOUD, SYNC facultatif (progression.js)
+   · UNITS, SOURATES (donnees.js) · discsFor (parcours.js) · ico, icoImg, icoEcran (assets.js)
+   · chime, SND, et en ligne toggleSound (son.js) · qariCur, et en ligne openQari (revision.js)
+   · toAr (ui/accueil.js)
+   Gardes : outils/verifier-interface.mjs, previews/_verif_interface.html. */
 
-   ═══ POURQUOI UN SCRIPT CLASSIQUE, ET CHARGÉ ICI ═══
-   Chargé sous ui/navigation.js et AVANT le grand script d'index.html. Ni
-   `defer`, ni `type="module"`, ni `import`/`export`. Il ne lit RIEN
-   d'index.html au chargement — ICO_AFFICHAGE, ICO_VERSION, MOIS_FR, CROIX_* sont
-   des chaînes pures. Voir l'en-tête de ui/accueil.js pour la règle complète.
-
-   ═══ LE CONTRAT (résolu À L'APPEL) ═══
-   index.html : VERSION, BUILD_NUM, BUILD_DATE, escHTML, nomChoisiHTML, cloudCardHTML,
-   fatihaPct, arReveal, SND, SYNC (facultatif : la feuille dit s'il manque) — et, en ligne
-   dans le HTML produit : toggleSound, openQari, openPrenom, cloudLogout.
-   constance.js (depuis le 16/09) : today, objMinutes, objGoal, objFete, objRingHTML,
-   rankFor, RANKS, rankTrackHTML, ecussonHTML, BADGES, maybeGhufranPrompt — et
-   showGhufranInfo, appelée en ligne depuis la tuile 🕊️ du Profil.
-   progression.js : S, save, dkey, unitValidated, unitUnlocked, SB, CLOUD ·
-   donnees.js : UNITS, SOURATES · parcours.js : discsFor · assets.js : ico, icoImg, icoEcran ·
-   son.js : chime · revision.js : qariCur. toAr vient de ui/accueil.js.
-
-   GARDES : outils/verifier-interface.mjs (⑦ à ⑩, ⑬ — le banc CLIQUE sur les
-   lignes, les objectifs, le numéro), previews/_verif_interface.html.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* Carte détail du rang (clic sur le rang) */
-/* La croix se cale en haut à droite de l'ÉCRAN (le .finish est fixed) ; le contenu vit
-   directement sur le fond, sans boîte. Règle posée par Myriam le 09/08. */
+/* Modales : la croix se cale en haut à droite de l'écran (.finish est fixed), le contenu
+   vit sur le fond, sans boîte. */
 const CROIX_SUCCES='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="closeSucces()" aria-label="Fermer">\u2715</button>'+
   '<div style="max-width:340px;width:100%;margin:0 auto;text-align:center">';
 const CROIX_RANG='<button class="sm-close" style="top:calc(14px + env(safe-area-inset-top,0px));right:14px" onclick="closeRank()" aria-label="Fermer">\u2715</button>'+
@@ -82,13 +61,8 @@ function rankInfo(idx){ // popup d'un rang cliqué depuis la barre du profil (Pr
 
 function unitVocabCount(){ let n=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))n+=(U.words||[]).length; }); return n; }
 
-/* ===== Paramètres (08/08) — dissocié du Profil à la demande de Myriam. Accueille les
-   réglages transverses ; l'espace compte complet (e-mail, export, suppression) arrivera
-   ici (tâche Notion S06). ⏳ le sélecteur de voix f/h attend toujours sa décision. */
-/* ═══ AFFICHAGE (13/08) — les deux leviers d'accessibilité, dans Paramètres ═══
-   Ils écrivent dans localStorage, PAS dans S : ce sont des réglages d'APPAREIL, pas de
-   compte. L'élève qui voit mal sur son téléphone ne veut pas imposer son réglage à la
-   tablette de la maison — et un réglage d'affichage doit survivre à une déconnexion. */
+/* Affichage : réglages d'APPAREIL, écrits dans localStorage et jamais dans S — ils ne suivent
+   pas le compte et survivent à une déconnexion (journal : ui/parametres.js · Affichage). */
 function themeClair(){ try{ return localStorage.getItem('alaq_theme')==='clair'; }catch(e){ return false; } }
 function grosTexte(){ try{ return localStorage.getItem('alaq_gtexte')==='1'; }catch(e){ return false; } }
 function setThemeClair(on){
@@ -104,17 +78,16 @@ function setGrosTexte(on){
 const ICO_AFFICHAGE='<svg class="prm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
   'stroke-width="1.9" stroke-linecap="round" style="color:var(--gold2)">'+
   '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17" /><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor" stroke="none"/></svg>';
-/* L'étiquette de version — même format que ICO_AFFICHAGE : un SVG en ligne, classe .prm-ic,
-   couleur --gold2 ; il n'existe pas de PNG pour ce titre et un trait suffit. */
+/* l'icône de la carte Version : même format que ICO_AFFICHAGE (SVG en ligne, .prm-ic) */
 const ICO_VERSION='<svg class="prm-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
   'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold2)">'+
   '<path d="M4 4h7.2l8.8 8.8-7.2 7.2L4 11.2z"/><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none"/></svg>';
-/* « 2026-09-06 » → « 6 septembre 2026 ». Une table plutôt que toLocaleDateString : le même
-   texte sur tout moteur (un harnais peut le comparer), et le « 1er » du français. */
+/* « 2026-09-06 » → « 6 septembre 2026 » ; une table plutôt que toLocaleDateString : le même
+   texte sur tout moteur, et le « 1er ». */
 const MOIS_FR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 function dateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); if(!m)return String(iso||'');
   var j=+m[3]; return (j===1?'1er':j)+' '+(MOIS_FR[+m[2]-1]||'?')+' '+m[1]; }
-/* « 6 septembre 2026 à 23h26 » — la date seule si l'heure manque (06/09, carte « Version de l’app ») */
+/* « 6 septembre 2026 à 23h26 », la date seule si l'heure manque */
 function dateHeureFr(iso){ var m=/^(\d{4}-\d{2}-\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(String(iso||'')); if(!m)return String(iso||'');
   return dateFr(m[1])+(m[2]?' à '+m[2]+'h'+m[3]:''); }
 function prmSw(on){ return '<span class="prm-sw'+(on?' on':'')+'"><i></i></span>'; }
@@ -125,23 +98,15 @@ function renderParams(){
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-sons')+'" alt=""> Sons</h3></div>'+
       '<button class="prm-row" onclick="toggleSound();renderParams()">Effets sonores'+prmSw(SND)+'</button>'+
     '</div>'+
-    /* Le récitateur se choisit ICI, plus dans les exercices (Myriam 11/08). La même feuille
-       basse que le Qorān — une seule liste de voix, un seul S.qari. */
+    /* le récitateur se choisit ici seulement : la même feuille que le Qorān, un seul S.qari */
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-voix')+'" alt=""> Récitateur</h3></div>'+
       '<button class="prm-row" onclick="openQari()">'+escHTML(qariCur().fr)+'<span style="color:var(--muted)">›</span></button>'+
     '</div>'+
-    /* ⛔ LA CARTE « VOIX ARABE » A ÉTÉ RETIRÉE le 15/09/2026 (décision de Myriam). Elle était
-       déjà masquée depuis le 10/08 par VOIX_HOMME_ACTIVE=false — aucune voix d'homme n'avait
-       passé son oreille — et il a été mesuré ce jour-là qu'il n'existe ZÉRO fichier de voix
-       d'homme dans le dépôt : le drapeau gardait un sélecteur posé sur du vide. Une voix
-       d'homme, un jour, sera un vrai lot avec de vraies prises. */
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-objectif')+'" alt=""> Objectif quotidien</h3></div>'+
       '<div class="prm-goals">'+['5','10','15','20'].map(function(m){
         return '<button class="prm-goal'+(obj===m?' sel':'')+'" onclick="prmObjectif(\''+m+'\')">'+m+' min</button>';
       }).join('')+'</div>'+
     '</div>'+
-    /* L'AFFICHAGE — posé JUSTE AVANT « À propos », donc en bas mais toujours visible.
-       Demandé le 13/08 pour une vision réduite (déchirure de la rétine). */
     '<div class="ccard"><div class="ctt"><h3>'+ICO_AFFICHAGE+' Affichage</h3></div>'+
       '<button class="prm-row" onclick="setThemeClair(!themeClair())">Mode clair'+prmSw(themeClair())+'</button>'+
       '<button class="prm-row" onclick="setGrosTexte(!grosTexte())">Grands caractères'+prmSw(grosTexte())+'</button>'+
@@ -150,11 +115,9 @@ function renderParams(){
     '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('prm-apropos')+'" alt=""> À propos</h3></div>'+
       '<a class="prm-row" href="confidentialite.html" target="_blank" rel="noopener" style="text-decoration:none">Politique de confidentialité<span style="color:var(--muted)">›</span></a>'+
     '</div>'+
-    /* La version REVIENT à l'écran, dans sa propre carte (Myriam 06/09) — la ligne « Version »
-       avait quitté « À propos » le 10/08. Depuis le 07/09 (V1, Myriam) l'écran dit le NUMÉRO —
-       VERSION (BUILD_NUM), « 3.5.1 (197) » — et le libellé BUILD a quitté l'écran : il reste
-       pour les commits et la page de diagnostic (window.BUILD). Des <p>, pas des <div> : la
-       règle .prm-row:first-of-type compte par TYPE, et le premier div de la carte est l'en-tête. */
+    /* Version : VERSION (BUILD_NUM) ; le libellé BUILD reste hors écran (window.BUILD).
+       ⚠️ des <p>, pas des <div> : .prm-row:first-of-type compte par type, et le premier div de
+       la carte est l'en-tête (journal : ui/parametres.js · la carte Version). */
     '<div class="ccard"><div class="ctt"><h3>'+ICO_VERSION+' Version de l’app</h3></div>'+
       '<p class="prm-row prm-lit">Version<span id="prm-ver">'+escHTML(VERSION+' ('+BUILD_NUM+')')+'</span></p>'+
       '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateHeureFr(BUILD_DATE))+'</span></p>'+
@@ -162,20 +125,11 @@ function renderParams(){
     _armerLectureFile();
   }
 
-/* ═══ LIRE LA FILE D'ENVOI, SANS QU'UNE ÉLÈVE LE SACHE (09/09, POC-5) ═══════════
-   Myriam : « garde ça totalement invisible pour les élèves normaux ». La carte
-   « Version de l'app » ne change donc PAS d'un pixel : ni point, ni flèche, ni
-   couleur. Sept tapotements sur le NUMÉRO ouvrent une feuille qui dit ce que la
-   file contiendrait. C'est le geste du mode développeur d'Android, et ce choix
-   n'est pas arbitraire : sept touchers volontaires en moins de deux secondes ne se
-   produisent JAMAIS par accident, là où un appui long s'obtient avec un doigt qui
-   traîne sur un écran posé — c'est ce qui a écarté la variante B en preview.
-   Variante retenue par Myriam le 09/09 (previews/_preview-etat-file-v1.html).
-   ⚠️ PROVISOIRE, ET PENSÉ POUR PARTIR. Tout tient dans ce bloc et dans .filesheet
-   d'app.css : le jour où elle n'en veut plus, on retire l'appel ci-dessus et ces
-   deux blocs — aucune trace ailleurs.
-   ⚠️ Aucun onclick en ligne : le harnais du 15/08 exige qu'après rendu il n'en
-   reste plus un seul (« un harnais doit CLIQUER »). */
+/* LA FILE D'ENVOI, INVISIBLE POUR LES ÉLÈVES : sept tapotements sur le numéro de version, chacun
+   à moins de deux secondes du précédent, ouvrent une feuille qui dit ce que la file contiendrait ; la carte ne
+   change pas d'un pixel. Provisoire : pour la retirer, l'appel _armerLectureFile() ci-dessus,
+   ces blocs et .filesheet d'app.css. ⚠️ Aucun onclick en ligne : le harnais exige qu'il n'en
+   reste aucun après rendu. (journal : ui/parametres.js · la lecture de la file d’envoi) */
 var _verTaps=0, _verT=null;
 function _armerLectureFile(){
   var el=document.getElementById('prm-ver'); if(!el)return;
@@ -228,13 +182,12 @@ function _fermerLectureFile(){
   if(f)f.classList.remove('on'); if(v)v.classList.remove('on');
 }
 function prmObjectif(m){ if(!S.onb||typeof S.onb!=='object')S.onb={}; S.onb.objectif=m; save();
-  // abaisser l'objectif APRÈS avoir déjà dépassé le nouveau seuil doit valider le jour (audit 10/08)
+  // abaisser l'objectif sous un seuil déjà dépassé doit valider le jour
   if(objMinutes()>=objGoal()&&S.lastDay!==today())objFete();
   renderParams(); }
 
 function renderProg(){
-  // Le compte d'abord, tout en discrétion quand on est connectée ; le titre « Ta progression »
-  // a disparu : c'est l'encadré du rang qui porte l'étiquette (choix Myriam 13/07).
+  // le compte d'abord ; pas de titre « Ta progression », l'encadré du rang porte l'étiquette
   let h='';
   if(SB&&CLOUD.user){
     h+='<div class="acct"><span class="acct-dot"></span><div class="acct-id">'+nomChoisiHTML()+
@@ -248,8 +201,7 @@ function renderProg(){
     h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
   }
   var _R=rankFor(S.consScore);
-  // Le tracé des 7 rangs est IMBRIQUÉ dans l'encadré doré (une seule boîte, choix Myriam 13/07) —
-  // rangée titre en haut, tracé en PLEINE LARGEUR dessous. div (pas button) : les points du
+  // Le tracé des 7 rangs est imbriqué dans l'encadré doré. div, pas button : les points du
   // tracé ont leur propre clic (rankInfo, stopPropagation).
   h+='<div class="rankcard" role="button" tabindex="0" onclick="showRank()">'+
        '<div class="rk-row">'+
@@ -259,14 +211,9 @@ function renderProg(){
        '</div>'+
        rankTrackHTML()+
      '</div>';
-  h+=objRingHTML();      // l'anneau de l'objectif quotidien — seul, rien d'autre (validé 10/08)
-  h+=parcoursCardHTML(); // « Ton parcours » remonte juste sous l'encadré du rang (choix Myriam 13/07)
-  /* ═══ LES GRAINES ENTRENT DANS LE PROFIL (Myriam, 14/08) ═══
-     « Que fait-on des graines gagnées ? Elles n'apparaissent même pas dans le profil. Je sais
-     qu'on permettra plus tard d'acheter des danses ou des skins… mais le nombre de graines
-     gagnées au total doit quand même apparaître. » Une monnaie qu'on ne peut pas compter n'est
-     pas une monnaie : elles étaient gagnées, comptées dans S.graines, et visibles nulle part
-     hors de l'écran de fin. Elles rejoignent la rangée du Profil, à côté de la série. */
+  h+=objRingHTML();      // l'anneau de l'objectif quotidien, seul
+  h+=parcoursCardHTML(); // « Ton parcours », juste sous l'encadré du rang
+  /* les graines gagnées au total sont visibles ici (journal : ui/parametres.js · renderProg, les graines dans le Profil) */
   h+='<div class="pgrid pgrid4">'+
      '<div class="pstat"><div class="pv">'+(S.streak||0)+'</div><div class="pl">série</div></div>'+
      '<div class="pstat"><div class="pv">'+(S.graines||0)+'</div><div class="pl">graines</div></div>'+
@@ -303,7 +250,6 @@ function renderProg(){
     }
     return '<div class="ccard"><div class="ctt"><h3><img class="prm-ic" src="'+ico('menu-profil')+'" alt=""> Ton parcours</h3></div>'+inner+'</div>';
   }
-  // (« Mon compte » est désormais tout en haut — ancien code de sauvegarde ALAQ1 retiré le 07/07.)
   document.getElementById('view-prog').innerHTML=h; try{maybeGhufranPrompt();}catch(e){}
 }
 // Popup détail d'un succès (clic sur une image de la grille)

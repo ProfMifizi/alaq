@@ -1,88 +1,42 @@
 /* ══════════════════════════════════════════════════════════════════════════════
-   LE SON D'ALAQ — une table, une porte.
-   Sorti d'index.html et de src/ecrans/index.js le 15/09/2026 (sous-lot 4 de la tâche
-   Notion « extraire le lecteur »), sur décision de Myriam : « on fait un truc ultra propre ».
+   son.js — le son d'Alaq : une table, une porte.
+   Porte : SND/toggleSound, la translittération (LTRANS, sylBase), la table SONS (semée
+   par règles, écrite, composée) avec inscrireLeSon/aLeSon/aUnSon, l'état (_curAudio,
+   _sndGen, stopAudio, quandSonFini), le pool iOS (audioBeni), la porte jouer/jouerFichier
+   et ses raccourcis (speak, sayLetterName…), le haut-parleur (spkSVG/spkOn/spkOff), la
+   marque sonore (playSfx, comboBonneReponse, okBeep, errorBeep, toc, chime, reveilAudio).
+   ⛔ Aucun nom de fichier ne s'assemble au moment de jouer : la table est bâtie au
+   chargement, puis seulement lue. Un son introuvable est un silence, jamais une voix de
+   machine (journal : son.js · ce qui a disparu le 15/09).
 
-   ── POURQUOI CE FICHIER EXISTE ───────────────────────────────────────────────
-   Avant lui, SIX fonctions faisaient sortir un son, et chacune cherchait son fichier
-   à sa façon : `speak` lisait la table, `sayLetterName` assemblait un nom, `jouerSyl`
-   en assemblait un autre, `jouerMot` escaladait sur deux étages, `sayLetterSound`
-   n'en avait qu'un, `jouerF` n'essayait jamais le nom nu. Résultat mesuré le 15/09 :
-   151 clés étaient connues DEUX FOIS, par la table ET par une formule, et six
-   lettres (ث ج خ ش ظ ف) dont la prise de Myriam existe sur le disque passaient en voix
-   de synthèse sur les écrans qui consultaient la table.
-
-   ── LA RÈGLE DU FICHIER, EN UNE PHRASE ───────────────────────────────────────
-   ⛔ PLUS AUCUN NOM DE FICHIER NE S'ASSEMBLE AU MOMENT DE JOUER. La table est bâtie
-   une fois, au chargement ; ensuite on ne fait plus que la LIRE. Un son introuvable
-   est un SILENCE, jamais une voix de machine — et le portillon le voit avant la
-   livraison (`outils/verifier-son.mjs` compare la table entière au dossier).
-
-   ── POURQUOI UN SCRIPT CLASSIQUE, ET PAS UN MODULE ───────────────────────────
-   Deux raisons, toutes deux MESURÉES, pas supposées :
-   ① La table est ÉCRITE au chargement par plusieurs scripts — les mots des unités 1-7 ICI
-      même, en fin de fichier (depuis le 16/09), puis par revision.js et le grand script : les mots
-      des unités 1-7 (le package), les cinq raccords de l'unité 9, les Noms d'Allah,
-      les mots de l'unité 8, et `_adopteNoms` quand Supabase répond. Un module, différé,
-      arriverait après ces écritures.
-   ② `_sndGen` — le jeton qui tient « un seul son à la fois » — est un NOMBRE réassigné, lu
-      par index.html et par le pont de l'unité 8 (qui le résout par accesseur) ; `SND` est lu
-      en nom nu depuis src/player, un module. Un module publie
-      ses valeurs par COPIE : le nombre serait figé chez les lecteurs. Ce n'est pas une
-      hypothèse — c'est exactement ce qui est arrivé le 15/09 au matin à `_tocCtx`, `_LN`
-      et `_LNg`, partis dans src/ecrans (module) en 3.14 : `reveilAudio()` ne réveillait
-      plus le contexte de `toc`, et le préchargement des noms de lettres était devenu
-      inerte. Ces trois-là reviennent ICI, dans le monde classique, où ils appartiennent.
-      ⚠️ Une fonction publiée par un module reste partagée (même objet) ; une VALEUR
-      réassignée, non. Ne jamais publier depuis un module une valeur que le monde
-      classique doit relire.
-
-   Chargé par <script src="son.js"></script> sous generateurs.js et AVANT le grand
-   script. Ni `defer`, ni `type="module"`, ni `import`, ni `export` — jamais.
-
-   ── CE QUE CE FICHIER NE FAIT PAS ────────────────────────────────────────────
-   Les récitations du Qorān restent dans index.html : 17 voix, dont 10 hébergées chez
-   nous et le reste en flux (cdn.islamic.network), des droits et une mise en cache
-   différents. L'unité 8 garde sa propre table (src/units/unit-8/donnees/sons.js), qui
-   suit déjà la même règle : « résolue CONTRE LE DISQUE, jamais devinée à l'exécution ».
-   C'est ce modèle-là, qui protège l'unité 8 depuis août, que ce fichier étend au reste.
-
-   ── CE QUI A DISPARU LE 15/09, ET SUR QUELLE DÉCISION ────────────────────────
-   · LA VOIX DE SYNTHÈSE, en entier (Myriam, 15/09 : « silence, et le portillon rougit »).
-     `_speakSynth`, `speakFr`, `bestVoice`, `warmVoices`, `expandShadda`, `ttsRom`, `WSAY`,
-     `_curUtter` et tous les contournements iOS qui les entouraient. L'app ne prononce
-     plus jamais un son qu'elle n'a pas enregistré. Rien ne s'est tu pour autant : les
-     460 fichiers du dossier sont là, et le banc les exige désormais un par un.
-   · LA DEUXIÈME VOIX (-f / -h), en entier (Myriam, 15/09). Mesuré ce jour-là : ZÉRO
-     fichier -h dans tout le dépôt, et les seuls -f encore atteignables étaient les quatre
-     félicitations — qui sont donc entrées dans la table sous leur vrai nom. `VOIX_G`,
-     `VOIX_HOMME_ACTIVE`, `setVoix` et `MOTS_SANS_IA` ont disparu avec. Une voix d'homme,
-     un jour, sera un vrai lot avec de vrais fichiers, pas un drapeau posé sur du vide.
-   · LA NARRATION DES CONSIGNES (Myriam, 15/09 : « tout retirer, dépôt compris »). Elle
-     ne jouait plus depuis le 13/08 — `spokenInstr()` rend `''` en dur, donc `readInstr`
-     n'était plus jamais atteinte — et ses 60 fichiers pesaient 4,6 Mo, dont 2,8 Mo
-     téléchargés sur le téléphone de chaque élève à chaque installation. `INSTR_LIST`,
-     `INSTR_AUDIO`, `readInstr`, `_normInstr`, `NARR` et `toggleNarr` sont partis avec.
+   Script classique, pas un module :
+   ① la table est écrite au chargement par plusieurs scripts (son.js lui-même en fin de
+      fichier, revision.js, le grand script) : un module différé arriverait après eux ;
+   ② _sndGen est un nombre réassigné, lu par revision.js, constance.js et l'hôte de
+      l'unité 8 ; SND est lu depuis src/player. Un module publie ses valeurs par copie :
+      elles seraient figées chez les lecteurs (journal : son.js · pourquoi un script classique).
+   ⚠️ Chargé sous generateurs.js et avant le grand script ; ni defer, ni type="module",
+   ni import/export.
+   Hors de ce fichier : les récitations du Qorān (revision.js) et la table de l'unité 8
+   (src/units/unit-8/donnees/sons.js), qui suit la même règle.
+   Gardes : outils/verifier-son.mjs (table contre disque et pré-cache, écrans des leçons
+   joués), previews/_verif_son.html, garderLeSon() dans vite.config.mjs.
    ══════════════════════════════════════════════════════════════════════════════ */
 
-/* ═══════════════ 1. LE RÉGLAGE ═══════════════════════════════════════════════
-   Un seul, celui que l'élève voit dans Paramètres. Il coupe les sons d'AMBIANCE —
-   la signature, l'erreur, les carillons — jamais une voix enregistrée ni une
-   récitation : couper « Effets sonores » ne doit pas rendre la leçon muette. */
+/* ═══ 1. LE RÉGLAGE — « Effets sonores » coupe l'ambiance (signature, erreur, carillons),
+   jamais une voix enregistrée ni une récitation. */
 let SND=(function(){try{return localStorage.getItem('alaq_snd')!=='off'}catch(e){return true}})();
 function toggleSound(){
   SND=!SND;try{localStorage.setItem('alaq_snd',SND?'on':'off')}catch(e){}
 }
 
-/* ═══════════════ 2. LA TRANSLITTÉRATION ══════════════════════════════════════
-   Venue de src/ecrans/index.js le 15/09 : c'est du SON (elle ne sert qu'à nommer des
-   fichiers), et elle doit être lisible au chargement pour semer la table. */
+/* ═══ 2. LA TRANSLITTÉRATION — du son (elle nomme des fichiers), lisible au chargement
+   pour semer la table. */
 const LTRANS={'ا':'alif','ب':'ba','ت':'ta','ث':'tha','ج':'jim','ح':'hha','خ':'kha','د':'dal','ذ':'dhal','ر':'ra','ز':'zay','س':'sin','ش':'shin','ص':'sad','ض':'dad','ط':'tta','ظ':'dha','ع':'ayn','غ':'ghayn','ف':'fa','ق':'qaf','ك':'kaf','ل':'lam','م':'mim','ن':'nun','ه':'ha','و':'waw','ي':'ya'};
 const HKF={'َ':'fatha','ِ':'kasra','ُ':'damma'};
 const MDF={'ا':'alif','ي':'ya','و':'waw'};
-/* ⚠️ Les enregistrements de SYLLABES portent l'ANCIEN nommage pour deux lettres :
-   LTRANS dit nun/ayn, les fichiers disent noun-/ain- (attrapé par l'audit du 10/08 —
-   sans ça le ن de l'unité 1 partait en synthèse). */
+/* ⚠️ Les fichiers de syllabes disent noun-/ain- là où LTRANS dit nun/ayn
+   (journal : son.js · syllabes noun/ain). */
 const SYLTR={'nun':'noun','ayn':'ain'};
 function sylBase(s){
   if(typeof s!=='string')return null;
@@ -95,37 +49,20 @@ function sylBase(s){
   return null;
 }
 
-/* ═══════════════ 3. LA TABLE ═════════════════════════════════════════════════
-   Clé = ce que l'app demande. Valeur = le nom NU du fichier, sans dossier ni `.mp3` :
-   la porte les ajoute, à un seul endroit. Le préfixe du nom porte la FAMILLE du son,
-   et les 460 fichiers du dossier respectent cette discipline sans exception.
-
-   ⚠️ LA CLÉ D'UNE LETTRE EST AMBIGUË, ET C'EST RÉSOLU ICI : « م » demande le NOM de la
-   lettre, « son:م » demande son SON. Deux clés, une table ; l'app n'a jamais à choisir
-   entre deux fonctions selon ce qu'elle veut entendre. */
+/* ═══ 3. LA TABLE — clé = ce que l'app demande ; valeur = nom nu du fichier (la porte
+   ajoute le dossier et .mp3). « م » demande le NOM de la lettre, « son:م » son SON. */
 const SONS={};
 
-/* ⚠️ UN SILENCE VOULU N'EST PAS UN TROU. Un alif NU n'a pas de son : il PORTE la voyelle
-   (Myriam, 17/08 : « alif fait un son bizarre. Silence cet audio car alif n'a pas de son »).
-   Elle a raison sur le fond — le alif nu ne porte aucune valeur sonore, c'est un support de
-   voyelle et de hamza ; lui faire dire quelque chose enseignerait une fausseté à une
-   primo-lectrice. Il se tait donc, et son NOM (الِفْ) reste disponible, lui.
-   Une clé citée ici n'entre JAMAIS dans la table : elle n'a pas de fichier, et c'est voulu.
-   Le banc lit cette table pour ne pas compter ce silence comme un enregistrement manquant. */
+/* ⚠️ Un silence voulu n'est pas un trou : le alif nu n'a pas de son, il porte la voyelle
+   (son nom reste). Une clé citée ici n'entre jamais dans la table, et le banc la lit
+   (journal : son.js · le alif nu se tait). */
 const SANS_SON={'son:ا':'Myriam 17/08 — un alif nu n\'a pas de son, il porte la voyelle'};
 
-/* ── ① CE QUI SE DÉDUIT : trois règles, déroulées une fois au chargement ──────
-   Mesuré le 15/09 avant de les écrire, en comparant chaque règle à la table de
-   l'époque : 128 syllabes et 23 noms de lettres produits, ZÉRO divergence. Ces
-   151 lignes n'ont donc jamais eu besoin d'être écrites. Et une règle n'a pas de
-   trou, là où une liste en a toujours un (ta règle du 17/08, Myriam). */
+/* ── ① ce qui se déduit : trois règles, déroulées une fois au chargement (une règle n'a
+   pas de trou, une liste en a toujours un). */
 function semerLesSons(){
-  /* ⚠️ LES SYLLABES SONT BORNÉES AUX LETTRES ENSEIGNÉES, et c'est mesuré : les 28 lettres
-     ont toutes leur NOM et leur SON enregistrés, mais seules les 21 lettres des unités 1
-     à 7 ont leurs 6 syllabes (126 prises, zéro manquante). Semer les 7 autres poserait
-     42 clés vers des fichiers qui n'existent pas, et le banc aurait raison de rougir.
-     La borne se LIT dans UNITS : le jour où une unité enseigne ث, ses syllabes entrent
-     ici toutes seules, sans que personne ait à y penser. */
+  /* ⚠️ Les syllabes sont bornées aux lettres enseignées, lues dans UNITS : les autres
+     lettres n'ont pas leurs prises de syllabes (journal : son.js · syllabes bornées). */
   const enseignees=new Set();
   try{ UNITS.forEach(function(u){ (u.letters||[]).forEach(function(L){ enseignees.add(letterKey(L)); }); }); }catch(e){}
   for(const L in LTRANS){
@@ -136,40 +73,24 @@ function semerLesSons(){
     for(const h in HKF)SONS[L+h]=trSyl+'-'+HKF[h]+'-son-court';
     for(const m in MDF)SONS[L+MDH[m]+m]=trSyl+'-'+MDF[m]+'-son-prolonge';
   }
-  /* ⚠️ LA FAMILLE DU ALIF, ET C'EST UN PIÈGE VÉRIFIÉ CONTRE L'ANCIENNE TABLE : ا أ إ آ ٱ
-     sont CINQ caractères distincts pour le navigateur, et l'ancienne carte portait bien
-     « أ » comme « ا », « أَ » comme « اَ », « إِي » comme « اِي »… neuf clés, dont des
-     syllabes. On les DÉRIVE : chaque clé semée pour ا est recopiée pour chaque variante,
-     plutôt que d'en écrire la liste — qui aurait un trou, comme toujours.
-     ⚠️ ALIF_FAM est une CHAÎNE ('اأإآٱ'), pas un tableau : un `.forEach` dessus lève, et un
-     try/catch l'aurait avalé en silence — c'est arrivé pendant ce lot même, et seul le
-     contrôle de non-régression l'a vu. Pas de try/catch ici : si la famille ne se dérive
-     pas, la page doit le crier, pas se taire. */
+  /* ⚠️ ا أ إ آ ٱ sont cinq caractères distincts : chaque clé semée pour ا est recopiée
+     pour chaque variante. ALIF_FAM est une chaîne, pas un tableau (pas de .forEach), et
+     pas de try/catch ici : une dérivation qui échoue doit lever, pas se taire. */
   const deAlif=Object.keys(SONS).filter(function(k){ return k.indexOf('ا')===0; });
   for(const v of ALIF_FAM){
     if(v==='ا')continue;
     deAlif.forEach(function(k){ SONS[v+k.slice(1)]=SONS[k]; });
   }
-  /* 🔴 آ N'EST PAS UN ALIF COMME LES AUTRES, ET LA DÉRIVATION L'AVAIT ÉCRASÉ. Le alif madda
-     est la PROLONGATION du hamza — il se dit « ââ », pas « alif ». La boucle ci-dessus lui
-     avait posé le NOM de la lettre. Mesuré sur l'écran des prolongations de l'unité 2 : la
-     seule option portant le hamza prolongé faisait entendre « alif », une fausseté enseignée
-     là où c'est tout l'objet de l'écran — et la prise de Myriam (21/06), pourtant présente et
-     pré-cachée, redevenait inatteignable. C'est une deuxième forme de l'incident du 08/09.
-     Le cas spécial se pose APRÈS la dérivation, et le banc vérifie désormais qu'AUCUNE clé de
-     la table ne contredit `sylBase` : c'est le garde générique qui aurait attrapé celui-ci. */
+  /* ⚠️ آ (alif madda) dit la prolongation du hamza, pas « alif » : ce cas se pose APRÈS
+     la dérivation, qui l'écrasait. Le banc exige qu'aucune clé ne contredise sylBase
+     (journal : son.js · آ écrasé par la dérivation). */
   SONS['آ']='alif-alif-son-prolonge';
 }
 
-/* ── ② CE QUI NE SE DEVINE PAS : une ligne par son ───────────────────────────
-   Un mot arabe ne dit pas le nom de son fichier : مَكْتَبٌ → mot-maktab ne s'invente
-   pas. Ces 99 lignes sont donc écrites.
-   ⚠️ 76 D'ENTRE ELLES SONT AUSSI DANS `src/content/units/unit-0N.json`, où Myriam écrit le
-   mot et son son. C'est voulu, et c'est le JSON qui TRANCHE : le grand script verse ces 76
-   mots par `inscrireLeSon` APRÈS ce littéral, donc il écrase ce qui diverge — deux mots le
-   font (الرَّحْمَٰنُ et الرَّحِيمُ, que le JSON pointe vers la prise des NOMS D'ALLAH, celle que
-   les élèves entendent). Elles restent ici pour que la table soit complète AVANT que le grand
-   script tourne : le studio, les bancs et le pré-cache la lisent à cet instant-là. */
+/* ── ② ce qui ne se devine pas : une ligne par son (مَكْتَبٌ → mot-maktab ne s'invente pas).
+   ⚠️ Beaucoup sont aussi dans src/content/units/unit-0N.json, et c'est le JSON qui tranche :
+   la fin de ce fichier les reverse par inscrireLeSon et écrase ce qui diverge. Ils restent
+   ici pour que la table soit complète dès le chargement (studio, bancs, pré-cache). */
 const SONS_ECRITS={
   'أَمْ':'am-soukoun',
   'أَنْ':'an-soukoun',
@@ -272,26 +193,10 @@ const SONS_ECRITS={
   'التُّرَابُ':'mot-atturab',
 };
 
-/* ── ③ LES SONS DE L'APP, qui ne sont ni des mots ni des lettres ─────────────
-   Ils étaient assemblés à la volée avant le 15/09 ; ils sont dans la table comme
-   tout le reste. Les quatre félicitations gardent leur suffixe `-f` : c'est leur
-   vrai nom de fichier, et ce sont les seules prises de voix générée que l'app
-   demande encore. Le jour où Myriam les réenregistre, la ligne change ici, et
-   nulle part ailleurs. */
-/* ── ④ LES GRAPHIES QUE LES ÉCRANS COMPOSENT À LA VOLÉE ──────────────────────
-   🔴 CES CINQ CLÉS MANQUAIENT, ET DEUX REVUES ONT DÛ LES TROUVER. Elles ne s'écrivent nulle
-   part dans les données : un écran les COMPOSE au moment de sonner, et sa composition ne
-   tombe pas sur la même suite de caractères que la table.
-   · أَمَّ / أَنَّ / أَلَّ — les trois écrans « chedda » de l'unité 1. La table les écrit
-     fatha PUIS chedda ; le générateur assemble chedda PUIS fatha. Deux suites de caractères
-     différentes pour le même mot à l'œil. Le désaccord est ANCIEN, mais sa conséquence a
-     changé le 15/09 : avant, une voix de machine comblait le trou ; depuis, le silence.
-   · ؤُ / ئِ — les deux sièges de la hamza (`hamzaTap`) : « la hamza seule dit son nom, les
-     sièges disent la voyelle qu'ils permettent ». Ces deux prises de Myriam existent, sous
-     le nom de leur syllabe — elles n'étaient simplement jamais demandées.
-   ⚠️ Le garde qui les attrape désormais JOUE les 63 leçons et confronte chaque clé demandée
-   à la table (`outils/verifier-son.mjs`, essai ⑬). Comparer la table au disque ne suffit
-   pas : il faut confronter l'ÉCRAN à la table. */
+/* ── ③ les graphies que les écrans composent à la volée : l'ordre des signes y diffère
+   de la table (chedda puis fatha), ou la prise existe sous le nom de sa syllabe (sièges de
+   la hamza de hamzaTap). ⚠️ Confronter l'écran à la table, pas seulement la table au disque
+   (journal : son.js · les sons de l'app et les cinq graphies composées). */
 const SONS_COMPOSES={
   '\u0623\u064E\u0645\u0651\u064E':'am-chedda',   // أَمَّ, chedda avant fatha
   '\u0623\u064E\u0646\u0651\u064E':'an-chedda',   // أَنَّ
@@ -300,6 +205,8 @@ const SONS_COMPOSES={
   '\u0626\u0650':'ya-kasra-son-court',               // ئِ — le siège ya dit « i »
 };
 
+/* ── ④ les sons de l'app, ni mots ni lettres. Les félicitations gardent leur suffixe -f :
+   c'est leur vrai nom de fichier. */
 const SONS_APP={
   'sfx:bonne-reponse':'sfx-bonne-reponse',
   'sfx:erreur':'sfx-erreur',
@@ -313,18 +220,15 @@ const SONS_APP={
 semerLesSons();
 Object.assign(SONS,SONS_ECRITS,SONS_COMPOSES,SONS_APP);
 
-/* Le grand script verse ici ce qui vient des DONNÉES : les mots des unités 1-7 (leur
-   champ `snd`), les Noms d'Allah (le code d'abord, Supabase ensuite), les mots des
-   unités 8 à 10. Une seule porte d'entrée, pour que rien n'écrive dans SONS à la main. */
+/* La seule porte d'entrée de ce qui vient des données (mots des unités, Noms d'Allah,
+   unités 8+) : rien n'écrit dans SONS à la main. */
 function inscrireLeSon(cle,nom){
   if(!cle||!nom)return;
   SONS[cle]=String(nom).replace(/^audios-app-alaq\//,'').replace(/\.mp3$/,'');
 }
 
-/* ── LES FAMILLES ────────────────────────────────────────────────────────────
-   Aujourd'hui elles ne servent qu'au BANC, qui vérifie que chaque son de la table
-   tombe dans une famille connue et que son fichier existe. Elles ne pilotent plus
-   aucun repli : depuis le 15/09 il n'y en a qu'un, le silence, pour tout le monde. */
+/* Les familles ne servent qu'au banc (chaque son tombe dans une famille connue) ;
+   elles ne pilotent aucun repli. */
 const FAMILLES=['lettre','mot','nom','voyelle','sfx','felicit','am','an','al','faux'];
 function familleDe(nom){
   const s=String(nom||'');
@@ -332,20 +236,14 @@ function familleDe(nom){
   const p=s.split('-')[0];
   return FAMILLES.indexOf(p)>=0?p:null;
 }
-/* « Ce son existe-t-il ? » — la question que tout écran doit pouvoir poser AVANT d'offrir un
-   bouton. Depuis que l'app se tait au lieu d'appeler une voix de machine, un haut-parleur
-   affiché sur un son absent ne joue plus rien : l'élève lit ça comme une panne. Un écran qui
-   n'est pas sûr de son son demande ici, et n'offre le bouton que si la réponse est oui. */
+/* « Ce son existe-t-il ? » — à demander avant d'offrir un haut-parleur : un bouton qui
+   ne joue rien se lit comme une panne. */
 function aLeSon(cle){ return typeof cle==='string' && !!SONS[cle]; }
-/* « Cette lettre a-t-elle un son à faire entendre ? » — la grille des 28 du Cours s'en
-   sert pour n'offrir le bouton que là où il sonnera. */
+/* « Cette lettre a-t-elle un son ? » — pour la grille des 28 du Cours. */
 function aUnSon(L){ const k='son:'+letterKey(L); return !!SONS[k] && !SANS_SON[k]; }
 
-/* ═══════════════ 4. L'ÉTAT ═══════════════════════════════════════════════════
-   `_sndGen` est le jeton de génération : tout repli et toute minuterie d'un ancien son
-   sont annulés dès qu'un nouveau son démarre. Il est lu par index.html, src/ecrans,
-   src/player et le pont de l'unité 8 — d'où la note de l'en-tête : il doit rester ici,
-   dans un script classique, pour que tout le monde lise LE MÊME nombre. */
+/* ═══ 4. L'ÉTAT — _sndGen est le jeton de génération : un nouveau son annule les replis
+   et minuteries de l'ancien. Il reste dans ce script classique (voir l'en-tête). */
 let _curAudio=null,_sndGen=0;
 function stopAudio(){ // un seul son à la fois : coupe le fichier ET le tampon WebAudio, et invalide les replis en attente
   _sndGen++;
@@ -363,14 +261,10 @@ function quandSonFini(cb){ // rappelle cb à la fin du son EN COURS (filet 2,5 s
   },150);
 }
 
-/* ═══════════════ 5. LE POOL BÉNI (iOS) ═══════════════════════════════════════
-   Copié à l'identique d'index.html le 15/09 — ses commentaires datés racontent quatre
-   bugs vécus, ils restent tels quels. */
+/* ═══ 5. LE POOL BÉNI (iOS) */
 const _POOL=[];let _poolI=0;
-/* ⚠️ Le 1er silence (v2b) était un base64 bricolé, INVALIDE : play() échouait, la
-   bénédiction ratait EN SILENCE et iOS continuait de bloquer la signature (vécu par
-   Myriam le soir même). Celui-ci est fabriqué octet par octet — 20 ms, 8 kHz. Et on
-   ne se déclare béni qu'après un play() RÉUSSI : sinon on réessaie au geste suivant. */
+/* ⚠️ Un silence WAV valide (20 ms, 8 kHz) ; on ne se déclare béni qu'après un play()
+   réussi, sinon on réessaie au geste suivant (journal : son.js · le silence base64 invalide). */
 const _SIL='data:audio/wav;base64,UklGRmQBAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
 function benirAudio(){
   if(_POOL.length)return;
@@ -387,14 +281,8 @@ function benirAudio(){
 try{
   ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,benirAudio,true));
 }catch(e){}
-/* 🔴 UN SEUL LECTEUR DE SECOURS, PAS UN NOUVEAU À CHAQUE FOIS (Myriam, 16/08 : « au
-   début j'ai eu les audios… puis ça s'est arrêté en cours de route » — un exercice
-   qui enchaîne 14 sons, exactement le nombre qui use la patience d'un tas d'<audio>
-   jamais libérés). Tant que le pool n'est pas béni, `new Audio(url)` en créait un
-   NEUF à chaque appel, sans jamais le détruire ni le réutiliser — une fuite muette
-   qui grossit à chaque son et peut finir par faire refuser les suivants. _SECOURS
-   suit exactement le geste des éléments du pool : on le met en pause, on efface ses
-   anciens écouteurs, on pose la nouvelle source — un seul élément, pour toujours. */
+/* ⚠️ Un seul lecteur de secours, réutilisé : un new Audio() par appel fuyait et finissait
+   par faire refuser les sons (journal : son.js · un seul lecteur de secours). */
 let _secours=null;
 function audioBeni(url){ // un lecteur du pool si béni, le même lecteur de secours sinon (bureau)
   if(!_POOL.length){
@@ -403,17 +291,9 @@ function audioBeni(url){ // un lecteur du pool si béni, le même lecteur de sec
     _secours.onended=null;_secours.onerror=null;_secours.muted=false;_secours.src=url;
     return _secours;
   }
-  /* 🔴 UN DEUXIÈME SON FAIT TAIRE LE PREMIER (Myriam, 28/08 : « quand je fais glisser
-     l'objet sur la maman avant que l'audio ne soit terminé, les deux audios se jouent
-     en même temps »). LA CAUSE EST ICI, pas dans l'exercice : le pool sert QUATRE
-     lecteurs à tour de rôle, et on ne mettait en pause que celui qu'on rendait — le
-     précédent, un autre élément du pool, continuait tranquillement de sonner. Un
-     exercice qui énonce sa phrase puis la répète à la réussite en superposait donc
-     jusqu'à quatre. On fait taire TOUT le pool (et le lecteur de secours) avant de
-     servir : la règle vaut pour tous les appelants, pas seulement pour le registre.
-     ⚠️ Le sfx récompense/erreur ne passe PAS par ici quand son tampon est décodé
-     (branche WebAudio de playSfx) — la superposition VOULUE du 17/08, « le mot finit
-     de sonner sous le ding », reste donc intacte. */
+  /* ⚠️ Faire taire TOUT le pool (et le secours) avant de servir, sinon deux sons se
+     superposent (journal : son.js · un deuxième son fait taire le premier). Le sfx
+     WebAudio de playSfx ne passe pas ici : sa superposition au mot est voulue. */
   _POOL.forEach(function(p){try{p.pause();}catch(e){}});
   try{if(_secours)_secours.pause();}catch(e){}
   const a=_POOL[_poolI++%_POOL.length];
@@ -421,27 +301,21 @@ function audioBeni(url){ // un lecteur du pool si béni, le même lecteur de sec
   return a;
 }
 
-/* ═══════════════ 6. LA PORTE ═════════════════════════════════════════════════
-   UNE seule fonction fait sortir une voix enregistrée. Tout le reste de ce chapitre
-   n'est que du vocabulaire : des raccourcis d'une ligne, pour que les milliers
-   d'appels existants gardent le nom qui dit ce qu'ils veulent entendre. */
+/* ═══ 6. LA PORTE — une seule fonction fait sortir une voix enregistrée ; le reste
+   n'est que du vocabulaire. */
 const DOSSIER='audios-app-alaq/';
 function urlDuSon(nom){ return DOSSIER+nom+'.mp3'; }
 
-/* `cle` : ce que l'app demande (un mot, une lettre, « son:ل », « sfx:erreur »…).
-   `o.el` : le haut-parleur dont les ondes bougent pendant que le son joue.
-   `o.fin` : rappelé quand CE son est fini — TOUJOURS appelé, même sur un silence.
-   ⚠️ RÈGLE (gravée le 09/08) : « allumer le bouton après le son » passe TOUJOURS par
-   `o.fin`, JAMAIS par quandSonFini() armé AVANT l'appel — celui-ci capture le jeton du
-   moment, que stopAudio() incrémente aussitôt : il se croit périmé et n'allume rien. */
+/* cle : ce que l'app demande · o.el : le haut-parleur animé · o.fin : rappelé à la fin
+   de CE son, toujours, même sur un silence.
+   ⚠️ Allumer un bouton après le son passe par o.fin, jamais par quandSonFini() armé avant
+   l'appel : stopAudio() incrémente le jeton, et le rappel se croit périmé. */
 function jouer(cle,o){
   o=o||{};
   const nom=(typeof cle==='string'&&SONS[cle])||null;
   return jouerFichier(nom,o);
 }
-/* Joue un fichier NOMMÉ, sans passer par la table. Réservé aux rares sons que la table
-   ne peut pas porter parce que l'appelant tient déjà le nom : les prises de l'unité 8,
-   les extraits de verset. Un nom absent du disque se tait, comme partout ailleurs. */
+/* Joue un fichier NOMMÉ, hors table (pour jouerF). Un nom absent se tait aussi. */
 function jouerFichier(nom,o){
   o=o||{};
   stopAudio();
@@ -449,9 +323,8 @@ function jouerFichier(nom,o){
   const gen=_sndGen;
   let fini=false;
   const termine=function(){ if(fini||gen!==_sndGen)return; fini=true; spkOff(); if(o.fin)o.fin(); };
-  /* ⛔ AUCUNE VOIX DE MACHINE (Myriam, 15/09). Un son que l'app n'a pas enregistré est
-     un SILENCE — et le bouton CONTINUER s'allume quand même, par `termine`. Le trou,
-     lui, est signalé au portillon, pas à l'élève : voir outils/verifier-son.mjs. */
+  /* ⛔ Aucune voix de machine : un son absent est un silence, et termine rend la main
+     (CONTINUER s'allume). Le trou est signalé au portillon (outils/verifier-son.mjs). */
   if(!nom){ setTimeout(termine,120); return; }
   try{
     const a=audioBeni(urlDuSon(nom)); _curAudio=a;
@@ -463,30 +336,21 @@ function jouerFichier(nom,o){
     /* un chargement lent n'est PAS un fichier absent : on ne rend la main que si rien
        n'a même commencé à se télécharger (readyState 0 = pas même les métadonnées). */
     setTimeout(function(){ if(!parti&&gen===_sndGen&&a.paused&&a.readyState===0)termine(); },1400);
-    /* ⚠️ 6 s, PAS 8 : c'est le filet que `jouerMot` avait, et il borne l'attente maximale du
-       bouton CONTINUER. Une revue a relevé qu'un filet unique à 8 s ALLONGEAIT l'attente là
-       où l'ancien code descendait à 2,2 s (le nom d'une lettre) ou 2,6 s (le son d'une
-       lettre) — et un site ne porte aucune ceinture : `asmFini` appelle la porte sans
-       `objectifFilet()`. Sur un réseau lent, l'élève y attendait deux secondes de plus
-       qu'avant. Le filet le plus long d'avant fait donc loi pour tous. */
+    /* ⚠️ 6 s, pas plus : ce filet borne l'attente de CONTINUER, et asmFini appelle la
+       porte sans objectifFilet() (journal : son.js · le filet de 6 s). */
     setTimeout(termine,6000);  // filet : le rappel finit toujours par venir (CONTINUER ne reste jamais gris)
   }catch(e){ setTimeout(termine,120); }
 }
 
-/* ── LE VOCABULAIRE : des raccourcis d'une ligne vers la porte unique ────────
-   Ils ne contiennent AUCUNE logique. Ils existent pour que l'appel dise ce qu'il veut
-   entendre — `sayLetterSound(L)` se lit mieux que `jouer('son:'+L)` — et pour que les
-   soixante appels dispersés dans index.html, src/ecrans, src/player, ui/reviser,
-   trace-lettres et les onclick du HTML n'aient pas eu à changer. */
+/* ── le vocabulaire : raccourcis d'une ligne vers la porte, sans logique — l'appel dit
+   ce qu'il veut entendre, et les appelants existants n'ont pas eu à changer. */
 function speak(t){ jouer(t); }
 function sayLetterName(L,fin,el){ jouer(L,{fin:fin,el:el}); }
 function sayLetterSound(L,fin){ jouer('son:'+letterKey(L),{fin:fin}); }
 function jouerMot(ar,fin,el){ jouer(ar,{fin:fin,el:el}); }
 function spkAudio(t,el){ jouer(t,{el:el||document.getElementById('spkBig')}); }
 function spkRejouer(L){ jouer(L,{el:document.getElementById('spkBig')}); }
-/* jouerF gardait un nom de fichier en dur (les six syllabes du disque 1, مَدْرَسَةٌ) :
-   il passe par le nom, pas par la table — d'où jouerFichier. Le 2e argument, jadis le
-   texte à faire lire par la synthèse, n'a plus d'objet et n'est plus lu. */
+/* jouerF : un nom de fichier en dur, donc hors table. Son 2e argument n'est plus lu. */
 function jouerF(f,_inutile,fin){ jouerFichier(String(f).replace(/\.mp3$/,''),{fin:fin}); }
 /* Les 3 haut-parleurs sonnent l'un après l'autre. La grille est en `direction:rtl`,
    donc l'option 0 est celle de DROITE : la séquence suit le sens de l'arabe. */
@@ -498,8 +362,7 @@ function spkSequence(st,k){
                fin:function(){ setTimeout(function(){ spkSequence(st,k+1); },260); }});
 }
 
-/* ═══════════════ 7. LE HAUT-PARLEUR DESSINÉ ══════════════════════════════════
-   Les trois ondes s'animent en cascade tant que le son joue. */
+/* ═══ 7. LE HAUT-PARLEUR DESSINÉ — trois ondes animées en cascade pendant le son. */
 function spkSVG(cls){
   return '<svg class="spk'+(cls?' '+cls:'')+'" viewBox="0 0 52 34" aria-hidden="true">'+
     '<path class="cone" d="M5 12.5h7l9-7.5a1.6 1.6 0 012.6 1.2v21.6a1.6 1.6 0 01-2.6 1.2l-9-7.5H5a2 2 0 01-2-2v-5a2 2 0 012-2z"/>'+
@@ -513,41 +376,28 @@ function spkOn(el){
   var s=el.querySelector('.spk'); if(s)s.classList.add('on');
 }
 function spkOff(){
-  /* ⚠️ 17/08 — `.wspk` AJOUTÉ. Sans lui, le haut-parleur d'une ligne de vocabulaire
-     s'allumait et ne s'éteignait plus jamais : spkOn() pose `on` sur l'élément ET sur son
-     `.spk`, mais spkOff() ne balayait que trois classes. Toute nouvelle sorte de bouton
-     sonore DOIT rejoindre cette liste. */
+  /* ⚠️ Toute nouvelle sorte de bouton sonore doit rejoindre ce sélecteur, sinon son
+     haut-parleur reste allumé (journal : son.js · spkOff et .wspk). */
   var l=document.querySelectorAll('.spk.on,.spkbtn.on,.opt.on,.wspk.on');
   for(var i=0;i<l.length;i++)l[i].classList.remove('on');
 }
 
-/* ═══════════════ 8. LA MARQUE SONORE ═════════════════════════════════════════
-   Validée par Myriam le 05/08/2026 — trois étages :
-   ① la SIGNATURE à chaque bonne réponse : sfx-bonne-reponse.mp3, le motif « Ṭalaʿa al-badr »
-      en trois frappes sur la seconde neutre du maqām Bayātī. Toujours le même : c'est la
-      répétition qui grave, comme le « ding » de Duolingo.
-   ② le COMBO toutes les COMBO_TOUS bonnes réponses D'AFFILÉE : un mot tiré d'un pool qui
-      tourne. Rare donc précieux, varié donc jamais lassant — et la récompense enseigne du
-      vocabulaire, ce qu'une app d'arabe peut faire et pas une app généraliste.
-   ③ la CLÔTURE en fin de leçon : confettis + sfx-fin-lecon.mp3 (voir finishDisque). */
+/* ═══ 8. LA MARQUE SONORE — ① la signature à chaque bonne réponse (sfx-bonne-reponse) ;
+   ② un mot de félicitation toutes les COMBO_TOUS bonnes réponses d'affilée ; ③ la clôture
+   de leçon (sfx-fin-lecon) (journal : son.js · la marque sonore). */
 const _SFXB={};let _sfxCtx=null,_curSrc=null;
 function chargerSfx(){ // réveille le moteur à chaque geste, décode les sons courts une seule fois
   try{
     _sfxCtx=_sfxCtx||new (window.AudioContext||window.webkitAudioContext)();
     if(_sfxCtx.state!=='running')_sfxCtx.resume(); // iOS : couvre aussi l'état « interrupted »
-    /* 🔴 15/09 — 'fin-lecon' MANQUAIT à cette liste, et c'était mesurable : ses trois
-       appels prenaient donc TOUJOURS la branche <audio> de repli, celle qui appelle
-       stopAudio() et coupe le son en cours — exactement ce que la branche WebAudio
-       existe pour éviter. La clôture de leçon coupait la dernière félicitation. */
+    /* ⚠️ Chaque sfx de playSfx doit être décodé ici : sinon il prend le repli <audio>,
+       qui appelle stopAudio() et coupe le son en cours (journal : son.js · fin-lecon). */
     ['bonne-reponse','erreur','fin-lecon'].forEach(n=>{
       if(_SFXB[n]||_SFXB['_'+n])return;
       _SFXB['_'+n]=1; // verrou : un seul téléchargement par son
       fetch(urlDuSon(SONS['sfx:'+n])).then(r=>r.arrayBuffer())
-        /* ⚠️ decodeAudioData accepte DEUX rappels **et** rend une promesse. La nôtre
-           est bien rattrapée par le .catch du bas ; celle qu'il rend, elle, ne trouvait
-           personne — d'où un « EncodingError » en promesse non gérée à chaque décodage
-           qui échoue (visible dans les harnais et la console de l'élève). On la congédie
-           explicitement : elle ne nous apprend rien de plus que `rej`. */
+        /* ⚠️ decodeAudioData rend AUSSI une promesse : on la rattrape, sinon une
+           « EncodingError » non gérée à chaque échec de décodage. */
         .then(ab=>new Promise((res,rej)=>{const p=_sfxCtx.decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(()=>{});}))
         .then(b=>{_SFXB[n]=b;}).catch(()=>{delete _SFXB['_'+n];});
     });
@@ -556,17 +406,10 @@ function chargerSfx(){ // réveille le moteur à chaque geste, décode les sons 
 try{
   ['touchend','pointerup','mousedown','click'].forEach(ev=>document.addEventListener(ev,chargerSfx,true));
 }catch(e){}
-/* ═══ 17/08 — « PARFOIS LE SON DU BOUTON CONTINUER DISPARAÎT » (Myriam) ═══════════════
-   Sur iOS, un AudioContext passé « interrupted » (appel, Siri, verrouillage, bascule
-   d'app) ne repart JAMAIS tout seul — resume() doit être rappelé. Tous les gardes du
-   fichier ne testaient que 'suspended' : ils rataient cet état WebKit hors standard, et
-   comme le tampon sfx est décodé, playSfx prenait toujours la branche WebAudio gelée —
-   le repli <audio> était inatteignable. D'où « je dois fermer l'application ».
-   `state!=='running'` couvre les deux états, et au retour au premier plan on réveille
-   TOUS les contextes du fichier d'un coup.
-   ⚠️ 15/09 — LES QUATRE CONTEXTES VIVENT DÉSORMAIS DANS CE FICHIER, et c'est la raison
-   pour laquelle `_tocCtx` en revient : parti dans un module le matin même, il n'était
-   plus le même objet ici, et ce réveil ne le touchait plus. */
+/* ⚠️ iOS : un AudioContext « interrupted » (appel, Siri, verrouillage) ne repart jamais
+   seul. D'où state!=='running' partout, et le réveil de TOUS les contextes au retour au
+   premier plan — ils doivent donc vivre dans ce fichier classique, _tocCtx compris
+   (journal : son.js · le son du bouton CONTINUER disparaît). */
 function reveilAudio(){
   [window._ac,_sfxCtx,_tocCtx,chime._ac].forEach(function(c){
     try{ if(c&&c.state!=='running')c.resume(); }catch(e){}
@@ -578,9 +421,8 @@ function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jam
   try{
     const b=_SFXB[name];
     if(b&&_sfxCtx){
-      /* ⚠️ 17/08 — Myriam : « le son du dernier mot choisi est tu par l'apparition du
-         bouton continuer ». Le sfx WebAudio se SUPERPOSE : plus de stopAudio() ici —
-         le mot (`_curAudio`) finit de sonner, seul le sfx précédent s'arrête. */
+      /* ⚠️ Pas de stopAudio() ici : le sfx se superpose et le mot finit de sonner
+         (journal : son.js · le sfx se superpose au mot). */
       try{ if(_curSrc){ _curSrc.stop(); _curSrc=null; } }catch(_){}
       if(_sfxCtx.state!=='running')_sfxCtx.resume(); // iOS : couvre aussi l'état « interrupted »
       const s=_sfxCtx.createBufferSource();s.buffer=b;s.connect(_sfxCtx.destination);_curSrc=s;s.start();
@@ -649,7 +491,7 @@ function toc(){ // l'erreur : deux frappes du timbre Bayātī, +1,5 puis −1,5 
   if(_SFXB['erreur']){ playSfx('erreur'); return; }
   try{
     _tocCtx=_tocCtx||new (window.AudioContext||window.webkitAudioContext)();
-    if(_tocCtx.state!=='running')_tocCtx.resume(); // iOS : ce contexte n'avait AUCUN resume
+    if(_tocCtx.state!=='running')_tocCtx.resume(); // iOS : couvre aussi l'état « interrupted »
     const o=_tocCtx.createOscillator(),g=_tocCtx.createGain();
     o.frequency.setValueAtTime(170,_tocCtx.currentTime);
     o.frequency.exponentialRampToValueAtTime(110,_tocCtx.currentTime+.12);
@@ -659,7 +501,7 @@ function toc(){ // l'erreur : deux frappes du timbre Bayātī, +1,5 puis −1,5 
   }catch(e){}
 }
 function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, sans fichier
-  if(!SND)return;   // 15/09 : c'était le SEUL générateur du projet sans ce garde
+  if(!SND)return;   // comme tous les générateurs
   try{
     var AC=window.AudioContext||window.webkitAudioContext; if(!AC)return;
     var ac=chime._ac||(chime._ac=new AC()); if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
@@ -675,23 +517,11 @@ function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, san
   }catch(e){}
 }
 
-/* ── LE SON DE CHAQUE MOT DES UNITÉS 1 À 7 (06/09/2026 ; versé ICI depuis le 16/09/2026) ──
-   ⚠️ POURQUOI ICI, ET PAS DANS index.html COMME AVANT : le hub Réviser (revision.js) verse
-   les Noms d'Allah et le cache Supabase au chargement, AVANT le grand script. Deux clés sont
-   partagées avec la graine des Noms (الرَّحْمَٰنُ, الرَّحِيمُ) et, contre la TABLE réelle, deux de
-   plus divergent (الصَّمَدُ, اللَّهُ : le package dit mot-*, la table nom-*). Avant le 16/09, le
-   cache des Noms écrivait EN DERNIER et gagnait, en ligne comme en avion ; laissé dans
-   index.html, ce versement serait passé après lui et deux mots auraient changé de prise en
-   avion. Versé ici — son.js se charge avant revision.js —, l'ordre d'écriture est celui
-   d'avant, à la clé près, et le banc du hub (outils/verifier-revision.mjs ⑤) l'exige :
-   le cache des Noms gagne sur le package. UNITS vient de donnees.js, chargé avant.
-   🔴 IL VIENT DU PACKAGE, ET IL DOIT GAGNER SUR LA CARTE CI-DESSUS. Jusqu’ici
-   c’est la table Supabase `vocabulaire` qui posait ces entrées, et elle ne
-   disait pas tout à fait la même chose : pour الرَّحْمَٰنُ et الرَّحِيمُ elle sert la
-   prise des NOMS D’ALLAH (`nom-*`) là où la carte dit `mot-*`. Ce sont deux
-   enregistrements différents, et c’est la version des Noms que les élèves
-   entendent. Sans cette boucle, couper l’adoption ferait changer deux mots du
-   Qorān de voix — en silence. Le `snd` de chaque mot porte la vérité. */
+/* ── le son de chaque mot des unités 1 à 7, depuis le package (champ snd).
+   ⚠️ Versé ICI, pas dans le grand script : son.js se charge avant revision.js, dont le
+   cache des Noms d'Allah doit écrire APRÈS et gagner (outils/verifier-revision.mjs ⑤).
+   ⚠️ Et il gagne sur SONS_ECRITS : pour الرَّحْمَٰنُ et الرَّحِيمُ, le package pointe la prise
+   des Noms d'Allah (journal : son.js · les mots des unités 1 à 7 versés ici). */
 UNITS.forEach(function(U){ (U.words||[]).forEach(function(w){
   if (w && w.w && w.snd) inscrireLeSon(w.w, w.snd);
 }); });

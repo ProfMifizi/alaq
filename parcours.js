@@ -1,72 +1,30 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   parcours.js — L'ORCHESTRATION DES DISQUES (10/09/2026)
-   ───────────────────────────────────────────────────────────────────────────
-   CE QU'IL PORTE : la table des neuf disques types, les disques particuliers
-   (Révision, « Lettres vs prolongations »), les trois moteurs d'unités de
-   grammaire (u8Disques / u9Disques / u10Disques) et `discsFor(u)` —
-   L'AIGUILLAGE CENTRAL, qui décide pour chaque unité QUELS disques l'élève voit
-   et dans quel ORDRE.
+/* parcours.js — l'orchestration des disques.
+   Porte : la table des neuf disques types (disques()), les disques particuliers
+   (revisionDisc(), LETTREVSPRO_DISC), u8Disques / u9Disques / u10Disques, et
+   discsFor(u) : quels disques chaque unité montre, et dans quel ordre.
+   ⚠️ Cet ordre est la progression : dkey(u,i) enregistre par numéro de disque,
+   réordonner réécrit le sens de ce qui est déjà coché (voir fixOrdreFormes(),
+   progression.js). (journal : parcours.js · la table paresseuse et buildReview)
 
-   ⚠️ CET ORDRE EST LA PROGRESSION. `dkey(u,i)` enregistre l'avancement par
-   NUMÉRO de disque : réordonner les disques réécrit le sens de ce qui est déjà
-   coché. C'est l'incident du 02/08, que `fixOrdreFormes()` répare encore
-   aujourd'hui dans progression.js.
+   Script classique, ni defer ni module : showTab('home') appelle discsFor de façon
+   synchrone au premier rendu.
+   ⚠️ disques() et revisionDisc() restent paresseuses et mémoïsées : ce fichier ne
+   capture rien au chargement (essai ⑫ de verifier-parcours.mjs, qui le charge sans
+   constructeurs). Historique : les constructeurs vivaient alors dans le grand script.
 
-   ═══ POURQUOI CE FICHIER EST UN SCRIPT CLASSIQUE, ET CHARGÉ ICI ═══
-   `<script src="parcours.js"></script>` vit juste sous progression.js et AVANT
-   le grand script de l'application. Ni `defer`, ni `type="module"`, ni `import`,
-   ni `export` — jamais. Deux raisons, et elles se contredisent :
-   — il ne peut pas être chargé APRÈS : `showTab('home')`, à la fin du grand
-     script, appelle `discsFor` de façon SYNCHRONE (renderHome) ;
-   — il ne peut pas capturer ses dépendances au chargement : les dix
-     constructeurs (`buildAlphabet` … `buildReview`) vivent dans index.html, et
-     la remontée des déclarations `function` ne franchit PAS la frontière d'un
-     script. Une `const DISQUES=[{build:buildAlphabet}]` lèverait ReferenceError.
-   D'où `disques()` et `revisionDisc()`, PARESSEUSES et mémoïsées : elles
-   résolvent à l'appel, quand index.html a fini de se déclarer. Le même contrat
-   que `setupTrace()` dans trace-lettres.js et `fixOrdreFormes()` dans
-   progression.js.
-
-   ═══ LE CONTRAT AVEC index.html, DANS LES DEUX SENS ═══
-   ① CE FICHIER RÉSOUT À L'APPEL, jamais à la définition : les dix constructeurs,
-      `UNITS`, `U8`, `window.__alaqU9`, `window.__alaqU10`. Cette liste EST le
-      contrat, et le banc la garde.
-   ② index.html et progression.js LISENT `discsFor` — et surtout ils
-      reconnaissent un disque PAR IDENTITÉ DE FONCTION :
-        progression.js : `d.build === buildForms`   (fixOrdreFormes)
-        index.html     : `ds[i].build === buildWords` (_lireDone)
-      Ce n'est pas le libellé qui compte, c'est l'OBJET. Une réécriture qui
-      recréerait ces fonctions au lieu de les référencer casserait la migration
-      des formes et la révision du vocabulaire — en silence, sans une erreur.
-      L'essai ② du banc est le seul endroit du dépôt qui l'éprouve.
-   ⚠️ `disques()` rend l'objet PARTAGÉ (mémoïsé), comme la `const` d'avant :
-      `discsFor(0)` le rend tel quel. Rien ne doit le muter — rien ne le fait.
-
-   GARDE : outils/verifier-parcours.mjs éprouve les six branches de l'aiguillage,
-   le compte de NEUF disques partout, l'identité des constructeurs et les deux
-   ponts vers les modules ES. Il localise ce bloc PAR SON CONTENU, dans index.html
-   ou ici — il rend donc les mêmes verdicts des deux côtés du déménagement. C'est
-   ce qui prouve qu'aucune ligne ne s'est perdue au copier-coller.
-   ═══════════════════════════════════════════════════════════════════════════ */
+   À l'appel seulement : les dix constructeurs buildAlphabet … buildReview
+   (generateurs.js), UNITS (donnees.js), U8 (index.html), window.__alaqU9,
+   window.__alaqU10 (modules ES).
+   ⚠️ Un disque est reconnu par identité de fonction — progression.js
+   (d.build === buildForms, fixOrdreFormes) et revision.js (ds[i].build ===
+   buildWords, _lireDone) : référencer les constructeurs, jamais les recréer.
+   ⚠️ disques() rend un objet partagé : rien ne doit le muter.
+   Gardes : outils/verifier-parcours.mjs, previews/_verif_parcours.html. */
 
 // ORDRE PÉDAGOGIQUE : « Les formes » AVANT « Dans la Fātiḥa » — on ne peut pas demander de repérer
 // une lettre dans le verset (où elle est écrite liée) avant d'avoir montré début/milieu/fin.
-/* ═══ LES NEUF DISQUES TYPES — UNE TABLE PARESSEUSE, ET C'EST DÉLIBÉRÉ ═══════
-   ⚠️ CECI N'EST PAS UNE TABLE DE DONNÉES. C'est une table de RÉFÉRENCES VIVANTES
-   vers dix constructeurs qui vivent plus haut dans ce fichier (L794-1118) — et
-   `build:buildAlphabet` les CAPTURE au moment où la table s'évalue.
-   Tant que tout habitait le même script, l'ordre suffisait : les `function`
-   remontent en tête de LEUR script. Mais la remontée ne franchit pas la frontière
-   d'un fichier : une `const` évaluée au chargement de parcours.js chercherait
-   `buildAlphabet` avant qu'index.html l'ait déclaré, et lèverait ReferenceError —
-   page blanche. Et on ne peut pas non plus charger parcours.js APRÈS : `showTab('home')`
-   appelle `discsFor` de façon synchrone à la fin du grand script.
-   D'où la construction À L'APPEL, mémoïsée : le même contrat que `setupTrace()` dans
-   trace-lettres.js et que `fixOrdreFormes()` dans progression.js. C'est ce qui rend
-   ce bloc extractible — éprouvé par l'essai ⑫ d'outils/verifier-parcours.mjs, qui
-   charge le bloc dans un bac où les constructeurs n'existent PAS ENCORE.
-   ⚠️ La table est mémoïsée : `discsFor(0)` rend l'objet PARTAGÉ, comme avant. Rien
-   ne doit le muter — rien ne le fait aujourd'hui, et le banc compte ses neuf entrées. */
+/* Les neuf disques types : des RÉFÉRENCES vers les constructeurs, résolues à l'appel
+   (voir l'en-tête). L'essai ⑫ de verifier-parcours.mjs charge ce fichier sans eux. */
 let _disques=null;
 function disques(){
   if(!_disques)_disques=[
@@ -84,14 +42,8 @@ function disques(){
 }
 
 // Premier disque selon l'unité : tour d'alphabet en unité 1, révision dès l'unité 2.
-/* ⚠️ MÊME PIÈGE, ET IL SE CACHE MIEUX : cette constante-ci ne capture qu'UN
-   constructeur, `buildReview`, mais il vit lui aussi dans index.html (L1118). Rendre
-   `DISQUES` paresseux et laisser celle-ci en `const` aurait suffi à lever
-   ReferenceError au chargement de parcours.js. Le tableau des dépendances de la
-   tâche Notion rangeait d'ailleurs `buildReview` avec les neuf autres — c'est
-   précisément ce qui rendait l'oubli invisible.
-   `LETTREVSPRO_DISC`, juste en dessous, n'a PAS besoin de ce traitement : la
-   fonction qu'elle capture voyage AVEC elle dans le bloc extrait. */
+/* Paresseuse elle aussi (même contrat, essai ⑫).
+   LETTREVSPRO_DISC n'en a pas besoin : sa fonction est déclarée dans ce fichier. */
 let _revisionDisc=null;
 function revisionDisc(){
   if(!_revisionDisc)_revisionDisc={icon:'🔄',img:'reviser',label:'Révision',build:buildReview};
@@ -103,13 +55,9 @@ function buildLettreVsProlong(U){
   const DM=(base,hk,answer,result,tag,read)=>({type:'dragmad',base,hk,answer,result,tag,read,say:result,note:'Glisse la bonne lettre de prolongation sur la lettre'});
   const DA=(carrier,cells)=>({type:'dragassoc',carrier,cells,note:'Glisse chaque prolongation sur la lettre qui lui correspond'});
   return [
-    /* 13/08 — principe 1 appliqué (Myriam : « trop trop trop de texte, c'est illisible ») :
-       le titre EST l'instruction, il n'y a plus ni boîte, ni badge « À DÉCOUVRIR », ni
-       paragraphe, ni rappel fléché. Sur chaque face : la lettre et son RÔLE, rien de plus —
-       le son s'entend, il ne s'écrit pas (principe 2). */
-    /* 14/08 — l'écran d'ouverture demandé par Myriam : l'alphabet en deux parties, et les
-       trois lettres qui ont un second rôle se découvrent au doigt. Il vient AVANT les
-       cartes : on voit d'abord QUI a deux rôles, on retourne ensuite pour voir LESQUELS. */
+    /* Le titre est l'instruction ; sur chaque carte, la lettre et son rôle, rien de plus.
+       L'écran des rôles vient AVANT les cartes : d'abord QUI a deux rôles, puis LESQUELS.
+       (journal : parcours.js · « Lettres vs prolongations », les retours de Myriam) */
     {type:'roles', gate:true, title:'3 lettres peuvent avoir 2 rôles'},
     {type:'flipcards', gate:true, cartes:[
       {ar:'ي', cons:'يَ', pro:'إِي'},
@@ -122,22 +70,11 @@ function buildLettreVsProlong(U){
     DA('ي',[{short:'يَ',madd:'ا',long:'يَا',say:'يَا'},{short:'يِ',madd:'ي',long:'يِي',say:'يِي'},{short:'يُ',madd:'و',long:'يُو',say:'يُو'}]),
     DA('و',[{short:'وَ',madd:'ا',long:'وَا',say:'وَا'},{short:'وِ',madd:'ي',long:'وِي',say:'وِي'},{short:'وُ',madd:'و',long:'وُو',say:'وُو'}]),
     DA('ء',[{short:'أَ',madd:'ا',long:'آ',say:'أَا'},{short:'إِ',madd:'ي',long:'إِي',say:'إِي'},{short:'أُ',madd:'و',long:'أُو',say:'أُو'}]),
-    /* 13/08 — mêmes principes que l'écran 1 : le titre EST l'instruction, et l'écran est
-       un GESTE. Les deux paragraphes et les étiquettes latines tombent — le son enseigne
-       ce que la lettre dit (principe 2), l'œil n'a pas besoin d'un doublon écrit. */
-    /* 14/08 — « change instruction par "touche chaque support" » : ces trois lignes sont
-       le alif PORTANT la hamza, donc des supports ; « voyelle » nommait le son entendu,
-       pas ce qu'on touche. Le mot est aussi celui du filet de l'écran 1 — un seul terme
-       pour une seule idée, d'un bout à l'autre de la leçon. */
+    /* Le alif portant la hamza : des « supports » (pas « voyelle »), un seul terme dans la leçon. */
     {type:'taprow', title:'Touche chaque support', lignes:['أَ','إِ','أُ']},
-    /* ═══ ÉCRAN 10 — LE TRI, à la place de « Compare les deux sièges » (Myriam, 14/08) ═══
-       Comparer deux cartes était un écran à REGARDER ; trier six mots est un écran à FAIRE
-       (principe ③ : chaque écran est un geste). Le tri est le moteur déjà écrit pour le
-       soukoun/chedda de la leçon 6 — écrans jumeaux, un seul moteur (principe ⑨) : il fait
-       sonner chaque mot posé et n'allume CONTINUER qu'à la fin du dernier son.
-       Les mots : quatre viennent du vocabulaire de l'unité 2 ; إِمَامٌ et إِلَيْنَا sont ajoutés
-       ICI (et non dans U.words, que Supabase écrase au démarrage) — ils n'utilisent que des
-       lettres déjà connues, il fallait trois mots par panier pour que le tri soit un tri. */
+    /* Le tri des sièges (même moteur que le tri soukoun/chedda). إِمَامٌ et إِلَيْنَا sont
+       ajoutés dans ce littéral, pas dans U.words : trois mots par panier, lettres déjà connues.
+       (journal : parcours.js · « Lettres vs prolongations », les retours de Myriam) */
     {type:'tri', mute:true,
       paniers:[{sig:'أ',cle:'a'},{sig:'إ',cle:'i'}],
       mots:shuffle([
@@ -157,31 +94,17 @@ function buildLettreVsProlong(U){
   ];
 }
 const LETTREVSPRO_DISC={icon:'💡',img:'decouvrir',label:'Lettres vs prolongations',build:buildLettreVsProlong};
-/* ── LES 9 DISQUES DE L'UNITÉ 8 ─────────────────────────────────────────────
-   L'unité 8 n'a pas la structure des unités-consonnes : pas de « Mémoriser », pas
-   de « Formes », pas de « Prolongations » — il n'y a aucune lettre neuve à
-   mémoriser. Ses neuf disques sont ceux des previews validées le 15/08.
-
-   ⚠️ PAS de disque « Révision » en tête, contrairement aux unités 2 à 7 : D1 est
-   une DÉCOUVERTE et doit rester le premier écran de l'unité. Le vocabulaire des
-   unités précédentes continue de se réviser depuis l'onglet Réviser.
-
-   Les libellés ne sont pas ceux de src/units/unit-8/donnees/disques.js
-   (« Découverte (الـ), lecture lunaire 1/2 ») : ceux-là décrivent un fichier,
-   ceux-ci se lisent sur un disque de l'accueil. `U8.titre(k)` garde les
-   premiers pour le diagnostic.
-
-   ⚠️ Construits À LA DEMANDE : `U8` est déclaré plus haut mais les images et les
-   libellés n'ont de sens qu'au premier affichage — et surtout, une const au niveau
-   du script forcerait un ordre de déclaration de plus à tenir. */
+/* Les 9 disques de l'unité 8 (aucune lettre neuve : ni Mémoriser, ni Formes).
+   ⚠️ Pas de « Révision » en tête : D1 est une découverte et reste le premier écran.
+   Libellés d'accueil, distincts de ceux de src/units/unit-8/donnees/disques.js
+   (U8.titre(k) garde ces derniers pour le diagnostic).
+   u8Disques() à la demande, mémoïsé ; build() ne lit U8 (let d'index.html, déclaré
+   après ce fichier) qu'au doigt. */
 const U8_PLAN=[
   {k:'D1', img:'decouvrir', label:'L’article الـ'},
   {k:'D2', img:'ecrire',    label:'Écrire avec الـ'},
-  /* ⚠️ « Le ل qui s’avale » est BANNI (Myriam, 05/09) : l'expression est
-     familière et décrit un geste de gorge, là où la règle décrit une LETTRE.
-     La terminologie officielle du projet est « lettre muette » — elle dit ce
-     que l'élève doit retenir, et c'est elle qu'emploient le Cours et la
-     révision de grammaire. */
+  /* ⛔ Jamais « Le ل qui s’avale » : le terme du projet est « lettre muette ».
+     (journal : parcours.js · unité 8, previews validées le 15/08 et « lettre muette ») */
   {k:'D3', img:'decouvrir', label:'Le ل, lettre muette'},
   {k:'D4', img:'ecrire',    label:'Écrire les solaires'},
   {k:'D5', img:'memoriser', label:'Poser l’article'},
@@ -194,58 +117,27 @@ let _u8Disques=null;
 function u8Disques(){
   if(!_u8Disques) _u8Disques=U8_PLAN.map(function(p){
     return {icon:'🌙', img:p.img, label:p.label, u8:p.k,
-            /* D4 clôt l'apprentissage des 14 mots (lus en D1/D3, écrits en D2/D4) :
-               c'est lui qui ouvre la révision espacée, comme « Lire des mots » ailleurs. */
+            /* D4 clôt l'apprentissage des mots : il ouvre la révision espacée. */
             vocab:(p.k==='D4'),
             build:function(){ return U8.disque(p.k); }};
   });
   return _u8Disques;
 }
 
-/* ── LE DISQUE DE L'UNITÉ 9 ──────────────────────────────────────────────────
-   Contrairement à U8_PLAN, il n'y a ici NI moteur à soi NI branche `build:
-   function(){ return U8.disque(k); }` par disque : chaque écran de
-   `src/units/unit-9/donnees/disque-1.js` EST un `st.type` que le registre des
-   exercices sait déjà monter (association-mots, glisser-scene, classer-harf,
-   rappel-images) — « registre d'exercices », pas moteur parallèle. Le lecteur
-   n'a donc besoin que d'une chose : le TABLEAU des `st` que `build()` retourne.
-
-   ⚠️ La métadonnée d'accueil (icône, libellé) et la LONGUEUR du tableau — un
-   seul disque pour l'instant — sont fixées ICI, dans le script classique,
-   jamais dérivées du module : `discsFor(8).length` doit être juste dès le tout
-   premier rendu de l'accueil, qu'il précède ou suive l'arrivée du module
-   (même prudence qu'U8_TALON). Seul le CONTENU de `build()` est différé, et
-   il ne l'est que jusqu'au premier appel — au plus tôt quand une élève ouvre
-   le disque, donc toujours après que `entree.js` a fini de s'exécuter. */
-/* ⚠️ PLUS AUCUN DISQUE « À VENIR » DEPUIS LE 03/09 — l'unité 9 est COMPLÈTE
-   (9 disques réels, le bilan compris). Cette fabrique n'a donc plus d'appelant.
-   Elle est LAISSÉE, et pas par négligence : c'est le gabarit exact du disque
-   grisé (`aVenir:true`, gardé à vie par `renderHome` sur `unlocked`), et
-   l'unité 10 le reprendra tel quel le jour où elle s'ouvrira. Le supprimer
-   obligerait à le réinventer.
-   Historique : posée le 24/08 sur la demande de Myriam (« il devrait y avoir
-   9 dont 8 grisées »), pour que l'accueil ne dise pas « cette unité s'arrête
-   là » avant l'heure ; les huit ont été remplacées une à une par de vrais
-   disques, la dernière le 03/09.
-   ✅ ET L'UNITÉ 10 LA REPREND, LE JOUR MÊME (02/09) : elle s'ouvre avec UN
-   disque réel et huit grisés. La fabrique perd donc son préfixe `u9` — elle
-   sert deux unités, et un nom qui ment sur sa portée finit par faire écrire
-   un doublon. Elle n'avait aucun appelant : le renommage ne peut rien casser. */
+/* Le disque grisé « À venir » (aVenir:true : renderHome le laisse grisé quel que soit
+   S.done), pour que l'accueil montre toujours neuf disques. Utilisé par l'unité 10.
+   (journal : parcours.js · la fabrique des disques « À venir ») */
 function disqueAVenir(){
   return { icon:'🌙', img:'decouvrir', label:'À venir', aVenir:true,
     build:function(){ return [{type:'slide',nobadge:true,center:true,title:'Bientôt disponible',html:''}]; } };
 }
-/* 🔴 LES 9 DISQUES PORTAIENT TOUS L'AMPOULE — signalé par Myriam le 05/09
-   (« les disques n'ont eu des lampe, bug majeur »). `img:` n'avait jamais suivi
-   le contenu réel : chaque disque copiait 'decouvrir' au moment de sa naissance,
-   disque après disque, sans qu'aucun n'y revienne une fois le suivant écrit.
-   La règle, DÉJÀ posée par les unités 1-8 (DISQUES l.3853 et suivantes) : l'icône
-   dit la NATURE du disque, pas son rang — 💡decouvrir (une notion s'introduit) ·
-   📌memoriser (une FORME/terminaison se travaille, sans notion neuve) ·
-   🕋qoran (le texte coranique réel) · 🏆bilan (la synthèse finale). Les disques
-   1-4 restent decouvrir (sens de بِ/عَلَى/لِ) ; 5-7 passent à memoriser (ils
-   « n'enseignent plus un sens mais une terminaison », note du 29/08 sur D5) ;
-   8 passe à qoran (transfert au VRAI texte de la Fātiḥa) ; 9 était déjà bilan. */
+/* Unité 9 : chaque écran est un st.type du registre d'exercices, pas un moteur à soi.
+   ⚠️ Icône, libellé et longueur restent dans ce script classique, jamais dérivés du
+   module : discsFor(8).length doit être juste dès le premier rendu. Seul build() est différé :
+   il n'est appelé qu'au doigt, donc après src/entree.js.
+   ⚠️ L'icône dit la NATURE du disque, pas son rang : decouvrir (une notion s'introduit),
+   memoriser (une forme se travaille), qoran (le texte réel), bilan.
+   (journal : parcours.js · les 9 disques portaient tous l'ampoule) */
 function u9Disques(){
   return [
     { icon:'🌙', img:'decouvrir', label:'بِ · عَلَى · لِ',
@@ -263,23 +155,13 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque3==='function') return window.__alaqU9.disque3();
         console.error('unité 9 : module non chargé (disque 3)'); return [];
       } },
-    /* ⚠️ `vocab:true` — LA PORTE D'ENTRÉE DU VOCABULAIRE EN RÉVISION (04/09).
-       _lireDone(idx) cherche un disque dont le build est buildWords OU qui porte
-       ce drapeau ; l'unité 9 n'a pas de leçon « Lire des mots », donc sans lui
-       ses mots n'entreraient qu'à la validation de l'unité ENTIÈRE — neuf disques
-       plus tard. Motif exact de l'unité 8 (l.3871, vocab:(p.k==='D4')).
-       LE DISQUE 4, parce que c'est lui qui CLÔT le corpus : les trois harf sont
-       tous introduits (بِ au 2, عَلَى au 3, لِ ici) et les six noms aussi. Les
-       disques 5 à 9 n'enseignent plus un mot, mais une terminaison. */
+    /* ⚠️ vocab:true fait entrer les mots en révision (_lireDone, revision.js) : sans lui,
+       seulement à la validation de l'unité entière. Le disque 4 clôt le corpus. */
     { icon:'🌙', img:'decouvrir', label:'لِ — pour / à qui', vocab:true,
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque4==='function') return window.__alaqU9.disque4();
         console.error('unité 9 : module non chargé (disque 4)'); return [];
       } },
-    /* ⚠️ CES DEUX LIGNES SONT SOLIDAIRES : un disque réel ajouté = un grisé
-       retiré. `_verif_u8_app` et `_verif_u8_dist` vérifient l'INVARIANT — neuf
-       disques, les réels d'abord, les « à venir » ensuite, aucun trou — et
-       toucher l'une sans l'autre les fait rougir toutes les deux. */
     { icon:'🌙', img:'memoriser', label:'بِ — la fin du nom',
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque5==='function') return window.__alaqU9.disque5();
@@ -300,18 +182,8 @@ function u9Disques(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque8==='function') return window.__alaqU9.disque8();
         console.error('unité 9 : module non chargé (disque 8)'); return [];
       } },
-    /* ── LE 9ᵉ ET DERNIER : LE BILAN (GO de Myriam, 03/09) ──────────────
-       🏆 `img:'bilan'` comme partout ailleurs (les unités 1 à 8 le portent) :
-       une élève reconnaît un bilan à son icône avant d'en lire le titre.
-       ⚠️ DEUX LIGNES SOLIDAIRES — ce disque réel REMPLACE le dernier « à
-       venir » ; `_verif_u8_app` et `_verif_u8_dist` gardent l'invariant
-       (9 disques, les réels d'abord, aucun trou) et rougissent si l'un bouge
-       sans l'autre.
-       ⚠️ ET IL CHANGE UNE CHOSE QUE LE LIBELLÉ NE DIT PAS : jusqu'ici le
-       dernier disque de l'unité 9 était un « à venir » grisé À VIE, donc
-       l'unité ne pouvait JAMAIS être validée. Elle le peut désormais. C'est
-       sans danger — `unitUnlocked` refuse toute unité `ready:false`, donc
-       l'unité 10 reste « À VENIR » au lieu de s'ouvrir sur du vide. */
+    /* Le bilan : aucun disque grisé, l'unité 9 peut être validée (sans risque :
+       unitUnlocked refuse une unité ready:false). (journal : parcours.js · unité 9, vocab:true et le bilan) */
     { icon:'🏆', img:'bilan', label:'Bilan — بِ · لِ · عَلَى',
       build:function(){
         if(window.__alaqU9 && typeof window.__alaqU9.disque9==='function') return window.__alaqU9.disque9();
@@ -320,34 +192,22 @@ function u9Disques(){
   ];
 }
 
-/* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS (GO de Myriam, 02/09) ═══
-   L'unité s'ouvre avec UN disque réel et huit grisés, exactement comme
-   l'unité 9 le 24/08 (« il devrait y avoir 9 dont 8 grisées ») : l'accueil ne
-   doit pas laisser croire que l'unité s'arrête au premier disque.
-   Même mécanique que `u9Disques()` — le contenu vient du module ES
-   (`window.__alaqU10`, publié par src/entree.js), la MÉTADONNÉE d'accueil
-   (icône, libellé, longueur de la liste) reste ici, dans le script classique.
-   ⚠️ ET C'EST VOULU : si la longueur dépendait du module, l'accueil
-   afficherait « 0/0 » le temps que le module charge (la prudence d'U8_TALON).
-   ⚠️ LE LIBELLÉ NE DIT PAS « مُضَاف » — les directives validées par Myriam
-   l'interdisent explicitement au disque 1 : l'élève comprend le LIEN, elle
-   n'apprend pas encore son nom. */
+/* Unité 10 « X de Y » : un disque réel et huit grisés ; même mécanique que u9Disques()
+   (contenu dans window.__alaqU10, métadonnée et longueur dans ce script classique).
+   ⛔ Le libellé ne dit pas « مُضَاف » : interdit au disque 1 par les directives validées.
+   (journal : parcours.js · unité 10, ouverture) */
 function u10Disques(){
   return [
-    /* ⚠️ `vocab:true` POSÉ D'AVANCE, ET IL NE FAIT RIEN AUJOURD'HUI — UNITS[9].words
-       est vide (les groupes d'annexion n'entrent pas encore en révision : leur
-       graphie porte une ESPACE, dont splitUnits() ferait une tuile VIDE dans
-       l'écriture guidée — mesuré). Le drapeau est là parce que l'unité 10 finit
-       sur un GRISÉ : unitValidated(9) ne peut JAMAIS devenir vrai, et sans ce
-       drapeau son vocabulaire serait inerte à vie, sans une ligne d'erreur. Le
-       jour où ces mots entrent, il n'y aura que words à remplir. */
+    /* ⚠️ vocab:true posé d'avance (UNITS[9].words est vide) : l'unité finit sur un grisé,
+       unitValidated(9) ne devient jamais vrai, ce drapeau est sa seule porte vers la révision.
+       Les groupes d'annexion portent une espace : splitUnits() en ferait une tuile vide. */
     { icon:'🌙', img:'decouvrir', label:'De qui ? de quoi ?', vocab:true,
       build:function(){
         if(window.__alaqU10 && typeof window.__alaqU10.disque1==='function') return window.__alaqU10.disque1();
         console.error('unité 10 : module non chargé (disque 1)'); return [];
       } },
-    /* ⚠️ DEUX LIGNES SOLIDAIRES, comme dans l'unité 9 : un disque réel ajouté
-       ici = un grisé retiré là. Le compte doit rester à NEUF. */
+    /* ⚠️ Un disque réel ajouté = un grisé retiré : neuf disques, réels d'abord
+       (gardé par _verif_u8_app et _verif_u8_dist). */
     ...Array.from({length:8}, disqueAVenir),
   ];
 }

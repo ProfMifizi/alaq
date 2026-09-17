@@ -1,35 +1,18 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   LES DONNÉES D'ALAQ — l'alphabet, les harakāt, la Fātiḥa, les douze unités,
-   les sourates et leur programme. Sorti d'index.html le 14/09/2026 (sous-lot 2
-   de « extraire le lecteur »), copié à l'identique.
+/* donnees.js — les données d'Alaq : l'alphabet, les harakāt (HK, MD, MDH, maddSyl),
+   la Fātiḥa, UNITS (les douze unités), SOURATES, SOURATE_PLAN, UNIT_ACCENTS/unitAccent,
+   et les outils arabes (ZWJ, TAT, formGlyph, joinsL, sameLetter, letterKey…).
 
-   ⚠️ SCRIPT CLASSIQUE, ni `defer` ni `type="module"`, aucun `import`, aucun
-   `export`. Un module est différé : `UNITS` est lu de façon SYNCHRONE dès le
-   premier rendu (l'accueil dessine une section par unité), et `const UNITS`
-   reste une liaison lexicale globale, partagée entre scripts classiques.
+   Script classique, ni defer ni module : UNITS est lu de façon synchrone au premier
+   rendu (l'accueil dessine une section par unité).
 
-   ═══ CE QU'IL LIT AILLEURS, ET QUAND ═══
-   ① `window.__ALAQ_UNITS` — posé par `content/unites.js` (les unités 1 à 7,
-      semées depuis src/content/units/*.json). Lu AU CHARGEMENT : content/unites.js
-      doit être chargé AVANT ce fichier. Sans lui, le repli garde sept places
-      fermées (voir le commentaire de UNITS).
-   ② `LT` — la table des tracés, dans `trace-lettres.js`. Lue AU CHARGEMENT par
-      la dérivation `U.strokes`/`U.strokesPos` en fin de fichier : trace-lettres.js
-      doit être chargé AVANT ce fichier.
-   Rien d'autre. Ce fichier ne lit RIEN du grand script d'index.html — c'est ce
-   qui rend son chargement anticipé sûr, et le banc le vérifie.
+   Au chargement, il ne lit que deux choses, chargées avant lui :
+   ① window.__ALAQ_UNITS (content/unites.js) — les unités 1 à 7 ;
+   ② LT (trace-lettres.js) — pour dériver U.strokes / U.strokesPos en fin de fichier.
+   Rien du grand script d'index.html : le banc le vérifie.
 
-   ═══ CE QUE LE RESTE DE L'APP Y LIT ═══
-   `ALPHABET` (la grille des 28 lettres, le vocabulaire), `HK`/`MD`/`MDH`/`maddSyl`
-   (les harakāt et les prolongations), `FATIHA` (les sept versets), `UNITS` (tout :
-   l'accueil, la progression, les générateurs, le Cours), `SOURATES`, `SOURATE_PLAN`,
-   `UNIT_ACCENTS`/`unitAccent` (l'arc-en-ciel des sept unités), et les outils arabes
-   (`ZWJ`, `TAT`, `formGlyph`, `joinsL`, `sameLetter`, `letterKey`…).
-
-   ⛔ Corriger un mot des unités 1 à 7 ne se fait PAS ici : c'est
-   `src/content/units/unit-0N.json`, puis `node outils/semer-unites.mjs`.
-   Gardes : outils/verifier-lecons.mjs, previews/_verif_lecons.html.
-   ═══════════════════════════════════════════════════════════════════════════ */
+   ⛔ Un mot des unités 1 à 7 se corrige dans src/content/units/unit-0N.json, puis
+   node outils/semer-unites.mjs — jamais ici.
+   Gardes : outils/verifier-lecons.mjs, previews/_verif_lecons.html. */
 
 /* ================= OUTILS ARABES ================= */
 const ZWJ='\u200D';
@@ -68,25 +51,12 @@ const FATIHA=[
  'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ',
  'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
  'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ'];
-/* LT — les 100 tracés de l'alphabet (28 lettres, calqués sur Noto Naskh 190 px) — vit dans
-   trace-lettres.js depuis le 07/09/2026, avec setupTrace. Lu ICI de façon synchrone (la
-   dérivation strokes/strokesPos plus bas) : trace-lettres.js est un script classique chargé
-   AVANT celui-ci, juste sous assets.js. */
 const UNITS=(function(){
-  /* ═══ LES UNITÉS 1 À 7 VIENNENT DE content/unites.js (06/09/2026) ═══
-     Leur contenu — lettres, noms de lettres, 76 mots avec leur son — vit
-     désormais dans src/content/units/unit-0N.json, et le script classique
-     chargé plus haut le pose sur window.__ALAQ_UNITS. Corriger un mot se
-     fait LÀ-BAS, puis `node outils/semer-unites.mjs` ; le portillon compare
-     les deux et rougit si la semence a vieilli.
-     ⚠️ LES UNITÉS 8 À 12 RESTENT ICI, et c’est voulu : elles n’ont pas de
-     contenu à déclarer (leurs écrans vivent dans des modules ES), le
-     littéral n’en garde que la métadonnée d’accueil.
-     ⚠️ LE REPLI N’EST PAS UN TABLEAU VIDE. Sans les sept premières, les
-     unités 8 à 12 remonteraient aux positions 0 à 4 : `dkey(u,i)` lit
-     `UNITS[u].no`, `unitUnlocked` prend `U.no===1` pour racine, et
-     l’accueil afficherait la grammaire en première leçon. On garde donc
-     SEPT places, fermées et annoncées, plutôt qu’un décalage silencieux. */
+  /* Unités 1 à 7 : window.__ALAQ_UNITS (content/unites.js). Unités 8 à 12 : la seule
+     métadonnée d’accueil, leurs écrans vivent dans des modules ES.
+     (journal : donnees.js · les unités 1 à 7 sorties en JSON)
+     ⚠️ Le repli n’est pas un tableau vide : sans sept places, les unités 8 à 12
+     glisseraient aux positions 0 à 4 (dkey, unitUnlocked, l’accueil). */
   var s = window.__ALAQ_UNITS;
   if (!Array.isArray(s) || s.length !== 7) {
     console.error('[contenu] content/unites.js absent ou incomplet — les unités 1 à 7 sont indisponibles. Vérifier le pré-cache du service worker et le déploiement de content/.');
@@ -95,49 +65,20 @@ const UNITS=(function(){
     });
   }
   return s.concat([
- /* ═══ UNITÉ 8 — LA GRAMMAIRE COMMENCE ═══
-    Première unité SANS lettre neuve : ce n'est plus l'alphabet qu'on apprend, c'est ce
-    que les lettres FONT. D'où `letters:[]` — et le soin à prendre partout où le code
-    boucle sur les lettres d'une unité (`UNITS.every`, la grille des lettres, le bilan) :
-    ces endroits filtrent déjà sur `U.letters`, l'unité 8 en sort d'elle-même.
-    `u8:true` dit que ses 9 disques ne sont pas ceux des unités-consonnes : ils vivent
-    dans le moteur U8, qui vit dans src/units/unit-8/ (modules ES, POC-1 du 18/08).
-    ⚠️ `words` est REMPLI À L'ENREGISTREMENT depuis U8.mots, jamais retapé ici : les
-    14 mots ont une seule source (src/units/unit-8/donnees/mots.js). */
+ /* Unité 8 : aucune lettre neuve (letters:[]) ; u8:true → le moteur U8 (src/units/unit-8/).
+    ⚠️ letters:[] : tout code qui boucle sur les lettres d'une unité doit filtrer sur U.letters.
+    ⚠️ words est rempli par index.html depuis U8.mots, jamais retapé dans ce littéral.
+    (journal : donnees.js · unité 8, première unité de grammaire) */
  { no:8,  ready:true,  ph:'GRAMMAIRE', u8:true, letters:[], words:[],
    court:'L’article الـ',                       // ce que le ciel annonce, à la place des lettres
    sub:'L’article الـ · lettres solaires et lunaires — 9 leçons' },
- /* ═══ UNITÉ 9 — بِ ﻭ عَلَى ﻭ لِ : LA GRAMMAIRE PAR LA MANIPULATION ═══
-    Disques 1 à 5 ouverts (GO de Myriam sur le disque 5, 29/08). `u9:true`
-    dit à `discsFor` de lire `u9Disques()` — pas de moteur à soi comme U8, les
-    écrans sont des exercices ORDINAIRES du registre (voir u9Disques() plus
-    haut et src/units/unit-9/donnees/disque-1.js … disque-5.js).
-    ⚠️ LE DISQUE 5 CHANGE DE NATURE : les quatre premiers enseignent un SENS
-    (quel harf pour quelle relation), le cinquième une FORME — la terminaison
-    du nom qui passe de ـُ à ـِ derrière بِ. Ses écrans manipulent donc des
-    fragments de mot arabe, pas des images, d'où les six exercices neufs qu'il
-    apporte au registre (voir src/exercises/_mot-colore.js).
-    LE VOCABULAIRE (GO de Myriam, 04/09) — les trois harf que l'unité enseigne,
-    puis les six noms qu'elle introduit. Format {w,fr,say}, celui de l'unité 8 :
-    ni `e` ni `confus` ni `b`, trois champs que plus AUCUN code ne lit (les emoji
-    de sens sont retirés depuis le 12/08 ; le commentaire de wordSoundOptions dit
-    que le QCM n'utilise PAS `confus` — il tire ses leurres des autres mots de
-    l'unité ; `b` n'existe que sur les objets-lettres).
-    ⚠️ LES DEUX FORMES DÉFINIES NE SONT PAS UNE INCOHÉRENCE. مَكْتَبٌ · بِنْتٌ ·
-    وَلَدٌ · نَبَاتٌ se citent à l'indéfini, comme tout le vocabulaire du projet.
-    الْمَاءُ et التُّرَابُ non : l'unité ne les enseigne QUE sous cette forme, et
-    aucune source du dépôt ne porte مَاءٌ ni تُرَابٌ. Les écrire serait inventer
-    une graphie — ce que la doctrine interdit — et les prises correspondantes
-    n'existent pas (mot-maa.mp3 / mot-turab.mp3 sont absents du disque).
-    ⚠️ CETTE GRAINE NE SERT À RIEN SANS DEUX AUTRES LIGNES, posées dans le même
-    lot : le drapeau `vocab:true` sur le disque 4 de u9Disques() (sans lui,
-    _lireDone(8) rend false et ces mots n'entrent JAMAIS en révision, en silence),
-    et les entrées de la carte AUDIO plus bas (sans elles, speak() retombe sur la
-    voix de SYNTHÈSE, que la doctrine interdit pour ce qui enseigne un son).
-    ⚠️ `_adopteVocab` remplacerait cette graine s'il existait des lignes
-    unite_no=9 dans Supabase — il n'y en a pas, et sa garde « pas de lignes pour
-    cette unité : sa graine reste » la protège. Le jour où il y en aura, c'est
-    LÀ que le vocabulaire vivra, plus ici. */
+ /* Unité 9 : u9:true → u9Disques() (parcours.js), des exercices ordinaires du registre.
+    Vocabulaire au format {w,fr,say} : les trois harf, puis les six noms.
+    ⚠️ الْمَاءُ et التُّرَابُ restent à la forme définie : l'unité ne les enseigne que
+    sous cette forme, et aucune source ne porte l'indéfini — ne pas inventer de graphie.
+    ⚠️ Ces mots n'entrent en révision que par vocab:true sur le disque 4 (parcours.js),
+    et ne sonnent que s'ils sont dans la table SONS (son.js) : un son absent est un silence.
+    (journal : donnees.js · unité 9, disques et vocabulaire) */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[],
    words:[
   {w:'بِ',fr:'avec, au moyen de',say:'bi'},
@@ -150,30 +91,14 @@ const UNITS=(function(){
   {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
   {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
    ],
-   /* ⚠️ « Les harfs » PRÉFIXÉ (Myriam, 05/09) : les trois lettres seules ne
-      disaient pas QUOI elles étaient — le mot les nomme, comme « L'article
-      الـ » le fait déjà pour l'unité 8. Alimente tout ce qui lit `court`
-      (bandeau du ciel, Cours › Résumé, le hub de grammaire) depuis CETTE
-      seule source — rien à répéter ailleurs.
-      ⚠️ CASSE corrigée le 05/09 (retour de Myriam) : `court` s'écrit en
-      MINUSCULE avec une majuscule de début, jamais en capitales — le figeage
-      en capitales de la transition d'unité sur l'accueil (`.unit-sep`) est un
-      CSS (`text-transform:uppercase`), pas une convention à recopier ici. */
+   /* court : seule source du bandeau du ciel, du Cours › Résumé et du hub de grammaire.
+      ⚠️ En minuscules avec majuscule initiale : les capitales de .unit-sep sont du CSS. */
    court:'Les harfs بِ · عَلَى · لِ',
    sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
- /* ═══ UNITÉ 10 — « X DE Y » : LA RELATION ENTRE DEUX NOMS ═══
-    Ouverte le 02/09 (GO de Myriam : « okay pour le cablage »). `u10:true` dit
-    à `discsFor` de lire `u10Disques()` — même dispositif que l'unité 9 : pas
-    de moteur à soi, les écrans sont des exercices ORDINAIRES du registre
-    (`scene-relation`, voir src/units/unit-10/donnees/disque-1.js).
-    ⚠️ `sub` COMPTE LES DISQUES RÉELS, pas les neuf de l'accueil : l'unité 9 a
-    dit « 5 leçons » puis 6, puis 7, à mesure que ses grisés devenaient réels.
-    Une seule leçon ici, et le mot est au singulier.
-    ⚠️ `court` NE NOMME PAS LA RÈGLE : les directives validées interdisent
-    مُضَاف / إِضَافَة au disque 1. Le ciel annonce donc ce que l'élève va
-    FAIRE — reconnaître de qui, de quoi on parle — pas ce qu'elle apprendra.
-    `words:[]` : comme l'unité 9, les groupes nominaux ne rejoignent pas encore
-    la révision espacée — à trancher avec Myriam. */
+ /* Unité 10 : u10:true → u10Disques() (parcours.js), même dispositif que l'unité 9.
+    ⚠️ sub compte les disques RÉELS, pas les neuf de l'accueil.
+    words:[] : les groupes nominaux n'entrent pas encore en révision (à trancher avec Myriam).
+    (journal : donnees.js · unité 10, ouverture) */
  { no:10, ready:true,  ph:'GRAMMAIRE', u10:true, letters:[], words:[],
    court:'L’annexion — الإِضَافَة',   // graphie relevée dans le document d'architecture, jamais retapée
    sub:'« X de Y » — de qui ? de quoi ? · 1 leçon' },

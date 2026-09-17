@@ -1,43 +1,26 @@
-/* ALAQ service worker — hors ligne complet
-   Stratégie :
-   - index.html / navigation : cache VERSIONNÉ d'abord (l'app s'ouvre tout de suite, même en
-     avion), réseau seulement si le cache est vide. La nouvelle version arrive par le NOUVEAU
-     sw (skipWaiting), jamais par une réécriture de l'ancien cache (06/09)
-   - audios, polices, icônes : cache d'abord (rapide), réseau en secours
-   - le cœur (app.css, assets.js, trace-lettres.js, donnees.js, generateurs.js, son.js, progression.js, parcours.js, ui/accueil.js · navigation.js · parametres.js · reviser.js, revision.js, signalements.js, constance.js, content/unites.js, polices.css, moteur U8 — la liste CORE) : cache
-     versionné d'abord, réseau en secours (06/09 : avant, pré-caché mais jamais SERVI)
-   - les audios de la voix de Myriam sont pré-chargés à l'installation
-   - la RÉCITATION n'est plus hébergée ici : elle est streamée depuis cdn.islamic.network
-     et mise en cache au fil des versets écoutés (voir VOIX dans revision.js) */
-const CACHE='alaq-v220-2026-09-16';  // L'APP : versionné, purgé à chaque livraison
-/* LES MÉDIAS : un cache À PART, JAMAIS purgé. Un mp3 ne change pas de contenu —
-   ba-fatha-son-court.mp3 dira la même chose dans dix ans. Les ranger dans le cache
-   versionné revenait à les jeter et à les racheter (8 Mo) à CHAQUE déploiement, sur
-   chaque appareil. Ici ils se téléchargent une seule fois dans la vie de l'appareil. */
+/* sw.js — le service worker d'Alaq : hors ligne complet.
+   · index.html et navigation : cache versionné d'abord, réseau si le cache est vide. Une
+     livraison arrive par le NOUVEAU sw (skipWaiting), jamais en réécrivant l'ancien cache.
+   · le cœur (la liste CORE) : cache versionné d'abord, réseau en secours.
+   · audios, polices, icônes : cache d'abord ; audios et icônes pré-chargés après le 1er rendu.
+   · la récitation est streamée (cdn.islamic.network) et mise en cache au fil de l'écoute.
+   Gardes : outils/verifier-sw-horsligne.mjs (le sw joué dans un bac, réseau coupé).
+   ⚠️ Vite, precache-sons, precache-u8 et installer-prises relisent ce fichier par son texte :
+   en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
+   doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
+   (journal : sw.js · en-tête historique) */
+const CACHE='alaq-v221-2026-09-17';  // L'APP : versionné, purgé à chaque livraison
+/* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
+   retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
-/* LES IMAGES : un cache versionné À PART (10/08). Contrairement aux mp3, une icône
-   RETOUCHÉE garde souvent son nom — dans MEDIA elle restait alors périmée à vie.
-   Ici : une image change → IMGV s'incrémente → à l'activation l'ancien cache
-   d'images est jeté entier et tout se retélécharge frais (quelques Mo d'icônes,
-   rien à voir avec les 8 Mo d'audio qui ne bougent jamais). Plus de renommage
-   obligatoire, plus de liste de purge à tenir pour les images. */
-/* 🔴 RETOUCHÉES TROIS FOIS SOUS LE MÊME NOM (Myriam, 15/08 : « le test dans localhost
-   me donne toujours les mêmes images »). Les 40 illustrations de l'unité 8 sont
-   passées par trois régénérations — 8,1 Mo → 420 Ko, puis 384 px, puis sans tramage
-   — toujours sous les noms qalam.png, himar.png… Chaque image est CACHE-D'ABORD
-   (voir le fetch handler plus bas) : le navigateur a gardé la TOUTE PREMIÈRE version
-   vue de chaque fichier, et rien sur le disque ne pouvait la déloger.
-   Bumper IMGV renomme le cache (alaq-images-v1 → v2) : l'ancien ne correspond plus
-   à rien, `activate` le jette, et chaque image repart chercher le réseau. C'est la
-   règle que ce projet a déjà pour toute image retouchée sous le même nom — je l'ai
-   moi-même oubliée trois fois de suite ici. */
+/* IMGCACHE : versionné à part. ⚠️ Une image retouchée garde souvent son nom et reste en
+   cache à vie : incrémenter IMGV, et activate jette l'ancien cache d'images.
+   (journal : sw.js · images retouchées trois fois sous le même nom) */
 const IMGV=17;
 const IMGCACHE='alaq-images-v'+IMGV;
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
-/* LES CHEMINS DU CŒUR, pour la branche du fetch plus bas : résolus contre l'URL de ce script
-   (la racine du site en prod, /dist/ ou /alaq-vercel-static/ en local), pour que la liste
-   CORE reste écrite en relatif. Dérivé À L'EXÉCUTION : ce que le build ajoute à CORE
-   (u8/u8.js, u8/u8.css) y entre tout seul. */
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+/* Chemins du cœur résolus contre l'URL du sw (racine en prod, sous-dossier en local), dérivés
+   à l'exécution : ce que le build ajoute à CORE (le paquet u8) y entre tout seul. */
 const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
 const RACINE_SW=new URL('.',self.location.href).pathname;   // '/' en prod, '/dist/' ou '/alaq-vercel-static/' en local
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
@@ -49,7 +32,7 @@ const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques so
 "images-app-alaq/epi-pousse-anime-v1.webp",
 "images-app-alaq/icone-tb-coeur-v1.png",
 "images-app-alaq/icone-loupe-v1.png",
-"images-app-alaq/icone-loupe-v1-clair.png",  // le jumeau du mode clair (02/09) : sans lui, la loupe est morte hors ligne sur le parchemin
+"images-app-alaq/icone-loupe-v1-clair.png",  // jumeau du mode clair : sans lui, loupe morte hors ligne
 "images-app-alaq/icone-tab-video.png",
 "images-app-alaq/icone-tab-cartes.png",
 "images-app-alaq/icone-tab-crayon.png",
@@ -117,11 +100,9 @@ const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques so
 "images-app-alaq/icone-disq7-c-reviser.png"
 ];
 const AUDIOS=[
-/* ⚠️ 15/09/2026 — CETTE LISTE EST DÉRIVÉE DE LA TABLE DU SON, plus écrite à la main :
-   `node outils/precache-sons.mjs` la régénère depuis `son.js` et les données des unités,
-   et `outils/verifier-son.mjs` rougit au portillon si un son que la table peut demander
-   n'est pas ici. Les 28 sons de lettres y sont entrés ce jour-là : ils manquaient, donc
-   le tracé d'une lettre était MUET hors ligne depuis toujours. */
+/* ⛔ Liste dérivée de la table du son : node outils/precache-sons.mjs --ecrire la régénère,
+   outils/verifier-son.mjs rougit s'il manque un son. Ne pas l'éditer à la main.
+   (journal : sw.js · la liste AUDIOS) */
 "audios-app-alaq/ain-alif-son-prolonge.mp3",
 "audios-app-alaq/ain-damma-son-court.mp3",
 "audios-app-alaq/ain-fatha-son-court.mp3",
@@ -582,15 +563,11 @@ self.addEventListener('install',e=>{
     self.skipWaiting();
   })());
 });
-/* Les 301 audios + les icônes sont pré-chargés APRÈS le premier rendu : la page envoie
-   « precache » quand elle est affichée. Avant, ils saturaient le réseau pendant le chargement
-   (écran blanc à chaque déploiement). */
+/* Audios et icônes pré-chargés APRÈS le premier rendu (message « precache » de la page) :
+   avant, ils saturaient le réseau pendant le chargement. */
 let _preFait=false;
-/* Six téléchargements à la fois, pas 360. Lancer toute la liste d'un coup ne la rendait
-   pas plus rapide — le navigateur la met de toute façon en file — mais cette file entrait
-   en concurrence avec ce dont l'app a besoin au même instant : Supabase, les polices, et
-   désormais la récitation streamée. Et l'on SAUTE ce qui est déjà là : au deuxième
-   passage, c'est 360 lectures de cache, zéro requête réseau. */
+/* Six téléchargements à la fois, et ce qui est déjà en cache est sauté : la liste entière d'un
+   coup concurrençait Supabase, les polices et la récitation. */
 async function enFile(liste,c,n){
   let i=0;
   const ouvrier=async()=>{
@@ -612,34 +589,24 @@ self.addEventListener('activate',e=>{
     const keys=await caches.keys();
     // MEDIA survit aux livraisons ; IMGCACHE survit tant qu'IMGV ne bouge pas
     await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA&&k!==IMGCACHE).map(k=>caches.delete(k)));
-    // ménage UNE fois : les images historiquement rangées dans MEDIA (jamais purgé)
-    // sont celles qui restaient périmées à vie sur les appareils — on les en sort,
-    // elles vivent désormais dans IMGCACHE.
+    // les images anciennement rangées dans MEDIA y restaient périmées : on les en sort
     try{
       const md=await caches.open(MEDIA);
       const ks=await md.keys();
       await Promise.all(ks.filter(rq=>/\.(png|jpe?g|webp|gif)$/.test(new URL(rq.url).pathname))
         .map(rq=>md.delete(rq)));
     }catch(_){ }
-    // ⚠️ MEDIA n'est jamais purgé — donc un fichier REMPLACÉ sous le même nom y reste
-    // périmé pour toujours. Purge CIBLÉE de TOUS les remplacés (liste vérifiée au blob git
-    // le 08/08 : 7 fichiers). Les deux sfx du 05/08 manquaient — c'est pour ça que
-    // l'iPhone de Myriam jouait encore l'أَحْسَنْتِ (voix homme) du 13/07 à chaque bonne
-    // réponse, quel que soit le contenu poussé depuis. Un fichier re-déposé sous le
-    // même nom DOIT rejoindre cette liste (ou changer de nom).
+    // ⚠️ MEDIA n'est jamais purgé : un fichier remplacé sous le même nom DOIT rejoindre cette
+    // liste (ou changer de nom), et CACHE monter pour la rejouer. Complétée par outils/installer-prises.js.
+    // (journal : sw.js · la purge ciblée de MEDIA)
     const m=await caches.open(MEDIA);
     await Promise.all(['lettre-alif-nom-f.mp3','lettre-alif-nom-h.mp3',
       'lettre-fa-nom-f.mp3','lettre-fa-nom-h.mp3','mot-madrasatoun.mp3',
       'sfx-bonne-reponse.mp3','sfx-fin-lecon.mp3',
-      /* 17/08 — les 5 autres noms de lettres en voix IA, RETIRÉS du dépôt le même jour.
-         `sayLetterName` demande le nom PLAT d'abord, mais retombe sur le « -f » si la
-         prise plate échoue (hors ligne, cache incomplet) : sans cette purge, un appareil
-         qui a entendu l'IA la garderait en secours à vie. */
+      /* 17/08 : noms de lettres en voix IA retirés */
       'lettre-ayn-nom-f.mp3','lettre-hamza-nom-f.mp3','lettre-lam-nom-f.mp3',
       'lettre-mim-nom-f.mp3','lettre-waw-nom-f.mp3',
-      /* 10/08 tard — les syllabes IA RETIRÉES (« c'est la cata », Myriam) + 4 mots à
-         revoir : servis quelques heures, ils doivent sortir du cache des appareils
-         qui les ont entendus, sinon ils y restent à vie (cache MEDIA). */
+      /* 10/08 : syllabes IA retirées et 4 mots à revoir */
       'lam-fatha-son-court-f.mp3',
       'lam-kasra-son-court-f.mp3',
       'lam-damma-son-court-f.mp3',
@@ -758,9 +725,7 @@ self.addEventListener('activate',e=>{
       'mot-allah-f.mp3',
       'mot-alladhina-f.mp3',
       'mot-addallin-f.mp3',
-      /* 15/08 — les prises de Myriam remplacent des
-         fichiers déjà servis : sans cette liste, les appareils qui les ont entendus
-         garderaient l'ancienne voix à vie (cache MEDIA, jamais purgé). */
+      /* 15/08 : prises de Myriam */
       'dad-alif-son-prolonge.mp3',
       'dad-damma-son-court.mp3',
       'dad-fatha-son-court.mp3',
@@ -967,9 +932,7 @@ self.addEventListener('activate',e=>{
       'voyelle-a.mp3',
       'voyelle-i.mp3',
       'voyelle-ou.mp3',
-      /* 16/08 — les prises de Myriam remplacent des
-         fichiers déjà servis : sans cette liste, les appareils qui les ont entendus
-         garderaient l'ancienne voix à vie (cache MEDIA, jamais purgé). */
+      /* 16/08 : prises de Myriam */
       'dal-alif-son-prolonge.mp3',
       'dal-damma-son-court.mp3',
       'dal-fatha-son-court.mp3',
@@ -1049,9 +1012,7 @@ self.addEventListener('activate',e=>{
       'sin-damma-son-court.mp3',
       'sin-fatha-son-court.mp3',
       'sin-kasra-son-court.mp3',
-      /* 16/08 — les prises de Myriam remplacent des
-         fichiers déjà servis : sans cette liste, les appareils qui les ont entendus
-         garderaient l'ancienne voix à vie (cache MEDIA, jamais purgé). */
+      /* 16/08 : prises de Myriam */
       'lettre-ba-nom.mp3',
       'lettre-ba-nom-f.mp3',
       'lettre-nun-nom.mp3',
@@ -1066,24 +1027,11 @@ self.addEventListener('activate',e=>{
       'mot-alrumman.mp3',
       'mot-bab.mp3',
       'mot-bab-f.mp3',
-      /* 01/09 — mot-bi.mp3 RECOUPÉ sous le MÊME nom (0,78 s au lieu de 1,38 s :
-         la voix est intacte au bit près, on a retiré le silence et le clic de
-         souris que le rogneur du studio avait laissés — sa bouffée faisait
-         200 ms, au-dessus du seuil de 120 ms qu'il sait reconnaître).
-         ⚠️ IL EST PARTI EN PRODUCTION UNE HEURE PLUS TÔT, DANS LE PRÉ-CACHE DE
-         SW v169 : sans cette ligne, tout appareil ayant installé v169 garderait
-         l'ancienne prise À VIE (le cache MEDIA n'est jamais purgé). C'est
-         exactement l'incident du 08/08 — le « Mehdi » de la récompense, qui
-         était un fichier remplacé sous le même nom et embaumé par ce cache. */
+      /* 01/09 : mot-bi recoupé sous le même nom (journal : sw.js · mot-bi.mp3 recoupé) */
       'mot-bi.mp3',
     ]
       .map(f=>m.delete('audios-app-alaq/'+f,{ignoreSearch:true})));
-    /* 24/08 — les 4 mp4 de l'écriture guidée U9 (écran 6/7, disque 1), réécrits
-       SOUS LE MÊME NOM plusieurs fois dans la même journée pendant la mise au
-       point (fond vert non détouré, puis mauvais recadrage/zoom, puis liseré
-       résiduel en bas de cadre) : exactement le cas que cette purge ciblée
-       existe pour couvrir — un appareil qui a ouvert le disque 1 CE jour-là a
-       pu mettre en cache une version cassée, `MEDIA` ne l'aurait jamais lâchée. */
+    /* les 4 mp4 de l'écriture guidée U9, réécrits sous le même nom (journal : sw.js · les 4 mp4) */
     await Promise.all(['ecrire-sombre-bg.mp4','ecrire-clair-bg.mp4',
       'ecrire-sombre-panel.mp4','ecrire-clair-panel.mp4']
       .map(f=>m.delete('images-app-alaq/u9/'+f,{ignoreSearch:true})));
@@ -1091,27 +1039,14 @@ self.addEventListener('activate',e=>{
   })());
 });
 self.addEventListener('fetch',e=>{
-  /* ⚠️ LES REQUÊTES « Range » NE SE INTERCEPTENT JAMAIS (10/08). Safari streame l'audio
-     par tranches (Range: bytes=…) et exige un 206 ; le cache répondait un 200 complet
-     → AVFoundation refuse → « les sons de récitateurs ne fonctionnent pas » (Myriam),
-     alors que le CDN répond 200 partout. On laisse ces requêtes filer au réseau. */
+  /* ⛔ Ne jamais intercepter une requête Range : Safari streame l'audio par tranches et exige
+     un 206 ; un 200 complet venu du cache est refusé. (journal : sw.js · les requêtes Range) */
   if(e.request.headers.get('range'))return;
   const url=new URL(e.request.url);
-  /* NAVIGATION / INDEX : cache VERSIONNÉ d'abord (l'app s'ouvre tout de suite), réseau si le
-     cache est vide.
-     🔴 06/09 — DEUX CHOSES ONT CHANGÉ ICI, TOUTES DEUX PROUVÉES AU BAC (outils/verifier-sw-horsligne.mjs).
-     ① Seules la racine et index.html sont « l'index ». Avant, TOUTE navigation du scope recevait
-        index.html, ET la réponse de la page demandée était rangée SOUS LA CLÉ index.html : ouvrir
-        confidentialite.html (target=_blank) affichait l'app à sa place, puis l'ouverture SUIVANTE
-        de l'app servait… la page de confidentialité. Préexistant. Les pages de CORE passent
-        désormais par la branche COEUR ; une navigation inconnue reçoit toujours index.html (repli
-        d'app), mais rien de ce qu'elle rapporte n'est jamais écrit.
-     ② L'ancien cache n'est plus réécrit en douce. Le « rafraîchissement silencieux » rangeait
-        l'index.html NEUF dans l'ANCIEN cache pendant que la nouvelle version s'installait : la
-        feuille étant désormais externe et servie du MÊME cache, ça donnait un index.html neuf
-        habillé de l'app.css d'avant. La nouvelle livraison arrive par le NOUVEAU sw, dont addAll
-        apporte index.html ET app.css du même lot — c'est le « recharger deux fois » de la doctrine.
-        On n'écrit dans le cache qu'en cas de TROU (cache vidé par le navigateur), pour se réparer. */
+  /* Navigation / index : cache versionné d'abord, réseau si vide. Seules la racine et
+     index.html sont « l'index » ; une autre navigation hors CORE reçoit index.html mais rien
+     n'est écrit. ⛔ Ne jamais réécrire l'ancien cache (index.html neuf + app.css ancien) : on
+     n'écrit qu'en cas de trou. (journal : sw.js · la navigation et l'ancien cache réécrit) */
   const versIndex=url.pathname===RACINE_SW||url.pathname.endsWith('/index.html');
   if(versIndex||(e.request.mode==='navigate'&&!COEUR.has(url.pathname))){
     e.respondWith((async()=>{
@@ -1120,22 +1055,14 @@ self.addEventListener('fetch',e=>{
       if(hit)return hit;   // le cache d'abord : l'app s'ouvre TOUT DE SUITE, même si le réseau traîne
       try{
         const r=await fetch(e.request);
-        if(r&&r.ok&&versIndex)c.put('index.html',r.clone());   // jamais un 500/portail captif (audit 10/08), jamais une autre page
+        if(r&&r.ok&&versIndex)c.put('index.html',r.clone());   // jamais un 500 ni un portail captif, jamais une autre page
         return r;
       }catch(_){return (await caches.match('.'))||Response.error();}
     })());
     return;
   }
-  /* LE CŒUR DE L'APP — app.css, content/unites.js, polices.css, le moteur U8 (la liste CORE) :
-     cache VERSIONNÉ d'abord, réseau en secours.
-     🔴 06/09 — AVANT CETTE BRANCHE, PRÉ-CACHER NE SERVAIT À RIEN. addAll(CORE) rangeait ces
-     fichiers dans le cache à l'installation, mais AUCUNE branche de ce gestionnaire ne les
-     en ressortait : la requête filait au réseau. En avion, index.html s'ouvrait (lui, il a
-     sa branche) mais SANS police, SANS les données des unités 1 à 7, SANS l'unité 8. Et le
-     harnais hors ligne était vert : il vérifiait le CONTENU du cache, jamais qu'on le SERT.
-     Servir depuis le cache versionné garde index.html et sa feuille de la MÊME livraison — à
-     la condition que l'ancien cache ne soit JAMAIS réécrit (voir la branche navigation) ; la
-     purge à l'activation fait le reste. Preuve : outils/verifier-sw-horsligne.mjs. */
+  /* Le cœur (CORE) : cache versionné d'abord, réseau en secours. ⚠️ Pré-cacher ne suffit pas,
+     c'est cette branche qui SERT le cœur hors ligne. (journal : sw.js · pré-cacher ne servait à rien) */
   if(url.origin===self.location.origin&&COEUR.has(url.pathname)){
     e.respondWith((async()=>{
       const c=await caches.open(CACHE);
@@ -1153,7 +1080,7 @@ self.addEventListener('fetch',e=>{
   const cacheFirst=url.pathname.indexOf('/audios-app-alaq/')>=0
     ||url.hostname==='fonts.googleapis.com'||url.hostname==='fonts.gstatic.com'||url.hostname==='cdn.jsdelivr.net'
     ||url.hostname==='cdn.islamic.network'  // la récitation streamée : mise en cache côté client, comme leurs conditions le demandent
-    ||/\.(png|jpe?g|webp|mp3|mp4|woff2?)$/.test(url.pathname); // webp ajouté le 27/08 (épi animé) — un oubli du régime cache-d'abord, corrigé au passage
+    ||/\.(png|jpe?g|webp|mp3|mp4|woff2?)$/.test(url.pathname);
   if(cacheFirst){
     e.respondWith((async()=>{
       const hit=await caches.match(e.request);

@@ -1,34 +1,18 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   LES GÉNÉRATEURS DES DISQUES — ce qui FABRIQUE la file d'écrans d'une leçon.
-   Sorti d'index.html le 14/09/2026 (sous-lot 2 de « extraire le lecteur »),
-   copié à l'identique.
+/* generateurs.js — ce qui fabrique la file d'écrans d'une leçon.
+   Neuf constructeurs, un par disque type : buildAlphabet, buildMemo, buildSpot,
+   buildForms, buildHarakat, buildMadd, buildWords, buildWrite, buildBilan — plus
+   buildReview (la Révision). Et leurs outils : shuffle/rnd/weightedShuffle, mcq,
+   balancePos, wordSoundOptions/audioKey, leconSyllabes.
 
-   Neuf constructeurs, un par disque type : `buildAlphabet` (les lettres),
-   `buildMemo` (la mémorisation), `buildSpot` (repérer), `buildForms` (les quatre
-   formes), `buildHarakat` et `buildMadd` (les syllabes), `buildWords` (les mots),
-   `buildWrite` (écrire), `buildBilan` (le bilan) — plus `buildReview` (la leçon
-   Révision). Chacun rend un tableau d'écrans que le lecteur (src/player/) déroule.
-   Avec eux, leurs outils : `shuffle`/`rnd`/`weightedShuffle` (le tirage),
-   `mcq` (un écran à choix), `balancePos` (la place de la bonne réponse),
-   `wordSoundOptions`/`audioKey` (les options sonores), `leconSyllabes`.
+   Script classique, ni defer ni module : parcours.js référence ces constructeurs dans
+   sa table des disques, évaluée au premier rendu (showTab('home') → renderHome →
+   discsFor, en synchrone). ⚠️ progression.js reconnaît un disque par identité de
+   fonction (d.build === buildForms) : une seconde définition les ferait diverger.
 
-   ⚠️ SCRIPT CLASSIQUE, ni `defer` ni `type="module"`, aucun `import`, aucun
-   `export`. `parcours.js` RÉFÉRENCE ces neuf constructeurs dans sa table des
-   disques, et cette table s'évalue au PREMIER RENDU (`showTab('home')` →
-   `renderHome` → `discsFor`, tout en synchrone) : un module, différé, n'existerait
-   pas encore — ReferenceError, et l'accueil ne se dessinerait pas. Même raison
-   que pour `ui/`. Et `progression.js` reconnaît un disque par IDENTITÉ de
-   fonction (`d.build === buildForms`) : une seconde définition les ferait diverger.
-
-   ═══ LE CONTRAT — ce qu'ils résolvent À L'APPEL (jamais au chargement) ═══
-   Les données : `UNITS`, `FATIHA`, `HK`, `MD`, `maddSyl` (donnees.js) ;
-   les outils arabes : `formGlyph`, `joinsL`, `sameLetter` (donnees.js) ;
-   la progression : `S` (progression.js) ;
-   et trois gabarits restés dans index.html : `letAr`, `splitUnits`, `buildVerseTiles`.
-   Un générateur n'est appelé qu'au doigt de l'élève (`startDisque` →
-   `discsFor(u)[i].build(…)`), bien après que tous ces scripts sont là.
-   Gardes : outils/verifier-lecons.mjs, previews/_verif_lecons.html.
-   ═══════════════════════════════════════════════════════════════════════════ */
+   À l'appel seulement (un générateur n'est appelé qu'au doigt, via startDisque) :
+   UNITS, FATIHA, HK, MD, maddSyl, formGlyph, joinsL, sameLetter (donnees.js) · S
+   (progression.js) · letAr, splitUnits (src/ecrans, module) · buildVerseTiles (revision.js).
+   Gardes : outils/verifier-lecons.mjs, previews/_verif_lecons.html. */
 
 /* ================= GÉNÉRATEURS ================= */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -58,10 +42,9 @@ function balancePos(opts,ansKey){
   return arr;
 }
 
-// Pour « touche le bon son », les 3 options doivent sonner DIFFÉREMMENT.
-// La voix de synthèse ne rend ni la chedda ni les nuances de longueur, donc on
-// n'utilise pas les quasi-homographes (confus) : on prend d'autres mots de l'unité,
-// en garantissant des sons mutuellement distincts (clés audio différentes).
+// « Touche le bon son » : les 3 options doivent sonner différemment. Pas de quasi-homographes :
+// d'autres mots de l'unité, aux clés audio distinctes (chedda ignorée).
+// (journal : generateurs.js · wordSoundOptions et la voix de synthèse)
 function audioKey(s){ return (s||'').normalize('NFC').replace(/\u0651/g,''); }
 function wordSoundOptions(U,w){
   const used=new Set([audioKey(w.w)]);
@@ -78,8 +61,7 @@ function wordSoundOptions(U,w){
 const NONATTACH=['ا','د','ذ','ر','ز','و'];
 
 function buildAlphabet(U){
-  // Leçon 1 v2 (corrections Myriam 07/08) : le TITRE est l'instruction, jamais lu.
-  // Le français ne parle plus ; seul l'arabe sonne. 15 écrans (9/10/12/14/18 supprimés).
+  // Le titre est l'instruction, jamais lu : seul l'arabe sonne. (journal : generateurs.js · leçon 1 v2)
   const q=[
    {type:'tapset',title:'Touche 3 des 28 lettres de l\u2019alphabet',items:[],alphabet:true,cols:4},
    {type:'harakat3',title:'Révèle les harakat'},
@@ -115,11 +97,8 @@ function buildAlphabet(U){
   return q;
 }
 
-/* ══ LEÇON 2 v2 — « Mémoriser » refondue avec Myriam le 08/08. 25 écrans → 14. ══
-   Retirés : l'écran « touche chaque lettre 3 fois » (doublon des 3 cartes qui précèdent)
-   et 12 des 18 quiz (six suffisent, trois par sens). Ajoutés : le jeu de bulles (la vraie
-   phase d'apprentissage) et le repérage des 3 lettres dans l'alphabet, jumeau de la leçon 1.
-   ⚠️ Cette fonction sert les 7 unités : elle ne parle jamais de م ل ن en dur. */
+/* Leçon 2 « Mémoriser » : cartes, bulles, repérage, quiz dans les deux sens, tracé.
+   ⚠️ Sert les 7 unités : jamais de م ل ن en dur. (journal : generateurs.js · leçon 2 v2, « Mémoriser » refondue) */
 function buildMemo(U){
   const q=[];
   U.letters.forEach(L=>q.push({type:'learn',L,mute:true}));  // le français n'est JAMAIS lu (doctrine) — le titre suffit
@@ -148,18 +127,14 @@ function buildSpot(U){
 }
 
 function buildForms(U){
-  /* Refonte du 10/08 (tâche Notion « UNITÉ 1 - LEÇON 3 », preview v3 validée par Myriam),
-     pour les 7 unités d'un coup : chaque lettre suit un arc complet — on la GLISSE dans ses
-     4 cases (l'exercice de la leçon 1), puis on l'ÉCRIT dans ses 4 formes (isolée · début ·
-     milieu · fin — « pédagogiquement on n'a pas le choix »), puis 24 bulles-formes (chaque
-     forme deux fois) et les deux quiz de la leçon 2. Titres courts jamais lus (mute). */
+  /* Chaque lettre : la glisser dans ses cases, l'écrire dans ses formes ; puis les
+     bulles-formes et les deux quiz de la leçon 2. (journal : generateurs.js · leçon 3, refonte des formes) */
   const q=[];
   U.letters.forEach(L=>{
     q.push({type:'formslide',L,title:'Fais glisser la lettre\u00A0'+letAr(L)});
     q.push({type:'trace',L});
-    /* les lettres qui ne s'attachent qu'à droite (أ و ر د ذ…) n'ont que DEUX formes
-       réelles : début = isolée et milieu = fin. On n'écrit que les formes distinctes —
-       leurs tracés « début/milieu » n'existent d'ailleurs pas dans le pointage de Myriam. */
+    /* Lettres qui ne s'attachent qu'à droite (أ و ر د ذ…) : début = isolée, milieu = fin ;
+       seules les formes distinctes s'écrivent (pas de tracé début/milieu pour elles). */
     (joinsL(L)?[1,2,3]:[3]).forEach(p=>q.push({type:'trace',L,pos:p}));
   });
   q.push({type:'bulles',lettres:U.letters.slice(),formes:true});
@@ -178,14 +153,9 @@ function buildForms(U){
 }
 
 function sylHK(L,h){return L+h;}
-/* ══ LEÇONS 5 & 6 v2 — refonte du 10/08 (previews v3 validées par Myriam), MÊME moteur.
-   13 écrans pour 3 lettres, DYNAMIQUE pour les 7 unités : un « fuse » par lettre (glisser
-   les harakat/prolongations — l'exercice de la leçon 1), puis les bulles-syllabes (chaque
-   syllabe ×2, le son d'une bulle est SA syllabe), puis chaque syllabe testée UNE fois —
-   moitié haute « Choisis la bonne écriture » (son → écrit), moitié basse « Choisis le bon
-   son » (écrit → 3 haut-parleurs rtl). Distracteurs : même lettre autre signe + autre
-   lettre même signe. Le son passe par sayLetterName → jouerSyl (Habibah -f d'abord,
-   la voix de Myriam en repli). */
+/* Leçons 5 et 6, un seul moteur : un « fuse » par lettre, les bulles-syllabes, puis chaque
+   syllabe testée une fois (moitié son → écrit, moitié écrit → son). Distracteurs : même
+   lettre autre signe + autre lettre même signe. (journal : generateurs.js · leçons 5 et 6 v2, les syllabes) */
 function leconSyllabes(U,paires,fabrique,titreFuse){
   const q=[];
   U.letters.forEach(L=>q.push({type:'fuse',L,mute:true,title:titreFuse+'\u00A0'+letAr(L),
@@ -194,8 +164,8 @@ function leconSyllabes(U,paires,fabrique,titreFuse){
   q.push({type:'bulles',syllabes:syls.slice()});
   const ordre=shuffle(syls.slice()), nEcrit=Math.ceil(ordre.length/2);
   ordre.forEach((s,k)=>{
-    /* retrouver (lettre, signe) en BALAYANT — jamais via s[0] : les graphies corrigées
-       du hamza (إِ, آ) ne commencent pas par la lettre de la table (audit 10/08) */
+    /* ⚠️ retrouver (lettre, signe) en balayant, jamais via s[0] : إِ et آ ne commencent
+       pas par la lettre de la table */
     let L=null,pMien=null;
     U.letters.forEach(l=>paires.forEach(p=>{ if(fabrique(l,p[0])===s){L=l;pMien=p[0];} }));
     const pAutre=shuffle(paires.filter(p=>p[0]!==pMien))[0][0];
@@ -208,12 +178,12 @@ function leconSyllabes(U,paires,fabrique,titreFuse){
   });
   return q;
 }
-function sylHKG(L,h){ return (L==='أ'&&h==='\u0650')?'إِ':L+h; }    // la kasra porte le hamza DESSOUS : أِ n'existe pas (audit 10/08) — partagée leçon 5 + bilan
-function sylMDG(L,m){ if(L==='أ'&&m==='ا')return 'آ'; if(L==='أ'&&m==='ي')return 'إِي'; return maddSyl(L,m); } // hamza : آ (jamais أَا) et إِي (jamais أِي — attrapé par le harnais du bilan, 10/08 tard) — partagée leçon 6 + bilan
+function sylHKG(L,h){ return (L==='أ'&&h==='\u0650')?'إِ':L+h; }    // la kasra porte la hamza dessous : أِ n'existe pas — partagée leçon 5 + bilan
+function sylMDG(L,m){ if(L==='أ'&&m==='ا')return 'آ'; if(L==='أ'&&m==='ي')return 'إِي'; return maddSyl(L,m); } // hamza : آ (jamais أَا) et إِي (jamais أِي) — partagée leçon 6 + bilan
 function buildHarakat(U){ return leconSyllabes(U,HK,sylHKG,'Glisse les harakat sur la lettre'); }
 
 function buildMadd(U){ return leconSyllabes(U,MD,sylMDG,'Glisse les prolongations sur la lettre'); }
-function buildMaddANCIEN(U){ // conservé quelques jours en référence, plus appelé — à jeter avec l'accord de Myriam
+function buildMaddANCIEN(U){ // plus appelé — à jeter avec l'accord de Myriam
   const q=[];
   U.letters.forEach(L=>{
     const syls=MD.map(m=>maddSyl(L,m[0]));
@@ -244,13 +214,9 @@ function buildMaddANCIEN(U){ // conservé quelques jours en référence, plus ap
   return q;
 }
 
-/* ══ LEÇON 7 « Lire des mots » v3 — refonte du 11/08 (preview preview_lecon7_lire_v3,
-   retours de Myriam du 10/08 : plus AUCUNE traduction ni emoji, on GLISSE les signes,
-   « Touche le mot qui porte… », grosses bulles-mots, le tri final).
-   DYNAMIQUE pour les 7 unités : chaque écran se construit sur U.words / U.letters.
-   Les 4 anciens écrans `info` en paragraphes (relus à l'identique dans CHAQUE unité)
-   sont morts : les signes ne s'expliquent plus, ils se manipulent — et une seule fois,
-   en unité 1, là où ils sont NEUFS. Les unités suivantes attaquent les mots. ══ */
+/* Leçon 7 « Lire des mots », construite sur U.words / U.letters pour les 7 unités.
+   Ni traduction ni emoji ; les signes se manipulent, une seule fois, en unité 1.
+   (journal : generateurs.js · leçon 7 « Lire des mots » v3) */
 function buildWords(U){
   const SUK='ْ', CHD='ّ', TAN='ٌ', FAT='َ', TAT='ـ';
   const ui=UNITS.indexOf(U), q=[], W=(U.words||[]).slice();
@@ -335,15 +301,13 @@ function buildWords(U){
   {
     const parSigne={}; [SUK,CHD].forEach(sig=>{ parSigne[sig]=dejaVus.filter(m=>m.w.indexOf(sig)>-1); });
     /* Unité 1 : un seul mot porte un soukoun (نَمْلٌ). Les syllabes-signes qu'on vient de
-       fabriquer à l'écran A complètent les paniers — elles ont leur son dans AUDIO.
+       fabriquer à l'écran A complètent les paniers (leur son est dans SONS, son.js).
        Dès l'unité 2, les mots déjà lus suffisent : aucun ajout. */
     if(ui===0)U.letters.forEach(L=>{ parSigne[SUK].push({w:'أَ'+L+SUK}); parSigne[CHD].push({w:'أَ'+L+CHD+FAT}); });
     if(parSigne[SUK].length>=2&&parSigne[CHD].length>=2){
       const n=Math.min(3,parSigne[SUK].length,parSigne[CHD].length);
-      /* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — un tatweel (ـ) porte très peu
-         d'encre : agrandir sa police ne change rien, le signe reste presque invisible à côté
-         d'un mot entier. Il porte maintenant une VRAIE lettre (ن, déjà l'exemple générique de
-         l'app) — toujours le signe SEUL, jamais son nom écrit (règle de Myriam), mais lisible. */
+      /* ⚠️ Le signe du panier porte une vraie lettre (ن), pas un tatweel presque invisible ;
+         jamais son nom écrit. (journal : generateurs.js · leçon 7 « Lire des mots » v3) */
       q.push({type:'tri',mute:true,
         paniers:[{sig:'ن'+SUK,cle:'s'},{sig:'ن'+CHD,cle:'c'}],
         mots:shuffle([...shuffle(parSigne[SUK]).slice(0,n).map(m=>({w:m.w,cle:'s'})),
@@ -356,17 +320,16 @@ function buildWords(U){
   return q;
 }
 
-/* ══ LEÇON 8 « Écrire des mots » v2 (10/08 soir) — écriture GUIDÉE (tuile fausse
-   refusée + indice au 2e refus), un écran par mot, du plus court au plus long. 7 unités. ══ */
+/* Leçon 8 « Écrire des mots » : écriture guidée, un écran par mot, du plus court au plus long.
+   (journal : generateurs.js · leçons 8 et 9 v2) */
 function buildWrite(U){
   return U.words.slice()
     .sort((a,b)=>splitUnits(a.w).length-splitUnits(b.w).length)
     .map(w=>({type:'assemble',w,graded:true,mute:true}));
 }
 
-/* ══ LEÇON 9 « Bilan » v2 (10/08 soir) — chaque acquis testé UNE fois, par le JUMEAU
-   de sa leçon : lettre (L1-2) → nom (L2-3) → forme déguisée (L3) → syllabe (L5) →
-   prolongation (L6) → lecture de mots (L7) → écriture guidée (L8). 10 écrans, 7 unités. ══ */
+/* Leçon 9 « Bilan » : chaque acquis testé une fois, par le jumeau de sa leçon
+   (lettre → nom → forme → syllabe → prolongation → mot lu → mot écrit). */
 function buildBilan(U){
   const q=[], L=shuffle(U.letters.slice());
   const l=i=>L[i%L.length];
@@ -414,16 +377,9 @@ function buildReview(U){
     const others=shuffle(pool.filter(x=>x!==L)).slice(0,2);
     return balancePos(shuffle([L,...others]).map(x=>({ar:glyph(x),key:x})),L);
   };
-  /* ═══ PLAFOND 15 ET BASCULE VERS LE MOT (Myriam, 13/08) ═══
-     L'ancienne révision prenait TOUTES les lettres précédentes × 3 positions : elle enflait
-     d'unité en unité (17 · 26 · 35 · 44 · 53 · 62 écrans) et personne n'atteignait la fin.
-     Deux règles la remplacent :
-       ① jamais plus de REV_MAX écrans — la durée d'une leçon normale ;
-       ② la part du MOT (le lire, l'écrire) grandit à chaque unité, celle du glyphe fond :
-          U2 5/15 · U3 7/15 · U4 9/15 · U5 11/15 · U6 13/15 · U7 15/15.
-     En unité 7, la révision n'est donc plus QUE de la lecture et de l'écriture de mots.
-     Ce qui reste de lettres est tiré au sort PONDÉRÉ par les erreurs (weightedShuffle) :
-     plafonner ne fait pas perdre la couverture, ça la concentre là où ça a coincé. */
+  /* ① jamais plus de REV_MAX écrans ; ② la part du mot grandit à chaque unité
+     (U2 5/15 … U7 15/15), le reste des lettres est tiré au sort pondéré par les erreurs.
+     (journal : generateurs.js · plafond 15 de la Révision) */
   const REV_MAX=15;
   const assezDeMots=words.length>=3;
   const nMots=assezDeMots?Math.min(REV_MAX,5+2*Math.max(0,ui-1)):0;

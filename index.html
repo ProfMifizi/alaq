@@ -18,30 +18,25 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ALAQ">
-<!-- LES POLICES SONT DANS LE DÉPÔT, PLUS CHEZ GOOGLE (19/08/2026, décision de Myriam).
-     Trois raisons, dans cet ordre : (1) l'arabe est JUSTE dès la première milliseconde —
-     le tatweel -0.22em, la géométrie des jetons et les 100 tracés LT (trace-lettres.js) sont calibrés sur
-     Noto Naskh, et un repli système les fausse tous ; (2) un appel tiers de moins à
-     chaque chargement, donc un gain RGPD ; (3) sans ça un paquet natif ouvert hors
-     réseau perdait toute sa typographie. Fichiers produits par outils/rapatrier-polices.js.
-     Noto Naskh Arabic et Nunito : SIL Open Font License. -->
+<!-- Polices servies par le dépôt, jamais par Google : l'arabe est calibré sur Noto Naskh (tatweel,
+     jetons, tracés LT de trace-lettres.js), un appel tiers de moins (RGPD), typographie intacte hors
+     réseau. Produites par outils/rapatrier-polices.js ; Noto Naskh Arabic et Nunito sous SIL OFL. -->
 <link rel="stylesheet" href="polices/polices.css">
 <link rel="stylesheet" href="app.css">
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ⚠️ AVANT TOUT AFFICHAGE : sans ça l'app apparaît en sombre puis bascule — un
-   clignotement que personne ne devrait subir, et surtout pas un œil fragile. */
+/* ⚠️ avant tout affichage : sinon l'app apparaît en sombre puis bascule, un clignotement. */
 (function(){try{var h=document.documentElement;
   if(localStorage.getItem('alaq_theme')==='clair')h.classList.add('clair');
   if(localStorage.getItem('alaq_gtexte')==='1')h.classList.add('gtexte');
-  h.classList.add('gros');   // les écrans de glisser sont EN GRAND pour tout le monde
+  h.classList.add('gros');   // les écrans de glisser sont en grand pour tout le monde
 }catch(e){}})();
 </script>
   <script type="module" crossorigin src="./u8/u8.js"></script>
   <link rel="stylesheet" crossorigin href="./u8/u8.css">
 </head>
 <body>
-<!-- ===== LE CIEL DE LA JOURNÉE (ciel-v1) — derrière toute l'app, sur l'accueil seul ===== -->
+<!-- Le ciel de la journée (ciel-v1) : derrière toute l'app, visible sur l'accueil seul -->
 <div id="skyWrap" aria-hidden="true">
   <div id="skyBg"></div>
   <div id="skyStars"></div>
@@ -138,16 +133,14 @@
   <div class="big" id="fin-icon" style="display:none">✓</div>
   <h2 id="fin-title">Leçon terminée !</h2>
   <div class="fin-score"><span class="fs-v" id="fin-acc">100%</span><span class="fs-l">de réussite</span></div>
-  <!-- Les trois cases (Myriam, 14/08 : « ce type d'écran devrait être celui de chaque fin de
-       leçon » + « je préfère avoir les trois petites box… le nombre de graines, le pourcentage
-       de réussite et l'assiduité »). Elles remplacent le grand pourcentage seul. -->
+  <!-- Les trois cases de fin : graines, réussite, assiduité (remplies par constance.js). -->
   <div id="fin-cases"></div>
   <div id="fin-extra"></div>
   <span id="fin-xp" style="display:none"></span>
   <button class="cta" id="fin-cta" style="max-width:300px;margin-top:14px" onclick="closeFinish()">CONTINUER</button>
 </div>
 
-<!-- La traduction du mot touché (13/08) — un seul bandeau pour toute l'app -->
+<!-- La traduction du mot touché : un seul bandeau pour toute l'app -->
 <div class="motbulle" id="motbulle">
   <div class="mb-h"><button class="mb-spk" id="mbSpk" aria-label="Réécouter"></button>
     <div class="mb-ar" id="mbAr"></div>
@@ -279,9 +272,8 @@
   </div>
 </div>
 
-<!-- L'ÉCRAN D'ASSIDUITÉ (refondu le 14/08 sur les demandes de Myriam : plus d'emoji, le verset
-     ENTIER, la traduction ENTIÈRE, et la récitation). Les épis sont désormais les icônes du
-     registre (icone-tb-epi) — jamais 🌾/🌱, qui se peignent tout seuls et ignorent le thème. -->
+<!-- L'écran d'assiduité : le verset 2:261 entier, sa traduction entière, sa récitation.
+     ⚠️ jamais d'emoji 🌾/🌱 : ils se peignent seuls et ignorent le thème. -->
 <div class="finish" id="streak">
   <div style="font-weight:900;color:var(--gold2);margin-top:6px"><span id="streakNum" style="font-size:46px">1</span> <span id="streakUnit" style="font-size:18px">jour</span></div>
   <img class="streak-plant" src="images-app-alaq/epi-pousse-anime-v1.webp" alt="" width="210" height="210">
@@ -293,9 +285,8 @@
 </div>
 
 <div class="finish" id="obAccount">
-  <!-- ⚠️ le motif .ic2 deux-fichiers, comme les autres icônes d'écran : la variante
-       -clair existait sur le disque depuis le 20/08 mais n'était branchée nulle part —
-       l'icône crème s'effaçait sur le parchemin du mode clair (contre-expertise 23/08) -->
+  <!-- ⚠️ .ic2 à deux fichiers (nuit / -clair), comme les autres icônes d'écran : sinon l'icône crème
+       s'efface sur le parchemin du mode clair. (journal : index.html · icône du compte en mode clair) -->
   <span class="ic2"><img class="o-nuit" data-ico="ecran-compte" src="images-app-alaq/icone-ecran-compte.png" alt="" style="width:88px;height:auto"><img class="o-jour" src="images-app-alaq/icone-ecran-compte-clair.png" alt="" style="width:88px;height:auto"></span>
   <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
   <p id="obQuote" style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
@@ -353,187 +344,95 @@
   <button class="bn" id="bn-params" onclick="showTab('params')"><span class="bi"><img class="bni" data-ico="menu-parametres" src="images-app-alaq/icone-menu-parametres.png" alt=""></span><span class="bn-lab">Paramètres</span></button>
 </nav>
 
-<!-- ═══════════════════════════════════════════════════════════════════════
-     LES UNITÉS 1 À 7 — SCRIPT CLASSIQUE, ET IL DOIT RESTER AVANT LE BLOC
-     SUIVANT. Généré depuis src/content/units/unit-0N.json par
-     `node outils/semer-unites.mjs`. Un script classique s’exécute pendant
-     l’analyse du document : tout ce qui lit une unité plus bas — la
-     dérivation des tracés, les clés de progression, le premier rendu de
-     l’accueil — le fait de façon SYNCHRONE et le trouve donc en place.
-     ⛔ NI `defer`, NI `type="module"` : les deux le repousseraient APRÈS ce
-     bloc, et les unités 1 à 7 seraient absentes au moment où on les lit.
-     ══════════════════════════════════════════════════════════════════ -->
+<!-- Unités 1 à 7, générées depuis src/content/units/unit-0N.json (node outils/semer-unites.mjs).
+     Classique, ni defer ni module : tout ce qui suit les lit de façon synchrone. -->
 <script src="content/unites.js"></script>
-<!-- ═══════════════════════════════════════════════════════════════════════
-     LE LOGO ET LE REGISTRE DES ICÔNES — assets.js (06-07/09/2026), MÊME RÈGLE :
-     script classique chargé ICI, avant le grand script qui lit LOGO, ICONES
-     et ico() dès le premier rendu. ⛔ NI `defer`, NI `type="module"`.
-     Une icône se nomme dans assets.js, jamais ici (registre des icônes).
-     ══════════════════════════════════════════════════════════════════ -->
+<!-- Logo et registre des icônes (LOGO, ICONES, ico) : classique, lus dès le premier rendu. Voir l'en-tête d'assets.js. -->
 <script src="assets.js"></script>
-<!-- ═════════════════════════════════════════════════════════════════
-     LE MOTEUR DE TRACÉ CANVAS — trace-lettres.js (07/09/2026), MÊME RÈGLE :
-     script classique chargé ICI, avant le grand script qui lit LT de façon
-     synchrone (dérivation strokes/strokesPos) et appelle setupTrace() à
-     chaque écran « À toi d'écrire ». ⛔ NI `defer`, NI `type="module"`.
-     Un tracé se corrige dans trace-lettres.js (table LT), jamais ici.
-     ═════════════════════════════════════════════════════════════════ -->
+<!-- Moteur de tracé (LT, setupTrace) : classique, LT est lu de façon synchrone. Voir l'en-tête de trace-lettres.js. -->
 <script src="trace-lettres.js"></script>
-<!-- ══════════════════════════════════════════════════════════════════════════
-     LES DONNÉES — donnees.js (14/09/2026) : l'alphabet, les harakāt, la Fātiḥa,
-     les douze unités, les sourates et leur programme, plus les outils arabes.
-     Script CLASSIQUE chargé ICI : il lit content/unites.js et LT (trace-lettres.js)
-     AU CHARGEMENT, et le grand script lit UNITS de façon synchrone dès le premier
-     rendu. ⛔ NI `defer`, NI `type="module"`.
-     ══════════════════════════════════════════════════════════════════════════ -->
+<!-- Données et outils arabes : classique, UNITS est lu au premier rendu ; il lit lui-même
+     content/unites.js et LT au chargement. Voir l'en-tête de donnees.js. -->
 <script src="donnees.js"></script>
-<!-- LES GÉNÉRATEURS DES DISQUES — generateurs.js (14/09/2026) : les neuf
-     constructeurs qui fabriquent la file d'écrans d'une leçon, et leurs outils de
-     tirage. Script CLASSIQUE : parcours.js les référence dans sa table des disques,
-     évaluée au premier rendu, et progression.js reconnaît un disque par IDENTITÉ de
-     fonction. ⛔ NI `defer`, NI `type="module"`. -->
+<!-- Générateurs des disques : classique, parcours.js les référence au premier rendu et progression.js
+     reconnaît un disque par identité de fonction. Voir l'en-tête de generateurs.js. -->
 <script src="generateurs.js"></script>
-<!-- LE SON : la table et la porte. CLASSIQUE et pas module — la table est écrite par le
-     grand script au chargement, et _sndGen est un nombre partagé par quatre fichiers.
-     Voir l'en-tête de son.js. -->
+<!-- Le son, une table et une porte : classique, la table est écrite au chargement par plusieurs
+     scripts et _sndGen est un nombre partagé. Voir l'en-tête de son.js. -->
 <script src="son.js"></script>
 
-<!-- ═════════════════════════════════════════════════════════════════
-     LA PERSISTANCE ET L'ÉTAT LOCAL — progression.js (07/09/2026), MÊME RÈGLE :
-     script classique chargé ICI, avant le grand script qui lit S et appelle
-     save()/saveLocal()/dkey()/unitUnlocked() partout, dès le premier rendu.
-     ⛔ NI `defer`, NI `type="module"`.
-     Une clé de progression se corrige dans progression.js, jamais ici.
-     ═════════════════════════════════════════════════════════════════ -->
+<!-- Persistance et état local (S, save, dkey, le nuage) : classique, S est lu dès le premier rendu.
+     Voir l'en-tête de progression.js. -->
 <script src="progression.js"></script>
-<!-- ═════════════════════════════════════════════════════════════════
-     CE QUE L'APP RAPPORTE — signalements.js (16/09/2026, sous-lot 6) : le drapeau ⚑
-     que l'élève lève, les tickets 🤖 que l'app dépose toute seule, et LES DEUX
-     CAPTEURS D'ERREUR. Script classique, ⛔ ni `defer` ni `type="module"`.
-
-     ⚠️ IL EST POSÉ ICI, LE PLUS TÔT POSSIBLE, ET C'EST TOUT L'INTÉRÊT. Ses deux
-     capteurs ne voient QUE ce qui s'exécute APRÈS eux. Jusqu'au 16/09 ils
-     s'installaient à la ligne 1324 du grand script : aveugles à ses 874 premières
-     lignes ET aux dix scripts classiques précédents — donc à une erreur qui
-     tuerait la page avant l'accueil, la panne « page blanche », celle qui ne
-     laisse aucune trace au pupitre. Posés ICI, ils couvrent parcours.js, les
-     quatre ui/, revision.js et tout le grand script.
-     ⚠️ ET PAS PLUS HAUT : ses deux files de réessai appellent sigPoster/tikPoster,
-     qui lisent SUPA_URL et SUPA_ANON — déclarés par progression.js, juste au-dessus.
-     ⚠️ ET AVANT constance.js, toujours : les capteurs doivent être debout avant que
-     le roulement du jour (majJour, rollConstance, la migration v7) ne s'exécute.
-     Un signalement, un ticket : ça se corrige LÀ-BAS.
-     ═════════════════════════════════════════════════════════════════ -->
+<!-- Signalements ⚑, tickets 🤖 et les deux capteurs d'erreur. Classique, et posé le plus tôt possible :
+     les capteurs ne voient que ce qui s'exécute après eux. ⚠️ pas plus haut (ses files de réessai lisent
+     SUPA_URL de progression.js), et toujours avant constance.js. Voir l'en-tête de signalements.js.
+     (journal : index.html · capteurs d'erreur posés trop tard) -->
 <script src="signalements.js"></script>
-<!-- L'orchestration des disques : la table des neuf disques types et discsFor(u),
-     l'aiguillage qui décide QUELS disques chaque unité montre et dans quel ORDRE.
-     Script CLASSIQUE, ni defer ni module : discsFor est appelé de façon SYNCHRONE
-     par showTab('home') à la fin du grand script. Et sa table est PARESSEUSE, parce
-     qu'elle référence dix constructeurs qui vivent, eux, dans index.html — la
-     remontée des `function` ne franchit pas la frontière d'un script.
-     Voir l'en-tête de parcours.js pour le contrat complet. -->
+<!-- Orchestration des disques (discsFor) : classique, showTab('home') l'appelle de façon synchrone.
+     Voir l'en-tête de parcours.js. -->
 <script src="parcours.js"></script>
-<!-- ═════════════════════════════════════════════════════════════════
-     LES ÉCRANS D'INTERFACE — ui/ (12/09/2026), MÊME RÈGLE : quatre scripts
-     classiques chargés ICI, sous parcours.js et AVANT le grand script, dont la
-     dernière ligne — showTab('home') → renderHome() — peint l'accueil de façon
-     SYNCHRONE. C'est ce qui le peint sans scintillement, avant tout module ES.
-     ⛔ NI `defer`, NI `type="module"`. Ils ne lisent RIEN de ce fichier au
-     chargement : tout se résout à l'appel (l'en-tête de chacun dit son contrat,
-     le banc outils/verifier-interface.mjs le garde).
-       ui/accueil.js     l'accueil : le ciel, les disques, le bandeau d'unité
-       ui/navigation.js  showTab, l'aiguillage des cinq onglets
-       ui/parametres.js  Paramètres et Profil, les modales du rang et des succès
-       ui/reviser.js     le Cours (accordéons, résumés) et le hub Réviser
-     Un écran de ces quatre familles se corrige LÀ-BAS, jamais ici.
-     ═════════════════════════════════════════════════════════════════ -->
+<!-- Écrans d'interface : accueil, navigation (showTab), Paramètres et Profil, Cours et peinture du hub
+     Réviser. Classiques : la dernière ligne du grand script peint l'accueil de façon synchrone, sans
+     scintillement. Ils ne lisent rien de ce fichier au chargement ; voir l'en-tête de chacun. -->
 <script src="ui/accueil.js"></script>
 <script src="ui/navigation.js"></script>
 <script src="ui/parametres.js"></script>
 <script src="ui/reviser.js"></script>
-<!-- ═════════════════════════════════════════════════════════════════
-     LE HUB RÉVISER — revision.js (16/09/2026), MÊME RÈGLE : un script classique
-     chargé ICI, sous ui/reviser.js et AVANT le grand script. Il SERT AU PREMIER
-     RENDU (showTab('home') appelle motBulleOff() en première ligne — le seul appel
-     nu du premier rendu ; Paramètres lit qariCur() au doigt) : différé, l'accueil
-     resterait vide à vie — mesuré. ⛔ NI `defer`, NI `type="module"`, et la balise reste
-     EXACTEMENT ainsi (outils/inventaire.js relit VOIX et NOMS_ALLAH par elle).
-     Il ne lit au chargement que ce que les douze scripts ci-dessus déclarent
-     (S, saveLocal, inscrireLeSon, FATIHA/SOURATES) — rien de ce fichier.
-       revision.js   le Qorān et ses 17 voix, les cinq boîtes, les séances de
-                     vocabulaire, de grammaire et de lettres, les Noms d'Allah,
-                     launchQuranReview et finishReview
-     Une séance de révision, un écran du Qorān, une voix : ça se corrige LÀ-BAS.
-     Le banc outils/verifier-revision.mjs garde le contrat.
-     ═════════════════════════════════════════════════════════════════ -->
+<!-- Hub Réviser (le Qorān et ses voix, les boîtes, les séances, les Noms d'Allah) : classique, il sert au
+     premier rendu (showTab appelle motBulleOff) ; différé, l'accueil resterait vide. ⚠️ balise exacte,
+     relue par outils/inventaire.js. Voir l'en-tête de revision.js. -->
 <script src="revision.js"></script>
-<!-- ═════════════════════════════════════════════════════════════════
-     LA CONSTANCE — constance.js (16/09/2026, sous-lot 6) : les rangs, les
-     succès, les graines, l'objectif du jour, la série, le Ghufrān, le passage
-     de minuit. Script classique chargé ICI, sous revision.js et AVANT le grand
-     script. ⛔ NI `defer`, NI `type="module"`, et la balise reste EXACTEMENT
-     ainsi : sept outils la relisent par la même expression.
-     ⚠️ ET ICI, PAS PLUS HAUT : garderLaRevision() (vite.config.mjs) exige que
-     le dernier script AVANT revision.js soit ui/reviser.js — s'insérer entre
-     les deux ferait échouer `npm run build`.
-
-     POURQUOI UN SCRIPT CLASSIQUE — MESURÉ, PAS SUPPOSÉ :
-     ① `refreshStats()` appelle `updRankBadge()` SANS garde (ui/accueil.js:45),
-        et le grand script l'appelle au premier niveau, juste avant sa dernière
-        ligne `showTab('home')`. Différé, ce bloc lève ReferenceError là et TOUT
-        ce qui suit meurt : l'accueil ne se peint jamais.
-     ② `feteJourPending` est un `let` RÉASSIGNÉ par src/player/ (un module) et
-        par revision.js. Un module ne partage pas une valeur, il la COPIE.
-     ③ Deux gestes EN LIGNE du HTML statique plus haut (le haut-parleur des 7 épis
-        et CONTINUER) appellent ces noms : ce HTML est peint avant le premier script.
-
-     ⚠️ signalements.js, son frère de lot, est chargé BIEN PLUS HAUT (sous
-     progression.js) : ses deux capteurs d'erreur doivent être debout avant tout
-     le reste — y compris avant le roulement du jour d'ici.
-     Un rang, un succès, une graine, la série, le Ghufrān : ça se corrige LÀ-BAS.
-     Le banc outils/verifier-constance.mjs garde les deux contrats.
-     ═════════════════════════════════════════════════════════════════ -->
+<!-- Constance (rangs, succès, graines, série, Ghufrān, passage de minuit) : classique, refreshStats()
+     appelle updRankBadge() sans garde au premier rendu. ⚠️ balise exacte, relue par les outils ; et ici,
+     pas entre ui/reviser.js et revision.js (garderLaRevision() refuserait le build).
+     Voir l'en-tête de constance.js. (journal : index.html · constance.js reste classique) -->
 <script src="constance.js"></script>
+<!-- Comptes et entrée dans l'app (connexion, verrou, onboarding, prénom, effacement, code de sauvegarde).
+     Classique : les minuteries de fin du grand script lancent onbStart et obLoginOpen de comptes.js, et
+     des gestes en ligne du HTML l'appellent ; en module, la course n'est pas garantie et une panne ne
+     laisse aucune trace. ⚠️ seule place mesurée sûre : sous constance.js, juste avant le grand script.
+     Voir l'en-tête de comptes.js. (journal : index.html · comptes.js reste classique) -->
+<script src="comptes.js"></script>
 <script>
 
-/* ═══ LES DONNÉES (l'alphabet, les harakāt, la Fātiḥa, les douze unités, les sourates)
-   et les OUTILS ARABES vivent dans alaq-vercel-static/donnees.js depuis le 14/09/2026 —
-   un script CLASSIQUE chargé plus haut, avant celui-ci : UNITS est lu de façon SYNCHRONE
-   dès le premier rendu. Corriger un mot des unités 1 à 7 se fait dans
-   src/content/units/unit-0N.json, puis `node outils/semer-unites.mjs`. ═══ */
+/* ═══ LA CARTE : ce qui vit hors de ce script (chaque fichier dit son contrat dans son en-tête) ═══
+   · content/unites.js    les unités 1 à 7, générées (node outils/semer-unites.mjs)
+   · assets.js            LOGO, ICONES, ico, icoImg
+   · trace-lettres.js     LT, setupTrace
+   · donnees.js           l'alphabet, les harakāt, FATIHA, UNITS, SOURATES, les outils arabes
+   · generateurs.js       les constructeurs de disques (buildAlphabet … buildReview), shuffle, mcq
+   · son.js               SONS, jouer, speak, sayLetterName, stopAudio, playSfx, SND
+   · progression.js       S, DEF, save, saveLocal, dkey, unitUnlocked ; le nuage (SB, CLOUD, cloudPull,
+                          cloudInit), dont localStorage reste la source immédiate
+   · signalements.js      le drapeau ⚑, les tickets 🤖, les deux capteurs d'erreur
+   · parcours.js          discsFor et la table paresseuse des disques
+   · ui/accueil.js        renderHome, refreshStats, setBanner, discTip
+   · ui/navigation.js     showTab
+   · ui/parametres.js     renderParams, renderProg (le Profil), showRank, showSucces
+   · ui/reviser.js        renderCours, RESUME_GRAM, renderReviser
+   · revision.js          le hub Réviser : le Qorān et ses voix, startReview, finishReview, NOMS_ALLAH
+   · constance.js         rangs, succès (checkBadges), graines, objectif du jour, série, Ghufrān, majJour
+   · comptes.js           connexion, verrou, onboarding (onbStart), prénom, effacement (doReset et
+                          l'appui long sur le logo), code de sauvegarde
+   · src/player/index.js  module : startDisque, renderStep, ctaClick, advance, finishDisque, ecranRate
+   · src/ecrans/index.js  module : les gabarits des unités 1 à 7 (setupDrag, asmSaisie, setupRead,
+                          objectifAtteint)
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   @U8 — L'UNITÉ 8 EST UN MODULE (POC-1, 18/08/2026).
+   Restent ici, entre autres : l'état du joueur (let), l'hôte de l'unité 8, « Plus de cœurs », escHTML,
+   toast, lecteurPret, les bulles, la hamza des leçons, les tutoriels, fatihaPct, returnFromPlayer,
+   BUILD et VERSION, le démarrage.
+   ⚠️ les scripts classiques partagent la portée lexicale globale : ce script lit ces noms nus, et les
+   fichiers ci-dessus ne lisent d'ici qu'à l'appel, jamais au chargement. ═══ */
 
-   Son moteur — 115 écrans, 9 disques, 14 mots — vivait ici, généré depuis
-   previews/_u8/ par outils/integrer-u8.js et recollé dans ce fichier à chaque
-   correction. Il vit désormais dans src/units/unit-8/, en modules ES, chargé
-   par le <script type="module"> posé en fin de page. Il n'y a plus de bloc
-   généré : corriger un mot se fait dans src/units/unit-8/donnees/mots.js, et
-   c'est tout — plus de commande à relancer, plus de correction qui disparaît.
+/* ═══ L'UNITÉ 8 EST UN MODULE (src/units/unit-8/, importé par src/entree.js) ═══
+   Ce script publie son contrat (__alaqHoteU8) et une porte d'enregistrement ; l'unité s'annonce à
+   l'arrivée de son module. Sûr parce qu'un module s'exécute après ce script et avant DOMContentLoaded,
+   et que rien du premier rendu (refreshStats, showTab('home')) ne touche à l'unité 8.
+   (journal : index.html · l'unité 8 devient un module) ═══ */
 
-   CE QUI RESTE ICI, ET C'EST TOUT : le talon, le CONTRAT, et l'enregistrement.
-
-   ⚠️ LE SENS DU LIEN EST INVERSÉ, ET C'EST CE QUI REND LE DIFFÉRÉ SÛR. Un
-   <script type="module"> s'exécute forcément APRÈS ce script-ci. Hier l'app
-   lisait `U8` de haut en bas ; aujourd'hui l'app publie son contrat, puis
-   l'unité s'annonce quand elle arrive. Mesuré avant d'être adopté : le seul
-   travail synchrone de l'app au chargement est `refreshStats()` (S.streak, le
-   rang, S.hearts) et `showTab('home')` (libellés pris dans U8_PLAN, `build:`
-   PARESSEUX) — rien n'y touche à l'unité 8. Et un module s'exécute AVANT
-   DOMContentLoaded, donc avant cloudInit() et contentPull().
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ── LE TALON ──────────────────────────────────────────────────────────────
-   ⚠️ `renderStep` appelle `U8.repos()` à CHAQUE écran, U8 ou non. Depuis le
-   14/09 renderStep vit dans le MÊME bundle que U8 (src/player/, importé en
-   premier par entree.js) : aucune leçon ne s'ouvre plus avant l'arrivée du
-   module (lecteurPret). Le talon reste nécessaire : le lecteur se publie à SA
-   propre évaluation, et si entree.js échouait ensuite — avant de poser U8 —
-   renderStep tournerait sur ce talon. Un talon inerte, jamais `null`.
-   ⚠️ Il garde aussi vraie la garde `typeof U8!=='undefined'` dont dépend
-   outils/sons-des-lecons.js, qui rejoue ce fichier PAR TRANCHES dans un bac à
-   sable : sa tranche « AUDIO » ne contient pas cette déclaration. */
+/* Le talon : un U8 inerte, jamais null, tant que le module n'est pas arrivé (ou s'il échoue).
+   parcours.js, revision.js et ui/reviser.js lisent U8 ; disque() lève alors un message clair. */
 const U8_TALON = {
   disque(k){ throw new Error('unité 8 : module non chargé (disque '+k+')'); },
   dessine(){ throw new Error('unité 8 : module non chargé'); },
@@ -541,300 +440,70 @@ const U8_TALON = {
 };
 let U8 = U8_TALON;
 
-/* ── LE CONTRAT — ce que l'unité 8 attend de l'app, et rien d'autre ────────
-   ⚠️ L'ÉTAT PASSE PAR DES ACCESSEURS, JAMAIS PAR UNE COPIE. `S` est réaffecté
-   par cloudPull, par la réinitialisation et par la restauration d'un code ;
-   `QUEUE` et `MISSED` repartent à zéro à chaque leçon. Une référence capturée
-   au moment de l'enregistrement serait donc MORTE au premier retour du nuage :
-   l'unité écrirait ses cœurs dans un objet jeté, et MISSED retomberait dans la
-   boucle de rattrapage du 17/08. Un getter lit la variable À CHAQUE appel.
-   Les FONCTIONS, elles, sont capturées : une `function` déclarée ne change pas
-   d'identité. */
-/* ═══ LE VERDICT NÉGATIF (ecranRate, l'arbitre des seize exercices du registre et des écrans
-   classiques) vit dans src/player/index.js depuis le 14/09/2026 — un MODULE, importé en premier
-   par src/entree.js ; le module se publie LUI-MÊME sur window (sa fin de fichier). Son verrou _verdictEnCours l'a suivi. ═══ */
+/* Le contrat de l'unité 8. ⚠️ l'état passe par des accesseurs, jamais par une copie : S est réaffecté
+   (cloudPull, réinitialisation, code de sauvegarde), QUEUE et MISSED repartent à zéro à chaque leçon.
+   Une référence capturée serait morte : cœurs écrits dans un objet jeté, MISSED retombé dans la boucle
+   de rattrapage du 17/08. Les fonctions déclarées, elles, peuvent être capturées. */
 
 window.__alaqHoteU8 = {
-  /* les primitives — toutes déclarées par un script CLASSIQUE chargé avant celui-ci, donc
-     sûres en raccourci. `toc` les a rejointes le 15/09 en revenant de src/ecrans (module)
-     vers son.js (classique) : il n'a plus besoin de son accesseur. */
+  /* déclarées par des scripts classiques chargés avant (goNoHearts : plus bas, hissée), donc sûres en raccourci */
   audioBeni, playSfx, save, goNoHearts, stopAudio, icoImg, toc,
-  /* 🔴 15/09 — CINQ DE CES PRIMITIVES VIVENT DANS src/ecrans/ (un MODULE, exécuté APRÈS ce
-     script). Écrites en raccourci, comme les autres, elles seraient capturées au chargement :
-     ReferenceError, et tout ce script mourrait avant même l'accueil. Des accesseurs les
-     résolvent à l'appel — même remède que pour `advance` au sous-lot 1, et l'unité 8
-     (pont/hote.js) les lit à SON initialisation, après les écrans. */
+  /* ⚠️ ces quatre-là vivent dans src/ecrans, un module exécuté après ce script : en raccourci, capturées
+     au chargement, elles lèveraient ReferenceError et tueraient ce script avant l'accueil. Des accesseurs
+     les résolvent à l'appel ; l'unité 8 les lit à son initialisation.
+     (journal : index.html · modules capturés par l'hôte de l'unité 8) */
   get objectifAtteint(){ return objectifAtteint; },
   get elogeHTML(){ return elogeHTML; },
   get draggable(){ return draggable; },
   get dansRectMarge(){ return dansRectMarge; },
-  /* 🔴 14/09 — `advance` vit dans src/player/ (un MODULE, exécuté APRÈS ce script). Écrit ici
-     en raccourci, comme les autres, il serait capturé au chargement : ReferenceError, et tout
-     ce script mourrait avant même l'accueil. Un accesseur le résout à l'appel — comme l'état
-     juste en dessous — et l'unité 8 (pont/hote.js) le lit à SON initialisation, après le lecteur
-     (src/entree.js l'importe en premier). */
+  /* … et advance, pour la même raison : il vit dans src/player, importé en premier par src/entree.js */
   get advance(){ return advance; },
-  /* l'état, LU À CHAQUE APPEL */
+  /* l'état, lu à chaque appel */
   get S(){ return S; },  get QUEUE(){ return QUEUE; },  get qi(){ return qi; },
   get MISSED(){ return MISSED; },  get curU(){ return curU; },
   get _sndGen(){ return _sndGen; },
   get REVIEW(){ return REVIEW; },  get RECHARGE(){ return RECHARGE; },
   get EXAM(){ return EXAM; },      get inRetry(){ return inRetry; },
-  /* les deux ÉCRITURES : un module ne peut pas affecter une variable d'ici */
+  /* les deux écritures */
   compterFaute(){ wrongCount++; gramFaute(); },
   poserSonCourant(a){ _curAudio = a; },
-  /* ── PERDRE UN CŒUR (unité 9, 23/08) ──────────────────────────────────────
-     Même idiome qu'aux 3 sites classiques d'index.html (fsTap, asmTaper, tileTap)
-     et qu'à ctaClick (src/player/) : ni la
-     révision ni la reprise « recharge » ne coûtent de cœur, et les deux
-     affichages suivent. Une primitive à part plutôt qu'un doublon du bloc
-     `graded` classique : les exercices du registre tiennent leur PROPRE
-     verdict (comme l'unité 8), le lecteur ne fait qu'exposer le geste.
-     ⚠️ NE PAS toucher `cta.onclick` ici — ce cœur peut se perdre en PLEIN
-     MILIEU d'un exercice à plusieurs manches, bien avant que CONTINUER ne
-     s'allume : river le bouton sur `goNoHearts` à cet instant figerait une
-     décision PÉRIMÉE (l'écran se termine quand même, et devient injouable
-     à sa propre réussite). La bascule à 0 cœur se décide dans
-     `objectifAtteint()`, au moment où le bouton s'allume — jamais avant. */
+  /* Perdre un cœur passe par l'arbitre ecranRate (src/player) : ni la révision ni la reprise « recharge »
+     n'en coûtent. ⚠️ ne pas toucher cta.onclick ici : ce cœur peut se perdre en plein milieu d'un exercice
+     à plusieurs manches, et river le bouton sur goNoHearts figerait une décision périmée. À 0 qatra,
+     ecranRate arrête lui-même l'exercice (repos puis goNoHearts) ; objectifAtteint ne décide que la
+     cible de CONTINUER sur un écran réussi. */
   coeur(){ ecranRate(); },
 };
 
-/* ── L'ENREGISTREMENT ─────────────────────────────────────────────────────
-   C'est ici que se font les deux branchements qui vivaient jusqu'ici en clair
-   dans ce fichier : les 14 mots dans le vocabulaire, et leurs mp3 dans AUDIO.
-   Ils ne sont pas retapés — ils viennent de U8.mots, qui EST
-   src/units/unit-8/donnees/mots.js. Une chedda corrigée là-bas l'est ici. */
+/* L'enregistrement, appelé par src/entree.js à l'arrivée du module : les mots viennent de U8.mots
+   (src/units/unit-8/donnees/mots.js), jamais retapés ici. */
 let _u8Branchee = false;
 window.__alaqEnregistrerU8 = function(api){
   if (_u8Branchee) return;            /* idempotent : deux poses ne doublent pas le vocabulaire */
   _u8Branchee = true;
   U8 = api;
   const m = U8.mots;
-  /* les 14 mots entrent au vocabulaire — forme de CITATION, donc indéfinie
-     (قَلَمٌ et non الْقَلَمُ) : c'est ainsi qu'un vocabulaire se cite.
-     ⚠️ `_adopteVocab` remplacerait cette graine s'il existait des lignes
-     unite_no=8 dans Supabase — il n'y en a pas, et sa garde « pas de lignes :
-     sa graine reste » la protège. */
+  /* les mots entrent au vocabulaire en forme de citation, indéfinie (قَلَمٌ et non الْقَلَمُ) */
   const U = UNITS[7];
   Object.keys(m).forEach(function(k){ U.words.push({w:m[k].nu, fr:m[k].fr, say:m[k].tr}); });
-  /* et leurs deux enregistrements : le mot nu, et le mot défini.
-     ⚠️ Nom SANS `-f` : `jouerMot` essaie d'abord `<nom>-f.mp3` puis celui-ci. */
+  /* et leurs deux sons : le mot nu et le mot défini */
   Object.keys(m).forEach(function(k){
     inscrireLeSon(m[k].nu ,'mot-'+m[k].an);
     inscrireLeSon(m[k].def,'mot-'+m[k].ad);
   });
-  /* ── ET LES 10 MOTS DE LA FĀTIḤA QUE LE DISQUE 8 FAIT REPÉRER (05/09) ────
-     Le résumé de Cours les fait entendre. Sans cette ligne, `speak()` ne
-     trouve aucune entrée et part en voix de SYNTHÈSE — interdit pour ce qui
-     enseigne une prononciation, et le timbre robotique désignerait à lui seul
-     les mots « du Qorān » parmi les autres.
-     ⚠️ ON N'ÉCRASE JAMAIS UNE PRISE DÉJÀ EN PLACE : ces graphies portent la
-     finale de leur POSITION dans le verset, et si un vocabulaire venait un jour
-     à citer la même, c'est SA prise qui doit rester (règle « un fichier, un
-     mot »). Le garde coûte trois caractères et ferme la question d'avance. */
+  /* Les mots de la Fātiḥa que le disque 8 fait repérer : le résumé du Cours les fait entendre.
+     ⚠️ on n'écrase jamais une prise en place : un vocabulaire qui citerait la même graphie garde sa
+     prise (un fichier, un mot). (journal : index.html · les mots de la Fātiḥa de l'unité 8) */
   const mv=U8.versets||{};
   Object.keys(mv).forEach(function(w){ if(!SONS[w])inscrireLeSon(w,'mot-'+mv[w]); });
 };
-/* @U8-FIN */
 
-/* ── LES 14 MOTS DE L'UNITÉ 8, PRIS À LA SOURCE ─────────────────────────────
-   05/09 : commentaire corrigé — depuis POC-1 (18/08), previews/_u8/ n'existe
-   plus du tout sur le disque ; il décrivait l'ancien mécanisme, avant que la
-   source ne devienne src/units/unit-8/. Ils ne sont pas retapés : U8.mots EST
-   src/units/unit-8/donnees/mots.js, la même table qui sert aux neuf previews
-   assemblées par `npm run previews`. Une chedda corrigée là-bas l'est ici
-   aussitôt — le contraire de deux vérités qui divergent.
-   Forme de CITATION, donc indéfinie (قَلَمٌ et non الْقَلَمُ) : c'est ainsi qu'un
-   vocabulaire se cite, et c'est la même règle qu'au marfūʿ de l'unité 7.
-   ⚠️ `_adopteVocab` remplacerait cette graine s'il existait des lignes `unite_no=8`
-   dans Supabase — il n'y en a pas, et sa garde « pas de lignes : sa graine reste »
-   la protège. Voir la mémoire vocabulaire-vit-dans-supabase. */
-/* (déplacé dans window.__alaqEnregistrerU8, plus haut : le module arrive après ce script) */
-/* (leurs mp3 sont branchés sur AUDIO plus bas, là où AUDIO existe) */
-
-
-
-/* ═══ LES GÉNÉRATEURS DES DISQUES (buildAlphabet, buildMemo, buildSpot, buildForms,
-   buildHarakat, buildMadd, buildWords, buildWrite, buildBilan, buildReview, et leurs outils
-   shuffle/mcq/balancePos/wordSoundOptions) vivent dans alaq-vercel-static/generateurs.js
-   depuis le 14/09/2026 — un script CLASSIQUE, parce que parcours.js les RÉFÉRENCE dans sa
-   table des disques, évaluée au premier rendu. Ils résolvent letAr, splitUnits et
-   buildVerseTiles (ci-dessous) à l'appel. ═══ */
-
-/* ═══ L'ORCHESTRATION DES DISQUES A DÉMÉNAGÉ (10/09/2026) ═══════════════════
-   La table des neuf disques types, REVISION_DISC / LETTREVSPRO_DISC,
-   buildLettreVsProlong, U8_PLAN, u8Disques(), disqueAVenir(), u9Disques(),
-   u10Disques() et discsFor() vivent désormais dans
-   alaq-vercel-static/parcours.js — un script classique chargé AVANT celui-ci,
-   comme progression.js et trace-lettres.js.
-   ⚠️ CE FICHIER CONTINUE DE LES UTILISER, et il en a le droit : les scripts
-   classiques partagent la même portée lexicale globale. `discsFor`, `disques`
-   et les autres sont des `function` — donc des propriétés de `window` du simple
-   fait d'être déclarées. Seuls `_disques`, `_revisionDisc` et `_u8Disques`
-   (des `let`) restent invisibles depuis `window` : rien ici ne les touche.
-   ⚠️ ET LE SENS INVERSE : parcours.js lit les DIX CONSTRUCTEURS déclarés plus
-   haut dans ce fichier (buildAlphabet … buildReview), mais seulement À L'APPEL.
-   C'est pour cela que la table est paresseuse — voir l'en-tête de parcours.js. */
-
-/* HEARTS_MAX, DEF, load()/save()/saveLocal(), fixOrdreFormes(), S, dkey() et unitValidated()/
-   unitUnlocked() vivent désormais dans progression.js (07/09/2026) — un script classique chargé
-   AVANT celui-ci (voir progression.js pour le contrat : S sur window via un accesseur, les
-   fonctions déjà des propriétés de window du simple fait d'être des `function`). */
-
-/* ===== Phase A : compte & progression dans le nuage (Supabase) =====
-   L'app reste 100 % fonctionnelle hors ligne et sans compte : le localStorage
-   est la source immédiate, le nuage est une copie synchronisée en arrière-plan. */
-/* ═══ LE MOTEUR DE SYNCHRONISATION A DÉMÉNAGÉ (08/09/2026, POC-5 sous-lot 2) ═══
-   SUPA_URL, SUPA_ANON, SB, CLOUD, cloudSaveSoon, cloudSaveNow, cloudPull, cloudInit,
-   cloudResync et les verrous _syncT / _syncPret vivent désormais dans
-   alaq-vercel-static/progression.js — chargé AVANT ce script, comme lui en script
-   classique. Le déplacement est VERBATIM : pas une ligne réécrite, les commentaires
-   des trois incidents (17/08, 28/08, 04/09) compris.
-   ⚠️ CE FICHIER CONTINUE DE LES UTILISER, et il en a le droit : les scripts
-   classiques partagent la même portée lexicale globale. Mesuré dans un vrai
-   navigateur avant le déménagement — ce script LIT `SB`, `CLOUD`, `SUPA_URL`,
-   `SUPA_ANON`, et il ÉCRIT dans `SB` (la ligne du DOMContentLoaded qui recrée le
-   client quand le CDN Supabase est enfin arrivé). C'est la même liaison, pas une copie.
-   ⚠️ `SB` et `CLOUD` sont des `let`/`const` : ils ne sont donc PAS des propriétés de
-   `window`. `cloudPull` et les autres `function`, si. Même règle que pour `S` dans
-   progression.js.
-   Le banc outils/verifier-sync-nuage.mjs suit le bloc dans son nouveau fichier : il le
-   localise par son CONTENU, et rend les mêmes 28 verdicts des deux côtés. */
-async function cloudSendCode(btn){
-  const em=((document.getElementById('cloudEmail')||{}).value||'').trim();
-  if(!SB){toast('Connexion indisponible hors ligne');return;}
-  if(!/^\S+@\S+\.\S+$/.test(em)){toast('E-mail invalide 🤔');return;}
-  if(btn)btn.disabled=true;
-  try{
-    // Compte déjà existant ? `shouldCreateUser:false` n'envoie un code QUE si le
-    // compte existe : c'est la sonde. Si elle échoue, on rappelle sans l'option et
-    // le compte est créé. Le verdict est MÉMORISÉ par e-mail : « Renvoyer un code »
-    // ne refait donc qu'UN seul appel, sinon la limite de débit de Supabase (60 s)
-    // ferait échouer le renvoi.
-    let known;
-    if(window._cloudProbe && window._cloudProbe.em===em){
-      known=window._cloudProbe.known;
-      const r=await SB.auth.signInWithOtp(known?{email:em,options:{shouldCreateUser:false}}:{email:em});
-      if(r&&r.error)throw r.error;
-    }else{
-      const probe=await SB.auth.signInWithOtp({email:em,options:{shouldCreateUser:false}});
-      known=!(probe&&probe.error);
-      if(!known){ const r=await SB.auth.signInWithOtp({email:em}); if(r&&r.error)throw r.error; }
-      window._cloudProbe={em:em,known:known};
-    }
-    window._cloudEmail=em;
-    const z=document.getElementById('cloudStep2'); if(z)z.style.display='block';
-    cloudApplyVerdict(known,em);
-    const ci=document.getElementById('cloudCode'); if(ci)setTimeout(function(){try{ci.focus();}catch(_){}} ,120);
-    toast(known?'Tu as déjà un compte — connecte-toi 🔑':'Code envoyé — regarde tes e-mails 📧');
-  }catch(e){ toast('Envoi impossible — réessaie dans une minute'); }
-  if(btn)btn.disabled=false;
-}
-/* Le verdict de la sonde s'AFFICHE au lieu de passer dans un toast de 2 s (Myriam a
-   refait tout le parcours sans le voir). Compte existant + écran d'inscription visible :
-   l'écran se TRANSFORME — titre « Tu as déjà un compte », citation et cases masquées,
-   il ne reste que l'e-mail et le code. Fonction séparée : le harnais la rejoue. */
-function cloudApplyVerdict(known,em){
-  const k=document.getElementById('cloudKnown'); if(k)k.style.display=known?'block':'none';
-  const nw=document.getElementById('cloudNew'); if(nw)nw.style.display=known?'none':'block';
-  const ec=document.getElementById('cloudMailEcho'); if(ec)ec.textContent=em||'';
-  const vb=document.getElementById('cloudVerifyBtn');
-  if(vb)vb.textContent=known?'🔑 Me reconnecter':'✅ Valider mon e-mail';
-  const oa=document.getElementById('obAccount');
-  if(known&&oa&&oa.classList.contains('on')){
-    const t=document.getElementById('obAccountTitle'); if(t)t.textContent='Tu as déjà un compte';
-    const qd=document.getElementById('obQuote'); if(qd)qd.style.display='none';
-    oa.querySelectorAll('.rgpd-l').forEach(function(l){l.style.display='none';});
-    if(k)k.style.display='none';   // le titre suffit, pas de panneau en plus
-  }
-}
-async function cloudVerify(){
-  const code=((document.getElementById('cloudCode')||{}).value||'').trim();
-  if(!SB||!window._cloudEmail||code.length<6){toast('Saisis le code reçu par e-mail');return;}
-  try{
-    const r=await SB.auth.verifyOtp({email:window._cloudEmail, token:code, type:'email'});
-    if(r&&r.error)throw r.error;
-    CLOUD.user=r.data&&r.data.user;
-  }catch(e){ toast('Code invalide ou expiré'); return; }
-  var _mk=null; try{var _me=document.getElementById('cloudMkt'); if(_me)_mk=_me.checked?1:0;}catch(_){}
-  toast('Connectée, ماشاء الله ✨');
-  try{ await cloudPull(); }catch(_){}          // une erreur ici ne doit PAS faire croire que le code est faux
-  if(_mk!==null){ S.mktOk=_mk; S.mktTs=Date.now(); save(); }  // consentement newsletter, HORODATÉ (preuve RGPD)
-  try{ renderProg(); }catch(_){}
-  verrouLibere();                                 // 17/08 : la connexion lève le verrou
-  const lg=document.getElementById('obLogin');    // « J'ai déjà un compte » : on rejoint l'accueil
-  if(lg&&lg.classList.contains('on')){ lg.classList.remove('on'); var lc=document.getElementById('obLoginCard'); if(lc)lc.innerHTML='';
-    try{showTab('home');}catch(_){} try{maybeGhufranPrompt();}catch(_){} return; }
-  const ov=document.getElementById('obAccount');  // dans l'onboarding : fermer l'écran compte et rejoindre l'accueil
-  if(ov&&ov.classList.contains('on')){ ov.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; try{returnFromPlayer();}catch(_){ try{renderHome();}catch(_){}} }
-}
-async function cloudLogout(){
-  // Sécurité comptes : la progression de CE compte ne doit JAMAIS être héritée
-  // par le prochain compte connecté sur le même appareil. On vide la mémoire
-  // locale puis on RECHARGE l'app : tout repart par le circuit normal de
-  // démarrage (état neuf, structures internes réinitialisées, tutos compris).
-  /* 🔓 SOUS-LOT 5 — APRÈS LE signOut IL N'Y A PLUS DE JETON : tout ce qui reste en
-     file partirait en 401. On court une fois, brièvement. La course est bornée à
-     1,5 s et, hors ligne, le feu vert rend la main immédiatement : on ne fait
-     jamais attendre l'élève devant un bouton « se déconnecter ». */
-  try{ if(typeof SYNC!=='undefined'&&SYNC&&SYNC.avantDeconnexion)await SYNC.avantDeconnexion(); }catch(e){}
-  try{ if(SB)await SB.auth.signOut(); }catch(e){}
-  CLOUD.user=null;
-  try{ clearTimeout(_syncT); }catch(e){}
-  try{ localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){} // appareil marqué « vierge » : au prochain login, le nuage fait foi
-  location.reload();
-}
-function cloudCardHTML(mode){
-  const inp='width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:15px';
-  if(!SB)return '<p style="color:var(--muted);font-family:var(--ui);font-size:13px;margin:0">Connexion indisponible hors ligne — ta progression reste enregistrée sur cet appareil.</p>';
-  if(CLOUD.user)return '<div class="acct" style="border:none;padding:4px 0"><span class="acct-dot"></span><span class="acct-mail">'+(CLOUD.user.email||'')+'</span>'+
-    '<button class="acct-out" onclick="cloudLogout()">se déconnecter</button></div>'; // sobre : point de présence + e-mail, rien d'autre (Myriam 13/07)
-  /* mode 'login' = « J'ai déjà un compte » : le consentement a déjà été donné à
-     l'inscription, la case RGPD n'a donc pas à être redemandée pour se reconnecter. */
-  return '<input id="cloudEmail" type="email" autocomplete="email" inputmode="email" placeholder="Ton e-mail" oninput="cloudMailInput()" style="'+inp+'">'+
-    (mode==='login'?'':
-      '<label class="rgpd-l"><input type="checkbox" id="cloudRgpd" onchange="cloudMailInput()">'+
-      '<span>J\'accepte que mon e-mail serve à créer mon compte et à sauvegarder ma progression. '+
-      '<a href="confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a></span></label>'+
-      '<label class="rgpd-l"><input type="checkbox" id="cloudMkt">'+
-      '<span>Je veux recevoir les conseils d\'apprentissage et les nouveautés d\'ALAQ <i style="font-style:normal;opacity:.75">(facultatif)</i></span></label>')+
-    '<button class="cbtn" id="cloudSendBtn" disabled style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
-    '<div id="cloudStep2" style="display:none;margin-top:10px">'+
-      '<div id="cloudKnown" class="known-box" style="display:none">🔑 <b>Tu as déjà un compte</b> — entre le code reçu.</div>'+
-      '<p id="cloudNew" style="display:none;color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 9px;line-height:1.45">Code envoyé à <b id="cloudMailEcho" style="color:var(--cream)"></b></p>'+
-      '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" oninput="cloudCodeInput()" style="'+inp+';letter-spacing:.2em;text-align:center">'+
-      '<button class="cbtn" id="cloudVerifyBtn" disabled style="margin-top:8px" onclick="cloudVerify()">✅ Valider mon e-mail</button>'+
-      '<button onclick="cloudSendCode(this)" style="margin-top:8px;background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:13px;text-decoration:underline;cursor:pointer;width:100%">Renvoyer un code</button>'+
-    '</div>';
-}
-/* Le bouton d'envoi reste GRIS tant que l'adresse n'est pas plausible ET que le
-   consentement n'est pas donné : le refus doit se voir AVANT le clic, pas après. */
-function cloudMailInput(){
-  var e=document.getElementById('cloudEmail'), b=document.getElementById('cloudSendBtn');
-  if(!b)return;
-  var ck=document.getElementById('cloudRgpd');
-  var ok=/^\S+@\S+\.\S+$/.test(((e||{}).value||'').trim()) && (!ck||ck.checked);
-  b.disabled=!ok;
-}
-function cloudCodeInput(){
-  var c=document.getElementById('cloudCode'), b=document.getElementById('cloudVerifyBtn');
-  if(b)b.disabled=(((c||{}).value||'').replace(/\D/g,'').length<6);
-}
-// S — l'objet de progression — est déclaré dans progression.js (07/09/2026), chargé avant ce script.
+/* Les champs de S que ce script complète s'ils manquent (S vient de progression.js). */
 if(!S.tests||typeof S.tests!=='object')S.tests={};   // examens d'unité réussis : { [noUnité]:true }
 if(!S.err||typeof S.err!=='object')S.err={};         // erreurs par item (répétition espacée)
 if(!S.rev||typeof S.rev!=='object')S.rev={};         // répétition espacée du vocabulaire : { mot:{n,next} }
-/* 🔴 08/09 — SIGNALÉ PAR LE PUPITRE : « TypeError: undefined is not an object
-   (evaluating 'S.revGram[u]') ». S.revGram n'était créé QU'À UN SEUL ENDROIT :
-   cloudPull, et seulement dans sa branche takeRemote. Une élève SANS COMPTE — ou dont
-   l'état n'a jamais pris cette branche — arrivait donc à la fin d'une révision de
-   grammaire avec S.revGram indéfini, et finishReview levait sur `S.revGram[u]`.
-   ⚠️ CE QUE ÇA COÛTAIT : le crash frappe AVANT les paliers de révision, AVANT les
-   graines et AVANT le save() de fin de session. Toute la session était perdue — ni
-   graines, ni cœurs, ni paliers. C'est l'incident du 14/08 dans une autre porte :
-   « un écran de fin qui n'est pas la fin coûte à l'élève ce qu'elle vient de gagner ».
-   La lecture d'AFFICHAGE était déjà défendue (`S.revGram&&S.revGram[u]`, gramEtat) ;
-   celle d'ÉCRITURE ne l'était pas. Il manquait simplement ici, avec ses frères. */
+/* ⚠️ S.revGram doit exister avant toute écriture (finishReview) : il n'était créé que par cloudPull, et
+   une élève sans compte perdait toute sa session. (journal : index.html · S.revGram absent) */
 if(!S.revGram||typeof S.revGram!=='object')S.revGram={}; // maîtrise par notion : { unité:{n,ko,maj} }
 if(!S.revIn||typeof S.revIn!=='object')S.revIn={d:'',n:0}; // §2.5 : admissions du jour { d:date, n:nb de mots neufs entrés }
 if(!S.letSeen||typeof S.letSeen!=='object')S.letSeen={}; // lettres déjà revues (halo « nouveau »)
@@ -852,56 +521,31 @@ if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions termin�
 if(typeof S.onboarded==='undefined')S.onboarded=((S.done&&Object.keys(S.done).length>0)||S.xp>0||S.streak>0)?1:0; // élèves DÉJÀ existantes (progression présente) → pas d'onboarding
 if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {source,intention[],niveau,objectif,ts}
 if(typeof S.prenom!=='string')S.prenom='';           // prénom (personnalisation + colonne Supabase profiles.prenom)
-(function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)saveLocal();})();  /* migration D<n> → U1-D<n> : un RENOMMAGE de clés, pas une progression — saveLocal (voir 04/09) */
+(function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)saveLocal();})();  /* migration D<n> → U1-D<n> : un renommage de clés, pas une progression, d'où saveLocal */
 fixOrdreFormes(); // échange formes ↔ repérage (02/08) : rattrape les progressions écrites sous l'ancien ordre
-/* ═══ SND et toggleSound (« Effets sonores ») vit dans son.js (15/09/2026). ═══ */
-/* ⛔ NARR / toggleNarr / VOIX_G / VOIX_HOMME_ACTIVE / setVoix RETIRÉS le 15/09 (Myriam) :
-   la narration des consignes ne jouait plus depuis le 13/08, et il n'existe zéro fichier
-   de voix d'homme dans le dépôt. Détail et décision : l'en-tête de son.js. */
 
 function currentLesson(){ // 1re leçon non terminée d'une unité débloquée = le disque « courant » de l'accueil
   for(let u=0;u<UNITS.length;u++){ if(!unitUnlocked(u))continue;
     const ds=discsFor(u);
     for(let k=0;k<ds.length;k++){
-      /* 🔴 10/09 — UN DISQUE « À VENIR » N'EST PAS UNE LEÇON. Signalé par Myriam : à
-         0 qatra elle a choisi RECOMMENCER, l'app a ouvert un écran « Bientôt
-         disponible », l'écran de fin s'est affiché, et elle a gagné +3 qatarāt SANS
-         RIEN FAIRE — le disque grisé étant au passage marqué TERMINÉ dans sa
-         progression.
-         L'accueil, lui, connaissait la règle depuis le 24/08 : renderHome saute les
-         grisés pour calculer sa frontière (l. ~2590) et ne les déverrouille jamais
-         (l. ~2601). La même règle était donc écrite DEUX FOIS, et celle-ci l'avait
-         oubliée — d'où un disque atteignable par un chemin détourné alors qu'aucun
-         doigt ne peut le toucher sur l'accueil. */
+      /* ⚠️ un disque « À venir » n'est pas une leçon : on le saute, comme renderHome, sinon il s'ouvrait
+         et rapportait des qatarāt sans rien faire. (journal : index.html · disque à venir ouvert) */
       if(ds[k]&&ds[k].aVenir)continue;
       if((k===0||!!S.done[dkey(u,k-1)])&&!S.done[dkey(u,k)])return {u:u,i:k};
     }
   }
   return null;
 }
-/* La leçon qu'on vient de QUITTER — posée par goNoHearts(), lue par showNoHearts() et
-   noHeartsRedo(). Déclarée ICI, au-dessus de ses deux lecteurs : un `let` reste en zone
-   morte temporelle jusqu'à sa ligne, et si un jour quelqu'un appelle showNoHearts() plus
-   haut dans le fichier, la lecture lèverait au lieu de rendre `null`. */
+/* La leçon qu'on vient de quitter : posée par goNoHearts(), lue par showNoHearts() et noHeartsRedo().
+   ⚠️ déclarée au-dessus de ses lecteurs : un let reste en zone morte temporelle jusqu'à sa ligne. */
 let _repriseL=null;
 function showNoHearts(){
-  /* 🔴 10/09 — LE BOUTON « RECOMMENCER » AVAIT DISPARU, et c'était ma faute. En faisant
-     sauter les disques grisés à `currentLesson()` (correctif du même jour), son résultat
-     devient `null` pour une élève À JOUR : plus aucune leçon « non terminée » à désigner.
-     Or c'est LUI qui décidait de l'affichage du bouton. Signalé par Myriam : « ça ne
-     propose plus de regagner 3 qitarat en refaisant l'exercice, ça propose uniquement
-     réviser — je trouve intéressant de pouvoir regagner 3 points en retentant
-     l'exercice, c'est valoriser l'erreur. »
-     La leçon qu'on vient de QUITTER est la bonne réponse dans les deux cas : c'est elle
-     qu'on veut reprendre, et c'est elle que `noHeartsRedo()` rouvre déjà. `currentLesson()`
-     ne reste qu'un repli, pour les chemins qui n'arrivent pas d'une leçon (le cœur du
-     bandeau, ou un démarrage refusé faute de qatarāt). */
+  /* RECOMMENCER suit la leçon quittée (_repriseL) ; currentLesson() n'est qu'un repli pour les chemins
+     qui n'arrivent pas d'une leçon (le cœur du bandeau, un départ refusé faute de qatarāt).
+     (journal : index.html · RECOMMENCER avait disparu) */
   const hasRev=allReviewWords().length>0, L=_repriseL||currentLesson();
-  // 05/09 : le titre seul (Myriam 09/08) cède la place à la phrase du puits Zamzam (static,
-  // voir #noHearts) — le sens des sept versets ne se dit plus ici, mais la métaphore de l'eau
-  // qui se recharge par la révision, elle, revient explicitement (Myriam, 05/09).
   let h='';
-  var co=icoImg('tb-coeur','','height:18px;vertical-align:-3px'); // le MÊME cœur que la navbar — registre ICONES, jamais d'emoji (Myriam 10/08)
+  var co=icoImg('tb-coeur','','height:18px;vertical-align:-3px'); // le même cœur que la barre du haut : registre ICONES, jamais d'emoji
   if(hasRev)h+='<button class="cta" style="max-width:300px" onclick="noHeartsReview()">RÉVISER +3 '+co+'</button>';
   if(L)h+='<button class="cta" style="max-width:300px'+(hasRev?';background:none;color:var(--gold2);border:2px solid var(--gold-d);margin-top:10px':'')+'" onclick="noHeartsRedo()">RECOMMENCER +3 '+co+'</button>';
   h+='<button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="closeNoHearts()">PLUS TARD</button>';
@@ -909,15 +553,9 @@ function showNoHearts(){
   document.getElementById('noHearts').classList.add('on'); S.bigNext=1; save(); // la 1re recharge (révision OU reprise) donnera +3
 }
 function closeNoHearts(){ document.getElementById('noHearts').classList.remove('on'); }
-/* ═══ LE CŒUR DE LA BARRE DU HAUT RÉPOND (demande de Myriam, 14/08) ═══
-   « si le user clique sur le cœur, ça lui affiche son nombre de cœurs, et si c'est ≤ 4,
-   ça lui propose de réviser. » Le seuil 4 est le moment où la partie n'est pas encore
-   perdue mais le devient : proposer la révision AVANT le mur des 0 cœur, pas après.
-   ⚠️ À 0 cœur on ouvre l'écran « Plus de cœurs » existant — inutile d'en avoir deux.
-   La rangée de cœurs est DESSINÉE avec l'icône du registre (jamais un emoji) : les cœurs
-   dépensés restent visibles, éteints — on voit ce qu'on a perdu, pas seulement ce qu'il
-   reste. Ces cœurs éteints sont volontairement en retrait : ils sortent du décompte du
-   balayage de contraste comme tout élément désactivé. */
+/* Le cœur de la barre du haut : à 0, l'écran « Plus de cœurs » ; sinon la rangée des Qatarāt, dessinée
+   avec l'icône du registre, les dépensées visibles mais éteintes (hors du décompte de contraste, comme
+   tout élément désactivé). (journal : index.html · le cœur de la barre du haut répond) */
 function showHearts(){
   if(S.hearts<=0){ showNoHearts(); return; }
   var m=document.getElementById('heartsModal');
@@ -925,9 +563,6 @@ function showHearts(){
   var rangee='';
   for(var i=1;i<=HEARTS_MAX;i++)
     rangee+=icoImg('tb-coeur','','height:26px;margin:0 2px'+(i<=S.hearts?'':';filter:grayscale(1);opacity:.28'));
-  /* 05/09 — Myriam : le texte disait « Une révision t'en rend trois. » OU « Ils
-     reviennent au complet demain. » selon le seuil ; un seul message unifié explique
-     maintenant les deux voies (puits ou attente), grossi (peu lisible à 13.5px). */
   var titre=S.hearts+(S.hearts>1?' gouttes d’eau':' goutte d’eau');
   var frac=S.hearts+' '+(S.hearts>1?'Qatarāt':'Qatra')+' / '+HEARTS_MAX+' Qatarāt';
   var bas='<p class="succ-desc" style="margin:10px 4px 0;font-size:15.5px;line-height:1.55">Recharge tes Qatarāt au puits Zamzam du savoir ou attends demain, elles reviendront au complet sans le moindre effort.</p>';
@@ -942,11 +577,8 @@ function showHearts(){
 function closeHearts(){ var m=document.getElementById('heartsModal'); if(m)m.classList.remove('on'); }
 function heartsReview(){ closeHearts(); S.bigNext=1; save(); startReview(); } // même barème que « Plus de cœurs » : la 1re recharge rend +3
 function noHeartsReview(){ closeNoHearts(); startReview(); }
-/* 🔴 10/09 — « RECOMMENCER » NE RECOMMENÇAIT PAS. Son commentaire disait « reprise de
-   la leçon EN COURS » ; son code appelait currentLesson(), c'est-à-dire la première
-   leçon NON TERMINÉE de tout le parcours — une AUTRE leçon, dans une autre unité. Pour
-   une élève à jour, c'était un disque grisé. On retient donc la leçon qu'on vient de
-   quitter, au moment précis où on la quitte. */
+/* rouvre la leçon quittée, pas la première non terminée du parcours
+   (journal : index.html · RECOMMENCER ne recommençait pas) */
 function noHeartsRedo(){
   var L=_repriseL||currentLesson();
   closeNoHearts();
@@ -957,346 +589,52 @@ function goNoHearts(){
   document.getElementById('player').classList.remove('on'); showNoHearts();
 }
 
-/* ===== Onboarding de bienvenue + écran de série « 7 épis » ===== */
+/* L'état de l'onboarding (ses fonctions : comptes.js) et de la fête des 7 épis (constance.js).
+   ⚠️ une seule instruction, relue telle quelle par des bancs ; pendingStreak est réassigné par
+   src/player et revision.js. */
 let ONB={step:0,data:{}}, obAccountPending=false, pendingStreak=false;
-function onbStart(){ ONB={step:0,data:{}}; document.getElementById('onb').classList.add('on'); onbShow(); var v=document.getElementById('obVideo'); if(v){try{v.play();}catch(e){}} }
-function onbShow(){
-  var all=document.querySelectorAll('#onb [data-obs]');
-  for(var i=0;i<all.length;i++)all[i].classList.toggle('on', +all[i].getAttribute('data-obs')===ONB.step);
-  if(ONB.step===1){ var pi=document.getElementById('obPrenomOnb'); if(pi&&pi.value!==(S.prenom||''))pi.value=S.prenom||''; }
-  var q=(ONB.step>=1&&ONB.step<=6);
-  document.getElementById('onbTop').style.visibility=q?'visible':'hidden';
-  if(q)document.getElementById('onbFill').style.width=Math.round(ONB.step/6*100)+'%';
-  var b=document.querySelector('#onb .onb-body'); if(b)b.scrollTop=0;
-}
-function onbNext(){
-  var need={2:'source',3:'intention',4:'niveau',6:'objectif'}[ONB.step]; // écrans-questions : réponse obligatoire
-  if(need){ var v=ONB.data[need]; if(!v||(Array.isArray(v)&&!v.length)){ toast('Choisis une réponse 🙂'); return; } }
-  if(ONB.step<7){ONB.step++;onbShow();}
-}
-function onbBack(){ if(ONB.step>0){ONB.step--;onbShow();} }
-function onbExistingAccount(){ // élève existante sur un appareil neuf : le nuage fait foi (_fresh)
-  S.onboarded=1; S.tutHome=1; S._fresh=1; save();
-  document.getElementById('onb').classList.remove('on');
-  if(CLOUD.user){ cloudPull(); showTab('home'); toast('Bon retour ✨'); return; } // session encore vivante : AUCUNE reconnexion à saisir
-  obLoginOpen();
-}
-/* ===== Se reconnecter : un ÉCRAN, pas un dépôt sur l'onglet Progrès (08/08) =====
-   Avant, ce bouton menait à Progrès, où l'élève voyait « Choisis ta kunya » et un
-   champ e-mail : elle croyait devoir se réinscrire. Ici, e-mail puis code, rien d'autre.
-   Mode 'login' : pas de case RGPD — le consentement date de l'inscription. */
-/* ═══ LE VERROU DE DÉCONNEXION (17/08, décision de Myriam) ═══════════════════════════
-   « normalement quand je suis déconnectée, je ne devrais plus avoir accès à l'écran
-   d'accueil mais à une page de connexion. » Sa mise à jour l'avait déconnectée en silence,
-   et elle a continué à jouer en croyant sa progression sauvegardée.
-   ⚠️ TROIS GARDES, et chacune évite d'enfermer quelqu'un à tort :
-   ① `!SB` — le client Supabase vient d'un CDN. S'il n'a pas chargé (réseau coupé, CDN en
-      panne), l'app NE PEUT PAS SAVOIR si l'élève est connectée. Verrouiller sur une
-      ignorance enfermerait dehors des élèves parfaitement connectées, sur un hoquet réseau.
-      « Impossible de savoir » vaut « on n'enferme pas ». C'est la réserve annoncée à Myriam.
-   ② `!S._uid` — cet appareil n'a JAMAIS connu de compte : c'est une nouvelle élève, elle doit
-      pouvoir faire son inscription. Le verrou ne vise que celles qui AVAIENT un compte.
-   ③ une déconnexion VOLONTAIRE vide le localStorage (`cloudLogout`), donc `_uid` disparaît et
-      l'appareil repart en inscription — comportement voulu, inchangé.
-   L'app reste par ailleurs utilisable hors ligne : c'est la session gardée par Supabase
-   (`persistSession`) qui compte, pas la présence du réseau. */
-var VERROU_CONNEXION=false;
-function verrouConnexion(){
-  try{
-    if(!SB)return;              // ① on ne peut pas savoir → on n'enferme pas
-    if(CLOUD.user)return;       // connectée : rien à faire
-    if(!S._uid)return;          // ② appareil qui n'a jamais eu de compte : inscription libre
-    VERROU_CONNEXION=true;
-    try{ document.getElementById('player').classList.remove('on'); }catch(e){}
-    try{ document.getElementById('finish').classList.remove('on'); }catch(e){}
-    var t=document.querySelector('#obLogin h2');
-    if(t)t.textContent='Reconnecte-toi pour continuer';
-    var b=document.getElementById('obLoginBack'); if(b)b.style.display='none';
-    obLoginOpen();
-  }catch(e){}
-}
-function verrouLibere(){
-  VERROU_CONNEXION=false;
-  var t=document.querySelector('#obLogin h2'); if(t)t.textContent='Content de te revoir !';
-  var b=document.getElementById('obLoginBack'); if(b)b.style.display='';
-}
-function obLoginOpen(){
-  /* Une seule carte de connexion vivante à la fois : sinon deux #cloudEmail (et deux
-     #cloudRgpd) coexistent dans le DOM et getElementById rend le MAUVAIS — la case
-     RGPD de l'écran compte réapparaîtrait à la connexion. Attrapé par le harnais. */
-  var mien=document.getElementById('obLoginCard');
-  ['cloudEmail','cloudRgpd','cloudCode','cloudStep2','cloudSendBtn','cloudVerifyBtn','cloudKnown','cloudNew','cloudMailEcho']
-    .forEach(function(id){ var o=document.getElementById(id); if(o&&(!mien||!mien.contains(o))){ var c=o.closest('#obAccountCard,.ccard'); if(c)c.innerHTML=''; } });
-  var c=document.getElementById('obLoginCard'); if(c)c.innerHTML=cloudCardHTML('login');
-  document.getElementById('obLogin').classList.add('on');
-  var i=document.getElementById('cloudEmail'); if(i)setTimeout(function(){try{i.focus();}catch(_){}} ,120);
-}
-function obLoginClose(){
-  if(VERROU_CONNEXION)return;   // 17/08 : déconnectée, on ne sort pas de la page de connexion
-  document.getElementById('obLogin').classList.remove('on');
-  var c=document.getElementById('obLoginCard'); if(c)c.innerHTML=''; // pas de #cloudEmail en double avec Progrès
-  if(!S.onboarded){ try{onbStart();}catch(_){} } else { try{showTab('home');}catch(_){} }
-}
-/* « Plus tard » : dire ce qu'on perd. Sans compte, la progression ne vit que dans
-   le localStorage de CET appareil — et cloudLogout() le vide (voir sa note). */
-function obLaterWarn(){
-  var m=document.getElementById('laterModal');
-  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='laterModal'; document.body.appendChild(m); }
-  m.innerHTML='<div style="max-width:340px;width:100%;margin:0 auto;text-align:center;position:relative">'+
-    '<div style="font-size:44px">⚠️</div>'+
-    '<h2 style="margin:8px 0 18px;font-size:21px">Tu perdras ta progression</h2>'+
-    '<button class="cbtn" onclick="obLaterCancel()">CRÉER MON COMPTE</button>'+
-    '<button class="cbtn" style="background:none;color:var(--cream);border:2px solid var(--line);margin-top:8px" onclick="obLaterConfirm()">Continuer sans compte</button>'+
-    '</div>';
-  m.classList.add('on');
-}
-function obLaterCancel(){ var m=document.getElementById('laterModal'); if(m)m.classList.remove('on'); }
-function obLaterConfirm(){ obLaterCancel(); obAccountClose(); }
-function onbLaunchLesson(){
-  var pi=document.getElementById('obPrenomOnb'); if(pi)S.prenom=(pi.value||'').trim();
-  S.onb={source:ONB.data.source||'', intention:ONB.data.intention||[], niveau:ONB.data.niveau||'', objectif:ONB.data.objectif||'', ts:Date.now()};
-  S.onboarded=1; S.tutHome=1; save();
-  document.getElementById('onb').classList.remove('on');
-  obAccountPending=!CLOUD.user;                       // proposer le compte après cette 1re leçon si non connectée
-  var L=(typeof currentLesson==='function'&&currentLesson())||{u:0,i:0};
-  if(lecteurPret())startDisque(L.u,L.i);   // l'onboarding est consommé ; sans lecteur : l'accueil, et le toast dit de recharger
-}
-document.addEventListener('click',function(e){
-  var b=e.target.closest('#onb .ob-opt'); if(!b)return;
-  var k=b.getAttribute('data-obk'), v=b.getAttribute('data-obv');
-  if(b.hasAttribute('data-obmulti')){
-    b.classList.toggle('sel');
-    ONB.data[k]=ONB.data[k]||[];
-    var idx=ONB.data[k].indexOf(v);
-    if(b.classList.contains('sel')){ if(idx<0)ONB.data[k].push(v); } else if(idx>=0)ONB.data[k].splice(idx,1);
-  } else {
-    ONB.data[k]=v;
-    var sib=b.parentElement.querySelectorAll('.ob-opt');
-    for(var i=0;i<sib.length;i++)sib[i].classList.remove('sel');
-    b.classList.add('sel');
-  }
-});
-/* ═══ L'ÉCRAN DES 7 ÉPIS (showStreak, la récitation de 2:261, streakPrecharger,
-   streakRecite, streakContinue) vit dans alaq-vercel-static/constance.js depuis le
-   16/09/2026, avec le reste de la série. Script classique chargé plus haut, AVANT
-   celui-ci. ⚠️ streakContinue LIT `obAccountPending` et appelle `showObAccount()` et
-   `returnFromPlayer()` — tous trois déclarés ICI, résolus à l'appel : c'est le
-   contrat entre les deux fichiers, et le banc le garde. ═══ */
-function obAccTitle(){ return S.prenom?S.prenom+', sauvegarde ta progression.':'Sauvegarde ta progression'; }
-function onbPrenomInput(v){ S.prenom=(v||'').trim(); save(); var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle(); }
-/* ===== Le nom choisi, affiché et modifiable dans le profil (02/08) =====
-   Le prénom demandé à l'inscription n'apparaissait nulle part : il vit désormais dans la bande
-   du compte, au-dessus du mail. S'il manque, l'invitation « Choisis ta kunya » prend sa place —
-   il y a TOUJOURS un nom que l'élève a choisi. Le seul stockage est S.prenom (déjà poussé dans
-   profiles.prenom par cloudSaveNow) : rien de neuf à synchroniser. */
+/* escHTML, l'échappeur de toute l'app (& < > " ') : ui/parametres.js et src/ecrans l'appellent aussi.
+   Le banc outils/verifier-comptes.mjs exécute le vrai. */
 function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
-function nomChoisiHTML(){
-  return S.prenom ? '<b>'+escHTML(S.prenom)+'</b>' : '<b class="acct-todo">Choisis ta kunya</b>';
-}
-function openPrenom(){
-  var m=document.getElementById('prenomModal');
-  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='prenomModal'; document.body.appendChild(m); }
-  m.innerHTML='<div class="sm-box" style="max-width:340px;text-align:center">'+
-    '<button class="sm-close" onclick="closePrenom()" aria-label="Fermer">✕</button>'+
-    '<h2 style="margin:8px 0 2px">Ton nom</h2>'+
-    '<p class="succ-desc" style="margin:8px 0 14px">La <b style="color:var(--gold2)">kunya</b> <span class="arw" style="font-size:16px">كُنْيَة</span> est le nom d’affection en islam : <span class="arw" style="font-size:16px">أمّ</span> ou <span class="arw" style="font-size:16px">أبو</span> suivi d’un prénom comme Umm Salama, Abū Bakr. Tu peux aussi tout simplement écrire ton prénom.</p>'+
-    '<input id="prenomIn" type="text" maxlength="24" autocomplete="given-name" placeholder="Ton prénom ou ta kunya" value="'+escHTML(S.prenom||'')+'" style="width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--cream);font-family:var(--ui);font-size:16px;text-align:center">'+
-    '<button class="cbtn" style="margin-top:12px" onclick="savePrenom()">Enregistrer</button>'+
-    '</div>';
-  m.classList.add('on');
-  var i=document.getElementById('prenomIn');
-  if(i){ i.addEventListener('keydown',function(e){ if(e.key==='Enter')savePrenom(); });
-         setTimeout(function(){ try{i.focus();}catch(_){}} ,80); }
-}
-function closePrenom(){ var m=document.getElementById('prenomModal'); if(m)m.classList.remove('on'); }
-function savePrenom(){
-  var i=document.getElementById('prenomIn');
-  S.prenom=(i?i.value:'').trim(); save();   // save() → cloudSaveSoon() → upsert profiles.prenom
-  closePrenom(); try{renderProg();}catch(_){}
-}
-function showObAccount(){
-  var card=document.getElementById('obAccountCard'); if(card)card.innerHTML=cloudCardHTML();
-  var q=document.getElementById('obQuote'); if(q)q.style.display='';
-  var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle();
-  document.getElementById('obAccount').classList.add('on');
-}
-function obAccountClose(){ var o=document.getElementById('obAccount'); o.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; returnFromPlayer(); } // vider la carte : pas de #cloudEmail en double avec Progrès
-function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
-function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
-function doReset(){
-  /* 🔓 SOUS-LOT 5 — EN PREMIÈRE LIGNE, ET L'ORDRE EST TOUT LE SUJET. Les entrées en
-     attente décrivent EXACTEMENT la progression que l'élève vient d'effacer : les
-     laisser partir la reconstruirait au serveur une seconde après qu'elle a demandé
-     sa disparition. SYNC.reset() vide la file, oublie ce que le serveur savait, pose
-     l'intention de purge distante — et ANNONCE la réaffectation de S qui suit, pour
-     que le garde du diff ne la prenne pas pour une quatrième, inconnue. */
-  try{ SYNC.reset(); }catch(e){}
-  try{localStorage.removeItem('alaq2');}catch(e){}
-  /* 🔴 11/09 — LE TAMPON DE REFONTE SURVIT À L'EFFACEMENT, et c'est la racine d'un
-     bloquant trouvé par la QUATRIÈME revue. DEF ne porte pas `_refonte` : sans cette
-     ligne, `S._refonte` retombe à 0 ici, et tout cloudPull joué AVANT que la purge
-     distante n'ait abouti (elle a 12 s de délai de garde, et elle peut échouer) voit
-     « un effacement que je n'ai jamais vu » — il adopte alors le blob du nuage, QUI
-     N'EST PAS ENCORE VIDÉ, et rend à l'écran la progression qu'on vient d'effacer.
-     REPRODUIT : 40 leçons ressuscitées par un simple changement d'onglet. Le tampon ne
-     décrit pas la progression, il décrit CE QUE CET APPAREIL SAIT DU SERVEUR : un
-     effacement local n'a aucune raison de le lui faire oublier. La purge, quand elle
-     réussit, le met à jour elle-même (voir _purgerDistant dans progression.js). */
-  var _refonteAvant=+(S&&S._refonte)||0;
-  S=Object.assign({},DEF,{done:{},tests:{}});
-  if(_refonteAvant)S._refonte=_refonteAvant;
-  /* 🔴 09/09 — SANS CETTE LIGNE, « EFFACER MA PROGRESSION » LA RENDAIT.
-     DEF ne porte pas `_uid` (progression.js:54) : l'état neuf ne savait donc plus à
-     qui appartient cet appareil, et deux mécanismes s'écroulaient d'un coup —
-     ① le dépilage entier gelait (`_peutDepiler` exige la propriété PROUVÉE), donc
-        l'intention de purge distante ne partait JAMAIS ;
-     ② au prochain cloudPull, un S sans `_uid` retombe dans la « fenêtre de
-        migration » du 17/08, où le plus RICHE gagne : 82 leçons contre 0, le nuage
-        RESSUSCITAIT la progression que l'élève venait d'effacer — et la purge ne
-        partait qu'ensuite, vidant le portefeuille sur une progression restaurée.
-     Net : le geste rendait la progression et détruisait les graines. Le défaut ②
-     préexistait au sous-lot 5 ; le ① et la perte des graines sont nés avec lui.
-     Trouvé par la revue adversariale, par quatre angles indépendants, et reproduit
-     dans outils/verifier-sync-nuage.mjs (essai ㊱bis, qui rejoue ces lignes VERBATIM
-     — l'ancien essai ㊱ réinjectait `_uid` de sa propre main, et son vert ne prouvait
-     rien). L'état neuf appartient à l'élève connectée : on le DIT. */
-  try{ if(typeof CLOUD!=='undefined'&&CLOUD&&CLOUD.user)S._uid=CLOUD.user.id; }catch(e){}
-  save();
-  document.getElementById('confirmReset').classList.remove('on');
-  renderHome();
-}
 
-/* ═══ LES SIGNALEMENTS ⚑ ET LES TICKETS 🤖 vivent dans
-   alaq-vercel-static/signalements.js depuis le 16/09/2026 : le drapeau du bandeau
-   bas (sigOuvrir, sigChoisir, sigEcran, sigEnvoyer), les tickets que l'app dépose
-   toute seule (tikNote, tikEnvoyer, le journal de bord), les deux files de
-   réessai et LES DEUX CAPTEURS. Script classique chargé plus haut, AVANT celui-ci
-   — et c'est le but : les capteurs voient désormais TOUTE la vie de ce script, y
-   compris une erreur qui le tuerait avant l'accueil. ⚠️ `sigEcran()` lit l'état du
-   joueur déclaré ici (REVIEW, QUEUE, qi, curU, curD) sous try/catch : avant que
-   ces `let` n'existent, il rend '?' au lieu de lever. ═══ */
-
-/* ⛔ LES CONSIGNES LUES ONT ÉTÉ RETIRÉES le 15/09/2026 (Myriam : « tout retirer, dépôt
-   compris »). Elles ne jouaient plus depuis le 13/08 : `spokenInstr()` rend '' en dur,
-   donc `readInstr` n'était plus jamais atteinte. 60 fichiers instr-*.mp3 pesaient 4,6 Mo,
-   dont 2,8 Mo pré-cachés sur le téléphone de chaque élève à chaque installation.
-   `spokenInstr`, qui gardait cet appel, a disparu avec : voir le pavé ci-dessous. */
-/* ══ LE FRANÇAIS NE SE LIT JAMAIS À VOIX HAUTE — doctrine, principe 2 (13/08/2026) ══
-   Une fonction fabriquait ici une phrase FRANÇAISE pour chaque type d'écran, et les leçons
-   refondues la faisaient taire UNE PAR UNE (`mute:true`). C'est un modèle de liste blanche :
-   il fuit par construction — tout écran neuf, ou simplement oublié, se remet à parler. Myriam
-   l'a retrouvé le 13/08 sur « Associe chaque mot à sa traduction » et sur le placement des
-   mots du verset, des mois après la règle. La décision a donc remonté au SEUL endroit qui
-   tranche : plus rien n'est lu. L'oreille est réservée à la langue cible ; l'œil suffit au
-   français.
-   ⛔ 15/09 — `spokenInstr()` elle-même a disparu. Elle rendait '' en dur depuis le 13/08, et
-   son unique appelant (le lecteur) est parti avec la narration des consignes. Une fonction
-   qui ne rend que du vide n'est pas une garantie : c'est un reste. `mute` survit dans les
-   données, sans effet sur le son — le lecteur le lit encore pour l'écrit. */
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   LA CONSTANCE ET SES RÉCOMPENSES ONT DÉMÉNAGÉ (16/09/2026, sous-lot 6)
-   Les rangs (RANKS, rankFor, RANK_COLORS, lampSVG, updRankBadge, rankTrackHTML,
-   rankBarHTML), les trois cases de l'écran de fin (fillFinishConstance, caseHTML,
-   fillFinishCases), l'arithmétique des jours (today, yesterday, _dayNum, daysGap,
-   _addDays), la constance (rollConstance, bumpConstance), les graines (GRAINES,
-   gagnerGraines), l'objectif du jour (objMinutes, objGoal, objAddSec, objFete,
-   objRingHTML), la série (validerJour, feteJourPending), le Ghufrān
-   (maybeGhufranPrompt, useGhufran, retrogradation, acceptMiss…) et le passage de
-   minuit (majJour et ses trois branchements, la migration v7) vivent désormais
-   dans alaq-vercel-static/constance.js — un script CLASSIQUE chargé plus haut,
-   AVANT celui-ci, comme progression.js et revision.js.
-   ⚠️ CE FICHIER CONTINUE DE LES UTILISER, et il en a le droit : les scripts
-   classiques partagent la même portée lexicale globale. `refreshStats()`, plus
-   bas, appelle `updRankBadge()` SANS garde — c'est précisément la ligne qui
-   interdit d'en faire un module (mesuré : accueil vide à vie).
-   ⚠️ ET LE SENS INVERSE : constance.js résout ICI, À L'APPEL seulement, `toast`,
-   `fatihaPct`, `returnFromPlayer`, `obAccountPending` et `showObAccount`.
-   Un rang, un succès, une graine, la série, le Ghufrān : ça se corrige LÀ-BAS.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ═══ L'ACCUEIL a déménagé dans ui/accueil.js (12/09/2026) : OFFS, refreshStats, toAr,
-   sujetCours, discLabel, discImg, discTip/discTipClose et leurs écouteurs. Script classique
-   chargé plus haut, AVANT celui-ci — voir l'en-tête de ui/accueil.js. ═══ */
-const BUILD='securite-pupitre-confid-16sept';
+/* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
+const BUILD='comptes-externe-17sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
-/* La DATE ET L'HEURE de la livraison, affichées dans Paramètres › « Version de l’app »
-   (Myriam, 06/09 : « l'heure et le jour, comme ça y'a pas de doute »). ISO AAAA-MM-JJTHH:MM,
-   heure de Paris, jamais un texte : c'est dateHeureFr() qui la met en français au rendu.
-   ⚠️ ELLE SE POSE AU MOMENT DE LIVRER, avec le BUILD — c'est l'instant que l'élève lira. Sa
-   partie date doit dire la même chose que le nom du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) :
-   le portillon l'exige (outils/verifier-version.mjs), sinon l'écran mentirait au premier
-   BUILD bumpé sans elle. */
-const BUILD_DATE='2026-09-16T22:58';
+/* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
+   heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
+   du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
+const BUILD_DATE='2026-09-17T09:50';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
-/* LE NUMÉRO DE VERSION (Myriam, 07/09) — deux nombres, comme toute application. VERSION est
-   pour l'élève : mineur (3.6) = du nouveau pour lui ou une étape de structure, correctif
-   (3.5.1) = une réparation, majeur (4) = une autre app — c'est Myriam qui le dit au GO.
-   BUILD_NUM est pour nous et monte à CHAQUE livraison : c'est le compteur du cache de sw.js
-   (alaq-vNNN), et le portillon exige qu'ils soient égaux (outils/verifier-version.mjs) — comme
-   il exige que package.json, le projet iOS (MARKETING_VERSION / CURRENT_PROJECT_VERSION) et
-   le gradle Android (versionName / versionCode) disent les mêmes nombres : ce sont eux que
-   les stores liront. Le libellé BUILD reste pour les commits et le diagnostic ; l'écran, lui,
-   dit « 3.5.1 (197) » (forme V1 validée par Myriam sur preview le 07/09). */
-const VERSION='3.17';
-const BUILD_NUM=220;
+/* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
+   correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
+   de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android. */
+const VERSION='3.18';
+const BUILD_NUM=221;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
-/* ═══ … et la suite de l'accueil aussi (ui/accueil.js) : iconFallback, _homeFocusPending,
-   focusCurrentDisc, renderHome, insecables, arEnveloppe, setBanner, onHomeScroll. Les
-   constantes BUILD / BUILD_DATE / VERSION / BUILD_NUM ci-dessus RESTENT ici : le
-   portillon (verifier-version.mjs) les lit dans ce fichier. ═══ */
 
 /* ================= JOUEUR ================= */
 let QUEUE=[],qi=0,curU=0,curD=0,answered=false,picked=null,wrongCount=0,total=0,MISSED=[],inRetry=false,EXAM=false;
-let _grainesSession=0;   // les graines de la leçon en cours — RÉASSIGNÉE par finishDisque (src/player/, d'où ce `let` ici : règle ①) et par finishReview (revision.js depuis le 16/09 — un script classique réassigne une liaison lexicale globale par son nom nu)
-/* ═══ LE LECTEUR a déménagé dans src/player/index.js (14/09/2026, sous-lot 1) : startDisque,
-   quitDisque, advance, renderStep, selOpt, ctaClick, finishDisque, closeFinish, le test-out
-   (buildExam/startExam/finishExam). C'est un MODULE ES — le premier bloc de ce fichier à en
-   devenir un : il ne sert jamais au premier rendu, il s'ouvre au doigt. L'ÉTAT ci-dessus reste
-   ICI, en `let` classiques : le module les lit et les réassigne par leur nom (liaisons
-   lexicales globales) ; ecranRate, objectifAtteint, sigEcran, le hub Réviser et l'hôte U8
-   lisent les MÊMES variables. Voir l'en-tête de src/player/index.js. ═══ */
-/* ⚠️ UN MODULE EST DIFFÉRÉ ET FETCHÉ À PART : entre l'accueil peint (synchrone, par le script
-   classique) et l'exécution du bundle (372 Ko), un doigt PEUT arriver — premier chargement,
-   réseau lent — et si le bundle manque (hors ligne à la toute première visite), il n'arrive
-   jamais. DOMContentLoaded n'empêche pas de toucher l'écran : il ATTEND le module. Chaque
-   départ classique vers le lecteur passe donc ICI avant d'ouvrir quoi que ce soit — sinon
-   startReview/launchQuranReview ouvraient #player (un voile plein écran) AVANT d'appeler
-   renderStep : voile VIDE, et la croix (quitDisque, absent lui aussi) morte. Un toast, et
-   rien ne s'ouvre. Gardé par le banc (verifier-lecteur.mjs ⑤ balaie TOUS les appelants,
-   sans liste) et par la copie SANS module du harnais _verif_lecteur.html. */
+let _grainesSession=0;   // les graines de la leçon en cours, réassignées par finishDisque (src/player) et finishReview (revision.js)
+/* ⚠️ l'état du joueur reste ici, en let classiques : src/player (un module) les lit et les réassigne par
+   leur nom, et ecranRate, objectifAtteint, sigEcran, le hub Réviser et l'hôte U8 lisent ces mêmes
+   liaisons ; les redéclarer dans un module les rendrait privées. sigEcran les lit sous try/catch. */
+/* ⚠️ un module est différé et fetché à part : un doigt peut arriver avant lui, et hors ligne à la
+   première visite il n'arrive jamais. Chaque départ classique vers le lecteur passe par ici : un toast,
+   et rien ne s'ouvre (sinon un voile #player vide, à croix morte). Gardé par outils/verifier-lecteur.mjs
+   et previews/_verif_lecteur.html. */
 function lecteurPret(){
   if(typeof startDisque==='function'&&typeof renderStep==='function')return true;
   try{toast('Le lecteur n’est pas encore chargé — recharge la page');}catch(e){}
   return false;
 }
 
-/* ═══ LES GABARITS D'ÉCRAN DES UNITÉS 1 À 7 (le glisser-déposer, les tuiles qu'on assemble,
-   le tri, les choix au doigt, la lecture — splitUnits, letAr, chipHTML —, les récompenses
-   d'objectif) vivent dans
-   src/ecrans/index.js depuis le 15/09/2026 — un MODULE, importé par src/entree.js juste après
-   le lecteur, qui publie ses noms sur window : `renderStep` les appelle, mais aussi setupTrace, les générateurs et le
-   hub Réviser, qui sont classiques et les résolvent à l'appel sur window.
-   Le SON est parti à son tour le 15/09 au soir, dans son.js — table et porte — avec
-   comboBonneReponse. L'ÉTAT du joueur (QUEUE, qi, curU…) reste ICI, en `let` classiques.
-   ⚠️ RESTENT ICI AUSSI, et c'est facile à confondre : renderMatch, renderVt, renderVw et
-   renderSt — ils ressemblent à des gabarits, mais ils lisent l'état de trop près. ═══ */
-/* ═══ jouerMot et sayLetterName vivent dans son.js (15/09/2026) : ce sont devenus des
-   raccourcis d'une ligne vers `jouer()`. MOTS_SANS_IA est parti avec la deuxième voix —
-   sans variante -f à écarter, il n'avait plus d'objet. ═══ */
-
-
-/* ══════════════ LEÇON 2 v2 (08/08) — bulles, haut-parleur, icônes ══════════════ */
+/* ═══ LES LEÇONS : icônes du tracé, filet, bulles, hamza, tutoriels, tachkīl ═══ */
 
 /* Les icônes du tracé, dessinées (choix de Myriam : triangle dans un cercle · flèche
    circulaire). Sans texte : le libellé ne survit que pour les lecteurs d'écran. */
 const ICO_DEMO='<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12.5"/><path class="plein" d="M12.5 9.5v13l10.5-6.5z"/></svg>';
 const ICO_RECO='<svg viewBox="0 0 32 32"><path d="M26 16a10 10 0 11-3.4-7.5"/><path d="M26 4.5V11h-6.5"/></svg>';
-
-/* ═══ le haut-parleur dessiné (spkSVG, spkOn, spkOff) et ses trois appels nommés
-   (spkRejouer, spkAudio, spkSequence) vit dans son.js (15/09/2026). ═══ */
-
 
 /* La carte d'une lettre nouvelle : le bouton s'allume quand le NOM est fini de sonner. */
 function lettreTap(el,L){
@@ -1304,27 +642,16 @@ function lettreTap(el,L){
   sayLetterName(L,objectifAtteint);
   objectifFilet();
 }
-/* Ceinture : le bouton ne doit JAMAIS rester gris si un son se perd. */
-/* ⚠️ 14/08 — LE FILET NE S'ARME QU'UNE FOIS L'ÉCRAN FINI. Myriam, leçon 4 : « le bouton
-   continuer s'affiche après quelques secondes d'attente même si le user n'a pas déplacé la
-   lettre dans tous les box. » La cause tenait en DEUX ACCOLADES MANQUANTES :
-
-       if(window._fsl.size>=4)quandSonFini(objectifAtteint);objectifFilet();
-
-   sans bloc, seul `quandSonFini` était gardé — `objectifFilet()` partait à CHAQUE pose, et
-   2,8 s plus tard il allumait CONTINUER sur un écran à moitié rempli. La même ligne était
-   copiée sur QUATRE écrans (harakat, tapset, formes, repérage) : un seul symptôme signalé,
-   quatre écrans réparés. Le filet reste indispensable — il existe parce qu'un rappel de fin
-   de son se perd dès qu'un autre son démarre — mais il est une CEINTURE, pas un minuteur :
-   il ne doit jamais valider ce que l'élève n'a pas fait. */
+/* Ceinture : le bouton ne doit jamais rester gris si un son se perd (un rappel de fin de son se perd
+   dès qu'un autre son démarre). ⚠️ elle ne s'arme qu'une fois l'écran fini : jamais un minuteur qui
+   valide ce que l'élève n'a pas fait. (journal : index.html · le filet allumait CONTINUER trop tôt) */
 function objectifFilet(){
   var e=qi;
   setTimeout(function(){ if(qi===e)objectifAtteint(); },2800);
 }
 
-/* ══ LE JEU DE BULLES ══
-   Les bulles montent, dérivent au hasard et SE COGNENT : la non-superposition n'est pas
-   une contrainte de placement, c'est la conséquence des chocs (idée de Myriam, 08/08). */
+/* Le jeu de bulles : elles montent, dérivent au hasard et se cognent. La non-superposition n'est pas une
+   contrainte de placement, c'est la conséquence des chocs. */
 var BUL={raf:0,items:[],W:0,H:0,reste:0,R:32,v:40,bruit:70,chocs:0};   // v et bruit relevés le 09/08 : plus vif, plus désordonné
 function bulStop(){ if(BUL.raf)cancelAnimationFrame(BUL.raf); BUL.raf=0; BUL.items=[]; }
 function bulPose(b){
@@ -1350,17 +677,11 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   }
   shuffle(sac);
   BUL.reste=mots?sac.filter(function(x){return x.cible;}).length:sac.length;
-  /* 24 bulles au lieu de 15 : elles rapetissent pour garder l'air (preview v3 validée) ;
-     le rayon vit dans BUL.R — la physique et l'éclat le lisent, jamais de 32 en dur */
+  /* le rayon vit dans BUL.R : la physique et l'éclat le lisent, jamais un 32 en dur */
   BUL.R=mots?56:(syllabes?60:(formes?27:32));   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot) ; 60 = .bul.syl doublée (14/08)
   var R=BUL.R;
-  /* ⚠️ 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — LES 3 COLONNES ET LE PAS DES
-     RANGÉES ÉTAIENT FIXES, LE RAYON NON. « mots » (R=56) tenait tout juste dans 3 colonnes ;
-     doubler les bulles-syllabes à R=60 les a fait déborder des deux côtés — trois colonnes de
-     120 px ne rentrent plus dans la largeur de l'aire, et six rangées de 120 px ne rentrent
-     plus dans sa hauteur. Colonnes et pas de rangée se calculent maintenant sur LE RAYON RÉEL —
-     inchangé pour les 32/27/56 déjà validés (3 colonnes leur suffisaient encore), corrigé pour
-     60 (et pour tout rayon futur qui ne rentrerait plus). */
+  /* ⚠️ colonnes et pas des rangées se calculent sur le rayon réel : fixes, les bulles de R=60
+     débordaient de l'aire. (journal : index.html · les bulles débordaient) */
   var cols=(2*R*3<=BUL.W)?3:((2*R*2<=BUL.W)?2:1);
   var lignes=Math.ceil(sac.length/cols);
   var pitchY=Math.max((BUL.H+90)/lignes,2*R+8);
@@ -1497,14 +818,6 @@ function bulPop(b){
   },80);
 }
 
-/* ═══ LES LETTRES QUI N'ONT PAS DE SON PROPRE (17/08, décision de Myriam) ═══════════
-   « alif fait un son bizarre. Silence cet audio car alif n'a pas de son. »
-   Elle a raison sur le fond : le alif nu ne porte aucune valeur sonore — c'est un support
-   de voyelle (et de hamza). Lui faire dire quelque chose enseigne une fausseté à une
-   primo-lectrice. Il se TAIT donc, et son NOM (الِفْ) reste disponible, lui.
-   ⚠️ `letterKey` normalise toute la famille (ا أ إ آ ٱ) : une seule entrée suffit. */
-/* ═══ SANS_SON, aUnSon et sayLetterSound vivent dans son.js (15/09/2026). ═══ */
-
 /* Toucher un siège : il s'allume et il SONNE. La hamza seule dit son nom, les sièges
    disent la voyelle qu'ils permettent — c'est exactement ce que la hamza sert à faire. */
 const HAMZA_SON={'ء':'ء','أ':'أَ','إ':'إِ','ؤ':'ؤُ','ئ':'ئِ'};
@@ -1519,9 +832,7 @@ function roleTap(el,L){
     var c=document.querySelector('.rl-sieges .hz[data-s="'+s+'"]');
     if(!c||!c.classList.contains('vide'))return;
     c.classList.remove('vide'); c.classList.add('neuf');
-    /* 14/08 (correctifs 4) — Myriam : « enlève les annotations sur les box ayant les supports
-       de la hamza ». Le siège se découvre au TOUCHER (roleTap l'a déjà fait sonner) : la
-       petite lettre en indice n'apprend rien de plus, elle encombre juste la case. */
+    /* le siège se découvre au toucher, sans annotation (journal : index.html · annotations des sièges) */
     c.innerHTML=s;
     c.setAttribute('onclick','hamzaTap(this,\''+s+'\')');
   });
@@ -1529,17 +840,9 @@ function roleTap(el,L){
   window._rl.add(L);
   if(window._rl.size>=3)document.getElementById('cta').disabled=false;
 }
-/* ═══ LA MÊME LIGNE DE HAMZA DANS LES EXERCICES (Myriam, 14/08) ═══
-   « dans les leçons tu n'as pas utilisé l'alphabet mis à jour… j'ai pas envie que ça
-   apparaisse à l'unité 1 leçon 1 non plus. En revanche dans les exercices après l'unité 2
-   oui. » La grille du Cours porte la ligne de la hamza depuis le 13/08 ; la grille des
-   leçons ne l'avait pas. Elle est désormais RENDUE PAR LA MÊME FONCTION — plus deux
-   alphabets à tenir à jour séparément, ce qui est exactement ce qui a créé l'écart.
-   ⚠️ Ces cases ne comptent PAS dans l'exercice : on cherche ses 3 lettres parmi les 28, et
-   la hamza n'est pas une des 28. On la touche pour ENTENDRE (principe ⑧ : explorer n'est
-   pas être évalué) — un toucher n'y coûte donc jamais un cœur.
-   Le seuil est l'unité, pas la leçon : dès l'unité 2 (curU ≥ 1), l'alif est enseigné, donc
-   ses sièges ont un sens. Avant, ils n'en auraient aucun. */
+/* La ligne de la hamza dans les exercices, dès l'unité 2 (curU ≥ 1 : l'alif est enseigné).
+   ⚠️ ces cases ne comptent pas : on y touche pour entendre (explorer n'est pas être évalué), jamais un
+   cœur. (journal : index.html · la hamza dans les exercices) */
 function hamzaRailHTML(){
   if(!(curU>=1))return '';
   // le siège est écrit EN ARABE (14/08) : aucune translittération sous un glyphe arabe
@@ -1559,15 +862,9 @@ function hamzaTap(el,s){
 function letterTut(customSteps){
   var steps=(customSteps||[
     {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
-    /* 05/09 — ✨ retiré du titre ET du corps (Myriam : « trop chargé en
-       émojis, surtout pas utile »). Le texte reprend son mot exact.
-       ⚠️ 🔸 RETIRÉ À SON TOUR (05/09, 2e retour) : « devenait inutile ».
-       Le badge « à revoir » et son Set `revoir` sont supprimés de
-       `letterGridHTML` — cette étape du tuto n'a donc plus rien à en dire. */
     {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées',tx:'Ce sont les lettres que tu as débloquées dans tes leçons.'},
     {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Touche une lettre dorée : elle passe en JAUNE FONCÉ, avec un ✓. Tu peux en prendre plusieurs.',enter:function(){var a=document.querySelectorAll('.lg-cell.avail');var c=a[Math.min(3,a.length-1)]||a[0];if(c&&!c.querySelector('.ck')){c.classList.remove('avail');c.classList.add('sel','coachdemo');c.insertAdjacentHTML('afterbegin','<span class="ck">✓</span>');}},leave:function(){var c=document.querySelector('.lg-cell.coachdemo');if(c){c.classList.remove('sel','coachdemo');c.classList.add('avail');var k=c.querySelector('.ck');if(k)k.remove();}}},
-    /* Le SEUL endroit où la hamza s'explique — Myriam a tranché : pas de texte permanent
-       à l'écran, la ligne se montre, le guide raconte. */
+    /* le seul endroit où la hamza s'explique (Myriam) : pas de texte permanent à l'écran */
     {t:function(){return document.querySelector('.lg-hamza');},ti:'La hamza ء',
      tx:'L’alphabet compte <b>28 lettres</b>, et la hamza n’en fait pas partie : <b>elle n’a pas de forme à elle</b>.<br>Elle se pose toujours sur un <b>siège</b> — le alif (أ إ), le wāw (ؤ) ou le yāʾ (ئ).<br>Touche-la pour l’entendre.'},
     {t:function(){return document.querySelector('.lg-rev');},ti:'On révise ! 🌙',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
@@ -1594,17 +891,11 @@ function letterTut(customSteps){
       ov.querySelector('#ltNext').textContent=(ov._si===ov._steps.length-1)?'C’est parti !':'Suivant →';
       var bub=ov.querySelector('#ltBubble'),arrow=ov.querySelector('#ltArrow');
       var bw=Math.min(290,window.innerWidth-24);bub.style.width=bw+'px';
-      /* 🔴 DÉBORDEMENT DU TUTO 4/5 (Myriam, 05/09, capture à l'appui) —
-         « en dessous » se décidait sur un SEUIL DEVINÉ (170 px), pas sur la
-         hauteur RÉELLE de la bulle. Ça tenait tant que le texte était court ;
-         la hamza (l'étape la plus longue) dépasse 170 px et la bulle, posée
-         « en dessous » d'une ligne déjà basse dans la grille, sortait de
-         l'écran. La hauteur est mesurée AVANT la décision, jamais après. */
+      /* ⚠️ la hauteur réelle de la bulle est mesurée avant de choisir dessous ou dessus, jamais un seuil
+         deviné. (journal : index.html · le tuto 4/5 débordait) */
       var bh=bub.offsetHeight||160, below=r.bottom+bh+12<window.innerHeight;
       var top=below?(r.bottom+pad+12):(r.top-pad-12-bh);
-      /* ⚠️ GARDE DURABLE : même si `bh` est un jour mal estimé (police pas
-         encore chargée, texte allongé…), la bulle reste DANS l'écran — elle
-         perd un peu de précision sur la flèche plutôt que de sortir du cadre. */
+      /* ⚠️ et la bulle reste dans l'écran même si bh est mal estimée */
       top=Math.max(8,Math.min(top,window.innerHeight-bh-8));
       var left=Math.max(12,Math.min(window.innerWidth-bw-12,r.left+r.width/2-bw/2));
       bub.style.top=top+'px';bub.style.left=left+'px';
@@ -1617,11 +908,8 @@ function letterTut(customSteps){
 function maybeShowLetterTut(){
   if(S.tutLetters)return;
   if(!document.querySelector('.lg-cell.avail'))return; // rien de débloqué : pas de tuto
-  /* 🔴 07/09 — saveLocal, PAS save : AFFICHER un tuto n'est pas une progression.
-     save() rajeunit S._ts, et c'est le mécanisme même de l'incident du 04/09 — dans
-     une branche que le recensement d'alors n'avait pas couverte. Ce drapeau se repose
-     seul sur chaque appareil ; il rejoindra le nuage à la première vraie progression.
-     (La règle complète vit dans progression.js, au-dessus de saveLocal.) */
+  /* saveLocal, pas save : afficher un tuto n'est pas une progression, et save() rajeunit S._ts (règle
+     complète : progression.js, au-dessus de saveLocal). (journal : index.html · les tutos et save) */
   S.tutLetters=1;saveLocal();
   letterTut();
 }
@@ -1630,10 +918,8 @@ function homeTut(){ letterTut([
   {t:function(){return document.querySelector('.node .bubble')||document.querySelector('.bubble');},ti:'Les leçons ✍️',tx:'Chaque bulle est une leçon. Touche la première pour commencer, bismillah !'},
   {t:function(){return document.getElementById('botnav');},ti:'Le menu 🧭',tx:'En bas : 🏠 Apprendre · 📕 Cours · 🕋 Réviser · 📊 Progrès.'}
 ]); }
-/* 🔴 07/09 — saveLocal : LE PLUS DANGEREUX DES QUATRE. Il se déclenche au simple RENDU
-   DE L'ACCUEIL. Avec save(), ouvrir l'app suffisait à redater la progression AVANT que
-   cloudPull ait pu arbitrer — c'est l'incident du 04/09, à la lettre, par une porte que
-   le recensement d'alors n'avait pas ouverte. */
+/* saveLocal : ce tuto part au simple rendu de l'accueil, et save() y redaterait la progression avant que
+   cloudPull arbitre. (journal : index.html · les tutos et save) */
 function maybeShowHomeTut(){ if(!S.onboarded)return; if(S.tutHome)return; if(!document.querySelector('.unit-head'))return; S.tutHome=1;saveLocal(); homeTut(); }
 function openSurahMenu(){
   var m=document.getElementById('surahMenu');
@@ -1652,53 +938,13 @@ function openSurahMenu(){
 }
 function closeSurahMenu(){var m=document.getElementById('surahMenu');if(m)m.classList.remove('on');}
 function pickSurah(i){if(typeof curSourate!=='undefined')curSourate=i;closeSurahMenu();renderHome();}
-/* ═══ LES 28 LETTRES, RANGÉES EN DEUX FAMILLES DE 14 (unité 8) ═════════════
-   Un fait de la langue, pas une donnée de leçon : il ne dépend d'aucune unité
-   et ne bougera jamais. `LETTRES` (unit-8/donnees/mots.js) ne porte QUE les dix
-   lettres que l'unité travaille — le Cours, lui, montre les deux listes
-   ENTIÈRES (spec §1.2), et la grille badge toute lettre débloquée.
-   ☀️ solaire : le ل de l'article est MUET, la lettre double (chedda).
+/* Les 28 lettres en deux familles de 14 : un fait de la langue, pas une donnée de leçon (le Cours montre
+   les deux listes entières). ☀️ solaire : le ل de l'article est muet, la lettre double (chedda) ;
    🌙 lunaire : le ل se prononce, il porte un soukoun. */
 const SOLAIRES_14='تثدذرزسشصضطظلن';
 const LUNAIRES_14=ALPHABET.map(function(e){return e[0];})
   .filter(function(L){return SOLAIRES_14.indexOf(L)<0;}).join('');
 function estSolaire(L){ return SOLAIRES_14.indexOf(letterKey(L))>=0; }
-/* setupTrace(L,u,posN) — le moteur de tracé canvas (Catmull-Rom, goldLayer, doigt, démo,
-   crochets window._traceDemo/_traceClear/_traceFin/_traceState) — vit dans trace-lettres.js
-   depuis le 07/09/2026, avec LT. Appelé depuis renderStep (type 'trace'), il lit à l'APPEL :
-   UNITS, curU, formGlyph, okBeep, sayLetterSound, objectifAtteint, objectifFilet,
-   sayLetterName — tous définis ici. Cette liste est gardée par outils/verifier-trace-lettres.mjs. */
-
-/* ═══ LA TABLE DES SONS vit dans son.js (15/09/2026), et elle s'appelle SONS. Sa valeur
-   est le nom NU du fichier (« mot-maktab »), plus jamais un chemin : la porte ajoute le
-   dossier et l'extension à un seul endroit. 151 de ses entrées ne sont plus écrites du
-   tout — trois règles les produisent, et il a été mesuré avant la bascule qu'elles
-   rendent EXACTEMENT ce que la carte disait, à zéro divergence.
-   Ce qui vient des DONNÉES entre toujours ici, juste en dessous, par `inscrireLeSon`.
-   `expandShadda` est parti avec la voix de synthèse : il ne servait qu'à elle. ═══ */
-
-/* ═══ LE SON DE CHAQUE MOT DES UNITÉS 1 À 7 se verse dans son.js depuis le 16/09/2026 (en fin de
-   fichier) : il doit s'inscrire AVANT les Noms d'Allah et le cache Supabase, que revision.js verse
-   au chargement — l'ordre d'écriture dans SONS est celui d'avant le sous-lot 5, à la clé près. ═══ */
-
-/* ── LES SONS DE L'UNITÉ 8 DANS LA CARTE AUDIO ──────────────────────────────
-   Le moteur U8 a sa propre table (résolue contre le disque à la génération) ; la
-   carte AUDIO, elle, sert à TOUT LE RESTE de l'app — la révision espacée, la liste
-   du Cours, le studio des sons qui relit ce fichier pour bâtir son inventaire.
-   On y inscrit les DEUX formes : le mot nu (celui que la révision fera revenir) et
-   le mot défini (qu'on peut vouloir réécouter depuis la liste).
-   ⚠️ Nom SANS `-f` : `jouerMot` essaie d'abord `<nom>-f.mp3` puis celui-ci. Le jour
-   où Myriam refait un de ces mots, sa prise porte le nom plat et le `-f` est
-   supprimé — sinon l'IA parlerait par-dessus elle (règle de dépôt du 10/08). */
-/* ⚠️ LE `typeof` N'EST PAS UNE PRUDENCE DÉCORATIVE. Ce fichier n'est pas lu QUE par
-   le navigateur : outils/sons-des-lecons.js le rejoue PAR TRANCHES dans un bac à
-   sable pour dire au studio quelle leçon réclame quel son, et sa tranche « AUDIO »
-   ne contient pas le bloc U8. Sans cette garde, l'outil tombait et le studio
-   retombait sur ses leçons DEVINÉES — en silence, avec juste un avertissement.
-   Dans l'app, U8 est déclaré bien plus haut : la garde ne saute jamais. Et c'est
-   VÉRIFIÉ, pas supposé — previews/_verif_u8_app.html exige que AUDIO connaisse
-   قَلَمٌ et الْقَلَمُ. Une garde sans assertion, c'est une panne qui attend. */
-/* (déplacé dans window.__alaqEnregistrerU8 : AUDIO est rempli à l'arrivée du module) */
 
 function lvpFlip(card,consWord,proWord){ // carte recto/verso robuste (sans 3D) : écrase, bascule, joue le son visible
   try{
@@ -1725,18 +971,16 @@ function taprowTap(el,word){
   if(!window._tr)return;
   if(el.dataset.vu)return;
   el.dataset.vu=1; window._tr.n++;
-  /* ⚠️ 14/08 — Myriam : « le son de la dernière box ne s'active pas ». Il s'activait bien :
-     `objectifAtteint()` commence par `playSfx`, qui appelle `stopAudio()` — la récompense
-     COUPAIT le son qu'on venait de déclencher. On attend donc la fin du son avant de
-     récompenser, avec le filet 2,8 s en soupape si le rappel de fin se perd. */
+  /* ⚠️ on attend la fin du son avant de récompenser : objectifAtteint() → playSfx → stopAudio couperait
+     le son qu'on vient de lancer ; le filet de 2,8 s sert de soupape.
+     (journal : index.html · le son de la dernière box) */
   if(window._tr.n>=window._tr.tot){ quandSonFini(objectifAtteint); objectifFilet(); }
 }
 function lvpHit(el,word){ // slides Lettres vs prolongations : rejoue l'anim + audio au tap
   try{ el.classList.remove('lit'); void el.offsetWidth; el.classList.add('lit'); }catch(e){}
   if(word) speak(word);
 }
-// Translittération arabe -> latin : utilisée comme repli quand AUCUNE voix arabe n'est
-// disponible (ex. aperçu sandboxé, iPhone sans voix arabe installée). Au moins audible.
+// Translittération arabe → latin : servait de repli à la voix de synthèse, retirée le 15/09.
 const AR2LAT={
  'ا':'a','أ':'a','إ':'i','آ':'aa','ٱ':'a','ى':'a','ة':'a','ء':'',
  'ب':'b','ت':'t','ث':'s','ج':'dj','ح':'h','خ':'r','د':'d','ذ':'z','ر':'r','ز':'z',
@@ -1746,37 +990,14 @@ const AR2LAT={
  '\u0652':'','\u0651':'','\u0670':'a','\u0640':''
 };
 function translit(t){ let o=''; for(const ch of (t||'')) o += (ch in AR2LAT)?AR2LAT[ch]:ch; return o.trim(); }
-/* ═══ LA TACHKĪL EN ROUGE (Myriam, 14/08 — écrans 3 à 5 de la leçon 3) ═══
-   Le signe qui commande la prolongation doit se voir : c'est LUI qui dit quelle lettre
-   viendra. Le rouge est aussi celui des manuscrits — Abū al-Aswad notait déjà les voyelles
-   à l'encre rouge sur un texte à l'encre noire. Il porte donc son propre token, `--tach` :
-   ce n'est PAS le corail de l'erreur (une couleur par idée, règle du 10/08).
-   ⚠️ On n'enveloppe QUE les marques combinantes, jamais une lettre : une lettre isolée dans
-   un span casserait sa liaison, et c'est exactement la panne du لا déjà connue. */
+/* La tachkīl en rouge : le signe qui commande la prolongation doit se voir. Token --tach, le rouge des
+   manuscrits, pas le corail de l'erreur (une couleur par idée). (journal : index.html · la tachkīl en rouge) */
 // U+064B→U+0652 : les deux tanwīn, fatḥa, ḍamma, kasra, chedda, soukoun · U+0670 : alif poignard.
 // Volontairement PAS U+0654/0655 (la hamza combinante) : elle fait partie de la lettre.
 const RE_TACHKIL=/[\u064B-\u0652\u0670]/g;
-/* \u26A0\uFE0F 14/08 (correctifs 4) \u2014 TROIS FAUSSES PISTES AVANT CELLE-CI, LES TROIS PROUV\u00C9ES FAUSSES AU
-   HARNAIS (previews/_capture_kasra_*.html, relu deux fois par l'agent qa-visuel-alaq) \u2014 gard\u00E9
-   en m\u00E9moire pour ne pas y retomber :
-   \u2460 envelopper CHAQUE signe dans son propre <span> HTML : coup\u00E9 de sa lettre porteuse, il perd
-   l'ancrage GPOS calcul\u00E9 pour CE couple pr\u00E9cis et retombe sur une position par d\u00E9faut \u2014 m\u00EAme
-   dans Chrome (\u0646\u0650 isol\u00E9 flotte loin de la lettre ; \u0646\u0650 entier colle dessous).
-   \u2461 mesurer la position du signe avec Range().getClientRects() puis repeindre un calque
-   dessus : UN SIGNE COMBINANT A UNE AVANCE NULLE, son Range rend le M\u00CAME rectangle que tout le
-   cluster de base \u2014 il n'y a pas de sous-position \u00E0 mesurer.
-   \u2462 un <text>/<tspan> SVG : le tspan fractionne le run de shaping EXACTEMENT comme le span
-   HTML (l'agent l'a prouv\u00E9, rendu c\u00F4te \u00E0 c\u00F4te, profil neuf) \u2014 le signe traverse la lettre.
-   Une variante \u00E0 deux calques (le mot entier color\u00E9 dessous, le mot SANS ses signes redessin\u00E9
-   par-dessus dans la couleur ambiante \u2014 un signe combinant n'ayant pas d'avance, le retirer ne
-   d\u00E9cale rien) marche pour la kasra mais PAS pour la fat\u1E25a/\u1E0Damma : leur pr\u00E9sence d\u00E9place
-   l\u00E9g\u00E8rement le glyphe de la lettre elle-m\u00EAme (m\u00E9trique du couple, propre \u00E0 cette police), et
-   les deux calques cessent de co\u00EFncider pixel pour pixel.
-   La seule chose qui a shap\u00E9 JUSTE dans TOUS les essais (test\u00E9 lettre par lettre, kasra ET
-   fat\u1E25a ET \u1E0Damma ET un r\u00E9sultat \u00E0 3 caract\u00E8res) : ne JAMAIS s\u00E9parer le signe de sa lettre \u2014 le
-   cluster entier (lettre + signe) part dans UNE seule couleur. On perd la nuance \u00AB seul le
-   signe est rouge \u00BB, mais un signe visible au bon endroit vaut mieux qu'un signe illisible au
-   bon endroit ou lisible au mauvais \u2014 Myriam tranchera si elle veut la nuance \u00E0 ce prix. */
+/* ⚠️ ne jamais séparer un signe de sa lettre : le cluster entier part dans une seule couleur. Un span par
+   signe, un calque posé par Range ou un tspan SVG échouent tous.
+   (journal : index.html · trois fausses pistes pour la tachkīl) */
 function tachRouge(s){
   s=String(s==null?'':s);
   if(!s)return '';
@@ -1784,14 +1005,10 @@ function tachRouge(s){
   RE_TACHKIL.lastIndex=0;
   return RE_TACHKIL.test(s) ? ('<span class="tach">'+esc+'</span>') : esc;
 }
-/* ═══ LA HARAKAT COLORÉE, LA LETTRE INTACTE (17/08) ═══════════════════════════════
-   À utiliser dès qu'un signe est POSÉ SUR SA LETTRE. `tachRouge` reste bon pour un signe
-   SEUL (le jeton, où la harakat est portée par un tatweel) : là, un simple span suffit,
-   vérifié à 158 pixels bleus. Mais sur un cluster lettre+signe il ne marche pas — voir
-   le pavé du CSS `.hkw` : le rendu peint la marque avec la couleur de sa lettre.
-   Ici, deux couches : le cluster entier dessous (coloré), la lettre nue dessus (opaque).
-   ⚠️ Ne PAS ajouter d'espace ni de retour à la ligne entre les deux spans : ils sont en
-   `white-space:pre` et le moindre blanc décalerait la couche du dessus. */
+/* La harakat colorée, la lettre intacte : pour un signe posé sur sa lettre, deux couches (le cluster
+   coloré dessous, la lettre nue opaque dessus). tachRouge suffit pour un signe seul, porté par un tatweel.
+   ⚠️ aucun blanc entre les deux spans : en white-space:pre, il décalerait la couche du dessus.
+   (journal : index.html · la harakat colorée) */
 function tachCalque(s){
   s=String(s==null?'':s);
   if(!s)return '';
@@ -1799,23 +1016,10 @@ function tachCalque(s){
   RE_TACHKIL.lastIndex=0;
   if(!RE_TACHKIL.test(s))return ech(s);          // aucun signe : rien à superposer
   var nue=s.replace(RE_TACHKIL,'');              // la lettre (ou les lettres) sans un seul signe
-  /* ⚠️ `aria-hidden` sur la couche du DESSUS, et c'est important : les deux couches portent le
-     même texte, donc sans lui un lecteur d'écran annoncerait la lettre DEUX FOIS. On garde
-     accessible la couche complète (lettre + signe) — c'est elle qui dit la vérité du mot ;
-     celle du dessus n'est là que pour peindre. */
+  /* ⚠️ aria-hidden sur la couche du dessus : sans lui, un lecteur d'écran lirait la lettre deux fois */
   return '<span class="hkw"><span class="hkm">'+ech(s)+'</span>'+
          '<span class="hkb" aria-hidden="true">'+ech(nue)+'</span></span>';
 }
-
-
-/* ⛔ LA VOIX DE SYNTHÈSE A ÉTÉ RETIRÉE LE 15/09/2026, sur décision de Myriam : « silence,
-   et le portillon rougit ». L'app ne prononce plus jamais un son qu'elle n'a pas
-   enregistré — c'est la règle d'or n°4 rendue structurelle plutôt que surveillée.
-   Rien ne s'est tu : les 520 fichiers sont là, et `outils/verifier-son.mjs` compare
-   désormais la table entière au dossier avant chaque livraison. */
-/* ═══ l'état du son (_curAudio, _sndGen), stopAudio, la marque sonore (playSfx,
-   comboBonneReponse), le pool béni d'iOS (audioBeni) et la porte `jouer` vit dans son.js (15/09/2026). ═══ */
-
 
 // ===== Reconnaissance vocale (lecture à voix haute, modèle Duolingo) =====
 function normReco(s){
@@ -1878,10 +1082,6 @@ function zoomVerse(btn){
 function toast(m){const t=document.getElementById('toast');t.innerHTML=m;t.classList.add('on'); // innerHTML : le cœur du registre ICONES peut s'y afficher (tous les appels sont nos littéraux)
   setTimeout(()=>t.classList.remove('on'),2600);}
 
-/* ═══ LES SUCCÈS (BADGES, SUCCES_DESC, ecussonHTML, confettiBurst, award,
-   checkBadges) vivent dans alaq-vercel-static/constance.js depuis le 16/09/2026,
-   avec les rangs et les graines. ⚠️ checkBadges() résout ICI `fatihaPct()` et
-   `unitValidated()` — à l'appel, jamais au chargement. ═══ */
 /* ===== Carte de la Fātiḥa : les mots lisibles s'illuminent ===== */
 function knownLetterSet(){ // lettres des unités dont le disque « Mémoriser » est terminé
   const set=new Set();
@@ -1909,83 +1109,20 @@ function fatihaPct(){
   FATIHA.forEach(v=>v.split(' ').forEach(w=>{tot++;if(wordReadable(w,set))ok++;}));
   return tot?Math.round(ok/tot*100):0;
 }
-/* ===== Sauvegarde / restauration de la progression ===== */
-function exportSave(btn){
-  try{
-    const code='ALAQ1.'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
-    const done=()=>{ if(btn)btn.textContent='✅ Code copié !'; setTimeout(()=>{if(btn)btn.textContent='📋 Copier mon code de sauvegarde';},2200); toast('Code copié — garde-le dans tes notes 📝'); };
-    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(code).then(done,()=>{prompt('Copie ce code :',code);});
-    else prompt('Copie ce code :',code);
-  }catch(e){toast('Impossible de créer le code');}
-}
-function toggleRestore(){const b=document.getElementById('restoreBox');if(b)b.style.display=b.style.display==='none'?'block':'none';}
-function importSave(){
-  try{
-    const el=document.getElementById('restoreIn');
-    let code=(el&&el.value||'').trim();
-    if(code.indexOf('ALAQ1.')!==0){toast('Ce code ne ressemble pas à un code ALAQ 🤔');return;}
-    const obj=JSON.parse(decodeURIComponent(escape(atob(code.slice(6)))));
-    if(!obj||typeof obj.done!=='object'){toast('Code incomplet');return;}
-    S=Object.assign({},DEF,obj);
-    if(!S.err)S.err={};if(!S.badges)S.badges={};if(!S.tests)S.tests={};if(!S.letSeen)S.letSeen={};
-    /* 🔓 SOUS-LOT 5 — UN CODE ALAQ1. EST UN TEXTE QUE L'ÉLÈVE PEUT ÉDITER. C'est
-       ici le TROISIÈME point de réaffectation de S : SYNC.importe() repose le
-       marqueur du diff (sinon il se désarmerait pour le reste de la session) ET
-       marque tout le contenu importé « à ne jamais déclarer » — on ne certifie pas
-       au serveur une progression saisie au clavier. */
-    try{ SYNC.importe(); }catch(_){}
-    save();refreshStats();renderProg();
-    toast('✅ Progression restaurée, ماشاء الله !');
-  }catch(e){toast('Code invalide — vérifie la copie');}
-}
 
-/* ================= MENU DU BAS · ONGLETS ================= */
-// UNIT_VIDEOS (les vidéos du Cours, par numéro d'unité) vit dans ui/reviser.js (12/09/2026).
+/* ================= ÉTAT DE LA RÉVISION ================= */
 let REVIEW=false, backTo=null, REVSES=null, RECHARGE=false, REVFREE=false; // REVFREE = §3.5 : session d'entraînement libre (rien n'était dû) — cœurs oui, paliers NON
 // REVSES = résultats de la session de révision en cours { mot: true|false } ; RECHARGE = reprise « recharge cœurs » d'une leçon
 
-// unitValidated(idx) et unitUnlocked(idx) vivent désormais dans progression.js (07/09/2026).
-/* ═══ LE HUB RÉVISER vit dans revision.js (16/09/2026) : le Qorān et ses voix, les cinq
-   boîtes, les séances de vocabulaire, de grammaire et de lettres, les Noms d'Allah,
-   lastUnlockedIndex, launchQuranReview et finishReview. Ne restent ICI que l'état du joueur
-   (la ligne `let REVIEW…` ci-dessus), _addDays (yesterday() s'en sert), les tutoriels et
-   returnFromPlayer. ═══ */
-// unitVocabCount() vit dans ui/parametres.js (12/09/2026), avec renderProg qui seul l'appelle.
-
-/* ═══ showTab (l'aiguillage des cinq onglets) vit dans ui/navigation.js (12/09/2026). ═══ */
-/* ═══ PARAMÈTRES ET AFFICHAGE — themeClair/grosTexte, setThemeClair/setGrosTexte, dateFr,
-   dateHeureFr, prmSw, renderParams, la lecture de la file (sept tapotements) et prmObjectif —
-   vivent dans ui/parametres.js (12/09/2026). ═══ */
-
-/* ═══ LE COURS a déménagé dans ui/reviser.js (12/09/2026) : ytEmbed, coursOpen, la carte du
-   tachkīl, les accordéons (accCard/accToggle/accAll), playSyl, playLetterAnim, coursSignsHTML,
-   fatihaWordFor, RESUME_GRAM et le résumé de grammaire de l'unité 8. ═══ */
-/* Les cinq raccords AUDIO du résumé de l'unité 9 RESTENT ICI : ils lisent AUDIO au
-   chargement, or ui/reviser.js se charge AVANT ce script (il ne peut rien lire d'ici à ce
-   moment-là — c'est la règle de tous les scripts classiques externes). Le résumé lui-même,
-   resumeGramU9, vit dans ui/reviser.js. */
+/* Les sons du résumé de l'unité 9 (resumeGramU9, ui/reviser.js), inscrits au chargement sans écraser une
+   prise déjà en place. */
 if(!SONS['بِالْقَلَمِ'])inscrireLeSon('بِالْقَلَمِ','mot-bilqalam');
 if(!SONS['لِلْبِنْتِ'])inscrireLeSon('لِلْبِنْتِ','mot-lilbint');
 if(!SONS['عَلَى الْبَيْتِ'])inscrireLeSon('عَلَى الْبَيْتِ','mot-alalbayt');
 if(!SONS['بِسْمِ اللَّهِ'])inscrireLeSon('بِسْمِ اللَّهِ','mot-bismillah');
 if(!SONS['الْحَمْدُ لِلَّهِ'])inscrireLeSon('الْحَمْدُ لِلَّهِ','mot-alhamdulillah');
 
-/* ═══ resumeGramU9 et renderCours vivent dans ui/reviser.js (12/09/2026). ═══ */
-
-/* ═══ renderProg (le Profil) vit dans ui/parametres.js (12/09/2026). chime() reste ici : c'est
-   de l'audio, reveilAudio() le réveille avec les autres contextes. ═══ */
-/* ═══ chime, le carillon vit dans son.js (15/09/2026). ═══ */
-
-/* ═══ showSucces / closeSucces (la modale d'un succès) vivent dans ui/parametres.js (12/09/2026). ═══ */
-
-/* ═══ _addDays est parti dans constance.js le 16/09/2026, avec today/yesterday/
-   _dayNum/daysGap : toute l'arithmétique des jours au même endroit. revision.js le lit
-   toujours par son nom nu — et constance.js étant chargé APRÈS lui, c'est À L'APPEL
-   seulement, jamais au chargement. Le banc de la constance ④ l'exige. ═══ */
-
-/* ═══════════ Tuto de la liste de vocabulaire ═══════════
-   Réutilise le moteur de coach-marks de la grille des lettres (letterTut) : une étape par
-   signe, titre + UNE ligne. Ne se montre qu'une fois (S.tutVocab) ; le « ? » le rejoue. */
+/* Le tuto de la liste de vocabulaire (moteur letterTut) : une fois (S.tutVocab), le « ? » le rejoue. */
 function vocabTut(){ letterTut([
   {t:function(){return document.querySelector('#view-reviser .wspk');},ti:'Écouter',
    tx:'Touche la ligne : le mot se dit.'},
@@ -1999,13 +1136,11 @@ function vocabTut(){ letterTut([
 function maybeShowVocabTut(){
   if(S.tutVocab)return;
   if(!document.querySelector('#view-reviser .wpen'))return;   // liste vide : pas de tuto
-  S.tutVocab=1; saveLocal();   /* 07/09 : afficher un tuto n'est pas une progression — voir maybeShowHomeTut */
+  S.tutVocab=1; saveLocal();   /* afficher un tuto n'est pas une progression */
   setTimeout(vocabTut,320);
 }
-/* ═══════════ Tuto de l'onglet Cours (04/09) ═══════════
-   Même moteur (letterTut) : ce que le sous-titre retiré disait EN PERMANENCE
-   — « le contenu s'ajoute à mesure que tu débloques les unités » — un tuto ne
-   le dit qu'UNE fois (S.tutCours) ; le « ? » le rejoue. */
+/* Le tuto de l'onglet Cours (moteur letterTut) : dit une fois ce qu'un sous-titre permanent disait
+   (S.tutCours) ; le « ? » le rejoue. */
 function coursTut(){ letterTut([
   {t:function(){return document.querySelectorAll('#view-cours .itab')[0];},ti:'Les vidéos 🎬',
    tx:'La leçon filmée de chaque unité.'},
@@ -2019,7 +1154,7 @@ function coursTut(){ letterTut([
 function maybeShowCoursTut(){
   if(S.tutCours)return;
   if(!document.querySelector('#view-cours .ccard'))return;   // aucune unité débloquée : pas de tuto
-  S.tutCours=1; saveLocal();   /* 07/09 : afficher un tuto n'est pas une progression — voir maybeShowHomeTut */
+  S.tutCours=1; saveLocal();   /* afficher un tuto n'est pas une progression */
   setTimeout(coursTut,320);
 }
 
@@ -2030,47 +1165,22 @@ function returnFromPlayer(){
 }
 
 document.getElementById('blogo').src=LOGO;
-/* Reset réservé enseignant : appui long (2 s) sur le logo ALAQ en haut à gauche */
-(function(){
-  const b=document.getElementById('brand');if(!b)return;
-  let t=null;
-  const startp=()=>{ clearTimeout(t); t=setTimeout(()=>{t=null;resetProgress();},2000); };
-  const stop=()=>{ if(t){clearTimeout(t);t=null;} };
-  b.addEventListener('touchstart',startp,{passive:true});
-  b.addEventListener('touchend',stop);b.addEventListener('touchmove',stop);
-  b.addEventListener('mousedown',startp);
-  b.addEventListener('mouseup',stop);b.addEventListener('mouseleave',stop);
-})();
 /* fermer le menu des sourates au clic ailleurs */
 document.addEventListener('click',function(e){
   const m=document.getElementById('smenu');
   if(m&&!e.target.closest('.spick'))m.classList.remove('open');
 });
-/* PWA : service worker (fonctionnement hors ligne, audios en cache)
-
-   🔴 JAMAIS EN LOCAL (26/08) — ce sw a coûté TROIS JOURS de tests faussés à
-   Myriam. Son cache d'images ressert les octets vus la PREMIÈRE fois sous un
-   nom donné : les `*-clair.png` de l'unité 9 ayant d'abord été de simples
-   COPIES des versions sombres, le navigateur a gardé l'image sombre sous le
-   nom `-clair` et la reservait à chaque test, quoi qu'il y ait sur le disque.
-   Le piège est SILENCIEUX : « vider le cache du navigateur » n'y touche pas
-   (le Cache Storage du sw n'est pas le cache HTTP — il faut cocher « cookies
-   et autres données de site »), et rien à l'écran ne dit que l'image affichée
-   n'est pas celle du fichier. En local on veut TOUJOURS le disque ; le
-   hors-ligne ne sert qu'aux élèves, donc uniquement en production.
-
-   ⚠️ ET ON DÉSINSCRIT CE QUI TRAÎNE : ne plus appeler `register()` ne suffit
-   pas — un sw déjà enregistré sur localhost continue de contrôler la page pour
-   toujours. On le retire et on vide ses caches, sinon le correctif ne répare
-   que les machines qui n'ont jamais ouvert l'app. Sans effet en prod. */
+/* Service worker (hors ligne, audios en cache). ⛔ jamais en local : son cache ressert les octets vus la
+   première fois sous un nom, et « vider le cache » du navigateur n'y touche pas. ⚠️ en local on désinscrit
+   aussi ce qui traîne et on vide ses caches, sinon un sw déjà posé contrôle la page pour toujours.
+   (journal : index.html · le service worker en local) */
 if('serviceWorker'in navigator&&location.protocol!=='file:'){
   const enLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname==='[::1]';
   if(enLocal){
     navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
     if(window.caches)caches.keys().then(ks=>ks.forEach(k=>caches.delete(k))).catch(()=>{});
   }else{
-    /* 31/08 : une installation de sw qui échoue était TOTALEMENT silencieuse —
-       l'élève restait sur l'ancienne version sans que personne le sache. */
+    /* une installation qui échoue n'est jamais silencieuse : un ticket part */
     try{navigator.serviceWorker.register('sw.js')
       .catch(function(err){try{tikEnvoyer('sw',String(err&&err.message||err).slice(0,300))}catch(e){}});}catch(e){}
   }
@@ -2082,8 +1192,8 @@ setInterval(function(){ try{
   var pl=document.getElementById('player');
   if(pl&&pl.classList.contains('on')&&document.visibilityState==='visible')objAddSec(15);
 }catch(e){} },15000);
-/* Supabase est en defer (il ne bloque plus le premier rendu) : on le branche quand il est là.
-   Les scripts defer s'exécutent AVANT DOMContentLoaded — window.supabase est donc garanti ici. */
+/* Supabase est en defer, et un script defer s'exécute avant DOMContentLoaded : window.supabase est là.
+   ⚠️ SB est un let de progression.js : le réassigner ici écrit la même liaison, pas une copie. */
 document.addEventListener('DOMContentLoaded',function(){
   try{ if(window.supabase&&!SB)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
     {auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){}
@@ -2094,6 +1204,8 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){} // demande au navigateur de NE PAS purger le stockage (connexion + progression)
 
+/* ⚠️ le premier rendu est synchrone : refreshStats (qui appelle updRankBadge sans garde) et showTab('home').
+   Tout ce qu'ils touchent doit venir d'un script classique chargé plus haut. */
 refreshStats();
 showTab('home');
 /* alaq.fr ▸ « J'ai déjà un compte » arrive sur app.alaq.fr#connexion : l'écran de
@@ -2102,25 +1214,12 @@ if(location.hash==='#connexion'){
   try{history.replaceState(null,'',location.pathname);}catch(e){}
   setTimeout(function(){ try{ if(CLOUD.user){showTab('home');toast('Bon retour ✨');} else obLoginOpen(); }catch(e){} },200);
 } else if(location.hash==='#u9'){
-  /* raccourci de TEST pour Myriam (24/08) : ouvre directement U9-D1 sans passer par
-     l'accueil ni la progression des 8 unités précédentes — startDisque() n'a AUCUN
-     verrou de progression (seul renderHome() grise un disque non atteint), donc
-     appeler startDisque(8,0) est déjà sûr en soi. Ne touche jamais S.done : la
-     progression réelle du compte reste intacte, c'est un pur raccourci d'écran.
-     ⚠️ BUG VÉCU ET CORRIGÉ le jour même : un délai FIXE (200ms, comme #connexion)
-     appelait startDisque AVANT que le module ES de l'unité 9 (`src/entree.js`,
-     chargé en `<script type="module">`, async par nature) ait publié
-     `window.__alaqU9` — `discsFor(8)[0].build()` rendait alors un tableau VIDE
-     (u9Disques() l'avale silencieusement, cf. son propre garde-fou), et
-     `renderStep()` sur une QUEUE vide saute tout droit à `finishDisque()` :
-     l'élève atterrissait sur « Leçon terminée ! 100 % » sans avoir vu un seul
-     écran. On ATTEND donc que le module soit réellement là, sans borne de
-     temps arbitraire — le module est petit, l'attente réelle est de l'ordre
-     de quelques dizaines de ms, jamais des 200ms qui suffisaient par chance
-     pour #connexion (qui ne dépend d'aucun module). */
+  /* Raccourci de test pour Myriam : ouvre U9-D1 sans passer par l'accueil, sans toucher S.done.
+     ⚠️ on attend que les modules soient publiés (__alaqU9 et le lecteur), jamais un délai fixe : trop
+     tôt, la file est vide et l'élève tombe sur « Leçon terminée ! 100 % ».
+     (journal : index.html · le raccourci #u9 partait trop tôt) */
   try{history.replaceState(null,'',location.pathname);}catch(e){}
   (function attendreModuleU9(essai){
-    /* 14/09 : et le LECTEUR lui-même est un module désormais — on l'attend au même titre */
     if(window.__alaqU9&&typeof window.__alaqU9.disque1==='function'&&typeof window.startDisque==='function'){
       try{startDisque(8,0);}catch(e){}
     } else if(essai<100){ setTimeout(function(){attendreModuleU9(essai+1);},50); }
@@ -2163,19 +1262,10 @@ if(location.hash==='#connexion'){
 })();
 </script>
 <script>
-/* ══════════════════════════════════════════════════════════════════════════
-   CIEL-V1 — la journée de marche.
-   Bloc ADDITIF : il n'entre dans aucune fonction existante. Il se greffe par
-   trois enveloppes (renderHome, showTab) et un écouteur de défilement propre.
-   Le retirer, c'est supprimer ce <script> et le bloc CSS jumeau.
-
-   Principe : une sourate = une journée. La position sur le sentier vaut
-   t = numéro d'unité + fraction parcourue dans l'unité ; comme une unité
-   contient 9 disques régulièrement espacés, TERMINER UNE LEÇON avance le
-   soleil d'un neuvième d'heure. Les 12 heures sont fixes et se répartissent
-   sur le nombre d'unités réellement construites : 7 aujourd'hui, 12 demain,
-   sans une ligne à changer ici.
-   ══════════════════════════════════════════════════════════════════════════ */
+/* ═══ CIEL-V1 : la journée de marche ═══
+   Bloc additif : il enveloppe renderHome et showTab, et écoute le défilement. Une sourate = une journée :
+   la position sur le sentier (t = numéro d'unité + fraction parcourue) fixe l'heure, et les 12 heures se
+   répartissent sur les unités présentes. Le retirer : ce bloc et son CSS jumeau. */
 (function(){
 'use strict';
 var RM = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2298,12 +1388,8 @@ function peindre(t){
   MO.style.opacity=F.mn; FI.style.opacity=F.fi; CA.style.opacity=F.fi;
   D1.style.fill=rs(F.du[0]); D2.style.fill=rs(F.du[1]);
   var av=Math.min(t,CIEL.length-1)/(CIEL.length-1);
-  /* le dromadaire ne se gare plus au campement (proposition Myriam 10/08, validée en
-     preview ciel v2) : il entre hors écran à GAUCHE (−14 %) et SORT hors écran à
-     DROITE (112 %) — « le lendemain », en haut du sentier, il revient de la gauche.
-     Il TRAVERSE le campement en passant DEVANT le feu (z-index:1 — derrière, on ne le
-     voyait pas). Le bornage lim et .arrive disparaissent : plus de lecture de
-     CA.offsetLeft à chaque frame. */
+  /* le dromadaire traverse d'un bord à l'autre (112 % → −14 %, hors écran aux deux bouts) et passe devant
+     le feu (z-index:1). (journal : index.html · le dromadaire traverse) */
   var xc=112-av*126;
   CV.style.left=xc+'%';
   poserSurLaCrete(CV, xc+5, 2);          // 5 % : le milieu de la bête, 2 px d'enfoncement
@@ -2331,8 +1417,7 @@ function position(){
   }
   return t;
 }
-/* les 12 heures se répartissent sur les unités RÉELLEMENT construites :
-   7 aujourd'hui, 12 quand la grammaire existera — rien à changer ici. */
+/* les 12 heures se répartissent sur les unités présentes sur l'accueil */
 function accorder(){
   var home=document.getElementById('home');
   var n=home?home.querySelectorAll('.unit-sec').length:0;
@@ -2369,15 +1454,10 @@ setTimeout(cielSync,300);
 })();
 </script>
 <script>
-/* ══════════════════════════════════════════════════════════════════════════
-   CIEL-V2 — bandeau à deux lignes, sommaire du parchemin, lanterne, portail.
-   Bloc ADDITIF comme le lot 1 : il enveloppe renderHome / refreshStats /
-   openSurahMenu sans réécrire une ligne de l'app.
-   Note de portée : les `const` de premier niveau (S, UNITS, SOURATES,
-   RANK_COLORS… — ces deux-là dans constance.js depuis le 16/09) vivent dans
-   l'environnement lexical GLOBAL, partagé entre
-   tous les <script> classiques de la page — ce bloc les lit directement.
-   ══════════════════════════════════════════════════════════════════════════ */
+/* ═══ CIEL-V2 : bandeau à deux lignes, sommaire du parchemin, lanterne, portail ═══
+   Bloc additif : il enveloppe renderHome et refreshStats, et remplace openSurahMenu. Il lit directement
+   les liaisons lexicales globales des scripts classiques (S, UNITS, SOURATES ; RANK_COLORS et rankFor
+   de constance.js). */
 (function(){
 'use strict';
 
@@ -2405,22 +1485,15 @@ function refaireBandeaux(){
   for(var u=0;u<B.length;u++){
     var U=UNITS[u]; if(!U) continue;
     var lettres=(U.letters||[]).join(' ');
-    /* ⚠️ IL AFFICHAIT LA PHASE, PAS LE SUJET — et il annulait donc en silence la
-       règle du 17/08 (« une unité dit son sujet : ses lettres si elle en a, son
-       `court` sinon »), que `renderHome` applique pourtant deux mille lignes plus
-       haut. Résultat : CINQ unités de suite annonçaient « Grammaire », un mot qui
-       n'apprend rien à personne, pendant que `court` portait déjà « L’article الـ »
-       et « بِ · عَلَى · لِ ». La phase ne sert plus que de dernier recours, pour les
-       unités non construites qui n'ont pas encore de sujet à annoncer. */
+    /* une unité dit son sujet : ses lettres, sinon son court ; la phase n'est qu'un dernier recours
+       (unités sans sujet). (journal : index.html · le bandeau affichait la phase) */
     var sujet = lettres
       ? 'Lettres <span class="uh-let">'+lettres+'</span>'
       : (U.court ? arEnveloppe(insecables(U.court),'uh-let')
                  : phaseDe(U).charAt(0)+phaseDe(U).slice(1).toLowerCase());
     B[u]={ top:titre,
-      /* ⚠️ ESPACE INSÉCABLE AVANT LE DEUX-POINTS — la règle française, et ici elle
-         règle un vrai défaut : sans elle la coupure du titre replié tombait AVANT le
-         signe, et la 2ᵈᵉ ligne s'ouvrait sur « : L’annexion ». L'espace qui SUIT reste
-         sécable : c'est là, et là seulement, que le titre a le droit de se plier. */
+      /* ⚠️ espace insécable avant le deux-points, sinon la 2de ligne s'ouvre sur « : ». L'espace qui suit
+         reste sécable : c'est là seulement que le titre peut se plier. */
       title:'<span class="uh-l1">Unité '+U.no+'\u00A0: '+sujet+'</span>' };
   }
   var bn=document.getElementById('unitBanner');
@@ -2544,15 +1617,11 @@ function ouvrirHalte(){
   e.classList.add('on');
 }
 
-/* Le portail reste ÉTEINT tant que la sourate n'est pas achevée : il s'allume
-   quand la dernière leçon de la dernière unité disponible est terminée. */
+/* Le portail reste éteint tant que le parcours de la sourate n'est pas achevé. */
 function majPortail(){
   var d=document.getElementById('portail'); if(!d) return;
-  /* 11/08 — Myriam : « qu'elle ne soit pas active tant qu'on n'a pas atteint la dernière
-     étape du parcours de la Fātiḥa ». On n'exige plus la seule DERNIÈRE unité prête, mais
-     TOUT le parcours : chaque unité qui a des lettres doit être validée. Plus robuste quand
-     une unité s'ajoute, et fidèle à ce que la porte raconte — on sort quand on a tout lu.
-     ⚠️ `verrouille` porte aussi pointer-events:none : un toucher ne l'atteint même plus. */
+  /* chaque unité prête qui a des lettres doit être validée : tout le parcours, pas la seule dernière unité.
+     ⚠️ verrouille porte aussi pointer-events:none. (journal : index.html · le portail de la Fātiḥa) */
   var reste=[], u;
   for(u=0;u<UNITS.length;u++){
     var U=UNITS[u];
@@ -2581,18 +1650,9 @@ window.__ciel2={feuille:ouvrirFeuille, portail:poserPortail, bandeaux:refaireBan
 try{ poserLanterne(); refaireBandeaux(); poserPortail(); }catch(e){}
 })();
 </script>
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     L'UNITÉ 8 — modules ES, chargés par le navigateur (POC-1, 18/08/2026).
-     Un module est TOUJOURS différé : il s'exécute après tous les blocs
-     classiques ci-dessus, et avant DOMContentLoaded.
-     (⚠️ on n'écrit PAS la balise en toutes lettres dans ce commentaire :
-      outils/verifier-syntaxe.js extrait les blocs par expression régulière,
-      sans notion de commentaire HTML — il prendrait cette phrase pour du JS.) C'est exactement la
-     fenêtre qu'il faut — l'app a fini de publier son contrat, et rien de son
-     premier rendu ne touche à l'unité 8 (mesuré, pas supposé).
-     ⚠️ Chemin RELATIF, comme tout le reste de la page : il vaut aussi bien
-     servi depuis la racine (app.alaq.fr) que depuis /alaq-vercel-static/ en
-     local et dans les harnais.
-     ══════════════════════════════════════════════════════════════════════ -->
+<!-- Le point d'entrée des modules (src/entree.js : le lecteur, les gabarits, les exercices, les unités 8+).
+     Différé : il s'exécute après tous les scripts classiques et avant DOMContentLoaded. Chemin relatif :
+     il vaut à la racine (app.alaq.fr) comme sous /alaq-vercel-static/ en local.
+     ⚠️ ne jamais écrire la balise dans un commentaire : outils/verifier-syntaxe.js lit les blocs par regex. -->
 </body>
 </html>
