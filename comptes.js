@@ -7,14 +7,13 @@
      délégation des clics sur #onb .ob-opt, onbPrenomInput, et l'écran « Sauvegarde ta progression » :
      obAccTitle, showObAccount, obAccountClose, obLaterWarn, obLaterCancel, obLaterConfirm ;
    · le prénom / la kunya : nomChoisiHTML, openPrenom, closePrenom, savePrenom ;
-   · l'effacement : resetProgress, cancelReset, doReset, et l'appui long de 2 s sur le logo (#brand) ;
-   · le code de sauvegarde « ALAQ1. » : exportSave, toggleRestore, importSave.
+   · l'effacement : resetProgress, cancelReset, doReset, et l'appui long de 2 s sur le logo (#brand).
    ⚠️ Le moteur de synchronisation (SB, CLOUD, cloudPull, cloudInit, SYNC…) vit dans progression.js.
+   ⚠️ Une page ne parle qu'au nom d'un compte : quand un autre tient la session, cloudVerify se tait,
+   cloudLogout et doReset rechargent sans rien toucher (voir « un compte par page », progression.js).
    ⚠️ L'état de l'onboarding (ONB, obAccountPending, pendingStreak) reste en let dans index.html :
    une seule instruction les déclare, et pendingStreak est l'état du joueur.
    ⚠️ escHTML, l'échappeur de toute l'app, reste lui aussi dans index.html.
-   ⚠️ Dette connue : le code de sauvegarde n'a aucun appelant, et #restoreBox / #restoreIn n'existent
-   nulle part — son retrait est une décision de Myriam.
 
    Script classique, jamais un module. Aucune ligne du premier rendu ne l'appelle : ses pannes
    seraient donc muettes.
@@ -32,8 +31,8 @@
    AU CHARGEMENT : deux instructions agissent, et ne lisent que le DOM — la délégation des clics
    posée sur document et l'appui long posé sur #brand. ⛔ Rien d'un autre script.
    À L'APPEL seulement — et cette liste EST le contrat, gardée par le banc :
-   S, DEF, save, SB, CLOUD, SYNC, _syncT, cloudPull (progression.js)
-   · maybeGhufranPrompt (constance.js) · renderHome, refreshStats
+   S, DEF, save, SB, CLOUD, SYNC, _syncT, cloudPull, _avecGarde, _sessionMienne (progression.js)
+   · maybeGhufranPrompt (constance.js) · renderHome
    (ui/accueil.js) · showTab (ui/navigation.js) · renderProg (ui/parametres.js)
    · startDisque (src/player, module) · toast, returnFromPlayer, lecteurPret,
    currentLesson, escHTML, ONB, obAccountPending (index.html).
@@ -101,7 +100,12 @@ async function cloudVerify(){
   try{
     const r=await SB.auth.verifyOtp({email:window._cloudEmail, token:code, type:'email'});
     if(r&&r.error)throw r.error;
+    /* Un AUTRE compte que celui de la page : l'écouteur de cloudInit l'a condamnée, elle recharge.
+       Ni accueil de l'ancien compte, ni save() sur son état. */
+    try{ if(SYNC.redemarre())return; }catch(_){}
     CLOUD.user=r.data&&r.data.user;
+    /* la session vient de CETTE page : seule cette origine autorise la revendication persistante (progression.js) */
+    try{ if(typeof _sessionMienne==='function')_sessionMienne(); }catch(_){}
   }catch(e){ toast('Code invalide ou expiré'); return; }
   var _mk=null; try{var _me=document.getElementById('cloudMkt'); if(_me)_mk=_me.checked?1:0;}catch(_){}
   toast('Connectée, ماشاء الله ✨');
@@ -116,16 +120,33 @@ async function cloudVerify(){
   if(ov&&ov.classList.contains('on')){ ov.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; try{returnFromPlayer();}catch(_){ try{renderHome();}catch(_){}} }
 }
 async function cloudLogout(){
+  /* ⛔ Pas la session d'un AUTRE compte déjà visible (onglet resté ouvert) : signOut a une portée globale et la
+     fermerait sur tous ses appareils. On recharge au lieu de déconnecter. ⚠️ Revérifié juste avant
+     signOut : un autre compte peut arriver PENDANT les attentes. (journal : comptes.js · la déconnexion revérifiée)
+     ⚠️ « Déjà visible », pas « jamais » : signOut relit LUI-MÊME le stockage, sans verrou (l'option lock de
+     supabase-js est dépréciée et nulle par défaut en 2.116.0). Une session écrite par un autre onglet entre
+     notre relecture et la sienne part dans le logout GLOBAL — quelques microtâches, et fermer cette course
+     demande un changement de code (journal : comptes.js · la course qui reste).
+     ⛔ getSession SANS délai de garde : signOut attend tout ce qu'il attend ; à l'échéance, « inconnu » passait
+     pour « même compte » et signOut partait sous le jeton de B. (journal : comptes.js · la session lente) */
+  try{ if(SB&&CLOUD.user){ var _gs=await SB.auth.getSession();
+    var _su=_gs&&_gs.data&&_gs.data.session&&_gs.data.session.user;
+    if(_su&&_su.id!==CLOUD.user.id){ location.reload(); return; } } }catch(e){}
   // ⛔ La progression de ce compte ne doit jamais passer au compte suivant sur cet appareil :
   // on vide la mémoire locale puis on recharge l'app (tout repart par le démarrage normal).
   /* Avant le signOut (après, plus de jeton : tout partirait en 401), la file court une dernière fois :
      bornée à 1,5 s, et hors ligne la main est rendue tout de suite. ⚠️ Dette : le signOut lui-même n'a aucun délai de garde
      (journal : comptes.js · signOut sans délai). */
   try{ if(typeof SYNC!=='undefined'&&SYNC&&SYNC.avantDeconnexion)await SYNC.avantDeconnexion(); }catch(e){}
+  try{ if(SYNC.redemarre()){ location.reload(); return; } }catch(e){}
+  /* signOut relit lui-même la session dans le stockage : on la relit juste avant, sans attente entre les deux */
+  try{ if(typeof SYNC.ailleurs==='function'&&SYNC.ailleurs()){ location.reload(); return; } }catch(e){}
   try{ if(SB)await SB.auth.signOut(); }catch(e){}
   CLOUD.user=null;
   try{ clearTimeout(_syncT); }catch(e){}
-  try{ localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){} // appareil marqué « vierge » : au prochain login, le nuage fait foi
+  // appareil marqué « vierge » : au prochain login, le nuage fait foi. ⚠️ Sauf page condamnée PENDANT signOut : le disque est déjà celui du compte suivant.
+  // ⚠️ typeof : devant un progression.js de la 3.18 (course d'activation du service worker), le disque est vidé comme en 3.18.
+  try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre()))localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){}
   location.reload();
 }
 function cloudCardHTML(mode){
@@ -200,7 +221,7 @@ function verrouConnexion(){
   try{
     if(!SB)return;              // ① on ne peut pas savoir → on n'enferme pas
     if(CLOUD.user)return;       // connectée : rien à faire
-    if(!S._uid)return;          // ② appareil qui n'a jamais eu de compte : inscription libre
+    if(!S._uid&&!S._uidVu)return;          // ② appareil qui n'a jamais eu de compte (ni lu, ni REVENDIQUÉ) : inscription libre
     VERROU_CONNEXION=true;
     try{ document.getElementById('player').classList.remove('on'); }catch(e){}
     try{ document.getElementById('finish').classList.remove('on'); }catch(e){}
@@ -308,53 +329,46 @@ function showObAccount(){
 function obAccountClose(){ var o=document.getElementById('obAccount'); o.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; returnFromPlayer(); } // vider la carte : pas de #cloudEmail en double avec Progrès
 function resetProgress(){ document.getElementById('confirmReset').classList.add('on'); }
 function cancelReset(){ document.getElementById('confirmReset').classList.remove('on'); }
-function doReset(){
-  /* En première ligne, l'ordre est tout le sujet : les entrées en attente décrivent la progression
-     qu'on efface. SYNC.reset() vide la file, pose l'intention de purge distante et annonce la
-     réaffectation de S qui suit, pour
-     que le garde du diff ne la prenne pas pour une quatrième, inconnue. */
+async function doReset(){
+  /* ⛔ Décision de Myriam (17/09) : page (CLOUD.user, S._uid ou _uidVu), session du stockage et disque à deux
+     comptes → rien d'effacé, aucune purge, rechargement. ⚠️ L'onclick n'attend pas : sans compte tout reste
+     synchrone, et une session muette n'empêche pas l'effacement (inconnu n'est pas divergent). (journal : comptes.js · l'effacement refusé)
+     ⚠️ La confirmation se ferme AVANT l'attente : ouverte pendant, ANNULER promettait une annulation qui n'annulait rien. */
+  try{ document.getElementById('confirmReset').classList.remove('on'); }catch(e){}
+  try{
+    var page=function(){ var c=CLOUD.user&&CLOUD.user.id, p=S&&(S._uid||S._uidVu);
+      return ((c&&p&&c!==p)||(SYNC.redemarre&&SYNC.redemarre())||(typeof SYNC.ailleurs==='function'&&SYNC.ailleurs()))?false:(c||p||null); };
+    if(page()===false){ location.reload(); return; }
+    if(SB&&page()){
+      var su=null;
+      try{ var g=await _avecGarde(SB.auth.getSession(),1500,'session avant effacement');
+           su=g&&g.data&&g.data.session&&g.data.session.user; }catch(e){}
+      var id=page();
+      if(id===false||(su&&su.id!==id)){ location.reload(); return; }
+    }
+  }catch(e){}
+  /* En première ligne de l'effacement, l'ordre est tout le sujet : les entrées en attente décrivent la
+     progression qu'on efface. SYNC.reset() vide la file, pose l'intention de purge distante et annonce
+     la réaffectation de S qui suit, pour
+     que le garde du diff ne la prenne pas pour une réaffectation inconnue. */
   try{ SYNC.reset(); }catch(e){}
   try{localStorage.removeItem('alaq2');}catch(e){}
   /* Le tampon _refonte survit à l'effacement : il décrit ce que cet appareil sait du serveur, pas la
      progression. Sans lui, un cloudPull joué avant la purge distante adopterait le blob du nuage et
      rendrait la progression effacée (journal : comptes.js · le tampon de refonte survit). */
   var _refonteAvant=+(S&&S._refonte)||0;
+  var _uidAvant=S&&S._uid, _vuAvant=S&&S._uidVu;
   S=Object.assign({},DEF,{done:{},tests:{}});
   if(_refonteAvant)S._refonte=_refonteAvant;
   /* L'état neuf appartient à l'élève connectée, on le dit (_uid) : DEF ne le porte pas, et sans lui la
      purge distante ne partait jamais et le nuage rendait la progression effacée
-     (journal : comptes.js · l'effacement rendait la progression). */
-  try{ if(typeof CLOUD!=='undefined'&&CLOUD&&CLOUD.user)S._uid=CLOUD.user.id; }catch(e){}
+     (journal : comptes.js · l'effacement rendait la progression). ⚠️ Jamais si l'état effacé était
+     celui d'un AUTRE compte : il ne devient pas le sien. ⚠️ Sans session (hors ligne, SB nul), il garde
+     son propriétaire : sans marque, la relance en ligne rendait les leçons effacées par la fenêtre de migration. */
+  try{ if(typeof CLOUD!=='undefined'&&CLOUD&&CLOUD.user){ if(!_uidAvant||_uidAvant===CLOUD.user.id)S._uid=CLOUD.user.id; }
+       else if(_uidAvant)S._uid=_uidAvant; else if(_vuAvant)S._uidVu=_vuAvant; }catch(e){}
   save();
-  document.getElementById('confirmReset').classList.remove('on');
   renderHome();
-}
-
-/* ===== Sauvegarde / restauration de la progression ===== */
-function exportSave(btn){
-  try{
-    const code='ALAQ1.'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
-    const done=()=>{ if(btn)btn.textContent='✅ Code copié !'; setTimeout(()=>{if(btn)btn.textContent='📋 Copier mon code de sauvegarde';},2200); toast('Code copié — garde-le dans tes notes 📝'); };
-    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(code).then(done,()=>{prompt('Copie ce code :',code);});
-    else prompt('Copie ce code :',code);
-  }catch(e){toast('Impossible de créer le code');}
-}
-function toggleRestore(){const b=document.getElementById('restoreBox');if(b)b.style.display=b.style.display==='none'?'block':'none';}
-function importSave(){
-  try{
-    const el=document.getElementById('restoreIn');
-    let code=(el&&el.value||'').trim();
-    if(code.indexOf('ALAQ1.')!==0){toast('Ce code ne ressemble pas à un code ALAQ 🤔');return;}
-    const obj=JSON.parse(decodeURIComponent(escape(atob(code.slice(6)))));
-    if(!obj||typeof obj.done!=='object'){toast('Code incomplet');return;}
-    S=Object.assign({},DEF,obj);
-    if(!S.err)S.err={};if(!S.badges)S.badges={};if(!S.tests)S.tests={};if(!S.letSeen)S.letSeen={};
-    /* Troisième réaffectation de S : SYNC.importe() repose le marqueur du diff et marque le contenu
-       importé « à ne jamais déclarer » — un code ALAQ1. est un texte que l'élève peut éditer. */
-    try{ SYNC.importe(); }catch(_){}
-    save();refreshStats();renderProg();
-    toast('✅ Progression restaurée, ماشاء الله !');
-  }catch(e){toast('Code invalide — vérifie la copie');}
 }
 
 /* Reset réservé enseignant : appui long (2 s) sur le logo ALAQ en haut à gauche */

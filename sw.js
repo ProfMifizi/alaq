@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v221-2026-09-17';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v222-2026-09-18';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -18,6 +18,14 @@ const MEDIA='alaq-medias';
    (journal : sw.js · images retouchées trois fois sous le même nom) */
 const IMGV=17;
 const IMGCACHE='alaq-images-v'+IMGV;
+/* LE BUNDLE supabase-js, PRÉ-CACHÉ. Sans lui SB reste nul : ni connexion ni synchro. Il était rangé
+   dans MEDIA au premier passage RÉUSSI au réseau seulement — donc le premier démarrage HORS LIGNE
+   après une livraison qui change son URL n'avait aucun client.
+   ⛔ EXACTEMENT l'URL de la balise d'index.html : elle porte integrity, et une autre URL = un autre
+   fichier (garde : verifier-sw-horsligne.mjs, qui la DÉRIVE de la balise).
+   ⛔ Hors de CORE : addAll est atomique, le CDN ferait échouer toute l'installation.
+   (journal : sw.js · le bundle supabase pré-caché) */
+const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js';
 const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 /* Chemins du cœur résolus contre l'URL du sw (racine en prod, sous-dossier en local), dérivés
    à l'exécution : ce que le build ajoute à CORE (le paquet u8) y entre tout seul. */
@@ -556,10 +564,29 @@ const AUDIOS=[
 "audios-app-alaq/ya-waw-son-prolonge.mp3",
 "audios-app-alaq/ya-ya-son-prolonge.mp3",];
 
+/* Le bundle supabase-js dans MEDIA (jamais purgé : l'URL porte la version, le contenu est immuable).
+   ⛔ Tout est avalé : jsDelivr injoignable ne doit JAMAIS faire échouer l'installation — l'app
+   s'ouvrirait sans rien en avion. Deuxième chance après le premier rendu (precacheLourd).
+   ⛔ mode 'cors' : la balise porte integrity+crossorigin, donc sa requête est cors ; une réponse
+   OPAQUE lui serait refusée, et integrity ne peut pas vérifier une réponse opaque.
+   ⚠️ Prix assumé : un CDN qui traîne retarde skipWaiting de 8 s au plus — l'ancien sw sert pendant
+   ce temps, personne ne voit rien. */
+async function pecherSupabase(){
+  try{
+    const c=await caches.open(MEDIA);
+    if(await c.match(SUPABASE_JS))return;
+    const stop=new AbortController(), t=setTimeout(()=>{try{stop.abort()}catch(_){}},8000);
+    try{
+      const r=await fetch(SUPABASE_JS,{mode:'cors',credentials:'omit',signal:stop.signal});
+      if(r&&r.ok)await c.put(SUPABASE_JS,r);
+    }finally{ clearTimeout(t); }
+  }catch(_){ }
+}
 self.addEventListener('install',e=>{
   e.waitUntil((async()=>{
     const c=await caches.open(CACHE);
     await c.addAll(CORE);   // le cœur SEULEMENT : l'installation doit être rapide
+    await pecherSupabase();
     self.skipWaiting();
   })());
 });
@@ -580,6 +607,7 @@ async function enFile(liste,c,n){
 }
 async function precacheLourd(){
   if(_preFait)return; _preFait=true;
+  await pecherSupabase();   // deuxième chance si le CDN était injoignable à l'installation
   await enFile(IMAGES,await caches.open(IMGCACHE),6); // les images dans LEUR cache versionné
   await enFile(AUDIOS,await caches.open(MEDIA),6);
 }

@@ -23,7 +23,16 @@
      réseau. Produites par outils/rapatrier-polices.js ; Noto Naskh Arabic et Nunito sous SIL OFL. -->
 <link rel="stylesheet" href="polices/polices.css">
 <link rel="stylesheet" href="app.css">
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- supabase-js FIGÉ sur 2.116.0 (Myriam, 17/09) : l'isolation lit son format de session et épingle son
+     jeton (setHeader). ⛔ CHEMIN EXPLICITE OBLIGATOIRE avec integrity : l'URL courte (@2.116.0 nu) est un
+     fichier GÉNÉRÉ par jsDelivr — même code, coiffé d'une bannière de 292 octets qui dit elle-même « Do NOT
+     use SRI with dynamically generated files ». ⛔ crossorigin aussi : sans lui la réponse est opaque et
+     integrity la refuse. ⚠️ Changer de version = recalculer l'empreinte (openssl dgst -sha384 -binary | base64)
+     ET revérifier session.user.id et setHeader dans le bundle à la main, que rien ne garde.
+     Un seul contrôle l'ÉPROUVE : _verif_sync_nuage.html ⑦/⑦bis, qui rougit si le bundle n'a pas chargé.
+     ⚠️ Cette URL est aussi celle de SUPABASE_JS dans sw.js (pré-cache) : les deux ne se divisent jamais.
+     (journal : index.html · le SRI sur le bundle supabase-js) -->
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js" integrity="sha384-iLddHTLokph6Omwoyid4XKxHaWa6w41BnoEj0q5oOrzmYPpHIKt1wyjReA7s//pP" crossorigin="anonymous"></script>
 <script>
 /* ⚠️ avant tout affichage : sinon l'app apparaît en sombre puis bascule, un clignotement. */
 (function(){try{var h=document.documentElement;
@@ -388,7 +397,7 @@
      pas entre ui/reviser.js et revision.js (garderLaRevision() refuserait le build).
      Voir l'en-tête de constance.js. (journal : index.html · constance.js reste classique) -->
 <script src="constance.js"></script>
-<!-- Comptes et entrée dans l'app (connexion, verrou, onboarding, prénom, effacement, code de sauvegarde).
+<!-- Comptes et entrée dans l'app (connexion, verrou, onboarding, prénom, effacement).
      Classique : les minuteries de fin du grand script lancent onbStart et obLoginOpen de comptes.js, et
      des gestes en ligne du HTML l'appellent ; en module, la course n'est pas garantie et une panne ne
      laisse aucune trace. ⚠️ seule place mesurée sûre : sous constance.js, juste avant le grand script.
@@ -414,7 +423,7 @@
    · revision.js          le hub Réviser : le Qorān et ses voix, startReview, finishReview, NOMS_ALLAH
    · constance.js         rangs, succès (checkBadges), graines, objectif du jour, série, Ghufrān, majJour
    · comptes.js           connexion, verrou, onboarding (onbStart), prénom, effacement (doReset et
-                          l'appui long sur le logo), code de sauvegarde
+                          l'appui long sur le logo)
    · src/player/index.js  module : startDisque, renderStep, ctaClick, advance, finishDisque, ecranRate
    · src/ecrans/index.js  module : les gabarits des unités 1 à 7 (setupDrag, asmSaisie, setupRead,
                           objectifAtteint)
@@ -441,7 +450,7 @@ const U8_TALON = {
 let U8 = U8_TALON;
 
 /* Le contrat de l'unité 8. ⚠️ l'état passe par des accesseurs, jamais par une copie : S est réaffecté
-   (cloudPull, réinitialisation, code de sauvegarde), QUEUE et MISSED repartent à zéro à chaque leçon.
+   (cloudPull, réinitialisation), QUEUE et MISSED repartent à zéro à chaque leçon.
    Une référence capturée serait morte : cœurs écrits dans un objet jeté, MISSED retombé dans la boucle
    de rattrapage du 17/08. Les fonctions déclarées, elles, peuvent être capturées. */
 
@@ -599,18 +608,18 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='comptes-externe-17sept';
+const BUILD='comptes-isolation-18sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-09-17T09:50';
+const BUILD_DATE='2026-09-18T11:29';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android. */
-const VERSION='3.18';
-const BUILD_NUM=221;
+const VERSION='3.18.1';
+const BUILD_NUM=222;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */

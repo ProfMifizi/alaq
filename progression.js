@@ -10,7 +10,7 @@
    (parcours.js), buildForms (generateurs.js). Le contrat du moteur de synchro est en tête de
    sa section.
    ⚠️ window.S est un accesseur, jamais une capture : S est un let, réaffecté par cloudPull
-   (ce fichier), doReset et importSave (comptes.js). Les function sont déjà des propriétés de
+   (ce fichier) et doReset (comptes.js). Les function sont déjà des propriétés de
    window, les let/const non.
    Gardes : outils/verifier-progression.mjs, previews/_verif_progression.html,
    outils/verifier-sync-nuage.mjs. */
@@ -24,17 +24,48 @@ const DEF={xp:0,done:{},tests:{},hearts:7,streak:0,lastDay:null,heartDay:null,qa
    DEF.done, et une leçon écrite dans la constante passerait au compte suivant connecté sans
    rechargement. (journal : progression.js · DEF partagé par référence) */
 function _neuf(){ return Object.assign({},DEF,{done:{},tests:{}}); }
-function load(){try{return Object.assign(_neuf(),JSON.parse(localStorage.getItem('alaq2')||'{}'))}catch(e){return _neuf()}}
+function load(){try{var t=localStorage.getItem('alaq2');_marqueVue=_marque(t?JSON.parse(t):null);return Object.assign(_neuf(),JSON.parse(t||'{}'))}catch(e){return _neuf()}}
+/* À qui est un état : _uid (nuage lu), sinon _uidVu (revendiqué par la page connectée, lecture jamais réussie),
+   '·vierge' (_fresh, donc à PERSONNE), '' (personne). ⛔ _uidVu ne compte jamais comme « même compte » dans
+   l'arbitrage. (journal : progression.js · la page sans _uid) */
+function _marque(x){ return (x&&typeof x==='object')?(x._uid||x._uidVu||(x._fresh?'·vierge':'')):''; }
+/* La page est condamnée — un AUTRE compte (_autreCompteArrive), ou un effacement fait ailleurs
+   (_disqueEfface) : elle recharge, et d'ici là ne relit, n'envoie ni n'ÉCRIT plus alaq2. Déclaré
+   avant save(). (journal : progression.js · une page condamnée n'écrit plus alaq2) */
+let _autreCompte=false;
+let _marqueVue='';      // la marque d'alaq2 tel que CETTE page l'a lu ou écrit en dernier
+let _sessionLue=false;  // cloudInit a lu la session : sans CLOUD.user, S._uid/_uidVu disent alors le compte de la page
+/* ⛔ REVENDIQUER N'EST PAS CONSTATER — les deux idées que _uidVu confondait (journal : progression.js · revendiquer
+   n'est pas constater). _vuSession : une session de ce compte est PASSÉE sur l'appareil (diffusion, écrit de
+   stockage) — volatile, jamais écrite dans S ni sur le disque, elle ne sert qu'à SE TAIRE. _sessionAMoi : la
+   session vient de CETTE page — posé par cloudInit au démarrage et par cloudVerify (comptes.js) quand le code
+   est validé —, et lui seul autorise S._uidVu. */
+let _vuSession='';      // le PREMIER compte dont cette page a vu la session
+let _sessionAMoi=false;
+/* ⛔ Avant d'écrire alaq2, trois gardes SYNCHRONES (supabase-js peut n'avoir encore rien dit : dégel, onglet périmé).
+   Condamnée, la page n'écrit pas ; son état est mis de côté. (journal : progression.js · les gardes d'écriture) */
+function _ecrireS(){
+  if(_autreCompte)return;
+  var id=_sessionDAutrui();
+  if(id||_disqueDAutrui()){
+    if(id)_autreCompteArrive(id); else _seTaire();
+    _mettreDeCote(S);
+    return;
+  }
+  /* ③ le MÊME compte a effacé ailleurs : rien n'est mis de côté (ce serait garder ce qu'on vient d'effacer) */
+  if(_disqueEfface()){ _effacementAilleurs=true; _seTaire(); return; }
+  localStorage.setItem('alaq2',JSON.stringify(S)); _marqueVue=_marque(S);
+}
 /* save() date S._ts, déclare au serveur (_semerLeDiff) et envoie au nuage (cloudSaveSoon) :
    réservée à une vraie progression. */
-function save(){try{S._ts=Date.now();localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){} _semerLeDiff(); cloudSaveSoon();}
+function save(){try{S._ts=Date.now();_ecrireS()}catch(e){} _semerLeDiff(); cloudSaveSoon();}
 /* saveLocal() écrit sur l'appareil, rien d'autre : ni date, ni déclaration, ni envoi.
    ⛔ Jamais pour une progression (leçon, cœur perdu, mot révisé, minutes d'objectif, score de
    constance) : elle ne rejoindrait jamais le nuage. Réservée à ce qui se recalcule seul sur
    chaque appareil (ménage du démarrage, migrations). ⚠️ Inversement, un save() de ménage au
    chargement rajeunit S._ts : cloudPull donnerait raison au dernier appareil ouvert, même plus
    pauvre, et le pousserait dans le nuage. (journal : progression.js · l'horodatage mentait) */
-function saveLocal(){try{localStorage.setItem('alaq2',JSON.stringify(S))}catch(e){}}
+function saveLocal(){try{_ecrireS()}catch(e){}}
 
 let S=load();
 /* window.S : un accesseur, jamais une capture (voir l'en-tête). */
@@ -75,13 +106,17 @@ function setDone(u,i,v){
    Dans ce fichier parce qu'il a besoin de S, save() et saveLocal(), et que la file hors ligne
    doit exister dès le premier rendu. Au chargement, rien que des littéraux, un client Supabase
    sous try/catch (le CDN est defer : SB reste nul, et index.html le recrée au
-   DOMContentLoaded) et des écouteurs.
+   DOMContentLoaded) et des écouteurs — plus ceci, à connaître avant de se fier à cette ligne :
+   la clé de session est CALCULÉE depuis SUPA_URL (_CLE_SESSION) ; charger ce fichier LIT le
+   stockage deux fois (la file _OB, le registre _CONNU, par _lire), y ÉCRIT une fois (removeItem
+   'alaq_ignore_v1', la quarantaine ALAQ1 retirée le 17/09) et pose le marqueur du diff sur S
+   (_poserTag, une propriété non énumérable).
    ① Résolus à l'appel, jamais capturés : verrouConnexion, verrouLibere (comptes.js) ;
       tikEnvoyer (signalements.js) et BUILD_NUM (index.html), sous typeof ; _progVisible
       (constance.js) ; renderHome, refreshStats, _homeFocusPending (ui/accueil.js — un let que
       cloudPull réassigne) ; renderProg (ui/parametres.js).
    ② Lus ailleurs : index.html lit SB, CLOUD, SUPA_URL, SUPA_ANON, cloudInit et écrit SB ;
-      comptes.js lit S, DEF, save, SB, CLOUD, SYNC, _syncT, cloudPull ; signalements.js lit
+      comptes.js lit S, DEF, save, SB, CLOUD, SYNC, _syncT, cloudPull, _avecGarde, _sessionMienne ; signalements.js lit
       SUPA_URL, SUPA_ANON, CLOUD ; revision.js lit SB, SYNC ; ui/parametres.js lit SB, CLOUD,
       SYNC ; src/player lit SYNC (la portée lexicale globale est partagée).
    ⚠️ SB, CLOUD, _syncT, _syncPret sont des let/const : pas des propriétés de window.
@@ -94,8 +129,11 @@ let SB=null; try{ if(window.supabase)SB=window.supabase.createClient(SUPA_URL,SU
 const CLOUD={user:null};
 let _syncT=null;
 function cloudSaveSoon(){ if(!SB||!CLOUD.user)return; clearTimeout(_syncT); _syncT=setTimeout(cloudSaveNow,2000); }
-let _syncPret=false; // la première synchro de la session a-t-elle eu lieu ? (voir cloudSaveNow)
+let _syncPret=false; // le nuage de CE compte a-t-il été lu ? Retombe à la déconnexion et au changement de compte (voir cloudSaveNow)
 let _refonteVue=0;   // §7 : la state_migrated_at du DERNIER cloudPull réussi — jamais un défaut de 0 par ignorance
+/* Un ticket « lecture » par série d'échecs : hors ligne, chaque save() relit et évinçait les vrais tickets de la file.
+   (journal : progression.js · un ticket de lecture par série) */
+let _lectureSignalee=false;
 
 /* _avecGarde : aucun appel réseau sans délai de garde. Une requête qui ne se règle jamais (métro,
    portail captif) suspendrait cloudPull : _syncPret resterait faux et plus rien ne partirait, sans
@@ -115,13 +153,31 @@ function _ticketSync(quoi, e){
   try{ if(typeof tikEnvoyer==='function')
     tikEnvoyer('suspect','synchro — '+quoi+' : '+((e&&e.message)||e||'?')); }catch(_){}
 }
+/* ⚠️ Le compte qui ÉCRIT est celui du JETON, relu par supabase-js dans le stockage PARTAGÉ, jamais CLOUD.user.
+   Les RPC (sans RLS) et la lecture qui décide passent donc sous un jeton vérifié puis ÉPINGLÉ : le stockage
+   peut changer entre les deux. (journal : progression.js · le jeton d'un autre compte) */
+async function _sessionDe(uid,ms,quoi){
+  var g=await _avecGarde(SB.auth.getSession(),ms,'session avant '+quoi);
+  var s=g&&g.data&&g.data.session;
+  /* deux messages : une session illisible (hors ligne, jeton expiré) n'est pas un autre compte */
+  if(!s||!s.user)throw new Error('aucune session lisible (jeton expiré ou hors ligne) : '+quoi);
+  if(s.user.id!==uid)throw new Error('jeton d\'un autre compte : '+quoi);
+  return s;
+}
+function _epingle(q,s){
+  try{ if(s.access_token&&q&&typeof q.setHeader==='function')q.setHeader('Authorization','Bearer '+s.access_token); }catch(e){}
+  return q;
+}
+async function _rpcDe(uid,nom,args,ms,quoi){ var s=await _sessionDe(uid,ms,quoi); return _avecGarde(_epingle(SB.rpc(nom,args),s),ms,quoi); }
+async function _lireDe(uid,fabrique,ms,quoi){ var s=await _sessionDe(uid,ms,quoi); return _avecGarde(_epingle(fabrique(),s),ms,quoi); }
 async function cloudSaveNow(){
   try{ if(!SB||!CLOUD.user)return;
     /* ⚠️ On ne parle pas avant d'avoir écouté : tant que _syncPret est faux, on va lire le nuage,
        et cloudPull poussera lui-même si le local est le plus récent. Ce verrou ferme toute la
        classe des save() de démarrage. Pas de récursion : cloudPull pose _syncPret avant
-       d'appeler cloudSaveNow. (journal : progression.js · le filet structurel) */
-    if(!_syncPret){ await cloudPull(); return; }
+       d'appeler cloudSaveNow. (journal : progression.js · le filet structurel)
+       ⛔ Et jamais l'état d'un autre compte (S._uid) : on relit, le nuage de celui-ci tranche. */
+    if(!_syncPret||!S||S._uid!==CLOUD.user.id){ await cloudPull(); return; }
     /* L'identité se fige avant l'attente et se revérifie après (session expirée, compte changé).
        ⚠️ Puis on ne pousse jamais un état plus vieux que celui du nuage : un onglet resté ouvert
        des heures écraserait en silence ce qu'un autre appareil a fait entre-temps.
@@ -132,7 +188,7 @@ async function cloudSaveNow(){
     /* Une erreur n'est pas un nuage vide : sans ce garde, remote serait indéfini et l'envoi
        partirait comme si le nuage ne portait rien. */
     if(r&&r.error) throw r.error;
-    if(!CLOUD.user||CLOUD.user.id!==uid)return;   // le compte a changé pendant l'attente
+    if(!CLOUD.user||CLOUD.user.id!==uid||_autreCompte)return;   // le compte a changé, ou la page a été condamnée, pendant l'attente
     const remote=r&&r.data&&r.data.state;
     if(remote&&(remote._ts||0)>(S._ts||0))return;
     const w=await _avecGarde(SB.from('profiles').upsert({user_id:uid, prenom:S.prenom||null, state:S, updated_at:new Date().toISOString()}),
@@ -148,15 +204,23 @@ document.addEventListener('visibilitychange',function(){
   if(document.hidden&&_syncT){ clearTimeout(_syncT); _syncT=null; cloudSaveNow(); }
 });
 async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
-  try{ if(!SB||!CLOUD.user)return;
+  try{ if(!SB||!CLOUD.user||_autreCompte)return;   // une page qui recharge n'adopte rien
     /* l'identité se fige avant l'attente (voir cloudSaveNow) */
     const uid=CLOUD.user.id;
-    const r=await _avecGarde(SB.from('profiles').select('state,state_migrated_at').eq('user_id',uid).maybeSingle(),
-                             8000, 'lecture du profil au démarrage');
-    /* _syncPret ne se pose qu'après une lecture réussie : une erreur lève, le verrou reste fermé,
-       le prochain passage réessaie. (journal : progression.js · identité et erreurs de lecture) */
-    if(r&&r.error) throw r.error;
-    if(!CLOUD.user||CLOUD.user.id!==uid)return;   // le compte a changé pendant l'attente
+    /* avant toute attente : si la lecture échoue, l'état reste à ce compte. ⛔ Mais seulement si la session est
+       CELLE DE CETTE PAGE : arrivée d'un autre onglet (diffusion), elle ne fait que CONSTATER. */
+    if(_sessionAMoi)_prendreActe(uid); else _constater(uid);
+    /* _syncPret ne se pose qu'après une lecture réussie : une erreur rend la main, le verrou reste
+       fermé, le prochain passage réessaie. (journal : progression.js · identité et erreurs de lecture)
+       ⚠️ Jamais muette : la lecture en échec ouvrait l'écriture croisée sans laisser de trace. */
+    let r;
+    try{
+      r=await _lireDe(uid,function(){ return SB.from('profiles').select('state,state_migrated_at').eq('user_id',uid).maybeSingle(); },
+                      8000, 'lecture du profil au démarrage');
+      if(r&&r.error) throw r.error;
+    }catch(e){ if(!_lectureSignalee){ _lectureSignalee=true; _ticketSync('lecture',e); } return; }
+    _lectureSignalee=false;
+    if(!CLOUD.user||CLOUD.user.id!==uid||_autreCompte)return;   // le compte a changé pendant l'attente
     const remote=r&&r.data&&r.data.state;
     /* state_migrated_at est posée par le SERVEUR (ventilation, chaque effacement), jamais par un
        client : elle seule dit si ce contenu précède un effacement, ce que S._ts (horloge client
@@ -178,25 +242,26 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
        du VIDE, jamais son contenu : du périmé entré dans S serait repoussé au prochain save()
        (cloudSaveNow, _semerLeDiff). (journal : progression.js · la course RPC/upsert) */
     const _remotePerime = _reveille && (+((remote&&remote._ts)||0))<=_refonteServeur;
-    /* Fenêtre de migration : un état SANS _uid (d'avant le 17/08) ne se tranche ni à la date, ni
-       « nuage d'office » : on garde le plus RICHE (leçons cochées), le perdant va dans
-       alaq2_ecarte. Risque assumé : un appareil jamais déconnecté par son ancien propriétaire
-       peut imposer son état plus riche. (journal : progression.js · la fenêtre de migration) */
+    /* Fenêtre de migration : un état qui n'est à PERSONNE (ni _uid, ni _uidVu d'un autre compte) ne se
+       tranche ni à la date, ni « nuage d'office » : on garde le plus RICHE (leçons cochées), le perdant
+       va dans alaq2_ecarte. (journal : progression.js · la fenêtre de migration) */
     const richesse=function(x){ return x?Object.keys(x.done||{}).length:0; };
     let takeRemote;
-    /* ⚠️ Nuage vide ne veut pas dire « garder le local » : l'état d'un TIERS (_uid d'un autre
+    /* ⚠️ Nuage vide ne veut pas dire « garder le local » : l'état d'un TIERS (_uid, ou _uidVu, d'un autre
        compte) n'est ni gardé ni poussé, il est mis de côté comme tout perdant et le compte neuf
        part vierge. (journal : progression.js · nuage vide et appareil partagé) */
-    const _etranger = S._uid && S._uid!==CLOUD.user.id;
+    const _etranger = (S._uid && S._uid!==CLOUD.user.id) || (!S._uid && S._uidVu && S._uidVu!==CLOUD.user.id);
     if(!remote && _etranger){ takeRemote=true; }   // « prendre » un nuage vide = repartir de DEF
     else if(!remote) takeRemote=false;
     else if(S._fresh) takeRemote=true;
     else if(_reveille) takeRemote=true;   // un effacement jamais vu bat toute date (voir plus haut)
     else if(memeCompte) takeRemote=(remote._ts||0)>(S._ts||0);
-    else if(!S._uid) takeRemote=richesse(remote)>=richesse(S);  // fenêtre de migration : propriété INCONNUE
+    else if(!S._uid && !_etranger) takeRemote=richesse(remote)>=richesse(S);  // fenêtre de migration : propriété INCONNUE
     else takeRemote=true;  // _uid d'un AUTRE compte : la propriété est PROUVÉE, le nuage fait foi — sans heuristique
-    /* rien ne s'écrase en silence : l'état perdant est gardé sous une clé de côté */
-    try{ var _perdant=takeRemote?S:remote; if(richesse(_perdant)>0)localStorage.setItem('alaq2_ecarte',JSON.stringify(_perdant)); }catch(e){}
+    /* rien ne s'écrase en silence : l'état perdant est gardé sous une clé de côté — par _mettreDeCote,
+       comme tout le reste : alaq2_ecarte n'a qu'UNE place, et le plus riche la garde. Un perdant plus
+       pauvre que celui qui y dort n'y entre donc pas. (journal : progression.js · l'unique copie écrasée) */
+    _mettreDeCote(takeRemote?S:remote);
     /* Capturé avant que S change de main : ce que §7 aura le droit de livrer. Un état _fresh
        (« ne me fais pas confiance ») ne se livre pas plus qu'il ne se compare. */
     var _avantS=S, _vuDistant=remote, _vuMeme=memeCompte, _vuPris=takeRemote, _vuFresh=!!S._fresh;
@@ -209,11 +274,11 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
       S=_remotePerime ? _neuf() : Object.assign(_neuf(),remote);
       if(_remotePerime)S._ts=_refonteServeur;
       delete S._fresh;
-      /* Le marqueur du diff suit S (cloudPull est l'un des trois points de réaffectation connus),
-         sinon le diff se désarmerait à la première synchro descendante. Les deux autres, doReset
-         et importSave, vivent dans comptes.js. (journal : progression.js · le marqueur suit S) */
+      /* Le marqueur du diff suit S (cloudPull est l'un des points de réaffectation connus, avec
+         doReset dans comptes.js), sinon le diff se désarmerait à la première synchro descendante.
+         (journal : progression.js · le marqueur suit S) */
       try{ if(typeof _poserTag==='function')_poserTag(S); }catch(e){}
-      S._uid=CLOUD.user.id;                           // désormais cet appareil sait à qui est cet état
+      S._uid=CLOUD.user.id; delete S._uidVu;          // désormais cet appareil sait à qui est cet état
       S._refonte=Math.max(_refonteConnue,_refonteServeur);  // le tampon suit S, comme _uid (même contrat)
       S.done=S.done||{};S.tests=S.tests||{};S.err=S.err||{};S.rev=S.rev||{};S.letSeen=S.letSeen||{};S.revIn=S.revIn||{d:'',n:0};
       /* ⛔ S.rev est réservé au vocabulaire (palier, prochaine date) : une notion de grammaire ne
@@ -221,7 +286,11 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
          neuve évite toute migration de l'existant. */
       S.revGram=S.revGram||{};
       fixOrdreFormes(); // l'état du nuage peut venir d'un appareil resté sur l'ancien ordre
-      try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
+      /* _marqueVue suit toute écriture d'alaq2 faite par une page VIVANTE (ici et dans _ecrireS) : c'est
+         l'invariant sur lequel s'appuie la garde ②. Seule exception, le disque vierge d'_autreCompteArrive :
+         la page est déjà condamnée, plus rien ne relit _marqueVue.
+         (journal : progression.js · la marque vue après cloudPull) */
+      try{localStorage.setItem('alaq2',JSON.stringify(S)); _marqueVue=_marque(S);}catch(e){}
       // élève reconnue (session encore vivante) : on referme l'onboarding qui aurait pu s'ouvrir
       if(S.onboarded){try{document.getElementById('onb').classList.remove('on');}catch(e){}}
       _homeFocusPending=true; // et on recentre sur son disque courant
@@ -230,9 +299,9 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
       /* Cas où le local part au nuage : ① même compte, local le plus récent (la vraie fusion) ;
          ② aucune ligne dans le nuage, local à ce compte ou à personne ; ③ fenêtre de migration,
          local sans _uid plus riche. (journal : progression.js · la fusion détruisait la progression) */
-      if(CLOUD.user)S._uid=CLOUD.user.id;
+      if(CLOUD.user){ S._uid=CLOUD.user.id; delete S._uidVu; }
       S._refonte=Math.max(_refonteConnue,_refonteServeur);  // même tampon que dans l'autre branche
-      try{localStorage.setItem('alaq2',JSON.stringify(S));}catch(e){}
+      try{localStorage.setItem('alaq2',JSON.stringify(S)); _marqueVue=_marque(S);}catch(e){}
       cloudSaveNow();
     }
     /* Le dépilage se greffe ici, jamais juste après la pose de _syncPret (avant l'arbitrage, S._uid
@@ -251,15 +320,121 @@ async function cloudInit(){
   try{
     const g=await SB.auth.getSession();
     const sess=g&&g.data&&g.data.session;
-    if(sess&&sess.user){ CLOUD.user=sess.user; cloudPull(); }
+    _sessionLue=true;
+    if(sess&&sess.user){ CLOUD.user=sess.user; _sessionMienne(); cloudPull(); }
     else { verrouConnexion(); }   /* 17/08 : aucune session ET cet appareil connaissait un compte */
-    SB.auth.onAuthStateChange((ev,se)=>{ CLOUD.user=(se&&se.user)||null;
-      if(_progVisible())renderProg();
-      /* une session qui expire en cours de route verrouille elle aussi (journal : progression.js · la session qui expire) */
-      if(!CLOUD.user)verrouConnexion(); else verrouLibere();
+    /* ⚠️ On compare des IDENTIFIANTS, jamais le nom de l'événement : SIGNED_IN du même compte revient à
+       chaque retour sur l'onglet. ⛔ Ni await ni exception ici : supabase-js attend cet écouteur, et
+       verifyOtp relance son erreur (« Code invalide »). */
+    SB.auth.onAuthStateChange((ev,se)=>{
+      try{
+        if(_autreCompte)return;   // la page recharge : plus rien ne la concerne
+        var u=(se&&se.user)||null;
+        if(u&&_disqueDAutrui()){ _seTaire(); return; }   // page sans session, disque passé à un autre : on n'adopte rien
+        if(u&&_autreCompteArrive(u.id,u))return;
+        CLOUD.user=u;
+        if(u)_constater(u.id);    // une session VUE, jamais une revendication : elle peut venir d'un autre onglet
+        if(!u)_syncPret=false;    // session tombée : le nuage sera relu avant de reparler
+        if(_progVisible())renderProg();
+        /* une session qui expire en cours de route verrouille elle aussi (journal : progression.js · la session qui expire) */
+        if(!CLOUD.user)verrouConnexion(); else verrouLibere();
+      }catch(e){}
     });
   }catch(e){}
 }
+
+/* ═══ UN COMPTE PAR PAGE ═══ Un AUTRE compte que celui de la page arrive : on se tait, le diff de l'ancien
+   entre dans SA file, son disque est écarté S'IL EST LE SIEN (voir plus bas : jamais un disque _fresh, jamais
+   celui du compte suivant), et on recharge (le démarrage est le seul chemin prouvé sûr).
+   ⚠️ CLOUD.user avant S._uid : une page rechargée porte encore l'ancien disque.
+   ⚠️ Le compte de la page, c'est aussi S._uidVu (revendiqué), puis _vuSession (seulement vu) : sans eux, une page
+   dont la lecture n'a jamais réussi n'était à personne après SIGNED_OUT. (journal : progression.js · un autre compte sans rechargement) */
+function _condamner(){
+  _autreCompte=true; _syncPret=false;
+  try{ clearTimeout(_syncT); _syncT=null; }catch(e){}
+  try{ _semerLeDiff(); }catch(e){}
+}
+function _seTaire(){ _condamner(); try{ location.reload(); }catch(e){} }   // condamnée sans toucher au disque (il est à un autre)
+function _autreCompteArrive(id,user){
+  var avant=(CLOUD.user&&CLOUD.user.id)||(S&&(S._uid||S._uidVu))||_vuSession||null;
+  if(_autreCompte||!id||!avant||id===avant)return false;
+  _condamner();
+  try{ var d=_lire('alaq2',null);
+    /* On ne vide que le disque de l'ancien compte : marqué à son nom, ou sans marque quand la page le revendiquait.
+       ⛔ Jamais un disque _fresh ou d'un autre : c'est celui du compte suivant (sa leçon hors ligne). */
+    var sien=d&&typeof d==='object'&&(d._uid?d._uid===avant:d._uidVu?d._uidVu===avant:(!d._fresh&&!!S&&!S._uid&&S._uidVu===avant));
+    if(sien){
+      /* par _mettreDeCote, jamais en direct : alaq2_ecarte est l'UNIQUE copie, et un perdant d'arbitrage
+         plus riche y dormait déjà. (journal : progression.js · l'unique copie écrasée) */
+      _mettreDeCote(d);
+      /* onboarded/tutHome : une session existe, l'onboarding ne doit pas clignoter (décision de Myriam) */
+      localStorage.setItem('alaq2','{"_fresh":1,"onboarded":1,"tutHome":1}');
+    } }catch(e){}
+  if(user)CLOUD.user=user;
+  try{ location.reload(); }catch(e){}
+  return true;
+}
+/* ⛔ DEUX IDÉES, JAMAIS UNE SEULE. La REVENDICATION (S._uidVu, écrite au prochain save) dit « cet état est à ce
+   compte » : elle n'est posée QUE par la page CONNECTÉE avec son propre client, au début de cloudPull. Une session
+   seulement APERÇUE (diffusion d'un autre onglet, écrit de stockage) ne donne que la CONSTATATION _vuSession, en
+   mémoire, jamais sur le disque : elle sert à SE TAIRE, jamais à déclarer ni à verrouiller.
+   (journal : progression.js · revendiquer n'est pas constater) */
+function _constater(id){ try{ if(typeof id==='string'&&id&&!_vuSession)_vuSession=id; }catch(e){} }
+function _sessionMienne(){ _sessionAMoi=true; }   // appelée par cloudInit et par cloudVerify (comptes.js)
+/* En mémoire : le prochain save() l'écrit (jamais un saveLocal ici, un onglet périmé écraserait le disque). */
+function _prendreActe(id){ _constater(id); try{ if(typeof id==='string'&&id&&S&&!S._uid&&!S._uidVu)S._uidVu=id; }catch(e){} }
+/* ① l'identifiant de la session du stockage, s'il n'est pas le compte de la page. ⚠️ Sans CLOUD.user, S._uid ne
+   compte qu'après la lecture de la session par cloudInit : avant, « disque de A, session de B » est un départ légitime.
+   ⛔ Le compte de la page est une PROPRIÉTÉ, jamais _vuSession : une élève sans compte serait condamnée parce
+   qu'un parent s'est connecté ailleurs, puis un autre. (journal : progression.js · revendiquer n'est pas constater) */
+function _sessionDAutrui(){
+  try{ var p=CLOUD.user?CLOUD.user.id:((_sessionLue&&S&&(S._uid||S._uidVu))||null); if(!p)return null;
+    var id=_idSession(); return (id&&id!==p)?id:null; }catch(e){ return null; }
+}
+/* ② une page SANS session dont alaq2 a changé de propriétaire derrière elle (réclamé par un autre compte).
+   ⛔ '·vierge' (_fresh, le sceau d'une déconnexion) n'est à PERSONNE : il ne condamne aucune page — une élève
+   sans compte y perdait son écran et retrouvait l'onboarding. (journal : progression.js · le sceau vierge) */
+function _disqueDAutrui(){
+  try{ if(CLOUD.user)return false;
+    var m=_marque(_lire('alaq2',null));
+    if(!m||m===_marqueVue||m==='·vierge')return false;
+    return m!==(S&&S._uid)&&m!==(S&&S._uidVu)&&m!==_vuSession; }catch(e){ return false; }
+}
+/* ③ le disque porte un effacement que CETTE page n'a pas vu : un autre onglet du MÊME compte a effacé, et
+   son S précède l'effacement. Elle ne déclare plus rien et recharge — le démarrage relira le disque effacé.
+   ⚠️ _syncPret : une page qui n'a pas encore lu le nuage laisse son propre cloudPull arbitrer (_reveille),
+   sinon la course de démarrage entre deux onglets la ferait recharger pour rien.
+   (journal : progression.js · l'effacement défait par l'autre onglet) */
+let _effacementAilleurs=false;
+function _disqueEfface(){
+  try{ if(!_syncPret||!S)return false;
+    var d=_lire('alaq2',null); if(!d||typeof d!=='object')return false;
+    if((+d._refonte||0)<=(+S._refonte||0))return false;
+    var m=_marque(d); return !!m&&m!=='·vierge'&&m===_marque(S); }   // le MÊME compte, prouvé des deux côtés
+  catch(e){ return false; }
+}
+/* Le geste refusé d'une page condamnée n'est pas perdu sans trace : il va dans alaq2_ecarte, sauf s'il y
+   écraserait un perdant d'arbitrage plus riche (l'unique copie). */
+function _mettreDeCote(x){
+  try{ var n=function(y){ return (y&&y.done)?Object.keys(y.done).length:0; };
+    if(!n(x))return; var e=_lire('alaq2_ecarte',null); if(n(e)>n(x))return;
+    localStorage.setItem('alaq2_ecarte',JSON.stringify(x)); }catch(e){}
+}
+/* Sans diffusion (Safari < 15.4, onglet gelé), un autre onglet qui connecte un autre compte n'écrit que la
+   clé de session de supabase-js. ⛔ Jamais sur alaq2 : un onglet périmé qui la réécrit ferait recharger
+   l'onglet légitime (et perdre sa leçon). Une session illisible ne prouve rien. */
+const _CLE_SESSION='sb-'+SUPA_URL.split('//')[1].split('.')[0]+'-auth-token';
+/* le compte de la session du stockage, au format de supabase-js 2.116.0 ; illisible ou sans utilisateur : null */
+function _idSession(){ try{ var s=JSON.parse(localStorage.getItem(_CLE_SESSION)||'null'), id=s&&s.user&&s.user.id; return (typeof id==='string'&&id)?id:null; }catch(e){ return null; } }
+try{ window.addEventListener('storage',function(e){
+  try{
+    if(_autreCompte||!e||(e.key!==null&&e.key!==_CLE_SESSION))return;
+    var id=_idSession();
+    /* on CONSTATE la session qui arrive (sans diffusion, c'est son seul signe) ; on ne revendique rien :
+       une page sans client Supabase déclarerait les leçons de l'élève au compte d'un autre. */
+    if(id&&!_autreCompteArrive(id))_constater(id);
+  }catch(x){}
+}); }catch(e){}
 
 /* Au retour sur l'app, on rejoue cloudPull : un onglet resté ouvert ne voit rien de ce qui a
    progressé ailleurs. ⚠️ Sauf en pleine leçon : remplacer S sous les pieds de l'élève
@@ -295,7 +470,7 @@ const ENVOI = true;
 const OB_LOT=50;          // la taille d'un lot — voir la règle ⑤ du §6
 const OB_TOURS=6;         // 6 × 50 = 300 = OB_MAX : un tour vide la file entière
 const PURGE_CLE='alaq_purge_v1';   // l'intention d'effacement distant, posée avant le réseau
-const OB_CLE='alaq_outbox_v1', CONNU_CLE='alaq_connu_v1', IGNORE_CLE='alaq_ignore_v1';
+const OB_CLE='alaq_outbox_v1', CONNU_CLE='alaq_connu_v1';
 const OB_MAX=300;         // borne dure de la file
 const OB_REBUT_MAX=50;    // les refusées, gardées AVEC leur motif
 const OB_REFUS_MAX=3;     // refus explicites tolérés — PAR ENTRÉE (décision ②)
@@ -354,11 +529,14 @@ function _obEcrire(){
 var _acquittees={};   // ce que CETTE session a déjà fait acquitter (cimetière court)
 
 /* Le propriétaire de l'état courant. Tant que l'arbitrage n'a pas tranché, on ne sait
-   pas à qui appartient S : on se tait plutôt que de déclarer au nom de quelqu'un. */
+   pas à qui appartient S : on se tait plutôt que de déclarer au nom de quelqu'un.
+   ⚠️ L'état d'un compte sous la session d'un AUTRE : personne (les gestes de l'un n'iraient pas à
+   l'autre). Sans session, S._uid fait foi : la leçon finie juste avant l'expiration reste à son compte. */
 function _proprio(){
-  if(S&&S._uid)return S._uid;
-  if(typeof CLOUD!=='undefined'&&CLOUD&&CLOUD.user)return CLOUD.user.id;
-  return null;
+  var u=(typeof CLOUD!=='undefined'&&CLOUD&&CLOUD.user)?CLOUD.user.id:null;
+  if(S&&S._uid)return (!u||u===S._uid)?S._uid:null;
+  if(S&&S._uidVu)return (!u||u===S._uidVu)?S._uidVu:null;   // la revendication vaut propriété, jamais sous un autre compte
+  return u;
 }
 
 /* ⚠️ Un identifiant d'entrée n'est unique qu'au sein d'un compte : la clé du cimetière porte
@@ -378,7 +556,8 @@ function _enfiler(id,k,d,uid){
    _CONNU : ce que le serveur sait déjà, par compte — { l:{}, t:{}, w:{}, g:{}, gk:{} }, plus
    p dès qu'un versement de graines est acquitté. */
 let _CONNU=_lire(CONNU_CLE,{});
-let _IGN=_lire(IGNORE_CLE,{});
+/* La quarantaine des codes ALAQ1. est retirée : on efface sa clé, que plus rien ne lit. (journal : progression.js · la quarantaine retirée) */
+try{ localStorage.removeItem('alaq_ignore_v1'); }catch(e){}
 function _connuPour(uid){
   var c=_CONNU[uid];
   if(!c||typeof c!=='object')c=_CONNU[uid]={l:{},t:{},w:{},g:{},gk:{}};
@@ -390,7 +569,7 @@ function _connuPour(uid){
    bouge pas) qui manque à tout S qu'on n'a pas vu naître. Une réaffectation inconnue désarme
    le diff et le dit, plutôt que de redéclarer un état étranger. */
 const _tag=('t'+Math.random()).slice(0,12);
-let _diffArme=true;
+let _diffArme=true;        // désarmé, il ne se réarme qu'au rechargement : plus rien ne le remet à true
 let _resetAnnonce=false;   // SYNC.reset() l'arme : la prochaine réaffectation de S est ATTENDUE
 function _poserTag(o){
   try{ Object.defineProperty(o,'_projTag',{value:_tag,enumerable:false,configurable:true,writable:true}); }catch(e){}
@@ -405,7 +584,8 @@ _poserTag(S);
 const GRAM_SLUG={ '7':'article-solaire-lunaire', '8':'harf' };
 
 function _semerLeDiff(){
-  if(!_diffArme)return false;
+  /* ⛔ Après un effacement fait ailleurs, la file rendrait au serveur ce que l'élève vient d'effacer. */
+  if(!_diffArme||_effacementAilleurs)return false;
   var uid=_proprio(); if(!uid)return false;
   if(!S||S._projTag!==_tag){
     /* Une réaffectation annoncée par SYNC.reset() (doReset, comptes.js) repose le marqueur ;
@@ -414,7 +594,7 @@ function _semerLeDiff(){
     else{
       _diffArme=false; _poserTag(S);
       try{ if(typeof tikEnvoyer==='function')
-        tikEnvoyer('suspect','sync — S remplace hors des trois points connus : diff desarme'); }catch(e){}
+        tikEnvoyer('suspect','sync — S remplace hors des points connus : diff desarme'); }catch(e){}
       return false;
     }
   }
@@ -427,7 +607,7 @@ function _semerLeDiff(){
      Une clé hors format n'est pas devinée : elle est ignorée. */
   try{
     Object.keys(S.done||{}).forEach(function(k){
-      if(!S.done[k]||c.l[k]||_IGN['l:'+k])return;
+      if(!S.done[k]||c.l[k])return;
       var m=/^U(\d{1,2})-D(\d{1,2})$/.exec(k); if(!m)return;
       if(_enfiler('l.'+m[1]+'.'+m[2],'lecon',{unit_no:+m[1],disc_no:+m[2]},uid))bouge=true;
     });
@@ -436,7 +616,7 @@ function _semerLeDiff(){
   /* ② LES TEST-OUT. S.tests est indexé par NUMÉRO d'unité. */
   try{
     Object.keys(S.tests||{}).forEach(function(n){
-      if(!S.tests[n]||c.t[n]||_IGN['t:'+n])return;
+      if(!S.tests[n]||c.t[n])return;
       if(!/^\d{1,2}$/.test(n))return;
       if(_enfiler('t.'+n,'test',{unit_no:+n},uid))bouge=true;
     });
@@ -447,7 +627,7 @@ function _semerLeDiff(){
   try{
     Object.keys(S.rev||{}).forEach(function(w){
       var r=S.rev[w]; if(!r||!(r.n>0))return;
-      if(c.w[w]===r.n||_IGN['w:'+w])return;
+      if(c.w[w]===r.n)return;
       if(_enfiler('w.'+w+'.'+r.n,'rev',
         {type:'word',item_id:w,step:r.n,next_due:r.next,success:true,maj:new Date().toISOString()},uid))bouge=true;
     });
@@ -464,7 +644,6 @@ function _semerLeDiff(){
       if(!slug){ try{ if(typeof tikEnvoyer==='function')
         tikEnvoyer('suspect','sync — notion de grammaire sans etiquette (unite index '+u+') : GRAM_SLUG a completer'); }catch(_){}
         return; }
-      if(_IGN['g:'+slug])return;
       var dn=(g.n||0)-(c.g[slug]||0); if(dn<=0)return;
       if(dn>GRAM_PLAFOND)dn=GRAM_PLAFOND;
       var dko=Math.max(0,Math.min(dn,(g.ko||0)-(c.gk[slug]||0)));
@@ -486,6 +665,7 @@ function _semerLeDiff(){
    l'inscription ne rejoignent pas le compte (règle validée par Myriam). */
 let _opSeq=0;
 function _declarerGraines(lesson_id,sans_faute,is_daily_goal){
+  if(_effacementAilleurs)return null;   // la leçon n'est pas gardée : sa graine ne l'est pas non plus
   var uid=_proprio(); if(!uid)return null;
   var l=String(lesson_id||'').toUpperCase();
   if(!/^(U\d{1,2}-D\d{1,2}|EXAM-U\d{1,2}|REV-[A-Z0-9-]{1,32}|DAILY)$/.test(l))return null;
@@ -499,10 +679,9 @@ function _declarerGraines(lesson_id,sans_faute,is_daily_goal){
 /* ═════════════════════ §6 · LE DÉPILAGE ═════════════════════
    ⚠️ Le seul point par lequel part une déclaration de la file : alaq_pousser (le blob, la purge
    et la livraison ont leurs propres appels).
-   ① On ne parle qu'une fois le propriétaire prouvé : _syncPret ne suffit pas (jamais remis à
-      false, et un changement de compte passe par onAuthStateChange sans cloudPull), il faut
-      aussi que S._uid soit CLOUD.user.id. Le serveur crédite le compte de la session, jamais
-      l'uid de l'entrée : c'est la garde contre l'erreur de destinataire.
+   ① On ne parle qu'une fois le propriétaire prouvé : _syncPret ne suffit pas, il faut aussi que
+      S._uid soit CLOUD.user.id. Le serveur crédite le compte du JETON, jamais l'uid de l'entrée :
+      _rpcDe vérifie que ce jeton est celui du propriétaire.
    ② Une entrée d'un autre compte dort : ni envoyée, ni jetée.
    ③ Échec de transport ≠ refus : seul un acquittement « refus » explicite consomme une vie.
    ④ On ne jette jamais avant l'acquittement : rejouer est sûr (sauf rev, voir ⛔).
@@ -641,7 +820,7 @@ function _purgeDue(){
 async function _purgerDistant(uid){
   var du=null; try{ du=localStorage.getItem(PURGE_CLE); }catch(e){}
   if(!du||du!==uid)return false;
-  var r=await _avecGarde(SB.rpc('alaq_effacer_progression',{}),12000,'purge distante');
+  var r=await _rpcDe(uid,'alaq_effacer_progression',{},12000,'purge distante');
   if(r&&r.error)throw r.error;
   try{ localStorage.removeItem(PURGE_CLE); }catch(e){}
   /* ⚠️ Le tampon se met à jour ICI, après une purge réussie : sinon le prochain arbitrage
@@ -687,8 +866,8 @@ async function _unTour(){
       lot.push(e);
     }
     if(!lot.length)break;
-    var rep=await _avecGarde(SB.rpc('alaq_pousser',{p_entrees:lot.map(_surLeFil),p_profil:_profil()}),
-                             12000,'envoi de la file ('+lot.length+' entrees)');
+    var rep=await _rpcDe(uid,'alaq_pousser',{p_entrees:lot.map(_surLeFil),p_profil:_profil()},
+                         12000,'envoi de la file ('+lot.length+' entrees)');
     /* supabase-js ne lève pas : il résout avec {error}. Une erreur de LOT ne touche aucune
        entrée : elle lève ici, sans consommer de vie (règle ③). */
     if(rep&&rep.error)throw rep.error;
@@ -755,8 +934,6 @@ function _reglerMetronome(){ if(_aEnvoyer())_armerMetronome(); else _desarmerMet
    ⛔ rev exclu : alaq_livrer_blob fusionne les paliers au least(), une livraison qui se rejoue
    tirerait éternellement vers le bas ce que la file certifie.
    ⛔ Aucune graine : une monnaie ne se lit pas dans un texte fabriqué par celui qu'elle enrichit.
-   ⛔ La quarantaine _IGN s'applique aussi (codes ALAQ1. collés) : _moissonner filtre comme
-   _semerLeDiff.
    Deux gardes, toutes deux nécessaires : _reveille (cloudPull) protège l'arbitrage contre un
    effacement ignoré ; _livrable protège la livraison contre la course entre le RPC qui date
    l'effacement et l'upsert qui vide profiles.state. (journal : progression.js · la livraison du blob) */
@@ -775,13 +952,12 @@ function _livrable(b){
   if(!_refonteVue)return true;   // ce compte n'a jamais connu de refonte serveur
   return (+b._ts||0)>_refonteVue;
 }
-/* On moissonne la VÉRACITÉ (l'app lit partout !!S.done[k]) et on consulte la quarantaine
-   _IGN, comme _semerLeDiff. */
+/* On moissonne la VÉRACITÉ (l'app lit partout !!S.done[k]). */
 function _moissonner(src,out){
   if(!src||typeof src!=='object')return out;
   var k,d=src.done,t=src.tests,H=Object.prototype.hasOwnProperty;
-  if(d&&typeof d==='object')for(k in d){ if(H.call(d,k)&&d[k]&&!_IGN['l:'+k])out.done[k]=true; }
-  if(t&&typeof t==='object')for(k in t){ if(H.call(t,k)&&t[k]&&!_IGN['t:'+k])out.tests[k]=true; }
+  if(d&&typeof d==='object')for(k in d){ if(H.call(d,k)&&d[k])out.done[k]=true; }
+  if(t&&typeof t==='object')for(k in t){ if(H.call(t,k)&&t[k])out.tests[k]=true; }
   return out;
 }
 /* Deux livraisons identiques ne repartent pas : cloudPull se rejoue à chaque reprise de focus. */
@@ -791,8 +967,8 @@ function _empreinteBlob(c){
 }
 
 /* ⛔ Ne rejette jamais (oubli-et-continue depuis cloudPull, comme _depiler). perdant arrive déjà
-   filtré par la propriété : restent la fraîcheur (_livrable), la quarantaine (_moissonner) et
-   le fail-closed (_refonteVue jamais 0 par ignorance). */
+   filtré par la propriété : restent la fraîcheur (_livrable) et le fail-closed (_refonteVue
+   jamais 0 par ignorance). */
 function _livrerBlob(gagnant,perdant){
   try{
     if(!LIVRAISON||!SB){ _livraisonMotif='livraison eteinte'; return; }
@@ -809,10 +985,10 @@ function _livrerBlob(gagnant,perdant){
     if(_livrable(perdant)){ _moissonner(perdant,colis); sources++; }
     if(!sources){ _livraisonMotif='rien de posterieur a la derniere refonte connue'; return; }
     var n=Object.keys(colis.done).length+Object.keys(colis.tests).length;
-    if(!n){ _livraisonMotif='rien a livrer (tout est en quarantaine ou deja connu)'; return; }
+    if(!n){ _livraisonMotif='rien a livrer'; return; }
     var emp=_empreinteBlob(colis);
     if(_livre[uid]===emp){ _livraisonMotif='deja livre'; return; }
-    _avecGarde(SB.rpc('alaq_livrer_blob',{p_blob:colis}),12000,'livraison du blob')
+    _rpcDe(uid,'alaq_livrer_blob',{p_blob:colis},12000,'livraison du blob')
       .then(function(r){
         if(r&&r.error)throw r.error;
         /* ⚠️ On n'acquitte QUE si le compte n'a pas changé pendant l'attente :
@@ -832,7 +1008,7 @@ function _livrerBlob(gagnant,perdant){
   }
 }
 
-/* ═══ §8 · SYNC — ce qu'appellent comptes.js (reset, importe, avantDeconnexion),
+/* ═══ §8 · SYNC — ce qu'appellent comptes.js (reset, avantDeconnexion, redemarre),
    revision.js et src/player (poseKind, graines), ui/parametres.js (etat) ═══ */
 var SYNC={
   /* Déclaré au versement des graines (les trois sites de gagnerGraines). */
@@ -842,25 +1018,6 @@ var SYNC={
   },
   /* Le type de session courante, pour construire un lesson_id 'REV-…' honnête. */
   poseKind:function(k){ try{ SYNC._kind=(typeof k==='string')?k:null; }catch(e){} },
-  /* Un code de sauvegarde importé est un texte que l'élève peut éditer : tout son
-     contenu est marqué « à ne jamais déclarer », sinon on certifierait du texte saisi. */
-  importe:function(){
-    try{
-      _diffArme=false;
-      var c=_connuPour(_proprio()||'?');
-      Object.keys(S.done||{}).forEach(function(k){ _IGN['l:'+k]=1; });
-      Object.keys(S.tests||{}).forEach(function(n){ _IGN['t:'+n]=1; });
-      Object.keys(S.rev||{}).forEach(function(w){ _IGN['w:'+w]=1; });
-      /* La grammaire aussi : sans elle, un code collé ferait certifier jusqu'à GRAM_PLAFOND
-         intentions par session. (journal : progression.js · la grammaire en quarantaine) */
-      Object.keys(S.revGram||{}).forEach(function(u){
-        var g=(typeof GRAM_SLUG!=='undefined')&&GRAM_SLUG[String(u)];
-        if(g)_IGN['g:'+g]=1;
-      });
-      _ecrire(IGNORE_CLE,JSON.stringify(_IGN));
-      _poserTag(S); _diffArme=true;
-    }catch(e){}
-  },
   /* ═══ L'EFFACEMENT — première ligne de doReset (comptes.js) ═══ On purge la file AVANT que
      S soit remplacé : ses entrées reconstruiraient au serveur la progression effacée. */
   reset:function(){
@@ -874,7 +1031,6 @@ var SYNC={
       _ecrire(OB_CLE,JSON.stringify(_OB));
       if(uid)delete _CONNU[uid];
       _ecrire(CONNU_CLE,JSON.stringify(_CONNU));
-      _IGN={}; _ecrire(IGNORE_CLE,JSON.stringify(_IGN));
       _soldeAPoser=null; _desarmerMetronome();
       /* L'INTENTION avant le réseau : si l'app meurt ici, le prochain dépilage reprend. */
       if(uid){ try{ localStorage.setItem(PURGE_CLE,uid); }catch(e){} }
@@ -891,6 +1047,11 @@ var SYNC={
                               new Promise(function(r){ setTimeout(r,1500); })]); }
     catch(e){ return Promise.resolve(); }
   },
+  /* Un autre compte a condamné la page (_autreCompteArrive) : comptes.js se tait (cloudVerify, cloudLogout, doReset). */
+  redemarre:function(){ return !!_autreCompte; },
+  /* comptes.js, juste avant signOut et avant d'effacer : la session ou le disque sont-ils déjà à un autre compte ?
+     Une question, sans effet (le refus recharge, rien n'est écrit). */
+  ailleurs:function(){ try{ return !!(_sessionDAutrui()||_disqueDAutrui()); }catch(e){ return false; } },
   /* Le dépilage à la demande (console). */
   depiler:function(){ try{ return _depiler(); }catch(e){ return Promise.resolve({envoye:0,motif:'?'}); } },
   /* Sans argument, sans perdant : ne livre que S, avec la même fraîcheur que le chemin normal
