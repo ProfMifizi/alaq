@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v223-2026-09-18';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v224-2026-09-18';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -26,7 +26,7 @@ const IMGCACHE='alaq-images-v'+IMGV;
    ⛔ Hors de CORE : addAll est atomique, le CDN ferait échouer toute l'installation.
    (journal : sw.js · le bundle supabase pré-caché) */
 const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js';
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','coque.js','rail-ordinateur.js','ciel-v1.js','ciel-v2.js','content/unites.js','confidentialite.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 /* Chemins du cœur résolus contre l'URL du sw (racine en prod, sous-dossier en local), dérivés
    à l'exécution : ce que le build ajoute à CORE (le paquet u8) y entre tout seul. */
 const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
