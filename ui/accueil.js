@@ -9,7 +9,8 @@
    À L'APPEL : UNITS, SOURATES, unitAccent (donnees.js) · curSourate (revision.js) ·
    S, dkey, unitValidated (progression.js) · discsFor (parcours.js) · ICONES (assets.js) ·
    startDisque, startExam (src/player, module : lecteurPret() prévient s'il manque) ·
-   arReveal, currentLesson, lecteurPret, maybeShowHomeTut, openSurahMenu (index.html) ·
+   arReveal, currentLesson, lecteurPret, openSurahMenu (index.html) ·
+   maybeShowHomeTut (bulles-tutoriels.js) ·
    updRankBadge, maybeGhufranPrompt (constance.js).
    Dans l'autre sens, progression.js réassigne _homeFocusPending (let partagé entre scripts).
    Gardes : outils/verifier-interface.mjs, previews/_verif_interface.html. */

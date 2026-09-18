@@ -14,9 +14,9 @@
      gramMaitrise, et en ligne coursTabTap, reviserTabTap, boiteTap, startReview, openWrite,
      startGrammarReview, startGrammarTargeted (revision.js)
    · today (constance.js) · isHarakat (src/ecrans, module)
-   · arReveal, estSolaire, LUNAIRES_14, SOLAIRES_14, U8 (le talon, puis le module), knownLetterSet,
-     fatihaPct, maybeShowCoursTut, maybeShowLetterTut, maybeShowVocabTut, et en ligne coursTut,
-     vocabTut (index.html)
+   · arReveal, U8 (le talon, puis le module), knownLetterSet, fatihaPct (index.html)
+   · estSolaire, LUNAIRES_14, SOLAIRES_14, maybeShowCoursTut, maybeShowLetterTut,
+     maybeShowVocabTut, et en ligne coursTut, vocabTut (bulles-tutoriels.js)
    · toAr, sujetCours (ui/accueil.js)
    Gardes : outils/verifier-interface.mjs, previews/_verif_interface.html. */
 

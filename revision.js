@@ -32,10 +32,11 @@
    Le banc ⑤ le mesure avec un cache pré-rempli.
 
    ═══ LE CONTRAT (résolu À L'APPEL, jamais à la définition) ═══
-   index.html : toast, lecteurPret, knownLetterSet, wordReadable, SOLAIRES_14, LUNAIRES_14,
-   estSolaire (lus par badgeSolaire), U8, QUEUE, qi, curU,
+   index.html : toast, lecteurPret, knownLetterSet, wordReadable, U8, QUEUE, qi, curU,
    curD, total, wrongCount, MISSED, inRetry, EXAM, REVIEW, REVSES, REVFREE, backTo,
-   _grainesSession, pendingStreak · constance.js : feteJourPending,
+   _grainesSession, pendingStreak ·
+   bulles-tutoriels.js : SOLAIRES_14, LUNAIRES_14, estSolaire (lus par badgeSolaire), letterTut ·
+   constance.js : feteJourPending,
    GRAINES, gagnerGraines, bumpConstance, validerJour, checkBadges, confettiBurst,
    fillFinishCases, fillFinishConstance, today, _addDays — chargé APRÈS ce fichier,
    donc résolu à l'appel seulement · progression.js : S, save, saveLocal, dkey,
