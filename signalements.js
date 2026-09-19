@@ -7,7 +7,7 @@
      capture, unhandledrejection).
 
    Script classique, pas un module :
-   ① le HTML statique, peint avant tout script, l'appelle en ligne (le ⚑, le voile, les
+   ① le HTML statique (squelette.js, posé avant tout script qui le lit) l'appelle en ligne (le ⚑, le voile, les
       six motifs, ENVOYER) : un module différé laisserait un bouton mort ;
    ② progression.js, chargé plus haut, appelle tikEnvoyer sous garde typeof (une panne
       serait muette), et src/player appelle tikNote et sigEcran à chaque écran ;

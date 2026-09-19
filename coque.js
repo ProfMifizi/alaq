@@ -1,5 +1,7 @@
 
 /* ═══ LA CARTE : ce qui vit hors de ce script (chaque fichier dit son contrat dans son en-tête) ═══
+   · squelette.js         tout le HTML statique (écrans, #player, menu), injecté par la première balise de
+                          <body> ; lu ici AU CHARGEMENT (#blogo, sans garde)
    · content/unites.js    les unités 1 à 7, générées (node outils/semer-unites.mjs)
    · assets.js            LOGO, ICONES, ico, icoImg
    · trace-lettres.js     LT, setupTrace
@@ -203,19 +205,19 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='solde-coque-18sept';
+const BUILD='squelette-html-19sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-09-18T21:25';
+const BUILD_DATE='2026-09-19T01:00';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
-   ⏳ 3.19 proposé (sous-lot 8, une étape de structure) : à confirmer par Myriam au GO. */
-const VERSION='3.20';
-const BUILD_NUM=224;
+   ⏳ 3.21 proposé (le squelette HTML : index.html devient un point d’entrée) : à confirmer par Myriam au GO. */
+const VERSION='3.21';
+const BUILD_NUM=225;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
