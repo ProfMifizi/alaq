@@ -70,5 +70,185 @@
   "lecons": [
    "U10 · Disque 1 — « X de Y », قَلَمُ الْبِنْتِ"
   ]
+ },
+ {
+  "fichier": "mot-hammam.mp3",
+  "arabe": "حَمَّامٌ",
+  "sens": "salle de bain",
+  "translit": "hammâmun",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-mirhad.mp3",
+  "arabe": "مِرْحَاضٌ",
+  "sens": "toilettes",
+  "translit": "mirhâdun",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-babul-bayt.mp3",
+  "arabe": "بَابُ الْبَيْتِ",
+  "sens": "la porte de la maison",
+  "translit": "bâbu l-bayti",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-babul-mirhad.mp3",
+  "arabe": "بَابُ الْمِرْحَاضِ",
+  "sens": "la porte des toilettes",
+  "translit": "bâbu l-mirhâdi",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-babul-hammam.mp3",
+  "arabe": "بَابُ الْحَمَّامِ",
+  "sens": "la porte de la salle de bain",
+  "translit": "bâbu l-hammâmi",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-sath.mp3",
+  "arabe": "سَطْحٌ",
+  "sens": "toit",
+  "translit": "sathun",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-sathul-bayt.mp3",
+  "arabe": "سَطْحُ الْبَيْتِ",
+  "sens": "le toit de la maison",
+  "translit": "sathu l-bayti",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-sur.mp3",
+  "arabe": "سُورٌ",
+  "sens": "mur d’enceinte",
+  "translit": "sûrun",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-surul-bayt.mp3",
+  "arabe": "سُورُ الْبَيْتِ",
+  "sens": "le mur d’enceinte de la maison",
+  "translit": "sûru l-bayti",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-kub.mp3",
+  "arabe": "كُوبٌ",
+  "sens": "verre",
+  "translit": "kûbun",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-halib.mp3",
+  "arabe": "حَلِيبٌ",
+  "sens": "lait",
+  "translit": "halîbun",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-asir.mp3",
+  "arabe": "عَصِيرٌ",
+  "sens": "jus",
+  "translit": "ʿasîrun",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-kubul-ma.mp3",
+  "arabe": "كُوبُ الْمَاءِ",
+  "sens": "le verre d’eau",
+  "translit": "kûbu l-mâʾi",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-kubul-halib.mp3",
+  "arabe": "كُوبُ الْحَلِيبِ",
+  "sens": "le verre de lait",
+  "translit": "kûbu l-halîbi",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
+ },
+ {
+  "fichier": "mot-kubul-asir.mp3",
+  "arabe": "كُوبُ الْعَصِيرِ",
+  "sens": "le verre de jus",
+  "translit": "kûbu l-ʿasîri",
+  "emoji": "",
+  "famille": "Unité 10 — groupes nominaux",
+  "unite": 10,
+  "lecons": [
+   "U10 · Disque 2 — la porte de la maison, بَابُ الْبَيْتِ"
+  ]
  }
 ]

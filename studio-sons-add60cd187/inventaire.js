@@ -61,9 +61,30 @@ const src = fs.readFileSync(INDEX, 'utf8');
    et commentaires) jusqu'à la fermeture, et on évalue le morceau obtenu.
    eval() est ici sans risque : la seule entrée est notre propre index.html, lu sur
    le disque par un script lancé à la main. Aucune donnée extérieure n'y entre.  */
+/* ⚠️ ON CHERCHE DANS TOUTE LA PAGE, PAS DANS index.html SEUL (15/09/2026). `LTRANS` est parti
+   dans interactions.js avec les gabarits d'écran, et ce découpage mourait — cinquième fois que
+   cette famille casse. La page, ici, c'est index.html PLUS chaque script classique qu'il charge,
+   dans l'ordre des balises : un littéral déménage, on le retrouve sans rien changer ici. */
+const PAGE = (() => {
+  const app = path.join(RACINE, 'alaq-vercel-static');
+  let tout = src;
+  for (const m of src.matchAll(/<script src="([^"]+)"><\/script>/g)) {
+    const p = path.join(app, m[1]);
+    if (fs.existsSync(p)) tout += '\n' + fs.readFileSync(p, 'utf8');
+  }
+  /* ET LES MODULES QUI PUBLIENT SUR window (15/09) : le lecteur et les gabarits d'écran ne
+     sont pas chargés par une balise, mais leurs constantes appartiennent bien à la page —
+     `LTRANS` est parti dans src/ecrans/ avec eux. */
+  for (const rel of ['src/player/index.js', 'src/ecrans/index.js']) {
+    const p = path.join(RACINE, rel);
+    if (fs.existsSync(p)) tout += '\n' + fs.readFileSync(p, 'utf8');
+  }
+  return tout;
+})();
 function litteral(nom) {
+  const src = PAGE;                            /* ← la page entière, pas index.html seul */
   const i = src.indexOf('\nconst ' + nom + '=');
-  if (i < 0) throw new Error('introuvable dans index.html : ' + nom);
+  if (i < 0) throw new Error('introuvable dans la page (index.html ni aucun script classique) : ' + nom);
   let j = i + ('\nconst ' + nom + '=').length;
   const ouvre = src[j];                       // { ou [
   const ferme = ouvre === '{' ? '}' : ']';
@@ -80,16 +101,134 @@ function litteral(nom) {
   return eval('(' + src.slice(j, k + 1) + ')');
 }
 
-const AUDIO      = litteral('AUDIO');        // mot/syllabe arabe -> chemin mp3
-const INSTR_LIST = litteral('INSTR_LIST');   // [slug, texte français]
+/* ⚠️ 15/09 — LA TABLE NE S'EXTRAIT PLUS D'UN LITTÉRAL, ELLE S'EXÉCUTE. Depuis le lot du
+   son, 151 de ses entrées sont produites par trois règles au chargement de son.js : les
+   lire dans le texte ne rendrait qu'une moitié de vérité. `carteDesSons` charge les scripts
+   classiques dans un bac et nous rend la table complète, projetée en chemins.
+   C'est la doctrine du dépôt, celle qui a coûté quatre pannes silencieuses en huit jours :
+   un outil EXÉCUTE le code, il ne le découpe pas. */
+const AUDIO      = require('./sons-des-lecons.js').carteDesSons().table;  // arabe -> chemin mp3
+/* ⛔ 15/09/2026 — LES CONSIGNES LUES N'EXISTENT PLUS (décision de Myriam : « tout retirer,
+   dépôt compris »). Elles ne jouaient plus depuis le 13/08, et leurs 60 enregistrements ont
+   quitté le dépôt avec le lot du son. L'onglet « consignes » du studio reste en place et
+   vide : le jour où Myriam voudra refaire parler les consignes, c'est ici qu'on rebranchera
+   sa liste — pas dans une table ressuscitée à l'aveugle. */
+const INSTR_LIST = [];                       // [slug, texte français] — vide depuis le 15/09
 const LTRANS     = litteral('LTRANS');       // lettre arabe -> translittération du nom de fichier
-const UNITS      = litteral('UNITS');        // les 7 unités : lettres + mots
+/* ── LES UNITÉS NE VIENNENT PLUS D'index.html (06/09/2026) ────────────────
+   🔴 Elles vivent dans `src/content/units/unit-0N.json`, et l'app les lit par
+   `alaq-vercel-static/content/unites.js` — un script CLASSIQUE généré par
+   `node outils/semer-unites.mjs`. C'est CE fichier qu'on lit ici : il porte
+   exactement ce que l'app sert, alors qu'un JSON d'édition pourrait avoir été
+   corrigé sans avoir été semé.
+
+   ⚠️ ET ON ÉCHOUE FORT SI LE FICHIER MANQUE. Cet inventaire alimente le studio
+   des sons : un repli silencieux sur une liste vide ne ferait pas d'erreur, il
+   ferait simplement disparaître les 76 mots des sept unités du tableau de
+   Myriam — elle croirait n'avoir plus rien à enregistrer. */
+const UNITS = (() => {
+  const f = path.join(RACINE, 'alaq-vercel-static', 'content', 'unites.js');
+  if (!fs.existsSync(f))
+    throw new Error('content/unites.js introuvable — les unités 1 à 7 y vivent depuis le 06/09/2026. ' +
+      'Lancer : node outils/semer-unites.mjs');
+  const bac = { window: {} };
+  require('vm').runInNewContext(fs.readFileSync(f, 'utf8'), bac);
+  const semees = bac.window.__ALAQ_UNITS;
+  if (!Array.isArray(semees) || !semees.length)
+    throw new Error('content/unites.js ne pose pas window.__ALAQ_UNITS — le studio perdrait les 76 mots des unités 1 à 7');
+
+  /* 🔴 ET LES UNITÉS 8 À 12 VIENNENT TOUJOURS D'index.html. Elles n'ont pas
+     migré : leur contenu vit dans des modules ES, et le littéral n'en garde
+     que la métadonnée. Ne lire QUE la semence ferait tomber l'inventaire de 12
+     unités à 7 — mesuré : sept sons de l'unité 9 perdaient leur étiquette
+     d'unité et passaient à « null » dans le tableau de Myriam, sans qu'aucune
+     erreur ne soit levée. On fusionne donc les deux sources par leur `no`, et
+     ce montage vaut AVANT comme APRÈS le retrait du littéral : demain il n'y
+     restera que les unités 8 à 12, et la règle ne bouge pas. */
+  /* ⚠️ ON N'EXTRAIT PLUS UN LITTÉRAL, ET PLUS AUCUNE TRANCHE (14/09/2026). `UNITS` a quitté
+     index.html pour alaq-vercel-static/donnees.js — et ce fichier-ci le découpait encore sur
+     « const UNITS=(function(){ », donc il MOURAIT : le studio ne pouvait plus rafraîchir son
+     inventaire, et le tableau de Myriam serait resté figé. C'est la TROISIÈME panne de cette
+     famille (07/09, 10/09, celle-ci) : un découpage par marqueur de texte finit toujours par
+     casser. On charge donc le fichier EN ENTIER, comme la page le fait — la recette retenue
+     pour sons-des-lecons.js le même jour.
+     On le charge SANS lui donner la semence : son repli rend sept places fermées, et les
+     vraies unités 8 à 12 derrière. Ce sont ces dernières qu'on garde. */
+  const restantes = (() => {
+    const app = path.join(RACINE, 'alaq-vercel-static');
+    for (const n of ['donnees.js']) if (!fs.existsSync(path.join(app, n)))
+      throw new Error(n + ' introuvable — les unités et l’alphabet y vivent depuis le 14/09/2026');
+    const el = () => ({ classList: { add() {}, remove() {}, contains: () => false }, style: {}, appendChild() {},
+      setAttribute() {}, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [],
+      getContext: () => null, children: [], dataset: {} });
+    const bac = { console: { error() {}, log() {}, warn() {} }, Math, JSON, Date, Object, Array, String, Number,
+      Boolean, RegExp, Set, Map, parseInt, parseFloat, isNaN, setTimeout: () => 0, clearTimeout: () => {},
+      document: { getElementById: () => el(), querySelector: () => null, querySelectorAll: () => [],
+        createElement: () => el(), body: el(), documentElement: el(), addEventListener() {} } };
+    bac.window = bac; bac.globalThis = bac; bac.self = bac;
+    const vm = require('vm'); vm.createContext(bac);
+    /* trace-lettres.js d'abord : donnees.js lit `LT` AU CHARGEMENT (la dérivation des tracés) */
+    vm.runInContext(fs.readFileSync(path.join(app, 'trace-lettres.js'), 'utf8'), bac, { filename: 'trace-lettres.js' });
+    vm.runInContext(fs.readFileSync(path.join(app, 'donnees.js'), 'utf8'), bac, { filename: 'donnees.js' });
+    /* ⚠️ un `const` de portée script n'est PAS une propriété du global : on ÉVALUE son nom */
+    const tout = vm.runInContext('UNITS', bac);
+    if (!Array.isArray(tout) || !tout.length)
+      throw new Error('donnees.js n’expose pas UNITS — le studio étiquetterait les sons avec des unités fausses');
+    return tout.filter(U => !semees.some(s => s.no === U.no));
+  })();
+  const toutes = semees.concat(restantes).sort((a, b) => a.no - b.no);
+
+  /* l'assertion qui aurait attrapé la panne ci-dessus : douze unités, dans
+     l'ordre, sans trou ni doublon */
+  const nos = toutes.map(U => U.no);
+  const attendu = Array.from({ length: nos.length }, (_, i) => i + 1);
+  if (nos.length !== 12 || nos.join(',') !== attendu.join(','))
+    throw new Error('inventaire : les unités ne forment pas 1..12 mais [' + nos.join(',') + ']. ' +
+      'Le studio étiquetterait des sons avec une unité fausse ou nulle. ' +
+      '(semence : ' + semees.map(u => u.no).join(',') + ' · donnees.js : ' + restantes.map(u => u.no).join(',') + ')');
+  return toutes;
+})();
 const NOMS_ALLAH = litteral('NOMS_ALLAH');   // les Noms d'Allah (hors unités)
 const VOIX       = litteral('VOIX');         // les récitateurs — loc:1 = hébergé (10/08)
 
-/* les 9 disques (= leçons) d'une unité, dans l'ordre pédagogique */
-const DISQUES = [...src.slice(src.indexOf('const DISQUES=['))
-  .slice(0, 900).matchAll(/label:'((?:[^'\\]|\\.)*)'/g)].map(m => m[1].replace(/\\u2019/g, '’'));
+/* ── LES 9 DISQUES (= leçons) D'UNE UNITÉ, DANS L'ORDRE PÉDAGOGIQUE ──────────────
+   ⚠️ ON EXÉCUTE LA TABLE, ON NE LA DÉCOUPE PLUS (14/09/2026). Ce bloc cherchait
+   `const DISQUES=[` dans index.html ; la table a déménagé dans parcours.js le 10/09 et
+   s'appelle désormais `disques()` — une FONCTION paresseuse. `indexOf` rendait -1,
+   `slice(-1)` le dernier caractère du fichier, et DISQUES était un tableau VIDE : le
+   tableau des disques de Myriam s'est affiché vide pendant quatre jours sans qu'une
+   ligne d'erreur ne sorte. Quatrième panne de cette famille — on ne devine plus la
+   forme du code, on l'exécute. `d.build` est la VRAIE fonction : son nom relie chaque
+   disque à son constructeur, exactement comme progression.js le fait par identité. */
+const { DISQUES, nomDeBuild } = (() => {
+  const app = path.join(RACINE, 'alaq-vercel-static');
+  const el = () => ({ classList: { add() {}, remove() {}, contains: () => false }, style: {}, appendChild() {},
+    setAttribute() {}, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [],
+    getContext: () => null, children: [], dataset: {} });
+  const bac = { console: { error() {}, log() {}, warn() {} }, Math, JSON, Date, Object, Array, String, Number,
+    Boolean, RegExp, Set, Map, parseInt, parseFloat, isNaN, setTimeout: () => 0, clearTimeout: () => {},
+    localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    /* progression.js pose des écouteurs sur window au chargement (focus, visibilitychange) */
+    addEventListener() {}, removeEventListener() {}, navigator: { onLine: true, language: 'fr' },
+    location: { hash: '', pathname: '/', search: '', hostname: 'studio' }, fetch: () => Promise.reject(new Error('pas de réseau dans le studio')),
+    document: { getElementById: () => el(), querySelector: () => null, querySelectorAll: () => [],
+      createElement: () => el(), body: el(), documentElement: el(), addEventListener() {} } };
+  bac.window = bac; bac.globalThis = bac; bac.self = bac;
+  const vm = require('vm'); vm.createContext(bac);
+  /* l'ordre de la page : la semence, les tracés, les données, les générateurs, la progression, le parcours */
+  for (const n of ['content/unites.js', 'trace-lettres.js', 'donnees.js', 'generateurs.js', '../src/ecrans/index.js', 'progression.js', 'parcours.js']) {
+    const p = path.join(app, n);
+    if (!fs.existsSync(p)) throw new Error(n + ' introuvable — le studio ne peut plus nommer les leçons');
+    vm.runInContext(fs.readFileSync(p, 'utf8'), bac, { filename: n });
+  }
+  const table = vm.runInContext('disques()', bac);
+  if (!Array.isArray(table) || table.length < 9)
+    throw new Error('parcours.js : disques() rend ' + (Array.isArray(table) ? table.length : typeof table) +
+      ' entrée(s) au lieu de 9 — le tableau des disques de Myriam serait faux ou vide');
+  const noms = {};
+  table.forEach(d => { if (d && typeof d.build === 'function') noms[d.build.name] = d.label; });
+  return { DISQUES: table.map(d => d.label), nomDeBuild: noms };
+})();
 
 /* ---------- fichiers présents / pré-cachés ---------- */
 const presents = new Set(fs.readdirSync(AUDIOS).filter(f => f.endsWith('.mp3')));
@@ -131,13 +270,20 @@ UNITS.forEach(U => (U.words || []).forEach(w => { infoMot[w.w] = { unite: U.no, 
 /* ---------- dernier recours : dans quelle leçon ce mot est-il écrit ? ----------
    On cherche le token dans le code et on remonte à la fonction build* qui l'entoure ;
    DISQUES donne le nom affiché de cette leçon (build:buildAlphabet → « L’alphabet »). */
-const nomDeBuild = {};
-[...src.slice(src.indexOf('const DISQUES=[')).slice(0, 900)
-  .matchAll(/label:'((?:[^'\\]|\\.)*)'[^}]*build:(\w+)/g)]
-  .forEach(m => { nomDeBuild[m[2]] = m[1].replace(/\\u2019/g, '’'); });
-const bornesBuild = [...src.matchAll(/\nfunction (build\w+)\(/g)].map(m => ({ nom: m[1], i: m.index }));
+/* `nomDeBuild` vient de la table exécutée (plus haut) : build:buildAlphabet → « L'alphabet ».
+   ⚠️ ET LE CODE DES CONSTRUCTEURS N'EST PLUS DANS index.html : ils vivent dans
+   generateurs.js depuis le 14/09. On cherche donc le token LÀ — sinon ce dernier recours
+   ne trouvait plus jamais rien, et des sons perdaient leur colonne « leçon » en silence. */
+const CODE_LECONS = (() => {
+  const p = path.join(RACINE, 'alaq-vercel-static', 'generateurs.js');
+  return (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '') + '\n' + src;
+})();
+const bornesBuild = [...CODE_LECONS.matchAll(/\nfunction (build\w+)\(/g)].map(m => ({ nom: m[1], i: m.index }));
+if (!bornesBuild.length)
+  throw new Error('aucune fonction build* trouvée (ni dans generateurs.js, ni dans index.html) — ' +
+    'le dernier recours pour nommer la leçon d’un mot est mort, et des sons perdraient leur colonne');
 function leconDuToken(token) {
-  const i = src.indexOf("'" + token + "'");
+  const i = CODE_LECONS.indexOf("'" + token + "'");
   if (i < 0) return null;
   let dernier = null;
   for (const b of bornesBuild) { if (b.i < i) dernier = b.nom; else break; }
@@ -380,6 +526,22 @@ function compte(a) {
   a.forEach(l => c[l.statut]++); return c;
 }
 
+/* ── LE MODE --verifier (14/09/2026) ─────────────────────────────────────────
+   Câblé dans `npm run qa`. Cet outil s'est cassé DEUX fois en silence — le 06/09 (une
+   borne partie avec content/unites.js) et le 14/09 (`const UNITS=(function(){` parti dans
+   donnees.js, l'outil MORT, l'inventaire de Myriam figé) — et son appelant, le studio,
+   enveloppe tout dans un try/catch par choix : une colonne devinée vaut mieux qu'un studio
+   hors ligne. Un choix qui rend une panne invisible doit avoir sa sonnette ailleurs. La voici.
+   ⚠️ En mode --verifier on N'ÉCRIT PAS inventaire.json : le portillon ne modifie pas le dépôt. */
+if (process.argv.includes('--verifier')) {
+  const nU = UNITS.length, nSons = lignes.length, nD = DISQUES.length;
+  if (nD < 9) { console.error('✗ inventaire.js : ' + nD + ' disque(s) nommé(s) au lieu de 9 — le tableau des leçons de Myriam serait vide (c’est arrivé du 10/09 au 14/09, en silence)'); process.exit(1); }
+  if (nU !== 12) { console.error('✗ inventaire.js : ' + nU + ' unité(s) au lieu de 12 — le studio étiquetterait des sons avec une unité fausse'); process.exit(1); }
+  if (nSons < 400) { console.error('✗ inventaire.js : ' + nSons + ' son(s) seulement — la base est à 530 ; une source a-t-elle changé de fichier ?'); process.exit(1); }
+  console.log('✓ inventaire.js : ' + nSons + ' sons arabes et ' + consignes.length + ' consignes, ' + nU +
+    ' unités (semence + donnees.js), ' + nD + ' disques nommés (parcours.js exécuté)');
+  process.exit(0);
+}
 fs.writeFileSync(SORTIE, JSON.stringify(inv, null, 1));
 console.log('inventaire.json écrit — ' + lignes.length + ' sons arabes, ' + consignes.length + ' consignes françaises');
 console.log('  arabe    :', JSON.stringify(inv.bilan.arabe));
