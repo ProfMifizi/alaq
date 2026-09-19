@@ -46,7 +46,7 @@
     /* la barre du haut : la série, les Qatarāt, la lampe du rang */
     `
 <div class="topbar">
-  <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ"></div>
+  <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ" src="icon-192.png"></div>
   <div class="stats">
     <div class="stat"><img class="tbic" data-ico="tb-epi" src="images-app-alaq/icone-tb-epi-v1.png" alt=""> <span id="st-streak">0</span></div>
     <div class="stat" onclick="showHearts()" style="cursor:pointer" role="button" tabindex="0" aria-label="Tes Qatarāt"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-goutte-v1.png" alt=""> <span id="st-hearts">7</span></div>
@@ -119,7 +119,7 @@
     <rect class="mjambe mjd" id="mjD" x="112" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(-15)"/>
   </svg></div>
   <div class="big" id="fin-icon" style="display:none">✓</div>
-  <h2 id="fin-title">Leçon terminée !</h2>
+  <h2 id="fin-title">Leçon terminée !</h2>
   <div class="fin-score"><span class="fs-v" id="fin-acc">100%</span><span class="fs-l">de réussite</span></div>
   <!-- Les trois cases de fin : graines, réussite, assiduité (remplies par constance.js). -->
   <div id="fin-cases"></div>
@@ -143,7 +143,7 @@
     `
 <div class="finish" id="confirmReset">
   <div class="big">⚠️</div>
-  <h2>Réinitialiser la progression ?</h2>
+  <h2>Réinitialiser la progression ?</h2>
   <p style="max-width:320px;color:var(--cream);opacity:.8;margin:-14px 0 26px">Tout repart à zéro (étoiles, disques terminés). Cette action est irréversible.</p>
   <button class="cta cta-danger" style="max-width:300px" onclick="doReset()">RÉINITIALISER</button>
   <button class="cta" style="max-width:300px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:10px" onclick="cancelReset()">ANNULER</button>
@@ -175,7 +175,7 @@
 
     <section class="obs" data-obs="1">
       <div style="flex:1"></div>
-      <h1>Comment t'appelles-tu ?</h1>
+      <h1>Comment t'appelles-tu ?</h1>
       <input class="ob-in" id="obPrenomOnb" type="text" autocomplete="given-name" placeholder="Ton prénom" oninput="onbPrenomInput(this.value)">
       <div style="flex:1"></div>
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
@@ -198,7 +198,7 @@
 
     <section class="obs" data-obs="3">
       <div style="flex:1"></div>
-      <h1>Quelle est ton intention ?</h1>
+      <h1>Quelle est ton intention ?</h1>
       <div class="ob-ar">نِيَّتُك</div><div class="ob-hint">Plusieurs choix possibles</div>
       <div class="ob-opts">
         <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Apprendre l'arabe"><span class="em">🔤</span> Apprendre l'arabe</button>
@@ -214,7 +214,7 @@
 
     <section class="obs" data-obs="4">
       <div style="flex:1"></div>
-      <h1>Sais-tu lire l'arabe ?</h1>
+      <h1>Sais-tu lire l'arabe ?</h1>
       <div class="ob-opts">
         <button class="ob-opt" data-obk="niveau" data-obv="Je pars de zéro"><span class="em">🌱</span> Je pars de zéro</button>
         <button class="ob-opt" data-obk="niveau" data-obv="Quelques lettres"><span class="em">🔤</span> Je connais quelques lettres</button>

@@ -1528,7 +1528,7 @@ function finishReview(){
     ?'<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="qNext()">▶ Verset suivant</button>'
     :'';
   document.getElementById('fin-icon').textContent='';
-  document.getElementById('fin-title').textContent='Révision terminée !';
+  document.getElementById('fin-title').textContent='Révision terminée !';
   document.getElementById('fin-xp').textContent='+10';
   document.getElementById('fin-acc').textContent=acc+'%';
   /* _vfGraines vaut toujours 0 (le vrai/faux ne crédite plus) : c'est _grainesSession qui porte
