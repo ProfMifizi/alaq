@@ -153,7 +153,7 @@
     `
 <div class="finish" id="noHearts">
   <div class="big"><img src="images-app-alaq/icone-tb-goutte-v1.png" data-ico="tb-coeur" alt="" style="height:64px;filter:grayscale(1) opacity(.55)"></div>
-  <h2>Ton eau est épuisée !</h2>
+  <h2>Ton eau est épuisée !</h2>
   <p class="succ-desc" style="margin:0 0 14px">Recharge tes Qatarāt en révisant au puits Zamzam du savoir.</p>
   <div id="nh-actions" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>
 </div>
@@ -183,7 +183,7 @@
 
     <section class="obs" data-obs="2">
       <div style="flex:1"></div>
-      <h1>Comment as-tu connu ALAQ ?</h1>
+      <h1>Comment as-tu connu ALAQ ?</h1>
       <div class="ob-opts">
         <button class="ob-opt" data-obk="source" data-obv="YouTube"><span class="em">▶️</span> YouTube</button>
         <button class="ob-opt" data-obk="source" data-obv="Bouche à oreille"><span class="em">👥</span> Bouche à oreille</button>
@@ -316,7 +316,7 @@
     <rect x="70" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(12 79 203)"/>
     <rect x="112" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(-12 121 203)"/>
   </svg>
-  <h2 style="margin:10px 0 14px">Content de te revoir !</h2>
+  <h2 style="margin:10px 0 14px">Content de te revoir !</h2>
   <div id="obLoginCard" style="width:100%;max-width:320px"></div>
   <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" id="obLoginBack" onclick="obLoginClose()">Retour</button>
 </div>

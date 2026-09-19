@@ -233,7 +233,7 @@ function verrouConnexion(){
 }
 function verrouLibere(){
   VERROU_CONNEXION=false;
-  var t=document.querySelector('#obLogin h2'); if(t)t.textContent='Content de te revoir !';
+  var t=document.querySelector('#obLogin h2'); if(t)t.textContent='Content de te revoir !';
   var b=document.getElementById('obLoginBack'); if(b)b.style.display='';
 }
 function obLoginOpen(){
