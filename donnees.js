@@ -96,12 +96,12 @@ const UNITS=(function(){
    court:'Les harfs بِ · عَلَى · لِ',
    sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
  /* Unité 10 : u10:true → u10Disques() (parcours.js), même dispositif que l'unité 9.
-    ⚠️ sub compte les disques RÉELS, pas les neuf de l'accueil.
+    ⚠️ sub compte les disques RÉELS — les neuf depuis le GO du 24/09.
     words:[] : les groupes nominaux n'entrent pas encore en révision (à trancher avec Myriam).
     (journal : donnees.js · unité 10, ouverture) */
  { no:10, ready:true,  ph:'GRAMMAIRE', u10:true, letters:[], words:[],
    court:'L’annexion — الإِضَافَة',   // graphie relevée dans le document d'architecture, jamais retapée
-   sub:'« X de Y » — de qui ? de quoi ? · 1 leçon' },
+   sub:'« X de Y » — de qui ? de quoi ? · 9 leçons' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
 ]);

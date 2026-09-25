@@ -219,7 +219,7 @@
   .speak{display:block;margin:0 auto 22px;background:var(--panel);border:2px solid var(--line);
     color:var(--gold2);border-radius:14px;padding:12px 20px;font-weight:800;font-size:15px}
   .bigspeak{display:grid;place-items:center;margin:14px auto 20px;width:120px;height:120px;border-radius:28px;
-    border:2px solid var(--line);border-bottom-width:5px;background:var(--panel);font-size:52px}
+    border:2px solid var(--line);background:var(--panel);font-size:52px}
   .bigspeak:active{transform:translateY(2px);border-color:var(--gold)}
   .hint{color:var(--muted);font-size:16px;font-weight:700;margin-top:16px}
 
@@ -231,7 +231,7 @@
      أُمٌّ empile ḍamma + chedda + tanwīn au-dessus de la ligne : à `line-height:1.2` la pile
      sort de sa boîte. Le remède est la HAUTEUR DE LIGNE de l'arabe, pas seulement le
      rembourrage — le rembourrage seul décale le mot sans lui donner de place au-dessus. */
-  .opt{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;color:var(--cream);
+  .opt{background:var(--panel);border:2px solid var(--line);color:var(--cream);
     border-radius:14px;padding:20px 10px 16px;font-size:18px;font-weight:700;text-align:center;transition:.08s;
     min-height:68px;display:grid;place-items:center}
   .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.55;font-weight:700}
@@ -258,7 +258,7 @@
   @keyframes pop{40%{transform:scale(1.15)}}
 
   .explore{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .exp-card{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;
+  .exp-card{background:var(--panel);border:2px solid var(--line);border-radius:16px;
     padding:18px 6px;display:flex;flex-direction:column;align-items:center;gap:8px}
   .exp-card:active{background:#3a312b;border-color:var(--gold)}
   .exp-card .ar{font-family:var(--ar);font-size:50px;color:var(--gold);line-height:1.2}
@@ -329,9 +329,9 @@
   .opt.on:not(.ok):not(.bad){border-color:#f7cd74;background:#403727;
     box-shadow:0 0 16px rgba(247,205,116,.30),inset 0 0 12px rgba(247,205,116,.08)}
   .tico{display:flex;gap:14px;justify-content:center;margin-top:14px}
-  .tico button{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  .tico button{background:var(--panel);border:2px solid var(--line);border-radius:14px;
     width:64px;height:56px;display:grid;place-items:center;cursor:pointer;color:var(--gold2)}
-  .tico button:active{transform:translateY(2px);border-bottom-width:2px}
+  .tico button:active{transform:translateY(2px)}
 .tico button:disabled{opacity:.35;pointer-events:none}
   .tico svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
   .tico .plein{fill:currentColor;stroke:none}
@@ -476,7 +476,7 @@
     background:var(--panel);border:2px dashed var(--line);border-radius:18px;padding:34px 12px 18px;margin-bottom:14px;line-height:1.5}
   .slots .ph{color:var(--lock)}
   .tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;direction:rtl}
-  .tile{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  .tile{background:var(--panel);border:2px solid var(--line);border-radius:14px;
     width:64px;height:64px;font-family:var(--ar);font-size:36px;color:var(--gold);display:grid;place-items:center;
     position:relative;font-weight:400}
   /* La zone de TOUCHE déborde la tuile de 4 px sans rien déplacer (14/08 — « la sensibilité
@@ -630,7 +630,7 @@
   .hkcirc.lit .sign{color:var(--gold2)}
   .assoc-l{font-family:var(--ar);font-size:80px;text-align:center;line-height:1.4}
   .assoc-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  .assoc-c{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  .assoc-c{background:var(--panel);border:2px solid var(--line);border-radius:14px;
     padding:14px 4px;display:flex;flex-direction:column;align-items:center;gap:6px}
   .assoc-c.lit{border-color:var(--gold);background:#3a312b}
   .assoc-c .sm{font-family:var(--ar);font-size:34px;color:var(--muted)}
@@ -642,7 +642,7 @@
      HAUTE ; sans centrage vertical, les glyphes restaient collés en haut avec du vide
      dessous — d'autant plus visible que certaines cartes portent une étiquette et d'autres
      non. C'est le même défaut que la ligne de la hamza, corrigé le 14/08 de la même façon. */
-  .ts-card{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  .ts-card{background:var(--panel);border:2px solid var(--line);border-radius:14px;
     padding:14px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:4px;direction:ltr}
   .ts-card.seen{background:var(--gold);border-color:var(--gold)}
@@ -739,7 +739,7 @@
     clip-path:inset(0.78em 0 0 0)}
   .gone{visibility:hidden}
   .g6{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;direction:rtl;margin-top:8px}
-  .b6{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+  .b6{background:var(--panel);border:2px solid var(--line);border-radius:14px;
     padding:12px 4px;font-size:42px;color:var(--gold);transition:opacity .3s;cursor:pointer;font-weight:700}
   .b6.sel{background:var(--gold);color:var(--bg);border-color:var(--gold)}
   .b6.dim{opacity:.28;pointer-events:none}
@@ -774,7 +774,7 @@
   @keyframes fbshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}55%{transform:translateX(4px)}80%{transform:translateX(-2px)}}
   /* ═══ LEÇON 7 « Lire des mots » v3 (11/08) — glisser le signe · bulles-mots · le tri ═══ */
   .sigchip{width:96px;height:96px;margin:6px auto 26px;border-radius:20px;
-    background:var(--panel);border:2px solid var(--line);border-bottom-width:5px;
+    background:var(--panel);border:2px solid var(--line);
     display:grid;place-items:center;font-family:var(--ar);font-size:52px;color:var(--gold);
     touch-action:none;cursor:grab;user-select:none}
   .grps{display:flex;flex-direction:column;gap:12px;align-items:center}
@@ -798,7 +798,7 @@
   .trirow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;direction:rtl;margin-bottom:22px}
   /* 14/08 (correctifs 4) — Myriam, jeu de tri (écran 10 leçon 3 ET leçon 7, même moteur) :
      « augmente la taille de la police des mots à trier, et la hauteur des box pointillées ». */
-  .chipmot{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;
+  .chipmot{background:var(--panel);border:2px solid var(--line);
     border-radius:14px;padding:9px 18px;font-family:var(--ar);font-size:36px;color:var(--gold);
     touch-action:none;cursor:grab;user-select:none;font-weight:400}
   .chipmot.gone{visibility:hidden}
@@ -824,6 +824,8 @@
      grand — le drapeau RENTRE à son coin haut-droit (position validée le 08/08) au lieu de
      monter sur la leçon ; au repos il flotte au-dessus du bandeau (position validée le 10/08). */
   #p-foot.ok .p-flag,#p-foot.bad .p-flag{top:2px}
+  /* le drapeau rentré mord sur la 1re ligne d'un verdict long : la place lui est laissée (QA 19/09) */
+  #p-foot.ok .fb,#p-foot.bad .fb{padding-right:24px}
   #player.vfmode .p-flag{display:none}
   .sig-voile{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.25s;z-index:90}
   .sig-voile.on{opacity:1;pointer-events:auto}
@@ -1377,7 +1379,7 @@
 .pen-zone.ok{color:var(--green)}
 .pen-zone.ko{color:var(--coral)}
 .pen-tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;direction:rtl;margin-top:6px}
-.pen-t{background:var(--panel2);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+.pen-t{background:var(--panel2);border:2px solid var(--line);border-radius:14px;
   min-width:56px;padding:8px 12px;font-family:var(--ar);font-size:30px;color:var(--cream);line-height:1.2;cursor:pointer}
 .pen-t[disabled]{opacity:.25}
 /* Le clavier du stylo ✏️ suit la même règle que celui des leçons (14/08) : le signe est
@@ -1391,7 +1393,7 @@
 @keyframes penhint{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 7px rgba(232,169,79,.26)}}
 @media (prefers-reduced-motion:reduce){.pen-t.shake,.pen-t.hint,.srcL.invite,.fourc.invite{animation:none}}
 .pen-btns{display:flex;gap:9px;margin-top:16px}
-.pen-btns button{flex:1;border:2px solid var(--line);border-bottom-width:4px;background:var(--panel2);
+.pen-btns button{flex:1;border:2px solid var(--line);background:var(--panel2);
   border-radius:13px;padding:12px 8px;font-weight:900;font-size:13.5px;font-family:var(--ui);color:var(--cream);cursor:pointer}
 .pen-btns button.prim{background:var(--gold);border-color:var(--gold-d);color:#241f1d}
 /* ===== Les noms d'Allah (13/07) : sélection, nom illuminé, cartes retournées, touche ⌫ ===== */
@@ -1418,7 +1420,7 @@
 .opt.fopt.sel .fdevant{border-color:var(--gold);background:#3d3120}
 .opt.fopt.ok .fdevant{border-color:#35a468;background:#26302a}
 .opt.fopt.bad .fdevant{border-color:#d8463a}
-.wtile{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;
+.wtile{background:var(--panel);border:2px solid var(--line);border-radius:14px;
   /* 🔴 LA HAUTEUR SUIT LA POLICE (01/09). La boite etait calee sur 24px ;
      a 36px une ligne de Naskh mesure environ 65px et le mot chevaucherait
      son cadre. Mesure, pas devine : c'est la boite de ligne qui commande. */
@@ -1640,7 +1642,7 @@
 .m-row .m-fr{font-family:var(--ui);font-weight:800;color:var(--cream);font-size:14px;flex:1}
 .m-cols{display:flex;gap:12px}
 .m-col{flex:1;display:flex;flex-direction:column;gap:10px}
-.m-cell{background:var(--panel);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:10px;cursor:pointer;
+.m-cell{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;
   color:var(--cream);font-family:var(--ui);font-weight:800;font-size:15px;height:74px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2}
 .m-col .m-arc{font-family:var(--ar);font-size:30px;color:var(--gold);direction:rtl}
 .m-cell.sel{border-color:var(--gold);background:rgba(220,144,46,.16);transform:translateY(-1px)}

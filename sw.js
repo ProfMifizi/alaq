@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v225-2026-09-19';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v226-2026-09-25';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -321,6 +321,43 @@ const AUDIOS=[
 "audios-app-alaq/mot-audhu.mp3",
 "audios-app-alaq/mot-ayn.mp3",
 "audios-app-alaq/mot-bab.mp3",
+"audios-app-alaq/mot-hammam.mp3",
+"audios-app-alaq/mot-mirhad.mp3",
+"audios-app-alaq/mot-babul-bayt.mp3",
+"audios-app-alaq/mot-babul-mirhad.mp3",
+"audios-app-alaq/mot-babul-hammam.mp3",
+"audios-app-alaq/mot-sath.mp3",
+"audios-app-alaq/mot-sathul-bayt.mp3",
+"audios-app-alaq/mot-sur.mp3",
+"audios-app-alaq/mot-surul-bayt.mp3",
+"audios-app-alaq/mot-kub.mp3",
+"audios-app-alaq/mot-halib.mp3",
+"audios-app-alaq/mot-asir.mp3",
+"audios-app-alaq/mot-kubul-ma.mp3",
+"audios-app-alaq/mot-kubul-halib.mp3",
+"audios-app-alaq/mot-kubul-asir.mp3",
+"audios-app-alaq/mot-tinul-himar.mp3",
+"audios-app-alaq/mot-mudaf.mp3",
+"audios-app-alaq/mot-mudaf-ilayh.mp3",
+"audios-app-alaq/mot-babul-dar.mp3",
+"audios-app-alaq/mot-rummanul-bint.mp3",
+"audios-app-alaq/mot-tinul-walad.mp3",
+"audios-app-alaq/mot-muallim.mp3",
+"audios-app-alaq/mot-muallimul-walad.mp3",
+"audios-app-alaq/mot-waladul-muallim.mp3",
+"audios-app-alaq/mot-baytul-walad.mp3",
+"audios-app-alaq/mot-ismu-allah.mp3",
+"audios-app-alaq/mot-rabbul-alamin.mp3",
+"audios-app-alaq/mot-yawmud-din.mp3",
+"audios-app-alaq/mot-malikul-yawm.mp3",
+"audios-app-alaq/mot-an-nahlu-ghayrut-tayr.mp3",
+"audios-app-alaq/mot-ghayrul-maghdub.mp3",
+"audios-app-alaq/mot-maliku-yawmid-din.mp3",
+"audios-app-alaq/mot-hamdu-allah.mp3",
+"audios-app-alaq/mot-linul-umm.mp3",
+"audios-app-alaq/mot-rabbun-nas.mp3",
+"audios-app-alaq/mot-aynul-himar.mp3",
+"audios-app-alaq/mot-umrul-bint.mp3",
 "audios-app-alaq/mot-bayt.mp3",
 "audios-app-alaq/mot-bi-ismin.mp3",
 "audios-app-alaq/mot-bi.mp3",

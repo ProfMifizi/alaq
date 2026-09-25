@@ -192,23 +192,42 @@ function u9Disques(){
   ];
 }
 
-/* Unité 10 « X de Y » : un disque réel et huit grisés ; même mécanique que u9Disques()
+/* Unité 10 « X de Y » : les NEUF disques de l'annexion ; même mécanique que u9Disques()
    (contenu dans window.__alaqU10, métadonnée et longueur dans ce script classique).
    ⛔ Le libellé ne dit pas « مُضَاف » : interdit au disque 1 par les directives validées.
-   (journal : parcours.js · unité 10, ouverture) */
+   ⚠️ Ne mémoïse pas, comme u9Disques : chaque appel rend un tableau neuf.
+   (journal : parcours.js · unité 10, ouverture · les neuf disques livrés) */
 function u10Disques(){
   return [
-    /* ⚠️ vocab:true posé d'avance (UNITS[9].words est vide) : l'unité finit sur un grisé,
-       unitValidated(9) ne devient jamais vrai, ce drapeau est sa seule porte vers la révision.
-       Les groupes d'annexion portent une espace : splitUnits() en ferait une tuile vide. */
-    { icon:'🌙', img:'decouvrir', label:'De qui ? de quoi ?', vocab:true,
-      build:function(){
-        if(window.__alaqU10 && typeof window.__alaqU10.disque1==='function') return window.__alaqU10.disque1();
-        console.error('unité 10 : module non chargé (disque 1)'); return [];
-      } },
-    /* ⚠️ Un disque réel ajouté = un grisé retiré : neuf disques, réels d'abord
-       (gardé par _verif_u8_app et _verif_u8_dist). */
-    ...Array.from({length:8}, disqueAVenir),
+    /* LES NEUF DISQUES DE L'ANNEXION, tous réels depuis le 24/09 (GO de Myriam : « tu es
+       censé délivrer toutes les leçons de l'unité 10, on a tout construit »). Ils étaient
+       écrits et gardés depuis des semaines, mais le parcours n'en servait qu'un : huit
+       grisés tenaient leur place. `vocab:true` reste sur le PREMIER (UNITS[9].words est
+       vide : c'est la seule porte vers la révision — les groupes d'annexion portent une
+       espace, splitUnits() en ferait une tuile vide).
+       ⚠️ Les titres sont COURTS — l'accueil n'est pas la place d'un sous-titre (règle 1),
+       et l'icône dit la NATURE du disque, pas son rang. L'emoji n'est que le REPLI
+       si l'image ne charge pas (onerror, ui/accueil.js) : il suit sa famille. */
+    ...[
+      ['🌙','decouvrir','De qui ? de quoi ?',   1, true ],
+      ['📌','memoriser','La porte de la maison',2, false],
+      ['📌','memoriser','Transformer',          3, false],
+      ['✏️','ecrire',   'Produire',             4, false],
+      ['💡','decouvrir','Le premier mot',       5, false],
+      ['💡','decouvrir','Le deuxième mot',      6, false],
+      ['📌','memoriser','Nommer les deux rôles',7, false],
+      ['🕋','qoran',    'Dans Al-Fātiḥa',       8, false],
+      ['🏆','bilan',    'Bilan',                9, false],
+    ].map(function(d){
+      var icon=d[0], img=d[1], label=d[2], n=d[3], vocab=d[4];
+      var o={ icon:icon, img:img, label:label, build:function(){
+        var f=window.__alaqU10 && window.__alaqU10['disque'+n];
+        if(typeof f==='function') return f();
+        console.error('unité 10 : module non chargé (disque '+n+')'); return [];
+      } };
+      if(vocab) o.vocab=true;
+      return o;
+    }),
   ];
 }
 
