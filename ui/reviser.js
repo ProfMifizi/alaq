@@ -20,7 +20,9 @@
    · toAr, sujetCours (ui/accueil.js)
    Gardes : outils/verifier-interface.mjs, previews/_verif_interface.html. */
 
-const UNIT_VIDEOS={1:'',2:'',3:''}; // ← colle ici l'ID ou le lien YouTube de chaque unité (clé = numéro d'unité)
+/* L'ID YouTube de chaque unité (clé = numéro d'unité). ytEmbed accepte un lien complet
+   ou l'ID nu ; on garde l'ID, il ne traîne aucun paramètre de partage. */
+const UNIT_VIDEOS={1:'V3boKxX7aY8',2:'',3:''};
 
 function ytEmbed(v){ if(!v)return''; v=String(v).trim(); let id='',m=v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); if(m)id=m[1]; else if(/^[\w-]{11}$/.test(v))id=v; return id?('https://www.youtube.com/embed/'+id):''; }
 
@@ -109,7 +111,8 @@ function fatihaWordFor(L){
    8 = l'unité 9). ⚠️ Une unité listée sans contenu rendrait une carte vide.
    ⛔ Un résumé s'écrit avec Myriam, jamais inventé ici : l'unité n'entre dans la table qu'une fois
    son résumé écrit. */
-const RESUME_GRAM={7:function(){ return resumeGramU8(); }, 8:function(){ return resumeGramU9(); }};
+const RESUME_GRAM={7:function(){ return resumeGramU8(); }, 8:function(){ return resumeGramU9(); },
+                   9:function(){ return resumeGramU10(); }};
 
 function gramChip(ar,ro){
   return '<button class="chip" onclick="playSyl(\''+ar+'\',this)">'+
@@ -122,6 +125,14 @@ function gramBande(fam,vues){
     var g=(L==='\u0647')?'\uFEE9':L;                 /* le ه isolé s'écrit rond, comme dans la grille */
     return vues.indexOf(L)>=0?'<b>'+g+'</b>':g;
   }).join(' ')+'</div>';
+}
+/* ⛔ UN BOUTON QUI NE JOUE RIEN EST PIRE QU'UN BOUTON ABSENT. Les formes ISOLEES d'une
+   transformation (le mot sans son article, la terminaison seule) n'ont pas de prise : on les
+   montre sans les rendre touchables, plutot que d'offrir un haut-parleur muet. */
+function gramChipSiSon(ar,ro){
+  if(typeof aLeSon==='function'&&aLeSon(ar))return gramChip(ar,ro);
+  return '<span class="chip" aria-hidden="false">'+
+    '<span class="chip-ar">'+ar+'</span><span class="chip-ro">'+ro+'</span></span>';
 }
 function gramSection(titre,inner,desc){
   return '<div class="sgn-card"><div class="sgn-head">'+titre+'</div>'+inner+
@@ -239,6 +250,61 @@ function resumeGramU9(){
     '<div class="sgn-chips">'+gramChip('بِسْمِ اللَّهِ','au nom d’Allah')+gramChip('الْحَمْدُ لِلَّهِ','la louange est à Allah')+'</div>',
     'Les deux premiers mots de la Fātiḥa portent déjà <span class="ar">بِ</span> et <span class="ar">لِ</span> — '+
     'la règle que tu viens d’apprendre est celle du Qorān lui-même.');
+
+  return s1+s2+s3+s4+s5;
+}
+
+/* LE RESUME DE GRAMMAIRE DE L'UNITE 10 — L'ANNEXION.
+   Forme validee par Myriam le 25/09 (cinq encadres, comme l'unite 9) ; elle a ecarte la
+   passerelle « complement du nom » : on garde le vocabulaire arabe.
+   Aucune graphie n'est tapee ici : les quinze formes sont RECOPIEES des donnees de
+   l'unite (GN et ETIQUETTES de _communs.js, les transformations des disques 5 et 6), en
+   echappements Unicode — une graphie retapee diverge d'un octet et ne joue plus son son.
+   Leurs sons sont verses dans SONS par src/entree.js, pas par ce fichier.
+   (journal : ui/reviser.js · le resume de grammaire de l'unite 10) */
+function resumeGramU10(){
+  var FL='<span class="gsec-fl">➔</span>';
+  /* 1 · L'ANNEXION : DEUX NOMS, AUCUN MOT POUR « DE » */
+  var s1=gramSection(
+    'L’annexion · <span class="ar">\u0627\u0644\u0625\u0650\u0636\u064e\u0627\u0641\u064e\u0629</span>',
+    '<div class="sgn-chips">'+gramChip('\u0628\u064e\u0627\u0628\u064f \u0627\u0644\u0652\u0628\u064e\u064a\u0652\u062a\u0650','la porte de la maison')
+      +gramChip('\u0642\u064e\u0644\u064e\u0645\u064f \u0627\u0644\u0652\u0628\u0650\u0646\u0652\u062a\u0650','le stylo de la fille')+'</div>',
+    'Deux noms posés l’un contre l’autre disent « X de Y ». '+
+    'Il n’y a <b>aucun mot</b> pour « de » : c’est leur place qui le dit.');
+
+  /* 2 · LE PREMIER MOT : IL PERD L'ARTICLE ET SON TANWIN */
+  var s2=gramSection(
+    'Le premier mot · <span class="ar">\u0645\u064f\u0636\u064e\u0627\u0641</span>',
+    '<div class="sgn-chips">'+gramChipSiSon('\u0627\u0644\u0652\u0628\u064e\u0627\u0628\u064f','le, la')+FL+gramChipSiSon('\u0628\u064e\u0627\u0628\u064f','de…')+'</div>'+
+    '<div class="sgn-chips">'+gramChipSiSon('\u0643\u064f\u0648\u0628\u064c','un, une')+FL+gramChipSiSon('\u0643\u064f\u0648\u0628\u064f','de…')+'</div>',
+    'Il perd son <span class="ar">الـ</span> et son tanwīn, et se termine par une '+
+    '<b style="white-space:nowrap">damma <span class="ar">ـُ</span></b>.');
+
+  /* 3 · LE DEUXIEME MOT : IL GARDE L'ARTICLE, SA FIN PASSE A LA KASRA */
+  var s3=gramSection(
+    'Le deuxième mot · <span class="ar">\u0645\u064f\u0636\u064e\u0627\u0641 \u0625\u0650\u0644\u064e\u064a\u0652\u0647\u0650</span>',
+    '<div class="sgn-chips">'+gramChipSiSon('\u0627\u0644\u0652\u062d\u0650\u0645\u064e\u0627\u0631\u064f','l’âne')+FL+gramChipSiSon('\u0627\u0644\u0652\u062d\u0650\u0645\u064e\u0627\u0631\u0650','de l’âne')+'</div>'+
+    '<div class="sgn-chips">'+gramChip('\u062a\u0650\u064a\u0646\u064f \u0627\u0644\u0652\u062d\u0650\u0645\u064e\u0627\u0631\u0650','la figue de l’âne')+'</div>',
+    'Lui <b>garde</b> son <span class="ar">الـ</span>, et sa terminaison passe de '+
+    '<span class="ar">ـُ</span> à une <b style="white-space:nowrap">kasra <span class="ar">ـِ</span></b>.');
+
+  /* 4 · LE ROLE TIENT A LA PLACE */
+  var s4=gramSection(
+    'Le rôle tient à la PLACE',
+    '<div class="sgn-chips">'+gramChip('\u0645\u064f\u0639\u064e\u0644\u0651\u0650\u0645\u064f \u0627\u0644\u0652\u0648\u064e\u0644\u064e\u062f\u0650','le professeur du garçon')+'</div>'+
+    '<div class="sgn-chips">'+gramChip('\u0648\u064e\u0644\u064e\u062f\u064f \u0627\u0644\u0652\u0645\u064f\u0639\u064e\u0644\u0651\u0650\u0645\u0650','le fils du professeur')+'</div>',
+    'Le même mot change de rôle selon sa place : <span class="ar">\u0645\u064f\u0636\u064e\u0627\u0641</span> est '+
+    '<b>le mot rattaché</b>, <span class="ar">\u0645\u064f\u0636\u064e\u0627\u0641 \u0625\u0650\u0644\u064e\u064a\u0652\u0647\u0650</span> <b>celui auquel il est rattaché</b>.');
+
+  /* 5 · DANS LA FATIHA */
+  var s5=gramSection(
+    'Dans la Fātiḥa',
+    '<div class="sgn-chips">'+gramChip('\u062d\u064e\u0645\u0652\u062f\u064f \u0627\u0644\u0644\u0651\u064e\u0670\u0647\u0650','la louange d’Allah')
+      +gramChip('\u0631\u064e\u0628\u0651\u064f \u0627\u0644\u0652\u0639\u064e\u0627\u0644\u064e\u0645\u0650\u064a\u0646\u064e','le Seigneur des mondes')+'</div>'+
+    '<div class="sgn-chips">'+gramChip('\u0645\u064e\u0627\u0644\u0650\u0643\u064f \u0627\u0644\u0652\u064a\u064e\u0648\u0652\u0645\u0650','le Maître du jour')
+      +gramChip('\u064a\u064e\u0648\u0652\u0645\u064f \u0627\u0644\u062f\u0651\u0650\u064a\u0646\u0650','le Jour de la Rétribution')+'</div>',
+    'Touche pour entendre. La première sourate en est pleine — la règle que tu viens '+
+    'd’apprendre est celle du Qorān lui-même.');
 
   return s1+s2+s3+s4+s5;
 }

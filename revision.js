@@ -462,6 +462,10 @@ const NOTIONS_GRAM=[
   /* même intitulé que sur l'accueil (UNITS[8].court) */
   { u:8, titre:'Les harf <span class="ar">بِ \u00b7 عَلَى \u00b7 لِ</span>',
     sous:'Le harf change la fin du nom', ecrans:gramEcransU9 },
+  /* Le sous-titre DEFINIT la notion (Myriam, 25/09 : « il faut expliquer en une ligne
+     c'est quoi l'annexion ») — l'exemple fait le travail, on comprend sans le mot. */
+  { u:9, titre:'L\u2019annexion <span class="ar">الإِضَافَة</span>',
+    sous:'Deux noms li\u00e9s : la porte de la maison', ecrans:gramEcransU10 },
 ];
 function notionsGram(){ return NOTIONS_GRAM.filter(function(N){ return unitUnlocked(N.u); }); }
 
@@ -491,6 +495,21 @@ function gramEcransU9(){
     return window.__alaqU9.disque9().map(function(st){
       if(!st.bilan)return st;
       var c=Object.assign({},st); delete c.bilan; return c;
+    });
+  }catch(e){ return []; }
+}
+
+/* L'unite 10 : son BILAN aussi, comme l'unite 9.
+   ⚠️ ON RETIRE `fin`, PAS `bilan` — et ce ne sont pas la meme chose : `fin` est la
+   banniere de fin d'unite (« Unite 10 terminee »), qui n'a aucun sens dans une revision ;
+   `bilan` est le recapitulatif d'un ecran de chasse, qui garde tout le sien.
+   Par un CLONE, jamais en place : la file du disque est partagee avec la lecon. */
+function gramEcransU10(){
+  if(!(window.__alaqU10&&typeof window.__alaqU10.disque9==='function'))return [];
+  try{
+    return window.__alaqU10.disque9().map(function(st){
+      if(!st.fin)return st;
+      var c=Object.assign({},st); delete c.fin; return c;
     });
   }catch(e){ return []; }
 }
