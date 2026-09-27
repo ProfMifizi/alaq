@@ -124,7 +124,26 @@ function setDone(u,i,v){
    (journal : progression.js · déménagement du moteur) */
 const SUPA_URL='https://ykggxipgirgjwhhxmhbn.supabase.co';
 const SUPA_ANON='sb_publishable_IpnRJf3j3JfyRhQ0WWSeww_V5ctBrkh'; // clé PUBLIQUE (la RLS protège les données)
-let SB=null; try{ if(window.supabase)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
+/* ⛔ LE POSTE DE DÉVELOPPEMENT N'ÉCRIT JAMAIS CHEZ UNE ÉLÈVE (26/09). signalements.js
+   se tait sur localhost depuis août — ses faux tickets noyaient les vrais ; la SYNCHRO,
+   elle, ne l'a jamais fait. Or les harnais lancent la VRAIE app, posent S.hearts=999 et
+   jouent des disques : avec une session ouverte sur localhost, tout cela partait dans le
+   compte connecté. Sans client, cloudSaveSoon/cloudSaveNow/cloudInit ne font rien — ils
+   commencent tous par `if(!SB)return`. Les harnais de synchro injectent leur propre client
+   feint : ils ne sont pas gênés. `__alaqNuageLocal` lève la garde pour le SEUL harnais qui
+   a besoin du vrai client (_verif_sync_nuage lit sa storageKey) — explicitement, jamais en
+   silence. (journal : progression.js · la synchro écrivait depuis le poste de développement) */
+function _posteDeDeveloppement(){
+  const h=(typeof location!=='undefined'&&location.hostname)||'';
+  if(!(h==='localhost'||h==='127.0.0.1'||h==='[::1]'||h==='::1'))return false;
+  /* la seule levée, EXPLICITE : le harnais qui doit lire la storageKey du vrai bundle
+     charge la page avec ?nuage-local=1 (un drapeau global ne survivrait pas à l'iframe).
+     Hors localhost ce paramètre ne veut rien dire : la garde ne s'y applique pas. */
+  try{ if(location.search.indexOf('nuage-local')>=0)return false; }catch(e){}
+  return !(typeof window!=='undefined'&&window.__alaqNuageLocal);
+}
+let SB=null; try{ if(window.supabase && (!_posteDeDeveloppement() || window.__alaqNuageLocal))
+  SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
   {auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){} // la connexion SURVIT aux visites : jeton gardé et renouvelé tout seul (Myriam 13/07)
 const CLOUD={user:null};
 let _syncT=null;

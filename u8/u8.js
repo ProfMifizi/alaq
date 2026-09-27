@@ -1995,7 +1995,10 @@ html.clair .ga-boite{color:var(--gold,#9A5A0B)}
 /* l'encadré "cours" (Myriam, 22/09) : un vrai blanc, le pourtour du bouton CONTINUER, le texte en
    encre noire quel que soit le thème — la manipulation reste dans les couleurs de l'app, seule
    l'explication porte ce langage. Les mots mis en avant restent en couleur (l'or n'est pas touché). */
-#p-body[data-echelle] .ga-carte{position:relative;background:#FFFFFF;border-color:var(--gold)}
+/* De l'air AU-DESSUS de l'encadre (Myriam, 26/09). Quand la fusion replie ce qui
+   precede, la carte remonte et vient toucher le haut de l'ecran — avec l'ampoule
+   qui deborde de son coin, elle paraissait coupee. */
+#p-body[data-echelle] .ga-carte{position:relative;background:#FFFFFF;border-color:var(--gold);margin-top:22px}
 #p-body[data-echelle] .ga-carte h3,#p-body[data-echelle] .ga-carte .r{color:#241D14}
 #p-body[data-echelle] .ga-schema .b{border-color:#D8CDBD}
 #p-body[data-echelle] .ga-schema .m{color:#241D14}
@@ -2148,8 +2151,13 @@ html.clair .clv-gloss{color:var(--info,#12607F)}
 /* l'encadré "cours" (Myriam, 22/09) : blanc, pourtour du bouton CONTINUER, texte noir — l'arabe
    mis en avant (.ar, déjà or) n'est pas touché ; les badges restent DEHORS, non concernés. */
 #p-body[data-echelle] .clv-apres.cadre .tx{position:relative;background:#FFFFFF;border-color:var(--gold)}
-#p-body[data-echelle] .clv-apres.cadre .ex,
-#p-body[data-echelle] .clv-apres.cadre .msg{color:#241D14}
+/* ⛔ .ex SEUL : il vit DANS la boite blanche. .msg, lui, est son FRERE — jamais dedans
+   (voletApres : .tx ne contient que l'ampoule et les transformations). Peint en sombre,
+   il tombait sur le fond sombre de l'app, illisible ; et quand l'ecran n'a aucune
+   transformation, il n'y a meme pas de boite pour expliquer le noir. Myriam l'a vu le
+   26/09 : « c'est que sur un seul texte, peut-etre qu'il manque l'encadre avec l'ampoule ».
+   (journal : clavier-arabe · le message peint pour une boite ou il n'entre pas) */
+#p-body[data-echelle] .clv-apres.cadre .ex{color:#241D14}
 #p-body[data-echelle] .clv-apres.cadre .tr+.tr{border-top-color:#D8CDBD}
 /* l'ampoule "à retenir", posée sur le coin arrondi droit de la carte */
 #p-body[data-echelle] .clv-apres.cadre .tx .cours-badge{position:absolute;top:-16px;right:-19px;width:34px;height:34px;

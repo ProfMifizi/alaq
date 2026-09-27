@@ -205,20 +205,20 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='u10-grammaire-26sept';
+const BUILD='garde-localhost-26sept';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-09-26T15:05';
+const BUILD_DATE='2026-09-26T18:07';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
-const VERSION='3.23';
-const BUILD_NUM=227;
+const VERSION='3.23.1';
+const BUILD_NUM=228;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
@@ -437,7 +437,11 @@ setInterval(function(){ try{
 /* Supabase est en defer, et un script defer s'exécute avant DOMContentLoaded : window.supabase est là.
    ⚠️ SB est un let de progression.js : le réassigner ici écrit la même liaison, pas une copie. */
 document.addEventListener('DOMContentLoaded',function(){
-  try{ if(window.supabase&&!SB)SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
+  /* ⛔ LA MÊME GARDE QU'EN HAUT DE progression.js : le client se crée à DEUX endroits
+     (ici, en rattrapage si le bundle differé n'était pas prêt) — n'en garder qu'un
+     laissait la porte ouverte, mesuré le 26/09. */
+  try{ if(window.supabase&&!SB&&!(typeof _posteDeDeveloppement==='function'&&_posteDeDeveloppement()&&!window.__alaqNuageLocal))
+    SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
     {auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){}
   try{cloudInit();}catch(e){}
   try{contentPull();}catch(e){} // le contenu des tables, une fois SB prêt
