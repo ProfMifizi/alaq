@@ -108,13 +108,34 @@ function tikNote(ev){ // une ligne de la traîne — jamais bloquant, jamais d'e
     if(_tikJournal.length>30)_tikJournal.shift();
   }catch(e){}
 }
+/* Les robots qui visitent l'app : indexeurs, lecteurs à voix haute, mesureurs de
+   performance, navigateurs sans fenêtre. La liste nomme ce qu'on a VU passer ;
+   `bot|crawler|spider` couvre le reste par convention (tous se déclarent ainsi). */
+const _ROBOTS=/bot|crawler|spider|Read-Aloud|HeadlessChrome|Lighthouse|PageSpeed|Chrome-Lighthouse|GTmetrix|Pingdom/i;
+function _robot(){ try{ return _ROBOTS.test(navigator.userAgent||''); }catch(e){ return false; } }
 function tikEnvoyer(type,msg){
   try{
     /* ⚠️ Le poste de développement se tait à la source : ses faux tickets noyaient les
        vrais (journal : signalements.js · le pupitre noyé par le poste de développement). */
     const h=(location&&location.hostname)||'';
     if(!h||h==='localhost'||h==='127.0.0.1'||h==='[::1]'||h==='::1')return;
-    const sig=(type+'|'+String(msg||'').replace(/\d+/g,'N').slice(0,80)+'|'+sigEcran()).slice(0,160);
+    /* ⛔ UN ROBOT NE SIGNALE RIEN. Mesuré le 27/09 : 72 des 130 tickets en attente —
+       55 % du pupitre — venaient de Google-Read-Aloud, qui lit la page sans charger les
+       images : les 22 icônes de l'app « échouent » à chacun de ses passages. Un robot
+       n'est pas une élève ; ses tickets noyaient les vrais, exactement comme ceux du
+       poste de développement en août.
+       (journal : signalements.js · le pupitre noyé par les robots) */
+    if(_robot())return;
+    /* ⛔ L'ÉCRAN NE SIGNE PAS UNE PANNE DE RÉSEAU. La signature dédoublonne UN ticket par
+       jour ; en y mettant l'écran, une seule condition réseau qui dure produisait un ticket
+       par écran visité. Mesuré le 27/09 : 52 tickets en attente pour UN sujet — « la synchro
+       dépasse 8 s » —, éparpillés sur 36 écrans. L'écran est utile quand le défaut EST sur
+       l'écran (une image morte, une erreur JS) ; il ne l'est pas quand le défaut est la
+       liaison. Le ticket porte toujours l'écran : il ne SIGNE plus par lui.
+       (journal : signalements.js · un sujet, 52 tickets) */
+    const parEcran = type!=='suspect';
+    const sig=(type+'|'+String(msg||'').replace(/\d+/g,'N').slice(0,80)
+      +(parEcran?'|'+sigEcran():'')).slice(0,160);
     const cle='alaq_tik_'+sig, jour=new Date().toISOString().slice(0,10);
     try{ if(localStorage.getItem(cle)===jour)return; localStorage.setItem(cle,jour); }catch(e){}
     const t={signature:sig,type:type,message:String(msg||'').slice(0,600),
