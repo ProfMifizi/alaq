@@ -333,16 +333,16 @@ function renderCours(sub){
       const rows=U.letters.map(function(L){ const d=U.alpha[L]; var ex=fatihaWordFor(L);
         return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
           /* ⛔ pas de transcription du nom (règle de Myriam, 14/08) : il s'écoute */
-          '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">🔊</button> <span class="lcap">son nom</span></div>'+
+          '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">'+spkSVG()+'</button> <span class="lcap">son nom</span></div>'+
           /* une lettre sans son propre (le alif) n'offre pas de bouton muet */
           (aUnSon(L)
-            ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button> '+d.son+'</div>'
+            ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">'+spkSVG()+'</button> '+d.son+'</div>'
             : '<div class="ls"><span class="lcap">porte la voyelle, sans son propre</span></div>')+
           /* ⚠️ le haut-parleur n'apparaît que si le son existe : fatihaWordFor rend la forme du
              verset, la table porte les formes de citation. Le mot reste affiché.
              (journal : ui/reviser.js · renderCours, le haut-parleur du mot de la Fātiḥa) */
-          (ex?'<div class="lex">📖 <span class="lex-w"'+(aLeSon(ex)?' onclick="speak(\''+ex+'\')"':'')+'>'+ex+'</span>'+
-              (aLeSon(ex)?' <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button>':'')+'</div>':'')+
+          (ex?'<div class="lex"><span class="lex-w"'+(aLeSon(ex)?' onclick="speak(\''+ex+'\')"':'')+'>'+ex+'</span>'+
+              (aLeSon(ex)?' <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">'+spkSVG()+'</button>':'')+'</div>':'')+
           '<div class="lanim"><button class="la-btn" onclick="playLetterAnim(this,\''+L+'\',\''+(U.lat[L]||'')+'\')">▶ voir la prolongation</button><div class="la-stage" style="display:none"><div class="la-word">'+L+'</div><div class="la-track"><div class="la-bar"></div></div><div class="la-ro"></div></div></div>'+
           '</div></div>';
       }).join('');
@@ -390,7 +390,7 @@ function grammaireHubHTML(){
            couverture de la notion (journal : ui/reviser.js · grammaireHubHTML, « % de réussite ») */
         '<div class="wfr">'+x.sous+(m<0?'':' \u00b7 '+pc+' % de réussite')+'</div>'+jauge+'</div>'+
       '<button class="wpen" onclick="startGrammarTargeted('+x.u+')" '+
-        'aria-label="S\u2019entraîner sur cette notion">\u270f\ufe0f</button>'+
+        'aria-label="S\u2019entraîner sur cette notion">'+icoImg('tab-crayon','wpen-ic')+'</button>'+
     '</div>';
   }).join('');
 
@@ -452,7 +452,7 @@ function renderReviser(sub){
         '<span class="wspk">'+spkSVG()+'</span>'+
         '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
         '<span class="wdot'+(dueSet.has(w.w)?'':' off')+'" title="à réviser aujourd\u2019hui"></span>'+
-        '<button class="wpen" onclick="event.stopPropagation();openWrite(\''+w.w+'\')" aria-label="S\'entraîner à écrire">✏️</button>'+
+        '<button class="wpen" onclick="event.stopPropagation();openWrite(\''+w.w+'\')" aria-label="S\'entraîner à écrire">'+icoImg('tab-crayon','wpen-ic')+'</button>'+
       '</div>';
     }).join('');
     h+='<div class="ccard">'+

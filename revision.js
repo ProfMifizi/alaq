@@ -113,7 +113,7 @@ function letterGridHTML(){
         : '<div class="hz locked">'+s[0]+'</div>';
     }).join('')+'</div>';
   }
-  if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
+  if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
   return h;
 }
 
@@ -1106,7 +1106,7 @@ function majPopNoms(){
           '<span class="ww">'+n.ar+'</span><span class="wfr">'+n.fr+'</span>'+
           '<span class="ck">'+(on?'✓':'')+'</span></div>';
       }).join('')
-    : '<p style="color:#fff;opacity:.85;font-family:var(--ui);font-size:12.5px;text-align:center;margin:8px 0">Apprends encore quelques lettres pour lire les premiers noms 🌱</p>';
+    : '<p style="color:#fff;opacity:.85;font-family:var(--ui);font-size:12.5px;text-align:center;margin:8px 0">Apprends encore quelques lettres pour lire les premiers noms</p>';
   const go=document.getElementById('rqPopGo');
   if(go){
     go.disabled=(NASEL.size!==3);
@@ -1258,7 +1258,7 @@ function recToggle(){
       if(msg)msg.textContent='Enregistré ! Ré-écoute-toi et compare au modèle.';
     };
     mr.start();
-    if(btn)btn.textContent='⏹ Terminer';
+    if(btn)btn.textContent='Terminer';
     if(msg)msg.textContent='Enregistrement… récite le verset.';
   }).catch(function(){
     if(msg)msg.textContent='Micro refusé — récite à voix haute, puis valide.';

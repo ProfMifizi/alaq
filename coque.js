@@ -459,7 +459,7 @@ showTab('home');
    connexion s'ouvre directement, sans traverser l'accueil ni l'onboarding. */
 if(location.hash==='#connexion'){
   try{history.replaceState(null,'',location.pathname);}catch(e){}
-  setTimeout(function(){ try{ if(CLOUD.user){showTab('home');toast('Bon retour ✨');} else obLoginOpen(); }catch(e){} },200);
+  setTimeout(function(){ try{ if(CLOUD.user){showTab('home');toast('Bon retour');} else obLoginOpen(); }catch(e){} },200);
 } else if(location.hash==='#u9'){
   /* Raccourci de test pour Myriam : ouvre U9-D1 sans passer par l'accueil, sans toucher S.done.
      ⚠️ on attend que les modules soient publiés (__alaqU9 et le lecteur), jamais un délai fixe : trop

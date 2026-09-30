@@ -1463,6 +1463,8 @@
 .rk-lbl{font-family:var(--ui);font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#241a06;opacity:.72;margin:0 0 2px}/* 🔴 2,19:1 — LA DERNIÈRE DETTE DU MODE SOMBRE, TRANCHÉE PAR MYRIAM LE 17/08 (preview_carte_rang_v1, variante ② : « la carte la plus lisible »). L'encre brune #241a06 était posée sur l'extrémité SOMBRE du dégradé doré. C'est le FOND qui monte en lumière (#6f4b0f→#b07c16), pas le texte : la carte reste la plaque d'or qu'elle a validée. Mesuré au point le plus sombre du dégradé : 2,19 → 4,68:1. */
 .lspk{background:none;border:none;cursor:pointer;font-size:14px;opacity:.85;padding:0 2px;vertical-align:middle;line-height:1}
 .lspk:active{transform:scale(.9)}
+.lspk .spk{width:26px;height:17px;color:var(--gold2)} /* 30/09 : le haut-parleur de l'app remplace l'emoji 🔊 */
+.wpen-ic{width:22px;height:22px;object-fit:contain} /* le crayon de l'app remplace l'emoji ✏️ */
 .sgn-card{background:#2a2422;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:8px}
 .sgn-head{font-family:var(--ui);font-weight:800;color:var(--cream);margin-bottom:10px}
 .sgn-chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:9px}
@@ -2356,6 +2358,7 @@ html.clair .acc-ic,
 html.clair .rq-boite img,
 html.clair .bn .bi img,
 html.clair .ic-inline,
+html.clair .wpen-ic,
 html.clair .case .ic img{ filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) brightness(.62) }
 html.clair .itab.active .itab-ic{ filter:none }
 
