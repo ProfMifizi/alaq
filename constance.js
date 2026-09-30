@@ -91,7 +91,6 @@ function streakContinue(){
 /* ===== Badges & confettis ===== */
 const BADGES=[
  // les premières fois — une pousse, trois métaux
- ['disque1','\u{1F331}','Première leçon terminée'],
  ['unite1','\u{1F331}','Première unité validée'],
  ['sourate1','\u{1F331}','Première sourate lisible'],
  // la perfection
@@ -133,7 +132,6 @@ function ecussonHTML(ar,taille){
 }
 // Descriptions des succès (affichées dans le popup détail)
 const SUCCES_DESC={
- disque1:'Tu as terminé ta toute première leçon. Le début du chemin, bismillah !',
  unite1:'Tu as validé ta première unité de la Fātiḥa.',
  sourate1:'Tu peux lire une sourate entière. Allāhumma bārik.',
  sansfaute:'Une leçon entière réussie sans la moindre faute.',
@@ -234,7 +232,7 @@ function checkBadges(ctx){
   ctx=ctx||{};
   const nLecons=Object.keys(S.done||{}).length;          // chaque leçon est un pas vers Allah
   [1,2,3,10,20,50,100,200,500,1000].forEach(function(n){ if(nLecons>=n)award('lecons'+n); });
-  if(nLecons>=1)award('disque1');                        // pousse de bronze
+  /* 30/09 : plus de badge « Première leçon terminée » (disque1) — il doublait « 1 leçon terminée » (Myriam) */
   if(UNITS.some((U,i)=>unitValidated(i)))award('unite1'); // pousse d'argent
   if(ctx.noMistake)award('sansfaute');
   if(ctx.unitPerfect)award('unite-sansfaute');

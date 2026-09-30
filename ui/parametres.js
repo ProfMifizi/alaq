@@ -227,7 +227,7 @@ function renderProg(){
      '<div class="sgrid">'+
      BADGES.map(function(b){var got=!!(S.badges&&S.badges[b[0]]);
        return '<button class="scell'+(got?'':' locked')+'" onclick="showSucces(\''+b[0]+'\')" aria-label="'+b[2].replace(/"/g,'')+'">'+
-              '<img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'">'+
+              '<img src="badges/'+b[0]+'.png" onerror="this.onerror=null;this.src=\'badges/ecusson-vierge.png\'">'+
               '</button>';}).join('')+
      '</div></div>';
   // La carte « Ton parcours » (déclaration hissée : appelée plus haut, juste sous l'encadré du rang)
@@ -261,7 +261,7 @@ function showSucces(id){
   if(!m){m=document.createElement('div');m.className='finish';m.id='succesModal';document.body.appendChild(m);}
   /* Un badge : son image et son titre. Pas de boîte, pas de corps de texte (règle Myriam 09/08). */
   m.innerHTML=(CROIX_SUCCES)+
-    '<div class="succ-big'+(got?' pop':' locked')+'"><img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'"></div>'+
+    '<div class="succ-big'+(got?' pop':' locked')+'"><img src="badges/'+b[0]+'.png" onerror="this.onerror=null;this.src=\'badges/ecusson-vierge.png\'"></div>'+
     '<h2 style="margin:16px 0 0;font-size:20px">'+b[2]+'</h2>'+
     '</div>';
   m.classList.add('on');
