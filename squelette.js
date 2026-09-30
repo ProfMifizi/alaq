@@ -167,7 +167,7 @@
     <section class="obs on" data-obs="0">
       <div style="flex:1"></div>
       <img class="ob-logo" src="icon-512.png" alt="ALAQ">
-      <p class="ob-lead">Méthode francophone pour apprendre à lire l'arabe, comprendre et mémoriser le Qor'an.</p>
+      <p class="ob-lead">La méthode gratuite pour apprendre à lire, comprendre, méditer et mémoriser le Qor'an en arabe.</p>
       <div style="flex:1"></div>
       <button class="cta" onclick="onbNext()">COMMENCER</button>
       <button class="cta" style="background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:10px" onclick="onbExistingAccount()">J'AI DÉJÀ UN COMPTE</button>
