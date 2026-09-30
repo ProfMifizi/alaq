@@ -122,6 +122,7 @@ if(typeof S.vfBest==='undefined')S.vfBest=0;            // record au « vrai ou 
 if(typeof S.consScore!=='number')S.consScore=0;        // score de constance (rang)
 if(typeof S.ghufLeft!=='number')S.ghufLeft=2;          // Ghufrān restants ce mois (max 2, jamais à vendre)
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
+if(!Array.isArray(S.badgesAVoir))S.badgesAVoir=[];      // badges gagnés pas encore montrés (constance.js · badgeSuivant)
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
 if(typeof S.onboarded==='undefined')S.onboarded=((S.done&&Object.keys(S.done).length>0)||S.xp>0||S.streak>0)?1:0; // élèves DÉJÀ existantes (progression présente) → pas d'onboarding
