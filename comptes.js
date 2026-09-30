@@ -87,6 +87,10 @@ function cloudApplyVerdict(known,em){
   const vb=document.getElementById('cloudVerifyBtn');
   if(vb)vb.textContent=known?'Me reconnecter':'Valider mon e-mail';
   const oa=document.getElementById('obAccount');
+  if(oa&&oa.classList.contains('on')){ // le code est parti : plus de « Plus tard », une sortie discrète en cas de souci
+    const lb=document.getElementById('obLaterBtn'); if(lb)lb.style.display='none';
+    const sc=document.getElementById('obSecours'); if(sc)sc.style.display='';
+  }
   if(known&&oa&&oa.classList.contains('on')){
     const t=document.getElementById('obAccountTitle'); if(t)t.textContent='Tu as déjà un compte';
     const qd=document.getElementById('obQuote'); if(qd)qd.style.display='none';
@@ -357,6 +361,8 @@ function showObAccount(){
   var card=document.getElementById('obAccountCard'); if(card)card.innerHTML=cloudCardHTML();
   var q=document.getElementById('obQuote'); if(q)q.style.display='';
   var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle();
+  var lb=document.getElementById('obLaterBtn'); if(lb)lb.style.display='';
+  var sc=document.getElementById('obSecours'); if(sc)sc.style.display='none';
   document.getElementById('obAccount').classList.add('on');
 }
 function obAccountClose(){ var o=document.getElementById('obAccount'); o.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; returnFromPlayer(); } // vider la carte : pas de #cloudEmail en double avec Progrès

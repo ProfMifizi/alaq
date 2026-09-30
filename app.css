@@ -1644,6 +1644,8 @@
   border:none;border-radius:16px;padding:15px;font-family:var(--ui);font-weight:900;font-size:16px;cursor:pointer}
 .cbtn:disabled{filter:grayscale(.85);opacity:.45;cursor:not-allowed}
 .cbtn.cbtn-2{background:none;color:var(--cream);border:2px solid var(--line);padding:13px} /* le second choix : même taille, sans le doré */
+.ob-secours{max-width:320px;margin:18px auto 0;font-family:var(--ui);font-size:13px;line-height:1.5;color:var(--muted);text-align:center}
+.ob-secours button{margin-top:6px;background:none;border:none;padding:4px;font-family:var(--ui);font-size:13px;font-weight:700;color:var(--muted);text-decoration:underline;cursor:pointer}
 /* Consentement RGPD : sans case cochée, aucun e-mail ne part (08/08) */
 .rgpd-l{display:flex;gap:9px;align-items:flex-start;margin:10px 0 2px;text-align:left;
   font-family:var(--ui);font-size:12.5px;line-height:1.45;color:var(--muted);cursor:pointer}
