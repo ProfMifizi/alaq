@@ -316,7 +316,8 @@
   <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
   <p id="obQuote" style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
   <div id="obAccountCard" style="width:100%;max-width:320px"></div>
-  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obLaterWarn()">Plus tard</button>
+  <!-- 30/09 : même bouton et même taille que « Recevoir mon code » (.cbtn) — il était plus GROS (.cta, 24 px) et poussait à ne pas s'inscrire ; seul le contour le met en second -->
+  <button class="cbtn cbtn-2" style="max-width:320px;margin-top:10px" onclick="obLaterWarn()">Plus tard</button>
 </div>
 `,
     /* « Content de te revoir ! » : la connexion à un compte existant (comptes.js) */

@@ -169,12 +169,12 @@ function cloudCardHTML(mode){
       '<a href="confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a></span></label>'+
       '<label class="rgpd-l"><input type="checkbox" id="cloudMkt">'+
       '<span>Je veux recevoir les conseils d\'apprentissage et les nouveautés d\'ALAQ <i style="font-style:normal;opacity:.75">(facultatif)</i></span></label>')+
-    '<button class="cbtn" id="cloudSendBtn" disabled style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
+    '<button class="cbtn" id="cloudSendBtn" disabled style="margin-top:8px" onclick="cloudSendCode(this)">Recevoir mon code</button>'+
     '<div id="cloudStep2" style="display:none;margin-top:10px">'+
       '<div id="cloudKnown" class="known-box" style="display:none">🔑 <b>Tu as déjà un compte</b> — entre le code reçu.</div>'+
       '<p id="cloudNew" style="display:none;color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 9px;line-height:1.45">Code envoyé à <b id="cloudMailEcho" style="color:var(--cream)"></b></p>'+
       '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" oninput="cloudCodeInput()" style="'+inp+';letter-spacing:.2em;text-align:center">'+
-      '<button class="cbtn" id="cloudVerifyBtn" disabled style="margin-top:8px" onclick="cloudVerify()">✅ Valider mon e-mail</button>'+
+      '<button class="cbtn" id="cloudVerifyBtn" disabled style="margin-top:8px" onclick="cloudVerify()">Valider mon e-mail</button>'+
       '<button onclick="cloudSendCode(this)" style="margin-top:8px;background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:13px;text-decoration:underline;cursor:pointer;width:100%">Renvoyer un code</button>'+
     '</div>';
 }
