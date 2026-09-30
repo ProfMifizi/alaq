@@ -165,6 +165,8 @@
   <div class="onb-body">
 
     <section class="obs on" data-obs="0">
+      <!-- le mode clair dès la porte, pour qui voit mal : le même réglage que Paramètres › Affichage -->
+      <button class="ob-theme" onclick="setThemeClair(!themeClair())" aria-label="Changer le contraste : mode clair ou sombre"><span class="obt-clair">☀︎ Mode clair</span><span class="obt-sombre">☾ Mode sombre</span></button>
       <div style="flex:1"></div>
       <img class="ob-logo" src="icon-512.png" alt="ALAQ">
       <p class="ob-lead">Méthode francophone pour apprendre à lire l'arabe, comprendre et mémoriser le Qor'an.</p>

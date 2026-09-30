@@ -583,6 +583,14 @@
   .ob-li{display:flex;align-items:center;gap:11px;color:var(--cream);font-size:16px;font-weight:700}
   .ob-li .ck{width:24px;height:24px;border-radius:50%;background:rgba(220,144,46,.18);border:1.5px solid var(--gold);
     color:var(--gold2);display:grid;place-items:center;font-size:13px;flex:0 0 auto}
+  /* le bouton de contraste de l'écran de bienvenue : grand, en haut à droite, l'étiquette
+     annonce le mode où il MÈNE (clair depuis le sombre, sombre depuis le clair) */
+  .ob-theme{align-self:flex-end;display:inline-flex;align-items:center;min-height:44px;padding:0 16px;
+    border-radius:22px;border:2px solid var(--line);background:var(--panel);color:var(--cream);
+    font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+  .ob-theme .obt-sombre{display:none}
+  html.clair .ob-theme .obt-clair{display:none}
+  html.clair .ob-theme .obt-sombre{display:inline}
   .ob-logo{width:150px;height:150px;object-fit:contain;border-radius:22px;margin:0 auto 10px;display:block}
   .ob-vid{width:210px;height:210px;object-fit:contain;margin:2px auto 6px;display:block;background:transparent}
   .ob-cta{margin-top:18px}
