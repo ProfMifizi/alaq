@@ -570,6 +570,17 @@
   .ob-lead{max-width:280px;margin:12px auto 20px;color:var(--cream);font-size:16px;font-weight:700;line-height:1.45}
   .ob-sub{max-width:280px;margin:0 auto 18px;color:var(--muted);font-size:14px;line-height:1.4}
   .ob-hint{color:var(--muted);font-size:12px;margin-top:3px}
+  /* dernier écran d'accueil (30/09) : la mascotte flotte, le titre et les 3 lettres se lisent de loin */
+  .ob-masc{animation:obFlotte 3.2s ease-in-out infinite}
+  .ob-masc .mhalo{animation:obHalo 3.2s ease-in-out infinite}
+  @keyframes obFlotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes obHalo{0%,100%{opacity:.45}50%{opacity:.7}}
+  @media (prefers-reduced-motion:reduce){.ob-masc,.ob-masc .mhalo{animation:none}}
+  .ob-go{margin:14px auto 4px;color:var(--cream);font-size:26px;font-weight:900;line-height:1.2}
+  .ob-go-sub{margin:10px auto 10px;color:var(--muted);font-size:17px;font-weight:700}
+  .ob-go-lettres{display:flex;justify-content:center;gap:12px}
+  .ob-go-lettres span{width:66px;height:66px;display:flex;align-items:center;justify-content:center;border-radius:16px;
+    background:var(--panel2);border:2px solid var(--line);color:var(--gold2);font-family:"Noto Naskh Arabic",serif;font-size:36px;font-weight:700;line-height:1}
   .ob-ar{color:var(--gold2);font-size:18px;margin-top:2px}
   .ob-opts{display:flex;flex-direction:column;gap:9px;text-align:left;margin-top:6px}
   .ob-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);

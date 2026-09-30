@@ -257,9 +257,36 @@
 
     <section class="obs" data-obs="7">
       <div style="flex:1"></div>
-      <div style="font-size:52px">🕋</div>
-      <p class="ob-lead" style="font-weight:900;font-size:18px;margin-bottom:2px">Bismillah, on commence !</p>
-      <p class="ob-sub">Tes 3 premières lettres : م · ل · ن</p>
+      <!-- la mascotte accueille l'élève (plus d'emoji 🕋 : il se peint seul et ignore le thème) ;
+           même dessin que l'écran de fin, sans id pour ne pas doubler ceux de #masc. -->
+      <div class="masc-wrap ob-masc"><svg class="masc" viewBox="0 0 200 236" aria-hidden="true">
+        <defs><radialGradient id="mglOb"><stop offset="0" stop-color="#FFD98A" stop-opacity=".95"/><stop offset="52%" stop-color="#F0A73C" stop-opacity=".33"/><stop offset="100%" stop-color="#F0A73C" stop-opacity="0"/></radialGradient></defs>
+        <ellipse class="mhalo" cx="100" cy="126" rx="98" ry="102" fill="url(#mglOb)"/>
+        <g class="mcorps">
+          <circle cx="100" cy="22" r="14" fill="none" stroke="#B9B2AC" stroke-width="7"/>
+          <rect x="92" y="32" width="16" height="18" rx="8" fill="#EFA63C"/>
+          <path d="M60 80 Q24 88 24 130 L24 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+          <path d="M140 80 Q176 88 176 130 L176 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+          <path d="M54 76 Q56 44 100 44 Q144 44 146 76 Z" fill="#EFA63C"/>
+          <ellipse cx="80" cy="60" rx="8" ry="11" fill="#FFD98A" opacity=".7" transform="rotate(-25 80 60)"/>
+          <rect x="48" y="74" width="104" height="13" rx="6.5" fill="#E39B2E"/>
+          <path d="M60 90 H140 Q148 134 134 172 H66 Q52 134 60 90 Z" fill="#F7EBC0"/>
+          <path d="M70 100 Q66 128 72 152" fill="none" stroke="#FFF8E0" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+          <ellipse cx="82" cy="120" rx="13" ry="16" fill="#fff"/><ellipse cx="118" cy="120" rx="13" ry="16" fill="#fff"/>
+          <ellipse cx="84" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/><ellipse cx="120" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/>
+          <circle cx="81" cy="117" r="2.8" fill="#fff"/><circle cx="117" cy="117" r="2.8" fill="#fff"/>
+          <path d="M88 142 Q100 152 112 142" fill="none" stroke="#E2622A" stroke-width="5.5" stroke-linecap="round"/>
+          <g class="mbassin">
+            <path d="M64 172 H136 L142 194 H58 Z" fill="#EFA63C"/>
+            <rect x="46" y="193" width="108" height="14" rx="7" fill="#E8A94F"/>
+          </g>
+        </g>
+        <rect class="mjambe" x="70" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(15)"/>
+        <rect class="mjambe" x="112" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(-15)"/>
+      </svg></div>
+      <p class="ob-go">Bismillah, on commence !</p>
+      <p class="ob-go-sub">Tes 3 premières lettres</p>
+      <div class="ob-go-lettres" dir="rtl" lang="ar"><span>م</span><span>ل</span><span>ن</span></div>
       <div style="flex:1"></div>
       <button class="cta ob-cta" onclick="onbLaunchLesson()">MA PREMIÈRE LEÇON</button>
     </section>
