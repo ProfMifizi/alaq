@@ -319,6 +319,7 @@
   <h2 style="margin:10px 0 14px">Content de te revoir !</h2>
   <div id="obLoginCard" style="width:100%;max-width:320px"></div>
   <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" id="obLoginBack" onclick="obLoginClose()">Retour</button>
+  <button class="cbtn" id="obLoginPasMoi" style="display:none;max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:14px" onclick="obPasMoi()">Ce n’est pas moi</button>
 </div>
 `,
     /* le ⚑ : le voile et la feuille des motifs (signalements.js) */

@@ -29,8 +29,8 @@ function load(){try{var t=localStorage.getItem('alaq2');_marqueVue=_marque(t?JSO
    '·vierge' (_fresh, donc à PERSONNE), '' (personne). ⛔ _uidVu ne compte jamais comme « même compte » dans
    l'arbitrage. (journal : progression.js · la page sans _uid) */
 function _marque(x){ return (x&&typeof x==='object')?(x._uid||x._uidVu||(x._fresh?'·vierge':'')):''; }
-/* La page est condamnée — un AUTRE compte (_autreCompteArrive), ou un effacement fait ailleurs
-   (_disqueEfface) : elle recharge, et d'ici là ne relit, n'envoie ni n'ÉCRIT plus alaq2. Déclaré
+/* La page est condamnée — un AUTRE compte (_autreCompteArrive), un effacement fait ailleurs (_disqueEfface), ou
+   l'appareil rendu (_appareilRendu, SYNC.pasMoi) : elle recharge, et d'ici là ne relit, n'envoie ni n'ÉCRIT plus alaq2. Déclaré
    avant save(). (journal : progression.js · une page condamnée n'écrit plus alaq2) */
 let _autreCompte=false;
 let _marqueVue='';      // la marque d'alaq2 tel que CETTE page l'a lu ou écrit en dernier
@@ -42,8 +42,9 @@ let _sessionLue=false;  // cloudInit a lu la session : sans CLOUD.user, S._uid/_
    est validé —, et lui seul autorise S._uidVu. */
 let _vuSession='';      // le PREMIER compte dont cette page a vu la session
 let _sessionAMoi=false;
-/* ⛔ Avant d'écrire alaq2, trois gardes SYNCHRONES (supabase-js peut n'avoir encore rien dit : dégel, onglet périmé).
-   Condamnée, la page n'écrit pas ; son état est mis de côté. (journal : progression.js · les gardes d'écriture) */
+/* ⛔ Avant d'écrire alaq2, quatre gardes SYNCHRONES (supabase-js peut n'avoir encore rien dit : dégel, onglet périmé).
+   Condamnée, la page n'écrit pas ; son état est mis de côté par ① et ② (③ jamais, ④ seulement ce qui n'est pas parti).
+   (journal : progression.js · les gardes d'écriture) */
 function _ecrireS(){
   if(_autreCompte)return;
   var id=_sessionDAutrui();
@@ -54,6 +55,10 @@ function _ecrireS(){
   }
   /* ③ le MÊME compte a effacé ailleurs : rien n'est mis de côté (ce serait garder ce qu'on vient d'effacer) */
   if(_disqueEfface()){ _effacementAilleurs=true; _seTaire(); return; }
+  /* ④ l'appareil a été RENDU ailleurs (déconnexion, « Ce n'est pas moi ») : une page qui tient un compte ne réécrit pas
+     son état par-dessus. Condamnée d'abord (le geste en cours entre dans SA file), puis ce qui n'est pas parti est gardé.
+     (journal : progression.js · l'appareil rendu) */
+  if(_appareilRendu()){ _condamner(); _garderCeQuiNEstPasParti(); try{ location.reload(); }catch(e){} return; }
   localStorage.setItem('alaq2',JSON.stringify(S)); _marqueVue=_marque(S);
 }
 /* save() date S._ts, déclare au serveur (_semerLeDiff) et envoie au nuage (cloudSaveSoon) :
@@ -379,9 +384,7 @@ function _autreCompteArrive(id,user){
   if(_autreCompte||!id||!avant||id===avant)return false;
   _condamner();
   try{ var d=_lire('alaq2',null);
-    /* On ne vide que le disque de l'ancien compte : marqué à son nom, ou sans marque quand la page le revendiquait.
-       ⛔ Jamais un disque _fresh ou d'un autre : c'est celui du compte suivant (sa leçon hors ligne). */
-    var sien=d&&typeof d==='object'&&(d._uid?d._uid===avant:d._uidVu?d._uidVu===avant:(!d._fresh&&!!S&&!S._uid&&S._uidVu===avant));
+    var sien=_disqueDe(d,avant);   // on ne vide que le disque de l'ancien compte (voir _disqueDe)
     if(sien){
       /* par _mettreDeCote, jamais en direct : alaq2_ecarte est l'UNIQUE copie, et un perdant d'arbitrage
          plus riche y dormait déjà. (journal : progression.js · l'unique copie écrasée) */
@@ -411,8 +414,9 @@ function _sessionDAutrui(){
     var id=_idSession(); return (id&&id!==p)?id:null; }catch(e){ return null; }
 }
 /* ② une page SANS session dont alaq2 a changé de propriétaire derrière elle (réclamé par un autre compte).
-   ⛔ '·vierge' (_fresh, le sceau d'une déconnexion) n'est à PERSONNE : il ne condamne aucune page — une élève
-   sans compte y perdait son écran et retrouvait l'onboarding. (journal : progression.js · le sceau vierge) */
+   ⛔ '·vierge' (_fresh, le sceau d'une déconnexion) n'est à PERSONNE : ② ne condamne jamais sur lui — une élève
+   sans compte y perdait son écran et retrouvait l'onboarding. (journal : progression.js · le sceau vierge)
+   Une page qui TIENT un compte, elle, s'arrête sur un appareil rendu : c'est ④. */
 function _disqueDAutrui(){
   try{ if(CLOUD.user)return false;
     var m=_marque(_lire('alaq2',null));
@@ -431,6 +435,32 @@ function _disqueEfface(){
     if((+d._refonte||0)<=(+S._refonte||0))return false;
     var m=_marque(d); return !!m&&m!=='·vierge'&&m===_marque(S); }   // le MÊME compte, prouvé des deux côtés
   catch(e){ return false; }
+}
+/* Le disque est-il celui de ce compte ? Marqué à son nom, ou sans marque quand la page le revendiquait.
+   ⛔ Jamais un disque _fresh ou d'un autre : c'est celui du compte suivant (sa leçon hors ligne).
+   Lu par _autreCompteArrive et par SYNC.pasMoi : un seul prédicat, pour que les deux ne divergent jamais. */
+function _disqueDe(d,avant){
+  return !!(d&&typeof d==='object'&&(d._uid?d._uid===avant:d._uidVu?d._uidVu===avant:(!d._fresh&&!!S&&!S._uid&&S._uidVu===avant)));
+}
+/* ④ l'appareil a été rendu ailleurs : la page tient un compte, AUCUNE session n'est dans le stockage, et le disque porte
+   le sceau vierge ou un état anonyme (le sceau se perd à un effacement) qu'elle n'a pas lu elle-même (_marqueVue).
+   ⛔ Une page SANS compte n'est jamais concernée (voir ②) ; une session présente non plus — le même compte revenu
+   ailleurs, lecture du nuage en échec, écrit légitimement (① et les écouteurs gardent les autres comptes). */
+function _appareilRendu(){
+  try{ var p=S&&(S._uid||S._uidVu); if(!p||_idSession())return false;
+    var x=_lire('alaq2',null); if(!x||typeof x!=='object')return false;   // absent : un effacement en cours (doReset retire puis réécrit), pas un appareil rendu
+    var m=_marque(x); return m!==_marqueVue&&(m==='·vierge'||m===''); }catch(e){ return false; }
+}
+/* Ce que le serveur n'a pas encore — des entrées de ce compte dans la file, en mémoire OU sur le disque (un autre onglet
+   a pu les y poser) — n'existe que sur cet appareil : l'état qui les porte passe par l'unique mise de côté. Rien d'autre :
+   une copie que le serveur détient déjà chasserait la seule copie d'une autre. ⚠️ Après _condamner (qui sème le diff du
+   geste en cours), jamais avant. */
+function _garderCeQuiNEstPasParti(){
+  try{ var p=_proprio(); if(!p)return;
+    var disque=_lire(OB_CLE,null), f=_OB.f.concat((disque&&_estTableau(disque.f))?disque.f:[]);
+    if(!f.some(function(e){ return e&&e.uid===p; }))return;
+    var d=_lire('alaq2',null); if(_disqueDe(d,p))_mettreDeCote(d);
+    _mettreDeCote(S); }catch(e){}
 }
 /* Le geste refusé d'une page condamnée n'est pas perdu sans trace : il va dans alaq2_ecarte, sauf s'il y
    écraserait un perdant d'arbitrage plus riche (l'unique copie). */
@@ -1027,7 +1057,7 @@ function _livrerBlob(gagnant,perdant){
   }
 }
 
-/* ═══ §8 · SYNC — ce qu'appellent comptes.js (reset, avantDeconnexion, redemarre),
+/* ═══ §8 · SYNC — ce qu'appellent comptes.js (reset, avantDeconnexion, redemarre, ailleurs, mettreDeCote, pasMoi),
    revision.js et src/player (poseKind, graines), ui/parametres.js (etat) ═══ */
 var SYNC={
   /* Déclaré au versement des graines (les trois sites de gagnerGraines). */
@@ -1066,11 +1096,31 @@ var SYNC={
                               new Promise(function(r){ setTimeout(r,1500); })]); }
     catch(e){ return Promise.resolve(); }
   },
-  /* Un autre compte a condamné la page (_autreCompteArrive) : comptes.js se tait (cloudVerify, cloudLogout, doReset). */
+  /* La page est condamnée (un autre compte, un effacement ailleurs, l'appareil rendu) : comptes.js se tait (cloudVerify, cloudLogout, doReset). */
   redemarre:function(){ return !!_autreCompte; },
   /* comptes.js, juste avant signOut et avant d'effacer : la session ou le disque sont-ils déjà à un autre compte ?
      Une question, sans effet (le refus recharge, rien n'est écrit). */
   ailleurs:function(){ try{ return !!(_sessionDAutrui()||_disqueDAutrui()); }catch(e){ return false; } },
+  /* cloudLogout, juste avant de rendre le disque vierge (voir _garderCeQuiNEstPasParti). */
+  mettreDeCote:function(){ _garderCeQuiNEstPasParti(); },
+  /* comptes.js : une session est-elle dans le stockage (même illisible — hors ligne, jeton expiré, getSession rend null) ? */
+  sessionPresente:function(){ try{ return !!_idSession(); }catch(e){ return false; } },
+  /* « Ce n'est pas moi » (le verrou, comptes.js) : l'appareil est RENDU, rien n'est effacé. La page se tait (son diff
+     entre dans SA file, qui attend le retour de ce compte SUR CET APPAREIL), ce que le serveur n'a pas encore est gardé
+     (même si un autre onglet a déjà rendu le disque), et le disque repart vierge — seulement s'il est encore le sien et
+     qu'aucune session n'est là (sinon le démarrage arbitre). */
+  pasMoi:function(){
+    try{
+      if(CLOUD.user&&!_autreCompte)return false;   // la session est revenue : il n'y a plus rien à rendre
+      var p=S&&(S._uid||S._uidVu), d=_lire('alaq2',null);
+      var rendre=!_autreCompte&&!!p&&!_idSession()&&!_disqueDAutrui()&&_disqueDe(d,p);
+      _condamner();
+      _garderCeQuiNEstPasParti();
+      if(rendre)localStorage.setItem('alaq2','{"_fresh":1}');
+    }catch(e){}
+    try{ location.reload(); }catch(e){}
+    return true;
+  },
   /* Le dépilage à la demande (console). */
   depiler:function(){ try{ return _depiler(); }catch(e){ return Promise.resolve({envoye:0,motif:'?'}); } },
   /* Sans argument, sans perdant : ne livre que S, avec la même fraîcheur que le chemin normal

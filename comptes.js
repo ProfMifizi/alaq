@@ -2,7 +2,7 @@
    · le compte (Supabase, code par e-mail) : cloudCardHTML, cloudMailInput / cloudCodeInput,
      cloudSendCode (la sonde « compte existant ? », mémorisée dans window._cloudProbe),
      cloudApplyVerdict, cloudVerify, cloudLogout ;
-   · le verrou de déconnexion : VERROU_CONNEXION, verrouConnexion, verrouLibere, obLoginOpen / obLoginClose ;
+   · le verrou de déconnexion : VERROU_CONNEXION, verrouConnexion, verrouLibere, obLoginOpen / obLoginClose, obPasMoi ;
    · l'onboarding : onbStart, onbShow, onbNext, onbBack, onbExistingAccount, onbLaunchLesson, la
      délégation des clics sur #onb .ob-opt, onbPrenomInput, et l'écran « Sauvegarde ta progression » :
      obAccTitle, showObAccount, obAccountClose, obLaterWarn, obLaterCancel, obLaterConfirm ;
@@ -19,7 +19,7 @@
    seraient donc muettes.
    ① la fin du grand script lance onbStart et obLoginOpen (comptes.js) par setTimeout : un module
       différé entre en course avec ces minuteries (mesuré : l'onboarding ne s'ouvrait plus) ;
-   ② quinze gestes en ligne du HTML statique l'appellent ;
+   ② seize gestes en ligne du HTML statique l'appellent ;
    ③ le Profil appelle nomChoisiHTML dès qu'on le touche ;
    ④ progression.js appelle verrouConnexion / verrouLibere sous try/catch : le verrou céderait en silence.
    ⚠️ Un script classique absent donne les mêmes pannes muettes : les gardes mesurent donc les
@@ -44,7 +44,7 @@
    verrouLibere), constance.js et src/player (showObAccount), ui/parametres.js
    (nomChoisiHTML, cloudCardHTML, et openPrenom / cloudLogout dans le HTML
    qu'il produit), la fin du grand script d'index.html (onbStart,
-   obLoginOpen), et les quinze gestes du HTML statique.
+   obLoginOpen), et les seize gestes du HTML statique.
 
    Gardes : outils/verifier-comptes.mjs, previews/_verif_comptes.html (source, dist, et la copie
    sans ce fichier), garderLesComptes() (vite.config.mjs), CORE de sw.js ; doReset est aussi rejoué
@@ -120,13 +120,15 @@ async function cloudVerify(){
   if(ov&&ov.classList.contains('on')){ ov.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; try{returnFromPlayer();}catch(_){ try{renderHome();}catch(_){}} }
 }
 async function cloudLogout(){
-  /* ⛔ Pas la session d'un AUTRE compte déjà visible (onglet resté ouvert) : signOut a une portée globale et la
-     fermerait sur tous ses appareils. On recharge au lieu de déconnecter. ⚠️ Revérifié juste avant
+  /* ⛔ Pas la session d'un AUTRE compte déjà visible (onglet resté ouvert) : signOut ferme la session du STOCKAGE,
+     celle de cet autre compte. On recharge au lieu de déconnecter. ⚠️ Revérifié juste avant
      signOut : un autre compte peut arriver PENDANT les attentes. (journal : comptes.js · la déconnexion revérifiée)
      ⚠️ « Déjà visible », pas « jamais » : signOut relit LUI-MÊME le stockage, sans verrou (l'option lock de
      supabase-js est dépréciée et nulle par défaut en 2.116.0). Une session écrite par un autre onglet entre
-     notre relecture et la sienne part dans le logout GLOBAL — quelques microtâches, et fermer cette course
+     notre relecture et la sienne est fermée à sa place, sur cet appareil — quelques microtâches, et fermer cette course
      demande un changement de code (journal : comptes.js · la course qui reste).
+     ⛔ Portée « cet appareil » (Myriam, 30/09) : sans option, signOut vaut scope 'global' en 2.116.0 et verrouillait
+     les autres appareils de l'élève. (journal : comptes.js · la déconnexion de cet appareil seulement)
      ⛔ getSession SANS délai de garde : signOut attend tout ce qu'il attend ; à l'échéance, « inconnu » passait
      pour « même compte » et signOut partait sous le jeton de B. (journal : comptes.js · la session lente) */
   try{ if(SB&&CLOUD.user){ var _gs=await SB.auth.getSession();
@@ -141,11 +143,16 @@ async function cloudLogout(){
   try{ if(SYNC.redemarre()){ location.reload(); return; } }catch(e){}
   /* signOut relit lui-même la session dans le stockage : on la relit juste avant, sans attente entre les deux */
   try{ if(typeof SYNC.ailleurs==='function'&&SYNC.ailleurs()){ location.reload(); return; } }catch(e){}
-  try{ if(SB)await SB.auth.signOut(); }catch(e){}
+  try{ if(SB)await SB.auth.signOut({scope:'local'}); }catch(e){}
+  /* Hors ligne, jeton expiré : signOut échoue SANS retirer la session (2.116.0). Vider l'appareil la laisserait revenir
+     au retour du réseau, et la personne suivante jouerait chez ce compte : on le dit, on ne touche à rien. */
+  try{ if(typeof SYNC.sessionPresente==='function'&&SYNC.sessionPresente()&&!SYNC.redemarre()){ toast('Connexion indisponible hors ligne'); return; } }catch(e){}
   CLOUD.user=null;
   try{ clearTimeout(_syncT); }catch(e){}
   // appareil marqué « vierge » : au prochain login, le nuage fait foi. ⚠️ Sauf page condamnée PENDANT signOut : le disque est déjà celui du compte suivant.
   // ⚠️ typeof : devant un progression.js de la 3.18 (course d'activation du service worker), le disque est vidé comme en 3.18.
+  // ⛔ Rien ne s'efface en silence (Myriam, 30/09) : ce que la file n'a pas encore livré passe aussi par l'unique mise de côté.
+  try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre())&&typeof SYNC.mettreDeCote==='function')SYNC.mettreDeCote(); }catch(e){}
   try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre()))localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){}
   location.reload();
 }
@@ -215,26 +222,52 @@ function onbExistingAccount(){ // élève existante sur un appareil neuf : le nu
    ① sans client Supabase (CDN non chargé), on ne peut pas savoir → on n'enferme pas ;
    ② un appareil qui n'a jamais connu de compte reste libre de s'inscrire ;
    ③ une déconnexion volontaire vide le localStorage : l'appareil repart en inscription.
-   Hors ligne l'app reste utilisable : c'est la session gardée par Supabase (persistSession) qui compte. */
+   Hors ligne l'app reste utilisable : c'est la session gardée par Supabase (persistSession) qui compte.
+   ⛔ Une sortie, « Ce n'est pas moi » (Myriam, 30/09) : sans elle, un appareil partagé n'avait qu'une issue,
+   le même compte. Le prénom au titre dit à un tiers que l'appareil est à quelqu'un d'autre. */
 var VERROU_CONNEXION=false;
 function verrouConnexion(){
   try{
     if(!SB)return;              // ① on ne peut pas savoir → on n'enferme pas
     if(CLOUD.user)return;       // connectée : rien à faire
     if(!S._uid&&!S._uidVu)return;          // ② appareil qui n'a jamais eu de compte (ni lu, ni REVENDIQUÉ) : inscription libre
+    /* ①bis une session dort encore dans le stockage, illisible (hors ligne, jeton expiré : getSession rend null) : on ne
+       sait pas → on n'enferme pas. Le verrou viendra si le serveur la refuse au retour du réseau. */
+    try{ if(typeof SYNC.sessionPresente==='function'&&SYNC.sessionPresente())return; }catch(e){}
     VERROU_CONNEXION=true;
     try{ document.getElementById('player').classList.remove('on'); }catch(e){}
     try{ document.getElementById('finish').classList.remove('on'); }catch(e){}
     var t=document.querySelector('#obLogin h2');
-    if(t)t.textContent='Reconnecte-toi pour continuer';
+    /* textContent : un prénom n'est jamais du HTML. Un titre trop long se raccourcit, jamais coupé par le CSS (Myriam) :
+       la limite de lettres écarte l'absurde, la MESURE tranche (des capitales, des W débordent avant 15 lettres). */
+    var pn=String(S.prenom||'').trim();
+    if(t)t.textContent=(pn&&pn.length<=24&&!/\S{16,}/.test(pn))?'Reconnecte-toi, '+pn:'Reconnecte-toi pour continuer';
     var b=document.getElementById('obLoginBack'); if(b)b.style.display='none';
+    var pm=document.getElementById('obLoginPasMoi'); if(pm)pm.style.display='';
     obLoginOpen();
+    titreQuiTient(t); try{ document.fonts.ready.then(function(){ titreQuiTient(t); }); }catch(e){}   // re-mesuré quand les polices sont là
+  }catch(e){}
+}
+/* Le titre affiché sort-il de l'écran ? Mesuré contre #obLogin, pas contre le h2 : centré, le h2 s'élargit avec un mot
+   trop long au lieu de le laisser dépasser (et le Range, parce que scrollWidth ne voit pas un débordement centré). */
+function titreQuiTient(t){
+  try{ if(!t||!VERROU_CONNEXION||t.textContent==='Reconnecte-toi pour continuer')return;
+    var r=document.createRange(); r.selectNodeContents(t); var rs=r.getClientRects(), b=document.getElementById('obLogin').getBoundingClientRect();
+    for(var i=0;i<rs.length;i++) if(rs[i].left<b.left-0.5||rs[i].right>b.right+0.5){ t.textContent='Reconnecte-toi pour continuer'; return; }
   }catch(e){}
 }
 function verrouLibere(){
   VERROU_CONNEXION=false;
   var t=document.querySelector('#obLogin h2'); if(t)t.textContent='Content de te revoir !';
   var b=document.getElementById('obLoginBack'); if(b)b.style.display='';
+  var pm=document.getElementById('obLoginPasMoi'); if(pm)pm.style.display='none';
+}
+/* « Ce n'est pas moi » : l'appareil est rendu ; ce que le serveur n'a pas reste dans la file de ce compte (et dans l'unique
+   mise de côté si la place est libre) jusqu'à son retour sur cet appareil (SYNC.pasMoi, progression.js). Seulement sous le verrou. */
+function obPasMoi(){
+  if(!VERROU_CONNEXION)return;
+  try{ if(typeof SYNC.pasMoi==='function'){ SYNC.pasMoi(); return; } }catch(e){}
+  try{ location.reload(); }catch(e){}
 }
 function obLoginOpen(){
   /* Une seule carte de connexion vivante : avec deux #cloudEmail (et deux #cloudRgpd) dans le DOM,
