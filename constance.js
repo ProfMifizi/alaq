@@ -94,7 +94,7 @@ const BADGES=[
  ['unite1','\u{1F331}','Première unité validée'],
  ['sourate1','\u{1F331}','Première sourate lisible'],
  // la perfection
- ['sansfaute','\u{1F48E}','Une leçon sans aucune erreur'],
+ ['sansfaute','\u{1F48E}','Leçon 100\u00a0% réussie'],   // Myriam, 01/10 : l'ancien titre laissait « erreur » seul
  ['unite-sansfaute','\u2734\uFE0F','Une unité entière sans erreur'],
  // les leçons — chaque leçon est un pas vers Allah (bronze · argent · or · émeraude)
  ['lecons1','\u{1F949}','1 leçon terminée'],

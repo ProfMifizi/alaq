@@ -550,7 +550,7 @@ function lancerGrammaire(unites){
   var qs=gramFile(unites);
   if(!qs.length){ toast('La grammaire se charge — réessaie dans un instant'); return; }
   GRAMSES={};
-  QCTX=null;               /* sinon un « ▶ Verset suivant » fantôme s'invite à la fin */
+  QCTX=null;               /* sinon un « Verset suivant » fantôme s'invite à la fin */
   launchQuranReview(qs);   /* le lanceur générique de session : il sert déjà les lettres */
 }
 /* La maîtrise se mesure sur les ERREURS, seul signal commun à tous les écrans ; les écrans
@@ -588,7 +588,7 @@ function startReview(){
   /* ⚠️ startReview ne passe pas par launchQuranReview : il pose le type lui-même, sinon la
      révision de vocabulaire hériterait du type de la session précédente. */
   try{ SYNC.poseKind('vocab'); }catch(_){}
-  QCTX=null; // sinon un « ▶ Verset suivant » fantôme, hérité d'un exercice mono-verset, s'invite en fin de vocabulaire
+  QCTX=null; // sinon un « Verset suivant » fantôme, hérité d'un exercice mono-verset, s'invite en fin de vocabulaire
   REVIEW=true;EXAM=false;backTo='reviser';curU=lastUnlockedIndex();curD=-1;qi=0;wrongCount=0;MISSED=[];inRetry=false;
   document.getElementById('player').classList.add('on');
   document.getElementById('finish').classList.remove('on');
@@ -1544,7 +1544,7 @@ function finishReview(){
   window._vfPct=null;
   document.getElementById('player').classList.remove('on');
   document.getElementById('fin-extra').innerHTML=(qNextVi()>=0)
-    ?'<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="qNext()">▶ Verset suivant</button>'
+    ?'<button class="cta" style="max-width:300px;margin-bottom:12px" onclick="qNext()">Verset suivant</button>'
     :'';
   document.getElementById('fin-icon').textContent='';
   document.getElementById('fin-title').textContent='Révision terminée !';
