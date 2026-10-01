@@ -161,14 +161,14 @@ function resumeGramU8(){
 
   /* ── 2 · LES 14 LUNAIRES ────────────────────────────────────────────────── */
   var s2=gramSection(
-    '\ud83c\udf19 Les 14 lettres lunaires \u00b7 <span class="ar">الْقَمَرِيَّة</span>',
+    repereSL(false,'rep-titre')+' Les 14 lettres lunaires \u00b7 <span class="ar">الْقَمَرِيَّة</span>',
     gramBande(LUNAIRES_14,vues)+
     '<div class="sgn-chips">'+['qamar','bab','yad','bayt'].map(function(k){return mot(k,'def');}).join('')+'</div>',
     'Devant ces 14 lettres, le <span class="ar">ل</span> porte un soukoun <span class="ar">الْـ</span> et s\u2019entend clairement.');
 
   /* ── 3 · LES 14 SOLAIRES ────────────────────────────────────────────────── */
   var s3=gramSection(
-    '\u2600\ufe0f Les 14 lettres solaires \u00b7 <span class="ar">الشَّمْسِيَّة</span>',
+    repereSL(true,'rep-titre')+' Les 14 lettres solaires \u00b7 <span class="ar">الشَّمْسِيَّة</span>',
     gramBande(SOLAIRES_14,vues)+
     '<div class="sgn-chips">'+['dar','dalw','tayr','tin'].map(function(k){return mot(k,'def');}).join('')+'</div>',
     /* ⚠️ « lettre muette », jamais « le ل s'avale » (journal : ui/reviser.js · « lettre muette ») */
@@ -180,10 +180,10 @@ function resumeGramU8(){
   var s4=gramSection(
     'Le repère dans l\u2019alphabet',
     '<div class="gsec-cells">'+ex.map(function(e){
-      return '<div class="lg-cell avail"><span class="sm">'+(e[1]?'\u2600\ufe0f':'\ud83c\udf19')+'</span>'+e[0]+'</div>';
+      return '<div class="lg-cell avail"><span class="sm">'+repereSL(!!e[1])+'</span>'+e[0]+'</div>';
     }).join('')+'</div>',
-    'Chaque lettre de la grille porte maintenant son repère : \u2600\ufe0f solaire (le <span class="ar">ل</span> est muet) '+
-    'ou \ud83c\udf19 lunaire (le <span class="ar">ل</span> s\u2019entend). Tu le retrouves dans <b>Réviser \u203a Les lettres</b>.');
+    'Chaque lettre de la grille porte maintenant son repère : '+repereSL(true,'rep-txt')+' solaire (le <span class="ar">ل</span> est muet) '+
+    'ou '+repereSL(false,'rep-txt')+' lunaire (le <span class="ar">ل</span> s\u2019entend). Tu le retrouves dans <b>Réviser \u203a Les lettres</b>.');
 
   /* ── 5 · DANS LE QORĀN ──────────────────────────────────────────────────── */
   /* ⚠️ les mots sont choisis par leur clé latine, jamais par leur graphie : une regex arabe tapée
@@ -194,7 +194,7 @@ function resumeGramU8(){
       .sort(function(a,b){return cles.indexOf(V[a])-cles.indexOf(V[b]);})
       .map(function(w){
         var L=lettreApresArticle(w);
-        return gramChip(w,(estSolaire(L)?'\u2600\ufe0f ':'\ud83c\udf19 ')+L);
+        return gramChip(w,repereSL(estSolaire(L),'rep-txt')+' '+L);
       }).join('')+'</div>';
   }
   var s5=gramSection(
@@ -314,7 +314,7 @@ function renderCours(sub){
   const tabs=[['video','<img class="itab-ic" src="'+ico('tab-video')+'" alt="">','Vidéos'],['resume','<img class="itab-ic" src="'+ico('tab2-lire')+'" alt="">','Résumé'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Vocabulaire']];
   const unlocked=UNITS.map((U,i)=>i).filter(i=>unitUnlocked(i));
   let h='<div style="display:flex;justify-content:flex-end;margin:0 0 4px">'+'<button class="lg-help" onclick="coursTut()" aria-label="À quoi servent ces onglets ?">?</button></div>';h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="coursTabTap(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
-  if(!unlocked.length){ h+='<div class="cempty"><div class="ce-ic">🔒</div>Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
+  if(!unlocked.length){ h+='<div class="cempty">Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
   /* une unité dit son sujet : ses lettres, ou son `court` quand elle n'en a pas */
   const head=U=>'<div class="ctt"><div class="cno">'+toAr(U.no)+'</div><h3>Unité</h3>'+((U.letters||[]).length?'<div class="clet">'+U.letters.join(' ')+'</div>':'<div class="clet csujet">'+sujetCours(U)+'</div>')+'</div>';
 
@@ -333,16 +333,16 @@ function renderCours(sub){
       const rows=U.letters.map(function(L){ const d=U.alpha[L]; var ex=fatihaWordFor(L);
         return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
           /* ⛔ pas de transcription du nom (règle de Myriam, 14/08) : il s'écoute */
-          '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">🔊</button> <span class="lcap">son nom</span></div>'+
+          '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">'+spkSVG()+'</button> <span class="lcap">son nom</span></div>'+
           /* une lettre sans son propre (le alif) n'offre pas de bouton muet */
           (aUnSon(L)
-            ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">🔊</button> '+d.son+'</div>'
+            ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">'+spkSVG()+'</button> '+d.son+'</div>'
             : '<div class="ls"><span class="lcap">porte la voyelle, sans son propre</span></div>')+
           /* ⚠️ le haut-parleur n'apparaît que si le son existe : fatihaWordFor rend la forme du
              verset, la table porte les formes de citation. Le mot reste affiché.
              (journal : ui/reviser.js · renderCours, le haut-parleur du mot de la Fātiḥa) */
-          (ex?'<div class="lex">📖 <span class="lex-w"'+(aLeSon(ex)?' onclick="speak(\''+ex+'\')"':'')+'>'+ex+'</span>'+
-              (aLeSon(ex)?' <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">🔊</button>':'')+'</div>':'')+
+          (ex?'<div class="lex"><span class="lex-w"'+(aLeSon(ex)?' onclick="speak(\''+ex+'\')"':'')+'>'+ex+'</span>'+
+              (aLeSon(ex)?' <button class="lspk" onclick="speak(\''+ex+'\')" aria-label="Écouter le mot">'+spkSVG()+'</button>':'')+'</div>':'')+
           '<div class="lanim"><button class="la-btn" onclick="playLetterAnim(this,\''+L+'\',\''+(U.lat[L]||'')+'\')">▶ voir la prolongation</button><div class="la-stage" style="display:none"><div class="la-word">'+L+'</div><div class="la-track"><div class="la-bar"></div></div><div class="la-ro"></div></div></div>'+
           '</div></div>';
       }).join('');
@@ -390,7 +390,7 @@ function grammaireHubHTML(){
            couverture de la notion (journal : ui/reviser.js · grammaireHubHTML, « % de réussite ») */
         '<div class="wfr">'+x.sous+(m<0?'':' \u00b7 '+pc+' % de réussite')+'</div>'+jauge+'</div>'+
       '<button class="wpen" onclick="startGrammarTargeted('+x.u+')" '+
-        'aria-label="S\u2019entraîner sur cette notion">\u270f\ufe0f</button>'+
+        'aria-label="S\u2019entraîner sur cette notion">'+icoImg('tab-crayon','wpen-ic')+'</button>'+
     '</div>';
   }).join('');
 
@@ -423,7 +423,7 @@ function renderReviser(sub){
       '<div class="smenu" id="smenu">'+
         '<div class="srow cur"><span class="sar">'+SR.ar+'</span> '+SR.nom+' <span class="pct">'+pc+' %</span></div>'+
         [['الإخلاص','Al-Ikhlāṣ'],['الفلق','Al-Falaq'],['الناس','An-Nās']].map(function(x){
-          return '<div class="srow lock"><span class="sar">'+x[0]+'</span> '+x[1]+' <span class="pct">🔒 0 %</span></div>';}).join('')+
+          return '<div class="srow lock"><span class="sar">'+x[0]+'</span> '+x[1]+' <span class="pct">0 %</span></div>';}).join('')+
         '<div class="shint">Une sourate se déverrouille dès que tu peux lire ses premiers mots</div>'+
       '</div></div>'+
       /* ⚠️ margin auto, pas 0 : une marge gauche en ligne battait le centrage bureau */
@@ -452,7 +452,7 @@ function renderReviser(sub){
         '<span class="wspk">'+spkSVG()+'</span>'+
         '<div class="wtx"><div class="ww">'+w.w+'</div><div class="wfr">'+w.fr+'</div></div>'+
         '<span class="wdot'+(dueSet.has(w.w)?'':' off')+'" title="à réviser aujourd\u2019hui"></span>'+
-        '<button class="wpen" onclick="event.stopPropagation();openWrite(\''+w.w+'\')" aria-label="S\'entraîner à écrire">✏️</button>'+
+        '<button class="wpen" onclick="event.stopPropagation();openWrite(\''+w.w+'\')" aria-label="S\'entraîner à écrire">'+icoImg('tab-crayon','wpen-ic')+'</button>'+
       '</div>';
     }).join('');
     h+='<div class="ccard">'+

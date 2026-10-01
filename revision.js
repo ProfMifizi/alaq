@@ -75,7 +75,7 @@ function startSelectedLetters(){
 function badgeSolaire(k){
   if(!unitUnlocked(7))return '';
   if(SOLAIRES_14.indexOf(k)<0&&LUNAIRES_14.indexOf(k)<0)return '';   /* la hamza, hors des 28 */
-  return '<span class="sm" aria-hidden="true">'+(estSolaire(k)?'☀️':'🌙')+'</span>';
+  return '<span class="sm">'+repereSL(estSolaire(k))+'</span>';
 }
 function letterGridHTML(){
   var order=['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
@@ -94,7 +94,7 @@ function letterGridHTML(){
     : '<div class="lg-prompt empty">débloque une leçon pour pouvoir sélectionner des lettres</div>';
   h+='<div class="lg-grid">'+order.map(function(L){
     var k=letterKey(L), g=(L==='ه')?'ﻩ':L;
-    if(!unlocked.has(k)) return '<div class="lg-cell locked"><span class="lk">🔒</span>'+g+'</div>';
+    if(!unlocked.has(k)) return '<div class="lg-cell locked">'+g+'</div>';
     var sel=LETSEL.has(k);
     var cls='lg-cell '+(sel?'sel':'avail')+(nouv.has(k)?' nouv':'');
     /* Le halo .nouv reste ; les emojis ✨ et 🔸 ont été retirés (journal : revision.js · emojis de la grille). */
@@ -113,7 +113,7 @@ function letterGridHTML(){
         : '<div class="hz locked">'+s[0]+'</div>';
     }).join('')+'</div>';
   }
-  if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">⚡ Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
+  if(any) h+='<div class="lg-qa"><button onclick="letSelAll()">Tout sélectionner</button><button onclick="letSelClear()">Effacer</button></div>';
   return h;
 }
 
@@ -1106,7 +1106,7 @@ function majPopNoms(){
           '<span class="ww">'+n.ar+'</span><span class="wfr">'+n.fr+'</span>'+
           '<span class="ck">'+(on?'✓':'')+'</span></div>';
       }).join('')
-    : '<p style="color:#fff;opacity:.85;font-family:var(--ui);font-size:12.5px;text-align:center;margin:8px 0">Apprends encore quelques lettres pour lire les premiers noms 🌱</p>';
+    : '<p style="color:#fff;opacity:.85;font-family:var(--ui);font-size:12.5px;text-align:center;margin:8px 0">Apprends encore quelques lettres pour lire les premiers noms</p>';
   const go=document.getElementById('rqPopGo');
   if(go){
     go.disabled=(NASEL.size!==3);
@@ -1258,7 +1258,7 @@ function recToggle(){
       if(msg)msg.textContent='Enregistré ! Ré-écoute-toi et compare au modèle.';
     };
     mr.start();
-    if(btn)btn.textContent='⏹ Terminer';
+    if(btn)btn.textContent='Terminer';
     if(msg)msg.textContent='Enregistrement… récite le verset.';
   }).catch(function(){
     if(msg)msg.textContent='Micro refusé — récite à voix haute, puis valide.';

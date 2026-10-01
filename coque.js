@@ -122,6 +122,7 @@ if(typeof S.vfBest==='undefined')S.vfBest=0;            // record au « vrai ou 
 if(typeof S.consScore!=='number')S.consScore=0;        // score de constance (rang)
 if(typeof S.ghufLeft!=='number')S.ghufLeft=2;          // Ghufrān restants ce mois (max 2, jamais à vendre)
 if(!S.badges||typeof S.badges!=='object')S.badges={};// badges gagnés
+if(!Array.isArray(S.badgesAVoir))S.badgesAVoir=[];      // badges gagnés pas encore montrés (constance.js · badgeSuivant)
 if(!S.uerr||typeof S.uerr!=='object')S.uerr={};  // unités où au moins une erreur a été faite
 if(typeof S.nrev!=='number')S.nrev=0;            // nombre de révisions terminées
 if(typeof S.onboarded==='undefined')S.onboarded=((S.done&&Object.keys(S.done).length>0)||S.xp>0||S.streak>0)?1:0; // élèves DÉJÀ existantes (progression présente) → pas d'onboarding
@@ -205,20 +206,20 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='verrou-sortie-30sept';
+const BUILD='retours-ux-01oct';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-09-30T15:50';
+const BUILD_DATE='2026-10-01T13:26';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
-const VERSION='3.24';
-const BUILD_NUM=232;
+const VERSION='3.25';
+const BUILD_NUM=233;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
@@ -458,7 +459,7 @@ showTab('home');
    connexion s'ouvre directement, sans traverser l'accueil ni l'onboarding. */
 if(location.hash==='#connexion'){
   try{history.replaceState(null,'',location.pathname);}catch(e){}
-  setTimeout(function(){ try{ if(CLOUD.user){showTab('home');toast('Bon retour ✨');} else obLoginOpen(); }catch(e){} },200);
+  setTimeout(function(){ try{ if(CLOUD.user){showTab('home');toast('Bon retour');} else obLoginOpen(); }catch(e){} },200);
 } else if(location.hash==='#u9'){
   /* Raccourci de test pour Myriam : ouvre U9-D1 sans passer par l'accueil, sans toucher S.done.
      ⚠️ on attend que les modules soient publiés (__alaqU9 et le lecteur), jamais un délai fixe : trop

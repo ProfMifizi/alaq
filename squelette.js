@@ -142,7 +142,6 @@
     /* la confirmation de l'effacement (comptes.js) */
     `
 <div class="finish" id="confirmReset">
-  <div class="big">⚠️</div>
   <h2>Réinitialiser la progression ?</h2>
   <p style="max-width:320px;color:var(--cream);opacity:.8;margin:-14px 0 26px">Tout repart à zéro (étoiles, disques terminés). Cette action est irréversible.</p>
   <button class="cta cta-danger" style="max-width:300px" onclick="doReset()">RÉINITIALISER</button>
@@ -185,12 +184,12 @@
       <div style="flex:1"></div>
       <h1>Comment as-tu connu ALAQ ?</h1>
       <div class="ob-opts">
-        <button class="ob-opt" data-obk="source" data-obv="YouTube"><span class="em">▶️</span> YouTube</button>
-        <button class="ob-opt" data-obk="source" data-obv="Bouche à oreille"><span class="em">👥</span> Bouche à oreille</button>
-        <button class="ob-opt" data-obk="source" data-obv="Recommandation IA"><span class="em">🤖</span> Recommandation IA</button>
-        <button class="ob-opt" data-obk="source" data-obv="Recherche Google"><span class="em">🔎</span> Recherche Google</button>
-        <button class="ob-opt" data-obk="source" data-obv="Réseaux sociaux"><span class="em">📱</span> Réseaux sociaux</button>
-        <button class="ob-opt" data-obk="source" data-obv="Autre"><span class="em">✨</span> Autre</button>
+        <button class="ob-opt" data-obk="source" data-obv="YouTube">YouTube</button>
+        <button class="ob-opt" data-obk="source" data-obv="Bouche à oreille">Bouche à oreille</button>
+        <button class="ob-opt" data-obk="source" data-obv="Recommandation IA">Recommandation IA</button>
+        <button class="ob-opt" data-obk="source" data-obv="Recherche Google">Recherche Google</button>
+        <button class="ob-opt" data-obk="source" data-obv="Réseaux sociaux">Réseaux sociaux</button>
+        <button class="ob-opt" data-obk="source" data-obv="Autre">Autre</button>
       </div>
       <div style="flex:1"></div>
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
@@ -201,12 +200,12 @@
       <h1>Quelle est ton intention ?</h1>
       <div class="ob-ar">نِيَّتُك</div><div class="ob-hint">Plusieurs choix possibles</div>
       <div class="ob-opts">
-        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Apprendre l'arabe"><span class="em">🔤</span> Apprendre l'arabe</button>
-        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Lire le Qor'an"><span class="em">📖</span> Lire le Qor'an</button>
-        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Mémoriser le Qor'an"><span class="em">🧠</span> Mémoriser le Qor'an</button>
-        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Comprendre le Qor'an"><span class="em">💡</span> Comprendre le Qor'an</button>
-        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Accompagner mes enfants"><span class="em">👨‍👩‍👧</span> Accompagner mes enfants</button>
-        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Autre"><span class="em">✨</span> Autre</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Apprendre l'arabe">Apprendre l'arabe</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Lire le Qor'an">Lire le Qor'an</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Mémoriser le Qor'an">Mémoriser le Qor'an</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Comprendre le Qor'an">Comprendre le Qor'an</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Accompagner mes enfants">Accompagner mes enfants</button>
+        <button class="ob-opt" data-obmulti data-obk="intention" data-obv="Autre">Autre</button>
       </div>
       <div style="flex:1"></div>
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
@@ -216,11 +215,11 @@
       <div style="flex:1"></div>
       <h1>Sais-tu lire l'arabe ?</h1>
       <div class="ob-opts">
-        <button class="ob-opt" data-obk="niveau" data-obv="Je pars de zéro"><span class="em">🌱</span> Je pars de zéro</button>
-        <button class="ob-opt" data-obk="niveau" data-obv="Quelques lettres"><span class="em">🔤</span> Je connais quelques lettres</button>
-        <button class="ob-opt" data-obk="niveau" data-obv="Je déchiffre lentement"><span class="em">🐢</span> Je déchiffre lentement</button>
-        <button class="ob-opt" data-obk="niveau" data-obv="Je lis sans comprendre"><span class="em">👁️</span> Je lis mais ne comprends pas</button>
-        <button class="ob-opt" data-obk="niveau" data-obv="Je lis et comprends un peu"><span class="em">💬</span> Je lis et comprends un peu</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Je pars de zéro">Je pars de zéro</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Quelques lettres">Je connais quelques lettres</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Je déchiffre lentement">Je déchiffre lentement</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Je lis sans comprendre">Je lis mais ne comprends pas</button>
+        <button class="ob-opt" data-obk="niveau" data-obv="Je lis et comprends un peu">Je lis et comprends un peu</button>
       </div>
       <div style="flex:1"></div>
       <button class="cta ob-cta" onclick="onbNext()">CONTINUER</button>
@@ -257,9 +256,36 @@
 
     <section class="obs" data-obs="7">
       <div style="flex:1"></div>
-      <div style="font-size:52px">🕋</div>
-      <p class="ob-lead" style="font-weight:900;font-size:18px;margin-bottom:2px">Bismillah, on commence !</p>
-      <p class="ob-sub">Tes 3 premières lettres : م · ل · ن</p>
+      <!-- la mascotte accueille l'élève (plus d'emoji 🕋 : il se peint seul et ignore le thème) ;
+           même dessin que l'écran de fin, sans id pour ne pas doubler ceux de #masc. -->
+      <div class="masc-wrap ob-masc"><svg class="masc" viewBox="0 0 200 236" aria-hidden="true">
+        <defs><radialGradient id="mglOb"><stop offset="0" stop-color="#FFD98A" stop-opacity=".95"/><stop offset="52%" stop-color="#F0A73C" stop-opacity=".33"/><stop offset="100%" stop-color="#F0A73C" stop-opacity="0"/></radialGradient></defs>
+        <ellipse class="mhalo" cx="100" cy="126" rx="98" ry="102" fill="url(#mglOb)"/>
+        <g class="mcorps">
+          <circle cx="100" cy="22" r="14" fill="none" stroke="#B9B2AC" stroke-width="7"/>
+          <rect x="92" y="32" width="16" height="18" rx="8" fill="#EFA63C"/>
+          <path d="M60 80 Q24 88 24 130 L24 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+          <path d="M140 80 Q176 88 176 130 L176 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
+          <path d="M54 76 Q56 44 100 44 Q144 44 146 76 Z" fill="#EFA63C"/>
+          <ellipse cx="80" cy="60" rx="8" ry="11" fill="#FFD98A" opacity=".7" transform="rotate(-25 80 60)"/>
+          <rect x="48" y="74" width="104" height="13" rx="6.5" fill="#E39B2E"/>
+          <path d="M60 90 H140 Q148 134 134 172 H66 Q52 134 60 90 Z" fill="#F7EBC0"/>
+          <path d="M70 100 Q66 128 72 152" fill="none" stroke="#FFF8E0" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+          <ellipse cx="82" cy="120" rx="13" ry="16" fill="#fff"/><ellipse cx="118" cy="120" rx="13" ry="16" fill="#fff"/>
+          <ellipse cx="84" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/><ellipse cx="120" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/>
+          <circle cx="81" cy="117" r="2.8" fill="#fff"/><circle cx="117" cy="117" r="2.8" fill="#fff"/>
+          <path d="M88 142 Q100 152 112 142" fill="none" stroke="#E2622A" stroke-width="5.5" stroke-linecap="round"/>
+          <g class="mbassin">
+            <path d="M64 172 H136 L142 194 H58 Z" fill="#EFA63C"/>
+            <rect x="46" y="193" width="108" height="14" rx="7" fill="#E8A94F"/>
+          </g>
+        </g>
+        <rect class="mjambe" x="70" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(15)"/>
+        <rect class="mjambe" x="112" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(-15)"/>
+      </svg></div>
+      <p class="ob-go">Bismillah, on commence !</p>
+      <p class="ob-go-sub">Tes 3 premières lettres</p>
+      <div class="ob-go-lettres" dir="rtl" lang="ar"><span>م</span><span>ل</span><span>ن</span></div>
       <div style="flex:1"></div>
       <button class="cta ob-cta" onclick="onbLaunchLesson()">MA PREMIÈRE LEÇON</button>
     </section>
@@ -289,7 +315,12 @@
   <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
   <p id="obQuote" style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
   <div id="obAccountCard" style="width:100%;max-width:320px"></div>
-  <button class="cta" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);box-shadow:none;margin-top:12px" onclick="obLaterWarn()">Plus tard</button>
+  <!-- 30/09 : même bouton et même taille que « Recevoir mon code » (.cbtn) — il était plus GROS (.cta, 24 px) et poussait à ne pas s'inscrire ; seul le contour le met en second -->
+  <button class="cbtn cbtn-2" id="obLaterBtn" style="max-width:320px;margin-top:10px" onclick="obLaterWarn()">Plus tard</button>
+  <!-- 30/09 : une fois le code envoyé, l'élève a choisi de s'inscrire — « Plus tard » s'efface (comptes.js · cloudApplyVerdict).
+       Reste une sortie discrète si le code n'arrive jamais (bug, adresse fausse) : elle passe par l'avertissement habituel. -->
+  <p class="ob-secours" id="obSecours" style="display:none">Pas de code ? Regarde dans tes courriers indésirables, ou corrige ton adresse plus haut.<br>
+    <button onclick="obLaterWarn()">Continuer sans compte pour l'instant</button></p>
 </div>
 `,
     /* « Content de te revoir ! » : la connexion à un compte existant (comptes.js) */

@@ -570,6 +570,17 @@
   .ob-lead{max-width:280px;margin:12px auto 20px;color:var(--cream);font-size:16px;font-weight:700;line-height:1.45}
   .ob-sub{max-width:280px;margin:0 auto 18px;color:var(--muted);font-size:14px;line-height:1.4}
   .ob-hint{color:var(--muted);font-size:12px;margin-top:3px}
+  /* dernier écran d'accueil (30/09) : la mascotte flotte, le titre et les 3 lettres se lisent de loin */
+  .ob-masc{animation:obFlotte 3.2s ease-in-out infinite}
+  .ob-masc .mhalo{animation:obHalo 3.2s ease-in-out infinite}
+  @keyframes obFlotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes obHalo{0%,100%{opacity:.45}50%{opacity:.7}}
+  @media (prefers-reduced-motion:reduce){.ob-masc,.ob-masc .mhalo{animation:none}}
+  .ob-go{margin:14px auto 4px;color:var(--cream);font-size:26px;font-weight:900;line-height:1.2}
+  .ob-go-sub{margin:10px auto 10px;color:var(--muted);font-size:17px;font-weight:700}
+  .ob-go-lettres{display:flex;justify-content:center;gap:12px}
+  .ob-go-lettres span{width:66px;height:66px;display:flex;align-items:center;justify-content:center;border-radius:16px;
+    background:var(--panel2);border:2px solid var(--line);color:var(--gold2);font-family:"Noto Naskh Arabic",serif;font-size:36px;font-weight:700;line-height:1}
   .ob-ar{color:var(--gold2);font-size:18px;margin-top:2px}
   .ob-opts{display:flex;flex-direction:column;gap:9px;text-align:left;margin-top:6px}
   .ob-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);
@@ -908,6 +919,13 @@
   /* 05/09 — déplacé en haut-DROIT (spec §2.3), possible depuis que ✨ (qui y
    vivait) est retiré. Coin bas-gauche laissé aux futurs repères, si besoin. */
 .lg-cell .sm{position:absolute;top:3px;right:5px;font-size:10px;line-height:1;opacity:.9}
+/* le soleil et la lune dessinés (30/09) remplacent ☀️/🌙 : même place, même discrétion */
+.rep-sl img{width:13px;height:13px;object-fit:contain;vertical-align:middle}
+.rep-sl.rep-txt img{width:1.1em;height:1.1em;vertical-align:-.2em}
+.rep-sl.rep-titre img{width:1.25em;height:1.25em;vertical-align:-.25em}
+.rep-sl.rep-rang img{width:18px;height:18px;display:block}
+/* en clair, la lune pêche se perdait sur le parchemin à 13 px : saturée vers l'ambre, avec le soleil (Myriam, 01/10, préview v1 choix B) */
+html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
   .lg-rev{width:100%;margin-top:16px;padding:14px;border-radius:14px;border:none;cursor:pointer;font-family:var(--ui);font-weight:900;font-size:16px;background:var(--gold);color:#1a1410}
   .lg-rev:disabled{background:#3a332e;color:#6f665f;cursor:not-allowed}
   .lg-replay{background:transparent;border:1.5px solid var(--line);color:var(--muted);border-radius:10px;padding:8px 14px;font-family:var(--ui);font-weight:800;font-size:12.5px;cursor:pointer}
@@ -1452,6 +1470,8 @@
 .rk-lbl{font-family:var(--ui);font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#241a06;opacity:.72;margin:0 0 2px}/* 🔴 2,19:1 — LA DERNIÈRE DETTE DU MODE SOMBRE, TRANCHÉE PAR MYRIAM LE 17/08 (preview_carte_rang_v1, variante ② : « la carte la plus lisible »). L'encre brune #241a06 était posée sur l'extrémité SOMBRE du dégradé doré. C'est le FOND qui monte en lumière (#6f4b0f→#b07c16), pas le texte : la carte reste la plaque d'or qu'elle a validée. Mesuré au point le plus sombre du dégradé : 2,19 → 4,68:1. */
 .lspk{background:none;border:none;cursor:pointer;font-size:14px;opacity:.85;padding:0 2px;vertical-align:middle;line-height:1}
 .lspk:active{transform:scale(.9)}
+.lspk .spk{width:26px;height:17px;color:var(--gold2)} /* 30/09 : le haut-parleur de l'app remplace l'emoji 🔊 */
+.wpen-ic{width:22px;height:22px;object-fit:contain} /* le crayon de l'app remplace l'emoji ✏️ */
 .sgn-card{background:#2a2422;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:8px}
 .sgn-head{font-family:var(--ui);font-weight:800;color:var(--cream);margin-bottom:10px}
 .sgn-chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:9px}
@@ -1468,7 +1488,7 @@
   border-radius:12px;padding:9px 10px;margin-bottom:9px}
 .gsec-let b{color:var(--gold);font-weight:400}
 .gsec-cells{display:flex;gap:6px;justify-content:center;margin-bottom:9px}
-.gsec-cells .lg-cell{width:46px;padding:9px 0}
+.gsec-cells .lg-cell{width:56px;padding:9px 0} /* 56, pas 46 : le repère touchait les points de ق ب ت (Myriam, 01/10, choix C) */
 /* La pastille du numéro d'unité dans le hub de grammaire : le calque exact de
    celle des cartes du Cours (.acc .acc-h .cno), qui est ancrée sur son accordéon
    et ne peut donc pas être réemployée telle quelle. */
@@ -1524,6 +1544,13 @@
 @keyframes succglow{0%{box-shadow:0 0 0 0 rgba(232,169,79,.55)}100%{box-shadow:0 0 0 42px rgba(232,169,79,0)}}
 .succ-stat{font-family:var(--ui);font-weight:800;font-size:13px}
 .succ-desc{font-family:var(--ui);font-size:13.5px;color:var(--muted);line-height:1.5;margin:10px 4px 0}
+/* le nouveau badge (30/09) : l'image en grand, le titre lisible, un bouton — on le lit à son rythme */
+#badgeNeuf{z-index:90;text-align:center}
+.bn-lab{font-family:var(--ui);font-weight:900;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);margin-bottom:14px}
+.bn-img{width:190px;height:190px}
+.bn-img img{width:176px;height:176px}
+.bn-titre{max-width:320px;margin:18px auto 30px!important;font-size:26px!important;line-height:1.25}
+.bn-cta{max-width:300px}
 .pcs-top{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--ui);margin-bottom:8px}
 .pcs-top b{color:var(--cream);font-size:15px}
 .pcs-top span{color:var(--gold2);font-weight:800;font-size:12.5px}
@@ -1622,7 +1649,12 @@
 .prm-goal.sel{border-color:var(--gold);background:rgba(220,144,46,.16);color:var(--gold2)}
 .cbtn{display:block;width:100%;max-width:340px;margin:8px auto 0;background:var(--gold);color:#1a1410;text-transform:uppercase;
   border:none;border-radius:16px;padding:15px;font-family:var(--ui);font-weight:900;font-size:16px;cursor:pointer}
-.cbtn:disabled{filter:grayscale(.85);opacity:.45;cursor:not-allowed}
+/* Le bouton du compte qui ATTEND (mail, case, code) reste l'action principale : crème en sombre, marron en clair (l'inverse),
+   jamais grisé ; doré une fois prêt. « Plus tard » prend le gris qu'avait ce bouton éteint (Myriam, 01/10, préview v2). */
+.cbtn:disabled{background:#F2E9DA;color:#4E3210;cursor:not-allowed}
+.cbtn.cbtn-2{background:#5E5750;color:#F2E9DA}
+.ob-secours{max-width:320px;margin:18px auto 0;font-family:var(--ui);font-size:13px;line-height:1.5;color:var(--muted);text-align:center}
+.ob-secours button{margin-top:6px;background:none;border:none;padding:12px 10px;min-height:44px;font-family:var(--ui);font-size:13px;font-weight:700;color:var(--muted);text-decoration:underline;cursor:pointer}
 /* Consentement RGPD : sans case cochée, aucun e-mail ne part (08/08) */
 .rgpd-l{display:flex;gap:9px;align-items:flex-start;margin:10px 0 2px;text-align:left;
   font-family:var(--ui);font-size:12.5px;line-height:1.45;color:var(--muted);cursor:pointer}
@@ -2204,6 +2236,10 @@ html.clair .rankcard .ubar i,
 html.clair .rankcard .rbar-fill{ background:var(--on-gold) }
 html.clair .cta{ color:var(--on-gold) }          /* bouton doré foncé, encre claire */
 html.clair .cta[disabled]{ background:var(--sunk);color:var(--muted);box-shadow:0 5px 0 #D8CDB6 }
+html.clair .cbtn:disabled{ background:#4E3210; color:#F2E9DA }
+html.clair .cbtn.cbtn-2{ background:#B8B0A4; color:var(--cream) }   /* --cream = l'encre foncée en clair */
+/* en clair, le doré foncé de l'app se distinguait mal du marron d'attente : le doré lumineux, pour la carte du compte seulement (choix B) */
+html.clair #cloudSendBtn:not(:disabled), html.clair #cloudVerifyBtn:not(:disabled){ background:#DC902E; color:#241D14 }
 html.clair .fb > span:first-child{ color:#fff }
 
 /* ── FAMILLE C · les surfaces creuses ───────────────────────────────────── */
@@ -2336,6 +2372,7 @@ html.clair .acc-ic,
 html.clair .rq-boite img,
 html.clair .bn .bi img,
 html.clair .ic-inline,
+html.clair .wpen-ic,
 html.clair .case .ic img{ filter:sepia(.85) saturate(2.6) hue-rotate(-12deg) brightness(.62) }
 html.clair .itab.active .itab-ic{ filter:none }
 

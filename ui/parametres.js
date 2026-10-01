@@ -46,7 +46,7 @@ function showRank(){
 function closeRank(){ var m=document.getElementById('rankModal'); if(m)m.classList.remove('on'); }
 function rankInfo(idx){ // popup d'un rang cliqué depuis la barre du profil (Progrès)
   var R=RANKS[idx], cur=rankFor(S.consScore).idx;
-  var status = idx<cur?'✓ Atteint' : (idx===cur?'⭐ En cours' : '🔒 À atteindre');
+  var status = idx<cur?'✓ Atteint' : (idx===cur?'En cours' : 'À atteindre');
   var m=document.getElementById('rankModal');
   if(!m){ m=document.createElement('div'); m.className='finish'; m.id='rankModal'; document.body.appendChild(m); }
   m.innerHTML=(CROIX_RANG)+
@@ -198,7 +198,7 @@ function renderProg(){
     // Déconnectée, la bande du compte n'existe pas : le nom garde sa place, seul, au-dessus de la carte.
     h+='<div class="acct"><div class="acct-id">'+nomChoisiHTML()+'</div>'+
        '<button class="acct-pen" onclick="openPrenom()" aria-label="Modifier ton nom">'+icoImg('tab-crayon','ic-inline')+'</button></div>';
-    h+='<div class="ccard"><div class="ctt"><h3>☁️ Mon compte</h3></div>'+cloudCardHTML()+'</div>';
+    h+='<div class="ccard"><div class="ctt"><h3>'+icoEcran('ecran-compte','width:22px;height:auto;vertical-align:-4px;margin-right:4px')+' Mon compte</h3></div>'+cloudCardHTML()+'</div>';
   }
   var _R=rankFor(S.consScore);
   // Le tracé des 7 rangs est imbriqué dans l'encadré doré. div, pas button : les points du
@@ -227,7 +227,7 @@ function renderProg(){
      '<div class="sgrid">'+
      BADGES.map(function(b){var got=!!(S.badges&&S.badges[b[0]]);
        return '<button class="scell'+(got?'':' locked')+'" onclick="showSucces(\''+b[0]+'\')" aria-label="'+b[2].replace(/"/g,'')+'">'+
-              '<img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'">'+
+              '<img src="badges/'+b[0]+'.png" onerror="this.onerror=null;this.src=\'badges/ecusson-vierge.png\'">'+
               '</button>';}).join('')+
      '</div></div>';
   // La carte « Ton parcours » (déclaration hissée : appelée plus haut, juste sous l'encadré du rang)
@@ -239,7 +239,7 @@ function renderProg(){
     let inner='<div class="pcs-top"><b>'+arReveal('Al-Fātiḥa','الفاتحة')+'</b><span>'+nVal+' / '+nTot+' unités validées</span></div>'+
       '<div class="ubar"><i style="width:'+Math.round(nVal/Math.max(1,nTot)*100)+'%"></i></div>';
     if(nVal>=nTot && nTot>0){
-      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--gold2)">🏆 Fātiḥa complétée, ma shā’ Allāh !</div>';
+      inner+='<div class="ust" style="text-align:center;margin-top:12px;color:var(--gold2)">Fātiḥa complétée, ma shā’ Allāh !</div>';
     } else if(cur){
       const i=cur.i,U=cur.U,n=discsFor(i).length; let d=0; for(let k=0;k<n;k++) if(S.done[dkey(i,k)])d++;
       const lbl=(d>=n)?'Terminée':'En cours';
@@ -261,7 +261,7 @@ function showSucces(id){
   if(!m){m=document.createElement('div');m.className='finish';m.id='succesModal';document.body.appendChild(m);}
   /* Un badge : son image et son titre. Pas de boîte, pas de corps de texte (règle Myriam 09/08). */
   m.innerHTML=(CROIX_SUCCES)+
-    '<div class="succ-big'+(got?' pop':' locked')+'"><img src="badges/'+b[0]+'.png" onerror="this.parentNode.innerHTML=\''+b[1]+'\'"></div>'+
+    '<div class="succ-big'+(got?' pop':' locked')+'"><img src="badges/'+b[0]+'.png" onerror="this.onerror=null;this.src=\'badges/ecusson-vierge.png\'"></div>'+
     '<h2 style="margin:16px 0 0;font-size:20px">'+b[2]+'</h2>'+
     '</div>';
   m.classList.add('on');

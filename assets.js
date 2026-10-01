@@ -48,6 +48,15 @@ function icoEcran(nom,style){
     '<img class="o-jour" src="'+ico(nom).replace('.png','-clair.png')+'" alt=""'+s+'>'+
     '</span>';
 }
+/* Le repère solaire / lunaire : le soleil et la lune dessinés de l'unité 8, jamais ☀️/🌙
+   (emojis du téléphone, 30/09). Deux fichiers, un par thème, comme icoEcran. */
+function repereSL(solaire,cls){
+  var n=solaire?'soleil':'lune-croissant', c=cls?' '+cls:'';
+  return '<span class="ic2 rep-sl'+c+'" aria-hidden="true">'+
+    '<img class="o-nuit" src="images-app-alaq/u8/'+n+'.png" alt="">'+
+    '<img class="o-jour" src="images-app-alaq/u8/'+n+'-clair.png" alt="">'+
+    '</span>';
+}
 function icoImg(n,cls,st){ return '<img'+(cls?' class="'+cls+'"':'')+(st?' style="'+st+'"':'')+' src="'+ico(n)+'" alt="">'; }
 (function(){ /* resynchronise le HTML statique sur le registre, dès le chargement */
   try{

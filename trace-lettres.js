@@ -143,7 +143,7 @@ function setupTrace(L,u,posN){
     paint({cur,prog:(paths[cur]&&paths[cur].pts)?paths[cur].prog:0,full:doneAll},!doneAll);
     if(doneAll){ if(msg)msg.textContent=''; return; } // l'éloge vit dans la div du bas — pas de doublon sous la lettre
     const p=paths[cur];
-    if(p&&p.dots&&msg)msg.textContent='Ajoute '+(p.dots.length>1?'les points':'le point')+' 👆';
+    if(p&&p.dots&&msg)msg.textContent='Ajoute '+(p.dots.length>1?'les points':'le point');
   }
   /* Fin de l'écriture : l'accord, puis le SON de la lettre (pas son nom) ; la récompense et
      CONTINUER attendent la fin de ce son (rappel objectifAtteint). Le alif, sans son, rappelle
@@ -189,7 +189,7 @@ function setupTrace(L,u,posN){
       return;
     }
     if(dist(pt,p.pts[p.prog])<START_R){tracking=true;advance(pt);}
-    else if(msg)msg.textContent='Pose ton doigt sur le point vert 🟢';
+    else if(msg)msg.textContent='Pose ton doigt sur le point vert';
   }
   function move(e){if(!tracking||doneAll||demoOn)return;e.preventDefault();advance(pos(e));}
   function up(){tracking=false;}

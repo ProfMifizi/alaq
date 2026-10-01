@@ -53,7 +53,7 @@
 async function cloudSendCode(btn){
   const em=((document.getElementById('cloudEmail')||{}).value||'').trim();
   if(!SB){toast('Connexion indisponible hors ligne');return;}
-  if(!/^\S+@\S+\.\S+$/.test(em)){toast('E-mail invalide 🤔');return;}
+  if(!/^\S+@\S+\.\S+$/.test(em)){toast('E-mail invalide');return;}
   if(btn)btn.disabled=true;
   try{
     // Sonde : shouldCreateUser:false n'envoie un code que si le compte existe ; sinon on rappelle sans l'option.
@@ -73,7 +73,7 @@ async function cloudSendCode(btn){
     const z=document.getElementById('cloudStep2'); if(z)z.style.display='block';
     cloudApplyVerdict(known,em);
     const ci=document.getElementById('cloudCode'); if(ci)setTimeout(function(){try{ci.focus();}catch(_){}} ,120);
-    toast(known?'Tu as déjà un compte — connecte-toi 🔑':'Code envoyé — regarde tes e-mails 📧');
+    toast(known?'Tu as déjà un compte — connecte-toi':'Code envoyé — regarde tes e-mails');
   }catch(e){ toast('Envoi impossible — réessaie dans une minute'); }
   if(btn)btn.disabled=false;
 }
@@ -85,8 +85,12 @@ function cloudApplyVerdict(known,em){
   const nw=document.getElementById('cloudNew'); if(nw)nw.style.display=known?'none':'block';
   const ec=document.getElementById('cloudMailEcho'); if(ec)ec.textContent=em||'';
   const vb=document.getElementById('cloudVerifyBtn');
-  if(vb)vb.textContent=known?'🔑 Me reconnecter':'✅ Valider mon e-mail';
+  if(vb)vb.textContent=known?'Me reconnecter':'Valider mon e-mail';
   const oa=document.getElementById('obAccount');
+  if(oa&&oa.classList.contains('on')){ // le code est parti : plus de « Plus tard », une sortie discrète en cas de souci
+    const lb=document.getElementById('obLaterBtn'); if(lb)lb.style.display='none';
+    const sc=document.getElementById('obSecours'); if(sc)sc.style.display='';
+  }
   if(known&&oa&&oa.classList.contains('on')){
     const t=document.getElementById('obAccountTitle'); if(t)t.textContent='Tu as déjà un compte';
     const qd=document.getElementById('obQuote'); if(qd)qd.style.display='none';
@@ -108,7 +112,7 @@ async function cloudVerify(){
     try{ if(typeof _sessionMienne==='function')_sessionMienne(); }catch(_){}
   }catch(e){ toast('Code invalide ou expiré'); return; }
   var _mk=null; try{var _me=document.getElementById('cloudMkt'); if(_me)_mk=_me.checked?1:0;}catch(_){}
-  toast('Connectée, ماشاء الله ✨');
+  toast('Connectée, ماشاء الله');
   try{ await cloudPull(); }catch(_){}          // une erreur ici ne doit PAS faire croire que le code est faux
   if(_mk!==null){ S.mktOk=_mk; S.mktTs=Date.now(); save(); }  // consentement newsletter, HORODATÉ (preuve RGPD)
   try{ renderProg(); }catch(_){}
@@ -169,12 +173,12 @@ function cloudCardHTML(mode){
       '<a href="confidentialite.html" target="_blank" rel="noopener">Politique de confidentialité</a></span></label>'+
       '<label class="rgpd-l"><input type="checkbox" id="cloudMkt">'+
       '<span>Je veux recevoir les conseils d\'apprentissage et les nouveautés d\'ALAQ <i style="font-style:normal;opacity:.75">(facultatif)</i></span></label>')+
-    '<button class="cbtn" id="cloudSendBtn" disabled style="margin-top:8px" onclick="cloudSendCode(this)">📧 Recevoir mon code</button>'+
+    '<button class="cbtn" id="cloudSendBtn" disabled style="margin-top:8px" onclick="cloudSendCode(this)">Recevoir mon code</button>'+
     '<div id="cloudStep2" style="display:none;margin-top:10px">'+
-      '<div id="cloudKnown" class="known-box" style="display:none">🔑 <b>Tu as déjà un compte</b> — entre le code reçu.</div>'+
+      '<div id="cloudKnown" class="known-box" style="display:none"><b>Tu as déjà un compte</b> — entre le code reçu.</div>'+
       '<p id="cloudNew" style="display:none;color:var(--muted);font-family:var(--ui);font-size:13px;margin:0 0 9px;line-height:1.45">Code envoyé à <b id="cloudMailEcho" style="color:var(--cream)"></b></p>'+
       '<input id="cloudCode" inputmode="numeric" maxlength="8" placeholder="Code reçu par e-mail" oninput="cloudCodeInput()" style="'+inp+';letter-spacing:.2em;text-align:center">'+
-      '<button class="cbtn" id="cloudVerifyBtn" disabled style="margin-top:8px" onclick="cloudVerify()">✅ Valider mon e-mail</button>'+
+      '<button class="cbtn" id="cloudVerifyBtn" disabled style="margin-top:8px" onclick="cloudVerify()">Valider mon e-mail</button>'+
       '<button onclick="cloudSendCode(this)" style="margin-top:8px;background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:13px;text-decoration:underline;cursor:pointer;width:100%">Renvoyer un code</button>'+
     '</div>';
 }
@@ -204,14 +208,14 @@ function onbShow(){
 }
 function onbNext(){
   var need={2:'source',3:'intention',4:'niveau',6:'objectif'}[ONB.step]; // écrans-questions : réponse obligatoire
-  if(need){ var v=ONB.data[need]; if(!v||(Array.isArray(v)&&!v.length)){ toast('Choisis une réponse 🙂'); return; } }
+  if(need){ var v=ONB.data[need]; if(!v||(Array.isArray(v)&&!v.length)){ toast('Choisis une réponse'); return; } }
   if(ONB.step<7){ONB.step++;onbShow();}
 }
 function onbBack(){ if(ONB.step>0){ONB.step--;onbShow();} }
 function onbExistingAccount(){ // élève existante sur un appareil neuf : le nuage fait foi (_fresh)
   S.onboarded=1; S.tutHome=1; S._fresh=1; save();
   document.getElementById('onb').classList.remove('on');
-  if(CLOUD.user){ cloudPull(); showTab('home'); toast('Bon retour ✨'); return; } // session encore vivante : AUCUNE reconnexion à saisir
+  if(CLOUD.user){ cloudPull(); showTab('home'); toast('Bon retour'); return; } // session encore vivante : AUCUNE reconnexion à saisir
   obLoginOpen();
 }
 /* Se reconnecter : un écran à part, e-mail puis code, rien d'autre (sur l'onglet Progrès, l'élève
@@ -291,7 +295,6 @@ function obLaterWarn(){
   var m=document.getElementById('laterModal');
   if(!m){ m=document.createElement('div'); m.className='finish'; m.id='laterModal'; document.body.appendChild(m); }
   m.innerHTML='<div style="max-width:340px;width:100%;margin:0 auto;text-align:center;position:relative">'+
-    '<div style="font-size:44px">⚠️</div>'+
     '<h2 style="margin:8px 0 18px;font-size:21px">Tu perdras ta progression</h2>'+
     '<button class="cbtn" onclick="obLaterCancel()">CRÉER MON COMPTE</button>'+
     '<button class="cbtn" style="background:none;color:var(--cream);border:2px solid var(--line);margin-top:8px" onclick="obLaterConfirm()">Continuer sans compte</button>'+
@@ -357,6 +360,8 @@ function showObAccount(){
   var card=document.getElementById('obAccountCard'); if(card)card.innerHTML=cloudCardHTML();
   var q=document.getElementById('obQuote'); if(q)q.style.display='';
   var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle();
+  var lb=document.getElementById('obLaterBtn'); if(lb)lb.style.display='';
+  var sc=document.getElementById('obSecours'); if(sc)sc.style.display='none';
   document.getElementById('obAccount').classList.add('on');
 }
 function obAccountClose(){ var o=document.getElementById('obAccount'); o.classList.remove('on'); var c=document.getElementById('obAccountCard'); if(c)c.innerHTML=''; returnFromPlayer(); } // vider la carte : pas de #cloudEmail en double avec Progrès

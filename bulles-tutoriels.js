@@ -256,13 +256,13 @@ function estSolaire(L){ return SOLAIRES_14.indexOf(letterKey(L))>=0; }
 /* ═══ LES TUTORIELS (moteur letterTut, coach marks) ═══ */
 function letterTut(customSteps){
   var steps=(customSteps||[
-    {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises 🔒',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
+    {t:function(){return document.querySelector('.lg-cell.locked');},ti:'Les lettres grises',tx:'Elles ne sont pas encore débloquées : elles s’ouvriront au fur et à mesure que tu termineras tes leçons.'},
     {t:function(){return document.querySelectorAll('.lg-cell.avail')[0];},ti:'Les lettres dorées',tx:'Ce sont les lettres que tu as débloquées dans tes leçons.'},
     {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Touche une lettre dorée : elle passe en JAUNE FONCÉ, avec un ✓. Tu peux en prendre plusieurs.',enter:function(){var a=document.querySelectorAll('.lg-cell.avail');var c=a[Math.min(3,a.length-1)]||a[0];if(c&&!c.querySelector('.ck')){c.classList.remove('avail');c.classList.add('sel','coachdemo');c.insertAdjacentHTML('afterbegin','<span class="ck">✓</span>');}},leave:function(){var c=document.querySelector('.lg-cell.coachdemo');if(c){c.classList.remove('sel','coachdemo');c.classList.add('avail');var k=c.querySelector('.ck');if(k)k.remove();}}},
     /* le seul endroit où la hamza s'explique (Myriam) : pas de texte permanent à l'écran */
     {t:function(){return document.querySelector('.lg-hamza');},ti:'La hamza ء',
      tx:'L’alphabet compte <b>28 lettres</b>, et la hamza n’en fait pas partie : <b>elle n’a pas de forme à elle</b>.<br>Elle se pose toujours sur un <b>siège</b> — le alif (أ إ), le wāw (ؤ) ou le yāʾ (ئ).<br>Touche-la pour l’entendre.'},
-    {t:function(){return document.querySelector('.lg-rev');},ti:'On révise ! 🌙',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
+    {t:function(){return document.querySelector('.lg-rev');},ti:'On révise !',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
   ]).filter(function(x){return x.t();});
   if(!steps.length)return;
   var ov=document.getElementById('letterTut');
@@ -309,9 +309,9 @@ function maybeShowLetterTut(){
   letterTut();
 }
 function homeTut(){ letterTut([
-  {t:function(){return document.querySelector('.unit-head');},ti:'Ton parcours 👋',tx:'Voici ta sourate et ton unité. Le bandeau reste en haut quand tu descends. Touche le ☰ pour changer de sourate.'},
-  {t:function(){return document.querySelector('.node .bubble')||document.querySelector('.bubble');},ti:'Les leçons ✍️',tx:'Chaque bulle est une leçon. Touche la première pour commencer, bismillah !'},
-  {t:function(){return document.getElementById('botnav');},ti:'Le menu 🧭',tx:'En bas : 🏠 Apprendre · 📕 Cours · 🕋 Réviser · 📊 Progrès.'}
+  {t:function(){return document.querySelector('.unit-head');},ti:'Ton parcours',tx:'Voici ta sourate et ton unité. Le bandeau reste en haut quand tu descends. Touche le ☰ pour changer de sourate.'},
+  {t:function(){return document.querySelector('.node .bubble')||document.querySelector('.bubble');},ti:'Les leçons',tx:'Chaque bulle est une leçon. Touche la première pour commencer, bismillah !'},
+  {t:function(){return document.getElementById('botnav');},ti:'Le menu',tx:'En bas : Apprendre · Cours · Réviser · Progrès.'}
 ]); }
 /* saveLocal : ce tuto part au simple rendu de l'accueil, et save() y redaterait la progression avant que
    cloudPull arbitre. (journal : index.html · les tutos et save) */
@@ -320,11 +320,11 @@ function maybeShowHomeTut(){ if(!S.onboarded)return; if(S.tutHome)return; if(!do
 function vocabTut(){ letterTut([
   {t:function(){return document.querySelector('#view-reviser .wspk');},ti:'Écouter',
    tx:'Touche la ligne : le mot se dit.'},
-  {t:function(){return document.querySelector('#view-reviser .wpen');},ti:'Écrire ✏️',
+  {t:function(){return document.querySelector('#view-reviser .wpen');},ti:'Écrire',
    tx:'Entraîne-toi quand tu veux. Ça ne compte pas dans tes révisions.'},
   {t:function(){return document.querySelector('#view-reviser .wdot:not(.off)');},ti:'Le point bleu',
    tx:'Ce mot fait partie de ta série d\u2019aujourd\u2019hui.'},
-  {t:function(){return document.querySelector('#view-reviser .revcount');},ti:'Ta série 🌾',
+  {t:function(){return document.querySelector('#view-reviser .revcount');},ti:'Ta série',
    tx:'Le nombre de mots à revoir aujourd\u2019hui. Il descend à mesure que tu révises.'}
 ]); }
 function maybeShowVocabTut(){
@@ -336,9 +336,9 @@ function maybeShowVocabTut(){
 /* Le tuto de l'onglet Cours (moteur letterTut) : dit une fois ce qu'un sous-titre permanent disait
    (S.tutCours) ; le « ? » le rejoue. */
 function coursTut(){ letterTut([
-  {t:function(){return document.querySelectorAll('#view-cours .itab')[0];},ti:'Les vidéos 🎬',
+  {t:function(){return document.querySelectorAll('#view-cours .itab')[0];},ti:'Les vidéos',
    tx:'La leçon filmée de chaque unité.'},
-  {t:function(){return document.querySelectorAll('#view-cours .itab')[1];},ti:'Le résumé 📖',
+  {t:function(){return document.querySelectorAll('#view-cours .itab')[1];},ti:'Le résumé',
    tx:'Tes lettres, leurs sons, leur mot du Qorān.'},
   {t:function(){return document.querySelectorAll('#view-cours .itab')[2];},ti:'Le vocabulaire',
    tx:'Tous les mots que tu sais lire.'},
@@ -368,9 +368,9 @@ function startReco(btn){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   const fb=document.getElementById('recoFb');
   if(!SR){
-    fb.innerHTML='<div class="reco-warn">🎤 Ton appareil ne permet pas d\u2019écouter ta voix ici. '+
+    fb.innerHTML='<div class="reco-warn">Ton appareil ne permet pas d\u2019écouter ta voix ici. '+
       'Lis le mot à voix haute, puis confirme.</div>'+
-      '<button class="cta" style="margin-top:10px" onclick="recoSelf()">✅ Je l\u2019ai lu</button>';
+      '<button class="cta" style="margin-top:10px" onclick="recoSelf()">Je l\u2019ai lu</button>';
     return;
   }
   let rec;try{rec=new SR();}catch(e){recoSelf();return;}
@@ -384,17 +384,17 @@ function startReco(btn){
     const ok=alts.some(a=>recoMatch(a,window._reco.w));
     btn.classList.remove('listening');btn.innerHTML=icoImg('tab-micro','ic-inline')+' Réessayer';
     if(ok){window._reco.ok=true;
-      fb.innerHTML='<div class="reco-ok">✅ Très bien ! ماشاء الله</div>';
+      fb.innerHTML='<div class="reco-ok">Très bien ! ماشاء الله</div>';
       speak(window._reco.w.w);ctaOn();
     }else{
-      fb.innerHTML='<div class="reco-retry">🔁 Pas tout à fait — réécoute le modèle et réessaie.</div>'+
+      fb.innerHTML='<div class="reco-retry">Pas tout à fait — réécoute le modèle et réessaie.</div>'+
         '<button class="narr-link" style="margin-top:4px" onclick="recoSelf()">Valider quand même</button>';
     }
   };
   rec.onerror=(e)=>{
     btn.classList.remove('listening');btn.innerHTML=icoImg('tab-micro','ic-inline')+' Lis le mot';
-    fb.innerHTML='<div class="reco-warn">🎤 Micro indisponible. Lis à voix haute puis confirme.</div>'+
-      '<button class="cta" style="margin-top:10px" onclick="recoSelf()">✅ Je l\u2019ai lu</button>';
+    fb.innerHTML='<div class="reco-warn">Micro indisponible. Lis à voix haute puis confirme.</div>'+
+      '<button class="cta" style="margin-top:10px" onclick="recoSelf()">Je l\u2019ai lu</button>';
   };
   rec.onend=()=>{btn.classList.remove('listening');
     if(!got&&!window._reco.ok)btn.innerHTML=icoImg('tab-micro','ic-inline')+' Lis le mot';};
@@ -402,7 +402,7 @@ function startReco(btn){
 }
 function recoSelf(){
   window._reco.ok=true;const fb=document.getElementById('recoFb');
-  if(fb)fb.innerHTML='<div class="reco-ok">✅ Continue !</div>';
+  if(fb)fb.innerHTML='<div class="reco-ok">Continue !</div>';
   speak(window._reco.w.w);ctaOn();
 }
 function recoSkip(){ctaOn();advance();}

@@ -2,7 +2,7 @@
    · les rangs (7 stations, النية → النور ; 50 % constance · 30 % révision · 20 % apprentissage) :
      RANKS, rankFor, RANK_COLORS, lampSVG, updRankBadge, rankTrackHTML / rankBarHTML
      (leurs modales, showRank / rankInfo / showSucces, sont dans ui/parametres.js) ;
-   · les succès : BADGES, SUCCES_DESC, ecussonHTML, confettiBurst, award, checkBadges ;
+   · les succès : BADGES, SUCCES_DESC, ecussonHTML, confettiBurst, award, badgesAttendre, badgeSuivant, badgeVu, checkBadges ;
    · les graines : GRAINES, gagnerGraines ;
    · l'objectif du jour : objMinutes, objGoal, objAddSec, objFete, objRingHTML ;
    · la série : today / yesterday / _dayNum / daysGap / _addDays (heure locale), validerJour,
@@ -91,7 +91,6 @@ function streakContinue(){
 /* ===== Badges & confettis ===== */
 const BADGES=[
  // les premières fois — une pousse, trois métaux
- ['disque1','\u{1F331}','Première leçon terminée'],
  ['unite1','\u{1F331}','Première unité validée'],
  ['sourate1','\u{1F331}','Première sourate lisible'],
  // la perfection
@@ -133,7 +132,6 @@ function ecussonHTML(ar,taille){
 }
 // Descriptions des succès (affichées dans le popup détail)
 const SUCCES_DESC={
- disque1:'Tu as terminé ta toute première leçon. Le début du chemin, bismillah !',
  unite1:'Tu as validé ta première unité de la Fātiḥa.',
  sourate1:'Tu peux lire une sourate entière. Allāhumma bārik.',
  sansfaute:'Une leçon entière réussie sans la moindre faute.',
@@ -191,16 +189,50 @@ function confettiBurst(){
 }
 function award(id){
   if(S.badges[id])return false;
-  S.badges[id]=true;save();
-  const b=BADGES.find(x=>x[0]===id);
-  if(b){toast('🏅 Nouveau badge : '+b[1]+' '+b[2]);confettiBurst();}
+  S.badges[id]=true;
+  /* 30/09 : plus de toast de 2,6 s (on n'avait pas le temps de le lire, et 2 badges gagnés ensemble
+     s'écrasaient). Le badge attend son tour dans S.badgesAVoir — sauvé : s'il n'a pas été vu, il revient. */
+  if(BADGES.some(x=>x[0]===id)){ S.badgesAVoir=S.badgesAVoir||[]; S.badgesAVoir.push(id); }
+  save(); badgesAttendre();
   return true;
+}
+/* Le badge ne passe pas par-dessus la fin de leçon, la série ou la création du compte :
+   il attend qu'aucun de ces écrans ne soit ouvert, puis se montre, un à la fois. */
+let _badgesMinuteur=null;
+function badgesAttendre(){ if(!_badgesMinuteur)_badgesMinuteur=setInterval(badgeSuivant,400); }
+function _badgeGene(){
+  if(document.querySelector('.finish.on:not(#badgeNeuf)'))return true;
+  const pl=document.getElementById('player'), ob=document.getElementById('onb');
+  return !!((pl&&pl.classList.contains('on'))||(ob&&ob.classList.contains('on')));
+}
+function badgeSuivant(){
+  const file=S.badgesAVoir||[];
+  const m0=document.getElementById('badgeNeuf');
+  if(m0&&m0.classList.contains('on'))return;
+  if(!file.length){ clearInterval(_badgesMinuteur); _badgesMinuteur=null; return; }
+  if(_badgeGene())return;
+  const b=BADGES.find(x=>x[0]===file[0]);
+  if(!b){ file.shift(); save(); return; }
+  let m=m0;
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='badgeNeuf'; document.body.appendChild(m); }
+  const reste=file.length-1;
+  m.innerHTML='<div class="bn-lab">Nouveau badge</div>'+
+    '<div class="succ-big bn-img pop"><img src="badges/'+b[0]+'.png" alt=""></div>'+
+    '<h2 class="bn-titre">'+escHTML(b[2])+'</h2>'+
+    '<button class="cta bn-cta" onclick="badgeVu()">'+(reste?'BADGE SUIVANT':'CONTINUER')+'</button>';
+  m.classList.add('on');
+  confettiBurst(); try{chime();}catch(e){}
+}
+function badgeVu(){
+  const m=document.getElementById('badgeNeuf'); if(m)m.classList.remove('on');
+  (S.badgesAVoir||[]).shift(); save();
+  if((S.badgesAVoir||[]).length){ setTimeout(badgeSuivant,250); badgesAttendre(); }
 }
 function checkBadges(ctx){
   ctx=ctx||{};
   const nLecons=Object.keys(S.done||{}).length;          // chaque leçon est un pas vers Allah
   [1,2,3,10,20,50,100,200,500,1000].forEach(function(n){ if(nLecons>=n)award('lecons'+n); });
-  if(nLecons>=1)award('disque1');                        // pousse de bronze
+  /* 30/09 : plus de badge « Première leçon terminée » (disque1) — il doublait « 1 leçon terminée » (Myriam) */
   if(UNITS.some((U,i)=>unitValidated(i)))award('unite1'); // pousse d'argent
   if(ctx.noMistake)award('sansfaute');
   if(ctx.unitPerfect)award('unite-sansfaute');
@@ -260,7 +292,7 @@ function rankTrackHTML(){ // le tracé seul (points + remplissage) — réutilis
     var c=reached?RANK_COLORS[i]:'#4A403A';
     var sz=last?22:15; // le rang courant garde la même taille : seule sa lumière le distingue
     var sh=isCur?';box-shadow:0 0 0 3px rgba(232,169,79,.3),0 0 14px 3px rgba(244,208,137,.75)':(last&&reached?';box-shadow:0 0 8px '+c:'');
-    dots+='<i onclick="event.stopPropagation();rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?'☀️':'')+'</i>';
+    dots+='<i onclick="event.stopPropagation();rankInfo('+i+')" style="width:'+sz+'px;height:'+sz+'px;background:'+c+sh+'">'+((last&&!reached)?repereSL(true,'rep-rang'):'')+'</i>';
   }
   // la progression fine au sein du rang est fondue dans le remplissage du chemin : plus de petite barre
   // ni de légende à part (journal : constance.js · le chemin des rangs)
@@ -404,7 +436,7 @@ function maybeGhufranPrompt(){
   m.innerHTML='<div style="max-width:340px;width:100%;margin:0 auto;text-align:center;position:relative">'+
     icoEcran('ecran-ghufran','width:104px;height:auto;margin:0 auto')+
     '<h2 style="margin:6px 0 18px">Tu as manqu\u00e9 '+S.pendingMiss+' jour'+(S.pendingMiss>1?'s':'')+'</h2>'+
-    '<button class="cbtn" onclick="useGhufran()">\ud83d\udd4a\ufe0f Utiliser un Ghufr\u0101n</button>'+
+    '<button class="cbtn" onclick="useGhufran()">Utiliser un Ghufr\u0101n</button>'+
     '<button class="cbtn" style="background:var(--panel2);color:var(--cream);border:1px solid var(--line);margin-top:8px" onclick="acceptMiss()">Non, j\u2019assume</button>'+
     '</div>';
   document.body.appendChild(m);
@@ -436,7 +468,7 @@ function useGhufran(){
   if(S.lastDay===today()){ S.streak=(S._streakAvantMiss||0)+1; delete S._streakAvantMiss; }
   else S.lastDay=yesterday();       // pont : la série continue comme si elle était venue
   save(); closeGhufran();
-  toast('\ud83d\udd4a\ufe0f Ghufr\u0101n utilis\u00e9 — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
+  toast('Ghufr\u0101n utilis\u00e9 — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
   try{refreshStats();}catch(e){}
   if(_progVisible())renderProg();
 }
@@ -472,6 +504,7 @@ function majJour(){
   return true;
 }
 majJour();
+badgesAttendre(); // un badge gagné mais pas vu (app fermée trop tôt) revient au lancement
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)majJour(); });
 window.addEventListener('focus',majJour);
 setInterval(majJour,60000);
