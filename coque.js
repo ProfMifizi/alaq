@@ -206,20 +206,20 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='noindex-app-01oct';
+const BUILD='disque-courant-ancien-ios-08oct';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-10-01T17:15';
+const BUILD_DATE='2026-10-08T10:45';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
-const VERSION='3.25.1';
-const BUILD_NUM=235;
+const VERSION='3.25.2';
+const BUILD_NUM=236;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
