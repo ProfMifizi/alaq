@@ -2614,3 +2614,29 @@ html.gtexte .onb-body{ zoom:1.22 }
 .filesheet .fs-x{margin-top:16px;width:100%;padding:12px;border-radius:12px;
   border:1px solid var(--line);background:transparent;color:var(--cream);
   font-family:var(--ui);font-size:14.5px;font-weight:800}
+
+/* ═══ 08/10 — LE CARRÉ SUR LE DISQUE COURANT (anciens iPhone) ═══════════════
+   Sur un iPhone plus ancien, le disque « courant » portait un CARRÉ doré translucide
+   à la place de ses cercles. Le disque cumulait deux choses que les WebKit d'avant
+   ne savent pas arrondir quand la pièce flotte (animation `bob` du parent) :
+     · l'auréole en `box-shadow` d'étalement (0 0 0 5px), en color-mix ;
+     · un reflet animé (::after) qui ne tient dans l'ellipse que par `overflow:hidden`.
+   Même dessin, autre fabrication — rien qui dépende du découpage d'un calque :
+     · l'auréole devient une vraie bordure elliptique, sous la pièce (.bwrap::before),
+       couleur en rgba d'abord, color-mix seulement là où il est compris ;
+     · le reflet devient une couche de FOND de la pièce, qui balaie par
+       background-position : un fond suit toujours le border-radius. */
+.current .bwrap::before{content:'';position:absolute;top:-5px;left:-5px;right:-5px;bottom:-5px;
+  border-radius:50%;border:5px solid rgba(232,169,79,.42);pointer-events:none}
+@supports (color:color-mix(in srgb,red 50%,transparent)){
+  .current .bwrap::before{border-color:color-mix(in srgb,var(--accent,var(--gold2)) 42%,transparent)}
+}
+.node.current .bubble{
+  background:linear-gradient(100deg,transparent 42%,rgba(255,248,232,.62) 50%,transparent 58%) 100% 0/250% 100% no-repeat,
+             radial-gradient(circle at 34% 26%,#f7cd74,#DC902E 50%,#a86a12);
+  box-shadow:0 8px 0 var(--gold-d),
+    var(--ciel-shx,0px) var(--ciel-shy,4px) var(--ciel-shb,10px) rgba(0,0,0,var(--ciel-sha,.22));
+  animation:coinSweep 4.8s ease-in-out infinite}
+.node.current .bubble::after{content:none}
+@keyframes coinSweep{0%,62%{background-position:100% 0,0 0}100%{background-position:0 0,0 0}}
+@media (prefers-reduced-motion:reduce){.node.current .bubble{animation:none}}
