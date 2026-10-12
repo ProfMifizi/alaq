@@ -378,10 +378,19 @@ function validerJour(){
   try{checkBadges({});}catch(e){}             // les badges de série (3/7/30…) tombent au bon moment
   return true;
 }
+/* ⚠️ objAddSec ne tourne que lecteur ouvert : l'objectif tombe donc toujours EN PLEIN EXERCICE. La fête
+   (confettis, son, toast) attend, comme les badges, qu'aucun lecteur ni écran de fin ne soit ouvert. */
+let _objFeteMinuteur=null;
 function objFete(){
   validerJour();
   save();
   try{refreshStats();}catch(e){}
+  if(!_objFeteMinuteur)_objFeteMinuteur=setInterval(objFeteMontrer,400);
+}
+function objFeteMontrer(){
+  var bn=document.getElementById('badgeNeuf');
+  if(_badgeGene()||(bn&&bn.classList.contains('on')))return;
+  clearInterval(_objFeteMinuteur); _objFeteMinuteur=null;
   try{confettiBurst();}catch(e){}
   try{playSfx('bonne-reponse');}catch(e){}
   try{toast(icoImg('tb-epi','','height:16px;vertical-align:-3px')+' Objectif du jour atteint — épi validé !');}catch(e){}

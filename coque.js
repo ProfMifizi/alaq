@@ -218,7 +218,7 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
-const VERSION='3.25.3';
+const VERSION='3.25.4';
 const BUILD_NUM=237;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
