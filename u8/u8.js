@@ -313,6 +313,15 @@ html.clair .asm2-enonce{color:var(--gold,#9A5A0B)}
    (journal : association-mots · l'image qui débordait au premier affichage) */
 #p-body[data-echelle] .asm2-choix img{max-height:calc(var(--choix-px,150px) - 32px)}
 #p-body[data-echelle] .asm2-grille.mixte .asm2-choix.large img{max-height:88px}
+/* la borne ci-dessus ne suit pas une carte de la colonne flexible qui RÉTRÉCIT sous elle
+   (72 px sur un iPhone, pour une image de 118) : étirée, l'image prend la hauteur réelle
+   de sa carte, la borne la plafonne encore, contain garde ses proportions. L'air des
+   harakāt (18 px en haut) ne sert qu'à un mot : une carte-image le rend, centrée.
+   (journal : association-mots · les images qui sortaient des cartes rétrécies) */
+#p-body[data-echelle] .asm2-choix:not(.a-etiq-fr) > img{align-self:stretch;height:auto;min-height:0;object-fit:contain}
+#p-body[data-echelle] .asm2-choix:not(.a-etiq-fr):has(> img){padding-top:8px}
+#p-body[data-echelle] .asm2-grille.ligne:not(.choix-auto) .asm2-choix:has(> img){padding-top:5px}
+
 /* LA PLACE DE L'ÉTIQUETTE EST LIBÉRÉE TANT QU'ELLE N'EST PAS RÉVÉLÉE (Myriam, 23/09 :
    « on la libère, mot centré, la carte grandit à la révélation »). La base garde son
    visibility:hidden — l'unité 9 EN PRODUCTION ne bouge pas : là-bas la carte porte une
