@@ -2064,7 +2064,7 @@ html.clair .ga-ex .ev{color:var(--hl,var(--info,#12607F))}
 /* la zone de saisie : UN seul noeud de texte, sinon les lettres sortent isolees */
 .clv-saisie{font-family:var(--ar,'Noto Naskh Arabic',serif);font-size:var(--loupe-fs,32px);
   color:var(--cream,#f5ecdc);direction:rtl;line-height:1.75;white-space:nowrap;
-  min-width:88px;min-height:52px;padding:2px 12px;display:flex;align-items:center;
+  min-width:88px;min-height:52px;padding:12px 12px 4px;display:flex;align-items:center;
   justify-content:center;border:2px dashed var(--line,#3a312b);border-radius:12px;
   transition:font-size .18s,border-color .15s,background .15s}
 .clv-saisie.vide{color:var(--muted,#a99781)}
