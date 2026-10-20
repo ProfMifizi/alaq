@@ -8,7 +8,7 @@
 /* ---------- 1. la lanterne : icône fixe, halo à la couleur du rang ---------- */
 function poserLanterne(){
   var l=document.getElementById('st-lamp'); if(!l) return;
-  var c='#DC902E';
+  var c='#D0870D';
   try{ c=RANK_COLORS[rankFor(S.consScore).idx]||c; }catch(e){}
   l.classList.add('lant-wrap');
   l.style.filter='';
@@ -52,10 +52,10 @@ var feuille=null, niveau='unites';
 function rosace(n, etat){
   /* la marque de fin de verset du muṣḥaf : huit lobes, le numéro au centre */
   var fait=(etat==='fait'), ici=(etat==='ici');
-  var trait=(fait||ici)?'#E8A94F':'rgba(220,144,46,.45)', fond=fait?'#DC902E':'none', l='',k,a;
+  var trait=(fait||ici)?'#E8A94F':'rgba(208,135,13,.45)', fond=fait?'#D0870D':'none', l='',k,a;
   for(k=0;k<8;k++){ a=k*Math.PI/4;
     l+='<circle cx="'+(19+Math.cos(a)*13.5).toFixed(1)+'" cy="'+(19+Math.sin(a)*13.5).toFixed(1)+
-       '" r="3.1" fill="'+(fait?'#DC902E':'none')+'" stroke="'+trait+'" stroke-width="1.2"/>'; }
+       '" r="3.1" fill="'+(fait?'#D0870D':'none')+'" stroke="'+trait+'" stroke-width="1.2"/>'; }
   return '<span class="sc-m"><svg viewBox="0 0 38 38" fill="none">'+l+
     '<circle cx="19" cy="19" r="10.5" fill="'+fond+'" stroke="'+trait+'" stroke-width="1.5"/>'+
     '</svg><b>'+n+'</b></span>';

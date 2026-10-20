@@ -12,7 +12,7 @@
     var el=document.getElementById('deskrail');
     if(!el || typeof rankFor!=='function' || typeof S==='undefined') return;
     var r=rankFor(S.consScore||0), rank=r.rank||{ar:'',fr:''};
-    var col=(typeof RANK_COLORS!=='undefined'&&RANK_COLORS[r.idx])?RANK_COLORS[r.idx]:'#DC902E';
+    var col=(typeof RANK_COLORS!=='undefined'&&RANK_COLORS[r.idx])?RANK_COLORS[r.idx]:'#D0870D';
     var lamp=icoImg('tb-lanterne','lant');
     var due=0; try{ due=dueReviewWords().length; }catch(e){}
     var noms=[]; try{ noms=NOMS_ALLAH.filter(function(n){return wordReadable(n.ar,knownLetterSet());}); }catch(e){}

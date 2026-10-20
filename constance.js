@@ -167,7 +167,7 @@ function confettiBurst(){
     cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;
     document.body.appendChild(cv);
     const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
-    const cols=['#DC902E','#E8A94F','#F2E9DA','#6FB08A'];
+    const cols=['#D0870D','#E8A94F','#F2E9DA','#6FB08A'];
     const P=[];for(let i=0;i<110;i++)P.push({
       x:innerWidth/2+(Math.random()-.5)*150, y:innerHeight*0.35,
       vx:(Math.random()-.5)*9, vy:-4-Math.random()*7,

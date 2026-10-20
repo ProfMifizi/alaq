@@ -124,9 +124,9 @@ function setupTrace(L,u,posN){
       x.strokeStyle='rgba(185,169,154,.16)';x.lineWidth=1;
       x.beginPath();x.moveTo(14,gy);x.lineTo(W-14,gy);x.stroke();
     });
-    x.strokeStyle='rgba(220,144,46,.45)';x.lineWidth=1.6;
+    x.strokeStyle='rgba(208,135,13,.45)';x.lineWidth=1.6;
     x.beginPath();x.moveTo(14,215);x.lineTo(W-14,215);x.stroke();
-    letterStyle(x);x.fillStyle='rgba(220,144,46,.16)';x.fillText(GL,W/2,215);
+    letterStyle(x);x.fillStyle='rgba(208,135,13,.16)';x.fillText(GL,W/2,215);
     goldLayer(st8);
     x.drawImage(off,0,0,W,W);
     if(!showGuides)return;
