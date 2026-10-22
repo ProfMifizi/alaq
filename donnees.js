@@ -73,11 +73,11 @@ const UNITS=(function(){
    court:'L’article الـ',                       // ce que le ciel annonce, à la place des lettres
    sub:'L’article الـ · lettres solaires et lunaires — 9 leçons' },
  /* Unité 9 : u9:true → u9Disques() (parcours.js), des exercices ordinaires du registre.
-    Vocabulaire au format {w,fr,say} : les trois harf, puis les six noms.
+    Vocabulaire au format {w,fr,say,snd?} : les trois harf, les six noms, puis les verbes et اِسْمٌ.
     ⚠️ الْمَاءُ et التُّرَابُ restent à la forme définie : l'unité ne les enseigne que
     sous cette forme, et aucune source ne porte l'indéfini — ne pas inventer de graphie.
     ⚠️ Ces mots n'entrent en révision que par vocab:true sur le disque 4 (parcours.js),
-    et ne sonnent que s'ils sont dans la table SONS (son.js) : un son absent est un silence.
+    et ne sonnent que s'ils sont dans la table SONS (son.js, ou leur `snd`) : un son absent est un silence.
     (journal : donnees.js · unité 9, disques et vocabulaire) */
  { no:9,  ready:true,  ph:'GRAMMAIRE', u9:true, letters:[],
    words:[
@@ -90,6 +90,15 @@ const UNITS=(function(){
   {w:'نَبَاتٌ',fr:'une plante, de la végétation',say:'nabāt'},
   {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
   {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
+  /* les verbes, présentés par la SCÈNE au disque 2 (décision de Myriam, 21/10 : « tous les mots
+     présentés, dont les verbes » — la spec §1.4 les gardait hors du vocabulaire), puis اِسْمٌ (disque 8).
+     ⚠️ يَتَيَمَّمُ et تَتَسَلَّقُ n’ont pas encore de prise isolée : pas de `snd`, donc pas de haut-parleur. */
+  {w:'أَكْتُبُ',fr:'j’écris',say:'aktubu',snd:'mot-aktub'},
+  {w:'يَكْتُبُ',fr:'il écrit',say:'yaktubu',snd:'mot-yaktubu'},
+  {w:'يَتَوَضَّأُ',fr:'il fait ses ablutions',say:'yatawaḍḍaʾu',snd:'mot-yatawaddau'},
+  {w:'يَتَيَمَّمُ',fr:'il fait le tayammum',say:'yatayammamu'},
+  {w:'تَتَسَلَّقُ',fr:'elle grimpe',say:'tatasallaqu'},
+  {w:'اِسْمٌ',fr:'un nom',say:'ism',snd:'mot-ismoun'},
    ],
    /* court : seule source du bandeau du ciel, du Cours › Résumé et du hub de grammaire.
       ⚠️ En minuscules avec majuscule initiale : les capitales de .unit-sep sont du CSS. */
@@ -97,9 +106,21 @@ const UNITS=(function(){
    sub:'بِ · عَلَى · لِ — la grammaire par la manipulation · 9 leçons' },
  /* Unité 10 : u10:true → u10Disques() (parcours.js), même dispositif que l'unité 9.
     ⚠️ sub compte les disques RÉELS — les neuf depuis le GO du 24/09.
-    words:[] : les groupes nominaux n'entrent pas encore en révision (à trancher avec Myriam).
+    words : les NOMS que l'unité introduit (Myriam, 21/10), copiés des fiches et mis en NFC ; les groupes
+    d'annexion restent dehors (une espace ferait une tuile vide). `disque` : celui qui introduit le mot —
+    il n'entre en révision qu'une fois ce disque fait (allReviewWords, revision.js).
     (journal : donnees.js · unité 10, ouverture) */
- { no:10, ready:true,  ph:'GRAMMAIRE', u10:true, letters:[], words:[],
+ { no:10, ready:true,  ph:'GRAMMAIRE', u10:true, letters:[],
+   words:[
+  {w:'حَمَّامٌ',fr:'une salle de bain',say:'ḥammām',snd:'mot-hammam',disque:2},
+  {w:'مِرْحَاضٌ',fr:'des toilettes',say:'mirḥāḍ',snd:'mot-mirhad',disque:2},
+  {w:'سَطْحٌ',fr:'un toit',say:'saṭḥ',snd:'mot-sath',disque:2},
+  {w:'سُورٌ',fr:'un mur d’enceinte',say:'sūr',snd:'mot-sur',disque:2},
+  {w:'كُوبٌ',fr:'un verre',say:'kūb',snd:'mot-kub',disque:2},
+  {w:'حَلِيبٌ',fr:'du lait',say:'ḥalīb',snd:'mot-halib',disque:2},
+  {w:'عَصِيرٌ',fr:'du jus',say:'ʿaṣīr',snd:'mot-asir',disque:2},
+  {w:'مُعَلِّمٌ',fr:'un professeur',say:'muʿallim',snd:'mot-muallim',disque:7},
+   ],
    court:'L’annexion — الإِضَافَة',   // graphie relevée dans le document d'architecture, jamais retapée
    sub:'« X de Y » — de qui ? de quoi ? · 9 leçons' },
  { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },

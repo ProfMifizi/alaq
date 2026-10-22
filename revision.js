@@ -6,7 +6,10 @@
      écrans Construire (vt*), Réécrire (vw*), Ordonner (st*), Réciter (_rec, recToggle…) ;
    · le vocabulaire : allReviewWords, dueReviewWords, REV_INT…, startReview (match, vf, mcq,
      assemble), le stylo ✏️ (openWrite… closeWrite) ;
-   · la grammaire : NOTIONS_GRAM, gramEcransU8/U9, gramFile, lancerGrammaire, gramMaitrise, gramFaute ;
+   · la grammaire : NOTIONS_GRAM, gramEcransU8/U9/U10, gramChoisir et sa rotation (alaq_gramvu),
+     gramFile, lancerGrammaire, gramMaitrise, gramFaute ;
+   · la révision du jour depuis l'accueil : revisionDuJour, la popup (revPop*, une fois par jour,
+     alaq_revpop), le rond revPilule, la goutte de l'onglet revOngletBadge, reviserDuJour ;
    · les lettres : letterGridHTML, badgeSolaire, LETSEL, startSelectedLetters, formsOf, learnedLettersList ;
    · les Noms d'Allah (NOMS_ALLAH, NASEL, nomTog, startNoms, lumTap, majPopNoms) et l'adoption
      Supabase (CONTENU, contentPull — rappelé à DOMContentLoaded par index.html) ;
@@ -426,10 +429,13 @@ function _lireDone(idx){ const ds=discsFor(idx); for(let i=0;i<ds.length;i++){ i
 /* Un mot n'entre qu'UNE fois dans le vivier (journal : revision.js · doublon du vivier) : sinon
    deux bonnes réponses au QCM, deux cartes identiques, S.rev partagé.
    ⚠️ On garde la première rencontrée (l'unité qui l'enseigne en premier).
-   ⚠️ La comparaison passe par NFC. */
+   ⚠️ La comparaison passe par NFC.
+   ⚠️ Un mot qui porte `disque` (numéro humain, unité 10) n'entre qu'une fois CE disque fait : la
+   porte de l'unité s'ouvre au disque 1, ses noms n'arrivent qu'au disque 2 (et مُعَلِّمٌ au 7). */
 function allReviewWords(){
   const p=[], vus=new Set();
   UNITS.forEach((U,idx)=>{ if(unitUnlocked(idx)&&(_lireDone(idx)||unitValidated(idx)))(U.words||[]).forEach(w=>{
+    if(w.disque&&!unitValidated(idx)&&!S.done[dkey(idx,w.disque-1)])return;
     const k=(w.w||'').normalize('NFC'); if(vus.has(k))return; vus.add(k); p.push(w);
   }); });
   return p;
@@ -469,50 +475,65 @@ const NOTIONS_GRAM=[
 ];
 function notionsGram(){ return NOTIONS_GRAM.filter(function(N){ return unitUnlocked(N.u); }); }
 
-/* L'unité 8 : U8.disque(k) rend des st prêts pour le lecteur ; dessine() relit st.d. */
+/* LE VIVIER D'UNE NOTION : tous les écrans ÉVALUATIFS de ses disques, plus seulement le bilan
+   (Myriam, 21/10 : « ce ne doit pas être à chaque fois les mêmes révisions » — trois notions de
+   15 écrans figés repassaient les mêmes). Chaque écran est un CLONE (la file du disque est partagée
+   avec la leçon) qui porte `gramId`, son identifiant stable pour la rotation (gramChoisir). */
+function gramClone(st,id,retirer){
+  var c=Object.assign({},st,{gramId:id});
+  (retirer||[]).forEach(function(k){ delete c[k]; });
+  return c;
+}
+/* L'unité 8 : U8.disque(k) rend des st prêts pour le lecteur ; dessine() relit st.d.
+   D1 et D3 (découvertes) et l'écriture à l'ancienne grille (D2, D4) restent dehors ; un écran
+   repris tel quel par le bilan (même t, même mot u8.w, même st.d) n'entre qu'une fois. */
+const GRAM_U8={ D5:['article'], D6:['deuxsons','deuxecrits'], D7:['quiz','trigen'], D8:['verset','spotmot'],
+  D9:['article','deuxsons','deuxecrits','trigen','quiz','spotmot'] };
 function gramEcransU8(){
-  var qs=[];
+  var qs=[], vus={};
   try{
-    /* D7 : questions de règle et tri ☀️/🌙 · D9 (bilan) : article, oreille, œil, الـ de la Fātiḥa */
-    U8.disque('D7').forEach(function(st){
-      if(st.u8.t==='quiz'||st.u8.t==='trigen')qs.push(st); });
-    U8.disque('D9').forEach(function(st){
-      if(['article','deuxsons','deuxecrits','spotmot'].indexOf(st.u8.t)>=0)qs.push(st); });
+    Object.keys(GRAM_U8).forEach(function(k){
+      U8.disque(k).forEach(function(st,i){
+        if(GRAM_U8[k].indexOf(st.u8.t)<0)return;
+        var sig=st.u8.t+'|'+(st.u8.w||'')+'|'+JSON.stringify(st.d===undefined?null:st.d); if(vus[sig])return; vus[sig]=1;
+        qs.push(gramClone(st,'u8:'+k+'#'+(i+1)));
+      });
+    });
   }catch(e){ return []; }            /* module non chargé : la notion ne s'affiche pas */
-  /* L'écriture au clavier : deux mots seulement, sinon la session devient une séance d'écriture. */
+  /* L'écriture au clavier ({type:'assemble'}), sur les 14 mots ; gramChoisir en prend 2 au plus. */
   var m=U8.mots||{};
-  ['habl','nahl'].forEach(function(k){
-    if(m[k])qs.push({type:'assemble', w:{w:m[k].def, fr:m[k].le}, fromFr:true, graded:true});
+  Object.keys(m).forEach(function(k){
+    qs.push({type:'assemble', w:{w:m[k].def, fr:m[k].le}, fromFr:true, graded:true, gramId:'u8:asm:'+k});
   });
   return qs;
 }
-/* L'unité 9 : son BILAN, dont les écrans sont autonomes (ceux des disques se lisent en séquence). */
-function gramEcransU9(){
-  if(!(window.__alaqU9&&typeof window.__alaqU9.disque9==='function'))return [];
-  try{
-    /* On retire le champ bilan (la bannière de fin d'unité), par un clone, jamais en place
-       (journal : revision.js · bannière du bilan U9). */
-    return window.__alaqU9.disque9().map(function(st){
-      if(!st.bilan)return st;
-      var c=Object.assign({},st); delete c.bilan; return c;
-    });
-  }catch(e){ return []; }
+/* Les unités 9 et 10 : les disques 2 à 9 (le 1 est une découverte), moins ce qui découvre au lieu
+   d'évaluer, et moins le « que signifie ? » d'un mot isolé (du vocabulaire : il a sa révision).
+   ⚠️ Les bannières de fin d'unité tombent, par disque, jamais globalement : au bilan de l'unité 9
+   c'est `bilan` ; à l'unité 10 c'est `fin`, et son `bilan` est le récapitulatif d'une chasse, qui
+   reste — comme celui de la chasse du disque 8 de l'unité 9 (journal : revision.js · bannière du bilan U9). */
+const GRAM_DECOUVERTE=['glisser-scene','explorer-traduire','scene-pronom','scene-relation','classer-harf','bulles-lettres','ecrire-mot'];
+function gramMotIsole(st){
+  if(st.type!=='association-mots')return false;
+  var r=(st.rounds||[])[0]||{};
+  return typeof r.texte==='string'&&r.texte.trim().indexOf(' ')<0;
 }
-
-/* L'unite 10 : son BILAN aussi, comme l'unite 9.
-   ⚠️ ON RETIRE `fin`, PAS `bilan` — et ce ne sont pas la meme chose : `fin` est la
-   banniere de fin d'unite (« Unite 10 terminee »), qui n'a aucun sens dans une revision ;
-   `bilan` est le recapitulatif d'un ecran de chasse, qui garde tout le sien.
-   Par un CLONE, jamais en place : la file du disque est partagee avec la lecon. */
-function gramEcransU10(){
-  if(!(window.__alaqU10&&typeof window.__alaqU10.disque9==='function'))return [];
-  try{
-    return window.__alaqU10.disque9().map(function(st){
-      if(!st.fin)return st;
-      var c=Object.assign({},st); delete c.fin; return c;
-    });
-  }catch(e){ return []; }
+function gramEcransUnite(api,nom,retirer){
+  if(!api)return [];
+  var qs=[];
+  for(var d=2;d<=9;d++){
+    var f=api['disque'+d]; if(typeof f!=='function')continue;
+    try{
+      f().forEach(function(st,i){
+        if(GRAM_DECOUVERTE.indexOf(st.type)>=0||gramMotIsole(st)||st.mode==='lettre')return;
+        qs.push(gramClone(st,nom+':D'+d+'#'+(i+1),retirer[d]));
+      });
+    }catch(e){}
+  }
+  return qs;
 }
+function gramEcransU9(){ return gramEcransUnite(window.__alaqU9,'u9',{9:['bilan']}); }
+function gramEcransU10(){ return gramEcransUnite(window.__alaqU10,'u10',{9:['fin']}); }
 
 /* ⚠️ On clone : les objets des disques peuvent être partagés avec la leçon, un graded posé
    chez eux suivrait l'élève jusque dans son disque. */
@@ -536,12 +557,46 @@ function gramMaitrise(u){
   if(!g||!g.n)return -1;
   return Math.max(0,Math.min(1,(g.n-g.ko)/g.n));
 }
-/* La file d'une session : les notions demandées, panachées, plafonnées. */
+/* LA ROTATION : pour chaque notion, les gramId dans l'ordre où ils ont été servis (le plus récent
+   en dernier). Une commodité d'APPAREIL (localStorage, comme l'affichage) : perdue, la révision
+   redevient seulement aléatoire — rien d'une progression. */
+const GRAM_VU_CLE='alaq_gramvu';
+function gramVuLire(){ try{ var o=JSON.parse(localStorage.getItem(GRAM_VU_CLE)||'{}'); return o&&typeof o==='object'?o:{}; }catch(e){ return {}; } }
+function gramVuNoter(qs){
+  var o=gramVuLire();
+  qs.forEach(function(st){
+    if(st.revGram===undefined||!st.gramId)return;
+    var l=(o[st.revGram]||[]).filter(function(id){ return id!==st.gramId; });
+    l.push(st.gramId); o[st.revGram]=l.slice(-300);
+  });
+  try{ localStorage.setItem(GRAM_VU_CLE,JSON.stringify(o)); }catch(e){}
+}
+/* La part d'une notion : d'abord les écrans jamais servis, puis les plus anciens, le hasard
+   départageant (le tri est stable). Un même type d'exercice ne prend qu'un tiers de la part, et
+   l'écriture des mots de l'unité 8 deux écrans au plus, sinon la séance devient une série. */
+function gramChoisir(ecrans,part,vus){
+  var rang={}; (vus||[]).forEach(function(id,i){ rang[id]=i+1; });   /* absent = jamais servi = 0 */
+  var ordre=shuffle(ecrans.slice()).sort(function(a,b){ return (rang[a.gramId]||0)-(rang[b.gramId]||0); });
+  var pris=[], reste=[], parType={};
+  ordre.forEach(function(st){
+    var t=st.u8?st.u8.t:st.type, plafond=(t==='assemble')?2:Math.max(2,Math.ceil(part/3));
+    if(pris.length<part&&(parType[t]||0)<plafond){ pris.push(st); parType[t]=(parType[t]||0)+1; }
+    else reste.push(st);
+  });
+  for(var i=0;pris.length<part&&i<reste.length;i++)pris.push(reste[i]);   /* vivier maigre : le plafond cède */
+  return shuffle(pris);
+}
+/* La file d'une session : les notions demandées, chacune sa part, panachées, plafonnées.
+   ⚠️ gramFile ne NOTE rien (les harnais l'appellent à blanc) : c'est lancerGrammaire qui note. */
 function gramFile(unites){
-  var paquets=notionsGram()
+  var vus=gramVuLire();
+  var lots=notionsGram()
     .filter(function(N){ return !unites||unites.indexOf(N.u)>=0; })
-    .map(function(N){ return shuffle(N.ecrans()).map(function(st){ return gramMarquer(st,N.u); }); })
-    .filter(function(p){ return p.length; });
+    .map(function(N){ return {u:N.u, e:N.ecrans()}; })
+    .filter(function(x){ return x.e.length; });
+  var part=Math.ceil(GRAM_CAP/Math.max(1,lots.length));
+  var paquets=lots.map(function(x){
+    return gramChoisir(x.e,part,vus[x.u]).map(function(st){ return gramMarquer(st,x.u); }); });
   return gramPanacher(paquets,GRAM_CAP);
 }
 function startGrammarReview(){ lancerGrammaire(null); }
@@ -549,6 +604,7 @@ function startGrammarTargeted(u){ lancerGrammaire([u]); }
 function lancerGrammaire(unites){
   var qs=gramFile(unites);
   if(!qs.length){ toast('La grammaire se charge — réessaie dans un instant'); return; }
+  gramVuNoter(qs);         /* noté au départ : une séance quittée tôt ne ressert pas ses écrans */
   GRAMSES={};
   QCTX=null;               /* sinon un « Verset suivant » fantôme s'invite à la fin */
   launchQuranReview(qs);   /* le lanceur générique de session : il sert déjà les lettres */
@@ -560,6 +616,94 @@ function gramFaute(){
   var st=QUEUE[qi];
   if(!st||st.revGram===undefined)return;
   GRAMSES[st.revGram]=(GRAMSES[st.revGram]||0)+1;
+}
+
+/* ═══ LA RÉVISION DU JOUR, DEPUIS L'ACCUEIL (variante A validée par Myriam le 21/10, preview
+   _apercu-revision-accueil-v2) — la popup des boîtes du Qorān, une fois par jour, puis une pastille
+   sous le bandeau tant qu'il reste quelque chose à revoir. Les chiffres sont ceux du hub (mots dus,
+   notions pas encore revues aujourd'hui) : jamais deux chiffres en contradiction. */
+const REVPOP_CLE='alaq_revpop';     /* le jour où la popup a été montrée : une commodité d'APPAREIL */
+let _revPopEssais=0, _revPopT=null;
+function revisionDuJour(){
+  var mots=0, notions=0;
+  try{ mots=dueReviewWords().length; }catch(e){}
+  try{ notions=notionsGram().filter(function(x){ var g=S.revGram&&S.revGram[x.u]; return !g||g.maj!==today(); }).length; }catch(e){}
+  return {mots:mots, notions:notions, total:mots+notions};
+}
+/* ⚠️ Jamais par-dessus un autre écran : un badge, le Ghufrān, la série, un verrou (tous .finish.on),
+   le lecteur, l'onboarding, un tutoriel, une autre popup — ni s'ils sont seulement EN ATTENTE. */
+function revPopGene(){
+  var home=document.getElementById('home');
+  if(!home||home.style.display==='none')return true;
+  if(!S.onboarded||(S.badgesAVoir&&S.badgesAVoir.length)||S.pendingMiss>0)return true;
+  if(document.querySelector('.finish.on, #player.on, #onb.on, .rq-voile, #surahMenu.on, .disc-tip'))return true;
+  var lt=document.getElementById('letterTut');
+  return !!(lt&&lt.style.display!=='none');
+}
+function revPopVueAujourdhui(){ try{ return localStorage.getItem(REVPOP_CLE)===today(); }catch(e){ return false; } }
+/* appelée par renderHome : quelques essais espacés, le temps que badge, Ghufrān ou tutoriel passent */
+function revPopPlanifier(){ _revPopEssais=0; clearTimeout(_revPopT); _revPopT=setTimeout(revPopEssayer,900); }
+function revPopEssayer(){
+  if(revPopVueAujourdhui()||revisionDuJour().total===0)return;
+  if(revPopGene()){ if(++_revPopEssais<15)_revPopT=setTimeout(revPopEssayer,800); return; }
+  revPopMontrer();
+}
+function revPopCompte(r){
+  var c='';
+  if(r.mots)c+='<span>'+icoImg('tab-cartes')+r.mots+' mot'+(r.mots>1?'s':'')+'</span>';
+  if(r.notions)c+='<span>'+icoImg('tab-parchemin')+r.notions+' notion'+(r.notions>1?'s':'')+'</span>';
+  return c;
+}
+function revPopMontrer(){
+  var r=revisionDuJour(); if(!r.total)return;
+  try{ localStorage.setItem(REVPOP_CLE,today()); }catch(e){}
+  var v=document.createElement('div'); v.className='rq-voile'; v.id='revPopVoile';
+  v.onclick=function(e){ if(e.target===v)revPopFermer(); };
+  v.innerHTML='<div class="rq-pop revpop">'+
+    '<button class="dt-x-btn" onclick="revPopFermer()" aria-label="Fermer">✕</button>'+
+    '<div class="revpop-puits">'+icoImg('menu-reviser')+'</div>'+
+    '<div class="dt-t">Révision du jour</div>'+
+    '<div class="revpop-compte">'+revPopCompte(r)+'</div>'+
+    '<button class="dt-go" onclick="reviserDuJour()">Réviser</button></div>';
+  document.body.appendChild(v);
+}
+function revPopFermer(){ var v=document.getElementById('revPopVoile'); if(v)v.remove(); }
+/* La pastille, sous le bandeau de l'accueil. ⚠️ Pas DANS #unitBanner : il a overflow:hidden. Dans une
+   ancre collante de hauteur nulle posée juste après lui, collée à sa hauteur : elle le suit au
+   défilement sans pousser le chemin. */
+function revPilule(){
+  var bn=document.getElementById('unitBanner'); if(!bn)return;
+  var a=document.getElementById('revPilAncre'), r=revisionDuJour();
+  if(!r.total){ if(a)a.remove(); return; }
+  if(!a){ a=document.createElement('div'); a.id='revPilAncre'; a.className='revpil-ancre';
+    a.innerHTML='<button id="revPil" class="revpil"></button>'; bn.insertAdjacentElement('afterend',a);
+    a.firstChild.onclick=function(){ reviserDuJour(); }; }
+  a.style.top=((parseFloat(getComputedStyle(bn).top)||0)+bn.offsetHeight+12)+'px';
+  var p=a.firstChild;
+  p.setAttribute('aria-label','Réviser : '+r.total+' à revoir');
+  /* un ROND sans le mot (variante 1 de la preview v3, Myriam 21/10) : la pastille avec « RÉVISER »
+     mordait, sur iPhone, le disque de la leçon en cours. Les disques s'arrêtent à x ≈ 309 sur 390. */
+  p.innerHTML=icoImg('menu-reviser')+'<span class="revcount"><i>'+r.total+'</i></span>';
+  revOngletBadge(r);
+}
+/* La goutte sur l'onglet Réviser du menu bas (variante 3, avec la 1) : le même total. Tenue à jour par
+   refreshStats (ui/accueil.js), que chaque changement d'onglet appelle. */
+function revOngletBadge(r){
+  var bi=document.querySelector('#bn-reviser .bi'); if(!bi)return;
+  r=r||revisionDuJour();
+  var g=bi.querySelector('.bn-compte');
+  if(!r.total){ if(g)g.remove(); return; }
+  if(!g){ g=document.createElement('span'); g.className='revcount bn-compte'; bi.appendChild(g); }
+  g.innerHTML='<i>'+r.total+'</i>';
+}
+/* Le vocabulaire d'abord, puis la grammaire : la pastille, qui reste, mène à la suite. On revient à
+   l'ACCUEIL (startReview et lancerGrammaire posent backTo='reviser'). */
+function reviserDuJour(){
+  revPopFermer();
+  var r=revisionDuJour();
+  if(r.mots)startReview(); else if(r.notions)startGrammarReview(); else return;
+  var pl=document.getElementById('player');
+  if(pl&&pl.classList.contains('on'))backTo=null;
 }
 
 function startReview(){

@@ -6,7 +6,7 @@
    Script classique, chargé sous parcours.js et avant le grand script, ni defer ni module :
    la dernière ligne du grand script, showTab('home'), appelle renderHome() en synchrone et
    peint l'accueil sans scintillement. ⛔ Rien d'un autre script n'est lu au chargement.
-   À L'APPEL : UNITS, SOURATES, unitAccent (donnees.js) · curSourate (revision.js) ·
+   À L'APPEL : UNITS, SOURATES, unitAccent (donnees.js) · curSourate, revPilule, revPopPlanifier, revOngletBadge (revision.js) ·
    S, dkey, unitValidated (progression.js) · discsFor (parcours.js) · ICONES (assets.js) ·
    startDisque, startExam (src/player, module : lecteurPret() prévient s'il manque) ·
    arReveal, currentLesson, lecteurPret, openSurahMenu (index.html) ·
@@ -20,6 +20,7 @@ function refreshStats(){
   document.getElementById('st-streak').textContent=S.streak;
   updRankBadge();
   document.getElementById('st-hearts').textContent=S.hearts;
+  try{ revOngletBadge(); }catch(e){}   // la goutte de l'onglet Réviser (revision.js), jamais au prix de la barre
 }
 /* table portée aux 12 unités (journal : ui/accueil.js · toAr, le « 8 » latin) */
 function toAr(n){return ['','١','٢','٣','٤','٥','٦','٧','٨','٩','١٠','١١','١٢'][n]||n;}
@@ -180,6 +181,7 @@ function renderHome(){
   window.addEventListener('scroll',onHomeScroll,{passive:true});
   requestAnimationFrame(onHomeScroll);
   if(_homeFocusPending){_homeFocusPending=false;focusCurrentDisc();} // centre sur le disque courant
+  try{ revPilule(); revPopPlanifier(); }catch(e){}   // la révision du jour (revision.js) : jamais au prix de l'accueil
 }
 // Remplit le bandeau du haut avec le titre de l'unite u (sans re-render inutile).
 /* ⚠️ Un segment arabe dans une phrase française ne se rend pas tout seul : dans le bandeau il

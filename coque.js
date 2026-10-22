@@ -89,9 +89,16 @@ window.__alaqEnregistrerU8 = function(api){
   _u8Branchee = true;
   U8 = api;
   const m = U8.mots;
-  /* les mots entrent au vocabulaire en forme de citation, indéfinie (قَلَمٌ et non الْقَلَمُ) */
+  /* les mots entrent au vocabulaire en forme de citation, indéfinie (قَلَمٌ et non الْقَلَمُ).
+     ⚠️ Un mot déjà enseigné par une unité précédente n'y entre pas une seconde fois (Myriam, 21/10 :
+     بَابٌ, unité 3) — le Cours l'affichait deux fois. Comparé en NFC, comme le vivier de la révision. */
   const U = UNITS[7];
-  Object.keys(m).forEach(function(k){ U.words.push({w:m[k].nu, fr:m[k].fr, say:m[k].tr}); });
+  const dejaVus = new Set();
+  UNITS.slice(0,7).forEach(function(A){ (A.words||[]).forEach(function(x){ dejaVus.add((x.w||'').normalize('NFC')); }); });
+  Object.keys(m).forEach(function(k){
+    if (dejaVus.has(m[k].nu.normalize('NFC'))) return;
+    U.words.push({w:m[k].nu, fr:m[k].fr, say:m[k].tr});
+  });
   /* et leurs deux sons : le mot nu et le mot défini */
   Object.keys(m).forEach(function(k){
     inscrireLeSon(m[k].nu ,'mot-'+m[k].an);
@@ -206,20 +213,20 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='or-logo-conditions-20oct';
+const BUILD='revision-vocab-grammaire-21oct';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-10-20T16:54';
+const BUILD_DATE='2026-10-21T22:56';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
-const VERSION='3.25.8';
-const BUILD_NUM=243;
+const VERSION='3.26';
+const BUILD_NUM=244;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */

@@ -630,7 +630,7 @@ _poserTag(S);
    ⚠️ Une étiquette nomme la notion, jamais son contenu du moment : de nouveaux harf viendront.
    ⚠️ L'unité 8 porte une seule notion pour deux idées liées ; les séparer exigera de re-clé
    S.revGram et de migrer. (journal : progression.js · les étiquettes de grammaire) */
-const GRAM_SLUG={ '7':'article-solaire-lunaire', '8':'harf' };
+const GRAM_SLUG={ '7':'article-solaire-lunaire', '8':'harf', '9':'annexion' };   /* '9' : Myriam, 21/10 */
 
 function _semerLeDiff(){
   /* ⛔ Après un effacement fait ailleurs, la file rendrait au serveur ce que l'élève vient d'effacer. */

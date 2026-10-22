@@ -202,9 +202,10 @@ function u10Disques(){
     /* LES NEUF DISQUES DE L'ANNEXION, tous réels depuis le 24/09 (GO de Myriam : « tu es
        censé délivrer toutes les leçons de l'unité 10, on a tout construit »). Ils étaient
        écrits et gardés depuis des semaines, mais le parcours n'en servait qu'un : huit
-       grisés tenaient leur place. `vocab:true` reste sur le PREMIER (UNITS[9].words est
-       vide : c'est la seule porte vers la révision — les groupes d'annexion portent une
-       espace, splitUnits() en ferait une tuile vide).
+       grisés tenaient leur place. `vocab:true` reste sur le PREMIER : il ouvre la porte de
+       l'unité, et chaque nom de UNITS[9].words attend en plus SON disque (champ `disque`,
+       allReviewWords). Les groupes d'annexion restent hors du vocabulaire (une espace,
+       splitUnits() en ferait une tuile vide).
        ⚠️ Les titres sont COURTS — l'accueil n'est pas la place d'un sous-titre (règle 1),
        et l'icône dit la NATURE du disque, pas son rang. L'emoji n'est que le REPLI
        si l'image ne charge pas (onerror, ui/accueil.js) : il suit sa famille. */

@@ -351,7 +351,8 @@ function renderCours(sub){
   }
   else if(sub==='vocab'){
     h+=accAllBtn('vocab')+unlocked.map(i=>{ const U=UNITS[i];
-      const rows=(U.words||[]).map(w=>'<div class="grow"><div class="gar">'+w.w+'</div><div class="gtx"><span class="gfr">'+w.fr+'</span></div><button class="gspk" onclick="speak(\''+w.w+'\')" aria-label="Écouter">'+spkSVG()+'</button></div>').join('');
+      /* le haut-parleur seulement si la prise existe (un mot pas encore enregistré reste affiché) */
+      const rows=(U.words||[]).map(w=>'<div class="grow"><div class="gar">'+w.w+'</div><div class="gtx"><span class="gfr">'+w.fr+'</span></div>'+(aLeSon(w.w)?'<button class="gspk" onclick="speak(\''+w.w+'\')" aria-label="Écouter">'+spkSVG()+'</button>':'')+'</div>').join('');
       return accCard('vocab',U,'<div class="gloss">'+rows+'</div>'); }).join('');
   }
 

@@ -1214,6 +1214,33 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
   font-family:var(--ui);font-weight:900;letter-spacing:.05em;color:var(--accent,var(--gold-d));
   cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.22);text-transform:uppercase;font-size:15px;margin-top:2px}
 .rq-pop .dt-go:disabled{opacity:.5;cursor:default;box-shadow:none}
+/* LA RÉVISION DU JOUR (revision.js · revPopMontrer, revPilule) — la popup des boîtes en « or profond »,
+   variante A2 de Myriam (21/10, preview _apercu-revision-accueil-v2), la même dans les deux thèmes.
+   Titre et ✕ blancs sur #C27A0B : 3,45:1 (gros texte gras, seuil 3:1). Les petits textes (comptes,
+   bouton) gardent l'encre brune. La pastille garde l'or de l'app : à 14 px, seule l'encre y tient (4,97:1). */
+.revpop{--revpop-or:#C27A0B;--revpop-encre:#3A2410}
+.revpil{--revpop-or:#D0870D;--revpop-encre:#3A2410}
+.rq-pop.revpop{--accent:var(--revpop-or);max-width:320px;padding:22px 18px 18px}
+.revpop .dt-t,.revpop .dt-x-btn{color:#fff}
+.revpop .dt-go{color:var(--revpop-encre)}
+.revpop-puits{width:78px;height:78px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;
+  margin:2px auto 10px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.revpop-puits img{width:54px;height:54px}
+.revpop-compte{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:0 0 16px}
+.revpop-compte span{display:flex;align-items:center;gap:7px;background:#F6E6C4;color:var(--revpop-encre);
+  border-radius:12px;padding:7px 12px;font-family:var(--ui);font-weight:900;font-size:15px}
+.revpop-compte img{width:26px;height:26px;object-fit:contain}
+.revpil-ancre{position:sticky;height:0;z-index:19}   /* sous le bandeau (z 20), au-dessus du chemin */
+/* un ROND au bord droit (preview v3, variante 1) : à droite de tous les disques, même sur un petit iPhone.
+   ⚠️ right:-8px : l'ancre a la largeur de la COLONNE de l'accueil (marge de 16 px de chaque côté), pas de
+   l'écran. À right:8px il touchait l'anneau du disque le plus à droite sur 375 px (mesuré). */
+.revpil{position:absolute;top:14px;right:-8px;width:52px;height:52px;padding:0;display:flex;align-items:center;justify-content:center;
+  background:var(--revpop-or);border:none;border-radius:50%;cursor:pointer;
+  box-shadow:0 3px 0 #9A5A0B,0 8px 18px rgba(0,0,0,.35)}
+.revpil img{width:38px;height:38px;background:#fff;border-radius:50%;padding:3px}
+.revpil .revcount{position:absolute;top:-6px;right:-6px}
+/* la goutte sur l'onglet Réviser du menu bas (variante 3) — .botnav .bn .bi est position:relative */
+.bn-compte{position:absolute;top:-6px;right:-4px;z-index:1}
 .rq-parts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .rq-parts .rq-part:last-child:nth-child(odd){grid-column:1/-1}
 .rq-part{background:rgba(0,0,0,.18);border:1.5px solid transparent;border-radius:10px;padding:9px 10px;
