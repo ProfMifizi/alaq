@@ -87,7 +87,7 @@ const UNITS=(function(){
   {w:'مَكْتَبٌ',fr:'un bureau',say:'maktab'},
   {w:'بِنْتٌ',fr:'une fille',say:'bint'},
   {w:'وَلَدٌ',fr:'un garçon',say:'walad'},
-  {w:'نَبَاتٌ',fr:'une plante, de la végétation',say:'nabāt'},
+  {w:'نَبْتَةٌ',fr:'une plante',say:'nabta'},
   {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
   {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
   /* les verbes, présentés par la SCÈNE au disque 2 (décision de Myriam, 21/10 : « tous les mots
@@ -112,7 +112,7 @@ const UNITS=(function(){
     (journal : donnees.js · unité 10, ouverture) */
  { no:10, ready:true,  ph:'GRAMMAIRE', u10:true, letters:[],
    words:[
-  {w:'حَمَّامٌ',fr:'une salle de bain',say:'ḥammām',snd:'mot-hammam',disque:2},
+  {w:'حَمَّامٌ',fr:'une salle de bains',say:'ḥammām',snd:'mot-hammam',disque:2},
   {w:'مِرْحَاضٌ',fr:'des toilettes',say:'mirḥāḍ',snd:'mot-mirhad',disque:2},
   {w:'سَطْحٌ',fr:'un toit',say:'saṭḥ',snd:'mot-sath',disque:2},
   {w:'سُورٌ',fr:'un mur d’enceinte',say:'sūr',snd:'mot-sur',disque:2},

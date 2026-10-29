@@ -85,6 +85,10 @@ function semerLesSons(){
      la dérivation, qui l'écrasait. Le banc exige qu'aucune clé ne contredise sylBase
      (journal : son.js · آ écrasé par la dérivation). */
   SONS['آ']='alif-alif-son-prolonge';
+  /* ة n'est pas une des 28 lettres : son nom et son son sont ceux de ت, aucune prise à part
+     (Myriam, 29/10 : « ce doit être le même »). */
+  SONS['ة']=SONS['ت'];
+  SONS['son:ة']=SONS['son:ت'];
 }
 
 /* ── ② ce qui ne se devine pas : une ligne par son (مَكْتَبٌ → mot-maktab ne s'invente pas).
@@ -188,21 +192,23 @@ const SONS_ECRITS={
   'مَكْتَبٌ':'mot-maktab',
   'بِنْتٌ':'mot-bint',
   'وَلَدٌ':'mot-walad',
-  'نَبَاتٌ':'mot-nabat',
+  'نَبْتَةٌ':'mot-nabta',
   'الْمَاءُ':'mot-almaa',
   'التُّرَابُ':'mot-atturab',
 };
 
 /* ── ③ les graphies que les écrans composent à la volée : l'ordre des signes y diffère
-   de la table (chedda puis fatha), ou la prise existe sous le nom de sa syllabe (sièges de
+   de la table (chedda puis fatha), ou la prise est celle d'une autre graphie (sièges de
    la hamza de hamzaTap). ⚠️ Confronter l'écran à la table, pas seulement la table au disque
    (journal : son.js · les sons de l'app et les cinq graphies composées). */
 const SONS_COMPOSES={
   '\u0623\u064E\u0645\u0651\u064E':'am-chedda',   // أَمَّ, chedda avant fatha
   '\u0623\u064E\u0646\u0651\u064E':'an-chedda',   // أَنَّ
   '\u0623\u064E\u0644\u0651\u064E':'al-chedda',   // أَلَّ
-  '\u0624\u064F':'waw-damma-son-court',              // ؤُ — le siège waw dit « ou »
-  '\u0626\u0650':'ya-kasra-son-court',               // ئِ — le siège ya dit « i »
+  /* ⚠️ un siège de la hamza se tait : ؤُ se dit comme أُ, ئِ comme إِ — jamais « wu » ni « yi »
+     (Myriam 28/10 ; journal : son.js · le siège de la hamza se tait). */
+  '\u0624\u064F':'alif-damma-son-court',             // ؤُ — « ʾu »
+  '\u0626\u0650':'alif-kasra-son-court',             // ئِ — « ʾi »
 };
 
 /* ── ④ les sons de l'app, ni mots ni lettres. Les félicitations gardent leur suffixe -f :

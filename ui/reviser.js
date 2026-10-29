@@ -284,7 +284,7 @@ function resumeGramU10(){
   var s3=gramSection(
     'Le deuxième mot · <span class="ar">\u0645\u064f\u0636\u064e\u0627\u0641 \u0625\u0650\u0644\u064e\u064a\u0652\u0647\u0650</span>',
     '<div class="sgn-chips">'+gramChipSiSon('\u0627\u0644\u0652\u062d\u0650\u0645\u064e\u0627\u0631\u064f','l’âne')+FL+gramChipSiSon('\u0627\u0644\u0652\u062d\u0650\u0645\u064e\u0627\u0631\u0650','de l’âne')+'</div>'+
-    '<div class="sgn-chips">'+gramChip('\u062a\u0650\u064a\u0646\u064f \u0627\u0644\u0652\u062d\u0650\u0645\u064e\u0627\u0631\u0650','la figue de l’âne')+'</div>',
+    '<div class="sgn-chips">'+gramChip('\u062a\u0650\u064a\u0646\u064e\u0629\u064f \u0627\u0644\u0652\u062d\u0650\u0645\u064e\u0627\u0631\u0650','la figue de l’âne')+'</div>',
     'Lui <b>garde</b> son <span class="ar">الـ</span>, et sa terminaison passe de '+
     '<span class="ar">ـُ</span> à une <b style="white-space:nowrap">kasra <span class="ar">ـِ</span></b>.');
 

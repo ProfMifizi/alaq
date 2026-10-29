@@ -53,7 +53,7 @@ let U8 = U8_TALON;
 
 window.__alaqHoteU8 = {
   /* déclarées par des scripts classiques chargés avant (goNoHearts : plus bas, hissée), donc sûres en raccourci */
-  audioBeni, playSfx, save, goNoHearts, stopAudio, icoImg, toc,
+  audioBeni, playSfx, save, goNoHearts, stopAudio, icoImg, toc, jouer,
   /* ⚠️ ces quatre-là vivent dans src/ecrans, un module exécuté après ce script : en raccourci, capturées
      au chargement, elles lèveraient ReferenceError et tueraient ce script avant l'accueil. Des accesseurs
      les résolvent à l'appel ; l'unité 8 les lit à son initialisation.
@@ -137,6 +137,7 @@ if(!S.onb||typeof S.onb!=='object')S.onb={};         // données d'onboarding {s
 if(typeof S.prenom!=='string')S.prenom='';           // prénom (personnalisation + colonne Supabase profiles.prenom)
 (function(){var ch=false;for(var k in S.done){var m=k.match(/^D(\d+)$/);if(m){S.done['U1-D'+m[1]]=S.done[k];delete S.done[k];ch=true;}}if(ch)saveLocal();})();  /* migration D<n> → U1-D<n> : un renommage de clés, pas une progression, d'où saveLocal */
 fixOrdreFormes(); // échange formes ↔ repérage (02/08) : rattrape les progressions écrites sous l'ancien ordre
+if(typeof fixNomsDUnite==='function')fixNomsDUnite();  // 3.27 : le palier des cinq mots suit leur nouvelle écriture — gardé : une page mixte (vieux progression.js, course du service worker) ne doit pas mourir ici
 
 function currentLesson(){ // 1re leçon non terminée d'une unité débloquée = le disque « courant » de l'accueil
   for(let u=0;u<UNITS.length;u++){ if(!unitUnlocked(u))continue;
@@ -213,20 +214,20 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='revision-vocab-grammaire-21oct';
+const BUILD='formes-d-unite-327';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-10-21T22:56';
+const BUILD_DATE='2026-10-30T00:35';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
-const VERSION='3.26';
-const BUILD_NUM=244;
+const VERSION='3.27';
+const BUILD_NUM=245;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */

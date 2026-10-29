@@ -1,6 +1,6 @@
 /* ═══ progression.js — la persistance locale et la synchro nuage ═══════════════════════
    Porte : HEARTS_MAX, DEF, load()/save()/saveLocal() (localStorage.alaq2), S, dkey(),
-   fixOrdreFormes() (migration idempotente), unitValidated()/unitUnlocked(), isDone()/setDone()
+   fixOrdreFormes() et fixNomsDUnite() (migrations idempotentes), unitValidated()/unitUnlocked(), isDone()/setDone()
    (accroche POC-5) ; puis le moteur de synchro (cloudPull, cloudSaveNow, cloudInit,
    cloudResync), la file d'envoi et son diff (§3-§6), la livraison du blob (§7), SYNC (§8).
    ⛔ Script classique : ni import/export, ni defer, ni type="module". S est lu de façon
@@ -93,6 +93,31 @@ function fixOrdreFormes(){
   /* saveLocal, pas save : une migration n'est pas une progression (voir saveLocal). Idempotente
      et gardée par son drapeau, elle se rejoue sur chaque appareil, cloudPull compris. */
   saveLocal();
+}
+
+/* 3.27 : cinq mots passent du collectif au nom d'unité (Myriam, 24/10). Le palier (S.rev) et les erreurs (S.err)
+   sont rangés par l'ÉCRITURE du mot : on les reporte sur la nouvelle, sinon l'élève repartirait de zéro (Myriam, 27/10).
+   Sans drapeau : un appareil resté sur un ancien build peut réécrire l'ancienne clé ; on la reprend à chaque démarrage,
+   et on n'écrit que si quelque chose bouge. Rejouée sur l'état du nuage, comme fixOrdreFormes.
+   (journal : 3.27 · collectifs contre noms d'unité) */
+const NOMS_D_UNITE=[
+  ['\u0637\u064E\u064A\u0652\u0631\u064C','\u0637\u064E\u0627\u0626\u0650\u0631\u064C'],                         // طَيْرٌ → طَائِرٌ
+  ['\u0631\u064F\u0645\u064E\u0651\u0627\u0646\u064C','\u0631\u064F\u0645\u064E\u0651\u0627\u0646\u064E\u0629\u064C'], // رُمَّانٌ → رُمَّانَةٌ
+  ['\u0646\u064E\u062D\u0652\u0644\u064C','\u0646\u064E\u062D\u0652\u0644\u064E\u0629\u064C'],                   // نَحْلٌ → نَحْلَةٌ
+  ['\u062A\u0650\u064A\u0646\u064C','\u062A\u0650\u064A\u0646\u064E\u0629\u064C'],                                 // تِينٌ → تِينَةٌ
+  ['\u0646\u064E\u0628\u064E\u0627\u062A\u064C','\u0646\u064E\u0628\u0652\u062A\u064E\u0629\u064C']             // نَبَاتٌ → نَبْتَةٌ
+];
+function fixNomsDUnite(){
+  var bouge=false; S.rev=S.rev||{}; S.err=S.err||{};
+  NOMS_D_UNITE.forEach(function(p){
+    var a=p[0], b=p[1];
+    if(S.rev[a]){ var r=S.rev[a], n=S.rev[b];
+      if(!n||(r.n||0)>(n.n||0)) S.rev[b]=r;          // le palier le plus avancé gagne
+      delete S.rev[a]; bouge=true; }
+    if(Object.prototype.hasOwnProperty.call(S.err,a)){ S.err[b]=Math.max(S.err[b]||0,S.err[a]||0); delete S.err[a]; bouge=true; }
+  });
+  if(bouge) saveLocal();   // une migration n'est pas une progression (voir saveLocal)
+  return bouge;
 }
 
 function unitValidated(idx){ if(idx<0||idx>=UNITS.length)return false; const ds=discsFor(idx); return !!(S.done&&S.done[dkey(idx,ds.length-1)]); }
@@ -310,6 +335,7 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
          neuve évite toute migration de l'existant. */
       S.revGram=S.revGram||{};
       fixOrdreFormes(); // l'état du nuage peut venir d'un appareil resté sur l'ancien ordre
+      fixNomsDUnite();  // … ou sur les anciennes écritures des cinq mots (3.27)
       /* _marqueVue suit toute écriture d'alaq2 faite par une page VIVANTE (ici et dans _ecrireS) : c'est
          l'invariant sur lequel s'appuie la garde ②. Seule exception, le disque vierge d'_autreCompteArrive :
          la page est déjà condamnée, plus rien ne relit _marqueVue.

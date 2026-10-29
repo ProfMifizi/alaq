@@ -136,6 +136,16 @@ function buildForms(U){
     /* Lettres qui ne s'attachent qu'à droite (أ و ر د ذ…) : début = isolée, milieu = fin ;
        seules les formes distinctes s'écrivent (pas de tracé début/milieu pour elles). */
     (joinsL(L)?[1,2,3]:[3]).forEach(p=>q.push({type:'trace',L,pos:p}));
+    /* ة, la sœur de ت : la carte « se lit comme ت », puis ses deux tracés (isolée et en fin de mot, elle ne
+       s'attache jamais à gauche). Sa carte de la FORME attend ه, à l'unité 7. ﻩ = U+FEE9 : le ه seul de Noto
+       Naskh a deux boucles. (Myriam, 24-29/10, lot 3.27 ; exercice src/exercises/lettre-soeur.js) */
+    if(L==='\u062A')q.push({type:'lettre-soeur',consigne:'Quelle lettre se lit comme\u00A0'+letAr('\u0629')+'\u00A0?',
+        grand:'\u0629',son:'son:\u0629',recap:[{L:'\u0629'},' = ',{L:'\u062A',neuf:true}],
+        choix:[{L:'\u0646',son:'son:\u0646'},{L:'\u062A',son:'son:\u062A',bon:true},{L:'\u0628',son:'son:\u0628'}]},
+      {type:'trace',L:'\u0629'},{type:'trace',L:'\u0629',pos:3});
+    if(L==='\u0647')q.push({type:'lettre-soeur',consigne:'Quelle lettre a le même rond que\u00A0'+letAr('\u0629')+'\u00A0?',
+        grand:'\u0629',recap:[{L:'\uFEE9'},' + ',{L:'\u062A'},' \u2192 ',{L:'\u0629',neuf:true}],
+        choix:[{L:'\u0645'},{L:'\uFEE9',bon:true},{L:'\u0648'}]});
   });
   q.push({type:'bulles',lettres:U.letters.slice(),formes:true});
   let pc=Math.floor(Math.random()*3); const nextPos=()=>1+(pc++%3);

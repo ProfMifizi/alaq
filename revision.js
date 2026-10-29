@@ -104,12 +104,12 @@ function letterGridHTML(){
     var mk=(sel?'<span class="ck">✓</span>':'')+badgeSolaire(k);
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
-  /* La hamza, hors des 28 : visible dès que le alif est connu ; les sièges wāw et yāʾ restent
-     verrouillés (pas encore enseignés). ⚠️ Ces cases ne se sélectionnent pas : on touche pour ENTENDRE. */
+  /* La hamza, hors des 28 : visible dès que le alif est connu ; le siège wāw reste verrouillé (pas encore
+     enseigné), le siège yāʾ s'ouvre avec l'unité 8. ⚠️ Ces cases ne se sélectionnent pas : on touche pour ENTENDRE. */
   if(unlocked.has('ا')){
     /* ⚠️ Ne pas remettre d'étiquette <span class="hzl"> : le nom du siège s'écoute ; min-height:44px
        tient seul la zone de touche (journal : revision.js · étiquettes de la hamza). */
-    var SIEGES=[['ء',1],['أ',1],['إ',1],['ؤ',0],['ئ',0]];
+    var SIEGES=[['ء',1],['أ',1],['إ',1],['ؤ',0],['ئ',(unitUnlocked(7)?1:0)]];   /* ئ : dès l'unité 8 (طَائِرٌ) */
     h+='<div class="lg-hamza">'+SIEGES.map(function(s){
       return s[1]
         ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'</div>'
@@ -405,8 +405,16 @@ function playVerse(i){ // le verset : fichier HÉBERGÉ si la voix l'a, sinon le
 function lastUnlockedIndex(){ let last=0; UNITS.forEach((U,i)=>{ if(unitUnlocked(i))last=i; }); return last; }
 
 /* ===== Révision globale (réutilise le lecteur, ne marque aucun disque) ===== */
+/* Deux glosses qui se recouvrent ne s'opposent jamais : دَارٌ « une demeure » et بَيْتٌ « une maison » (3.27) — sinon
+   l'une serait proposée comme FAUSSE pour l'autre. On compare sans l'article. */
+const FR_PROCHES=[['demeure','maison']];
+function memeSens(a,b){
+  const n=s=>String(s||'').replace(/^(une?|la|le|les|des|du|de la|l\u2019|l\u0027)\s*/i,'').trim();
+  const x=n(a), y=n(b);
+  return x===y || FR_PROCHES.some(function(p){ return p.indexOf(x)>=0 && p.indexOf(y)>=0; });
+}
 function frOptions(pool,w){
-  const others=shuffle(pool.filter(x=>x.fr!==w.fr)).slice(0,2);
+  const others=shuffle(pool.filter(x=>!memeSens(x.fr,w.fr))).slice(0,2);
   return shuffle([{txt:w.fr,key:w.fr},...others.map(x=>({txt:x.fr,key:x.fr}))]);
 }
 // ===== Répétition espacée : sélection des mots à réviser =====
@@ -795,7 +803,7 @@ function vfRounds(st){
   const r=[];
   st.words.forEach(function(w){
     r.push({w:w,fr:w.fr,vrai:true});
-    const autres=shuffle(st.pool.filter(function(x){return x.fr!==w.fr;})); // frOptions filtre déjà les synonymes
+    const autres=shuffle(st.pool.filter(function(x){return !memeSens(x.fr,w.fr);})); // même filtre que frOptions
     r.push({w:w,fr:(autres[0]||w).fr,vrai:false});
   });
   return shuffle(r);
