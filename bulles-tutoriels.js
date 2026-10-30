@@ -207,7 +207,7 @@ function bulPop(b){
 /* Toucher un siège : il s'allume et il SONNE. La hamza seule dit son nom, les sièges
    disent la voyelle qu'ils permettent — c'est exactement ce que la hamza sert à faire. */
 const HAMZA_SON={'ء':'ء','أ':'أَ','إ':'إِ','ؤ':'ؤُ','ئ':'ئِ'};
-/* Toucher une des trois lettres faibles de l'écran « 2 rôles » : elle se fonce, elle SONNE,
+/* Toucher une des trois lettres faibles de l'écran des rôles : elle se fonce, elle SONNE,
    et ses sièges se posent en bas. Idempotent — retoucher la même lettre ne rejoue que le son
    et ne débloque pas deux fois le bouton. */
 const SIEGES_DE_LETTRE={'ا':['أ','إ'],'و':['ؤ'],'ي':['ئ']};
@@ -261,7 +261,7 @@ function letterTut(customSteps){
     {t:function(){var a=document.querySelectorAll('.lg-cell.avail');return a[Math.min(3,a.length-1)]||a[0];},ti:'Ton choix ✓',tx:'Touche une lettre dorée : elle passe en JAUNE FONCÉ, avec un ✓. Tu peux en prendre plusieurs.',enter:function(){var a=document.querySelectorAll('.lg-cell.avail');var c=a[Math.min(3,a.length-1)]||a[0];if(c&&!c.querySelector('.ck')){c.classList.remove('avail');c.classList.add('sel','coachdemo');c.insertAdjacentHTML('afterbegin','<span class="ck">✓</span>');}},leave:function(){var c=document.querySelector('.lg-cell.coachdemo');if(c){c.classList.remove('sel','coachdemo');c.classList.add('avail');var k=c.querySelector('.ck');if(k)k.remove();}}},
     /* le seul endroit où la hamza s'explique (Myriam) : pas de texte permanent à l'écran */
     {t:function(){return document.querySelector('.lg-hamza');},ti:'La hamza ء',
-     tx:'L’alphabet compte <b>28 lettres</b>, et la hamza n’en fait pas partie : <b>elle n’a pas de forme à elle</b>.<br>Elle se pose toujours sur un <b>siège</b> — le alif (أ إ), le wāw (ؤ) ou le yāʾ (ئ).<br>Touche-la pour l’entendre.'},
+     tx:'La hamza ء est une <b>vraie lettre</b>.<br>Elle reste seule, ou se pose sur un <b>support</b> : le alif (أ إ), le wāw (ؤ) ou le yāʾ (ئ).<br>Touche-la pour l’entendre.'},
     {t:function(){return document.querySelector('.lg-rev');},ti:'On révise !',tx:'Appuie sur « Réviser » : tu traceras chaque lettre choisie sous toutes ses formes. Bismillah !'}
   ]).filter(function(x){return x.t();});
   if(!steps.length)return;

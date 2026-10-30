@@ -8,7 +8,8 @@
    Script classique, chargé sous ui/parametres.js et avant le grand script ; rien n'est lu au
    chargement (RESUME_GRAM est une table de fonctions). Voir l'en-tête de ui/accueil.js.
    À L'APPEL :
-   · UNITS, SOURATES, letterKey (donnees.js) · S, unitUnlocked (progression.js) · ico, icoImg (assets.js)
+   · UNITS, SOURATES, letterKey (donnees.js) · sylHKG, sylMDG (generateurs.js)
+   · S, unitUnlocked (progression.js) · ico, icoImg (assets.js)
    · spkSVG, speak, aUnSon, aLeSon, et en ligne sayLetterName, sayLetterSound, spkAudio (son.js)
    · curSourate, curReviserTab, BOITES, letterGridHTML, allReviewWords, dueReviewWords, notionsGram,
      gramMaitrise, et en ligne coursTabTap, reviserTabTap, boiteTap, startReview, openWrite,
@@ -57,8 +58,10 @@ function playLetterAnim(btn,L,c){
   function say(t){try{speak(t);}catch(e){}}
   var t=0;
   V.forEach(function(v){
-    var sh=L+v.h, lg=L+v.h+v.m;
-    T(function(){W.innerHTML=L;Bar.style.width='0';Ro.textContent='';},t);
+    /* les syllabes des leçons 5 et 6 (sylHKG, sylMDG) : avec la hamza, إِ / إِي et آ, jamais أِ ni أَا
+       (journal : ui/reviser.js · la carte أ du Résumé) */
+    var sh=sylHKG(L,v.h), b=sh.replace(v.h,''), lg=sylMDG(L,v.m);
+    T(function(){W.innerHTML=b;Bar.style.width='0';Ro.textContent='';},t);
     T(function(){W.innerHTML=sh;pop();Bar.style.width='30px';Ro.textContent='';say(sh);},t+320);      // le signe se pose (bref)
     T(function(){W.innerHTML='<span>'+sh+'</span><span class="la-l2 away">'+v.m+'</span>';setTimeout(function(){var e=W.querySelector('.la-l2');if(e)e.classList.remove('away');},60);},t+1150); // la madd glisse
     T(function(){W.innerHTML=lg;pop();Bar.style.width='92px';Ro.textContent='';say(lg);},t+1800);      // soudure (long)
@@ -94,12 +97,17 @@ function coursSignsHTML(){
     }).join('')+'</div></div>';
 }
 // A : un mot de la Fātiḥa contenant la lettre
+/* la lettre EXACTE d'abord, la famille ensuite : letterKey confond ا أ إ آ ٱ, et أ rendait اللَّهِ, sans hamza
+   (journal : ui/reviser.js · la carte أ du Résumé) */
 function fatihaWordFor(L){
   var k=letterKey(L), FA=(SOURATES[0]&&SOURATES[0].verses)||[];
-  for(var v=0;v<FA.length;v++){ var ws=FA[v].split(' ');
-    for(var w=0;w<ws.length;w++){ var word=ws[w];
-      for(var c=0;c<word.length;c++){ if(letterKey(word[c])===k) return word; } } }
-  return '';
+  function premier(ok){
+    for(var v=0;v<FA.length;v++){ var ws=FA[v].split(' ');
+      for(var w=0;w<ws.length;w++){ var word=ws[w];
+        for(var c=0;c<word.length;c++){ if(ok(word[c])) return word; } } }
+    return '';
+  }
+  return premier(function(ch){ return ch===L; })||premier(function(ch){ return letterKey(ch)===k; });
 }
 /* LE RÉSUMÉ DE GRAMMAIRE DE L'UNITÉ 8 — l'article الـ.
    ⚠️ Il réemploie les gabarits du Cours (.sgn-card, .sgn-head, .sgn-chips, .chip, .sgn-desc,
@@ -334,10 +342,11 @@ function renderCours(sub){
         return '<div class="lrow"><div class="lbig">'+L+'</div><div class="ltx">'+
           /* ⛔ pas de transcription du nom (règle de Myriam, 14/08) : il s'écoute */
           '<div class="ln"><button class="lspk" onclick="sayLetterName(\''+L+'\')" aria-label="Écouter le nom">'+spkSVG()+'</button> <span class="lcap">son nom</span></div>'+
-          /* une lettre sans son propre (le alif) n'offre pas de bouton muet */
+          /* le alif n'a pas de prise de son : pas de bouton muet. La lettre de l'unité 2 est أ, qui porte
+             la hamza — une vraie lettre (journal : ui/reviser.js · la carte أ du Résumé) */
           (aUnSon(L)
             ? '<div class="ls"><button class="lspk" onclick="sayLetterSound(\''+L+'\')" aria-label="Écouter le son">'+spkSVG()+'</button> '+d.son+'</div>'
-            : '<div class="ls"><span class="lcap">porte la voyelle, sans son propre</span></div>')+
+            : '<div class="ls"><span class="lcap">porte la hamza : un petit coup de glotte</span></div>')+
           /* ⚠️ le haut-parleur n'apparaît que si le son existe : fatihaWordFor rend la forme du
              verset, la table porte les formes de citation. Le mot reste affiché.
              (journal : ui/reviser.js · renderCours, le haut-parleur du mot de la Fātiḥa) */

@@ -193,6 +193,10 @@ function insecables(txt){
      (journal : ui/accueil.js · insecables) */
   return String(txt||'').replace(/ (—|–) /g, '\u00A0$1\u00A0');
 }
+/* Le verdict du pied : la ponctuation française reste avec son mot, en fin comme en début de ligne (journal : app.css · le pied .fb) */
+function ponctuationInsecable(html){
+  return String(html==null?'':html).replace(/« /g,'«\u00A0').replace(/ ([»:;?!—])/g,'\u00A0$1');
+}
 function arEnveloppe(txt, cls){
   return String(txt||'').replace(
     /[\u0600-\u06FF\uFB50-\uFEFF]+(?:\s+[\u0600-\u06FF\uFB50-\uFEFF]+)*/g,

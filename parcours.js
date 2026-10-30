@@ -56,13 +56,13 @@ function buildLettreVsProlong(U){
   const DA=(carrier,cells)=>({type:'dragassoc',carrier,cells,note:'Glisse chaque prolongation sur la lettre qui lui correspond'});
   return [
     /* Le titre est l'instruction ; sur chaque carte, la lettre et son rôle, rien de plus.
-       L'écran des rôles vient AVANT les cartes : d'abord QUI a deux rôles, puis LESQUELS.
+       L'écran des rôles vient AVANT les cartes : d'abord QUI a plusieurs rôles, puis LESQUELS.
        (journal : parcours.js · « Lettres vs prolongations », les retours de Myriam) */
-    {type:'roles', gate:true, title:'3 lettres peuvent avoir 2 rôles'},
+    {type:'roles', gate:true, title:'3 lettres ont plusieurs rôles'},
     {type:'flipcards', gate:true, cartes:[
-      {ar:'ي', cons:'يَ', pro:'إِي'},
-      {ar:'و', cons:'وَ', pro:'أُو'},
-      {ar:'ا', cons:'',   pro:'أَا'}
+      {ar:'ي', role:'consonne', cons:'يَ', pro:'إِي'},
+      {ar:'و', role:'consonne', cons:'وَ', pro:'أُو'},
+      {ar:'ا', arRole:'أ', role:'support', cons:'',   pro:'أَا'}
     ]},
     DM('ن','\u0650','ي','نِي','ī','ni'),
     DM('م','\u064E','ا','مَا','ā','ma'),
@@ -81,15 +81,17 @@ function buildLettreVsProlong(U){
         {w:'أَمَانٌ',cle:'a'},{w:'أَمِينٌ',cle:'a'},{w:'أَلِيمٌ',cle:'a'},
         {w:'إِيمَانٌ',cle:'i'},{w:'إِمَامٌ',cle:'i'},{w:'إِلَيْنَا',cle:'i'}
       ])},
-    mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,mute:true,graded:true,answer:'p',explain:'Dans <span class="ar">مَالٌ</span>, le <span class="ar">ا</span> suit une fatḥa et prolonge le son : on dit « māl ». C’est son rôle de prolongation, pas de consonne.',
+    /* ي et و portant une voyelle sont des consonnes ; le alif ne l'est jamais : il prolonge ou il porte (journal : parcours.js · les rôles de ي et و).
+       Le alif nu ne prolonge pas toujours (الْـ) : la règle est bornée à l'unité (journal : parcours.js · les quiz de l'unité 2) */
+    mcq({prompt:'Ici, quel rôle joue le ا ?',glyph:'مَالٌ',glyphLinear:true,mute:true,graded:true,answer:'p',explain:'Dans <span class="ar">مَالٌ</span>, le <span class="ar">ا</span> suit une fatḥa et prolonge le son : on dit « māloun ». C’est son rôle de prolongation, pas de support.',
       options:shuffle([{txt:'Il prolonge le son « ā »',key:'p'},{txt:'Il fait le son « l »',key:'l'},{txt:'Il ne sert à rien',key:'x'}])}),
-    mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,mute:true,graded:true,answer:'c',explain:'Au début de <span class="ar">يَوْمٌ</span> (« yawm »), le <span class="ar">ي</span> porte une fatḥa et se prononce « y » : ici c’est une consonne, pas une prolongation.',
+    mcq({prompt:'Ici, le ي est…',glyph:'يَوْمٌ',glyphLinear:true,mute:true,graded:true,answer:'c',explain:'Au début de <span class="ar">يَوْمٌ</span> (« yawmoun »), le <span class="ar">ي</span> porte une fatḥa et se prononce « y » : ici c’est une consonne, pas une prolongation.',
       options:shuffle([{txt:'une consonne « y »',key:'c'},{txt:'une prolongation « ī »',key:'i'},{txt:'une harakat',key:'h'}])}),
     mcq({prompt:'Le و prolonge le son « ū »…',mute:true,graded:true,answer:'d',explain:'Le <span class="ar">و</span> prolonge en « ū » seulement après une ḍamma. Chaque prolongation suit sa voyelle : <span class="ar">ا</span> après fatḥa, <span class="ar">ي</span> après kasra, <span class="ar">و</span> après ḍamma.',
       options:shuffle([{txt:'après une ḍamma <span style="font-family:var(--ar);font-size:1.7em">ـُ</span>',key:'d'},{txt:'après une fatḥa <span style="font-family:var(--ar);font-size:1.7em">ـَ</span>',key:'f'},{txt:'après une kasra <span style="font-family:var(--ar);font-size:1.7em">ـِ</span>',key:'k'}])}),
     mcq({prompt:'À quoi sert la hamza <span style="font-family:var(--ar)">(ء)</span> posée sur le alif ?',mute:true,graded:true,answer:'v',explain:'La hamza <span class="ar">ء</span> est une vraie lettre (un petit coup de glotte). Posée sur le alif, elle permet de prononcer une voyelle seule — a, i ou ou — au début d’un mot.',
       options:shuffle([{txt:'à dire une voyelle seule : a, i, ou',key:'v'},{txt:'à prolonger le son',key:'l'},{txt:'à séparer deux mots',key:'s'}])}),
-    mcq({prompt:'Lorsqu\u2019on veut faire le son « i » tout seul, quel support utilise-t-on ?',mute:true,graded:true,grid:'grid3',answer:'i',explain:'Pour le son « i », la hamza se place sous le alif : <span class="ar">إ</span>. Au-dessus (<span class="ar">أ</span>) on dit « a » ou « ou » ; le alif nu <span class="ar">ا</span> sert seulement à prolonger.',
+    mcq({prompt:'Pour faire le son « i » tout seul, qu’écrit-on ?',mute:true,graded:true,grid:'grid3',answer:'i',explain:'Pour le son « i », la hamza se place sous le alif : <span class="ar">إ</span>. Au-dessus (<span class="ar">أ</span>) on dit « a » ou « ou » ; dans les mots de cette unité, le alif nu <span class="ar">ا</span> sert à prolonger.',
       options:shuffle([{ar:'إ',key:'i'},{ar:'أ',key:'a'},{ar:'ا',key:'n'}])}),
   ];
 }
