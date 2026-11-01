@@ -224,15 +224,38 @@
   .hint{color:var(--muted);font-size:16px;font-weight:700;margin-top:16px}
 
   .opts{display:grid;gap:12px}
-  .opts.grid2{grid-template-columns:1fr 1fr}
-  .opts.grid3{grid-template-columns:1fr 1fr 1fr}
+  /* Deux cartes : côte à côte, en colonne seulement si un mot sortirait (src/player/deux-cartes.js) : la piste ne s'élargit jamais pour lui. */
+  .opts.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  /* Les quiz à trois cartes sont en colonne, à chaque fois (Myriam, 1/11). Une carte de mot : 85 px, la pile du tachkīl de أُمٌّ à 6 px du bord. */
+  .opts.grid3,.opts.grid2.colonne{grid-template-columns:minmax(0,1fr);gap:10px}
+  .opts.grid3 .opt:has(> .ar),.opts.grid2.colonne .opt:has(> .ar){padding:15px 10px 1px;min-height:0}
+  .opts.grid3 .opt:has(> .spk){padding:14px 10px;min-height:0}
+  /* Écran court : la 3ᵉ carte tient si le haut de page se serre (quiz à trois cartes, lettre-soeur et sg-choix compris). Ni le texte ni la carte de mot ne rétrécissent ; le haut-parleur, si. */
+  @media (max-height:640px){
+    #p-body:has(.opts.grid3,.lsr-choix,.sg-choix){padding-top:0}
+    #p-body:has(.opts.grid3,.lsr-choix,.sg-choix) .q-title{margin:6px 0 10px}
+    #p-body:has(> .opts.grid3) .spkbtn{margin:0 auto 8px}
+    #p-body:has(> .opts.grid3) .spkbtn svg{width:92px;height:64px}
+    #p-body:has(> .opts.grid3) .glyph-big{margin:0 0 8px;padding:30px 0 6px}
+    .opts.grid3 .opt:has(> .spk){padding:10px;min-height:0}
+  }
+  @media (max-height:760px){
+    html.gtexte #p-body:has(.opts.grid3,.lsr-choix,.sg-choix){padding-top:0}
+    html.gtexte #p-body:has(.opts.grid3,.lsr-choix,.sg-choix) .q-title{margin:2px 0 8px}
+    html.gtexte #p-body:has(> .opts.grid3) .spkbtn{margin:0 auto 8px}
+    html.gtexte #p-body:has(> .opts.grid3) .spkbtn svg{width:92px;height:64px}
+    html.gtexte #p-body:has(> .opts.grid3) .glyph-big{margin:0 0 8px;padding:30px 0 6px}
+    html.gtexte .opts.grid3{gap:8px}
+    html.gtexte .opts.grid3 .opt:has(> .spk){padding:10px;min-height:0}
+  }
   /* ⚠️ 14/08 — Myriam : « les box contenant les mots doivent avoir un peu plus de padding
      sur le haut, parce que là les tachkīl touchent le contour de la box ». Un mot comme
      أُمٌّ empile ḍamma + chedda + tanwīn au-dessus de la ligne : à `line-height:1.2` la pile
      sort de sa boîte. Le remède est la HAUTEUR DE LIGNE de l'arabe, pas seulement le
      rembourrage — le rembourrage seul décale le mot sans lui donner de place au-dessus. */
   .opt{background:var(--panel);border:2px solid var(--line);color:var(--cream);
-    border-radius:14px;padding:20px 10px 16px;font-size:18px;font-weight:700;text-align:center;transition:.08s;
+    border-radius:14px;padding:20px 10px 16px;font-size:18px;font-weight:700;text-align:center;
+    transition:background-color .08s,border-color .08s,color .08s,box-shadow .08s,opacity .08s,transform .08s;   /* jamais la place : une carte ne glisse pas quand elle passe en colonne */
     min-height:68px;display:grid;place-items:center}
   .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.55;font-weight:700}
   .opt.sel{border-color:var(--gold);background:#3a312b;box-shadow:inset 0 0 0 1px var(--gold)}
