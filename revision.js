@@ -1681,10 +1681,8 @@ function finishReview(){
     REVSES=null;
   }
   REVIEW=false;REVFREE=false; S.xp+=10; S.nrev=(S.nrev||0)+1;
-  const before=S.hearts;
   const gain=S.bigNext?3:1;               // 1re révision après blocage = +3 ; les suivantes = +1
   S.hearts=Math.min(HEARTS_MAX,S.hearts+gain);S.bigNext=0;S.heartDay=today();
-  if(before<HEARTS_MAX)setTimeout(()=>toast(icoImg('tb-coeur','','height:16px;vertical-align:-3px')+' +'+gain+' '+(gain>1?'Qatarāt':'Qatra')+', ماشاء الله !'),600);
   checkBadges({review:true});
   validerJour();                                     // une révision terminée valide AUSSI le jour (règle adoucie)
   pendingStreak=feteJourPending; feteJourPending=false;

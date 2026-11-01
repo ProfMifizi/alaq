@@ -378,22 +378,12 @@ function validerJour(){
   try{checkBadges({});}catch(e){}             // les badges de série (3/7/30…) tombent au bon moment
   return true;
 }
-/* ⚠️ objAddSec ne tourne que lecteur ouvert : l'objectif tombe donc toujours EN PLEIN EXERCICE. La fête
-   (confettis, son, toast) attend, comme les badges, qu'aucun lecteur ni écran de fin ne soit ouvert. */
-let _objFeteMinuteur=null;
+/* Une réussite ne s'annonce jamais par un message en bas de l'écran (Myriam, 01/11) : l'épi planté se montre sur l'écran
+   des 7 épis, après la fin de leçon (journal : constance.js · plus aucun message de réussite en bas). */
 function objFete(){
   validerJour();
   save();
   try{refreshStats();}catch(e){}
-  if(!_objFeteMinuteur)_objFeteMinuteur=setInterval(objFeteMontrer,400);
-}
-function objFeteMontrer(){
-  var bn=document.getElementById('badgeNeuf');
-  if(_badgeGene()||(bn&&bn.classList.contains('on')))return;
-  clearInterval(_objFeteMinuteur); _objFeteMinuteur=null;
-  try{confettiBurst();}catch(e){}
-  try{playSfx('bonne-reponse');}catch(e){}
-  try{toast(icoImg('tb-epi','','height:16px;vertical-align:-3px')+' Objectif du jour atteint — épi validé !');}catch(e){}
 }
 function objRingHTML(){ // l'anneau, SEUL, entre la carte du rang et « Ton parcours »
   var m=objMinutes(), g=objGoal(), ok=m>=g, C=2*Math.PI*50, off=C*(1-Math.min(1,m/g));
