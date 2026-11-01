@@ -240,7 +240,8 @@
   .opt.ok .ar{color:var(--green)}
   .opt.bad{border-color:var(--coral);background:var(--coral-bg);color:var(--coral)}
   .opt.bad .ar{color:var(--coral)}
-  .opt[disabled]{opacity:.55}
+  /* après le verdict, seules les autres cartes pâlissent : la bonne réponse reste à pleine couleur (Myriam, 30/10) */
+  .opt[disabled]:not(.ok){opacity:.55}
   .opt .sopt{font-size:34px;line-height:1.2}
 
   .learn{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;text-align:center}
@@ -538,6 +539,8 @@
   .fb .elfr{margin-inline-start:6px}
   .why{display:none;font-size:13.5px;line-height:1.55;color:var(--cream);background:var(--coral-bg);border-left:3px solid var(--coral);border-radius:10px;padding:9px 12px;margin:2px 0 12px;font-weight:600}
   .why:not(:empty){display:block}
+  /* message d'erreur ouvert : un bouton désactivé laisse passer le doigt, le toucher arrive à son parent (src/player/pied-erreur.js) */
+  #player.pied-ouvert #p-body :disabled{pointer-events:none}
   .why .ar{font-family:var(--ar);font-size:18px;color:var(--gold);font-weight:700}
   .cta{width:100%;border:none;border-radius:14px;padding:12px;font-size:24px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;
     color:var(--bg);background:var(--gold);box-shadow:0 5px 0 var(--gold-d)}
@@ -890,7 +893,7 @@
      compte pas parmi les 28. Les cases sont plus petites que celles des lettres — elles
      ne prétendent pas au même rang. */
   .lg-hamza{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;direction:rtl;
-    margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+    margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
   /* 14/08 (correctifs 4, trouvé par l'agent qa-visuel-alaq) — depuis le retrait de l'annotation
      sur les sièges, la rangée s'étire à la hauteur de la SEULE case qui gardait encore un label
      (« seule », sous ء) : les 4 autres cases suivent (grid stretch) mais leur glyphe restait
@@ -899,8 +902,11 @@
      seconde passe) : les 5 cases retombent alors à ~38 px de haut sans lui — sous la zone de
      touche de 44 px. min-height le garantit maintenant pour TOUTES les cases, pas seulement
      `.vide` (qui perd cette classe dès que roleTap remplit le siège). */
+  /* Les cases grandissent de 8 px VERS LE HAUT, partout (Myriam, 30/10) : le haut de la hamza de أ touchait le cadre. Ce que le
+     padding ajoute, les marges au-dessus le rendent (14→10 + 14→10, ex-hamza 12→8 + 12→8, sg-rang, sg-choix, lsr-choix) : le
+     bas ne bouge pas, la police non plus. Garde : previews/_verif_lot_247.html */
   .lg-hamza .hz{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    min-height:44px;border-radius:12px;padding:7px 0 5px;text-align:center;
+    min-height:44px;border-radius:12px;padding:15px 0 5px;text-align:center;
     border:1.5px solid var(--line);background:#2a2422;font-family:"Noto Naskh Arabic",serif;
     font-size:42px;line-height:1.15;color:var(--gold2);cursor:pointer;font-weight:500}
   /* L'étiquette nomme le SIÈGE. Depuis le 14/08 elle est écrite en arabe (règle absolue :
@@ -914,7 +920,7 @@
   .lg-hamza .hz.lit{border-color:var(--gold);color:var(--gold2);background:rgba(232,169,79,.12)}
   /* La même ligne, posée sous la grille d'un EXERCICE (14/08) : elle respire un peu plus,
      le compteur « 0 / 3 » vient juste après et ne doit pas lui coller. */
-  .lg-hamza.ex-hamza{margin-top:12px;padding-top:12px;margin-bottom:6px}
+  .lg-hamza.ex-hamza{margin-top:8px;padding-top:8px;margin-bottom:6px}
   /* La fiche du Cours : le nom de la lettre ne s'écrit plus, le bouton dit ce qu'il joue. */
   .lcap{font-size:12px;font-weight:800;color:var(--muted)}
   @keyframes lgglow{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 2px rgba(232,169,79,.45)}}

@@ -131,6 +131,9 @@ function setDone(u,i,v){
   if(v===false)delete S.done[dkey(u,i)];
   else S.done[dkey(u,i)]=true;
 }
+/* La hamza sur yāʾ s'ouvre avec le disque 3 de l'unité 8, celui de la carte du mot طَائِرٌ. dkey compte unités et disques
+   depuis 0 : l'unité 8 est le 7, son D3 le 2. Lu par la grille de Réviser et la rangée des leçons ; banc : verifier-support-ya.mjs. */
+function supportYaOuvert(){ return isDone(7,2); }
 
 /* ═══ LE MOTEUR DE SYNCHRONISATION (sorti d'index.html le 08/09/2026, POC-5 sous-lot 2) ═══
    Dans ce fichier parce qu'il a besoin de S, save() et saveLocal(), et que la file hors ligne
