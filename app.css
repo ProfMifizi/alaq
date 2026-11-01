@@ -2295,7 +2295,9 @@ html.clair .rankcard .rk-chev{ color:var(--on-gold) }
 html.clair .rankcard{ background:linear-gradient(135deg,#6f4b0f,#9a6813 60%,#b8770f) }
 html.clair .rankcard .ubar i,
 html.clair .rankcard .rbar-fill{ background:var(--on-gold) }
-html.clair .cta{ color:var(--on-gold) }          /* bouton doré foncé, encre claire */
+/* le doré LUMINEUX à encre foncée, comme les boutons du compte : le doré foncé se confondait avec le marron (Myriam, 25/10) */
+html.clair .cta{ background:#D0870D;color:#241D14;box-shadow:0 5px 0 #B5751F }
+html.clair .cta:active{ box-shadow:0 2px 0 #B5751F }
 html.clair .cta[disabled]{ background:var(--sunk);color:var(--muted);box-shadow:0 5px 0 #D8CDB6 }
 html.clair .cbtn:disabled{ background:#4E3210; color:#F2E9DA }
 html.clair .cbtn.cbtn-2{ background:#B8B0A4; color:var(--cream) }   /* --cream = l'encre foncée en clair */
@@ -2362,6 +2364,10 @@ html.clair .lg-hamza .hz.locked{ background:var(--sunk);color:var(--lock);border
    l’attribut style pour pouvoir basculer. En clair, --coral fonce — l’encre s’éclaircit. */
 .cta-danger{ background:var(--coral);color:#1a1410 }
 html.clair .cta-danger{ color:var(--on-gold) }
+/* le doré lumineux de html.clair .cta (25/10) prenait aussi RÉINITIALISER : encre claire sur or, 2,78:1 — le corail revient,
+   avec son relief (mesuré par _qa_contraste.html) */
+html.clair .cta.cta-danger{ background:var(--coral);box-shadow:0 5px 0 var(--coral-d) }
+html.clair .cta.cta-danger:active{ box-shadow:0 2px 0 var(--coral-d) }
 html.clair .lg-hamza .hz.lit{ background:#FBE9C4;border-color:var(--gold);color:#8A4A00 }
 html.clair .lg-cell.avail{ background:#FBEFD8;color:var(--gold2) }
 html.clair .lum{ background:linear-gradient(180deg,#FFFDF8,#F4EBDA);border:1px solid #C9AF7C }

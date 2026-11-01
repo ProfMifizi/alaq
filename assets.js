@@ -16,6 +16,7 @@ var ICONES={
   'tb-epi':'icone-tb-epi-v1.png',
   'tb-coeur':'icone-tb-goutte-v1.png', /* la goutte des Qatarāt ; la clé garde son ancien nom (journal : assets.js · la goutte et le puits Zamzam) */
   'loupe':'icone-loupe-v1.png',
+  'oeil':'icone-oeil-v1.png',   /* l'encadré « observe » (Myriam, 15/10 : un œil, pas une loupe) */
   'tb-lanterne':'icone-tb-lanterne-v1.png',
   'dromadaire':'icone-ciel-dromadaire-v1.png',
   'porte':'icone-porte-v1.png',

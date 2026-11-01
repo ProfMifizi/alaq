@@ -232,7 +232,7 @@ function roleTap(el,L){
 function hamzaRailHTML(){
   if(!(curU>=1))return '';
   // le siège est écrit EN ARABE (14/08) : aucune translittération sous un glyphe arabe
-  var SIEGES=[['ء','seule',1],['أ','ا',1],['إ','ا',1],['ؤ','و',0],['ئ','ي',supportYaOuvert()?1:0]];
+  var SIEGES=[['ء','seule',1],['أ','ا',1],['إ','ا',1],['ؤ','و',supportWawOuvert()?1:0],['ئ','ي',supportYaOuvert()?1:0]];
   return '<div class="lg-hamza ex-hamza">'+SIEGES.map(function(s){
     return s[2]
       ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'<span class="hzl">'+s[1]+'</span></div>'

@@ -234,10 +234,37 @@ function u10Disques(){
   ];
 }
 
+/* Unité 11 : les NEUF disques (GO de Myriam, 01/11), même mécanique que u10Disques() : le rang i appelle disque(i+1),
+   dkey(u,i) enregistre par rang. `vocab:true` sur le premier seul ouvre la porte du vocabulaire ;
+   supportWawOuvert() (progression.js) lit le disque de rang 1 : ne pas réordonner. */
+function u11Disques(){
+  return [
+    ['🌙','decouvrir','Les pronoms collés',  1, true ],
+    ['💡','decouvrir','Nous, Tu, eux',       2, false],
+    ['📌','memoriser','Mon, ton, notre, leur',3, false],
+    ['✏️','ecrire',   'Produire',            4, false],
+    ['📌','memoriser','Transformer',         5, false],
+    ['💡','decouvrir','Les accords',         6, false],
+    ['📌','memoriser','Nommer',              7, false],
+    ['🕋','qoran',    'Dans Al-Fātiḥa',      8, false],
+    ['🏆','bilan',    'Bilan',               9, false],
+  ].map(function(d){
+    var icon=d[0], img=d[1], label=d[2], n=d[3], vocab=d[4];
+    var o={ icon:icon, img:img, label:label, build:function(){
+      var f=window.__alaqU11 && window.__alaqU11['disque'+n];
+      if(typeof f==='function') return f();
+      console.error('unité 11 : module non chargé (disque '+n+')'); return [];
+    } };
+    if(vocab) o.vocab=true;
+    return o;
+  });
+}
+
 function discsFor(u){
   if(UNITS[u]&&UNITS[u].u8) return u8Disques();               // unité 8 : la grammaire, 9 disques à elle
   if(UNITS[u]&&UNITS[u].u9) return u9Disques();               // unité 9 : la grammaire, registre d'exercices
   if(UNITS[u]&&UNITS[u].u10) return u10Disques();             // unité 10 : « X de Y », même registre
+  if(UNITS[u]&&UNITS[u].u11) return u11Disques();             // unité 11 : pronoms et accords, même registre
   var D=disques();
   if(u===0) return D;                                        // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure

@@ -123,7 +123,23 @@ const UNITS=(function(){
    ],
    court:'L’annexion — الإِضَافَة',   // graphie relevée dans le document d'architecture, jamais retapée
    sub:'« X de Y » — de qui ? de quoi ? · 9 leçons' },
- { no:11, ready:false, ph:'GRAMMAIRE',    letters:[], sub:'La grammaire de la Fātiḥa — à construire' },
+ /* Unité 11 : u11:true → u11Disques() (parcours.js), même dispositif que l'unité 10.
+    words : les mots qu'elle introduit (Myriam, 21/10), sans les formes à pronom ni le méta-langage (نَعْت, ضَمِير…).
+    Ils sont copiés des disques ; `disque` : celui qui introduit le mot (allReviewWords, revision.js). */
+ { no:11, ready:true,  ph:'GRAMMAIRE', u11:true, letters:[],
+   words:[
+  {w:'أُحِبُّ',fr:'j’aime',say:'uḥibbu',snd:'mot-uhibbu',disque:1},
+  {w:'إِيَّاكِ',fr:'toi (à une femme)',say:'iyyāki',snd:'mot-iyyaki',disque:1},
+  {w:'نَكْتُبُ',fr:'nous écrivons',say:'naktubu',snd:'mot-naktubu',disque:2},
+  {w:'نَتَوَضَّأُ',fr:'nous faisons nos ablutions',say:'natawaḍḍaʾu',snd:'mot-natawaddau',disque:2},
+  {w:'يَتَوَضَّؤُونَ',fr:'ils font leurs ablutions',say:'yatawaḍḍaʾūna',snd:'mot-yatawaddauna',disque:2},
+  {w:'صَغِيرٌ',fr:'petit',say:'ṣaghīr',snd:'mot-saghirun',disque:6},
+  {w:'كَبِيرٌ',fr:'grand',say:'kabīr',snd:'mot-kabirun',disque:6},
+  {w:'صَغِيرَةٌ',fr:'petite',say:'ṣaghīra',snd:'mot-saghiratun',disque:6},
+  {w:'كَبِيرَةٌ',fr:'grande',say:'kabīra',snd:'mot-kabiratun',disque:6},
+   ],
+   court:'Les pronoms et les accords',
+   sub:'Mon, ton, notre, leur — ce qui décrit s’accorde · 9 leçons' },
  { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
 ]);
 })();
@@ -146,7 +162,7 @@ const SOURATES=[
     ['Souverain','du Jour','de la Rétribution'],
     ['c\u2019est Toi que','nous adorons','et c\u2019est Toi que','nous implorons l\u2019aide'],
     ['guide-nous','sur le chemin','droit'],
-    ['le chemin','de ceux que','Tu as comblés de bienfaits','envers eux','non pas','ceux qui ont encouru la colère','envers eux','ni','les égarés'],
+    ['le chemin','de ceux que','Tu as comblés de bienfaits','envers eux','non pas','celui qui a encouru la colère','envers eux','ni','les égarés'],
    ] },
 ];
 

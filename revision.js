@@ -104,12 +104,12 @@ function letterGridHTML(){
     var mk=(sel?'<span class="ck">✓</span>':'')+badgeSolaire(k);
     return '<div class="'+cls+'" onclick="letToggle(\''+k+'\')">'+mk+g+'</div>';
   }).join('')+'</div>';
-  /* La hamza, hors des 28 : visible dès que le alif est connu ; le siège wāw reste verrouillé (pas encore
-     enseigné), le siège yāʾ s'ouvre avec le disque 3 de l'unité 8 (supportYaOuvert). ⚠️ Ces cases ne se sélectionnent pas : on touche pour ENTENDRE. */
+  /* La hamza, hors des 28 : visible dès que le alif est connu ; le siège wāw s'ouvre avec le disque 2 de l'unité 11,
+     le siège yāʾ avec le disque 3 de l'unité 8 (supportYaOuvert). ⚠️ Ces cases ne se sélectionnent pas : on touche pour ENTENDRE. */
   if(unlocked.has('ا')){
     /* ⚠️ Ne pas remettre d'étiquette <span class="hzl"> : le nom du siège s'écoute ; min-height:44px
        tient seul la zone de touche (journal : revision.js · étiquettes de la hamza). */
-    var SIEGES=[['ء',1],['أ',1],['إ',1],['ؤ',0],['ئ',(supportYaOuvert()?1:0)]];
+    var SIEGES=[['ء',1],['أ',1],['إ',1],['ؤ',(supportWawOuvert()?1:0)],['ئ',(supportYaOuvert()?1:0)]];
     h+='<div class="lg-hamza">'+SIEGES.map(function(s){
       return s[1]
         ? '<div class="hz" onclick="hamzaTap(this,\''+s[0]+'\')">'+s[0]+'</div>'

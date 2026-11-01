@@ -131,6 +131,9 @@ function setDone(u,i,v){
   if(v===false)delete S.done[dkey(u,i)];
   else S.done[dkey(u,i)]=true;
 }
+/* la hamza sur wāw s'ouvre avec le disque 2 de l'unité 11, qui l'enseigne : dkey compte les disques depuis 0
+   (grille de Réviser, rangée des leçons ; banc : verifier-support-waw.mjs). */
+function supportWawOuvert(){ return isDone(10,1)||unitValidated(10); }
 /* La hamza sur yāʾ s'ouvre avec le disque 3 de l'unité 8, celui de la carte du mot طَائِرٌ. dkey compte unités et disques
    depuis 0 : l'unité 8 est le 7, son D3 le 2. Lu par la grille de Réviser et la rangée des leçons ; banc : verifier-support-ya.mjs. */
 function supportYaOuvert(){ return isDone(7,2); }
