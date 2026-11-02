@@ -6,7 +6,7 @@
    Script classique, chargé sous parcours.js et avant le grand script, ni defer ni module :
    la dernière ligne du grand script, showTab('home'), appelle renderHome() en synchrone et
    peint l'accueil sans scintillement. ⛔ Rien d'un autre script n'est lu au chargement.
-   À L'APPEL : UNITS, SOURATES, unitAccent (donnees.js) · curSourate, revPilule, revPopPlanifier, revOngletBadge (revision.js) ·
+   À L'APPEL : UNITS, SOURATES, unitAccent (donnees.js) · curSourate, revPilule, revPilHauteur, revPopPlanifier, revOngletBadge (revision.js) ·
    S, dkey, unitValidated (progression.js) · discsFor (parcours.js) · ICONES (assets.js) ·
    startDisque, startExam (src/player, module : lecteurPret() prévient s'il manque) ·
    arReveal, currentLesson, lecteurPret, openSurahMenu (index.html) ·
@@ -209,6 +209,7 @@ function setBanner(u){
   bn.dataset.u=u;bn._filled=1;bn.style.setProperty('--accent',unitAccent(u));
   document.getElementById('uhTop').innerHTML=B.top;
   document.getElementById('uhTitle').innerHTML=B.title;
+  try{ revPilHauteur(); }catch(e){}   // la pastille Réviser se cale sous le bandeau (revision.js)
 }
 // Au defilement : le bandeau affiche la derniere unite dont le separateur est passe sous lui.
 function onHomeScroll(){

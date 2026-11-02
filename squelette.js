@@ -383,6 +383,10 @@
   <button class="bn" id="bn-params" onclick="showTab('params')"><span class="bi"><img class="bni" data-ico="menu-parametres" src="images-app-alaq/icone-menu-parametres.png" alt=""></span><span class="bn-lab">Paramètres</span></button>
 </nav>
 `,
+    /* la bande unie sous la barre d'état de l'iPhone (app.css · #bandeHaut), au-dessus de tout */
+    `
+<div id="bandeHaut" aria-hidden="true"></div>
+`,
   ];
   const ici = document.currentScript;
   if (!ici) throw new Error('squelette.js : script classique synchrone obligatoire (ni defer, ni async, ni module)');

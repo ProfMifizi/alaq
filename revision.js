@@ -8,8 +8,8 @@
      assemble), le stylo ✏️ (openWrite… closeWrite) ;
    · la grammaire : NOTIONS_GRAM, gramEcransU8/U9/U10, gramChoisir et sa rotation (alaq_gramvu),
      gramFile, lancerGrammaire, gramMaitrise, gramFaute ;
-   · la révision du jour depuis l'accueil : revisionDuJour, la popup (revPop*, une fois par jour,
-     alaq_revpop), le rond revPilule, la goutte de l'onglet revOngletBadge, reviserDuJour ;
+   · la révision du jour depuis l'accueil : revisionDuJour, la popup (revPop*, à chaque ouverture
+     tant qu'aucune révision n'est finie ce jour, alaq_revfaite), le rond revPilule, la goutte de l'onglet revOngletBadge, reviserDuJour ;
    · les lettres : letterGridHTML, badgeSolaire, LETSEL, startSelectedLetters, formsOf, learnedLettersList ;
    · les Noms d'Allah (NOMS_ALLAH, NASEL, nomTog, startNoms, lumTap, majPopNoms) et l'adoption
      Supabase (CONTENU, contentPull — rappelé à DOMContentLoaded par index.html) ;
@@ -24,7 +24,7 @@
    ② curSourate, curReviserTab, QCTX, GRAMSES et WPEN sont lus ou réassignés par d'autres
       scripts, un harnais ou un onclick : déclarés dans un module, ils deviendraient privés.
    ③ il AGIT au chargement (S.qari et sa migration, les Noms versés dans la table du son,
-      l'adoption du dernier contenu connu) et ne lit alors que S, saveLocal (progression.js),
+      l'adoption du dernier contenu connu, l'écoute du retour dans l'app pour la popup) et ne lit alors que S, saveLocal (progression.js),
       inscrireLeSon (son.js), FATIHA, SOURATES (donnees.js) et localStorage.
       ⚠️ Pas éprouvable dans un bac nu : la garde charge ses prédécesseurs (garderLaRevision).
    Balise nue, exactement <script src="revision.js"></script> (outils/inventaire.js la relit),
@@ -362,9 +362,15 @@ function motBulle(vi,wi){
      le style calculé (offsetParent est toujours null en position:fixed). ⚠️ Dès 700px, .botnav
      devient le rail gauche : même largeur de bascule que la feuille de style, sinon la bulle
      sort par le haut (journal : revision.js · la bulle de traduction). */
+  /* « Lire la sourate » est un .finish (z 60) qui couvre aussi la barre du bas : la bulle passe
+     devant lui, collée au bord (sinon elle s'ouvrait derrière, visible seulement à la fermeture). */
+  var plein=document.getElementById('lireSourate'), surPlein=!!(plein&&plein.classList.contains('on'));
+  b.classList.toggle('sur-plein',surPlein);
   try{
     if(window.matchMedia&&window.matchMedia('(min-width:700px)').matches){
       b.style.bottom='24px';                       // pas de barre du bas : on respire du bord
+    }else if(surPlein){
+      b.style.bottom='0px';
     }else{
       var nav=document.querySelector('.botnav');
       var vu=nav&&getComputedStyle(nav).display!=='none';
@@ -627,11 +633,15 @@ function gramFaute(){
 }
 
 /* ═══ LA RÉVISION DU JOUR, DEPUIS L'ACCUEIL (variante A validée par Myriam le 21/10, preview
-   _apercu-revision-accueil-v2) — la popup des boîtes du Qorān, une fois par jour, puis une pastille
-   sous le bandeau tant qu'il reste quelque chose à revoir. Les chiffres sont ceux du hub (mots dus,
-   notions pas encore revues aujourd'hui) : jamais deux chiffres en contradiction. */
-const REVPOP_CLE='alaq_revpop';     /* le jour où la popup a été montrée : une commodité d'APPAREIL */
-let _revPopEssais=0, _revPopT=null;
+   _apercu-revision-accueil-v2) — la popup des boîtes du Qorān, puis une pastille sous le bandeau
+   tant qu'il reste quelque chose à revoir. Les chiffres sont ceux du hub (mots dus, notions pas
+   encore revues aujourd'hui) : jamais deux chiffres en contradiction.
+   La popup revient à CHAQUE OUVERTURE de l'app (un chargement, ou un retour après REVPOP_ABSENCE
+   ailleurs) tant qu'aucune révision n'est finie aujourd'hui (Myriam, 02/11) ; un retour à l'onglet
+   Accueil n'est pas une ouverture. */
+const REVFAITE_CLE='alaq_revfaite'; /* le jour d'une révision finie : une commodité d'APPAREIL */
+const REVPOP_ABSENCE=5*60*1000;
+let _revPopEssais=0, _revPopT=null, _revPopVue=false, _revPopParti=0;
 function revisionDuJour(){
   var mots=0, notions=0;
   try{ mots=dueReviewWords().length; }catch(e){}
@@ -648,11 +658,11 @@ function revPopGene(){
   var lt=document.getElementById('letterTut');
   return !!(lt&&lt.style.display!=='none');
 }
-function revPopVueAujourdhui(){ try{ return localStorage.getItem(REVPOP_CLE)===today(); }catch(e){ return false; } }
+function revFaiteAujourdhui(){ try{ return localStorage.getItem(REVFAITE_CLE)===today(); }catch(e){ return false; } }
 /* appelée par renderHome : quelques essais espacés, le temps que badge, Ghufrān ou tutoriel passent */
 function revPopPlanifier(){ _revPopEssais=0; clearTimeout(_revPopT); _revPopT=setTimeout(revPopEssayer,900); }
 function revPopEssayer(){
-  if(revPopVueAujourdhui()||revisionDuJour().total===0)return;
+  if(_revPopVue||revFaiteAujourdhui()||revisionDuJour().total===0)return;
   if(revPopGene()){ if(++_revPopEssais<15)_revPopT=setTimeout(revPopEssayer,800); return; }
   revPopMontrer();
 }
@@ -664,7 +674,7 @@ function revPopCompte(r){
 }
 function revPopMontrer(){
   var r=revisionDuJour(); if(!r.total)return;
-  try{ localStorage.setItem(REVPOP_CLE,today()); }catch(e){}
+  _revPopVue=true;
   var v=document.createElement('div'); v.className='rq-voile'; v.id='revPopVoile';
   v.onclick=function(e){ if(e.target===v)revPopFermer(); };
   v.innerHTML='<div class="rq-pop revpop">'+
@@ -676,9 +686,17 @@ function revPopMontrer(){
   document.body.appendChild(v);
 }
 function revPopFermer(){ var v=document.getElementById('revPopVoile'); if(v)v.remove(); }
+/* Le retour dans l'app : iOS garde une app installée en mémoire, la rouvrir ne recharge pas la page. */
+function revPopAuRetour(){
+  if(document.hidden){ _revPopParti=Date.now(); return; }
+  if(_revPopParti&&Date.now()-_revPopParti>=REVPOP_ABSENCE){ _revPopVue=false; revPopPlanifier(); }
+  _revPopParti=0;
+}
+document.addEventListener('visibilitychange',revPopAuRetour);
 /* La pastille, sous le bandeau de l'accueil. ⚠️ Pas DANS #unitBanner : il a overflow:hidden. Dans une
-   ancre collante de hauteur nulle posée juste après lui, collée à sa hauteur : elle le suit au
-   défilement sans pousser le chemin. */
+   ancre collante de hauteur nulle posée juste après lui, collée sous lui : elle le suit au
+   défilement sans pousser le chemin. ⚠️ Jamais un top calculé une fois en JS : l'encoche pouvait
+   valoir 0 au premier rendu, et la pastille restait derrière le bandeau (Myriam, 02/11). */
 function revPilule(){
   var bn=document.getElementById('unitBanner'); if(!bn)return;
   var a=document.getElementById('revPilAncre'), r=revisionDuJour();
@@ -686,7 +704,8 @@ function revPilule(){
   if(!a){ a=document.createElement('div'); a.id='revPilAncre'; a.className='revpil-ancre';
     a.innerHTML='<button id="revPil" class="revpil"></button>'; bn.insertAdjacentElement('afterend',a);
     a.firstChild.onclick=function(){ reviserDuJour(); }; }
-  a.style.top=((parseFloat(getComputedStyle(bn).top)||0)+bn.offsetHeight+12)+'px';
+  revPilHauteur();
+  if(!bn._revPilSuivi&&window.ResizeObserver){ bn._revPilSuivi=new ResizeObserver(revPilHauteur); bn._revPilSuivi.observe(bn); }
   var p=a.firstChild;
   p.setAttribute('aria-label','Réviser : '+r.total+' à revoir');
   /* un ROND sans le mot (variante 1 de la preview v3, Myriam 21/10) : la pastille avec « RÉVISER »
@@ -694,6 +713,13 @@ function revPilule(){
   p.innerHTML=icoImg('menu-reviser')+'<span class="revcount"><i>'+r.total+'</i></span>';
   revOngletBadge(r);
 }
+/* Son top est en CSS (--uh-top suit l'encoche) ; la hauteur du bandeau change (une ou deux lignes,
+   polices chargées tard) : setBanner (ui/accueil.js), les polices et un observateur la relaient. */
+function revPilHauteur(){
+  var bn=document.getElementById('unitBanner'), a=document.getElementById('revPilAncre');
+  if(bn&&a)a.style.setProperty('--uh-h',bn.offsetHeight+'px');
+}
+try{ document.fonts.ready.then(revPilHauteur); }catch(e){}
 /* La goutte sur l'onglet Réviser du menu bas (variante 3, avec la 1) : le même total. Tenue à jour par
    refreshStats (ui/accueil.js), que chaque changement d'onglet appelle. */
 function revOngletBadge(r){
@@ -1296,7 +1322,7 @@ function ouvrirLireSourate(){
     '</div>';
   m.classList.add('on');
 }
-function fermerLireSourate(){ const m=document.getElementById('lireSourate'); if(m)m.classList.remove('on'); }
+function fermerLireSourate(){ const m=document.getElementById('lireSourate'); if(m)m.classList.remove('on'); motBulleOff(); }
 
 /* ── LES TROIS LANCEURS DE PARTIE ── deb/fin : indices de verset, fin exclue. */
 function startConstruireSourate(deb,fin){
@@ -1646,6 +1672,7 @@ function vtUndo(){
 }
 function finishReview(){
   if(REVFREE)REVSES=null;
+  if(GRAMSES||(REVSES&&Object.keys(REVSES).length)){ try{ localStorage.setItem(REVFAITE_CLE,today()); }catch(e){} }
   /* La grammaire tient ses comptes à part : écrans joués lus dans la file, fautes dans GRAMSES. */
   if(GRAMSES){
     var vus={};

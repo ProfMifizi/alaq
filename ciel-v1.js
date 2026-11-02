@@ -135,7 +135,7 @@ function peindre(t){
   var R=document.documentElement.style;
   R.setProperty('--ciel-ink',rs(F.ink));
   R.setProperty('--ciel-soft',ra(F.ink,.64));
-  R.setProperty('--ciel-scrim',ra(F.sky[0],.93));
+  R.setProperty('--ciel-haut',rs(F.sky[0]));   // le haut de l'écran, uni (app.css · --haut)
 }
 
 /* où en est-on sur le sentier ? Le repère de lecture est le bas du bandeau
