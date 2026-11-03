@@ -91,7 +91,7 @@ function monte(){
   T.innerHTML=
     '<div class="cor-vue cor-liste"></div>'+
     '<div class="cor-vue cor-lect" hidden>'+
-      '<div class="cor-tete"><button class="cor-x" data-a="retour" aria-label="Retour à la liste">✕</button><button class="cor-titre" data-a="sourates"></button>'+
+      '<div class="cor-tete"><button class="cor-x" data-a="fermer" aria-label="Fermer le Coran">✕</button><button class="cor-titre" data-a="sourates"></button>'+
         '<button class="cor-mp" data-a="marques" aria-label="Marque-pages">'+RUBAN+'</button></div>'+
       '<div class="cor-outils"><button class="cor-coche on" data-a="trad" aria-pressed="true"><span class="cor-bx">✓</span>Traduction</button></div>'+
       '<div class="cor-zone"><div class="cor-corps"></div><div class="cor-rail"><div class="cor-piste"></div><div class="cor-pouce"><span class="cor-etiq"></span></div></div></div>'+
@@ -316,7 +316,6 @@ function clic(e){
   if(!a)return;
   switch(a){
     case 'fermer': coranFermer(); break;
-    case 'retour': arret(); cacheBulle(); montreListe(); break;
     case 'ferme': fermeFeuilles(); break;
     case 'sourates': ouvreFeuille('sourates'); break;
     case 'qari': listeQari(); ouvreFeuille('qari'); break;
