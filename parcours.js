@@ -260,6 +260,35 @@ function u11Disques(){
   });
 }
 
+/* L'évaluation « AVANCER ICI ? » depuis l'unité 8 (Myriam, 02/11) : au plus 20 écrans DÉJÀ validés, dans l'ordre du cours,
+   tirés des disques : lettres solaires et lunaires, défini/indéfini, ḥarf jarr, annexion, écriture de mots.
+   Rend null avant l'unité 8 (buildExam garde alors ses lettres et ses mots).
+   Seulement des écrans à un seul geste, qui se comprennent seuls et peuvent compter une erreur : ni le volet de fin d'un
+   bilan, ni deux écrans dont l'un donne la réponse de l'autre (bilan U10 : rangs 3/8, 6/10). Les rangs sont gardés par
+   outils/verifier-parcours.mjs, écran par écran. */
+function examGrammaire(u){
+  var U=UNITS[u];
+  if(!U||!(U.u8||U.u9||U.u10||U.u11)) return null;
+  /* n écrans tirés parmi les rangs du disque k (de 1 à 9) de l'unité d'indice ui */
+  var tirer=function(ui,k,rangs,n){
+    var pas=discsFor(ui)[k-1].build();
+    return shuffle(rangs).slice(0,n).map(function(r){ return pas[r]; });
+  };
+  var u8=function(k,rangs,n){ return tirer(7,k,rangs,n); },
+      u9=function(rangs,n){ return tirer(8,9,rangs,n); },
+      u10=function(rangs,n){ return tirer(9,9,rangs,n); };
+  var niveau=U.u8?8:U.u9?9:10;
+  var solaires=[].concat(u8(9,[1],1), u8(7,[12,13],1), u8(9,[7],1)),
+      lunaires=[].concat(u8(9,[0],1), u8(7,[10,11,14],1)),
+      oreille =[].concat(u8(9,[2,3],niveau===8?2:1)),
+      defini  =[].concat(u8(9,[8],1), u8(1,[9,11,13],1), u8(1,[10,12,14],1));
+  var grammaireU8=[].concat(solaires,lunaires,oreille,defini);
+  if(niveau===8) return [].concat(grammaireU8, u8(7,[6,7],2), u8(3,[14,16],1), u8(3,[15,17],1), u8(9,[4,5],2)).slice(0,20);
+  if(niveau===9) return [].concat(grammaireU8, u9([0,1,2],3), u9([3,4,5],3), u9([9,10,11],3), u9([6,7,8],2)).slice(0,20);
+  /* ⚠️ le jour où l'unité 12 s'ouvre : ajouter ici les notions de l'unité 11 */
+  return [].concat(grammaireU8, u9([3,4,5],2), u9([9,10,11],1), u9([0,1,2],1), u10([0],1), u10([2],1), u10([4],1), u10([7],1), u10([9],1), u9([6,7,8],1), u10([1,8],1)).slice(0,20);
+}
+
 function discsFor(u){
   if(UNITS[u]&&UNITS[u].u8) return u8Disques();               // unité 8 : la grammaire, 9 disques à elle
   if(UNITS[u]&&UNITS[u].u9) return u9Disques();               // unité 9 : la grammaire, registre d'exercices

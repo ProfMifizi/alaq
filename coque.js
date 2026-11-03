@@ -200,7 +200,9 @@ function noHeartsRedo(){
   if(L&&lecteurPret())startDisque(L.u,L.i,true);
 }
 function goNoHearts(){
-  _repriseL={u:curU,i:curD};   // la leçon qu'on quitte : c'est ELLE qu'on reprendra
+  /* la leçon qu'on quitte : c'est ELLE qu'on reprendra. L'évaluation n'a pas de rang : sans ça RECOMMENCER levait, et la leçon suivante finissait en évaluation */
+  _repriseL=EXAM?null:{u:curU,i:curD};
+  EXAM=false;
   document.getElementById('player').classList.remove('on'); showNoHearts();
 }
 
@@ -214,12 +216,12 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='retours-accueil-2nov';
+const BUILD='retours-u11-3nov';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-11-03T00:58';
+const BUILD_DATE='2026-11-03T01:41';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
@@ -227,7 +229,7 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
 const VERSION='3.28.1';
-const BUILD_NUM=252;
+const BUILD_NUM=253;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
