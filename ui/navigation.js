@@ -4,20 +4,23 @@
    Script classique, chargé avant le grand script, dont la dernière ligne showTab('home') peint
    l'accueil en synchrone (voir l'en-tête de ui/accueil.js).
    À L'APPEL : motBulleOff (revision.js) · refreshStats, renderHome (ui/accueil.js) ·
-   renderCours, renderReviser (ui/reviser.js) · renderProg, renderParams (ui/parametres.js).
+   renderCours, renderReviser (ui/reviser.js) · renderProg, renderParams, renderIslam, plusToggle (ui/parametres.js).
    ⚠️ Un onglet neuf = une entrée dans map ET une branche de rendu, sinon la vue reste vide.
    Gardes : outils/verifier-interface.mjs, previews/_verif_interface.html. */
 
 function showTab(name,sub){
   motBulleOff();                     // le bandeau ne suit pas d'un onglet à l'autre
   refreshStats(); // la barre du haut reflète toujours l'état réel (cœurs, étoiles, série)
-  const map={home:'home',cours:'view-cours',reviser:'view-reviser',prog:'view-prog',params:'view-params'};
+  const map={home:'home',cours:'view-cours',reviser:'view-reviser',prog:'view-prog',params:'view-params',islam:'view-islam'};
   Object.keys(map).forEach(t=>{ const el=document.getElementById(map[t]); if(el)el.style.display=(t===name)?'':'none';
     const b=document.getElementById('bn-'+t); if(b)b.classList.toggle('active',t===name); });
+  const bp=document.getElementById('bn-plus'); if(bp)bp.classList.toggle('active',name==='prog'||name==='params');
+  plusToggle(false);
   try{window.scrollTo(0,0);}catch(e){}
   if(name==='home')renderHome();
   else if(name==='cours')renderCours(sub||'video');
   else if(name==='reviser')renderReviser(sub);
   else if(name==='prog')renderProg();
   else if(name==='params')renderParams();
+  else if(name==='islam')renderIslam();
 }

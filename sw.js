@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v253-2026-11-03';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v254-2026-11-03';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -32,6 +32,14 @@ const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','squelette.js','as
 const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
 const RACINE_SW=new URL('.',self.location.href).pathname;   // '/' en prod, '/dist/' ou '/alaq-vercel-static/' en local
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
+"images-app-alaq/icone-isl-pilier-v1.png",
+"images-app-alaq/icone-isl-plus-v1.png",
+"images-app-alaq/icone-isl-coran-v1.png",
+"images-app-alaq/icone-isl-douas-v1.png",
+"images-app-alaq/icone-isl-piliers-v1.png",
+"images-app-alaq/icone-isl-priere-v1.png",
+"images-app-alaq/icone-isl-hajj-v1.png",
+"images-app-alaq/icone-isl-noms-v1.png",
 "images-app-alaq/icone-tb-lanterne-v1.png",
 "images-app-alaq/icone-porte-v1.png",
 "images-app-alaq/icone-main-glisse-v2.png",

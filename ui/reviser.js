@@ -437,9 +437,8 @@ function renderReviser(sub){
         '<div class="shint">Une sourate se déverrouille dès que tu peux lire ses premiers mots</div>'+
       '</div></div>'+
       /* ⚠️ margin auto, pas 0 : une marge gauche en ligne battait le centrage bureau */
-      '<div style="display:flex;align-items:center;gap:10px;margin:0 auto 12px"><div class="ubar" style="flex:1;margin:0"><i style="width:'+pc+'%"></i></div>'+
-      '<b style="color:var(--gold2);font-family:var(--ui)">'+pc+' %</b></div>'+
       '<div class="rq-grille" id="rqGrille">'+BOITES.map(function(b,i){
+        if(b.k==='lire'||b.k==='noms')return '';   /* partis dans l'onglet Islam (Le Coran, Les noms) */
         return '<button class="rq-boite" id="rqBx'+i+'" onclick="boiteTap('+i+')" aria-label="'+b.t+'">'+
           '<img src="'+ico(b.ic)+'" alt=""><span class="rq-lab">'+b.lab+'</span></button>';
       }).join('')+'</div>';

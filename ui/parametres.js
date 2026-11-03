@@ -268,3 +268,28 @@ function showSucces(id){
   if(got){try{chime();}catch(e){}}
 }
 function closeSucces(){var m=document.getElementById('succesModal');if(m)m.classList.remove('on');}
+
+/* ═══ L'ONGLET ISLAM et la feuille « Plus » ═══
+   Six cases, deux ouvertes (Le Coran, Les noms) ; les quatre autres attendent leur contenu (« bientôt », inertes).
+   La prière porte les ablutions (condition de la prière) ; la case d'index levé présente les cinq piliers.
+   (journal : ui/parametres.js · l'onglet Islam) */
+const ISLAM_CASES=[
+  {k:'coran',  ic:'isl-coran',   lab:'Le Coran',      go:function(){ ouvrirLireSourate(); }},
+  {k:'douas',  ic:'isl-douas',   lab:'Les douas'},
+  {k:'piliers',ic:'isl-piliers', lab:'Les 5 piliers'},
+  {k:'priere', ic:'isl-priere',  lab:'La prière'},
+  {k:'hajj',   ic:'isl-hajj',    lab:'Le hajj'},
+  {k:'noms',   ic:'isl-noms',    lab:'Les noms',      go:function(){ boiteTap(4); }}
+];
+function renderIslam(){
+  const v=document.getElementById('view-islam'); if(!v)return;
+  v.innerHTML='<div class="isl-grille">'+ISLAM_CASES.map(function(c,i){
+    return '<button class="isl-case'+(c.go?'':' attend')+'" '+(c.go?'onclick="ISLAM_CASES['+i+'].go()"':'aria-disabled="true" tabindex="-1"')+'>'+
+      '<img src="'+ico(c.ic)+'" alt=""><b>'+c.lab+'</b>'+(c.go?'':'<span class="isl-bientot">bientôt</span>')+'</button>';
+  }).join('')+'</div>';
+}
+function plusToggle(on){
+  const f=document.getElementById('plusFeuille'), vo=document.getElementById('plusVoile'), b=document.getElementById('bn-plus'); if(!f)return;
+  const ouvrir=(on===undefined)?!f.classList.contains('on'):!!on;
+  f.classList.toggle('on',ouvrir); if(vo)vo.classList.toggle('on',ouvrir); if(b)b.setAttribute('aria-expanded',ouvrir?'true':'false');
+}

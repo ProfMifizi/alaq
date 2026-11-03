@@ -24,6 +24,7 @@ var ICONES={
   'menu-apprendre':'icone-menu-apprendre.png','menu-cours':'icone-menu-cours.png',
   'menu-reviser':'icone-menu-puits-v2.png' /* le puits Zamzam */,'menu-profil':'icone-menu-profil.png',
   'menu-parametres':'icone-menu-parametres.png',
+  'isl-pilier':'icone-isl-pilier-v1.png','isl-plus':'icone-isl-plus-v1.png','isl-coran':'icone-isl-coran-v1.png','isl-douas':'icone-isl-douas-v1.png','isl-piliers':'icone-isl-piliers-v1.png','isl-priere':'icone-isl-priere-v1.png','isl-hajj':'icone-isl-hajj-v1.png','isl-noms':'icone-isl-noms-v1.png',
   'ecran-compte':'icone-ecran-compte.png','ecran-pousse':'icone-ecran-pousse.png',
   'ecran-ghufran':'icone-ecran-ghufran.png','ecran-corriger':'icone-ecran-corriger.png',
   'prm-sons':'icone-prm-sons.png','prm-voix':'icone-prm-voix.png',

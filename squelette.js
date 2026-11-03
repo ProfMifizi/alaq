@@ -61,6 +61,7 @@
 <div class="view" id="view-reviser" style="display:none"></div>
 <div class="view" id="view-prog" style="display:none"></div>
 <div class="view" id="view-params" style="display:none"></div>
+<div class="view" id="view-islam" style="display:none"></div>
 <aside class="deskrail" id="deskrail"></aside>
 `,
     /* le lecteur d'exercices (src/player/) */
@@ -372,6 +373,14 @@
     `
 <div class="toast" id="toast"></div>
 `,
+    /* la feuille « Plus » (Profil, Paramètres) : au-dessus du contenu, sous le menu bas */
+    `
+<div class="plus-voile" id="plusVoile" onclick="plusToggle(false)"></div>
+<div class="plus-feuille" id="plusFeuille" role="menu">
+  <button class="plus-item" role="menuitem" onclick="plusToggle(false);showTab('prog')"><img data-ico="menu-profil" src="images-app-alaq/icone-menu-profil.png" alt=""><span>Profil</span></button>
+  <button class="plus-item" role="menuitem" onclick="plusToggle(false);showTab('params')"><img data-ico="menu-parametres" src="images-app-alaq/icone-menu-parametres.png" alt=""><span>Paramètres</span></button>
+</div>
+`,
     /* le menu bas, cinq onglets (ui/navigation.js) */
     `
 <nav class="botnav" id="botnav">
@@ -379,8 +388,8 @@
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi"><img class="bni" data-ico="menu-apprendre" src="images-app-alaq/icone-menu-apprendre.png" alt=""></span><span class="bn-lab">Apprendre</span></button>
   <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi"><img class="bni" data-ico="menu-cours" src="images-app-alaq/icone-menu-cours.png" alt=""></span><span class="bn-lab">Cours</span></button>
   <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi"><img class="bni" data-ico="menu-reviser" src="images-app-alaq/icone-menu-puits-v2.png" alt=""></span><span class="bn-lab">Réviser</span></button>
-  <button class="bn" id="bn-prog" onclick="showTab('prog')"><span class="bi"><img class="bni" data-ico="menu-profil" src="images-app-alaq/icone-menu-profil.png" alt=""></span><span class="bn-lab">Profil</span></button>
-  <button class="bn" id="bn-params" onclick="showTab('params')"><span class="bi"><img class="bni" data-ico="menu-parametres" src="images-app-alaq/icone-menu-parametres.png" alt=""></span><span class="bn-lab">Paramètres</span></button>
+  <button class="bn" id="bn-islam" onclick="showTab('islam')"><span class="bi"><img class="bni" data-ico="isl-pilier" src="images-app-alaq/icone-isl-pilier-v1.png" alt=""></span><span class="bn-lab">Islam</span></button>
+  <button class="bn" id="bn-plus" onclick="plusToggle()" aria-haspopup="true" aria-expanded="false"><span class="bi"><img class="bni" data-ico="isl-plus" src="images-app-alaq/icone-isl-plus-v1.png" alt=""></span><span class="bn-lab">Plus</span></button>
 </nav>
 `,
     /* la bande unie sous la barre d'état de l'iPhone (app.css · #bandeHaut), au-dessus de tout */
