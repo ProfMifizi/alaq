@@ -908,7 +908,6 @@ function vfEnd(){
   const record=(V.good>(S.vfBest||0));
   V.ancienBest=S.vfBest||0;
   if(record){ S.vfBest=V.good; save(); }
-  document.getElementById('player').classList.remove('vfmode');   // on rend le pied de page
   // le taux de réussite du JEU : les tours joués, pas les paliers de mémoire
   const tours=V.ri||1, pct=Math.round(V.good/Math.max(1,tours)*100);
   /* Les félicitations ne viennent qu'à la fin de la session (finishReview), après les mots
@@ -918,6 +917,26 @@ function vfEnd(){
   window._vfRecord=record; window._vfAncien=V.ancienBest||0;
   window._vfPct=pct;
   window._vf=null;
+  vfBilan(V.good,V.ancienBest,record,V.st.secs||VF_SECS);   // le bilan du chrono, puis CONTINUER → vfSuite
+}
+/* Le bilan, entre la fin des secondes et la suite (Myriam, 03/11) : les mots réussis, le record, et une jauge
+   dont le chiffre se pose au-dessus du bout du vert. Le pied reste caché (vfmode) : CONTINUER est à lui. */
+function vfBilan(good,ancien,record,secs){
+  const max=record?good:Math.max(ancien,1), fill=Math.min(100,Math.round(good/Math.max(1,max)*100));
+  const rec=ancien>0?(record?Math.round(ancien/good*100):100):null;   // où était l'ancien record sur la piste
+  const lib=record?'ancien record '+ancien:'record '+ancien;
+  document.getElementById('p-body').innerHTML=
+    '<div class="vf-bil"><div class="t">Temps écoulé</div><div class="n">'+good+'</div>'+
+      '<div class="u">'+(good>1?'mots réussis':'mot réussi')+' en '+secs+' s</div>'+
+      (record?'<div class="rec">RECORD BATTU</div>':'<div class="rec non">BON TRAVAIL !</div>')+
+      '<div class="jauge"><div class="piste"><div class="plein" style="width:'+fill+'%"></div>'+
+        '<span class="val'+(fill>=88?' fin':'')+'" style="left:'+fill+'%">'+good+'</span>'+
+        (rec!==null?'<div class="marque'+(rec>=88?' fin':'')+'" style="left:'+rec+'%"><span>'+lib+'</span></div>':'')+
+      '</div></div></div>'+
+    '<button class="vf-cta" onclick="vfSuite()">CONTINUER</button>';
+}
+function vfSuite(){
+  document.getElementById('player').classList.remove('vfmode');   // on rend le pied de page
   /* ⚠️ advance(), SURTOUT PAS finishDisque : le QCM et l'écriture viennent après le vrai/faux.
      C'est renderStep qui finit quand la file est vide. */
   advance();
