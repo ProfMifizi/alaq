@@ -107,9 +107,10 @@ function monte(){
   T.addEventListener('input',saisie);
   var corps=T.querySelector('.cor-corps');
   corps.addEventListener('pointerdown',function(e){ var m=e.target.closest('.cor-mot'); if(!m)return; montreBulle(m); joueMot(+m.dataset.k,+m.dataset.j,m); });
-  ['pointerup','pointercancel'].forEach(function(n){ corps.addEventListener(n,cacheBulle); });
+  corps.addEventListener('pointerup',function(e){ if(e.pointerType==='mouse')cacheBulle(); else cacheBulleBientot(); });
+  corps.addEventListener('pointercancel',cacheBulle);   /* le doigt part en défilement : rien à montrer */
   corps.addEventListener('pointerover',function(e){ if(e.pointerType!=='mouse')return; var m=e.target.closest('.cor-mot'); if(m)montreBulle(m); });
-  corps.addEventListener('pointerout',function(e){ if(e.target.closest('.cor-mot'))cacheBulle(); });
+  corps.addEventListener('pointerout',function(e){ if(e.pointerType==='mouse'&&e.target.closest('.cor-mot'))cacheBulle(); });
   corps.addEventListener('scroll',function(){ cacheBulle(); majRail(); clearTimeout(corps._d); corps._d=setTimeout(noteDerniere,400); });
   corps.addEventListener('contextmenu',function(e){ e.preventDefault(); });
   var pouce=T.querySelector('.cor-pouce'), rail=T.querySelector('.cor-rail');
@@ -190,13 +191,20 @@ function etiquette(txt,sous){
 }
 
 /* la bulle sous le mot : tant que le doigt (ou la souris) reste dessus */
+/* ⛔ AU-DESSUS du mot, jamais dessous : le doigt couvre le dessous (Myriam, 03/11). Au doigt elle reste 3 s après qu'on l'a levé ;
+   à la souris elle part dès qu'on quitte le mot ; un défilement la retire tout de suite. */
+var BULLE_MS=3000, _bulleT=0;
 function montreBulle(m){
+  clearTimeout(_bulleT);
   var b=T.querySelector('.cor-bulle'), k=+m.dataset.k, j=+m.dataset.j; b.querySelector('span').textContent=TXT[E.sur].v[k-1][1][j];
-  b.classList.add('on'); var tr=T.getBoundingClientRect(), r=m.getBoundingClientRect(), bw=b.offsetWidth;
+  b.classList.add('on'); var tr=T.getBoundingClientRect(), r=m.getBoundingClientRect(), bw=b.offsetWidth, bh=b.offsetHeight;
   var x=Math.max(8,Math.min(tr.width-bw-8,r.left-tr.left+r.width/2-bw/2));
-  b.style.left=x+'px'; b.style.top=(r.bottom-tr.top+7)+'px'; b.querySelector('i').style.left=(r.left-tr.left+r.width/2-x)+'px';
+  var zone=T.querySelector('.cor-zone').getBoundingClientRect(), dessus=r.top-bh-12>=zone.top;   /* de la place sous l'en-tête ? sinon dessous */
+  b.classList.toggle('haut',dessus);
+  b.style.left=x+'px'; b.style.top=(dessus?r.top-tr.top-bh-10:r.bottom-tr.top+7)+'px'; b.querySelector('i').style.left=(r.left-tr.left+r.width/2-x)+'px';
 }
-function cacheBulle(){ var b=T&&T.querySelector('.cor-bulle'); if(b)b.classList.remove('on'); }
+function cacheBulle(){ clearTimeout(_bulleT); var b=T&&T.querySelector('.cor-bulle'); if(b)b.classList.remove('on'); }
+function cacheBulleBientot(){ clearTimeout(_bulleT); _bulleT=setTimeout(cacheBulle,BULLE_MS); }
 
 /* la voix d'UN mot : sur un canal à part ; une récitation en cours se met en PAUSE, sans se perdre */
 function joueMot(k,j,el){

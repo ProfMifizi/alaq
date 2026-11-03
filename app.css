@@ -86,10 +86,12 @@
      Un dégradé ne compte pas (journal : app.css · le flou du haut sur iPhone). */
   /* --edge : la zone floutée par iOS 26 sous la barre d'état d'une app installée (~40 pt). Rien d'important n'y est posé : barre du haut, ✕, titres descendent d'autant (journal : app.css · le flou du haut, 03/11) */
   :root{--edge:0px}
-  @supports (-webkit-touch-callout:none){ @media (display-mode:standalone){ :root{--edge:32px} } }
+  @supports (-webkit-touch-callout:none){ @media (display-mode:standalone){ :root{--edge:44px} } }
   body{--haut:#3a302b}
   html.clair body{--haut:#FFFDF7}
   html body.ciel{--haut:var(--ciel-haut,#1d2236)}
+  /* le lecteur du Coran : sa barre du haut a la couleur de la bande, sans quoi iOS dessine un voile entre les deux */
+  body:has(.coran-plein.on){--haut:var(--panel2)}
   #bandeHaut{display:none}
   @supports (-webkit-touch-callout:none){ @media (display-mode:standalone){
     #bandeHaut{display:block;position:fixed;top:0;left:0;right:0;height:max(12px,env(safe-area-inset-top,0px));
@@ -2841,6 +2843,7 @@ html.clair .cor-carte.joue{background:#F6E3B4;border-color:var(--gold)}
 .cor-bulle{position:absolute;z-index:15;background:#F6EAD3;color:#2A2117;border-radius:12px;padding:7px 11px;font-size:14.5px;font-weight:900;line-height:1.25;max-width:200px;text-align:center;box-shadow:0 8px 20px rgba(0,0,0,.45);pointer-events:none;display:none}
 .cor-bulle.on{display:block}
 .cor-bulle i{position:absolute;top:-6px;width:12px;height:12px;background:#F6EAD3;transform:translateX(-50%) rotate(45deg)}
+.cor-bulle.haut i{top:auto;bottom:-6px}
 html.clair .cor-bulle,html.clair .cor-bulle i{background:var(--tip);color:var(--tip-txt)}
 /* la barre de défilement */
 .cor-rail{position:absolute;right:5px;top:8px;bottom:8px;width:14px;z-index:10}
