@@ -274,7 +274,7 @@ function closeSucces(){var m=document.getElementById('succesModal');if(m)m.class
    La prière porte les ablutions (condition de la prière) ; la case d'index levé présente les cinq piliers.
    (journal : ui/parametres.js · l'onglet Islam) */
 const ISLAM_CASES=[
-  {k:'coran',  ic:'isl-coran',   lab:'Le Coran',      go:function(){ ouvrirLireSourate(); }},
+  {k:'coran',  ic:'isl-coran',   lab:'Le Coran',      go:function(){ coranOuvrir(); }},
   {k:'douas',  ic:'isl-douas',   lab:'Les douas'},
   {k:'piliers',ic:'isl-piliers', lab:'Les 5 piliers'},
   {k:'priere', ic:'isl-priere',  lab:'La prière'},

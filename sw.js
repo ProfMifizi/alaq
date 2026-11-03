@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v254-2026-11-03';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v255-2026-11-03';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -26,7 +26,7 @@ const IMGCACHE='alaq-images-v'+IMGV;
    ⛔ Hors de CORE : addAll est atomique, le CDN ferait échouer toute l'installation.
    (journal : sw.js · le bundle supabase pré-caché) */
 const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js';
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','squelette.js','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','coque.js','rail-ordinateur.js','ciel-v1.js','ciel-v2.js','content/unites.js','confidentialite.html','conditions.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','squelette.js','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','coque.js','rail-ordinateur.js','ciel-v1.js','ciel-v2.js','coran.js','content/unites.js','confidentialite.html','conditions.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png'];
 /* Chemins du cœur résolus contre l'URL du sw (racine en prod, sous-dossier en local), dérivés
    à l'exécution : ce que le build ajoute à CORE (le paquet u8) y entre tout seul. */
 const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
@@ -1304,8 +1304,11 @@ self.addEventListener('fetch',e=>{
   const cacheFirst=url.pathname.indexOf('/audios-app-alaq/')>=0
     ||url.hostname==='fonts.googleapis.com'||url.hostname==='fonts.gstatic.com'||url.hostname==='cdn.jsdelivr.net'
     ||url.hostname==='cdn.islamic.network'  // la récitation streamée : mise en cache côté client, comme leurs conditions le demandent
+    ||url.pathname.indexOf('/coran/')>=0&&/-v1\.json$/.test(url.pathname)  // une sourate du lecteur (données de l'app, nom versionné)
     ||/\.(png|jpe?g|webp|mp3|mp4|woff2?)$/.test(url.pathname);
-  if(cacheFirst){
+  /* ⛔ Les fichiers de quran.com (voix d'un mot, horaires, versets) ne sont JAMAIS gardés : leurs conditions limitent le cache à 7 jours,
+     le cache HTTP du navigateur s'en charge (journal : sw.js · les voix de quran.com) */
+  if(cacheFirst&&!/(^|\.)(qurancdn\.com|quran\.com|quranicaudio\.com)$/.test(url.hostname)){
     e.respondWith((async()=>{
       const hit=await caches.match(e.request);
       if(hit)return hit;
