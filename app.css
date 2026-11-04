@@ -2647,6 +2647,11 @@ html.gtexte .finish,
 html.gtexte .botnav,
 html.gtexte .onb-body{ zoom:1.22 }
 
+/* grands caractères : le canevas de tracé (.trace) à 300px, multiplié par le zoom 1,22, dépassait
+   à droite et poussait ses boutons sous le pied (trouvé par la relecture visuelle du lot 3.27,
+   29/10 ; préview _apercu-trace-grands-v2.html, choix de Myriam le 03/11 : 220px, GO). */
+html.gtexte .trace{width:min(220px,60vw);height:min(220px,60vw)}
+
 /* ══ LA TRADUCTION AU TOUCHER ══
    Un bandeau BAS plutôt qu'une bulle ancrée au mot : une bulle couvrirait le verset
    qu'on est en train de lire, et il faut de la place pour écrire gros. Posé AU-DESSUS
