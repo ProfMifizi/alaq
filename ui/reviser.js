@@ -23,7 +23,7 @@
 
 /* L'ID YouTube de chaque unité (clé = numéro d'unité). ytEmbed accepte un lien complet
    ou l'ID nu ; on garde l'ID, il ne traîne aucun paramètre de partage. */
-const UNIT_VIDEOS={1:'V3boKxX7aY8',2:'',3:''};
+const UNIT_VIDEOS={1:'38e90_2GqrA',2:'yojEZqrNtng',3:''};
 
 function ytEmbed(v){ if(!v)return''; v=String(v).trim(); let id='',m=v.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/); if(m)id=m[1]; else if(/^[\w-]{11}$/.test(v))id=v; return id?('https://www.youtube.com/embed/'+id):''; }
 
