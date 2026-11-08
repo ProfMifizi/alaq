@@ -422,6 +422,8 @@ function reveilAudio(){
   });
 }
 try{ document.addEventListener('visibilitychange',function(){ if(!document.hidden)reveilAudio(); }); }catch(e){}
+/* iOS suspend un contexte audio resté sans geste : chaque toucher le réveille, pour que la clôture d'une leçon ou d'une révision soit toujours sonore (journal : son.js · le son de fin qui manque parfois, 03/11) */
+try{ document.addEventListener('pointerdown',reveilAudio,{capture:true,passive:true}); }catch(e){}
 function playSfx(name){ // récompense/erreur : tampon WebAudio si décodé (jamais bloqué), sinon <audio> béni, sinon SILENCE
   if(!SND)return; // « Effets sonores » coupe la récompense À L'INSTANT (Myriam 10/08)
   try{

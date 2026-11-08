@@ -364,7 +364,12 @@ function objAddSec(sec){
    leçon/révision terminée : qui pratique ne perd jamais sa série. */
 function validerJour(){
   var t=today(), y=yesterday();
-  if(S.lastDay===t)return false;
+  /* Un jour déjà validé ne vaut jamais 0 : acceptMiss a pu remettre la série à zéro APRÈS la leçon du jour.
+     (journal : constance.js · l'épi resté à 0 après une leçon) */
+  if(S.lastDay===t){
+    if(S.streak>0)return false;
+    S.streak=1; feteJourPending=true; return true;
+  }
   /* Le filet : pendingMiss est aussi alimenté depuis S.lastDay, sinon une élève qui ouvre l'app sans rien
      terminer perdait sa série en silence ; maybeGhufranPrompt le proposera, useGhufran sait la rendre après coup.
      ⚠️ Si consDay et lastDay sont tous deux en retard, le compte peut être trop haut, jamais trop bas.
@@ -489,7 +494,7 @@ function retrogradation(){
 function acceptMiss(){
   var r=retrogradation();
   S.consScore=Math.max(0,r.score);
-  S.streak=0; S.pendingMiss=0; delete S._streakAvantMiss; save();
+  S.streak=(S.lastDay===today())?1:0; S.pendingMiss=0; delete S._streakAvantMiss; save();   // la leçon du jour compte déjà
   closeGhufran(); if(_progVisible())renderProg();
 }
 /* Le passage de minuit : sur iPhone l'app n'est jamais rechargée, elle est mise en veille. Le jour est
@@ -502,11 +507,19 @@ function majJour(){
   var b=document.getElementById('p-hearts');if(b)b.textContent=S.hearts;
   return true;
 }
-majJour();
+/* Un jour déjà validé ne vaut jamais 0 : répare l'état laissé par l'ancien acceptMiss (l'épi resté à 0 après 9 min, Myriam 03/11).
+   Rejouée avec le roulement du jour : le nuage peut rapporter un état à 0 après le chargement. */
+function repareSerie(){
+  if(S.lastDay!==today()||S.streak>0)return false;
+  S.streak=1; saveLocal();
+  try{refreshStats();}catch(e){}
+  return true;
+}
+majJour(); repareSerie();
 badgesAttendre(); // un badge gagné mais pas vu (app fermée trop tôt) revient au lancement
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)majJour(); });
-window.addEventListener('focus',majJour);
-setInterval(majJour,60000);
+window.addEventListener('focus',function(){ majJour(); repareSerie(); });
+setInterval(function(){ majJour(); repareSerie(); },60000);
 try{rollConstance();}catch(e){}
 // Migration unique vers les 7 vies : les anciennes sauvegardes (5 cœurs) sont remontées à 7
 (function(){ if(!S.v7){S.v7=1;S.hearts=HEARTS_MAX;S.heartDay=today();saveLocal();} })();

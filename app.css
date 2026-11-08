@@ -85,6 +85,7 @@
      d'une app installée, sauf sous un bloc fixe, pleine largeur, d'une seule couleur, haut de plus de 10 px.
      Un dégradé ne compte pas (journal : app.css · le flou du haut sur iPhone). */
   /* --edge : la zone floutée par iOS 26 sous la barre d'état d'une app installée (~40 pt). Rien d'important n'y est posé : barre du haut, ✕, titres descendent d'autant (journal : app.css · le flou du haut, 03/11) */
+  /* ⚠️ À RETIRER DANS LE PAQUET NATIF (App Store / Play Store) : la barre d'état y est opaque et la page commence dessous, la marge ne sert qu'à la version web (tâche Notion « REMONTER LE HAUT DES ÉCRANS DANS L'APP NATIVE », Myriam 03/11) */
   :root{--edge:0px}
   @supports (-webkit-touch-callout:none){ @media (display-mode:standalone){ :root{--edge:44px} } }
   body{--haut:#3a302b}
@@ -1484,9 +1485,6 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
 /* Les cases vivent aussi sur #finish, qui centre déjà tout : elles n'ont plus à se recentrer
    elles-mêmes (Myriam 14/08 : « il faut centrer les éléments dans le sens de la hauteur »). */
 #finish .cases{margin:14px auto 4px}
-.vf-rec{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 16px;border-radius:999px;
-  background:var(--green-bg);border:1.5px solid var(--green-d);color:var(--green);font-size:13px;font-weight:800;
-  opacity:0;animation:casePose .5s 1.75s ease-out forwards}
 
 /* ===== Le stylo ✏️ (§3.4) : entraînement libre — aucun palier, aucun cœur =====
    Il ne juge pas, il guide : la mauvaise tuile est REFUSÉE (elle ne s'inscrit jamais, on
@@ -2917,3 +2915,8 @@ html.clair .cor-voile{background:rgba(36,29,20,.35)}
 .cor-reseaux button{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;color:var(--cream);font-size:11.5px;font-weight:800;cursor:pointer;font-family:var(--ui)}
 .cor-reseaux .rond{width:50px;height:50px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--line);display:grid;place-items:center;color:var(--gold2)}
 .cor-reseaux .rond svg{width:22px;height:22px;fill:currentColor}
+
+/* le texte hors connexion (liste du lecteur du Coran) */
+.cor-hors{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 2px 12px;font-size:12.5px;font-weight:800;color:var(--muted)}
+.cor-hors-b{flex:0 0 auto;background:rgba(208,135,13,.12);border:1.5px solid var(--gold-d);color:var(--gold2);border-radius:12px;padding:8px 11px;font-weight:900;font-size:12px;cursor:pointer;font-family:var(--ui)}
+.cor-hors-b:disabled{opacity:.6;cursor:default}

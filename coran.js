@@ -155,9 +155,28 @@ function montreListe(){
   var d=lire(K_DERNIERE,null), h='<div class="cor-tete"><button class="cor-x" data-a="fermer" aria-label="Fermer">✕</button><span class="cor-titre fixe">Le Coran</span><button class="cor-mp" data-a="marques-liste" aria-label="Marque-pages">'+RUBAN+'</button></div>'+
     '<div class="cor-scroll"><input class="cor-cherche2" placeholder="Chercher une sourate" aria-label="Chercher une sourate">'+
     (d&&LISTE[d.s-1]?'<button class="cor-reprendre" data-s="'+d.s+'" data-k="'+d.k+'"><span class="cor-ico2">'+PLAY.replace('<svg','<svg width="18" height="18" fill="currentColor"')+'</span><span>Reprendre<small>'+esc(nomS(d.s))+' · verset '+d.k+'</small></span></button>':'')+
+    '<div class="cor-hors"><span class="cor-hors-t">Texte hors connexion</span><button data-a="hors" class="cor-hors-b">Tout enregistrer (3,6 Mo)</button></div>'+
     '<div class="cor-ls">'+listeLignes('srow')+'</div>'+credit()+'</div>';
-  T.querySelector('.cor-liste').innerHTML=h;
+  T.querySelector('.cor-liste').innerHTML=h; majHors();
   T.querySelector('.cor-liste').hidden=false; T.querySelector('.cor-lect').hidden=true;
+}
+/* le texte des 114 sourates en mémoire de l'appareil (sw.js le garde dès qu'il est lu) : lisible en avion. La récitation, elle, demande une connexion. */
+function urlSourate(n){ return 'coran/'+('00'+n).slice(-3)+'-v1.json'; }
+function majHors(){
+  if(!window.caches)return;
+  Promise.all(LISTE.map(function(s){ return caches.match(urlSourate(s[0])).then(function(r){ return !!r; },function(){ return false; }); })).then(function(a){
+    var n=a.filter(Boolean).length, el=T&&T.querySelector('.cor-hors'); if(!el)return;
+    el.querySelector('.cor-hors-t').textContent='Texte hors connexion : '+n+' / 114 sourates';
+    el.querySelector('.cor-hors-b').style.display=n>=114?'none':'';
+  });
+}
+function toutEnregistrer(btn){
+  var i=0; btn.disabled=true;
+  (function suite(){
+    if(i>=LISTE.length){ btn.disabled=false; majHors(); return; }
+    var n=LISTE[i++][0]; btn.textContent='Enregistrement… '+n+' / 114';
+    fetch(urlSourate(n)).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(suite).catch(function(){ btn.disabled=false; btn.textContent='Interrompu : connexion. Réessayer'; majHors(); });
+  })();
 }
 function credit(){ return '<p class="cor-credit">Texte arabe : Tanzil · Traduction du sens : Rachid Maach (QuranEnc) · Mot à mot : Alaq · Voix des mots : Quran data provided by Quran.Foundation</p>'; }
 
@@ -203,7 +222,7 @@ function montreBulle(m){
   b.classList.toggle('haut',dessus);
   b.style.left=x+'px'; b.style.top=(dessus?r.top-tr.top-bh-10:r.bottom-tr.top+7)+'px'; b.querySelector('i').style.left=(r.left-tr.left+r.width/2-x)+'px';
 }
-function cacheBulle(){ clearTimeout(_bulleT); var b=T&&T.querySelector('.cor-bulle'); if(b)b.classList.remove('on'); }
+function cacheBulle(){ clearTimeout(_bulleT); var b=T&&T.querySelector('.cor-bulle'); if(b)b.classList.remove('on'); if(MOT_EL)MOT_EL.classList.remove('dit'); }
 function cacheBulleBientot(){ clearTimeout(_bulleT); _bulleT=setTimeout(cacheBulle,BULLE_MS); }
 
 /* la voix d'UN mot : sur un canal à part ; une récitation en cours se met en PAUSE, sans se perdre */
@@ -212,7 +231,8 @@ function joueMot(k,j,el){
   if(lecture)suspendre(); else coupeVoix();
   if(MOT_A){ try{ MOT_A.pause(); }catch(e){} if(MOT_EL)MOT_EL.classList.remove('dit'); }
   var a=new Audio(urlMot(E.sur,k,j)); MOT_A=a; MOT_EL=el; el.classList.add('dit');
-  var fin=function(){ el.classList.remove('dit'); if(MOT_A===a)MOT_A=null; };
+  /* le mot reste allumé aussi longtemps que sa bulle : cacheBulle() retire les deux (Myriam, 03/11) */
+  var fin=function(){ if(MOT_A===a)MOT_A=null; };
   a.onended=fin; a.onerror=fin; var p=a.play(); if(p&&p.catch)p.catch(fin);
 }
 
@@ -260,8 +280,11 @@ function jouerVerset(s,k,info){
     if(q===allume)return; allume=q;
     carte.querySelectorAll('.cor-mot').forEach(function(m){ var j=+m.dataset.j; m.classList.toggle('en',j===q); m.classList.toggle('lu',j<q); }); };
   VOIX_FIN=function(){ if(carte){ carte.classList.remove('joue'); carte.querySelectorAll('.cor-mot').forEach(function(m){ m.classList.remove('en','lu'); }); } };
-  a.onended=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.i++; suivant(); };
-  a.onerror=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.i++; setTimeout(suivant,200); };
+  a.onended=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.erreurs=0; lecture.i++; suivant(); };
+  /* ⛔ hors connexion (l'avion) : le fichier d'un verset est introuvable. Deux échecs de suite : on s'ARRÊTE et on le dit, au lieu de défiler tous les versets en silence (et sans fin en boucle) */
+  a.onerror=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.erreurs=(lecture.erreurs||0)+1;
+    if(lecture.erreurs>=2){ arret(); T.querySelector('.cor-q1').innerHTML='Récitation indisponible<span class="car">▾</span>'; T.querySelector('.cor-q2').textContent='Pas de connexion : elle se charge en ligne'; return; }
+    lecture.i++; setTimeout(suivant,200); };
   if(!lecture.pause){ var p=a.play(); if(p&&p.catch)p.catch(function(){}); }
 }
 function suspendre(){ if(!lecture||lecture.pause)return; lecture.pause=true; if(lecture.a){ try{ lecture.a.pause(); }catch(e){} } T.querySelector('.cor-jouer').innerHTML=PLAY; }
@@ -324,6 +347,7 @@ function clic(e){
   if(!a)return;
   switch(a){
     case 'fermer': coranFermer(); break;
+    case 'hors': toutEnregistrer(el); break;
     case 'ferme': fermeFeuilles(); break;
     case 'sourates': ouvreFeuille('sourates'); break;
     case 'qari': listeQari(); ouvreFeuille('qari'); break;

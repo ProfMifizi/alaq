@@ -1750,12 +1750,13 @@ function finishReview(){
      le montant. Expression gardée pour qu'un _vfGraines ressuscité se voie. ⛔ Ne pas déplacer le
      versement vers le jeu : seul finishReview connaît wrongCount. */
   fillFinishCases(acc,(window._vfGraines||0)||_grainesSession);
-  if(window._vfRecord)document.getElementById('fin-extra').innerHTML+=
-    '<div class="vf-rec">RECORD BATTU — ancien : '+(window._vfAncien||0)+'</div>';
+  /* le record est dit par le bilan du chrono (vfBilan), juste avant : plus rien ici (Myriam, 03/11) */
   window._vfGraines=0; window._vfRecord=false;
   fillFinishConstance();
   document.getElementById('finish').classList.add('on');
-  confettiBurst();
-  playSfx('fin-lecon');   // le maqsūm — même clôture que la leçon
-  mascotteDanse();        // le fanous danse dessus (partition FRAPPES_FIN)
+  /* ⚠️ chaque effet seul sous son try : un confetti qui lève ne doit jamais emporter le son ni la danse (Myriam, 03/11 : « des fois j'ai le son et la mascotte qui danse, des fois non ») */
+  try{ confettiBurst(); }catch(e){}
+  try{ reveilAudio(); }catch(e){}
+  try{ playSfx('fin-lecon'); }catch(e){}   // le maqsūm — même clôture que la leçon
+  try{ mascotteDanse(); }catch(e){}        // le fanous danse dessus (partition FRAPPES_FIN)
 }
