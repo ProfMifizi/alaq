@@ -46,7 +46,7 @@
     /* la barre du haut : la série, les Qatarāt, la lampe du rang */
     `
 <div class="topbar">
-  <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ" src="icon-192.png"></div>
+  <div class="brand" id="brand"><img class="blogo" id="blogo" alt="ALAQ" src="icone-alaq-192.png"></div>
   <div class="stats">
     <div class="stat"><img class="tbic" data-ico="tb-epi" src="images-app-alaq/icone-tb-epi-v1.png" alt=""> <span id="st-streak">0</span></div>
     <div class="stat" onclick="showHearts()" style="cursor:pointer" role="button" tabindex="0" aria-label="Tes Qatarāt"><img class="tbic" data-ico="tb-coeur" src="images-app-alaq/icone-tb-goutte-v1.png" alt=""> <span id="st-hearts">7</span></div>
@@ -166,7 +166,7 @@
 
     <section class="obs on" data-obs="0">
       <div style="flex:1"></div>
-      <img class="ob-logo" src="icon-512.png" alt="ALAQ">
+      <img class="ob-logo" src="icone-alaq-512.png" alt="ALAQ">
       <p class="ob-lead">La méthode gratuite pour apprendre à lire, comprendre, méditer et mémoriser le Qor'an en arabe.</p>
       <div style="flex:1"></div>
       <button class="cta" onclick="onbNext()">COMMENCER</button>
@@ -384,7 +384,7 @@
     /* le menu bas, cinq onglets (ui/navigation.js) */
     `
 <nav class="botnav" id="botnav">
-  <div class="deskbrand"><img class="dlg" src="icon-192.png" alt="ALAQ"></div>
+  <div class="deskbrand"><img class="dlg" src="icone-alaq-192.png" alt="ALAQ"></div>
   <button class="bn active" id="bn-home" onclick="showTab('home')"><span class="bi"><img class="bni" data-ico="menu-apprendre" src="images-app-alaq/icone-menu-apprendre.png" alt=""></span><span class="bn-lab">Apprendre</span></button>
   <button class="bn" id="bn-cours" onclick="showTab('cours')"><span class="bi"><img class="bni" data-ico="menu-cours" src="images-app-alaq/icone-menu-cours.png" alt=""></span><span class="bn-lab">Cours</span></button>
   <button class="bn" id="bn-reviser" onclick="showTab('reviser')"><span class="bi"><img class="bni" data-ico="menu-reviser" src="images-app-alaq/icone-menu-puits-v2.png" alt=""></span><span class="bn-lab">Réviser</span></button>

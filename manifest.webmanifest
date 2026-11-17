@@ -10,7 +10,7 @@
   "background_color": "#252120",
   "theme_color": "#252120",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "icone-alaq-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icone-alaq-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
