@@ -494,7 +494,11 @@ function retrogradation(){
 function acceptMiss(){
   var r=retrogradation();
   S.consScore=Math.max(0,r.score);
-  S.streak=(S.lastDay===today())?1:0; S.pendingMiss=0; delete S._streakAvantMiss; save();   // la leçon du jour compte déjà
+  S.streak=(S.lastDay===today())?1:0; S.pendingMiss=0; delete S._streakAvantMiss;   // la leçon du jour compte déjà
+  /* L'absence est TRANCHÉE : un pont jusqu'à hier, comme useGhufran, mais série à 0. Sans lui, la leçon du jour revoyait
+     le même trou depuis lastDay : second Ghufrān, seconde rétrogradation (journal : constance.js · le Ghufrān redemandé après la leçon) */
+  if(S.lastDay&&S.lastDay!==today())S.lastDay=yesterday();
+  save();
   closeGhufran(); if(_progVisible())renderProg();
 }
 /* Le passage de minuit : sur iPhone l'app n'est jamais rechargée, elle est mise en veille. Le jour est

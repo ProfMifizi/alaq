@@ -1464,6 +1464,15 @@ function recToggle(){
 function recPlay(){ if(_rec.url){ try{ stopAudio(); _curAudio=new Audio(_rec.url); _curAudio.play(); }catch(e){} } }
 function recValidate(btn){ if(btn){btn.disabled=true;btn.style.opacity=.5;} okBeep('final'); ctaOn(); }
 
+/* CONTINUER s'allume à la fin du verset, ou au plus tard après 9 s (le filet) — mais SEULEMENT sur l'écran
+   qui l'a demandé : un filet resté armé allumait le CONTINUER de l'écran suivant, avant tout geste
+   (journal : revision.js · le CONTINUER allumé tout seul). */
+function ctaApresVerset(a,allume){
+  const q=QUEUE, i=qi, fait=function(){ if(QUEUE===q&&qi===i)allume(); };
+  if(a)a.addEventListener('ended',fait,{once:true});
+  setTimeout(fait,9000);
+}
+
 /* ----- « Appuie sur ce que tu entends » (tuiles de mots du verset) ----- */
 function renderVt(){
   const box=document.getElementById('vtSlots');if(!box)return;
@@ -1553,9 +1562,8 @@ function vwFiniMot(){
     majVwVerse();
     if(msg)msg.textContent='';
     okBeep('final');
-    const a=playVerse(M.vi); if(a)a.addEventListener('ended',ctaOn,{once:true});
+    ctaApresVerset(playVerse(M.vi),ctaOn);
     const box=document.getElementById('vwClavier'); if(box)box.innerHTML='';
-    setTimeout(ctaOn,9000);            // filet : CONTINUER ne reste jamais gris
   } else {
     M.units=splitUnits(M.words[M.wi]);
     if(msg)msg.textContent='';
@@ -1592,9 +1600,8 @@ function vwTap(k){
       renderVw();
       if(msg)msg.textContent='';
       okBeep('final');
-      const a=playVerse(M.vi); if(a)a.addEventListener('ended',ctaOn,{once:true});
+      ctaApresVerset(playVerse(M.vi),ctaOn);
       document.getElementById('vwTiles').innerHTML='';
-      setTimeout(ctaOn,9000);            // filet : CONTINUER ne reste jamais gris
     } else {
       M.units=splitUnits(M.words[M.wi]);
       if(msg)msg.textContent='';
@@ -1640,8 +1647,7 @@ function stTap(k){        // même écriture guidée : un verset hors d'ordre es
     playSfx('bonne-reponse');
     const fb=document.getElementById('fb');fb.className='fb ok';fb.innerHTML=elogeHTML();
     document.getElementById('p-foot').classList.add('ok');
-    const a=playVerse(0); if(a)a.addEventListener('ended',ctaOn2,{once:true});
-    setTimeout(ctaOn2,9000);
+    ctaApresVerset(playVerse(0),ctaOn2);
   }
 }
 function stUndo(){
@@ -1677,9 +1683,7 @@ function vtFini(){        // complet donc juste : éloge, le verset se rejoue, C
   playSfx('bonne-reponse');
   fb.className='fb ok';fb.innerHTML=elogeHTML();
   foot.classList.remove('bad');foot.classList.add('ok');
-  const a=playVerse(M.vi);
-  if(a)a.addEventListener('ended',ctaOn2,{once:true});
-  setTimeout(ctaOn2,9000);   // filet : CONTINUER ne reste jamais gris
+  ctaApresVerset(playVerse(M.vi),ctaOn2);
 }
 function vtUndo(){
   const M=window._vt;if(!M||!M.ch.length)return;
