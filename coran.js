@@ -11,7 +11,8 @@
    DONNÉES : coran/NNN-v1.json, une par sourate (texte Tanzil, mot à mot de l'app, traduction du sens de Rachid Maach / QuranEnc),
    servies par sw.js (cache d'abord). Les horaires des mots viennent de api.quran.com ; la voix d'un mot, de audio.qurancdn.com :
    lues à la source au toucher, jamais copiées ni mises en cache (conditions de Quran Foundation : « Quran data provided by
-   Quran.Foundation »). */
+   Quran.Foundation »). Seule exception : une sourate TÉLÉCHARGÉE pour l'écoute sans connexion (sons et horaires), gardée 7 jours
+   au plus — voir « écouter sans connexion » plus bas. */
 (function(){
 'use strict';
 /* la liste : [n, nom, nom arabe vocalisé, sens, versets, slug du site] */
@@ -21,6 +22,21 @@ var OFF=(function(){ var o=[],a=0; LISTE.forEach(function(s){ o.push(a); a+=s[4]
 var QF={'ar.abdulbasitmurattal':2,'ar.abdurrahmaansudais':3,'ar.shaatree':4,'ar.hanirifai':5,'ar.husary':6,'ar.alafasy':7,'ar.minshawi':9,'ar.saoodshuraym':10};
 var K_MARQUES='alaq_coran_marques', K_DERNIERE='alaq_coran_derniere', K_TRAD='alaq_coran_trad', K_COPIE='alaq_coran_copie';
 var CHIFFRES_LIEN='https://www.alaq.fr/coran/';
+/* ÉCOUTER SANS CONNEXION (Myriam, 17/11 : « dans le métro… extrêmement pénible » ; préview _apercu-coran-v18.html). Une sourate
+   téléchargée pour UNE voix : les fichiers de ses versets (ceux que l'app joue) et l'horaire de ses mots, rangés dans le cache HORS,
+   joués depuis le téléphone par une adresse blob: — aucune requête au réseau, donc rien de ce qui coupe Safari sur iPhone (il
+   demande le son par morceaux, et sw.js laisse ces requêtes-là au réseau). Gardés 7 JOURS au plus (conditions de Quran
+   Foundation ; Myriam : « spécifier que c'est pour une semaine »), renouvelés dès le 6ᵉ jour s'il y a du réseau et que la
+   sourate a été écoutée dans la semaine. Voix sans horaire quran.com : everyayah (EA), les MÊMES enregistrements que le flux
+   (son décodé comparé le 17/11 : 16 voix identiques au bit près ; ash-Shuraym, même récitation, autre encodage).
+   ⚠️ sw.js garde ce cache à l'activation et n'intercepte jamais everyayah. Garde : previews/_verif_coran.html ⑬. */
+var HORS='alaq-coran-hors', K_HORS='alaq_coran_hors', SEPT_J=7*864e5, SIX_J=6*864e5;
+var EA={'ar.aymanswoaid':'Ayman_Sowaid_64kbps','ar.ibrahimakhbar':'Ibrahim_Akhdar_32kbps','ar.hudhaify':'Hudhaify_128kbps',
+  'ar.muhammadayyoub':'Muhammad_Ayyoub_64kbps','ar.alafasy':'Alafasy_128kbps','ar.husary':'Husary_128kbps',
+  'ar.shaatree':'Abu_Bakr_Ash-Shaatree_128kbps','ar.abdullahbasfar':'Abdullah_Basfar_192kbps','ar.minshawi':'Minshawy_Murattal_128kbps',
+  'ar.abdulbasitmurattal':'Abdul_Basit_Murattal_192kbps','ar.muhammadjibreel':'Muhammad_Jibreel_64kbps','ar.hanirifai':'Hani_Rifai_192kbps',
+  'ar.saoodshuraym':'Saood_ash-Shuraym_64kbps','ar.abdurrahmaansudais':'Abdurrahmaan_As-Sudais_192kbps',
+  'ar.ahmedajamy':'Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net','ar.mahermuaiqly':'Maher_AlMuaiqly_64kbps','ar.husarymujawwad':'Husary_128kbps_Mujawwad'};
 
 var SPK='<svg class="cor-ico" viewBox="0 0 26 20"><path class="f" d="M2 7h4l5-4.5v15L6 13H2z"/><path class="f" d="M15 6.2a5 5 0 0 1 0 7.6l-1.2-1.3a3.2 3.2 0 0 0 0-5z"/><path class="f" d="M18 3.4a9 9 0 0 1 0 13.2l-1.2-1.3a7.2 7.2 0 0 0 0-10.6z" opacity=".55"/></svg>';
 var RUBAN='<svg class="cor-ico" viewBox="0 0 16 20"><path d="M2 1.5h12v17l-6-4.5-6 4.5z"/></svg>';
@@ -53,6 +69,11 @@ var VOIX_A=null, VOIX_FIN=null;   // la voix de la récitation
 var MOT_A=null, MOT_EL=null;      // la voix d'un mot : un canal à part
 var cible=1;
 var CK=null;
+var DL=null;                      // le téléchargement en cours : { cle, n, fait, total, fini, err }
+var EN_LIGNE={};                  // « Écouter en ligne » choisi pour une sourate, le temps de la séance
+var HC_N=0, HC_APRES=null;        // la sourate de la feuille « sans connexion », et ce qui suit son choix
+var TEXTE_FAIT=false;
+var FLECHE='<svg class="cor-ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
 
 function coupeVoix(){ if(VOIX_A){ try{ VOIX_A.pause(); }catch(e){} } VOIX_A=null; var f=VOIX_FIN; VOIX_FIN=null; if(f)f(); }
 
@@ -65,24 +86,128 @@ function charger(n,suite){
 }
 /* l'horaire de chaque mot et le fichier de verset qu'il décrit : quran.com (public), pour les récitateurs qu'il couvre ;
    Al-Fātiḥa en al-Ḥuṣarī (et les autres voix hébergées) : les fichiers et repères de l'app, sans réseau */
-function segments(n,suite){
-  var v=qari();
+function segments(n,suite){ segmentsDe(qari(),n,suite); }
+/* frais : relu à la source, jamais le téléphone (le renouvellement du 6ᵉ jour) */
+function segmentsDe(v,n,suite,frais){
   if(n===1&&v.loc&&typeof HOROV!=='undefined'&&HOROV[v.id]){
     var M={}; for(var k=1;k<=7;k++){ var h=HOROV[v.id][String(k)]||[]; M[k]={url:'audios-app-alaq/recit/'+v.id+'/'+k+'.mp3',seg:h.map(function(x,j){ return [j,j+1,+x[0],+x[1]]; })}; }
     return suite(M);
   }
   var id=QF[v.id]; if(!id)return suite(null);
-  var cle=id+':'+n; if(SEG[cle])return suite(SEG[cle]);
-  var M2={};
-  (function page(p){
-    fetch('https://api.quran.com/api/v4/recitations/'+id+'/by_chapter/'+n+'?fields=segments&per_page=50&page='+p).then(function(r){ return r.json(); }).then(function(d){
-      (d.audio_files||[]).forEach(function(f){ var u=f.url||''; M2[+f.verse_key.split(':')[1]]={url:u.indexOf('//')===0?'https:'+u:(u.indexOf('http')===0?u:'https://verses.quran.com/'+u),seg:f.segments||[]}; });
-      if(d.pagination&&d.pagination.next_page)page(d.pagination.next_page); else { SEG[cle]=M2; suite(M2); }
-    }).catch(function(){ suite(null); });
-  })(1);
+  var cle=id+':'+n; if(SEG[cle]&&!frais)return suite(SEG[cle]);
+  var reseau=function(){
+    var M2={};
+    (function page(p){
+      fetch('https://api.quran.com/api/v4/recitations/'+id+'/by_chapter/'+n+'?fields=segments&per_page=50&page='+p).then(function(r){ return r.json(); }).then(function(d){
+        (d.audio_files||[]).forEach(function(f){ var u=f.url||''; M2[+f.verse_key.split(':')[1]]={url:u.indexOf('//')===0?'https:'+u:(u.indexOf('http')===0?u:'https://verses.quran.com/'+u),seg:f.segments||[]}; });
+        if(d.pagination&&d.pagination.next_page)page(d.pagination.next_page); else { SEG[cle]=M2; suite(M2); }
+      }).catch(function(){ suite(null); });
+    })(1);
+  };
+  /* téléchargée : l'horaire du téléphone d'abord (en avion, l'API ne répond pas et les mots ne s'allumeraient plus) */
+  if(frais||!horsDe(v,n)||!window.caches)return reseau();
+  caches.open(HORS).then(function(c){ return c.match(urlSeg(v,n)); }).then(function(r){ return r?r.json():null; })
+    .then(function(M){ if(M){ SEG[cle]=M; suite(M); } else reseau(); },reseau);
 }
 function urlVerset(n,k){ return qariUrl(qari(),OFF[n-1]+k); }
 function urlMot(s,k,j){ var p=function(x){ return ('00'+x).slice(-3); }; return 'https://audio.qurancdn.com/wbw/'+p(s)+'_'+p(k)+'_'+p(j+1)+'.mp3'; }
+
+/* ── écouter sans connexion ── */
+function trois(x){ return ('00'+x).slice(-3); }
+function cleHors(v,n){ return v.id+'|'+n; }
+function metas(){ return lire(K_HORS,{}); }
+/* l'entrée d'une sourate téléchargée (même en cours, « partiel ») si elle a moins de 7 jours */
+function horsDe(v,n){ var m=metas()[cleHors(v,n)]; return m&&Date.now()-m.t<SEPT_J?m:null; }
+function complete(v,n){ var m=horsDe(v,n); return !!(m&&!m.partiel); }
+/* le fichier d'un verset tel qu'on le télécharge, et tel qu'on le cherche au moment de jouer : celui que l'app joue */
+function urlHors(v,n,k,info){ if(info&&info.url)return info.url; var d=EA[v.id]; return d?'https://everyayah.com/data/'+d+'/'+trois(n)+trois(k)+'.mp3':qariUrl(v,OFF[n-1]+k); }
+function urlSeg(v,n){ return 'coran-hors/'+v.id+'/'+trois(n)+'.json'; }   // l'horaire des mots, rangé avec les sons (jamais demandé au réseau)
+function taille(v,n){
+  var M=SEG[QF[v.id]+':'+n], u=(M&&M[1]&&M[1].url)||EA[v.id]||'', b=/(\d+)\s*kbps/i.exec(u), kb=b?+b[1]:v.kb;
+  var mo=LISTE[n-1][4]*v.sec*kb/8/1024;
+  return '≈ '+(mo<1?'0,'+Math.max(1,Math.round(mo*10)):Math.round(mo))+' Mo';
+}
+function ecouteNotee(v,n){ var M=metas(), k=cleHors(v,n); if(M[k]&&Date.now()-(M[k].e||0)>6e4){ M[k].e=Date.now(); ecrire(K_HORS,M); } }
+/* la source d'un verset : le fichier du téléphone s'il y est, sinon le réseau comme avant */
+function sourceVerset(s,k,info,suite){
+  var v=qari(), net=info?info.url:urlVerset(s,k);
+  if(!horsDe(v,s)||!window.caches)return suite(net,false);
+  caches.open(HORS).then(function(c){ return c.match(urlHors(v,s,k,info)); }).then(function(r){ return r?r.blob():null; })
+    .then(function(b){ if(!b)return suite(net,false); ecouteNotee(v,s); suite(URL.createObjectURL(b),true); },function(){ suite(net,false); });
+}
+/* télécharger une sourate pour une voix ; maj() est rappelé à chaque fichier rangé. frais : le renouvellement — tout est relu à la
+   source, et l'entrée d'avant (sa date) n'est remplacée qu'au succès : un renouvellement raté laisse l'effacement du 7ᵉ jour */
+function telecharger(v,n,maj,frais){
+  var cle=cleHors(v,n), total=LISTE[n-1][4];
+  if(DL&&DL.cle===cle&&!DL.fini&&!DL.err)return;
+  var D={cle:cle,n:n,fait:0,total:total,fini:false,err:''}; if(!frais)DL=D; maj();
+  var rate=function(e){ if(D.fini||D.err)return; D.err=(e&&e.name==='QuotaExceededError')?'Plus assez de place sur ton téléphone.':'Interrompu : connexion. Réessaie.'; maj(); };
+  if(!window.caches)return rate();
+  segmentsDe(v,n,function(M){
+    if(QF[v.id]&&!M)return rate();          // sans l'API, pas l'horaire des mots ni le bon fichier
+    var urls=[], i=0, c=null;
+    for(var k=1;k<=total;k++)urls.push(urlHors(v,n,k,M&&M[k]));
+    if(!frais){ var MM=metas(); MM[cle]={t:Date.now(),e:Date.now(),n:total,u:urls,partiel:1}; ecrire(K_HORS,MM); }   // posée d'abord : un échec en route s'efface aussi au bout de 7 jours
+    var ouvrier=function(){
+      if(D.err||i>=urls.length)return Promise.resolve();
+      var u=urls[i++];
+      return (frais?Promise.resolve(null):c.match(u)).then(function(r){ if(r)return; return fetch(u,{cache:'reload'}).then(function(f){ if(!f.ok)throw new Error(String(f.status)); return c.put(u,f); }); })
+        .then(function(){ D.fait++; maj(); return ouvrier(); });
+    };
+    caches.open(HORS).then(function(cc){ c=cc; return M?c.put(urlSeg(v,n),new Response(JSON.stringify(M),{headers:{'Content-Type':'application/json'}})):null; })
+      .then(function(){ return Promise.all([ouvrier(),ouvrier(),ouvrier(),ouvrier()]); })
+      .then(function(){ if(D.err)return; var M3=metas(); M3[cle]={t:Date.now(),e:(M3[cle]&&M3[cle].e)||Date.now(),n:total,u:urls}; ecrire(K_HORS,M3); D.fini=true; maj(); marques(); })
+      .catch(rate);
+  },frais);
+}
+function effacerHors(cle,m){
+  if(!window.caches)return; var p=cle.split('|');
+  caches.open(HORS).then(function(c){ (m.u||[]).forEach(function(u){ c.delete(u); }); c.delete(urlSeg({id:p[0]},+p[1])); }).catch(function(){});
+}
+/* à l'ouverture : 7 jours passés, effacée ; dès le 6ᵉ jour, renouvelée si elle a été écoutée dans la semaine et qu'il y a du réseau */
+function entretienHors(){
+  var M=metas(), maintenant=Date.now(), change=false;
+  Object.keys(M).forEach(function(cle){
+    var m=M[cle], age=maintenant-m.t;
+    if(age>=SEPT_J){ effacerHors(cle,m); delete M[cle]; change=true; return; }
+    if(age>=SIX_J&&!m.partiel&&navigator.onLine!==false&&maintenant-(m.e||0)<SEPT_J){
+      var v=VOIX.filter(function(x){ return x.id===cle.split('|')[0]; })[0];
+      if(v)telecharger(v,+cle.split('|')[1],function(){},true);   // tout relu à la source, l'horaire aussi
+    }
+  });
+  if(change){ ecrire(K_HORS,M); marques(); }
+}
+/* les marques : le bouton du récitateur (cette sourate est sur le téléphone pour CETTE voix) et les lignes de la liste */
+function marques(){
+  if(!T)return; var v=qari(), M=metas(), ici=function(n){ var m=M[cleHors(v,n)]; return m&&!m.partiel&&Date.now()-m.t<SEPT_J?m:null; };
+  var li=T.querySelector('.cor-li'); if(li)li.classList.toggle('hc-ici',!!ici(E.sur));
+  T.querySelectorAll('.cor-liste .cor-srow').forEach(function(r){
+    var m=ici(+r.dataset.s), s=r.querySelector('.hc-marque');
+    if(!m){ if(s)s.remove(); return; }
+    if(!s){ r.insertAdjacentHTML('beforeend','<span class="hc-marque" aria-label="Sur le téléphone">'+FLECHE+'<b></b></span>'); s=r.querySelector('.hc-marque'); }
+    s.querySelector('b').textContent=Math.max(1,Math.ceil((m.t+SEPT_J-Date.now())/864e5))+' j';
+  });
+}
+/* la question au ▶ : « Écouter sans connexion » — sauf déjà là, déjà répondu « en ligne », hors ligne, ou une playlist */
+function demanderHors(){ var v=qari(); return E.mode!=='playlist'&&!!window.caches&&navigator.onLine!==false&&!complete(v,E.sur)&&!EN_LIGNE[cleHors(v,E.sur)]; }
+function ouvreHors(apres){ HC_N=E.sur; HC_APRES=apres; peindreHors(); ouvreFeuille('hors'); segments(HC_N,function(){ if(T.classList.contains('f-hors'))peindreHors(); }); }
+function peindreHors(){
+  var z=T.querySelector('.cor-hc'); if(!z||!HC_N)return;
+  var n=HC_N, v=qari(), x=LISTE[n-1][4], cle=cleHors(v,n), d=DL&&DL.cle===cle?DL:null;
+  var h='<p class="hc-sour">'+esc(nomS(n))+'<span class="ar">'+LISTE[n-1][2]+'</span></p>'+
+    '<p class="hc-det">'+x+' verset'+(x>1?'s':'')+' · '+esc(cap(v.fr))+' · '+taille(v,n)+'</p>'+
+    '<p class="hc-note">Gardée 7 jours sur ton téléphone.</p>';
+  if(d&&!d.fini&&!d.err)h+='<div class="hc-barre"><i style="width:'+Math.round(100*d.fait/d.total)+'%"></i></div><p class="hc-n">'+d.fait+' / '+d.total+'</p><button class="cor-grandbtn" data-a="hc-ecouter">ÉCOUTER</button>';
+  else if(complete(v,n))h+='<p class="hc-n">Sur ton téléphone ✓</p><button class="cor-grandbtn" data-a="hc-ecouter">ÉCOUTER</button>';
+  else h+=(d&&d.err?'<p class="hc-n hc-err">'+esc(d.err)+'</p>':'')+'<button class="cor-grandbtn" data-a="hc-dl">TÉLÉCHARGER</button><button class="hc-sec" data-a="hc-ligne">Écouter en ligne</button>';
+  z.innerHTML=h;
+}
+function apresHors(){ var f=HC_APRES; HC_APRES=null; fermeFeuilles(); if(f)f(); }
+/* le texte des 114 sourates, tout seul, une fois par séance (sw.js le garde : lisible en avion) — Myriam : « ce devrait être automatique » */
+function texteAuto(){
+  if(TEXTE_FAIT||navigator.onLine===false)return; TEXTE_FAIT=true; var i=0;
+  (function suite(){ if(i>=LISTE.length)return; fetch(urlSourate(LISTE[i++][0])).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(function(){ setTimeout(suite,40); },function(){ TEXTE_FAIT=false; }); })();
+}
 
 /* ═══ l'écran ═══ */
 function monte(){
@@ -95,7 +220,7 @@ function monte(){
         '<button class="cor-mp" data-a="marques" aria-label="Marque-pages">'+RUBAN+'</button></div>'+
       '<div class="cor-outils"><button class="cor-coche on" data-a="trad" aria-pressed="true"><span class="cor-bx">✓</span>Traduction</button></div>'+
       '<div class="cor-zone"><div class="cor-corps"></div><div class="cor-rail"><div class="cor-piste"></div><div class="cor-pouce"><span class="cor-etiq"></span></div></div></div>'+
-      '<div class="cor-lecteur"><button class="cor-jouer" data-a="jouer" aria-label="Écouter">'+PLAY+'</button><button class="cor-li" data-a="qari"><b class="cor-q1"></b><small class="cor-q2"></small></button>'+
+      '<div class="cor-lecteur"><button class="cor-jouer" data-a="jouer" aria-label="Écouter">'+PLAY+'</button><button class="cor-li" data-a="qari"><span class="cor-hcm" aria-label="Sur le téléphone">'+FLECHE+'</span><b class="cor-q1"></b><small class="cor-q2"></small></button>'+
         '<button class="cor-rep" data-a="ecoute" aria-label="Réglages de l’écoute">'+BOUCLE+'<span class="cor-repn">×1</span></button></div>'+
     '</div>'+
     '<div class="cor-bulle" role="tooltip"><i></i><span></span></div>'+
@@ -126,7 +251,8 @@ function monte(){
   E.playlist=[112,113,114];
 }
 function feuilles(){
-  return '<div class="cor-feuille fe"><h3>Écouter<button data-a="ferme" aria-label="Fermer">✕</button></h3>'+
+  return '<div class="cor-feuille fh"><h3>Écouter sans connexion<button data-a="ferme" aria-label="Fermer">✕</button></h3><div class="cor-hc"></div></div>'+
+    '<div class="cor-feuille fe"><h3>Écouter<button data-a="ferme" aria-label="Fermer">✕</button></h3>'+
       '<div class="cor-seg"><button data-m="verset">Un<br>verset</button><button data-m="versets">Des<br>versets</button><button data-m="sourate">La<br>sourate</button><button data-m="playlist">Une<br>playlist</button></div>'+
       '<div class="cor-panneau"></div><div class="cor-sep"></div>'+
       '<div class="cor-ligne"><span>Répéter</span><span class="cor-pas" data-k="fois"><button data-d="-1" aria-label="Moins">−</button><input type="number" inputmode="numeric" min="1" max="100"><button data-d="1" aria-label="Plus">+</button></span></div>'+
@@ -155,29 +281,12 @@ function montreListe(){
   var d=lire(K_DERNIERE,null), h='<div class="cor-tete"><button class="cor-x" data-a="fermer" aria-label="Fermer">✕</button><span class="cor-titre fixe">Le Coran</span><button class="cor-mp" data-a="marques-liste" aria-label="Marque-pages">'+RUBAN+'</button></div>'+
     '<div class="cor-scroll"><input class="cor-cherche2" placeholder="Chercher une sourate" aria-label="Chercher une sourate">'+
     (d&&LISTE[d.s-1]?'<button class="cor-reprendre" data-s="'+d.s+'" data-k="'+d.k+'"><span class="cor-ico2">'+PLAY.replace('<svg','<svg width="18" height="18" fill="currentColor"')+'</span><span>Reprendre<small>'+esc(nomS(d.s))+' · verset '+d.k+'</small></span></button>':'')+
-    '<div class="cor-hors"><span class="cor-hors-t">Texte hors connexion</span><button data-a="hors" class="cor-hors-b">Tout enregistrer (3,6 Mo)</button></div>'+
     '<div class="cor-ls">'+listeLignes('srow')+'</div>'+credit()+'</div>';
-  T.querySelector('.cor-liste').innerHTML=h; majHors();
+  T.querySelector('.cor-liste').innerHTML=h; marques();
   T.querySelector('.cor-liste').hidden=false; T.querySelector('.cor-lect').hidden=true;
 }
 /* le texte des 114 sourates en mémoire de l'appareil (sw.js le garde dès qu'il est lu) : lisible en avion. La récitation, elle, demande une connexion. */
 function urlSourate(n){ return 'coran/'+('00'+n).slice(-3)+'-v1.json'; }
-function majHors(){
-  if(!window.caches)return;
-  Promise.all(LISTE.map(function(s){ return caches.match(urlSourate(s[0])).then(function(r){ return !!r; },function(){ return false; }); })).then(function(a){
-    var n=a.filter(Boolean).length, el=T&&T.querySelector('.cor-hors'); if(!el)return;
-    el.querySelector('.cor-hors-t').textContent='Texte hors connexion : '+n+' / 114 sourates';
-    el.querySelector('.cor-hors-b').style.display=n>=114?'none':'';
-  });
-}
-function toutEnregistrer(btn){
-  var i=0; btn.disabled=true;
-  (function suite(){
-    if(i>=LISTE.length){ btn.disabled=false; majHors(); return; }
-    var n=LISTE[i++][0]; btn.textContent='Enregistrement… '+n+' / 114';
-    fetch(urlSourate(n)).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(suite).catch(function(){ btn.disabled=false; btn.textContent='Interrompu : connexion. Réessayer'; majHors(); });
-  })();
-}
 function credit(){ return '<p class="cor-credit">Texte arabe : Tanzil · Traduction du sens : Rachid Maach (QuranEnc) · Mot à mot : Alaq · Voix des mots : Quran data provided by Quran.Foundation</p>'; }
 
 /* ── le lecteur ── */
@@ -186,7 +295,7 @@ function montreLecteur(n,k){
     E.sur=n; T.querySelector('.cor-liste').hidden=true; T.querySelector('.cor-lect').hidden=false;
     var trad=lire(K_TRAD,true); T.classList.toggle('sans-trad',!trad);
     var c=T.querySelector('.cor-coche'); c.classList.toggle('on',!!trad); c.setAttribute('aria-pressed',trad?'true':'false'); c.querySelector('.cor-bx').textContent=trad?'✓':'';
-    peindre(); if(k)aller(n,k);
+    peindre(); marques(); if(k)aller(n,k);
   });
 }
 function peindre(){
@@ -269,7 +378,11 @@ function suivant(){
   var L1=lecture; segments(s,function(M){ if(lecture!==L1)return; jouerVerset(s,k,M&&M[k]); });
 }
 function jouerVerset(s,k,info){
-  coupeVoix(); var a=new Audio(info?info.url:urlVerset(s,k)); VOIX_A=a; lecture.a=a;
+  coupeVoix(); var L=lecture;
+  sourceVerset(s,k,info,function(src,local){ if(lecture!==L)return; jouerSource(s,k,info,src,local); });
+}
+function jouerSource(s,k,info,src,local){
+  var a=new Audio(src); VOIX_A=a; lecture.a=a;
   T.querySelector('.cor-jouer').innerHTML=lecture.pause?PLAY:PAUSE;
   etiquette(nomS(s)+' · verset '+k,(lecture.boucle?'en boucle':'tour '+lecture.tour+' / '+lecture.fois)+(lecture.pl?' · playlist':''));
   var carte=T.querySelector('.cor-carte[data-k="'+k+'"]'), allume=-1;
@@ -279,7 +392,7 @@ function jouerVerset(s,k,info){
     for(var i=0;i<info.seg.length;i++){ var g=info.seg[i]; if(ms>=g[2]-40)q=g[1]-1; }
     if(q===allume)return; allume=q;
     carte.querySelectorAll('.cor-mot').forEach(function(m){ var j=+m.dataset.j; m.classList.toggle('en',j===q); m.classList.toggle('lu',j<q); }); };
-  VOIX_FIN=function(){ if(carte){ carte.classList.remove('joue'); carte.querySelectorAll('.cor-mot').forEach(function(m){ m.classList.remove('en','lu'); }); } };
+  VOIX_FIN=function(){ if(local){ try{ URL.revokeObjectURL(src); }catch(e){} } if(carte){ carte.classList.remove('joue'); carte.querySelectorAll('.cor-mot').forEach(function(m){ m.classList.remove('en','lu'); }); } };
   a.onended=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.erreurs=0; lecture.i++; suivant(); };
   /* ⛔ hors connexion (l'avion) : le fichier d'un verset est introuvable. Deux échecs de suite : on s'ARRÊTE et on le dit, au lieu de défiler tous les versets en silence (et sans fin en boucle) */
   a.onerror=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.erreurs=(lecture.erreurs||0)+1;
@@ -334,7 +447,7 @@ function listeQari(){
 
 /* ── les gestes ── */
 function ouvreFeuille(c){ T.classList.add('f-'+c); }
-function fermeFeuilles(){ T.classList.remove('f-ecoute','f-marques','f-sourates','f-qari','f-copie','f-partage'); }
+function fermeFeuilles(){ T.classList.remove('f-hors','f-ecoute','f-marques','f-sourates','f-qari','f-copie','f-partage'); }
 function clic(e){
   var el=e.target.closest('[data-a]'), a=el&&el.dataset.a;
   if(e.target.closest('.cor-reseaux button')){ reseau(e.target.closest('.cor-reseaux button').dataset.r); return; }
@@ -343,11 +456,13 @@ function clic(e){
   var s=e.target.closest('.cor-srow, .cor-mrow, .cor-reprendre');
   if(s){ var fs=e.target.closest('.fs'); fermeFeuilles(); arret(); montreLecteur(+s.dataset.s,s.dataset.k?+s.dataset.k:0); return; }
   var qr=e.target.closest('.cor-qrow');
-  if(qr){ var id=qr.dataset.q; S.qari=id; try{ saveLocal(); }catch(x){} var rejoue=!!lecture&&!lecture.pause; fermeFeuilles(); /* en cours : on continue avec la nouvelle voix ; en pause : la lecture est abandonnée */ if(rejoue){ var L=lecture; arret(); lecture=L; suivant(); } else arret(); return; }
+  if(qr){ var id=qr.dataset.q; S.qari=id; try{ saveLocal(); }catch(x){} var rejoue=!!lecture&&!lecture.pause; fermeFeuilles(); marques(); /* en cours : on continue avec la nouvelle voix ; en pause : la lecture est abandonnée */ if(rejoue){ var L=lecture; arret(); lecture=L; suivant(); } else arret(); return; }
   if(!a)return;
   switch(a){
     case 'fermer': coranFermer(); break;
-    case 'hors': toutEnregistrer(el); break;
+    case 'hc-dl': (function(n,v){ telecharger(v,n,function(){ if(HC_N===n&&T.classList.contains('f-hors'))peindreHors(); }); })(HC_N,qari()); break;
+    case 'hc-ligne': EN_LIGNE[cleHors(qari(),HC_N)]=1; apresHors(); break;
+    case 'hc-ecouter': apresHors(); break;
     case 'ferme': fermeFeuilles(); break;
     case 'sourates': ouvreFeuille('sourates'); break;
     case 'qari': listeQari(); ouvreFeuille('qari'); break;
@@ -355,10 +470,10 @@ function clic(e){
     case 'trad': var on=!el.classList.contains('on'); el.classList.toggle('on',on); el.setAttribute('aria-pressed',on?'true':'false'); el.querySelector('.cor-bx').textContent=on?'✓':''; T.classList.toggle('sans-trad',!on); ecrire(K_TRAD,on); majRail(); break;
     case 'mq': var k=+el.dataset.k, M=lire(K_MARQUES,[]), i=M.findIndex(function(m){ return m[0]===E.sur&&m[1]===k; }); if(i>=0)M.splice(i,1); else M.push([E.sur,k]); ecrire(K_MARQUES,M); el.classList.toggle('on',i<0); break;
     case 'vj': arret(); ecouter([[E.sur,+el.dataset.k]],1,false); break;
-    case 'jouer': if(lecture){ if(lecture.pause)reprendre(); else suspendre(); } else ecouter(); break;
+    case 'jouer': if(lecture){ if(lecture.pause)reprendre(); else suspendre(); } else if(demanderHors())ouvreHors(function(){ ecouter(); }); else ecouter(); break;
     case 'ecoute': E.v=premierVisible(); panneau(); ouvreFeuille('ecoute'); break;
     case 'boucle': E.boucle=!E.boucle; T.querySelector('.bcl').classList.toggle('on',E.boucle); etiquette(); break;
-    case 'ecouter': fermeFeuilles(); arret(); ecouter(); break;
+    case 'ecouter': fermeFeuilles(); arret(); if(demanderHors())ouvreHors(function(){ ecouter(); }); else ecouter(); break;
     case 'cp': cible=+el.dataset.k; T.querySelectorAll('.cor-cases input').forEach(function(x){ x.checked=!!CK[x.dataset.c]; }); apercuCopie(); ouvreFeuille('copie'); break;
     case 'copier-go': copie(texteVerset(cible,CK),el,'COPIÉ ✓'); break;
     case 'pt': cible=+el.dataset.k; T.querySelector('.cor-lien-u').textContent=lienVerset(E.sur,cible); T.querySelector('[data-a="lien-c"]').textContent='COPIER LE LIEN'; ouvreFeuille('partage'); break;
@@ -389,7 +504,7 @@ function saisie(e){
 
 /* ── l'entrée et la sortie ── */
 window.coranOuvrir=function(){
-  monte(); montreListe(); T.classList.add('on'); fermeFeuilles();
+  monte(); entretienHors(); montreListe(); T.classList.add('on'); fermeFeuilles(); texteAuto();
 };
 window.coranFermer=function(){
   if(!T)return; arret(); cacheBulle(); fermeFeuilles(); T.classList.remove('on'); noteDerniere();

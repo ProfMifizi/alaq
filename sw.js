@@ -9,10 +9,11 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v264-2026-11-17';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v265-2026-11-17';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
+const HORS_CORAN='alaq-coran-hors';   // coran.js : les sourates téléchargées pour l'écoute sans connexion (7 jours, effacées par coran.js)
 /* IMGCACHE : versionné à part. ⚠️ Une image retouchée garde souvent son nom et reste en
    cache à vie : incrémenter IMGV, et activate jette l'ancien cache d'images.
    (journal : sw.js · images retouchées trois fois sous le même nom) */
@@ -829,7 +830,8 @@ self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
     const keys=await caches.keys();
     // MEDIA survit aux livraisons ; IMGCACHE survit tant qu'IMGV ne bouge pas
-    await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA&&k!==IMGCACHE).map(k=>caches.delete(k)));
+    // HORS_CORAN : les sourates téléchargées par coran.js pour l'écoute sans connexion — coran.js seul les efface (7 jours)
+    await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA&&k!==IMGCACHE&&k!==HORS_CORAN).map(k=>caches.delete(k)));
     // les images anciennement rangées dans MEDIA y restaient périmées : on les en sort
     try{
       const md=await caches.open(MEDIA);
@@ -1325,7 +1327,7 @@ self.addEventListener('fetch',e=>{
     ||/\.(png|jpe?g|webp|mp3|mp4|woff2?)$/.test(url.pathname);
   /* ⛔ Les fichiers de quran.com (voix d'un mot, horaires, versets) ne sont JAMAIS gardés : leurs conditions limitent le cache à 7 jours,
      le cache HTTP du navigateur s'en charge (journal : sw.js · les voix de quran.com) */
-  if(cacheFirst&&!/(^|\.)(qurancdn\.com|quran\.com|quranicaudio\.com)$/.test(url.hostname)){
+  if(cacheFirst&&!/(^|\.)(qurancdn\.com|quran\.com|quranicaudio\.com|everyayah\.com)$/.test(url.hostname)){
     e.respondWith((async()=>{
       const hit=await caches.match(e.request);
       if(hit)return hit;

@@ -2916,7 +2916,21 @@ html.clair .cor-voile{background:rgba(36,29,20,.35)}
 .cor-reseaux .rond{width:50px;height:50px;border-radius:50%;background:var(--panel2);border:1.5px solid var(--line);display:grid;place-items:center;color:var(--gold2)}
 .cor-reseaux .rond svg{width:22px;height:22px;fill:currentColor}
 
-/* le texte hors connexion (liste du lecteur du Coran) */
-.cor-hors{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 2px 12px;font-size:12.5px;font-weight:800;color:var(--muted)}
-.cor-hors-b{flex:0 0 auto;background:rgba(208,135,13,.12);border:1.5px solid var(--gold-d);color:var(--gold2);border-radius:12px;padding:8px 11px;font-weight:900;font-size:12px;cursor:pointer;font-family:var(--ui)}
-.cor-hors-b:disabled{opacity:.6;cursor:default}
+/* écouter sans connexion (Myriam, 17/11 ; préview _apercu-coran-v18.html) : la feuille au ▶, la marque sur le récitateur et dans la liste */
+.f-hors .cor-voile,.f-hors .fh{display:block}
+.hc-sour{text-align:center;margin:0 0 2px;font-weight:900;font-size:18px;color:var(--cream)}
+.hc-sour .ar{font-family:var(--ar);font-size:24px;margin-left:8px;color:var(--gold2);font-weight:400}
+.hc-det{text-align:center;margin:0 0 10px;color:var(--muted);font-weight:800;font-size:14px}
+.hc-note{text-align:center;margin:0 0 4px;color:var(--cream);font-size:13.5px;line-height:1.45}
+.hc-barre{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:14px 0 6px}
+.hc-barre i{display:block;height:100%;background:var(--gold);transition:width .25s}
+.hc-n{text-align:center;font-weight:900;color:var(--gold2);font-size:14px;margin:10px 0 0}
+.hc-err{color:var(--cream)}
+.hc-sec{display:block;width:100%;height:48px;margin-top:10px;border-radius:15px;background:none;border:1.5px solid var(--line);color:var(--cream);font-family:var(--ui);font-weight:900;font-size:15px;cursor:pointer}
+.cor-li{position:relative}
+.cor-hcm{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);color:var(--gold2)}
+.cor-hcm .cor-ico{width:16px;height:16px}
+.cor-li.hc-ici{padding-left:21px}
+.cor-li.hc-ici .cor-hcm{display:block}
+.hc-marque{display:inline-flex;align-items:center;gap:3px;color:var(--gold2);font-weight:900;font-size:12px;margin-left:auto;padding-left:6px;flex:0 0 auto}
+.hc-marque .cor-ico{width:15px;height:15px}
