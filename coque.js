@@ -216,20 +216,20 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='correctifs-17nov';
+const BUILD='mises-a-jour-17nov';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-11-17T18:58';
+const BUILD_DATE='2026-11-17T19:43';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
    de sw.js ; verifier-version.mjs exige les mêmes nombres dans package.json, iOS et Android.
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
-const VERSION='3.29.1';
-const BUILD_NUM=263;
+const VERSION='3.29.2';
+const BUILD_NUM=264;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
@@ -437,8 +437,54 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
   }else{
     /* une installation qui échoue n'est jamais silencieuse : un ticket part */
     try{navigator.serviceWorker.register('sw.js')
+      .then(function(reg){ try{suivreLesMisesAJour(reg);}catch(e){} })
       .catch(function(err){try{tikEnvoyer('sw',String(err&&err.message||err).slice(0,300))}catch(e){}});}catch(e){}
   }
+}
+/* LES MISES À JOUR NE SONT PLUS SILENCIEUSES (Myriam, 17/11 : deux élèves restées des semaines sur une version
+   d'octobre, sans aucun signal). ① au retour dans l'app, le navigateur revérifie sw.js (au plus toutes les 30 min) ;
+   ② une mise à jour qui n'a pas pu s'installer envoie un ticket (le sw neuf finit « redundant » sans être passé par
+   « installed ») : le build, le stockage, les fichiers que sw.js n'a pas pu ranger ; ③ quand la nouvelle version prend
+   la main, la page se recharge — SEULEMENT au repos : l'accueil, aucun écran ouvert (jamais en pleine leçon).
+   « Ouvert » = un enfant direct de <body> qui porte .on : leçon, Coran, fin, 7 épis, badge, onboarding, feuilles.
+   Garde : outils/verifier-mises-a-jour.mjs. (journal : coque.js · les mises à jour silencieuses) */
+let _majPrete=false, _majVerifiee=0, _majManque='';
+function _auRepos(){
+  const h=document.getElementById('home');
+  return !!(h&&h.style.display!=='none'&&!document.querySelector('body > .on'));
+}
+function _rechargerSiPret(){
+  if(!_majPrete||!_auRepos())return;
+  try{ if(Date.now()-(+sessionStorage.getItem('alaq_maj_recharge')||0)<60000)return;   // jamais en boucle
+       sessionStorage.setItem('alaq_maj_recharge',String(Date.now())); }catch(e){}
+  location.reload();
+}
+function _ticketMajRatee(){
+  const envoyer=function(sto){ try{ tikEnvoyer('sw-maj','mise à jour non installée · build '+BUILD_NUM+(sto?' · stockage '+sto:'')+(_majManque?' · manquent : '+_majManque:'')); }catch(e){} };
+  setTimeout(function(){   // le message « sw-echec » de sw.js arrive juste avant ou juste après « redundant »
+    try{ navigator.storage.estimate().then(function(x){ envoyer(Math.round(x.usage/1048576)+' Mo sur '+Math.round(x.quota/1048576)+' Mo'); },function(){ envoyer(''); }); }
+    catch(e){ envoyer(''); }
+  },1500);
+}
+function suivreLesMisesAJour(reg){
+  const sw=navigator.serviceWorker; let controlee=!!sw.controller;
+  sw.addEventListener('controllerchange',function(){
+    if(!controlee){ controlee=true; return; }   // la toute première installation : la page est déjà neuve
+    _majPrete=true; _rechargerSiPret();
+  });
+  sw.addEventListener('message',function(e){ if(e.data&&e.data.type==='sw-echec')_majManque=String(e.data.manque||'').slice(0,200); });
+  reg.addEventListener('updatefound',function(){
+    const w=reg.installing; if(!w)return; let installee=false;
+    w.addEventListener('statechange',function(){
+      if(w.state==='installed'||w.state==='activating'||w.state==='activated')installee=true;
+      else if(w.state==='redundant'&&!installee&&navigator.onLine!==false)_ticketMajRatee();   // hors ligne, l'échec est attendu
+    });
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'&&Date.now()-_majVerifiee>18e5){ _majVerifiee=Date.now(); try{reg.update().catch(function(){});}catch(e){} }
+    _rechargerSiPret();
+  });
+  setInterval(_rechargerSiPret,5000);
 }
 (function(){const b=document.getElementById('sndtog');if(b)b.textContent=SND?'🔊':'🔇';})();
 /* Les minutes de l'objectif : 15 s de leçon visible = 15 s comptées. Le lecteur fermé

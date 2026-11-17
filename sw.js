@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v263-2026-11-17';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v264-2026-11-17';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -781,11 +781,28 @@ async function pecherSupabase(){
 self.addEventListener('install',e=>{
   e.waitUntil((async()=>{
     const c=await caches.open(CACHE);
-    await c.addAll(CORE);   // le cœur SEULEMENT : l'installation doit être rapide
+    try{ await c.addAll(CORE); }   // le cœur SEULEMENT : l'installation doit être rapide
+    catch(err){ await coeurUnParUn(c,err); }
     await pecherSupabase();
     self.skipWaiting();
   })());
 });
+/* LA DEUXIÈME CHANCE DU CŒUR (17/11 : deux élèves restées des semaines sur une version d'octobre). addAll est
+   atomique : un seul fichier raté et toute la mise à jour tombait, en silence. On reprend fichier par fichier, sans le
+   cache HTTP. S'il manque encore quelque chose : la page l'apprend (message « sw-echec », elle envoie un ticket), le cache
+   à moitié rempli est rendu au téléphone, et l'installation échoue quand même — jamais un sw sans tout son cœur.
+   Garde : outils/verifier-sw-horsligne.mjs (S5). */
+async function coeurUnParUn(c,err){
+  const manque=[];
+  for(const u of CORE){
+    try{ if(await c.match(u))continue; const r=await fetch(u,{cache:'reload'}); if(!r.ok)throw new Error(String(r.status)); await c.put(u,r); }
+    catch(_){ manque.push(u); }
+  }
+  if(!manque.length)return;
+  try{ for(const cl of await self.clients.matchAll({includeUncontrolled:true}))cl.postMessage({type:'sw-echec',manque:manque.slice(0,8).join(' ')}); }catch(_){}
+  try{ await caches.delete(CACHE); }catch(_){}
+  throw err;
+}
 /* Audios et icônes pré-chargés APRÈS le premier rendu (message « precache » de la page) :
    avant, ils saturaient le réseau pendant le chargement. */
 let _preFait=false;
