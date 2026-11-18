@@ -191,10 +191,10 @@ function telecharger(v,n,maj,frais){
       return (frais?Promise.resolve(null):c.match(u)).then(function(r){ if(r)return; return fetch(u,{cache:'reload'}).then(function(f){ if(!f.ok)throw new Error(String(f.status)); return c.put(u,f); }); })
         .then(function(){ D.fait++; maj(); return ouvrier(); });
     };
+    var tj=rangerTJ(n);   // son mushaf avec ses sons : la sourate n'est « sur ton téléphone » qu'avec son écriture (Myriam, 18/11)
     caches.open(HORS).then(function(cc){ c=cc; return M?c.put(urlSeg(v,n),new Response(JSON.stringify(M),{headers:{'Content-Type':'application/json'}})):null; })
-      .then(function(){ return Promise.all([ouvrier(),ouvrier(),ouvrier(),ouvrier()]); })
-      .then(function(){ if(D.err)return; var M3=metas(); M3[cle]={t:Date.now(),e:(M3[cle]&&M3[cle].e)||Date.now(),n:total,u:urls}; ecrire(K_HORS,M3); D.fini=true; maj(); marques();
-        if(!frais)charger(n,function(){ chargerTJ(n,function(){}); }); })   // son mushaf aussi, pour le lire en avion
+      .then(function(){ return Promise.all([ouvrier(),ouvrier(),ouvrier(),ouvrier(),tj]); })
+      .then(function(r){ if(D.err)return; if(!r[4])return rate(); var M3=metas(); M3[cle]={t:Date.now(),e:(M3[cle]&&M3[cle].e)||Date.now(),n:total,u:urls}; ecrire(K_HORS,M3); D.fini=true; maj(); marques(); })
       .catch(rate);
   },frais);
 }
@@ -220,6 +220,12 @@ function entretienHors(){
     vieux.forEach(function(n){ delete MT[n]; delete TJ[n]; }); ecrire(K_TJ,MT);
     if(window.caches)caches.open(HORS).then(function(c){ vieux.forEach(function(n){ c.delete(urlTj(+n)); }); }).catch(function(){});
   }
+  /* une sourate téléchargée sans son mushaf (avant la 266) ou avec un mushaf plus vieux que ses sons : il est rangé, en ligne */
+  if(navigator.onLine===false)return;
+  var MH=metas(), MT2=lire(K_TJ,{}), afaire=[];
+  Object.keys(MH).forEach(function(cle){ var m=MH[cle], n=+cle.split('|')[1];
+    if(!m.partiel&&afaire.indexOf(n)<0&&(!MT2[n]||m.t-MT2[n]>36e5))afaire.push(n); });
+  (function suite(){ if(afaire.length)rangerTJ(afaire.shift()).then(suite); })();
 }
 /* les marques : le bouton du récitateur (cette sourate est sur le téléphone pour CETTE voix) et les lignes de la liste */
 function marques(){
@@ -274,6 +280,7 @@ function tjMots(h){
     }
   }
   fermeTaf(); cur.h+=ouvertes().map(function(){ return '</span>'; }).join('');
+  mots.forEach(function(w){ if(w.t.indexOf(PETIT_ALIF)<0)return; w.h=souder(w.h).split(PETIT_ALIF).join(ALIF_SUSCRIT); w.t=w.t.split(PETIT_ALIF).join(ALIF_SUSCRIT); });
   var out=[], avant='';
   mots.forEach(function(w){
     if(!w.t.trim())return;
@@ -281,6 +288,30 @@ function tjMots(h){
     else if(out.length)out[out.length-1]+=' '+w.h; else avant=avant?avant+' '+w.h:w.h;
   });
   return out;
+}
+/* ⛔ LE PETIT ALIF ٲ (U+0672) DE QURAN.COM S'ÉCRIT ٰ (U+0670) (Myriam, 18/11 : ذَٰلِكَ, ٱلصَّلَوٰةَ sur un rond pointillé ◌, iPhone ET
+   Mac). Après une lettre qui ne se lie pas (و ذ ر…), leur texte tajwīd met ٲ, que la police du mushaf dessine AVEC un rond
+   pointillé, et dans un autre <span> que sa lettre (145 fois dans Al-Baqara). On écrit l'alif suscrit ٰ de l'écriture simple, et
+   la lettre et ses signes passent dans le morceau du petit alif : un seul morceau, la couleur de la prolongation. */
+var PETIT_ALIF='ٲ', ALIF_SUSCRIT='ٰ';
+function souder(h){
+  var re=/<span class="tj tj-([a-z_]+)">|<\/span>|(&[a-z#0-9]+;|[\s\S])/g, m, pile=[], car=[];
+  while((m=re.exec(h))){
+    if(m[1]!==undefined){ pile.push(m[1]); continue; }
+    if(m[0]==='</span>'){ pile.pop(); continue; }
+    car.push({c:m[2],p:pile.slice()});
+  }
+  car.forEach(function(x,i){
+    if(x.c!==PETIT_ALIF)return;
+    for(var b=i-1;b>=0&&MARQUE.test(car[b].c);b--)car[b].p=x.p;   // ses signes…
+    if(b>=0&&LETTRE.test(car[b].c))car[b].p=x.p;                  // …et sa lettre
+  });
+  var out='', ouv=[];
+  car.forEach(function(x){
+    if(x.p.join(' ')!==ouv.join(' ')){ out+=ouv.map(function(){ return '</span>'; }).join('')+x.p.map(function(c){ return '<span class="tj tj-'+c+'">'; }).join(''); ouv=x.p; }
+    out+=x.c;
+  });
+  return out+ouv.map(function(){ return '</span>'; }).join('');
 }
 /* leurs mots sur les nôtres (la bulle et la voix d'un mot en dépendent) ; null : ce verset garde l'écriture simple */
 function aligneMots(tj,nous){
@@ -298,12 +329,24 @@ function lireTJ(n,tx){
   }catch(e){ return null; }
 }
 function urlTj(n){ return 'coran-hors/tj/'+trois(n)+'.json'; }   // rangé avec les sons téléchargés, jamais demandé au réseau
+var TJ_API='https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number=';
+/* le mushaf d'une sourate rangé sur le téléphone et daté (7 jours), sans rien peindre : avec ses sons, ou pour une sourate
+   téléchargée sans lui. Rend vrai une fois la copie rangée. */
+function rangerTJ(n){
+  if(!window.caches)return Promise.resolve(false);
+  var tx='';
+  return fetch(TJ_API+n).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(function(t){
+    var vs=JSON.parse(t).verses; if(!vs||vs.length!==LISTE[n-1][4])throw 0; tx=t; return caches.open(HORS);
+  }).then(function(c){ return c.put(urlTj(n),new Response(tx,{headers:{'Content-Type':'application/json'}})); })
+    .then(function(){ var M=lire(K_TJ,{}); M[n]=Date.now(); ecrire(K_TJ,M); delete TJ_ERR[n]; return true; })
+    .catch(function(){ return false; });
+}
 function chargerTJ(n,suite){
   if(TJ[n])return suite(TJ[n]);
   var fini=false, rend=function(d){ if(fini)return; fini=true; if(d)TJ[n]=d; suite(d||null); };
   var reseau=function(){
     var to=setTimeout(function(){ rend(null); },6000);
-    fetch('https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number='+n).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(function(tx){
+    fetch(TJ_API+n).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(function(tx){
       clearTimeout(to); var d=lireTJ(n,tx); if(!d)return rend(null);
       if(window.caches)caches.open(HORS).then(function(c){ return c.put(urlTj(n),new Response(tx,{headers:{'Content-Type':'application/json'}})); })
         .then(function(){ var M=lire(K_TJ,{}); M[n]=Date.now(); ecrire(K_TJ,M); }).catch(function(){});
@@ -495,7 +538,7 @@ function surligner(mot,l){
     var tw=document.createTreeWalker(mot,4), n, ns=[]; while((n=tw.nextNode()))ns.push(n);
     for(var a=ns.length-1;a>=0;a--){
       var t=ns[a], i=t.nodeValue.lastIndexOf(x); if(i<0)continue;
-      var j=i+1; while(j<t.nodeValue.length&&MARQUE.test(t.nodeValue[j]))j++;
+      var j=i+1; while(j<t.nodeValue.length&&(MARQUE.test(t.nodeValue[j])||t.nodeValue[j]===PETIT_ALIF))j++;   // jamais un ٲ coupé de sa lettre
       var mi=t.splitText(i); mi.splitText(j-i);
       var s=document.createElement('span'); s.className='rv-l'; mi.parentNode.insertBefore(s,mi); s.appendChild(mi);
       return true;
@@ -508,12 +551,14 @@ function peindreErreurs(){
   T.querySelectorAll('.rv-l').forEach(function(s){ var p=s.parentNode; while(s.firstChild)p.insertBefore(s.firstChild,s); p.removeChild(s); p.normalize(); });
   T.querySelectorAll('.rv-ligne').forEach(function(x){ x.remove(); });
   T.querySelectorAll('.rv-carte').forEach(function(c){ c.classList.remove('rv-carte'); });
+  T.querySelectorAll('.rv-mot').forEach(function(c){ c.classList.remove('rv-mot'); });
   ERR.forEach(function(e){
     if(e.s!==E.sur)return;
     var c=T.querySelector('.cor-carte[data-k="'+e.k+'"]'), m=c&&c.querySelector('.cor-mot[data-j="'+e.j+'"]'); if(!m)return;
-    surligner(m,e.l); c.classList.add('rv-carte');
+    if(e.m)m.classList.add('rv-mot'); else surligner(m,e.l);
+    c.classList.add('rv-carte');
     c.insertAdjacentHTML('beforeend','<div class="rv-ligne" data-e="'+esc(e.id)+'"><b>À revoir</b><span class="ar" lang="ar" dir="rtl">'+esc(m.textContent)+'</span>'+
-      '<span>'+esc(e.n)+' <span class="ar" lang="ar">'+esc(e.l)+'</span></span><span class="ed" aria-label="Modifier">'+STYLO+'</span></div>');
+      '<span>'+esc(e.n)+(e.m?'':' <span class="ar" lang="ar">'+esc(e.l)+'</span>')+'</span><span class="ed" aria-label="Modifier">'+STYLO+'</span></div>');
   });
 }
 function ouvreErreur(mot,id){
@@ -523,22 +568,29 @@ function ouvreErreur(mot,id){
   var t=mot.textContent, ls=[];
   for(var i=0;i<t.length;i++)if(LETTRE.test(t[i])&&ls.indexOf(t[i])<0)ls.push(t[i]);
   if(!ls.length)return;
-  ERR_ED={e:e,k:+mot.dataset.k,j:+mot.dataset.j,l:e&&ls.indexOf(e.l)>=0?e.l:ls[ls.length-1],n:e?e.n:''};
-  T.querySelector('.cor-er').innerHTML='<p class="cor-motgd" lang="ar" dir="rtl">'+esc(t)+'</p>'+
+  ERR_ED={e:e,k:+mot.dataset.k,j:+mot.dataset.j,t:t,m:!!(e&&e.m),l:e&&!e.m&&ls.indexOf(e.l)>=0?e.l:ls[ls.length-1],n:e?e.n:''};
+  /* « Une lettre » ou « Tout le mot » (Myriam, 18/11, choix C de _apercu-coran-v19) : le mot entier cache les lettres */
+  T.querySelector('.cor-er').innerHTML='<p class="cor-motgd" lang="ar" dir="rtl"></p>'+
+    '<div class="cor-tm"><button data-tm="lettre">Une lettre</button><button data-tm="mot">Tout le mot</button></div>'+
     '<div class="cor-lettres" dir="rtl">'+ls.map(function(x){ return '<button data-l="'+esc(x)+'">'+esc(x)+'</button>'; }).join('')+'</div>'+
     '<div class="cor-notes">'+NOTES.map(function(x){ return '<button data-n="'+esc(x)+'">'+esc(x)+'</button>'; }).join('')+'</div>'+
     '<div class="cor-act">'+(e?'<button class="cor-suppr" data-a="err-x">Je ne fais plus cette erreur</button>':'')+'<button class="cor-ok" data-a="err-ok">'+(e?'Enregistrer':'Marquer')+'</button></div>';
   peindreChoixErreur(); ouvreFeuille('erreur');
 }
 function peindreChoixErreur(){
-  T.querySelectorAll('.cor-lettres button').forEach(function(b){ b.classList.toggle('on',b.dataset.l===ERR_ED.l); });
+  var x=ERR_ED, g=T.querySelector('.cor-motgd');
+  g.textContent=x.t;   /* le grand mot montre en jaune ce qui sera marqué */
+  if(x.m){ var s=document.createElement('span'); s.className='rv-l'; s.textContent=x.t; g.textContent=''; g.appendChild(s); } else surligner(g,x.l);
+  T.querySelectorAll('.cor-tm button').forEach(function(b){ b.classList.toggle('on',(b.dataset.tm==='mot')===x.m); });
+  T.querySelector('.cor-lettres').hidden=x.m;
+  T.querySelectorAll('.cor-lettres button').forEach(function(b){ b.classList.toggle('on',!x.m&&b.dataset.l===x.l); });
   T.querySelectorAll('.cor-notes button').forEach(function(b){ b.classList.toggle('on',b.dataset.n===ERR_ED.n); });
 }
 function garderErreur(supprimer){
   var x=ERR_ED; if(!x)return; ERR_ED=null;
   if(supprimer)ERR=ERR.filter(function(e){ return e!==x.e; });
-  else if(x.e){ x.e.l=x.l; x.e.n=x.n||'à revoir'; }
-  else ERR.push({id:'e'+Date.now().toString(36)+ERR.length,s:E.sur,k:x.k,j:x.j,l:x.l,n:x.n||'à revoir'});
+  else if(x.e){ x.e.l=x.m?'':x.l; x.e.m=x.m?1:0; x.e.n=x.n||'à revoir'; }
+  else ERR.push({id:'e'+Date.now().toString(36)+ERR.length,s:E.sur,k:x.k,j:x.j,l:x.m?'':x.l,m:x.m?1:0,n:x.n||'à revoir'});
   ecrire(K_ERREURS,ERR); fermeFeuilles(); peindreErreurs();
 }
 
@@ -622,14 +674,18 @@ function montreBulle(m){
   b.classList.toggle('haut',dessus);
   b.style.left=x+'px'; b.style.top=(dessus?r.top-tr.top-bh-10:r.bottom-tr.top+7)+'px'; b.querySelector('i').style.left=(r.left-tr.left+r.width/2-x)+'px';
 }
-function cacheBulle(){ clearTimeout(_bulleT); var b=T&&T.querySelector('.cor-bulle'); if(b)b.classList.remove('on'); if(MOT_EL)MOT_EL.classList.remove('dit'); }
+function cacheBulle(){ clearTimeout(_bulleT); var b=T&&T.querySelector('.cor-bulle'); if(b)b.classList.remove('on'); eteindreMots(); }
+/* ⛔ TOUS les mots touchés, jamais le dernier seul : une voix finie oubliait le mot d'avant, et les mots allumés s'additionnaient
+   (Myriam, 18/11) */
+function eteindreMots(){ if(T)T.querySelectorAll('.cor-mot.dit').forEach(function(x){ x.classList.remove('dit'); }); }
 function cacheBulleBientot(){ clearTimeout(_bulleT); _bulleT=setTimeout(cacheBulle,BULLE_MS); }
 
 /* la voix d'UN mot : sur un canal à part ; une récitation en cours se met en PAUSE, sans se perdre */
 function joueMot(k,j,el){
   try{ stopAudio(); }catch(e){}
   if(lecture)suspendre(); else coupeVoix();
-  if(MOT_A){ try{ MOT_A.pause(); }catch(e){} if(MOT_EL)MOT_EL.classList.remove('dit'); }
+  if(MOT_A){ try{ MOT_A.pause(); }catch(e){} }
+  eteindreMots();
   var a=new Audio(urlMot(E.sur,k,j)); MOT_A=a; MOT_EL=el; el.classList.add('dit');
   /* le mot reste allumé aussi longtemps que sa bulle : cacheBulle() retire les deux (Myriam, 03/11) */
   var fin=function(){ if(MOT_A===a)MOT_A=null; };
@@ -768,7 +824,8 @@ function clic(e){
   var el=e.target.closest('[data-a]'), a=el&&el.dataset.a, b;
   if(e.target.closest('.cor-reseaux button')){ reseau(e.target.closest('.cor-reseaux button').dataset.r); return; }
   if((b=e.target.closest('.cor-opt'))){ choisirEcriture(b.dataset.ecr); return; }
-  if((b=e.target.closest('.cor-lettres button'))&&ERR_ED){ ERR_ED.l=b.dataset.l; peindreChoixErreur(); return; }
+  if((b=e.target.closest('.cor-tm button'))&&ERR_ED){ ERR_ED.m=b.dataset.tm==='mot'; if(ERR_ED.m&&!ERR_ED.n)ERR_ED.n='oublié'; peindreChoixErreur(); return; }
+  if((b=e.target.closest('.cor-lettres button'))&&ERR_ED){ ERR_ED.m=false; ERR_ED.l=b.dataset.l; peindreChoixErreur(); return; }
   if((b=e.target.closest('.cor-notes button'))&&ERR_ED){ ERR_ED.n=b.dataset.n; peindreChoixErreur(); return; }
   if(e.target.closest('.cor-seg button')){ E.mode=e.target.closest('.cor-seg button').dataset.m; panneau(); return; }
   if(e.target.closest('.cor-pas button')){ var p=e.target.closest('.cor-pas'), kk=p.dataset.k; E[kk]=borne(kk,E[kk]+(+e.target.closest('.cor-pas button').dataset.d)); p.querySelector('input').value=E[kk]; etiquette(); return; }

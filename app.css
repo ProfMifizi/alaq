@@ -440,16 +440,11 @@
      fichier, s'applique aussi ici — un span séparé casserait son rattachement). Toute la case
      grossit un peu, cible comme les autres, juste plus dure à repérer sans ce coup de pouce. */
   .vl-madd{font-size:36px;font-weight:400}
-  /* leçon 4 v3 (validée 10/08) : haut-parleur dessiné + nom du récitateur SANS boîte
-     (le toucher OUVRE le sélecteur) + loupe Artlist ; la loupe agrandit le verset */
+  /* leçon 4 v3 (validée 10/08) : haut-parleur dessiné + nom du récitateur SANS boîte (le toucher OUVRE le sélecteur) */
   .vtools{display:flex;align-items:center;justify-content:center;gap:8px;margin:-8px 0 10px}
   .vspk{background:none;border:none;padding:2px;display:flex;align-items:center;gap:7px;color:var(--gold)}
   .vspk .spk{width:44px;height:29px}
   .qari-nom{font-size:13px;color:var(--muted);font-weight:700}
-  .vloupe{background:none;border:none;padding:2px;margin-left:14px}
-  .vloupe img{height:30px;width:30px;display:block;transition:transform .2s}
-  .vloupe.zoomed img{transform:scale(1.18)}
-  .verse.zoomed{font-size:52px;line-height:2.2}
   .vl.hit{color:var(--gold);text-shadow:0 0 14px rgba(208,135,13,.45)}
   .vl.miss{animation:vlmiss .38s ease-out}
   @keyframes vlmiss{
@@ -2833,12 +2828,16 @@ html.clair .coran-plein{background-image:radial-gradient(circle at 50% 0%,#FFFDF
 .cor-tr{font-size:14px;line-height:1.45;color:#5A4E3E;margin-top:6px;padding-top:7px;border-top:1px solid #E7D9B8}
 .sans-trad .cor-tr{display:none}
 .cor-mot{border-radius:8px;padding:.24em .12em .04em;cursor:pointer;transition:background .12s,color .12s}
-.cor-mot.dit{background:var(--gold2);color:#2A1A05}
-/* la récitation (version B de Myriam) : le verset devient doré clair, les mots lus s'écrivent en noir, le mot récité est sur une boîte ambrée */
+/* le mot touché : une boîte BLANCHE cerclée d'ambre, posée sur la carte (Myriam, 18/11 : « sur fond blanc, pas transparent » —
+   sur la carte presque blanche, seule l'ombre la détache) */
+.cor-mot.dit{background:#FFFFFF;color:#120C05;box-shadow:inset 0 0 0 1.5px #9A5A0B,0 3px 10px rgba(122,78,12,.32)}
+/* la récitation (version B de Myriam) : le verset devient doré clair, les mots lus s'écrivent en noir ; le mot récité sur une boîte
+   presque blanche cerclée d'ambre (Myriam, 18/11, préview _apercu-coran-v19 A) : les couleurs du tajwīd, faites pour une page
+   claire, se perdaient sur l'ancienne boîte marron */
 .cor-carte.joue{background:#F2DFB2;border-color:#E8C27A}
 .cor-carte.joue .cor-ct{color:#7A5F38}
 .cor-carte.joue .cor-mot.lu{color:#120C05}
-.cor-carte.joue .cor-mot.en{background:#9A5A0B;color:#FFF6E6}
+.cor-carte.joue .cor-mot.en{background:#FFFBF2;color:#120C05;box-shadow:inset 0 0 0 1.5px #9A5A0B}
 .cor-carte.joue .cor-tr{color:#3D2F1C;border-top-color:rgba(61,47,28,.18)}
 .cor-carte.joue .cor-n,.cor-carte.joue .cor-ch button{color:#7A4E0C}
 html.clair .cor-carte.joue{background:#F6E3B4;border-color:var(--gold)}
@@ -2902,7 +2901,13 @@ html.clair .cor-stop{background:#4E3210;color:#F2E9DA}
 .cor-tjc .tj-madda_normal{color:#f77e00}.cor-tjc .tj-madda_permissible{color:#e12013}.cor-tjc .tj-madda_obligatory{color:#dd0b70}.cor-tjc .tj-madda_necessary{color:#610b49}
 .cor-tjc .tj-qalaqah{color:#006eff}.cor-tjc .tj-tafkhim{color:#1c1c57}
 /* les erreurs « à revoir » : la lettre au surligneur jaune (choix A), la carte bordée de rouge, la ligne à toucher pour modifier */
-.cor-crayonne .cor-ct .cor-mot{outline:1.5px dashed rgba(226,72,61,.75);outline-offset:3px;border-radius:5px}
+/* le stylo : un cadre pointillé fin par mot (tirets de 3 px, espacés de 2), tenu dans la hauteur de sa ligne et dans la largeur du
+   mot — deux cadres ne se touchent jamais (Myriam, 18/11). Un `outline` ne règle ni la longueur des tirets ni le débord. */
+.cor-crayonne .cor-ct .cor-mot{position:relative;border-radius:5px}
+.cor-crayonne .cor-ct .cor-mot::after{content:'';position:absolute;left:0;right:0;top:50%;height:1.7em;transform:translateY(-50%);border-radius:5px;pointer-events:none;
+  background:linear-gradient(90deg,rgba(226,72,61,.8) 60%,transparent 0) 0 0/5px 1px repeat-x,linear-gradient(90deg,rgba(226,72,61,.8) 60%,transparent 0) 0 100%/5px 1px repeat-x,
+    linear-gradient(rgba(226,72,61,.8) 60%,transparent 0) 0 0/1px 5px repeat-y,linear-gradient(rgba(226,72,61,.8) 60%,transparent 0) 100% 0/1px 5px repeat-y}
+.cor-mushaf.cor-crayonne .cor-ct .cor-mot::after{height:1.95em;top:calc(50% - .1em)}
 .rv-l{background:rgba(255,214,0,.42);border-radius:3px}
 .cor-carte.rv-carte{border-color:rgba(226,72,61,.75)}
 .rv-ligne{margin-top:6px;padding:6px 10px;border-radius:10px;background:rgba(226,72,61,.12);border:1px solid rgba(226,72,61,.45);color:#3B2A1A;font-size:13px;font-weight:700;display:flex;gap:8px;align-items:center;cursor:pointer}
@@ -3006,6 +3011,13 @@ html.clair .cor-voile{background:rgba(36,29,20,.35)}
 .cor-code span{font-size:12.5px;color:var(--muted);line-height:1.35;display:block}
 .cor-motgd{font-family:var(--ar);font-size:44px;line-height:1.6;text-align:center;color:var(--cream);margin:0 0 6px}
 .cor-mushaf .cor-motgd{font-family:"Uthmanic Hafs",var(--ar)}
+.cor-motgd .rv-l{border-radius:6px}
+/* « Une lettre » ou « Tout le mot » (choix C, v19) : l'allure du sélecteur de la feuille « Écouter » ; le mot entier, en jaune comme une lettre */
+.cor-tm{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 12px}
+.cor-tm button{border:1.5px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:12px;padding:11px 2px;font-weight:900;font-size:14px;line-height:1.2;cursor:pointer;font-family:var(--ui)}
+.cor-tm button.on{border-color:var(--gold-d);background:rgba(208,135,13,.16);color:var(--gold2)}
+.cor-lettres[hidden]{display:none}
+.cor-ct .cor-mot.rv-mot{background:rgba(255,214,0,.42)}
 .cor-lettres{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 12px}
 .cor-lettres button{min-width:54px;height:58px;border-radius:12px;border:2px solid var(--line);background:var(--panel2);color:var(--cream);font-family:var(--ar);font-size:30px;cursor:pointer}
 .cor-lettres button.on{border-color:#E2483D;background:rgba(226,72,61,.15)}
