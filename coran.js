@@ -3,11 +3,16 @@
    dessus, la voix du mot (quran.com), la récitation du récitateur choisi avec le verset doré et ses mots allumés un à un,
    pause qui garde sa place, écoute d'un verset / de versets / d'une sourate / d'une playlist de 1 à 100 fois ou en boucle,
    marque-pages et dernière lecture, copier et partager un verset. (journal : coran.js · le lecteur du Coran, 03/11)
-   Préviews validées par Myriam : previews/_apercu-coran-v10.html (branche retours-accueil-2nov).
+   Depuis le 18/11 (préviews _apercu-coran-v12 à v18, validées par Myriam) : la barre du haut (⏮ ⏭ changent de sourate, ▶ ■,
+   le récitateur, ×1, le cercle de l'épi), deux écritures (simple / mushaf de Médine et ses couleurs du tajwīd), les erreurs
+   « à revoir » surlignées et modifiables, mémoriser mot à mot, la lecture qui compte pour la série (3 min = le jour et +10 graines,
+   une fois par jour), l'écran de fin et les 7 épis en fermant, l'enchaînement d'une sourate à la suivante.
    Script CLASSIQUE, chargé sous bulles-tutoriels.js et avant coque.js. Ouvert au doigt (ui/parametres.js › ISLAM_CASES) : il
    ne sert jamais au premier rendu, mais il reste classique comme tous les écrans de la coque (aucun import, aucun export).
    AU CHARGEMENT : rien n'est lu ni écrit, il ne pose que coranOuvrir/coranFermer sur window.
-   À L'APPEL : S, saveLocal (progression.js) · VOIX, QARI_DEFAUT, HOROV, qariUrl (revision.js) · stopAudio (son.js).
+   À L'APPEL : S, save, saveLocal, today, SYNC (progression.js) · VOIX, QARI_DEFAUT, HOROV, qariUrl (revision.js) · stopAudio,
+   playSfx (son.js) · icoImg (assets.js) · toast, backTo, pendingStreak (coque.js) · validerJour, gagnerGraines, GRAINES,
+   feteJourPending, caseHTML, ICO_GRAIN_FIN, ICO_EPI_FIN, fillFinishConstance, confettiBurst, refreshStats (constance.js, ui/).
    DONNÉES : coran/NNN-v1.json, une par sourate (texte Tanzil, mot à mot de l'app, traduction du sens de Rachid Maach / QuranEnc),
    servies par sw.js (cache d'abord). Les horaires des mots viennent de api.quran.com ; la voix d'un mot, de audio.qurancdn.com :
    lues à la source au toucher, jamais copiées ni mises en cache (conditions de Quran Foundation : « Quran data provided by
@@ -37,6 +42,26 @@ var EA={'ar.aymanswoaid':'Ayman_Sowaid_64kbps','ar.ibrahimakhbar':'Ibrahim_Akhda
   'ar.abdulbasitmurattal':'Abdul_Basit_Murattal_192kbps','ar.muhammadjibreel':'Muhammad_Jibreel_64kbps','ar.hanirifai':'Hani_Rifai_192kbps',
   'ar.saoodshuraym':'Saood_ash-Shuraym_64kbps','ar.abdurrahmaansudais':'Abdurrahmaan_As-Sudais_192kbps',
   'ar.ahmedajamy':'Ahmed_ibn_Ali_al-Ajamy_128kbps_ketaballah.net','ar.mahermuaiqly':'Maher_AlMuaiqly_64kbps','ar.husarymujawwad':'Husary_128kbps_Mujawwad'};
+/* L'ÉCRITURE DU MUSHAF : le texte uthmani et ses couleurs du tajwīd viennent de api.quran.com (Quran Foundation), lus à la
+   source et gardés 7 JOURS au plus dans le cache HORS (leurs conditions : pas de base embarquée) ; hors connexion et sans
+   copie récente, l'écriture simple. Leur découpage en mots est le nôtre sur 6 232 versets sur 6 236 (mesuré le 18/11) ; un
+   signe seul (pause, ۞) rejoint son mot, et les 4 autres se recollent sur nos mots (aligneMots). La police : KFGQPC Uthmanic
+   Hafs v18, embarquée (polices/). ⛔ Leur HTML est une donnée étrangère : seules leurs balises de couleur sont relues, le
+   reste est échappé (tjMots). */
+var K_ECRITURE='alaq_coran_ecriture', K_ERREURS='alaq_coran_erreurs', K_JOUR='alaq_coran_jour', K_TJ='alaq_coran_tj';
+var TJ_CL=/^(ham_wasl|laam_shamsiyah|slnt|idgham_wo_ghunnah|idgham_mutajanisayn|idgham_mutaqaribayn|ghunnah|ikhafa|ikhafa_shafawi|idgham_ghunnah|idgham_shafawi|iqlab|madda_normal|madda_permissible|madda_obligatory|madda_necessary|qalaqah)$/;
+var LETTRE=/[ء-يٱ-ۓۺ-ۿ]/, MARQUE=/[ً-ٰٟۖ-ۭ]/, LOURDE=/[خصضغطقظ]/;
+/* LA LECTURE COMPTE POUR LA SÉRIE (Myriam, 17/11) : le TEXTE lu, 2 s par mot, une fois par passage, jamais plus vite que la
+   montre ; 3 minutes valident le jour (« un disque du parcours c'est environ 3 minutes »). Les graines : celles d'un disque
+   (GRAINES.lecon), une fois par jour, déclarées « REV-CORAN » — le serveur ne verse que par leçon et par jour, et son solde
+   remplace celui du téléphone : un autre montant serait effacé à la synchro suivante. */
+var SEC_MOT=2, SEUIL_JOUR=180, CERCLE=119.4;
+var NOTES=['amincir','épaissir','prolonger','ne pas prolonger','ghunna','qalqala','mal prononcé','oublié'];
+var CODE_TJ=[['#64655e','Gris','Ne se prononce pas : l’alif de liaison, le lām solaire, l’idghām.'],
+  ['#2b6228','Vert','Le son du nez (ghunna), deux temps : ikhfāʾ, idghām avec ghunna, iqlāb.'],
+  ['#f77e00','Orange','Prolongation naturelle : deux temps.'],['#e12013','Rouge vif','Prolongation permise : deux, quatre ou six temps.'],
+  ['#dd0b70','Rouge-rose','Prolongation obligatoire : quatre ou cinq temps.'],['#610b49','Bordeaux','Prolongation nécessaire : six temps.'],
+  ['#006eff','Bleu','Le rebond (qalqala).'],['#1c1c57','Bleu nuit','La lettre lourde (tafkhīm).']];
 
 var SPK='<svg class="cor-ico" viewBox="0 0 26 20"><path class="f" d="M2 7h4l5-4.5v15L6 13H2z"/><path class="f" d="M15 6.2a5 5 0 0 1 0 7.6l-1.2-1.3a3.2 3.2 0 0 0 0-5z"/><path class="f" d="M18 3.4a9 9 0 0 1 0 13.2l-1.2-1.3a7.2 7.2 0 0 0 0-10.6z" opacity=".55"/></svg>';
 var RUBAN='<svg class="cor-ico" viewBox="0 0 16 20"><path d="M2 1.5h12v17l-6-4.5-6 4.5z"/></svg>';
@@ -45,6 +70,12 @@ var PARTAGER='<svg class="cor-ico" viewBox="0 0 24 24"><circle cx="18" cy="5" r=
 var BOUCLE='<svg class="cor-ico" viewBox="0 0 24 24"><path d="M4 11V9a3 3 0 0 1 3-3h12l-3-3M20 13v2a3 3 0 0 1-3 3H5l3 3"/></svg>';
 var PLAY='<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>';
 var PAUSE='<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+var STOP='<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+var PREC='<svg viewBox="0 0 24 24"><path d="M6 6h2.4v12H6zM19 6v12l-9-6z"/></svg>';
+var SUIV='<svg viewBox="0 0 24 24"><path d="M15.6 6H18v12h-2.4zM5 6v12l9-6z"/></svg>';
+var STYLO='<svg viewBox="0 0 24 24"><path d="M4 20l1.2-4.6L15.5 5.1a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13.5 7l3.5 3.5" stroke="currentColor" stroke-width="2"/></svg>';
+var OEIL='<svg viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.8" fill="currentColor"/><path d="M4.5 4.5l15 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+var LIVRE='<svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 4 5v13.5c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5z"/><path d="M12 6.5V20"/></svg>';
 var LOGO={wa:'<svg viewBox="0 0 24 24"><path d="M12 2.2a9.7 9.7 0 0 0-8.4 14.6L2.3 21.8l5.1-1.3A9.7 9.7 0 1 0 12 2.2zm0 17.6a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 19.8zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3z"/></svg>',
   fb:'<svg viewBox="0 0 24 24"><path d="M13.5 21.5v-7.8h2.6l.4-3h-3V8.8c0-.9.3-1.5 1.5-1.5h1.6V4.6a21 21 0 0 0-2.3-.1c-2.3 0-3.9 1.4-3.9 4v2.2H7.8v3h2.6v7.8z"/></svg>',
   x:'<svg viewBox="0 0 24 24"><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.9 3h6.4l4.4 5.8zm-1.1 16.2h1.7L7.4 4.7H5.6z"/></svg>',
@@ -73,6 +104,12 @@ var DL=null;                      // le téléchargement en cours : { cle, n, fa
 var EN_LIGNE={};                  // « Écouter en ligne » choisi pour une sourate, le temps de la séance
 var HC_N=0, HC_APRES=null;        // la sourate de la feuille « sans connexion », et ce qui suit son choix
 var TEXTE_FAIT=false;
+var ECR=null;                     // l'écriture : { m:'simple'|'mushaf', c:1 couleurs du tajwīd }
+var TJ={}, TJ_ERR={};             // le mushaf de chaque sourate : par verset, ses mots en HTML (ou null : l'écriture simple)
+var ERR=[], ERR_ED=null;          // les erreurs « à revoir » : { id, s, k, j, l lettre, n note } ; celle qu'on écrit
+var MEMO=false, CRAYON=false;     // mémoriser (le texte caché) ; le stylo des erreurs
+var GEN=0;                        // une seule voix : chaque verset lancé invalide le précédent encore en route
+var CPT={dernier:0}, MINUT=null, SES={gain:0};   // le compteur de la lecture du jour ; ce que la séance a gagné
 var FLECHE='<svg class="cor-ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>';
 
 function coupeVoix(){ if(VOIX_A){ try{ VOIX_A.pause(); }catch(e){} } VOIX_A=null; var f=VOIX_FIN; VOIX_FIN=null; if(f)f(); }
@@ -156,7 +193,8 @@ function telecharger(v,n,maj,frais){
     };
     caches.open(HORS).then(function(cc){ c=cc; return M?c.put(urlSeg(v,n),new Response(JSON.stringify(M),{headers:{'Content-Type':'application/json'}})):null; })
       .then(function(){ return Promise.all([ouvrier(),ouvrier(),ouvrier(),ouvrier()]); })
-      .then(function(){ if(D.err)return; var M3=metas(); M3[cle]={t:Date.now(),e:(M3[cle]&&M3[cle].e)||Date.now(),n:total,u:urls}; ecrire(K_HORS,M3); D.fini=true; maj(); marques(); })
+      .then(function(){ if(D.err)return; var M3=metas(); M3[cle]={t:Date.now(),e:(M3[cle]&&M3[cle].e)||Date.now(),n:total,u:urls}; ecrire(K_HORS,M3); D.fini=true; maj(); marques();
+        if(!frais)charger(n,function(){ chargerTJ(n,function(){}); }); })   // son mushaf aussi, pour le lire en avion
       .catch(rate);
   },frais);
 }
@@ -176,6 +214,12 @@ function entretienHors(){
     }
   });
   if(change){ ecrire(K_HORS,M); marques(); }
+  /* le mushaf lu chez quran.com : 7 jours au plus, lui aussi */
+  var MT=lire(K_TJ,{}), vieux=Object.keys(MT).filter(function(n){ return maintenant-MT[n]>=SEPT_J; });
+  if(vieux.length){
+    vieux.forEach(function(n){ delete MT[n]; delete TJ[n]; }); ecrire(K_TJ,MT);
+    if(window.caches)caches.open(HORS).then(function(c){ vieux.forEach(function(n){ c.delete(urlTj(+n)); }); }).catch(function(){});
+  }
 }
 /* les marques : le bouton du récitateur (cette sourate est sur le téléphone pour CETTE voix) et les lignes de la liste */
 function marques(){
@@ -209,6 +253,82 @@ function texteAuto(){
   (function suite(){ if(i>=LISTE.length)return; fetch(urlSourate(LISTE[i++][0])).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(function(){ setTimeout(suite,40); },function(){ TEXTE_FAIT=false; }); })();
 }
 
+/* ── l'écriture du mushaf ── */
+/* le HTML tajwīd d'un verset, coupé en mots : une couleur à cheval sur deux mots est fermée avant l'espace et rouverte après ;
+   les lettres lourdes hors de toute couleur prennent la leur (tafkhīm) ; un signe seul rejoint son mot */
+function tjMots(h){
+  var re=/<tajweed class=([a-z_]+)>|<\/tajweed>|<span class=end>[^<]*<\/span>|<[^>]*>|([^<]+)/g, m, pile=[], mots=[], cur=null, taf=false;
+  var ouvre=function(c){ return '<span class="tj tj-'+c+'">'; }, ouvertes=function(){ return pile.filter(Boolean); };
+  var neuf=function(){ cur={h:ouvertes().map(ouvre).join(''),t:''}; mots.push(cur); };
+  var fermeTaf=function(){ if(taf){ cur.h+='</span>'; taf=false; } };
+  neuf();
+  while((m=re.exec(h))){
+    if(m[1]!==undefined){ fermeTaf(); var c=TJ_CL.test(m[1])?m[1]:''; pile.push(c); if(c)cur.h+=ouvre(c); continue; }
+    if(m[0]==='</tajweed>'){ fermeTaf(); if(pile.pop())cur.h+='</span>'; continue; }
+    if(m[2]===undefined)continue;                         // une autre balise, le numéro de fin : ignorés
+    for(var i=0;i<m[2].length;i++){ var ch=m[2][i];
+      if(ch===' '){ fermeTaf(); cur.h+=ouvertes().map(function(){ return '</span>'; }).join(''); neuf(); continue; }
+      if(taf&&!MARQUE.test(ch))fermeTaf();
+      if(!taf&&LOURDE.test(ch)&&!ouvertes().length){ cur.h+=ouvre('tafkhim'); taf=true; }
+      cur.h+=esc(ch); cur.t+=ch;
+    }
+  }
+  fermeTaf(); cur.h+=ouvertes().map(function(){ return '</span>'; }).join('');
+  var out=[], avant='';
+  mots.forEach(function(w){
+    if(!w.t.trim())return;
+    if(LETTRE.test(w.t)){ out.push(avant?avant+' '+w.h:w.h); avant=''; }
+    else if(out.length)out[out.length-1]+=' '+w.h; else avant=avant?avant+' '+w.h:w.h;
+  });
+  return out;
+}
+/* leurs mots sur les nôtres (la bulle et la voix d'un mot en dépendent) ; null : ce verset garde l'écriture simple */
+function aligneMots(tj,nous){
+  if(tj.length===nous.length)return tj;
+  var out=[], i=0;
+  for(var j=0;j<nous.length;j++){
+    var n=nous[j].split(' ').filter(function(x){ return LETTRE.test(x); }).length||1;
+    if(i+n>tj.length)return null; out.push(tj.slice(i,i+n).join(' ')); i+=n;
+  }
+  return i===tj.length?out:null;
+}
+function lireTJ(n,tx){
+  try{ var vs=JSON.parse(tx).verses, nous=TXT[n].v; if(!vs||vs.length!==nous.length)return null;
+    return vs.map(function(v,i){ return aligneMots(tjMots(String(v.text_uthmani_tajweed||'')),nous[i][0]); });
+  }catch(e){ return null; }
+}
+function urlTj(n){ return 'coran-hors/tj/'+trois(n)+'.json'; }   // rangé avec les sons téléchargés, jamais demandé au réseau
+function chargerTJ(n,suite){
+  if(TJ[n])return suite(TJ[n]);
+  var fini=false, rend=function(d){ if(fini)return; fini=true; if(d)TJ[n]=d; suite(d||null); };
+  var reseau=function(){
+    var to=setTimeout(function(){ rend(null); },6000);
+    fetch('https://api.quran.com/api/v4/quran/verses/uthmani_tajweed?chapter_number='+n).then(function(r){ if(!r.ok)throw 0; return r.text(); }).then(function(tx){
+      clearTimeout(to); var d=lireTJ(n,tx); if(!d)return rend(null);
+      if(window.caches)caches.open(HORS).then(function(c){ return c.put(urlTj(n),new Response(tx,{headers:{'Content-Type':'application/json'}})); })
+        .then(function(){ var M=lire(K_TJ,{}); M[n]=Date.now(); ecrire(K_TJ,M); }).catch(function(){});
+      rend(d);
+    }).catch(function(){ clearTimeout(to); rend(null); });
+  };
+  var t=lire(K_TJ,{})[n];
+  if(!t||Date.now()-t>=SEPT_J||!window.caches)return reseau();
+  caches.open(HORS).then(function(c){ return c.match(urlTj(n)); }).then(function(r){ return r?r.text():null; })
+    .then(function(tx){ var d=tx&&lireTJ(n,tx); if(d)rend(d); else reseau(); },reseau);
+}
+/* le texte de la sourate, et son mushaf si c'est l'écriture choisie (sans connexion ni copie : l'écriture simple, dite une fois).
+   Un réseau lent n'immobilise jamais l'écran : à 1,5 s la sourate s'ouvre en écriture simple, et son mushaf la repeint à son arrivée. */
+function preparer(n,suite){
+  charger(n,function(){
+    if(ECR.m!=='mushaf')return suite();
+    var fait=false, tard=setTimeout(function(){ if(!fait){ fait=true; suite(); } },1500);
+    chargerTJ(n,function(d){
+      if(!d&&!TJ_ERR[n]){ TJ_ERR[n]=1; try{ toast('L’écriture du mushaf demande une connexion'); }catch(e){} }
+      if(!fait){ fait=true; clearTimeout(tard); return suite(); }
+      if(d&&E.sur===n&&ECR.m==='mushaf'&&T&&!T.querySelector('.cor-lect').hidden)repeindre();
+    });
+  });
+}
+
 /* ═══ l'écran ═══ */
 function monte(){
   if(T)return;
@@ -216,12 +336,19 @@ function monte(){
   T.innerHTML=
     '<div class="cor-vue cor-liste"></div>'+
     '<div class="cor-vue cor-lect" hidden>'+
-      '<div class="cor-tete"><button class="cor-x" data-a="fermer" aria-label="Fermer le Coran">✕</button><button class="cor-titre" data-a="sourates"></button>'+
+      '<div class="cor-tete"><button class="cor-x" data-a="fermer" aria-label="Fermer le Coran">✕</button>'+
+        '<button class="cor-sour" data-a="moins" aria-label="Sourate précédente">'+PREC+'</button><button class="cor-titre" data-a="sourates"></button>'+
+        '<button class="cor-sour" data-a="plus" aria-label="Sourate suivante">'+SUIV+'</button>'+
         '<button class="cor-mp" data-a="marques" aria-label="Marque-pages">'+RUBAN+'</button></div>'+
-      '<div class="cor-outils"><button class="cor-coche on" data-a="trad" aria-pressed="true"><span class="cor-bx">✓</span>Traduction</button></div>'+
+      '<div class="cor-ctrl"><button class="cor-li" data-a="qari"><span class="cor-hcm" aria-label="Sur le téléphone">'+FLECHE+'</span><b class="cor-q1"></b></button>'+
+        '<button class="cor-jouer" data-a="jouer" aria-label="Écouter">'+PLAY+'</button><button class="cor-stop" data-a="stop" aria-label="Arrêter">'+STOP+'</button>'+
+        '<button class="cor-rep" data-a="ecoute" aria-label="Réglages de l’écoute">'+BOUCLE+'<span class="cor-repn">×1</span></button>'+
+        '<div class="cor-serie" role="img" aria-label="La lecture du jour"><svg viewBox="0 0 44 44"><circle class="fd" cx="22" cy="22" r="19"/><circle class="av" cx="22" cy="22" r="19"/></svg>'+icoImg('tb-epi')+'</div></div>'+
+      '<div class="cor-outils"><button class="cor-coche on" data-a="trad" aria-pressed="true"><span class="cor-bx">✓</span>Traduction</button>'+
+        '<div class="cor-outd"><button class="cor-ob cor-memo" data-a="memo" aria-pressed="false" aria-label="Mémoriser : cacher le texte">'+OEIL+'</button>'+
+        '<button class="cor-aa" data-a="ecriture" aria-label="L’écriture du Coran"><i></i><i></i><i></i>Aa</button>'+
+        '<button class="cor-ob cor-stylo" data-a="stylo" aria-pressed="false" aria-label="Marquer une erreur">'+STYLO+'</button></div></div>'+
       '<div class="cor-zone"><div class="cor-corps"></div><div class="cor-rail"><div class="cor-piste"></div><div class="cor-pouce"><span class="cor-etiq"></span></div></div></div>'+
-      '<div class="cor-lecteur"><button class="cor-jouer" data-a="jouer" aria-label="Écouter">'+PLAY+'</button><button class="cor-li" data-a="qari"><span class="cor-hcm" aria-label="Sur le téléphone">'+FLECHE+'</span><b class="cor-q1"></b><small class="cor-q2"></small></button>'+
-        '<button class="cor-rep" data-a="ecoute" aria-label="Réglages de l’écoute">'+BOUCLE+'<span class="cor-repn">×1</span></button></div>'+
     '</div>'+
     '<div class="cor-bulle" role="tooltip"><i></i><span></span></div>'+
     '<div class="cor-voile" data-a="ferme"></div>'+
@@ -231,6 +358,19 @@ function monte(){
   T.addEventListener('change',change);
   T.addEventListener('input',saisie);
   var corps=T.querySelector('.cor-corps');
+  /* AVANT la bulle (phase de capture) : la ligne « à revoir » se modifie ; en mémorisation, un toucher sur un verset montre le mot
+     suivant (au clic) et n'ouvre pas la bulle ; le stylo levé, un mot touché ouvre la feuille de l'erreur */
+  corps.addEventListener('pointerdown',function(e){
+    var l=e.target.closest('.rv-ligne');
+    if(l){ e.stopPropagation(); e.preventDefault(); ouvreErreur(null,l.dataset.e); return; }
+    if(MEMO&&!e.target.closest('button')&&e.target.closest('.cor-carte')){ e.stopPropagation(); return; }
+    var w=e.target.closest('.cor-mot'); if(!w||!CRAYON)return;
+    e.stopPropagation(); e.preventDefault(); crayon(false); ouvreErreur(w,null);
+  },true);
+  corps.addEventListener('click',function(e){
+    if(!MEMO||e.target.closest('button, .rv-ligne'))return;
+    var c=e.target.closest('.cor-carte'); if(!c)return; e.stopPropagation(); toucherMemo(c);
+  },true);
   corps.addEventListener('pointerdown',function(e){ var m=e.target.closest('.cor-mot'); if(!m)return; montreBulle(m); joueMot(+m.dataset.k,+m.dataset.j,m); });
   corps.addEventListener('pointerup',function(e){ if(e.pointerType==='mouse')cacheBulle(); else cacheBulleBientot(); });
   corps.addEventListener('pointercancel',cacheBulle);   /* le doigt part en défilement : rien à montrer */
@@ -251,7 +391,14 @@ function monte(){
   E.playlist=[112,113,114];
 }
 function feuilles(){
-  return '<div class="cor-feuille fh"><h3>Écouter sans connexion<button data-a="ferme" aria-label="Fermer">✕</button></h3><div class="cor-hc"></div></div>'+
+  return '<div class="cor-feuille fa"><h3>L’écriture du Coran<button data-a="ferme" aria-label="Fermer">✕</button></h3>'+
+      '<button class="cor-opt" data-ecr="simple"><b>Simple</b><small>Pour commencer à lire</small><span class="ex" lang="ar" dir="rtl">إِذَا السَّمَاءُ انفَطَرَتْ</span></button>'+
+      '<button class="cor-opt" data-ecr="mushaf"><b>Mushaf de Médine</b><small>Avec les signes du tajwīd</small><span class="ex h" lang="ar" dir="rtl">إِذَا ٱلسَّمَآءُ ٱنفَطَرَتْ</span></button>'+
+      '<button class="cor-sw" data-a="couleurs"><span>Couleurs du tajwīd</span><i></i></button><button class="cor-lien2" data-a="code">Le code couleur ›</button></div>'+
+    '<div class="cor-feuille fk"><h3>Le code couleur du tajwīd<button data-a="ferme-code" aria-label="Fermer">✕</button></h3><div class="cor-code">'+
+      CODE_TJ.map(function(c){ return '<i style="background:'+c[0]+'"></i><div><b>'+c[1]+'</b><span>'+c[2]+'</span></div>'; }).join('')+'</div></div>'+
+    '<div class="cor-feuille fz"><h3>À revoir<button data-a="ferme" aria-label="Fermer">✕</button></h3><div class="cor-er"></div></div>'+
+    '<div class="cor-feuille fh"><h3>Écouter sans connexion<button data-a="ferme" aria-label="Fermer">✕</button></h3><div class="cor-hc"></div></div>'+
     '<div class="cor-feuille fe"><h3>Écouter<button data-a="ferme" aria-label="Fermer">✕</button></h3>'+
       '<div class="cor-seg"><button data-m="verset">Un<br>verset</button><button data-m="versets">Des<br>versets</button><button data-m="sourate">La<br>sourate</button><button data-m="playlist">Une<br>playlist</button></div>'+
       '<div class="cor-panneau"></div><div class="cor-sep"></div>'+
@@ -291,31 +438,175 @@ function credit(){ return '<p class="cor-credit">Texte arabe : Tanzil · Traduct
 
 /* ── le lecteur ── */
 function montreLecteur(n,k){
-  charger(n,function(){
+  preparer(n,function(){
     E.sur=n; T.querySelector('.cor-liste').hidden=true; T.querySelector('.cor-lect').hidden=false;
     var trad=lire(K_TRAD,true); T.classList.toggle('sans-trad',!trad);
     var c=T.querySelector('.cor-coche'); c.classList.toggle('on',!!trad); c.setAttribute('aria-pressed',trad?'true':'false'); c.querySelector('.cor-bx').textContent=trad?'✓':'';
-    peindre(); marques(); if(k)aller(n,k);
+    peindre(); marques(); anneau(); CPT.dernier=Date.now(); if(k)aller(n,k);
   });
 }
 function peindre(){
-  var t=TXT[E.sur], M=lire(K_MARQUES,[]);
-  T.querySelector('.cor-lect .cor-titre').innerHTML=esc(t.nom)+'<span class="a">'+t.ar+'</span><span class="car">▾</span>';
+  var t=TXT[E.sur], M=lire(K_MARQUES,[]), tj=(ECR.m==='mushaf'&&TJ[E.sur])||null;
+  T.classList.toggle('cor-mushaf',!!tj);
+  T.querySelector('.cor-lect .cor-titre').innerHTML='<span class="cor-num">'+E.sur+'</span><span class="nm">'+esc(t.nom)+'</span><span class="a">'+t.ar+'</span><span class="car">▾</span>';
   T.querySelector('.cor-corps').innerHTML=t.v.map(function(v,i){ var k=i+1, mq=M.some(function(m){ return m[0]===E.sur&&m[1]===k; });
     return '<div class="cor-carte" data-k="'+k+'"><div class="cor-ch"><span class="cor-n">VERSET '+k+'</span>'+
       '<button class="mq'+(mq?' on':'')+'" data-a="mq" data-k="'+k+'" aria-label="Marque-page, verset '+k+'">'+RUBAN+'</button>'+
       '<button data-a="cp" data-k="'+k+'" aria-label="Copier le verset '+k+'">'+COPIER+'</button>'+
       '<button data-a="pt" data-k="'+k+'" aria-label="Partager le verset '+k+'">'+PARTAGER+'</button>'+
       '<button data-a="vj" data-k="'+k+'" aria-label="Écouter le verset '+k+'">'+SPK+'</button></div>'+
-      '<div class="cor-ct" lang="ar" dir="rtl">'+v[0].map(function(w,j){ return '<span class="cor-mot" data-k="'+k+'" data-j="'+j+'">'+esc(w)+'</span>'; }).join(' ')+'</div>'+
+      '<div class="cor-ct" lang="ar" dir="rtl">'+((tj&&tj[i])||v[0].map(esc)).map(function(w,j){ return '<span class="cor-mot" data-k="'+k+'" data-j="'+j+'">'+w+'</span>'; }).join(' ')+'</div>'+
       '<div class="cor-tr">'+esc(v[2])+'</div></div>'; }).join('')+credit();
-  T.querySelector('.cor-corps').scrollTop=0; majRail(); etiquette();
+  T.querySelector('.cor-corps').scrollTop=0; peindreErreurs(); majRail(); etiquette();
 }
-function etiquette(txt,sous){
+/* repeint la sourate (une autre écriture) sans perdre sa place ni le verset récité */
+function repeindre(){
+  var k=premierVisible(); peindre(); aller(E.sur,k);
+  var it=lecture&&lecture.f[lecture.i];
+  if(it&&it[0]===E.sur){ var c=T.querySelector('.cor-carte[data-k="'+it[1]+'"]'); if(c)c.classList.add('joue'); }
+}
+function etiquette(){
   var v=qari();
-  T.querySelector('.cor-q1').innerHTML=esc(txt||cap(v.fr)+(v.st==='j'?' · mujawwad':''))+'<span class="car">▾</span>';
-  T.querySelector('.cor-q2').textContent=sous||(nomS(E.sur)+' · '+TXT[E.sur].v.length+' versets');
+  T.querySelector('.cor-q1').innerHTML=esc(cap(v.fr)+(v.st==='j'?' · mujawwad':''))+'<span class="car">▾</span>';
   T.querySelector('.cor-repn').textContent=E.boucle?'boucle':'×'+E.fois;
+}
+
+/* ── l'écriture : le choix, les couleurs, le code couleur ── */
+function peindreEcriture(){
+  T.querySelectorAll('.cor-opt').forEach(function(o){ o.classList.toggle('on',o.dataset.ecr===ECR.m); });
+  var sw=T.querySelector('.cor-sw'); sw.classList.toggle('on',!!ECR.c); sw.classList.toggle('off',ECR.m!=='mushaf');
+}
+function choisirEcriture(m){
+  ECR.m=m; ecrire(K_ECRITURE,ECR); peindreEcriture();
+  if(!TXT[E.sur]||T.querySelector('.cor-lect').hidden)return;
+  preparer(E.sur,repeindre);
+}
+
+/* ── les erreurs « à revoir » : choisies au stylo, surlignées sur la lettre, modifiables et supprimables ── */
+function crayon(on){
+  CRAYON=!!on; var b=T&&T.querySelector('.cor-stylo'); if(!b)return;
+  b.classList.toggle('on',CRAYON); b.setAttribute('aria-pressed',CRAYON?'true':'false'); T.classList.toggle('cor-crayonne',CRAYON);
+}
+var EQUIV={'ا':'ٱ','ٱ':'ا','ي':'ى','ى':'ي'};   // une lettre notée dans une écriture, retrouvée dans l'autre
+/* surligne la DERNIÈRE occurrence de la lettre (et ses signes) dans le mot, à travers les couleurs du tajwīd */
+function surligner(mot,l){
+  [l,EQUIV[l]].some(function(x){
+    if(!x)return false;
+    var tw=document.createTreeWalker(mot,4), n, ns=[]; while((n=tw.nextNode()))ns.push(n);
+    for(var a=ns.length-1;a>=0;a--){
+      var t=ns[a], i=t.nodeValue.lastIndexOf(x); if(i<0)continue;
+      var j=i+1; while(j<t.nodeValue.length&&MARQUE.test(t.nodeValue[j]))j++;
+      var mi=t.splitText(i); mi.splitText(j-i);
+      var s=document.createElement('span'); s.className='rv-l'; mi.parentNode.insertBefore(s,mi); s.appendChild(mi);
+      return true;
+    }
+    return false;
+  });
+}
+function peindreErreurs(){
+  if(!T)return;
+  T.querySelectorAll('.rv-l').forEach(function(s){ var p=s.parentNode; while(s.firstChild)p.insertBefore(s.firstChild,s); p.removeChild(s); p.normalize(); });
+  T.querySelectorAll('.rv-ligne').forEach(function(x){ x.remove(); });
+  T.querySelectorAll('.rv-carte').forEach(function(c){ c.classList.remove('rv-carte'); });
+  ERR.forEach(function(e){
+    if(e.s!==E.sur)return;
+    var c=T.querySelector('.cor-carte[data-k="'+e.k+'"]'), m=c&&c.querySelector('.cor-mot[data-j="'+e.j+'"]'); if(!m)return;
+    surligner(m,e.l); c.classList.add('rv-carte');
+    c.insertAdjacentHTML('beforeend','<div class="rv-ligne" data-e="'+esc(e.id)+'"><b>À revoir</b><span class="ar" lang="ar" dir="rtl">'+esc(m.textContent)+'</span>'+
+      '<span>'+esc(e.n)+' <span class="ar" lang="ar">'+esc(e.l)+'</span></span><span class="ed" aria-label="Modifier">'+STYLO+'</span></div>');
+  });
+}
+function ouvreErreur(mot,id){
+  var e=id?ERR.filter(function(x){ return x.id===id; })[0]:null;
+  if(e)mot=T.querySelector('.cor-carte[data-k="'+e.k+'"] .cor-mot[data-j="'+e.j+'"]');
+  if(!mot)return;
+  var t=mot.textContent, ls=[];
+  for(var i=0;i<t.length;i++)if(LETTRE.test(t[i])&&ls.indexOf(t[i])<0)ls.push(t[i]);
+  if(!ls.length)return;
+  ERR_ED={e:e,k:+mot.dataset.k,j:+mot.dataset.j,l:e&&ls.indexOf(e.l)>=0?e.l:ls[ls.length-1],n:e?e.n:''};
+  T.querySelector('.cor-er').innerHTML='<p class="cor-motgd" lang="ar" dir="rtl">'+esc(t)+'</p>'+
+    '<div class="cor-lettres" dir="rtl">'+ls.map(function(x){ return '<button data-l="'+esc(x)+'">'+esc(x)+'</button>'; }).join('')+'</div>'+
+    '<div class="cor-notes">'+NOTES.map(function(x){ return '<button data-n="'+esc(x)+'">'+esc(x)+'</button>'; }).join('')+'</div>'+
+    '<div class="cor-act">'+(e?'<button class="cor-suppr" data-a="err-x">Je ne fais plus cette erreur</button>':'')+'<button class="cor-ok" data-a="err-ok">'+(e?'Enregistrer':'Marquer')+'</button></div>';
+  peindreChoixErreur(); ouvreFeuille('erreur');
+}
+function peindreChoixErreur(){
+  T.querySelectorAll('.cor-lettres button').forEach(function(b){ b.classList.toggle('on',b.dataset.l===ERR_ED.l); });
+  T.querySelectorAll('.cor-notes button').forEach(function(b){ b.classList.toggle('on',b.dataset.n===ERR_ED.n); });
+}
+function garderErreur(supprimer){
+  var x=ERR_ED; if(!x)return; ERR_ED=null;
+  if(supprimer)ERR=ERR.filter(function(e){ return e!==x.e; });
+  else if(x.e){ x.e.l=x.l; x.e.n=x.n||'à revoir'; }
+  else ERR.push({id:'e'+Date.now().toString(36)+ERR.length,s:E.sur,k:x.k,j:x.j,l:x.l,n:x.n||'à revoir'});
+  ecrire(K_ERREURS,ERR); fermeFeuilles(); peindreErreurs();
+}
+
+/* ── mémoriser (mot à mot, choix B de Myriam) : l'œil barré cache le texte ; chaque toucher sur un verset montre le mot suivant ;
+   tout vu, un toucher recache ── */
+function memo(on){
+  MEMO=!!on; if(MEMO)crayon(false);
+  var b=T.querySelector('.cor-memo'); b.classList.toggle('on',MEMO); b.setAttribute('aria-pressed',MEMO?'true':'false');
+  T.classList.toggle('cor-memo-on',MEMO); T.querySelectorAll('.cor-mot.mz-vu').forEach(function(m){ m.classList.remove('mz-vu'); });
+}
+function toucherMemo(c){
+  var ms=[].slice.call(c.querySelectorAll('.cor-ct .cor-mot')), caches=ms.filter(function(m){ return !m.classList.contains('mz-vu'); });
+  if(!caches.length){ ms.forEach(function(m){ m.classList.remove('mz-vu'); }); return; }
+  caches[0].classList.add('mz-vu'); crediter(SEC_MOT);
+}
+
+/* ── la lecture du jour : le cercle de l'épi ── */
+function jour(){ var j=lire(K_JOUR,null), t=today(); return j&&j.d===t?j:{d:t,s:0,g:0}; }
+function anneau(j){
+  var el=T&&T.querySelector('.cor-serie'); if(!el)return;
+  var p=Math.min(1,(j||jour()).s/SEUIL_JOUR);
+  el.querySelector('.av').style.strokeDashoffset=(CERCLE*(1-p)).toFixed(1); el.classList.toggle('plein',p>=1);
+}
+/* max : ce que le texte autorise ; le temps écoulé depuis le dernier crédit borne le reste */
+function crediter(max){
+  var now=Date.now(), c=Math.min((now-CPT.dernier)/1000,max); if(!(c>0))return 0;
+  CPT.dernier=now; var j=jour(); j.s+=c;
+  if(j.s>=SEUIL_JOUR&&!j.g){ j.g=1; ecrire(K_JOUR,j); recompense(); }
+  ecrire(K_JOUR,j); anneau(j); return c;
+}
+function recompense(){
+  try{
+    validerJour();
+    var g=gagnerGraines(GRAINES.lecon); SES.gain+=g;
+    if(g){ try{ SYNC.graines('REV-CORAN',false,false); }catch(e){} }
+    save(); try{ refreshStats(); }catch(e){}
+  }catch(e){}
+}
+/* chaque seconde : les versets à l'écran (60 % au moins) ont chacun leur budget (2 s par mot) ; un verset sorti de l'écran,
+   ou réécouté, recompte ; le texte caché ne compte que par ses vérifications */
+function tic(){
+  if(!T||!T.classList.contains('on')||T.querySelector('.cor-lect').hidden||document.hidden||MEMO||!TXT[E.sur])return;
+  var corps=T.querySelector('.cor-corps'), cr=corps.getBoundingClientRect(), vis=[];
+  T.querySelectorAll('.cor-carte').forEach(function(c){
+    var r=c.getBoundingClientRect(), h=Math.max(0,Math.min(r.bottom,cr.bottom)-Math.max(r.top,cr.top));
+    var ratio=r.height?h/Math.min(r.height,cr.height):0, joue=c.classList.contains('joue');
+    if(ratio<0.1)delete c._budget;
+    else if(c._budget===undefined||(joue&&!c._joue))c._budget=c.querySelectorAll('.cor-ct .cor-mot').length*SEC_MOT;
+    c._joue=joue;
+    if(ratio>=0.6&&c._budget>0)vis.push(c);
+  });
+  if(!vis.length)return;
+  var reste=crediter(Math.min(1.2,vis.reduce(function(s,c){ return s+c._budget; },0)));
+  vis.forEach(function(c){ var p=Math.min(c._budget,reste); c._budget-=p; reste-=p; });
+}
+/* fermer après avoir gagné : l'écran de fin d'une leçon (lecture, graines, assiduité), puis les 7 épis si le jour vient d'être validé */
+function finLecture(g){
+  try{
+    var mn=Math.max(1,Math.floor(jour().s/60)), F=function(id){ return document.getElementById(id); };
+    F('fin-icon').textContent=''; F('fin-title').textContent='Lecture terminée !'; F('fin-extra').innerHTML='';
+    F('fin-cases').innerHTML='<div class="cases">'+caseHTML('c-reus',LIVRE,'Lecture',mn+' min')+caseHTML('c-grain',ICO_GRAIN_FIN,'Graines','+'+g)+
+      caseHTML('c-assid',ICO_EPI_FIN,'Assiduité',(S.streak||0)+' j')+'</div>';
+    var fs=document.querySelector('#finish .fin-score'); if(fs)fs.style.display='none';
+    fillFinishConstance();
+    pendingStreak=feteJourPending; feteJourPending=false; backTo='islam';
+    F('finish').classList.add('on');
+    try{ confettiBurst(); playSfx('fin-lecon'); }catch(e){}
+  }catch(e){}
 }
 
 /* la bulle sous le mot : tant que le doigt (ou la souris) reste dessus */
@@ -366,44 +657,69 @@ function file(){
   else E.playlist.slice().sort(function(x,y){ return x-y; }).forEach(function(s){ for(var k3=1;k3<=LISTE[s-1][4];k3++)f.push([s,k3]); });
   return f;
 }
+/* suite : « la sourate » écoutée une fois enchaîne sur la suivante, comme une application de lecture (■ arrête) */
 function ecouter(f,fois,boucle){
+  var suite=!f&&E.mode==='sourate'&&!fois&&!E.boucle&&E.fois===1;
   f=f||file(); if(!f.length)return; try{ stopAudio(); }catch(e){}
-  lecture={f:f,i:0,tour:1,fois:fois||E.fois,boucle:boucle===undefined?E.boucle:boucle,pl:!fois&&E.mode==='playlist',pause:false,a:null}; suivant();
+  lecture={f:f,i:0,tour:1,fois:fois||E.fois,boucle:boucle===undefined?E.boucle:boucle,pl:!fois&&E.mode==='playlist',suite:suite,pause:false,a:null};
+  session(true); suivant();
 }
 function suivant(){
   if(!lecture)return;
-  if(lecture.i>=lecture.f.length){ lecture.tour++; lecture.i=0; if(!lecture.boucle&&lecture.tour>lecture.fois){ arret(); return; } }
+  if(lecture.i>=lecture.f.length){ lecture.tour++; lecture.i=0;
+    if(!lecture.boucle&&lecture.tour>lecture.fois){
+      var n=lecture.f[0][0]+1;
+      if(!lecture.suite||n>114){ arret(); return; }
+      lecture.f=[]; for(var k0=1;k0<=LISTE[n-1][4];k0++)lecture.f.push([n,k0]); lecture.tour=1;
+    }
+  }
   var it=lecture.f[lecture.i], s=it[0], k=it[1];
-  if(s!==E.sur){ var L0=lecture; charger(s,function(){ if(lecture!==L0)return; E.sur=s; peindre(); suivant(); }); return; }
+  if(s!==E.sur){ var L0=lecture; preparer(s,function(){ if(lecture!==L0)return; E.sur=s; peindre(); marques(); suivant(); }); return; }
   var L1=lecture; segments(s,function(M){ if(lecture!==L1)return; jouerVerset(s,k,M&&M[k]); });
 }
+/* ⛔ UNE SEULE VOIX (Myriam : « deux lectures en même temps ») : chaque verset lancé invalide celui qui était encore en route
+   (la source d'un verset arrive plus tard, par le cache ou le réseau) */
 function jouerVerset(s,k,info){
-  coupeVoix(); var L=lecture;
-  sourceVerset(s,k,info,function(src,local){ if(lecture!==L)return; jouerSource(s,k,info,src,local); });
+  coupeVoix(); var L=lecture, g=++GEN;
+  sourceVerset(s,k,info,function(src,local){
+    if(lecture!==L||g!==GEN){ if(local){ try{ URL.revokeObjectURL(src); }catch(e){} } return; }
+    jouerSource(s,k,info,src,local);
+  });
 }
 function jouerSource(s,k,info,src,local){
-  var a=new Audio(src); VOIX_A=a; lecture.a=a;
+  coupeVoix(); var a=new Audio(src); VOIX_A=a; lecture.a=a;
   T.querySelector('.cor-jouer').innerHTML=lecture.pause?PLAY:PAUSE;
-  etiquette(nomS(s)+' · verset '+k,(lecture.boucle?'en boucle':'tour '+lecture.tour+' / '+lecture.fois)+(lecture.pl?' · playlist':''));
-  var carte=T.querySelector('.cor-carte[data-k="'+k+'"]'), allume=-1;
-  if(carte){ carte.classList.add('joue'); T.querySelector('.cor-corps').scrollTo({top:carte.offsetTop-8,behavior:'smooth'}); }
+  /* la carte est relue à chaque fois : une autre écriture repeint les versets pendant la récitation */
+  var carte=function(){ return E.sur===s&&T?T.querySelector('.cor-carte[data-k="'+k+'"]'):null; }, allume=-1, vue=null, c0=carte();
+  /* ⛔ seule la voix EN COURS fait avancer la lecture : une voix arrêtée qui signale sa fin ou une erreur réseau en retard sautait un
+     verset de la lecture suivante, pendant qu'elle-même parlait encore (« deux lectures en même temps ») */
+  var actuelle=function(){ return !!lecture&&lecture.a===a; };
+  if(c0){ c0.classList.add('joue'); T.querySelector('.cor-corps').scrollTo({top:c0.offsetTop-8,behavior:'smooth'}); }
   /* les mots s'allument un à un : segments [rang, position du mot (à partir de 1), début, fin] en ms */
-  if(carte&&info&&info.seg.length)a.ontimeupdate=function(){ var ms=a.currentTime*1000, q=-1;
+  if(info&&info.seg.length)a.ontimeupdate=function(){ var c=carte(); if(!c||!actuelle())return; var ms=a.currentTime*1000, q=-1;
     for(var i=0;i<info.seg.length;i++){ var g=info.seg[i]; if(ms>=g[2]-40)q=g[1]-1; }
-    if(q===allume)return; allume=q;
-    carte.querySelectorAll('.cor-mot').forEach(function(m){ var j=+m.dataset.j; m.classList.toggle('en',j===q); m.classList.toggle('lu',j<q); }); };
-  VOIX_FIN=function(){ if(local){ try{ URL.revokeObjectURL(src); }catch(e){} } if(carte){ carte.classList.remove('joue'); carte.querySelectorAll('.cor-mot').forEach(function(m){ m.classList.remove('en','lu'); }); } };
-  a.onended=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.erreurs=0; lecture.i++; suivant(); };
+    if(q===allume&&c===vue)return; allume=q; vue=c; c.classList.add('joue');
+    c.querySelectorAll('.cor-ct .cor-mot').forEach(function(m){ var j=+m.dataset.j; m.classList.toggle('en',j===q); m.classList.toggle('lu',j<q); }); };
+  VOIX_FIN=function(){ if(local){ try{ URL.revokeObjectURL(src); }catch(e){} } var c=carte(); if(c){ c.classList.remove('joue'); c.querySelectorAll('.cor-mot').forEach(function(m){ m.classList.remove('en','lu'); }); } };
+  /* une voix relancée de dehors (écouteurs, écran verrouillé) alors qu'elle n'est plus la nôtre, ou en pause : on la retient */
+  a.onplay=function(){ if(!lecture||lecture.a!==a||lecture.pause){ try{ a.pause(); }catch(e){} } };
+  a.onended=function(){ if(!actuelle())return; var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); lecture.a=null; lecture.erreurs=0; lecture.i++; suivant(); };
   /* ⛔ hors connexion (l'avion) : le fichier d'un verset est introuvable. Deux échecs de suite : on s'ARRÊTE et on le dit, au lieu de défiler tous les versets en silence (et sans fin en boucle) */
-  a.onerror=function(){ var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); if(!lecture)return; lecture.a=null; lecture.erreurs=(lecture.erreurs||0)+1;
-    if(lecture.erreurs>=2){ arret(); T.querySelector('.cor-q1').innerHTML='Récitation indisponible<span class="car">▾</span>'; T.querySelector('.cor-q2').textContent='Pas de connexion : elle se charge en ligne'; return; }
+  a.onerror=function(){ if(!actuelle())return; var fn=VOIX_FIN; VOIX_FIN=null; VOIX_A=null; if(fn)fn(); lecture.a=null; lecture.erreurs=(lecture.erreurs||0)+1;
+    if(lecture.erreurs>=2){ arret(); try{ toast('Pas de connexion : la récitation se charge en ligne'); }catch(e){} return; }
     lecture.i++; setTimeout(suivant,200); };
   if(!lecture.pause){ var p=a.play(); if(p&&p.catch)p.catch(function(){}); }
 }
 function suspendre(){ if(!lecture||lecture.pause)return; lecture.pause=true; if(lecture.a){ try{ lecture.a.pause(); }catch(e){} } T.querySelector('.cor-jouer').innerHTML=PLAY; }
 function reprendre(){ if(!lecture||!lecture.pause)return; lecture.pause=false; T.querySelector('.cor-jouer').innerHTML=PAUSE;
   if(lecture.a){ VOIX_A=lecture.a; var p=lecture.a.play(); if(p&&p.catch)p.catch(function(){}); } else suivant(); }
-function arret(){ lecture=null; coupeVoix(); if(T){ T.querySelector('.cor-jouer').innerHTML=PLAY; if(TXT[E.sur])etiquette(); } }
+function arret(){ lecture=null; GEN++; coupeVoix(); session(false); if(T){ T.querySelector('.cor-jouer').innerHTML=PLAY; if(TXT[E.sur])etiquette(); } }
+/* les boutons de l'écran verrouillé et des écouteurs passent par notre pause, jamais à côté ; rendus quand la lecture s'arrête */
+function session(on){
+  try{ var ms=navigator.mediaSession; if(!ms)return;
+    ms.setActionHandler('play',on?reprendre:null); ms.setActionHandler('pause',on?suspendre:null); ms.setActionHandler('stop',on?arret:null);
+  }catch(e){}
+}
 function borne(k,x){ var max=k==='fois'?100:TXT[E.sur].v.length; return Math.max(1,Math.min(max,(x|0)||1)); }
 function panneau(){
   T.querySelectorAll('.cor-seg button').forEach(function(b){ b.classList.toggle('on',b.dataset.m===E.mode); });
@@ -447,19 +763,32 @@ function listeQari(){
 
 /* ── les gestes ── */
 function ouvreFeuille(c){ T.classList.add('f-'+c); }
-function fermeFeuilles(){ T.classList.remove('f-hors','f-ecoute','f-marques','f-sourates','f-qari','f-copie','f-partage'); }
+function fermeFeuilles(){ T.classList.remove('f-hors','f-ecoute','f-marques','f-sourates','f-qari','f-copie','f-partage','f-ecriture','f-code','f-erreur'); ERR_ED=null; }
 function clic(e){
-  var el=e.target.closest('[data-a]'), a=el&&el.dataset.a;
+  var el=e.target.closest('[data-a]'), a=el&&el.dataset.a, b;
   if(e.target.closest('.cor-reseaux button')){ reseau(e.target.closest('.cor-reseaux button').dataset.r); return; }
+  if((b=e.target.closest('.cor-opt'))){ choisirEcriture(b.dataset.ecr); return; }
+  if((b=e.target.closest('.cor-lettres button'))&&ERR_ED){ ERR_ED.l=b.dataset.l; peindreChoixErreur(); return; }
+  if((b=e.target.closest('.cor-notes button'))&&ERR_ED){ ERR_ED.n=b.dataset.n; peindreChoixErreur(); return; }
   if(e.target.closest('.cor-seg button')){ E.mode=e.target.closest('.cor-seg button').dataset.m; panneau(); return; }
   if(e.target.closest('.cor-pas button')){ var p=e.target.closest('.cor-pas'), kk=p.dataset.k; E[kk]=borne(kk,E[kk]+(+e.target.closest('.cor-pas button').dataset.d)); p.querySelector('input').value=E[kk]; etiquette(); return; }
   var s=e.target.closest('.cor-srow, .cor-mrow, .cor-reprendre');
   if(s){ var fs=e.target.closest('.fs'); fermeFeuilles(); arret(); montreLecteur(+s.dataset.s,s.dataset.k?+s.dataset.k:0); return; }
   var qr=e.target.closest('.cor-qrow');
-  if(qr){ var id=qr.dataset.q; S.qari=id; try{ saveLocal(); }catch(x){} var rejoue=!!lecture&&!lecture.pause; fermeFeuilles(); marques(); /* en cours : on continue avec la nouvelle voix ; en pause : la lecture est abandonnée */ if(rejoue){ var L=lecture; arret(); lecture=L; suivant(); } else arret(); return; }
+  if(qr){ var id=qr.dataset.q; S.qari=id; try{ saveLocal(); }catch(x){} var rejoue=!!lecture&&!lecture.pause; fermeFeuilles(); marques(); /* en cours : on continue avec la nouvelle voix ; en pause : la lecture est abandonnée */ if(rejoue){ var L=lecture; arret(); lecture=L; session(true); suivant(); } else arret(); return; }
   if(!a)return;
   switch(a){
     case 'fermer': coranFermer(); break;
+    case 'moins': case 'plus': var n2=E.sur+(a==='plus'?1:-1); if(n2>=1&&n2<=114){ arret(); montreLecteur(n2,0); } break;
+    case 'stop': arret(); break;
+    case 'memo': memo(!MEMO); break;
+    case 'stylo': if(MEMO)memo(false); crayon(!CRAYON); break;
+    case 'ecriture': peindreEcriture(); ouvreFeuille('ecriture'); break;
+    case 'couleurs': ECR.c=ECR.c?0:1; ecrire(K_ECRITURE,ECR); T.classList.toggle('cor-tjc',!!ECR.c); peindreEcriture(); break;
+    case 'code': ouvreFeuille('code'); break;
+    case 'ferme-code': T.classList.remove('f-code'); break;
+    case 'err-ok': garderErreur(false); break;
+    case 'err-x': garderErreur(true); break;
     case 'hc-dl': (function(n,v){ telecharger(v,n,function(){ if(HC_N===n&&T.classList.contains('f-hors'))peindreHors(); }); })(HC_N,qari()); break;
     case 'hc-ligne': EN_LIGNE[cleHors(qari(),HC_N)]=1; apresHors(); break;
     case 'hc-ecouter': apresHors(); break;
@@ -504,9 +833,13 @@ function saisie(e){
 
 /* ── l'entrée et la sortie ── */
 window.coranOuvrir=function(){
-  monte(); entretienHors(); montreListe(); T.classList.add('on'); fermeFeuilles(); texteAuto();
+  monte(); ECR=lire(K_ECRITURE,null)||{m:'simple',c:1}; ERR=lire(K_ERREURS,[]); T.classList.toggle('cor-tjc',!!ECR.c);   // relus à chaque ouverture
+  entretienHors(); montreListe(); T.classList.add('on'); fermeFeuilles(); texteAuto();
+  SES.gain=0; CPT.dernier=Date.now(); clearInterval(MINUT); MINUT=setInterval(tic,1000);
 };
 window.coranFermer=function(){
-  if(!T)return; arret(); cacheBulle(); fermeFeuilles(); T.classList.remove('on'); noteDerniere();
+  if(!T)return; arret(); cacheBulle(); fermeFeuilles(); crayon(false); if(MEMO)memo(false);
+  var ouvert=T.classList.contains('on'); T.classList.remove('on'); noteDerniere(); clearInterval(MINUT); MINUT=null;
+  var g=SES.gain; SES.gain=0; if(ouvert&&g>0)finLecture(g);
 };
 })();

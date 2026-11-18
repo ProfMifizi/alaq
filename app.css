@@ -2804,7 +2804,7 @@ html.clair .coran-plein{background-image:radial-gradient(circle at 50% 0%,#FFFDF
 .cor-bx{width:20px;height:20px;border-radius:6px;border:2px solid var(--gold-d);display:grid;place-items:center;font-size:13px;color:var(--on-gold,#2A1A05)}
 .cor-coche.on .cor-bx{background:var(--gold2)}
 .cor-zone{position:relative;flex:1 1 auto;min-height:0}
-.cor-corps{position:absolute;inset:0;overflow-y:auto;padding:12px 26px 30px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cor-corps{position:absolute;inset:0;overflow-y:auto;padding:12px 26px calc(30px + env(safe-area-inset-bottom,0px)) 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .cor-corps::-webkit-scrollbar{display:none}
 .cor-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px 14px calc(30px + env(safe-area-inset-bottom,0px))}
 .cor-cherche2{width:100%;border:1.5px solid var(--line);background:var(--panel2);border-radius:12px;padding:10px 12px;color:var(--cream);font-family:var(--ui);font-size:14px;font-weight:700;margin-bottom:10px;outline:none;-webkit-user-select:text;user-select:text}
@@ -2823,14 +2823,14 @@ html.clair .coran-plein{background-image:radial-gradient(circle at 50% 0%,#FFFDF
 .cor-vide{color:var(--muted);font-size:13.5px;font-weight:700;padding:14px 6px}
 .cor-muted{color:var(--muted)}
 /* une carte par verset */
-.cor-carte{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:9px 12px 12px;margin-bottom:10px;transition:border-color .2s,background .2s}
+.cor-carte{background:#FFFDF6;border:1.5px solid #E7D9B8;border-radius:16px;padding:9px 12px 12px;margin-bottom:10px;transition:border-color .2s,background .2s}
 .cor-ch{display:flex;align-items:center;gap:6px}
-.cor-n{flex:1;font-size:11px;font-weight:900;letter-spacing:.1em;color:var(--muted)}
-.cor-ch button{background:none;border:none;color:var(--muted);cursor:pointer;width:34px;height:30px;display:grid;place-items:center;border-radius:8px}
-.cor-ch button[data-a="vj"]{color:var(--gold2)}
-.cor-ch .mq.on{color:var(--gold2)}.cor-ch .mq.on path{fill:currentColor}
-.cor-ct{font-family:var(--quran,var(--ar));font-size:26px;line-height:2.05;direction:rtl;text-align:right;margin-top:2px}
-.cor-tr{font-size:14px;line-height:1.45;color:var(--muted);margin-top:6px;padding-top:7px;border-top:1px solid var(--line)}
+.cor-n{flex:1;font-size:11px;font-weight:900;letter-spacing:.1em;color:#776850}
+.cor-ch button{background:none;border:none;color:#776850;cursor:pointer;width:34px;height:30px;display:grid;place-items:center;border-radius:8px}
+.cor-ch button[data-a="vj"]{color:#9A5A0B}
+.cor-ch .mq.on{color:#9A5A0B}.cor-ch .mq.on path{fill:currentColor}
+.cor-ct{font-family:var(--quran,var(--ar));font-size:26px;line-height:2.05;direction:rtl;text-align:right;margin-top:2px;color:#1B1B1B}
+.cor-tr{font-size:14px;line-height:1.45;color:#5A4E3E;margin-top:6px;padding-top:7px;border-top:1px solid #E7D9B8}
 .sans-trad .cor-tr{display:none}
 .cor-mot{border-radius:8px;padding:.24em .12em .04em;cursor:pointer;transition:background .12s,color .12s}
 .cor-mot.dit{background:var(--gold2);color:#2A1A05}
@@ -2854,21 +2854,73 @@ html.clair .cor-bulle,html.clair .cor-bulle i{background:var(--tip);color:var(--
 .cor-pouce{position:absolute;left:0;width:14px;border-radius:8px;background:var(--gold-d);cursor:grab;touch-action:none}
 .cor-etiq{position:absolute;right:20px;top:50%;transform:translateY(-50%);background:var(--gold);color:#2A1A05;font-weight:900;font-size:12px;padding:4px 9px;border-radius:10px;white-space:nowrap;display:none}
 .cor-rail.tient .cor-etiq{display:block}
-/* le lecteur, en bas */
-.cor-lecteur{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--line);z-index:13}
-.cor-jouer{flex:0 0 48px;height:48px;border-radius:50%;background:var(--gold);border:none;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 0 var(--gold-d)}
-.cor-jouer svg{width:20px;height:20px;fill:var(--on-gold,#2A1A05)}
-.cor-li{flex:1;min-width:0;text-align:left;background:none;border:none;color:var(--cream);font-family:var(--ui);cursor:pointer;padding:0}
-.cor-li b{display:block;font-size:13.5px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cor-li small{display:block;font-size:11.5px;color:var(--muted);font-weight:700}
-.cor-li .car{color:var(--gold2);font-size:11px;margin-left:5px}
-.cor-rep{flex:0 0 auto;height:40px;border-radius:12px;border:1.5px solid var(--gold-d);background:rgba(208,135,13,.12);color:var(--gold2);display:flex;align-items:center;gap:6px;padding:0 10px;font-weight:900;font-size:12.5px;cursor:pointer;font-family:var(--ui)}
+/* la barre du lecteur, en haut (préviews _apercu-coran-v12 à v18, Myriam 17/11) : ⏮ ⏭ changent de sourate autour du titre ;
+   dessous, le récitateur, ▶ et ■ (44 px tous deux, ombre comprise), la répétition de l'écoute et le cercle de l'épi */
+.cor-lect .cor-tete{padding-left:48px;padding-right:50px;gap:0}
+.cor-sour{flex:0 0 36px;height:44px;display:grid;place-items:center;background:none;border:none;color:var(--gold2);cursor:pointer;padding:0}
+.cor-sour svg{width:21px;height:21px;fill:currentColor}
+.cor-lect .cor-titre{min-width:0;flex:0 1 auto;align-items:baseline;gap:6px}
+@media (max-width:389px){ .cor-lect .cor-titre{font-size:14.5px;gap:5px} .cor-lect .cor-titre .a{font-size:17px} .cor-lect .cor-tete{padding-left:44px;padding-right:46px} .cor-sour{flex-basis:32px} }
+.cor-titre .nm{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cor-num{font-weight:900;color:var(--gold2);font-size:15px;margin-right:-2px}
+.cor-ctrl{flex:0 0 auto;position:relative;display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 14px 10px;background:var(--panel2);border-bottom:1px solid var(--line);z-index:11}
+.cor-jouer{flex:0 0 44px;width:44px;height:44px;border-radius:50%;background:var(--gold);border:none;display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:none}
+.cor-jouer svg{width:24px;height:24px;fill:var(--on-gold,#2A1A05)}
+.cor-stop{flex:0 0 44px;width:44px;height:44px;border-radius:12px;border:none;background:#F2E9DA;color:#4E3210;display:grid;place-items:center;cursor:pointer;padding:0}
+html.clair .cor-stop{background:#4E3210;color:#F2E9DA}
+.cor-stop svg{width:24px;height:24px;fill:currentColor}
+.cor-li{position:absolute;left:12px;top:50%;transform:translateY(-50%);max-width:calc(50% - 76px);text-align:left;background:none;border:1.5px solid var(--line);border-radius:10px;padding:4px 8px;color:var(--muted);font-family:var(--ui);cursor:pointer}
+.cor-li b{display:block;font-size:11.5px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cor-li .car{color:var(--gold2);font-size:10px;margin-left:4px}
+.cor-rep{position:absolute;right:64px;top:50%;transform:translateY(-50%);height:32px;border-radius:10px;border:1.5px solid var(--line);background:none;color:var(--cream);display:flex;align-items:center;gap:3px;padding:0 7px;font-weight:900;font-size:12.5px;cursor:pointer;font-family:var(--ui)}
+.cor-rep .cor-ico{width:16px;height:16px}
+.cor-serie{position:absolute;right:12px;top:50%;margin-top:-22px;width:44px;height:44px;display:grid;place-items:center;border-radius:50%;transition:background .4s}
+.cor-serie.plein{background:rgba(208,135,13,.18)}   /* allumé : le fond du disque très légèrement doré (Myriam, 17/11) */
+.cor-serie svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.cor-serie circle{fill:none;stroke-width:4}
+.cor-serie .fd{stroke:var(--line)}
+.cor-serie .av{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:119.4;stroke-dashoffset:119.4;transition:stroke-dashoffset .5s}
+.cor-serie img{width:24px;height:24px;opacity:.75;filter:grayscale(.5);transition:opacity .3s,transform .3s,filter .3s}
+.cor-serie.plein img{opacity:1;filter:none;transform:scale(1.15)}
+.cor-serie.plein .fd{stroke:var(--gold)}
+/* les outils, à droite de « Traduction » : mémoriser, l'écriture, le stylo des erreurs */
+.cor-outils{gap:8px}
+.cor-outd{margin-left:auto;display:flex;gap:8px;align-items:center}
+.cor-ob{width:36px;height:32px;border-radius:10px;border:1.5px solid var(--line);background:none;color:var(--cream);display:grid;place-items:center;cursor:pointer;padding:0}
+.cor-ob svg{width:20px;height:20px}
+.cor-memo.on{background:rgba(208,135,13,.22);border-color:var(--gold);color:var(--gold2)}
+.cor-stylo{color:#E2483D}
+.cor-stylo.on{background:rgba(226,72,61,.18);border-color:#E2483D}
+.cor-aa{height:32px;border-radius:10px;border:1.5px solid var(--line);background:none;color:var(--cream);font-weight:900;font-size:13px;padding:0 9px;display:flex;gap:4px;align-items:center;cursor:pointer;font-family:var(--ui)}
+.cor-aa i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.cor-aa i:nth-child(1){background:#2b6228}.cor-aa i:nth-child(2){background:#f77e00}.cor-aa i:nth-child(3){background:#006eff;margin-right:2px}
+/* l'écriture du mushaf (police KFGQPC Uthmanic Hafs) et les couleurs officielles du tajwīd, sur la carte claire */
+@font-face{font-family:"Uthmanic Hafs";src:url(polices/uthmanic-hafs-v18.woff2) format("woff2");font-display:block}
+.cor-mushaf .cor-ct{font-family:"Uthmanic Hafs",var(--ar);font-size:29px;line-height:2.15}
+.cor-tjc .tj-ham_wasl,.cor-tjc .tj-laam_shamsiyah,.cor-tjc .tj-slnt,.cor-tjc .tj-idgham_wo_ghunnah,.cor-tjc .tj-idgham_mutajanisayn,.cor-tjc .tj-idgham_mutaqaribayn{color:#64655e}
+.cor-tjc .tj-ghunnah,.cor-tjc .tj-ikhafa,.cor-tjc .tj-ikhafa_shafawi,.cor-tjc .tj-idgham_ghunnah,.cor-tjc .tj-idgham_shafawi,.cor-tjc .tj-iqlab{color:#2b6228}
+.cor-tjc .tj-madda_normal{color:#f77e00}.cor-tjc .tj-madda_permissible{color:#e12013}.cor-tjc .tj-madda_obligatory{color:#dd0b70}.cor-tjc .tj-madda_necessary{color:#610b49}
+.cor-tjc .tj-qalaqah{color:#006eff}.cor-tjc .tj-tafkhim{color:#1c1c57}
+/* les erreurs « à revoir » : la lettre au surligneur jaune (choix A), la carte bordée de rouge, la ligne à toucher pour modifier */
+.cor-crayonne .cor-ct .cor-mot{outline:1.5px dashed rgba(226,72,61,.75);outline-offset:3px;border-radius:5px}
+.rv-l{background:rgba(255,214,0,.42);border-radius:3px}
+.cor-carte.rv-carte{border-color:rgba(226,72,61,.75)}
+.rv-ligne{margin-top:6px;padding:6px 10px;border-radius:10px;background:rgba(226,72,61,.12);border:1px solid rgba(226,72,61,.45);color:#3B2A1A;font-size:13px;font-weight:700;display:flex;gap:8px;align-items:center;cursor:pointer}
+.rv-ligne b{color:#B3261E}
+.rv-ligne .ar{font-family:var(--ar);font-size:18px}
+.rv-ligne .ed{margin-left:auto;color:#B3261E;display:grid}
+.rv-ligne .ed svg{width:16px;height:16px}
+/* mémoriser, mot à mot (choix B) : une pastille par mot caché ; le texte garde sa place */
+.cor-memo-on .cor-carte{cursor:pointer}
+.cor-memo-on .cor-ct .cor-mot:not(.mz-vu){background:#E6DAC0;border-radius:10px;color:transparent!important}
+.cor-memo-on .cor-ct .cor-mot:not(.mz-vu) *{color:transparent!important;background:none}
+.cor-memo-on .rv-ligne{display:none}   /* elle écrit le mot : elle le dévoilerait */
 /* les feuilles */
 .cor-voile{position:absolute;inset:0;background:rgba(8,6,4,.5);z-index:16;display:none}
 html.clair .cor-voile{background:rgba(36,29,20,.35)}
 .cor-feuille{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:var(--panel);border-top:2px solid var(--gold-d);border-radius:22px 22px 0 0;z-index:17;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));display:none;max-height:86%;overflow-y:auto}
-.f-ecoute .cor-voile,.f-marques .cor-voile,.f-sourates .cor-voile,.f-qari .cor-voile,.f-copie .cor-voile,.f-partage .cor-voile{display:block}
-.f-ecoute .fe,.f-marques .fm,.f-sourates .fs,.f-qari .fq,.f-copie .fc,.f-partage .fp{display:block}
+.f-ecoute .cor-voile,.f-marques .cor-voile,.f-sourates .cor-voile,.f-qari .cor-voile,.f-copie .cor-voile,.f-partage .cor-voile,.f-ecriture .cor-voile,.f-code .cor-voile,.f-erreur .cor-voile{display:block}
+.f-ecoute .fe,.f-marques .fm,.f-sourates .fs,.f-qari .fq,.f-copie .fc,.f-partage .fp,.f-ecriture .fa,.f-code .fk,.f-erreur .fz{display:block}
 .cor-feuille h3{font-size:17px;font-weight:900;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .cor-feuille h3 button{background:none;border:none;color:var(--muted);font-size:22px;font-family:serif;cursor:pointer}
 .cor-seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
@@ -2927,10 +2979,41 @@ html.clair .cor-voile{background:rgba(36,29,20,.35)}
 .hc-n{text-align:center;font-weight:900;color:var(--gold2);font-size:14px;margin:10px 0 0}
 .hc-err{color:var(--cream)}
 .hc-sec{display:block;width:100%;height:48px;margin-top:10px;border-radius:15px;background:none;border:1.5px solid var(--line);color:var(--cream);font-family:var(--ui);font-weight:900;font-size:15px;cursor:pointer}
-.cor-li{position:relative}
-.cor-hcm{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);color:var(--gold2)}
+.cor-hcm{display:none;position:absolute;left:5px;top:50%;transform:translateY(-50%);color:var(--gold2)}
 .cor-hcm .cor-ico{width:16px;height:16px}
-.cor-li.hc-ici{padding-left:21px}
+.cor-li.hc-ici{padding-left:23px;border-color:var(--gold2);color:var(--gold2)}
 .cor-li.hc-ici .cor-hcm{display:block}
 .hc-marque{display:inline-flex;align-items:center;gap:3px;color:var(--gold2);font-weight:900;font-size:12px;margin-left:auto;padding-left:6px;flex:0 0 auto}
 .hc-marque .cor-ico{width:15px;height:15px}
+
+/* les feuilles du lecteur : l'écriture, le code couleur, une erreur (préviews _apercu-coran-v12 à v18) */
+.cor-opt{display:block;width:100%;text-align:left;background:var(--panel2);border:2px solid var(--line);border-radius:16px;padding:10px 14px;margin:0 0 10px;color:var(--cream);font-family:var(--ui);cursor:pointer}
+.cor-opt.on{border-color:var(--gold)}
+.cor-opt b{display:block;font-size:15px}
+.cor-opt small{display:block;color:var(--muted);font-size:13px;font-weight:700}
+.cor-opt .ex{display:block;direction:rtl;text-align:right;font-family:var(--ar);font-size:26px;line-height:1.9;color:var(--cream);margin-top:2px}
+.cor-opt .ex.h{font-family:"Uthmanic Hafs",var(--ar);font-size:28px}
+.cor-sw{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;padding:10px 4px;background:none;border:none;color:var(--cream);font-weight:900;font-size:14.5px;font-family:var(--ui);cursor:pointer}
+.cor-sw i{width:46px;height:28px;border-radius:14px;background:var(--line);position:relative;flex:0 0 46px}
+.cor-sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.cor-sw.on i{background:var(--gold)}.cor-sw.on i::after{left:21px}
+.cor-sw.off{opacity:.4;pointer-events:none}
+.cor-lien2{background:none;border:none;color:var(--gold2);font-weight:900;font-family:var(--ui);font-size:14px;cursor:pointer;padding:6px 4px}
+.cor-feuille.fk{z-index:18}   /* ⚠️ jamais .fk seul : les tuiles d’écriture portent .tach.fk */
+.cor-code{display:grid;grid-template-columns:22px 1fr;gap:9px 10px;align-items:start}
+.cor-code i{width:20px;height:20px;border-radius:50%;margin-top:1px;border:2px solid rgba(255,255,255,.25)}
+.cor-code b{display:block;font-size:14px;color:var(--cream)}
+.cor-code span{font-size:12.5px;color:var(--muted);line-height:1.35;display:block}
+.cor-motgd{font-family:var(--ar);font-size:44px;line-height:1.6;text-align:center;color:var(--cream);margin:0 0 6px}
+.cor-mushaf .cor-motgd{font-family:"Uthmanic Hafs",var(--ar)}
+.cor-lettres{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 12px}
+.cor-lettres button{min-width:54px;height:58px;border-radius:12px;border:2px solid var(--line);background:var(--panel2);color:var(--cream);font-family:var(--ar);font-size:30px;cursor:pointer}
+.cor-lettres button.on{border-color:#E2483D;background:rgba(226,72,61,.15)}
+.cor-notes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
+.cor-notes button{border:1.5px solid var(--line);background:none;color:var(--cream);border-radius:20px;padding:7px 12px;font-family:var(--ui);font-weight:800;font-size:13.5px;cursor:pointer}
+.cor-notes button.on{border-color:#E2483D;background:rgba(226,72,61,.15)}
+.cor-act{display:flex;gap:10px}
+.cor-act button{flex:1;height:46px;border-radius:14px;font-family:var(--ui);font-weight:900;font-size:14px;cursor:pointer}
+.cor-ok{background:var(--gold);border:none;color:var(--on-gold,#2A1A05)}
+.cor-suppr{background:none;border:1.5px solid #E2483D;color:#E2483D}
+html.clair .cor-suppr{border-color:#B3261E;color:#B3261E}
