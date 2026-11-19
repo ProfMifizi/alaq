@@ -25,6 +25,9 @@
      un appel tiers de moins (RGPD). Produites par outils/rapatrier-polices.js ; Noto Naskh Arabic et Nunito sous SIL OFL. -->
 <link rel="stylesheet" href="polices/polices.css">
 <link rel="stylesheet" href="app.css">
+<!-- Le mode vitrine (l’app montrée dans le téléphone de www.alaq.fr) : vitrine.js passe avant tout, y compris le bloc du
+     thème, qui lit le stockage de l’appareil. Hors de ce mode, il ne fait rien. -->
+<script src="vitrine.js"></script>
 <!-- supabase-js FIGÉ sur 2.116.0 : l’isolation des comptes lit son format de session et épingle son jeton (setHeader).
      ⛔ CHEMIN EXPLICITE + integrity + crossorigin : l’URL courte est générée par jsDelivr, une SRI y est impossible.
      Changer de version = recalculer l’empreinte ET relire session.user.id et setHeader dans le bundle ; même URL que

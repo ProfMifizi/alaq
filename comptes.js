@@ -46,6 +46,9 @@
    qu'il produit), la fin du grand script d'index.html (onbStart,
    obLoginOpen), et les seize gestes du HTML statique.
 
+   ⚠️ Le mode vitrine (vitrine.js, l'app dans le téléphone de www.alaq.fr) : onbLaunchLesson, onbExistingAccount
+   et cloudVerify y rendent la main à window.__alaqVitrine — ni leçon, ni compte, ni nuage dans le cadre.
+
    Gardes : outils/verifier-comptes.mjs, previews/_verif_comptes.html (source, dist, et la copie
    sans ce fichier), garderLesComptes() (vite.config.mjs), CORE de sw.js ; doReset est aussi rejoué
    par outils/verifier-sync-nuage.mjs. (journal : comptes.js · en-tête d'origine) */
@@ -104,6 +107,8 @@ async function cloudVerify(){
   try{
     const r=await SB.auth.verifyOtp({email:window._cloudEmail, token:code, type:'email'});
     if(r&&r.error)throw r.error;
+    /* mode vitrine (vitrine.js) : la session est ouverte, le compte se charge en plein écran — jamais dans le cadre */
+    if(window.__alaqVitrine){ window.__alaqVitrine.connectee(); return; }
     /* Un AUTRE compte que celui de la page : l'écouteur de cloudInit l'a condamnée, elle recharge.
        Ni accueil de l'ancien compte, ni save() sur son état. */
     try{ if(SYNC.redemarre())return; }catch(_){}
@@ -213,6 +218,7 @@ function onbNext(){
 }
 function onbBack(){ if(ONB.step>0){ONB.step--;onbShow();} }
 function onbExistingAccount(){ // élève existante sur un appareil neuf : le nuage fait foi (_fresh)
+  if(window.__alaqVitrine){ window.__alaqVitrine.compte(); return; }   // mode vitrine (vitrine.js) : rien n'est marqué dans le cadre
   S.onboarded=1; S.tutHome=1; S._fresh=1; save();
   document.getElementById('onb').classList.remove('on');
   if(CLOUD.user){ cloudPull(); showTab('home'); toast('Bon retour'); return; } // session encore vivante : AUCUNE reconnexion à saisir
@@ -304,6 +310,7 @@ function obLaterWarn(){
 function obLaterCancel(){ var m=document.getElementById('laterModal'); if(m)m.classList.remove('on'); }
 function obLaterConfirm(){ obLaterCancel(); obAccountClose(); }
 function onbLaunchLesson(){
+  if(window.__alaqVitrine){ window.__alaqVitrine.lecon(); return; }   // mode vitrine (vitrine.js) : la leçon se joue en plein écran
   var pi=document.getElementById('obPrenomOnb'); if(pi)S.prenom=(pi.value||'').trim();
   S.onb={source:ONB.data.source||'', intention:ONB.data.intention||[], niveau:ONB.data.niveau||'', objectif:ONB.data.objectif||'', ts:Date.now()};
   S.onboarded=1; S.tutHome=1; save();

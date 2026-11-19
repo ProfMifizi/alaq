@@ -25,6 +25,8 @@
                           objectifAtteint)
    · bulles-tutoriels.js  les bulles, la grille des 28 lettres (hamza, solaire/lunaire), les
                           tutoriels (letterTut), le micro (startReco)
+   · vitrine.js           le mode vitrine (l'app dans le téléphone de www.alaq.fr) et les arrivées
+                          #bienvenue et #retour : vitrineArrivee, appelée à la fin de ce script
 
    Restent ici, entre autres : l'état du joueur (let), l'hôte de l'unité 8, « Plus de cœurs », escHTML,
    toast, lecteurPret, fatihaPct, returnFromPlayer, BUILD et VERSION, le démarrage.
@@ -216,12 +218,12 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='correctifs-myriam-18nov';
+const BUILD='mode-vitrine-19nov';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-11-18T09:36';
+const BUILD_DATE='2026-11-19T15:21';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
@@ -229,7 +231,7 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
 const VERSION='3.31';
-const BUILD_NUM=267;
+const BUILD_NUM=268;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
@@ -427,7 +429,8 @@ document.addEventListener('click',function(e){
    (journal : index.html · le service worker en local) */
 if('serviceWorker'in navigator&&location.protocol!=='file:'){
   const enLocal=location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname==='[::1]';
-  if(enLocal){
+  if(window.__alaqVitrine){ /* mode vitrine (vitrine.js) : ni service worker, ni cache touché */ }
+  else if(enLocal){
     navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
     /* sauf les sourates téléchargées par coran.js : ce n'est pas un cache du sw, la production les garde aussi */
     if(window.caches)caches.keys().then(ks=>ks.forEach(k=>{ if(k!=='alaq-coran-hors')caches.delete(k); })).catch(()=>{});
@@ -499,12 +502,14 @@ document.addEventListener('DOMContentLoaded',function(){
   try{ if(window.supabase&&!SB&&!(typeof _posteDeDeveloppement==='function'&&_posteDeDeveloppement()&&!window.__alaqNuageLocal))
     SB=window.supabase.createClient(SUPA_URL,SUPA_ANON,
     {auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){}
+  /* mode vitrine (vitrine.js) : le client ne sert qu'à la session — ni nuage lu, ni contenu, ni pré-chargement */
+  if(window.__alaqVitrine)return;
   try{cloudInit();}catch(e){}
   try{contentPull();}catch(e){} // le contenu des tables, une fois SB prêt
   // au 1er lancement le SW ne contrôle pas encore la page : 'ready' attend qu'il soit actif
   try{navigator.serviceWorker.ready.then(function(r){r.active&&r.active.postMessage('precache');});}catch(e){}
 });
-try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){} // demande au navigateur de NE PAS purger le stockage (connexion + progression)
+try{if(!window.__alaqVitrine&&navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){} // demande au navigateur de NE PAS purger le stockage (connexion + progression)
 
 /* ⚠️ le premier rendu est synchrone : refreshStats (qui appelle updRankBadge sans garde) et showTab('home').
    Tout ce qu'ils touchent doit venir d'un script classique chargé plus haut. */
@@ -527,4 +532,6 @@ if(location.hash==='#connexion'){
     } else if(essai<100){ setTimeout(function(){attendreModuleU9(essai+1);},50); }
     else{ try{toast('Module unité 9 introuvable');}catch(e){} }
   })(0);
+} else if(typeof vitrineArrivee==='function'&&vitrineArrivee()){
+  /* vitrine.js a pris l'arrivée en charge : le cadre du site (mode vitrine), #bienvenue=<charge> ou #retour */
 } else if(!S.onboarded){ setTimeout(function(){try{onbStart();}catch(e){}},120); } // 1er lancement : parcours de bienvenue

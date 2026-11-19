@@ -10,7 +10,7 @@
    (parcours.js), buildForms (generateurs.js). Le contrat du moteur de synchro est en tête de
    sa section.
    ⚠️ window.S est un accesseur, jamais une capture : S est un let, réaffecté par cloudPull
-   (ce fichier) et doReset (comptes.js). Les function sont déjà des propriétés de
+   (ce fichier) et doReset (comptes.js) — et une fois au chargement, avant tout lecteur, pour #bienvenue. Les function sont déjà des propriétés de
    window, les let/const non.
    Gardes : outils/verifier-progression.mjs, previews/_verif_progression.html,
    outils/verifier-sync-nuage.mjs. */
@@ -655,6 +655,13 @@ let _resetAnnonce=false;   // SYNC.reset() l'arme : la prochaine réaffectation 
 function _poserTag(o){
   try{ Object.defineProperty(o,'_projTag',{value:_tag,enumerable:false,configurable:true,writable:true}); }catch(e){}
 }
+/* #bienvenue=<charge> (vitrine.js, qui a lu la charge avant ce fichier) : sur un appareil SANS compte — ni _uid, ni
+   _uidVu, ni session gardée —, l'état d'invité est remplacé par un état neuf avant que rien ne le lise (Myriam, 17/11) ;
+   l'ancien passe par l'unique mise de côté. Avec un compte, rien n'est touché et l'arrivée est oubliée. */
+try{ if(window.__alaqBienvenue){
+  if(!S._uid&&!S._uidVu&&!_idSession()){ _mettreDeCote(S); S=_neuf(); window.__alaqBienvenue.neuf=1; }
+  else window.__alaqBienvenue=null;
+} }catch(e){}
 _poserTag(S);
 
 /* Les étiquettes des notions de grammaire (choisies par Myriam).
