@@ -203,8 +203,9 @@ function badgesAttendre(){ if(!_badgesMinuteur)_badgesMinuteur=setInterval(badge
 function _badgeGene(){
   if(document.querySelector('.finish.on:not(#badgeNeuf)'))return true;
   /* le lecteur du Coran aussi : 3 minutes de lecture valident le jour, et un badge de série ne passe pas par-dessus la lecture */
-  const pl=document.getElementById('player'), ob=document.getElementById('onb'), co=document.getElementById('coran');
-  return !!((pl&&pl.classList.contains('on'))||(ob&&ob.classList.contains('on'))||(co&&co.classList.contains('on')));
+  const pl=document.getElementById('player'), ob=document.getElementById('onb'), co=document.getElementById('coran'), fl=document.getElementById('film');
+  /* le récit de la naissance (src/film/) aussi : un badge ne passe pas par-dessus l'histoire */
+  return !!((pl&&pl.classList.contains('on'))||(ob&&ob.classList.contains('on'))||(co&&co.classList.contains('on'))||(fl&&fl.classList.contains('on')));
 }
 function badgeSuivant(){
   const file=S.badgesAVoir||[];

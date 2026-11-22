@@ -57,6 +57,7 @@ function sigChoisir(b){
 }
 function sigEcran(){ // où l'élève se trouve — capturé, jamais demandé
   try{
+    const film=window.__alaqRecit&&window.__alaqRecit.ecran&&window.__alaqRecit.ecran(); if(film)return film;   // le film de la naissance (src/film/)
     if(REVIEW)return 'révision · écran '+(qi+1)+(QUEUE[qi]&&QUEUE[qi].type?' · '+QUEUE[qi].type:'');
     const st=QUEUE[qi];
     return 'U'+((UNITS[curU]&&UNITS[curU].no)||curU+1)+'-D'+(curD+1)+'-E'+(qi+1)+(st&&st.type?' · '+st.type:' · quiz');

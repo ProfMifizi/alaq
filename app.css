@@ -285,6 +285,11 @@
     min-height:68px;display:grid;place-items:center}
   .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.55;font-weight:700}
   .opt.sel{border-color:var(--gold);background:#3a312b;box-shadow:inset 0 0 0 1px var(--gold)}
+  /* ⛔ en SOMBRE seulement (Myriam, 21/11 : « la sélection sur fond clair, généralisée sur tous les exercices ») : la carte CHOISIE passe en crème,
+     contour doré, texte brun — la préview v6 du film. La bonne réponse validée reste verte, la mauvaise rouge ; la carte retournée (.fopt) garde
+     son rendu ; en clair rien ne change. Garde : previews/_verif_selection_sombre.html */
+  html:not(.clair) .opt.sel:not(.fopt):not(.ok):not(.bad){background:#F2E9DA;border-color:#D0870D;box-shadow:inset 0 0 0 1px #D0870D;color:#3A2410}
+  html:not(.clair) .opt.sel:not(.fopt):not(.ok):not(.bad) .ar{color:#3A2410}
   .opt.ok{border-color:var(--green);background:var(--green-bg);color:var(--green)}
   .opt.ok .ar{color:var(--green)}
   .opt.bad{border-color:var(--coral);background:var(--coral-bg);color:var(--coral)}
@@ -2167,22 +2172,11 @@ body.ciel .unit-head .uh-burger img{width:26px;height:26px;object-fit:contain;di
   background:linear-gradient(180deg,#8A5A16,#3A2610)}
 /* verrouillé : la porte est là, on voit qu'elle attend, on ne peut pas l'ouvrir */
 #portail.verrouille{filter:grayscale(.9) brightness(.5);cursor:default;opacity:.85;pointer-events:none}
-/* l'entrée dans l'histoire : la lumière de la porte envahit l'écran */
-#entreeHalte{position:fixed;inset:0;z-index:80;display:none;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center;padding:0 28px;
-  background:radial-gradient(90% 70% at 50% 62%,#FFF3D2 0%,#F4D89C 30%,#EDBE72 62%,#C98F2E 100%)}
-#entreeHalte.on{display:flex;animation:enthalte 1.15s cubic-bezier(.4,0,.2,1) forwards}
+/* l'entrée dans l'histoire : la lumière de la porte envahit l'écran (le film de la naissance, src/film/, rejoue ces images clés sur #film) */
 @keyframes enthalte{from{clip-path:circle(7% at 50% 76%);opacity:.35}
   to{clip-path:circle(140% at 50% 50%);opacity:1}}
-#entreeHalte .eh-k{font-size:9.5px;letter-spacing:.34em;font-weight:900;color:#7A5514}
-#entreeHalte .eh-t{font-family:var(--ui);font-weight:900;font-size:23px;color:#2E2314;margin-top:10px}
-#entreeHalte .eh-s{font-size:11.5px;color:#6E5A33;margin-top:9px;font-weight:700}
-#entreeHalte .eh-n{font-size:11px;color:#7A6540;margin-top:22px;font-style:italic;max-width:280px;line-height:1.6}
-#entreeHalte .eh-x{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:16px;
-  background:rgba(46,35,20,.14);border:none;width:38px;height:38px;border-radius:50%;
-  color:#2E2314;font-size:17px;cursor:pointer}
 @media (prefers-reduced-motion: reduce){
-  #sommCiel .sc-in,#entreeHalte.on{animation:none}
+  #sommCiel .sc-in{animation:none}
   #portail .pt-v,#portail .pt-clarte{transition:none}
 }
 
@@ -2895,6 +2889,9 @@ html.clair .cor-stop{background:#4E3210;color:#F2E9DA}
 .cor-aa i:nth-child(1){background:#2b6228}.cor-aa i:nth-child(2){background:#f77e00}.cor-aa i:nth-child(3){background:#006eff;margin-right:2px}
 /* l'écriture du mushaf (police KFGQPC Uthmanic Hafs) et les couleurs officielles du tajwīd, sur la carte claire */
 @font-face{font-family:"Uthmanic Hafs";src:url(polices/uthmanic-hafs-v18.woff2) format("woff2");font-display:block}
+/* le signe ﷺ (U+FDFA) seul, en Scheherazade New (SIL OFL ; choix de Myriam, 21/11) : le film de la naissance le met devant la pile de ses textes, le reste garde Noto Naskh.
+   Le fichier est un sous-ensemble d'UN glyphe (3 Ko), pré-caché dans le CŒUR de sw.js. */
+@font-face{font-family:"SWS";src:url(polices/scheherazade-new-sws-v1.woff2) format("woff2");unicode-range:U+FDFA;font-display:block}
 .cor-mushaf .cor-ct{font-family:"Uthmanic Hafs",var(--ar);font-size:29px;line-height:2.15}
 .cor-tjc .tj-ham_wasl,.cor-tjc .tj-laam_shamsiyah,.cor-tjc .tj-slnt,.cor-tjc .tj-idgham_wo_ghunnah,.cor-tjc .tj-idgham_mutajanisayn,.cor-tjc .tj-idgham_mutaqaribayn{color:#64655e}
 .cor-tjc .tj-ghunnah,.cor-tjc .tj-ikhafa,.cor-tjc .tj-ikhafa_shafawi,.cor-tjc .tj-idgham_ghunnah,.cor-tjc .tj-idgham_shafawi,.cor-tjc .tj-iqlab{color:#2b6228}

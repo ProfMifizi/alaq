@@ -223,8 +223,85 @@ const SONS_APP={
   'felicit:allahumma-barik':'felicit-allahumma-barik-f',
 };
 
+/* ── ⑤ le film « La porte de la naissance » : ses 52 prises et ses 16 réponses (src/film/). Une clé « recit:<id> » = un fichier.
+   ⛔ Ces prises se chargent À LA DEMANDE : precache-sons.mjs ne les met PAS au pré-cache (~4 Mo qui n'ont rien à faire sur le
+   téléphone de qui n'ouvre pas la porte), et verifier-son.mjs exige qu'elles n'y soient pas.
+   Bloc généré par outils/fabriquer-donnees-recit.mjs — ne pas l'éditer à la main. */
+const SONS_RECIT={
+/*⟦recit-début⟧*/
+  'recit:0.1':'recit-0-1-v1',
+  'recit:0.2':'recit-0-2-v1',
+  'recit:0.3':'recit-0-3-v1',
+  'recit:0.4':'recit-0-4-v1',
+  'recit:1.1':'recit-1-1-v1',
+  'recit:1.2':'recit-1-2-v1',
+  'recit:1.3':'recit-1-3-v1',
+  'recit:2.1':'recit-2-1-v1',
+  'recit:2.2':'recit-2-2-v1',
+  'recit:2.3':'recit-2-3-v1',
+  'recit:2.4':'recit-2-4-v1',
+  'recit:2.5':'recit-2-5-v1',
+  'recit:2.6':'recit-2-6-v1',
+  'recit:2.7':'recit-2-7-v1',
+  'recit:2.8':'recit-2-8-v1',
+  'recit:2.9':'recit-2-9-v1',
+  'recit:Q1':'recit-q1-v1',
+  'recit:3.1':'recit-3-1-v1',
+  'recit:3.2':'recit-3-2-v1',
+  'recit:3.3':'recit-3-3-v1',
+  'recit:Q2':'recit-q2-v1',
+  'recit:4.1':'recit-4-1-v1',
+  'recit:4.2':'recit-4-2-v1',
+  'recit:4.3':'recit-4-3-v1',
+  'recit:Q3':'recit-q3-v1',
+  'recit:5.1':'recit-5-1-v1',
+  'recit:5.2':'recit-5-2-v1',
+  'recit:5.3':'recit-5-3-v1',
+  'recit:Q4':'recit-q4-v1',
+  'recit:6.1':'recit-6-1-v1',
+  'recit:6.2':'recit-6-2-v1',
+  'recit:6.3':'recit-6-3-v1',
+  'recit:6.4':'recit-6-4-v1',
+  'recit:6.5':'recit-6-5-v1',
+  'recit:6.6':'recit-6-6-v1',
+  'recit:7.1':'recit-7-1-v1',
+  'recit:7.2':'recit-7-2-v1',
+  'recit:7.3':'recit-7-3-v1',
+  'recit:7.4':'recit-7-4-v1',
+  'recit:7.5':'recit-7-5-v1',
+  'recit:Q5':'recit-q5-v1',
+  'recit:8.1':'recit-8-1-v1',
+  'recit:8.2':'recit-8-2-v1',
+  'recit:8.3':'recit-8-3-v1',
+  'recit:8.4':'recit-8-4-v1',
+  'recit:8.5':'recit-8-5-v1',
+  'recit:8.6':'recit-8-6-v1',
+  'recit:Q6':'recit-q6-v1',
+  'recit:9.1':'recit-9-1-v1',
+  'recit:9.2':'recit-9-2-v1',
+  'recit:9.4':'recit-9-4-v1',
+  'recit:9.5':'recit-9-5-v1',
+  'recit:M01':'recit-m01-v1',
+  'recit:M02':'recit-m02-v1',
+  'recit:M03':'recit-m03-v1',
+  'recit:M04':'recit-m04-v1',
+  'recit:M05':'recit-m05-v1',
+  'recit:M06':'recit-m06-v1',
+  'recit:M07':'recit-m07-v1',
+  'recit:M08':'recit-m08-v1',
+  'recit:M09':'recit-m09-v1',
+  'recit:M10':'recit-m10-v1',
+  'recit:M11':'recit-m11-v1',
+  'recit:M12':'recit-m12-v1',
+  'recit:M13':'recit-m13-v1',
+  'recit:M14':'recit-m14-v1',
+  'recit:M15':'recit-m15-v1',
+  'recit:M16':'recit-m16-v1',
+/*⟦recit-fin⟧*/
+};
+
 semerLesSons();
-Object.assign(SONS,SONS_ECRITS,SONS_COMPOSES,SONS_APP);
+Object.assign(SONS,SONS_ECRITS,SONS_COMPOSES,SONS_APP,SONS_RECIT);
 
 /* La seule porte d'entrée de ce qui vient des données (mots des unités, Noms d'Allah,
    unités 8+) : rien n'écrit dans SONS à la main. */
@@ -235,7 +312,7 @@ function inscrireLeSon(cle,nom){
 
 /* Les familles ne servent qu'au banc (chaque son tombe dans une famille connue) ;
    elles ne pilotent aucun repli. */
-const FAMILLES=['lettre','mot','nom','voyelle','sfx','felicit','am','an','al','faux'];
+const FAMILLES=['lettre','mot','nom','voyelle','sfx','felicit','am','an','al','faux','recit'];
 function familleDe(nom){
   const s=String(nom||'');
   if(/-son-(court|prolonge)$/.test(s))return 'syllabe';
@@ -311,6 +388,9 @@ function audioBeni(url){ // un lecteur du pool si béni, le même lecteur de sec
    n'est que du vocabulaire. */
 const DOSSIER='audios-app-alaq/';
 function urlDuSon(nom){ return DOSSIER+nom+'.mp3'; }
+/* L'adresse d'une clé de la table, ou null : pour qui doit PILOTER son élément audio (pause, horloge) — le film. Un son qui ne demande
+   que d'être entendu passe par jouer(). */
+function urlDe(cle){ const nom=(typeof cle==='string'&&SONS[cle])||null; return nom?urlDuSon(nom):null; }
 
 /* cle : ce que l'app demande · o.el : le haut-parleur animé · o.fin : rappelé à la fin
    de CE son, toujours, même sur un silence.

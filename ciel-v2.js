@@ -144,21 +144,12 @@ function poserPortail(){
   majPortail();
 }
 function ouvrirHalte(){
-  var e=document.getElementById('entreeHalte');
-  if(!e){
-    e=document.createElement('div'); e.id='entreeHalte';
-    e.innerHTML='<button class="eh-x" type="button" aria-label="Revenir">✕</button>'+
-      '<div class="eh-k">LA HALTE</div>'+
-      '<div class="eh-t">Un lundi, à La Mecque</div>'+
-      '<div class="eh-s">Ṣaḥīḥ Muslim n° 1162</div>'+
-      '<div class="eh-n">L’histoire audio de cette halte est en préparation, in shā’ Allāh.</div>';
-    document.body.appendChild(e);
-    e.querySelector('.eh-x').addEventListener('click', function(){
-      e.classList.remove('on');
-      var p=document.getElementById('portail'); if(p) p.classList.remove('ouvert');
-    });
-  }
-  e.classList.add('on');
+  /* le film de la naissance (src/film/, un module : atteint À L'APPEL, jamais capturé) ; la porte se rend quand il se ferme.
+     (journal : src/film · le film remplace l'écran « La halte ») */
+  var p=document.getElementById('portail'), R=window.__alaqRecit;
+  if(R&&typeof R.ouvrir==='function'){ R.ouvrir({quandFerme:function(){ if(p) p.classList.remove('ouvert'); }}); return; }
+  if(p) p.classList.remove('ouvert');
+  try{ toast('Le récit n’est pas encore chargé — recharge la page'); }catch(e){}
 }
 
 /* Le portail reste éteint tant que le parcours de la sourate n'est pas achevé. */
@@ -173,10 +164,13 @@ function majPortail(){
     var ok=false; try{ ok=unitValidated(u); }catch(e){}
     if(!ok) reste.push(U.no);
   }
-  var fini=(reste.length===0);
+  /* ⛔ la porte ne s'ouvre qu'avec le DERNIER disque (le 9ᵉ) de l'unité 12, la mémorisation (Myriam, 21/11) : UNITS[11].
+     Tant que l'unité 12 n'est pas livrée, ses disques ne se valident pas : la porte reste fermée. */
+  var u12=false; try{ u12=unitValidated(11); }catch(e){}
+  var fini=(reste.length===0&&u12);
   d.classList.toggle('verrouille', !fini);
   d.setAttribute('aria-disabled', fini?'false':'true');
-  d.title = fini ? 'La halte' : ('Termine le parcours de la Fātiḥa — il reste l\u2019unité '+reste[0]);
+  d.title = fini ? 'La halte' : ('Termine le parcours de la Fātiḥa — il reste l\u2019unité '+(reste.length?reste[0]:12));
 }
 
 /* ---------- greffes ---------- */

@@ -654,7 +654,7 @@ function revPopGene(){
   var home=document.getElementById('home');
   if(!home||home.style.display==='none')return true;
   if(!S.onboarded||(S.badgesAVoir&&S.badgesAVoir.length)||S.pendingMiss>0)return true;
-  if(document.querySelector('.finish.on, #player.on, #onb.on, .rq-voile, #surahMenu.on, .disc-tip'))return true;
+  if(document.querySelector('.finish.on, #player.on, #film.on, #onb.on, .rq-voile, #surahMenu.on, .disc-tip'))return true;   // #film : le récit de la naissance (src/film/)
   var lt=document.getElementById('letterTut');
   return !!(lt&&lt.style.display!=='none');
 }
