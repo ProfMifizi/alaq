@@ -303,7 +303,7 @@
   <button class="stk-spk" id="streakSpk" onclick="streakRecite()" aria-label="Écouter le verset"></button>
   <p class="verse" id="streakVerse">مَّثَلُ الَّذِينَ يُنْفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنْبَتَتْ سَبْعَ سَنَابِلَ فِي كُلِّ سُنْبُلَةٍ مِائَةُ حَبَّةٍ ۗ وَاللَّهُ يُضَاعِفُ لِمَنْ يَشَاءُ ۗ وَاللَّهُ وَاسِعٌ عَلِيمٌ</p>
   <p class="stk-tr">« Ceux qui dépensent leurs biens dans le chemin d’Allah sont à l’image d’un grain qui fait pousser sept épis, à cent grains chacun. Et Allah multiplie la récompense à qui Il veut. Allah est Immense et Savant. »</p>
-  <p class="stk-src">sourate Al-Baqara, verset 261</p>
+  <div class="stk-rang" id="streakRang"><p class="stk-src">sourate Al-Baqara, verset 261</p></div>
   <button class="cta" style="max-width:300px" onclick="streakContinue()">CONTINUER</button>
 </div>
 `,

@@ -26,7 +26,8 @@
    · spkSVG, spkOn, spkOff, stopAudio, playSfx, _curAudio, _sndGen (son.js)
    · icoImg, icoEcran (assets.js) · qariCur, qariUrlCdn (revision.js)
    · refreshStats (ui/accueil.js) · renderProg (ui/parametres.js)
-   · toast, fatihaPct, returnFromPlayer, obAccountPending (index.html) · showObAccount (comptes.js).
+   · toast, fatihaPct, returnFromPlayer, obAccountPending (index.html) · showObAccount (comptes.js)
+   · serieMotsOuvrir, serieMotsSuivre, serieMotsArret, serieMotsFermer (serie-mots.js : l'illumination et la loupe de l'écran des 7 épis, derrière try).
 
    ⚠️ Chargé après signalements.js : ses deux capteurs d'erreur doivent être debout avant le roulement du jour.
    Gardes : outils/verifier-constance.mjs, previews/_verif_constance.html, garderLaConstance()
@@ -42,6 +43,7 @@ function showStreak(){ // l'épi pousse du tas de terre ; le chiffre reste le ti
   document.getElementById('streakUnit').textContent=(n>1?'jours':'jour');
   var s=document.getElementById('streakSpk'); if(s&&!s.innerHTML)s.innerHTML=spkSVG();
   document.getElementById('streak').classList.add('on');
+  try{ serieMotsOuvrir(); }catch(e){}   // les mots du verset et la loupe (serie-mots.js)
   streakPrecharger();
   /* La récitation de 2:261 part toute seule : exception voulue par Myriam, pour que le verset soit
      entendu chaque jour — aucun autre écran ne doit réciter seul (journal : constance.js · récitation automatique).
@@ -68,7 +70,7 @@ function streakPrecharger(){
    ⚠️ Fichier non hébergé chez nous : il passe par le flux, et hors ligne on le dit. */
 function streakRecite(){
   var b=document.getElementById('streakSpk');
-  if(_curAudio&&!_curAudio.paused){ stopAudio(); spkOff(b&&b.querySelector('.spk')); return; }
+  if(_curAudio&&!_curAudio.paused){ stopAudio(); try{ serieMotsArret(); }catch(e){} spkOff(b&&b.querySelector('.spk')); return; }
   stopAudio();
   var url=qariUrlCdn(qariCur(),268);
   /* on reprend l'élément préchargé s'il porte LA MÊME voix, sinon on en fait un */
@@ -80,9 +82,11 @@ function streakRecite(){
   a.addEventListener('ended',fin,{once:true});
   a.addEventListener('error',function(){ fin(); toast('Récitation indisponible sans connexion'); },{once:true});
   var p=a.play(); if(p&&p.catch)p.catch(function(){ fin(); toast('Récitation indisponible sans connexion'); });
+  try{ serieMotsSuivre(a); }catch(e){}   // les mots s'allument au fil du son (serie-mots.js)
 }
 function streakContinue(){
   stopAudio();
+  try{ serieMotsFermer(); }catch(e){}
   document.getElementById('streak').classList.remove('on');
   if(obAccountPending){ obAccountPending=false; showObAccount(); return; }
   returnFromPlayer();

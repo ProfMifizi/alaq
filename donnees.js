@@ -51,6 +51,27 @@ const FATIHA=[
  'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ',
  'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
  'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ'];
+/* ═══ L'ENTRÉE DE TEST DE L'UNITÉ 12 (20/11/2026) ═══════════════════════════════════════════════
+   L'unité 12 reste FERMÉE à tout élève. Elle ne s'ouvre que sur un serveur de développement (hôte local ou réseau privé,
+   en http) ET quand previews/_u12_app.html a posé alaq_dev_u12 = '1' : c'est ainsi que Myriam la joue en vrai sur son iPhone.
+   ⛔ L'hôte se teste AVANT le drapeau : en production (https://app.alaq.fr), localStorage n'est même pas lu.
+   ⛔ Le paquet natif sert aussi « localhost » (Android https://localhost, iOS capacitor://localhost) : d'où le protocole http.
+   Pure et sans globale, pour que le banc l'éprouve hôte par hôte (outils/verifier-u12-entree.mjs). */
+function u12EntreeDeTest(protocole, hote, lireDrapeau){
+  if(protocole!=='http:') return false;
+  var o='(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)';
+  var local = hote==='localhost' || hote==='127.0.0.1'
+    || new RegExp('^192\\.168\\.'+o+'\\.'+o+'$').test(hote)
+    || new RegExp('^10\\.'+o+'\\.'+o+'\\.'+o+'$').test(hote);
+  if(!local) return false;
+  return lireDrapeau()==='1';
+}
+function u12Ouverte(){
+  try{ return u12EntreeDeTest(location.protocol, location.hostname, function(){ return localStorage.getItem('alaq_dev_u12'); }); }
+  catch(e){ return false; }
+}
+/* Poste de test de l'unité 12 SEULEMENT (même garde) : les qatarāt ne baissent plus, pour pouvoir se tromper à volonté en relisant. Lu par src/player/index.js. */
+window.__alaqDevCoeurs=u12Ouverte();
 const UNITS=(function(){
   /* Unités 1 à 7 : window.__ALAQ_UNITS (content/unites.js). Unités 8 à 12 : la seule
      métadonnée d’accueil, leurs écrans vivent dans des modules ES.
@@ -140,7 +161,8 @@ const UNITS=(function(){
    ],
    court:'Les pronoms et les accords',
    sub:'Mon, ton, notre, leur — ce qui décrit s’accorde · 9 leçons' },
- { no:12, ready:false, ph:'MÉMORISATION', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
+ /* Unité 12 : ouverte (3.32). u12Ouverte() ne sert plus qu'au poste de test local : qatarāt illimitées (window.__alaqDevCoeurs). */
+ { no:12, ready:true, ph:'MÉMORISATION', u12:true, letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
 ]);
 })();
 

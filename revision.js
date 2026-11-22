@@ -1021,8 +1021,8 @@ function accQTog(k){
    Une ligne = un nom ; la leçon est une file de composants génériques. Ajouter un nom : une
    ligne + son mp3. La table Supabase noms_allah remplace cette graine (CONTENU). */
 const NOMS_ALLAH=[
- {ar:'الرَّحْمَٰنُ',fr:'le Tout-Miséricordieux',snd:'nom-arrahman'},
- {ar:'الرَّحِيمُ',fr:'le Très-Miséricordieux',snd:'nom-arrahim'},
+ {ar:'الرَّحْمَٰنُ',fr:'le Tout-Miséricordieux',snd:'nom-arrahman-v2'},
+ {ar:'الرَّحِيمُ',fr:'le Très-Miséricordieux',snd:'nom-arrahim-v2'},
  {ar:'الْمَلِكُ',fr:'le Roi',snd:'nom-almalik'},
  {ar:'السَّلَامُ',fr:'la Paix',snd:'nom-assalam'},
  {ar:'الْمُؤْمِنُ',fr:'le Rassurant',snd:'nom-almumin'},

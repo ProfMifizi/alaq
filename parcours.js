@@ -260,6 +260,31 @@ function u11Disques(){
   });
 }
 
+/* Unité 12 : la mémorisation de la Fātiḥa, NEUF disques (spécification : notes/u12-structure-fiche-2026-11-18-v6.md), même
+   mécanique que u11Disques() : le rang i appelle disque(i+1). L'unité reste ready:false tant que Myriam n'a pas donné son GO. */
+function u12Disques(){
+  return [
+    ['📌','memoriser','Remettre en ordre',          1, false],
+    ['💡','decouvrir','Le sens · versets 1 à 5',     2, false],
+    ['💡','decouvrir','Le sens · versets 6 et 7',    3, false],
+    ['📌','memoriser','Placer les mots',             4, false],
+    ['📌','memoriser','Traduire',                    5, false],
+    ['🕋','qoran',    'L’histoire',                  6, false],
+    ['✏️','ecrire',   'Dictée',                      7, false],
+    ['📌','memoriser','Sans le son',                 8, false],
+    ['🏆','bilan',    'Bilan',                       9, false],
+  ].map(function(d){
+    var icon=d[0], img=d[1], label=d[2], n=d[3], vocab=d[4];
+    var o={ icon:icon, img:img, label:label, build:function(){
+      var f=window.__alaqU12 && window.__alaqU12['disque'+n];
+      if(typeof f==='function') return f();
+      console.error('unité 12 : module non chargé (disque '+n+')'); return [];
+    } };
+    if(vocab) o.vocab=true;
+    return o;
+  });
+}
+
 /* L'évaluation « AVANCER ICI ? » depuis l'unité 8 (Myriam, 02/11) : au plus 20 écrans DÉJÀ validés, dans l'ordre du cours,
    tirés des disques : lettres solaires et lunaires, défini/indéfini, ḥarf jarr, annexion, écriture de mots.
    Rend null avant l'unité 8 (buildExam garde alors ses lettres et ses mots).
@@ -268,7 +293,7 @@ function u11Disques(){
    outils/verifier-parcours.mjs, écran par écran. */
 function examGrammaire(u){
   var U=UNITS[u];
-  if(!U||!(U.u8||U.u9||U.u10||U.u11)) return null;
+  if(!U||!(U.u8||U.u9||U.u10||U.u11||U.u12)) return null;   // la bulle de l'unité 12 porte l'évaluation de la grammaire jusqu'à l'unité 11
   /* n écrans tirés parmi les rangs du disque k (de 1 à 9) de l'unité d'indice ui */
   var tirer=function(ui,k,rangs,n){
     var pas=discsFor(ui)[k-1].build();
@@ -294,6 +319,7 @@ function discsFor(u){
   if(UNITS[u]&&UNITS[u].u9) return u9Disques();               // unité 9 : la grammaire, registre d'exercices
   if(UNITS[u]&&UNITS[u].u10) return u10Disques();             // unité 10 : « X de Y », même registre
   if(UNITS[u]&&UNITS[u].u11) return u11Disques();             // unité 11 : pronoms et accords, même registre
+  if(UNITS[u]&&UNITS[u].u12) return u12Disques();             // unité 12 : mémoriser la Fātiḥa, même registre
   var D=disques();
   if(u===0) return D;                                        // unité 1 : tour d'alphabet en tête
   if(UNITS[u].kind==='weak')                                 // unité 2 : structure sur mesure
