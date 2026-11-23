@@ -263,6 +263,7 @@ function texteAuto(){
 /* le HTML tajwīd d'un verset, coupé en mots : une couleur à cheval sur deux mots est fermée avant l'espace et rouverte après ;
    les lettres lourdes hors de toute couleur prennent la leur (tafkhīm) ; un signe seul rejoint son mot */
 function tjMots(h){
+  h=signesDuMushaf(h);
   var re=/<tajweed class=([a-z_]+)>|<\/tajweed>|<span class=end>[^<]*<\/span>|<[^>]*>|([^<]+)/g, m, pile=[], mots=[], cur=null, taf=false;
   var ouvre=function(c){ return '<span class="tj tj-'+c+'">'; }, ouvertes=function(){ return pile.filter(Boolean); };
   var neuf=function(){ cur={h:ouvertes().map(ouvre).join(''),t:''}; mots.push(cur); };
@@ -289,6 +290,14 @@ function tjMots(h){
   });
   return out;
 }
+/* ⛔ QUATRE SIGNES DU TAJWĪD DE QURAN.COM QUE LA POLICE DU MUSHAF PEINT SUR UN ROND POINTILLÉ ◌ (Myriam, 20/11 ; mesuré le 23/11 :
+   leur texte n'écrit pas ces signes comme le mushaf de Médine). On les écrit comme le texte du Complexe du roi Fahd (qpc_hafs),
+   que la police dessine bien : U+06DF → U+06E0 (l'alif muet de أَنَا۠ et de قَوَارِيرَا۠ : 66 fois) ; U+06EB → U+06EC (l'ishmām de
+   تَأْمَ۬نَّا, 12:11) ; U+06E3 → U+06DC (le sīn de ٱلْمُصَۜيْطِرُونَ, 52:37). Et 32:3 : une balise ouverte cassée laisse un « > » et un
+   U+066E à la place du ى de ٱفْتَرَىٰهُ. Balayé en passant les 77 645 mots du Coran dans la police : il n'y a pas d'autre cas.
+   (journal : coran.js · le zéro rond sur un rond pointillé) */
+var SIGNES_MUSHAF=[['۟','۠'],['۫','۬'],['ۣ','ۜ'],['>ٮٰ','ىٰ']];
+function signesDuMushaf(h){ SIGNES_MUSHAF.forEach(function(p){ h=h.split(p[0]).join(p[1]); }); return h; }
 /* ⛔ LE PETIT ALIF ٲ (U+0672) DE QURAN.COM S'ÉCRIT ٰ (U+0670) (Myriam, 18/11 : ذَٰلِكَ, ٱلصَّلَوٰةَ sur un rond pointillé ◌, iPhone ET
    Mac). Après une lettre qui ne se lie pas (و ذ ر…), leur texte tajwīd met ٲ, que la police du mushaf dessine AVEC un rond
    pointillé, et dans un autre <span> que sa lettre (145 fois dans Al-Baqara). On écrit l'alif suscrit ٰ de l'écriture simple, et
