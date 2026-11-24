@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v271-2026-11-23';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v272-2026-11-24';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -781,7 +781,44 @@ async function pecherSupabase(){
     }finally{ clearTimeout(t); }
   }catch(_){ }
 }
+/* LE RECHARGEMENT FORCÉ des pages d'AVANT le build 264 (Myriam, 23/11) : elles ne voient ni n'appliquent une mise à jour (il faut
+   ouvrir puis fermer l'app deux fois), alors que ce sw arrive seul au lancement. ⚠️ Il ne voit pas le DOM : il ignore si l'élève est
+   en pleine leçon. Donc : ① seulement si le cache COMPLET (index.html dedans : une installation tuée en laisse un vide) de la version
+   PRÉCÉDENTE (alaq-vNNN-…, lu AVANT la purge) est d'avant le 264 — une page du 264 ou d'après se recharge seule, au repos (coque.js),
+   et n'est JAMAIS déplacée de force (leçon, Coran) ; cache introuvable (1re installation, purge du système) = rien ; ② seulement si
+   l'activation suit de moins d'une minute le début de l'installation (la mise à jour vient de commencer : ce n'est PAS l'âge de la page,
+   l'ouverture d'un 2e onglet la déclenche aussi) ; ③ seulement la racine de l'app, top-level, jamais un cadre ni une autre page du
+   domaine ; ④ navigate n'est jamais attendu (Chrome interbloque ≈ 5 min : la navigation passe par CE sw, « activé » seulement après ce
+   waitUntil) et l'adresse est rendue SANS le # (avec un #, WebKit et Firefox naviguent DANS le document : rien ne se recharge). Tout
+   est avalé : une mise à jour ne doit JAMAIS faire échouer l'activation. ⚠️ navigate : Safari 16+ seulement. À RETIRER quand
+   profiles.client_build n'a plus aucun compte d'avant le 264. Gardes : verifier-sw-horsligne.mjs (S7), verifier-maj-forcee-chrome.mjs.
+   (journal : sw.js · le rechargement forcé) */
+const BUILD_QUI_SE_RECHARGE_SEUL=264, FENETRE_RECHARGE=60000;
+let _installeA=0;
+async function _buildPrecedent(cles){   // le plus récent des autres caches COMPLETS de l'app : le build des pages que ce sw remplace
+  let m=0;
+  for(const k of cles){
+    const r=/^alaq-v(\d+)(?:-|$)/.exec(k);
+    if(!r||k===CACHE||+r[1]<=m)continue;
+    try{ if(await (await caches.open(k)).match('index.html'))m=+r[1]; }catch(_){}   // vide = une installation tuée, pas une version
+  }
+  return m;
+}
+function _racineDeLApp(cl){
+  try{
+    if(cl.frameType&&cl.frameType!=='top-level')return false;
+    const p=new URL(cl.url).pathname;
+    return p===RACINE_SW||p===RACINE_SW+'index.html';
+  }catch(_){ return false; }
+}
+async function rechargerLesVieillesPages(precedent){
+  if(!precedent||precedent>=BUILD_QUI_SE_RECHARGE_SEUL||!_installeA||Date.now()-_installeA>FENETRE_RECHARGE)return;
+  for(const c of (await self.clients.matchAll({type:'window'})).filter(_racineDeLApp)){
+    try{ c.navigate(c.url.split('#')[0]).catch(()=>{}); }catch(_){}   // jamais attendu (interblocage) ; sans # (sinon navigation dans le document)
+  }
+}
 self.addEventListener('install',e=>{
+  _installeA=Date.now();   // lu AVANT tout await : le début de CETTE installation
   e.waitUntil((async()=>{
     const c=await caches.open(CACHE);
     try{ await c.addAll(CORE); }   // le cœur SEULEMENT : l'installation doit être rapide
@@ -831,6 +868,7 @@ self.addEventListener('message',e=>{ if(e.data==='precache')e.waitUntil(precache
 self.addEventListener('activate',e=>{
   e.waitUntil((async()=>{
     const keys=await caches.keys();
+    const precedent=await _buildPrecedent(keys);   // lu AVANT la purge ci-dessous : le build des pages que ce sw remplace
     // MEDIA survit aux livraisons ; IMGCACHE survit tant qu'IMGV ne bouge pas
     // HORS_CORAN : les sourates téléchargées par coran.js pour l'écoute sans connexion — coran.js seul les efface (7 jours)
     await Promise.all(keys.filter(k=>k!==CACHE&&k!==MEDIA&&k!==IMGCACHE&&k!==HORS_CORAN).map(k=>caches.delete(k)));
@@ -1280,7 +1318,7 @@ self.addEventListener('activate',e=>{
     await Promise.all(['ecrire-sombre-bg.mp4','ecrire-clair-bg.mp4',
       'ecrire-sombre-panel.mp4','ecrire-clair-panel.mp4']
       .map(f=>m.delete('images-app-alaq/u9/'+f,{ignoreSearch:true})));
-    self.clients.claim();
+    try{ await self.clients.claim(); await rechargerLesVieillesPages(precedent); }catch(_){ }   // claim : pour les pages NON contrôlées (skipWaiting a déjà transféré les autres)
   })());
 });
 self.addEventListener('fetch',e=>{
