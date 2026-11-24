@@ -107,6 +107,8 @@ function renderParams(){
         return '<button class="prm-goal'+(obj===m?' sel':'')+'" onclick="prmObjectif(\''+m+'\')">'+m+' min</button>';
       }).join('')+'</div>'+
     '</div>'+
+    /* le rappel quotidien (rappels.js, résolu à l'appel) : '' si cet appareil ne peut pas, ou sans ce fichier */
+    (typeof rappelCarteHTML==='function'?rappelCarteHTML():'')+
     '<div class="ccard"><div class="ctt"><h3>'+ICO_AFFICHAGE+' Affichage</h3></div>'+
       '<button class="prm-row" onclick="setThemeClair(!themeClair())">Mode clair'+prmSw(themeClair())+'</button>'+
       '<button class="prm-row" onclick="setGrosTexte(!grosTexte())">Grands caractères'+prmSw(grosTexte())+'</button>'+

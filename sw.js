@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v273-2026-11-24';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v274-2026-11-24';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -27,7 +27,7 @@ const IMGCACHE='alaq-images-v'+IMGV;
    ⛔ Hors de CORE : addAll est atomique, le CDN ferait échouer toute l'installation.
    (journal : sw.js · le bundle supabase pré-caché) */
 const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js';
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','vitrine.js','squelette.js','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','coque.js','rail-ordinateur.js','ciel-v1.js','ciel-v2.js','coran.js','serie-mots.js','content/unites.js','confidentialite.html','conditions.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png','icone-alaq-192.png','icone-alaq-512.png','icone-alaq-apple-180.png','polices/scheherazade-new-sws-v1.woff2'];
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','vitrine.js','squelette.js','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','coque.js','rail-ordinateur.js','ciel-v1.js','ciel-v2.js','coran.js','serie-mots.js','rappels.js','content/unites.js','confidentialite.html','conditions.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png','icone-alaq-192.png','icone-alaq-512.png','icone-alaq-apple-180.png','polices/scheherazade-new-sws-v1.woff2'];
 /* Chemins du cœur résolus contre l'URL du sw (racine en prod, sous-dossier en local), dérivés
    à l'exécution : ce que le build ajoute à CORE (le paquet u8) y entre tout seul. */
 const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
@@ -1319,6 +1319,38 @@ self.addEventListener('activate',e=>{
       'ecrire-sombre-panel.mp4','ecrire-clair-panel.mp4']
       .map(f=>m.delete('images-app-alaq/u9/'+f,{ignoreSearch:true})));
     try{ await self.clients.claim(); await rechargerLesVieillesPages(precedent); }catch(_){ }   // claim : pour les pages NON contrôlées (skipWaiting a déjà transféré les autres)
+  })());
+});
+/* LES RAPPELS QUOTIDIENS (web push). Le serveur (Edge Function push-envoyer) envoie JSON {titre, corps, url, tag} ; le texte
+   est écrit là-bas, jamais ici. ⛔ TOUJOURS afficher une notification : sur iOS un push silencieux fait RÉVOQUER l'abonnement
+   — une charge illisible ou vide montre donc quand même « Alaq ». L'icône est le logo doré (jamais une cloche : Muslim), pas
+   d'emoji. Le plan et l'abonnement vivent dans rappels.js. Garde : outils/verifier-sw-horsligne.mjs (S6).
+   (journal : sw.js · les rappels, étape 2) */
+self.addEventListener('push',e=>{
+  let d={};
+  try{ d=e.data?e.data.json():{}; }catch(_){ try{ d={corps:e.data.text()}; }catch(__){ d={}; } }
+  if(!d||typeof d!=='object')d={};
+  e.waitUntil(self.registration.showNotification(String(d.titre||'Alaq').slice(0,120),{
+    body:String(d.corps||'Ta leçon du jour t’attend').slice(0,240),
+    icon:new URL('icone-alaq-192.png',self.location.href).href,
+    tag:String(d.tag||'alaq-rappel'),
+    renotify:true,   // un rappel d'hier resté sans réponse est REMPLACÉ, et celui d'aujourd'hui sonne quand même
+    lang:'fr',
+    data:{url:String(d.url||RACINE_SW)}
+  }));
+});
+/* Un toucher ouvre l'app : la fenêtre déjà ouverte sur l'app prend le premier plan, sinon une neuve s'ouvre. ⛔ Jamais une
+   autre page de la même origine (le pupitre et le studio y sont servis aussi) ni une adresse d'ailleurs. */
+self.addEventListener('notificationclick',e=>{
+  e.notification.close();
+  let cible=new URL(RACINE_SW,self.location.origin).href;
+  try{ const u=new URL(String((e.notification.data&&e.notification.data.url)||RACINE_SW),self.location.origin); if(u.origin===self.location.origin)cible=u.href; }catch(_){}
+  e.waitUntil((async()=>{
+    try{
+      const ouverte=(await self.clients.matchAll({type:'window',includeUncontrolled:true})).find(_racineDeLApp);
+      if(ouverte){ await ouverte.focus(); return; }
+    }catch(_){}
+    try{ await self.clients.openWindow(cible); }catch(_){}
   })());
 });
 self.addEventListener('fetch',e=>{

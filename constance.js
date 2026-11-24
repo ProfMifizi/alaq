@@ -336,6 +336,7 @@ function caseHTML(cl,ic,lab,val){
     '<div class="ic">'+ic+'</div><div class="lab">'+lab+'</div><div class="val">'+val+'</div></div></div>';
 }
 function fillFinishCases(pct,graines){
+  try{ if(typeof rappelNoterFin==='function')rappelNoterFin(); }catch(x){}   // un écran de fin s'ouvre : le retour qui suit est une FIN (rappels.js)
   var e=document.getElementById('fin-cases'); if(!e)return;
   var j=S.streak||0;
   /* Gain nul : pas de case Graines (décision de Myriam), règle générale — un examen raté non plus.

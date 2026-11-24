@@ -1764,6 +1764,16 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
    jamais grisé ; doré une fois prêt. « Plus tard » prend le gris qu'avait ce bouton éteint (Myriam, 01/10, préview v2). */
 .cbtn:disabled{background:#F2E9DA;color:#4E3210;cursor:not-allowed}
 .cbtn.cbtn-2{background:#5E5750;color:#F2E9DA}
+/* Les rappels quotidiens (rappels.js ; préview validée _apercu-notifications-v1) : la carte après la leçon et l'écran d'installation. */
+#rappelDemande h2,#rappelInstaller h2,.rap-q{text-wrap:balance}
+.rap-q{margin:-14px 0 18px;font-size:16px;line-height:1.5;color:var(--muted)}
+.rap-heures{margin:0 0 18px}
+.rap-etapes{list-style:none;margin:0 0 22px;padding:0;text-align:left}
+.rap-etapes li{display:flex;align-items:center;gap:14px;padding:11px 14px;margin:0 0 8px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:16px;font-weight:700;color:var(--cream)}
+.rap-etapes .rap-ic{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--panel2);color:var(--gold2)}
+.rap-etapes .rap-ic svg{width:22px;height:22px}
+.rap-etapes .rap-ic img{width:34px;height:34px;border-radius:9px}
+.rap-etapes small{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-top:2px}
 .ob-secours{max-width:320px;margin:18px auto 0;font-family:var(--ui);font-size:13px;line-height:1.5;color:var(--muted);text-align:center}
 .ob-secours button{margin-top:6px;background:none;border:none;padding:12px 10px;min-height:44px;font-family:var(--ui);font-size:13px;font-weight:700;color:var(--muted);text-decoration:underline;cursor:pointer}
 /* Consentement RGPD : sans case cochée, aucun e-mail ne part (08/08) */

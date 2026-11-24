@@ -456,15 +456,19 @@ function allReviewWords(){
 }
 // Un mot est « dû » s'il n'a jamais été révisé, ou si sa date de prochaine révision est atteinte.
 function wordDue(w){ const r=S.rev[w.w]; return !r || r.next<=today(); }
-function dueReviewWords(){
-  const t=today(), all=allReviewWords();
+/* La sélection du jour t, REJOUÉE à n'importe quelle date : rappels.js l'appelle pour les 7 prochains jours.
+   ⛔ `places` (les mots neufs admis ce jour-là) est PASSÉ, jamais lu par revIntakeLeft() — qui écrit S.revIn : l'appeler
+   pour un jour futur fausserait l'admission d'AUJOURD'HUI. (journal : revision.js · le plan des rappels) */
+function dueReviewWordsAt(t,places){
+  const all=allReviewWords();
   const vus  = all.filter(w=>S.rev[w.w] && S.rev[w.w].next<=t);          // déjà entrés en révision, leur date est atteinte
-  const neufs= all.filter(w=>!S.rev[w.w]).slice(0,revIntakeLeft());      // §2.5 : au plus 7/jour, dans l'ordre du programme
+  const neufs= all.filter(w=>!S.rev[w.w]).slice(0,places);               // §2.5 : au plus 7/jour, dans l'ordre du programme
   return vus.concat(neufs).sort((a,b)=>{
     const ra=S.rev[a.w]||{n:0,next:''}, rb=S.rev[b.w]||{n:0,next:''};
     return ra.next<rb.next?-1:ra.next>rb.next?1:(ra.n-rb.n);   // les plus anciens / les plus fragiles d'abord
   });
 }
+function dueReviewWords(){ return dueReviewWordsAt(today(),revIntakeLeft()); }
 function reviewSessionWords(){ return dueReviewWords().slice(0,REVIEW_CAP); }
 /* ═══ LA RÉVISION DE GRAMMAIRE — un hub, une session panachée ═══
    Modèle du vocabulaire : un bouton, la liste des notions ; pas de boîtes par unité. Aucun
