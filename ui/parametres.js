@@ -122,9 +122,10 @@ function renderParams(){
        la carte est l'en-tête (journal : ui/parametres.js · la carte Version). */
     '<div class="ccard"><div class="ctt"><h3>'+ICO_VERSION+' Version de l’app</h3></div>'+
       '<p class="prm-row prm-lit">Version<span id="prm-ver">'+escHTML(VERSION+' ('+BUILD_NUM+')')+'</span></p>'+
-      '<p class="prm-row prm-lit">Mise à jour<span>'+escHTML(dateHeureFr(BUILD_DATE))+'</span></p>'+
+      '<p class="prm-row prm-lit">Mise à jour<span id="prm-maj">'+escHTML(dateHeureFr(BUILD_DATE))+'</span></p>'+
     '</div>';
     _armerLectureFile();
+    _armerMysteres();
   }
 
 /* LA FILE D'ENVOI, INVISIBLE POUR LES ÉLÈVES : sept tapotements sur le numéro de version, chacun
@@ -139,6 +140,25 @@ function _armerLectureFile(){
     _verTaps++; clearTimeout(_verT);
     _verT=setTimeout(function(){_verTaps=0;},2000);   // deux secondes d'arret et tout retombe
     if(_verTaps>=7){ _verTaps=0; _ouvrirLectureFile(); }
+  });
+}
+/* L'INTERRUPTEUR DES MYSTÈRES DE DIYA, DEPUIS L'APP INSTALLÉE (sans barre d'adresse, `?mysteres=1` est impossible, et sur
+   iPhone Safari et l'app installée n'ont pas la même mémoire) : sept tapotements sur la date de « Mise à jour »,
+   chacun à moins de deux secondes du précédent, allument ou éteignent `alaq_mysteres` (la clé que lit
+   mysteres-chargeur.js), le disent par un message puis rechargent. Rien ne change à l'écran. Aucun onclick en ligne.
+   (journal : ui/parametres.js · l'interrupteur des Mystères dans l'app installée) */
+var _majTaps=0, _majT=null;
+function _armerMysteres(){
+  var el=document.getElementById('prm-maj'); if(!el)return;
+  el.addEventListener('click',function(){
+    _majTaps++; clearTimeout(_majT);
+    _majT=setTimeout(function(){_majTaps=0;},2000);
+    if(_majTaps<7)return;
+    _majTaps=0;
+    var neuf='1';
+    try{ neuf=localStorage.getItem('alaq_mysteres')==='1'?'0':'1'; localStorage.setItem('alaq_mysteres',neuf); }catch(_){ return; }
+    try{ toast(neuf==='1'?'Les Mystères de Diya sont allumés':'Les Mystères de Diya sont éteints'); }catch(_){ }
+    setTimeout(function(){ try{ location.reload(); }catch(_){ } },900);
   });
 }
 function _ligneFile(l,v,cl){
