@@ -258,20 +258,34 @@ function yesterday(){ return _addDays(today(),-1); } // la veille DANS LE MÊME 
 
 /* ===== Rang de constance : 50% constance · 30% révision · 20% apprentissage ===== */
 const RANKS=[
- {ar:'النية',    tr:'An-Niyya',    fr:'l’intention', min:0,   desc:'Tout commence par l’intention. Tu t’es lancée sur le chemin — bismillah.'},
- {ar:'الهمّة',   tr:'Al-Himma',    fr:'l’élan',      min:10,  desc:'L’élan du cœur : l’envie sincère qui te met en mouvement.'},
- {ar:'الاجتهاد', tr:'Al-Ijtihād',  fr:'l’effort',    min:25,  desc:'L’effort régulier. Tu t’exerces, jour après jour.'},
- {ar:'المثابرة', tr:'Al-Muthābara',fr:'l’assiduité', min:50,  desc:'L’assiduité : tu reviens fidèlement, même un peu chaque jour.'},
- {ar:'الصبر',    tr:'Aṣ-Ṣabr',     fr:'la patience', min:100, desc:'La patience dans la durée, malgré la fatigue. On tient bon.'},
- {ar:'الاستقامة',tr:'Al-Istiqāma', fr:'la constance',min:200, desc:'La constance ancrée : la régularité est devenue une habitude.'},
- {ar:'النور',    tr:'An-Nūr',      fr:'la lumière',  min:300, desc:'La lumière : la lecture du Livre t’illumine. Garde cette station en restant constante — entretiens par la révision.'},
+ {ar:'النية',    tr:'An-Niyya',    fr:'l’intention', min:0,   epi:0,  desc:'Tout commence par l’intention. Tu t’es lancée sur le chemin — bismillah.'},
+ {ar:'الهمّة',   tr:'Al-Himma',    fr:'l’élan',      min:10,  epi:2,  desc:'L’élan du cœur : l’envie sincère qui te met en mouvement.'},
+ {ar:'الاجتهاد', tr:'Al-Ijtihād',  fr:'l’effort',    min:25,  epi:4,  desc:'L’effort régulier. Tu t’exerces, jour après jour.'},
+ {ar:'المثابرة', tr:'Al-Muthābara',fr:'l’assiduité', min:50,  epi:7,  desc:'L’assiduité : tu reviens fidèlement, même un peu chaque jour.'},
+ {ar:'الصبر',    tr:'Aṣ-Ṣabr',     fr:'la patience', min:100, epi:14, desc:'La patience dans la durée, malgré la fatigue. On tient bon.'},
+ {ar:'الاستقامة',tr:'Al-Istiqāma', fr:'la constance',min:200, epi:30, desc:'La constance ancrée : la régularité est devenue une habitude.'},
+ {ar:'النور',    tr:'An-Nūr',      fr:'la lumière',  min:300, epi:60, desc:'La lumière : la lecture du Livre t’illumine. Garde cette station en restant constante — entretiens par la révision.'},
 ];
-function rankFor(score){
-  score=Math.max(0,score||0); var idx=0;
-  for(var i=0;i<RANKS.length;i++){ if(score>=RANKS[i].min)idx=i; }
-  var nx=RANKS[idx+1];
-  var prog=nx?Math.max(0,Math.min(100,Math.round((score-RANKS[idx].min)/(nx.min-RANKS[idx].min)*100))):100;
-  return {idx:idx, rank:RANKS[idx], next:nx, prog:prog};
+/* Un rang demande des points ET un nombre d'épis (Myriam, 24/11 : « points ET épi minimum »). C'est le MEILLEUR épi qui compte,
+   jamais l'épi du jour : une absence retire déjà 15 % des points (ABSENCE_TAUX) — si l'épi en cours comptait aussi, un seul jour
+   manqué ferait redescendre deux fois. Les élèves d'avant n'ont pas de record écrit : il se déduit de l'épi du jour, de celui d'avant
+   une absence en attente et des badges de série. (journal : constance.js · le rang demande des épis) */
+const SERIE_BADGES=[[360,'serie360'],[120,'serie120'],[30,'serie30'],[7,'serie7'],[3,'serie3']];
+function meilleureSerie(){
+  var m=Math.max(S.serieMax||0, S.streak||0, S._streakAvantMiss||0), b=S.badges||{};
+  for(var i=0;i<SERIE_BADGES.length;i++){ if(b[SERIE_BADGES[i][1]]){ m=Math.max(m,SERIE_BADGES[i][0]); break; } }
+  return m;
+}
+function noterSerieMax(){ var m=meilleureSerie(); if((S.serieMax||0)<m) S.serieMax=m; }   // écrit AVEC l'épi : avant qu'une absence ne le remette à zéro
+function rankFor(score,serie){
+  score=Math.max(0,score||0); serie=Math.max(0,(serie===undefined?meilleureSerie():serie)||0); var idx=0;
+  for(var i=0;i<RANKS.length;i++){ if(score>=RANKS[i].min&&serie>=(RANKS[i].epi||0))idx=i; }
+  var cu=RANKS[idx], nx=RANKS[idx+1], prog=100;
+  if(nx){   // la jauge avance au rythme du MOINS avancé des deux : les points ou les épis
+    var pp=(score-cu.min)/(nx.min-cu.min), pe=(serie-(cu.epi||0))/((nx.epi||0)-(cu.epi||0));
+    prog=Math.round(Math.max(0,Math.min(1,pp,pe))*100);
+  }
+  return {idx:idx, rank:cu, next:nx, prog:prog};
 }
 /* La lampe (mishkât, 24:35) : l'icône du rang, du gris de la pierre à la lumière — au 7e rang elle rayonne. */
 const RANK_COLORS=['#ab9d8a','#c0673a','#c9973f','#c6d0da','#e5c25e','#f39b26','#fff0c2'];
@@ -374,7 +388,7 @@ function validerJour(){
      (journal : constance.js · l'épi resté à 0 après une leçon) */
   if(S.lastDay===t){
     if(S.streak>0)return false;
-    S.streak=1; feteJourPending=true; return true;
+    S.streak=1; noterSerieMax(); feteJourPending=true; return true;
   }
   /* Le filet : pendingMiss est aussi alimenté depuis S.lastDay, sinon une élève qui ouvre l'app sans rien
      terminer perdait sa série en silence ; maybeGhufranPrompt le proposera, useGhufran sait la rendre après coup.
@@ -384,7 +398,7 @@ function validerJour(){
     var _gJ=Math.max(0,daysGap(S.lastDay,t)-1);
     if(_gJ>0){ S.pendingMiss=Math.max(S.pendingMiss||0,_gJ); S._streakAvantMiss=S.streak; }
   }
-  S.streak=(S.lastDay===y)?S.streak+1:1; S.lastDay=t;
+  S.streak=(S.lastDay===y)?S.streak+1:1; S.lastDay=t; noterSerieMax();
   feteJourPending=true;                       // l'écran « 7 épis » se montrera à la fin de l'exercice
   try{checkBadges({});}catch(e){}             // les badges de série (3/7/30…) tombent au bon moment
   return true;
@@ -477,7 +491,7 @@ function useGhufran(){
      (journal : constance.js · Ghufrān rendu après coup) */
   if(S.lastDay===today()){ S.streak=(S._streakAvantMiss||0)+1; delete S._streakAvantMiss; }
   else S.lastDay=yesterday();       // pont : la série continue comme si elle était venue
-  save(); closeGhufran();
+  noterSerieMax(); save(); closeGhufran();
   toast('Ghufr\u0101n utilis\u00e9 — '+(S.ghufLeft||0)+' restant'+((S.ghufLeft||0)>1?'s':'')+' ce mois');
   try{refreshStats();}catch(e){}
   if(_progVisible())renderProg();
@@ -499,6 +513,7 @@ function retrogradation(){
 }
 function acceptMiss(){
   var r=retrogradation();
+  noterSerieMax();   // le record est écrit AVANT que l'absence remette l'épi à zéro
   S.consScore=Math.max(0,r.score);
   S.streak=(S.lastDay===today())?1:0; S.pendingMiss=0; delete S._streakAvantMiss;   // la leçon du jour compte déjà
   /* L'absence est TRANCHÉE : un pont jusqu'à hier, comme useGhufran, mais série à 0. Sans lui, la leçon du jour revoyait
