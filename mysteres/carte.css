@@ -1,0 +1,107 @@
+/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-carte-joueuse-v9/carte.css) — ne pas retoucher à la main */
+/* La carte joueuse v9 : 5:7, TOUT en unités --q (1 px de dessin à 320 px de large). Toutes les règles sont sous « .cw » : la carte vit aussi dans le Profil de l'app (v10). */
+.cw{container-type:inline-size;width:100%;perspective:900px}
+.cw .carte{--q:.3125cqw;position:relative;width:100%;aspect-ratio:5/7;border-radius:calc(var(--q)*17);transform-style:preserve-3d;transition:transform .25s ease-out;touch-action:pan-y;user-select:none;-webkit-user-select:none;isolation:isolate;
+  background:#F7F1E4;color:#3A2410;padding:calc(var(--q)*8);box-shadow:0 18px 38px rgba(0,0,0,.5),inset 0 0 0 calc(var(--q)*3.2) #D0870D;font-family:Nunito,'Noto Naskh Arabic',system-ui,sans-serif;text-align:left}
+.cw .carte *{box-sizing:border-box}
+.cw .carte.bouge{transition:none}
+.cw .carte .reflet{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:9;mix-blend-mode:soft-light;opacity:0;transition:opacity .25s;background:radial-gradient(circle at var(--mx,50%) var(--my,30%),rgba(255,255,255,.85),transparent 48%),linear-gradient(115deg,transparent 28%,rgba(255,255,255,.35) 46%,transparent 62%)}
+.cw .carte.touche .reflet{opacity:.9}
+/* les quatre sections, séparées par de l'espace */
+.cw .carte .cadre{position:absolute;inset:calc(var(--q)*8);border-radius:calc(var(--q)*10);display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;padding:calc(var(--q)*15) calc(var(--q)*15) calc(var(--q)*17);background:radial-gradient(90% 55% at 50% 40%,#FFFBF0,transparent 70%)}
+.cw .carte .ar{font-family:'Noto Naskh Arabic',serif;direction:rtl;font-weight:700}
+/* les coins : l'étoile dessinée, ou un motif d'Artlist (le motif est en haut à gauche ; les trois autres coins le retournent) */
+.cw .carte .coin{position:absolute;z-index:3;pointer-events:none}
+.cw .carte span.coin{width:calc(var(--q)*20);height:calc(var(--q)*20);color:#D0870D;background:#F7F1E4;border-radius:50%}
+.cw .carte img.orn{width:calc(var(--q)*62);height:auto}
+.cw .carte .c1{left:calc(var(--q)*-5);top:calc(var(--q)*-5)}
+.cw .carte .c2{right:calc(var(--q)*-5);top:calc(var(--q)*-5)}
+.cw .carte .c3{left:calc(var(--q)*-5);bottom:calc(var(--q)*-5)}
+.cw .carte .c4{right:calc(var(--q)*-5);bottom:calc(var(--q)*-5)}
+.cw .carte img.orn.c2{transform:scaleX(-1)}
+.cw .carte img.orn.c3{transform:scaleY(-1)}
+.cw .carte img.orn.c4{transform:scale(-1,-1)}
+.cw .carte span.coin.c1,.cw .carte span.coin.c2,.cw .carte span.coin.c3,.cw .carte span.coin.c4{margin:0}
+/* SECTION 1 : le prénom en grand, puis « Niveau X : mot arabe • translittération » */
+.cw .carte .s1{text-align:center;display:flex;flex-direction:column;align-items:center;gap:calc(var(--q)*3);min-width:0}
+.cw .carte .nom{margin:0;font-size:calc(var(--q)*30);font-weight:900;line-height:1.1;color:#3A2410;white-space:nowrap;overflow:hidden;max-width:100%}
+.cw .carte .niv{margin:0;font-size:calc(var(--q)*12.4);font-weight:800;line-height:1.3;color:#4E3210}
+.cw .carte .niv b{font-weight:900;color:#3A2410}
+.cw .carte .niv .ar{display:inline-block;font-size:calc(var(--q)*20);line-height:1.2;color:#3A2410;vertical-align:-.14em}
+.cw .carte .niv .tr{white-space:nowrap}
+/* SECTION 2 : l'image carrée à gauche ; six lignes à droite, réparties sur toute la hauteur de l'image */
+.cw .carte .s2{display:flex;gap:calc(var(--q)*12);align-items:stretch}
+.cw .carte .vis{position:relative;flex:0 0 48%;aspect-ratio:1;border-radius:calc(var(--q)*9);overflow:hidden;border:calc(var(--q)*2.4) solid #D0870D;background:#1C1636}
+.cw .carte .vis .fond{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cw .carte .vis .pose{position:absolute;left:0;right:0;bottom:calc(var(--q)*-4);display:flex;justify-content:center}
+.cw .carte .masc{width:calc(var(--q)*96)!important;height:auto!important;display:block}
+.cw .carte .six{flex:1;min-width:0;margin:0;padding:0;list-style:none;display:flex;flex-direction:column;justify-content:space-between}
+.cw .carte .six li{font-size:calc(var(--q)*11);font-weight:700;line-height:1.2;color:#4E3210;white-space:nowrap}
+.cw .carte .six b{font-weight:900;color:#3A2410}
+/* SECTION 3 : l'encouragement, puis la citation */
+.cw .carte .s3{display:flex;flex-direction:column;gap:calc(var(--q)*9)}
+.cw .carte .val{margin:0;font-size:calc(var(--q)*11.6);font-weight:700;line-height:1.34;color:#3A2410;text-align:center}
+.cw .carte .val b{font-weight:900;color:#6B3E06}
+.cw .carte .cit{margin:0;padding-top:calc(var(--q)*8);border-top:calc(var(--q)*1) dotted #D0870D;text-align:center}
+.cw .carte .cit blockquote{margin:0;font-size:calc(var(--q)*10.2);font-weight:700;font-style:italic;line-height:1.32;color:#4E3210}
+.cw .carte .cit cite{font-style:normal;font-size:calc(var(--q)*9.4);font-weight:900;letter-spacing:.06em;color:#7E4808;text-transform:uppercase;white-space:nowrap}
+/* SECTION 4 : quatre disques sur fond doré ; l'icône, détourée, posée PAR-DESSUS le cercle (sans disque derrière) */
+.cw .carte .disques{display:grid;grid-template-columns:repeat(4,1fr);justify-items:center;padding-top:calc(var(--q)*6)}
+.cw .carte .dq{position:relative;width:calc(var(--q)*56);height:calc(var(--q)*56);border-radius:50%;border:calc(var(--q)*2.4) solid #8A5008;display:grid;place-items:center;
+  --lx:calc(50% + (var(--mx,30%) - 50%) * .9);--ly:calc(50% + (var(--my,22%) - 50%) * .9);
+  background:radial-gradient(circle at var(--lx) var(--ly),#F9D57A 0,#F0B955 22%,#E8A94F 55%,#BF7A0B 100%);
+  box-shadow:inset 0 calc(var(--q)*-3) calc(var(--q)*5) rgba(90,45,0,.38),inset 0 calc(var(--q)*1.6) calc(var(--q)*2.4) rgba(255,244,205,.55),0 calc(var(--q)*2) calc(var(--q)*3.4) rgba(60,30,0,.32)}
+/* le reflet : une tache brillante et un balayage de verre, qui suivent la lumière (--mx / --my) ; ils passent SOUS le chiffre */
+.cw .carte .dq::before{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse 28% 18% at var(--lx) var(--ly),rgba(255,255,255,.85) 0,rgba(255,255,255,.4) 45%,rgba(255,255,255,0) 100%)}
+.cw .carte .dq::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.3) 49%,rgba(255,255,255,0) 58%);background-size:300% 100%;background-position:calc(100% - var(--mx,30%) * 1) 0}
+.cw .carte .dq .num{position:relative;z-index:2;font-size:calc(var(--q)*18);font-weight:900;color:#2A1A0C;line-height:1}
+.cw .carte .dq .num.long{font-size:calc(var(--q)*13.5)}
+.cw .carte .dq .ic{position:absolute;right:calc(var(--q)*-11);top:calc(var(--q)*-13);width:calc(var(--q)*36);height:calc(var(--q)*36);object-fit:contain;filter:drop-shadow(0 calc(var(--q)*1.2) calc(var(--q)*1.6) rgba(60,30,0,.4))}
+/* les neuf indices (option : le pied de la v2) */
+.cw .carte .neuf9{width:100%;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:calc(var(--q)*3);margin-top:calc(var(--q)*8)}
+.cw .carte .neuf9 i{position:relative;display:block;aspect-ratio:1;border-radius:calc(var(--q)*4);background:#2A1A0C;border:calc(var(--q)*1.2) dotted rgba(232,169,79,.75);overflow:hidden}
+.cw .carte .neuf9 i.on{border:calc(var(--q)*1.2) solid #C58A2B}
+.cw .carte .neuf9 img{position:absolute;inset:calc(var(--q)*1.2);width:calc(100% - var(--q)*2.4);height:calc(100% - var(--q)*2.4);object-fit:contain}
+/* l'image partagée : la carte seule sur un fond de 1080 × 1350 */
+.expo{width:1080px;height:1350px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(120% 90% at 50% 20%,#3a2c22,#14100d);font-family:Nunito,system-ui,sans-serif}
+.expo .signature{display:flex;margin-top:34px;align-items:center;gap:16px;font-weight:900;letter-spacing:.2em;color:#E8A94F;font-size:30px}
+.expo .signature span{font-weight:700;letter-spacing:.05em;color:#d8c9b6;font-size:26px}
+@media(prefers-reduced-motion:reduce){.cw .carte,.cw .carte .reflet{transition:none}}
+
+.cw .carte .dq .ic[src*="epi"]{width:calc(var(--q)*44);height:calc(var(--q)*44);right:calc(var(--q)*-15);top:calc(var(--q)*-17)}
+
+.cw .carte .dq .num{margin-top:calc(var(--q)*4);margin-right:calc(var(--q)*1)}
+.cw .carte .dq .num.mid{font-size:calc(var(--q)*16)}
+.cw .carte .dq .ic{right:calc(var(--q)*-15);top:calc(var(--q)*-17);width:calc(var(--q)*36);height:calc(var(--q)*36)}
+.cw .carte .dq .ic[src*="epi"]{width:calc(var(--q)*46);height:calc(var(--q)*46);right:calc(var(--q)*-17);top:calc(var(--q)*-21)}
+
+/* les lignes entre les illustrations des coins : elles remplacent le cadre fin */
+.cw .carte .lg{position:absolute;z-index:1;pointer-events:none;border-radius:99px}
+/* le dessin de la tige : un trait brun (--lo, --ow q) de chaque côté et un cœur doré (--lc) ; pour les autres motifs --ow vaut 0 : un aplat */
+.cw .carte .lg-h{left:calc(var(--q)*var(--dep));right:calc(var(--q)*var(--dep));height:calc(var(--q)*var(--lth));background:linear-gradient(to bottom,var(--lo) 0,var(--lo) calc(var(--q)*var(--ow)),var(--lc) calc(var(--q)*var(--ow)),var(--lc) calc(100% - var(--q)*var(--ow)),var(--lo) calc(100% - var(--q)*var(--ow)),var(--lo) 100%)}
+.cw .carte .lg-t{top:calc(var(--q)*(var(--ty) - var(--lth)/2))}
+.cw .carte .lg-b{bottom:calc(var(--q)*(var(--ty) - var(--lth)/2))}
+.cw .carte .lg-v{top:calc(var(--q)*var(--dep));bottom:calc(var(--q)*var(--dep));width:calc(var(--q)*var(--ltv));background:linear-gradient(to right,var(--lo) 0,var(--lo) calc(var(--q)*var(--ow)),var(--lc) calc(var(--q)*var(--ow)),var(--lc) calc(100% - var(--q)*var(--ow)),var(--lo) calc(100% - var(--q)*var(--ow)),var(--lo) 100%)}
+.cw .carte .lg-l{left:calc(var(--q)*(var(--tx) - var(--ltv)/2))}
+.cw .carte .lg-r{right:calc(var(--q)*(var(--tx) - var(--ltv)/2))}
+
+/* v5 : la graine et l'épi, un peu moins grandes (hauteur visible 30 q, entre le livre 25 q et le cadenas 34 q), avec leur liseré ; leurs centres restent où ils étaient */
+.cw .carte .dq .ic[src*="graine"]{width:calc(var(--q)*15);height:calc(var(--q)*15);right:calc(var(--q)*-4.5);top:calc(var(--q)*-6.5)}
+.cw .carte .dq .ic[src*="epi"]{width:calc(var(--q)*11.8);height:calc(var(--q)*30);right:0;top:calc(var(--q)*-13)}
+.cw .carte .dq .ic{z-index:3}
+
+/* v6 : dans l'app, l'image de la carte se touche pour changer d'arrière-plan ; un petit crayon le dit (retiré de l'image partagée) */
+.cw .carte .vis[data-lm]{cursor:pointer}
+.cw .carte .vis-edit{position:absolute;right:calc(var(--q)*4);bottom:calc(var(--q)*4);width:calc(var(--q)*20);height:calc(var(--q)*20);display:grid;place-items:center;border-radius:50%;border:calc(var(--q)*1.6) solid #8A5008;background:#E8A94F;box-shadow:0 calc(var(--q)*1.2) calc(var(--q)*2) rgba(40,20,0,.45);pointer-events:none}
+.cw .carte .vis-edit svg{width:calc(var(--q)*11);height:calc(var(--q)*11);fill:none;stroke:#2A1A0C;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cw .carte .vis[data-lm]:focus-visible{outline:3px solid #F2E9DA;outline-offset:2px}
+
+/* v6 : devant la Mecque, Diya se met un peu à gauche : la Kaaba (à droite de l'image) reste entièrement visible (Myriam : « pour que la mascotte ne la cache pas ») */
+.cw .carte .vis[data-fond="mecque"] .pose{right:16%}
+
+/* v7 : l'arrière-plan UNI par défaut (la mascotte sur crème en mode sombre, sur marron foncé en mode clair) ; le thème voyage avec la carte (data-theme), donc l'image partagée l'a aussi */
+.cw .carte[data-theme="sombre"] .vis[data-fond="uni"]{background:#F2E9DA}
+.cw .carte[data-theme="clair"] .vis[data-fond="uni"]{background:#2A1A0C}
+/* v9 : la graine divisée par 2 (30 q → 15 q), à la même place (son centre n'a pas bougé) — Myriam : « elle fait un peu trop grosse, divise-la par 2 » */

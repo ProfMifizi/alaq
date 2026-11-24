@@ -1,0 +1,557 @@
+/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v15/couche.css) — ne pas retoucher à la main */
+/* Couche « Les Mystères de Diya » — préview v7 (la v6 plus le bloc « v7 » tout en bas ; les rubriques de la v5 qui ne servent plus sont laissées, inertes). Posée par l'atelier dans la VRAIE app (iframe) : rien de ceci n'est dans src/.
+   Jetons de l'app seulement (var(--bg), --panel, --line, --gold2…) pour suivre les deux thèmes ; seules les couleurs de la
+   SCÈNE (illustration provisoire) et du sceau (un objet doré) sont fixes. Texte : 13 px au minimum. */
+
+/* ——— la mascotte : le SVG de la fin de leçon, jamais une image ——— */
+.lm-m{display:inline-block;flex:none}
+.lm-m svg.masc{width:100%;height:100%;display:block;overflow:visible;margin:0}
+.lm-chev{flex:none;width:22px;height:22px;fill:none;stroke:var(--gold2);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ——— le bandeau compact : Apprendre (titre + compteur) et Islam (titre + flèche) ——— */
+.lm-bandeau{display:flex;align-items:center;gap:10px;width:100%;min-height:62px;padding:8px 12px;margin:0 0 12px;position:relative;z-index:1;
+  border:1px solid var(--gold-d);border-radius:16px;background:linear-gradient(120deg,var(--panel2),var(--panel));color:var(--cream);
+  font:inherit;text-align:left;cursor:pointer;box-shadow:0 5px 14px rgba(0,0,0,.28)}
+.lm-bandeau:active{transform:translateY(1px)}
+.lm-bandeau .lm-m{width:35px;height:44px;border-radius:50%;background:radial-gradient(closest-side,rgba(242,233,218,.30),rgba(242,233,218,0))}
+.lm-bt{flex:1;min-width:0;font-size:16px;font-weight:900;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lm-bc{flex:none;font-size:14px;font-weight:900;color:var(--gold2);padding:4px 9px;border-radius:9px;background:var(--bg);white-space:nowrap}
+#view-islam .lm-bandeau{margin:12px 0 0}
+#view-islam .lm-bandeau + .isl-grille{padding-top:12px}   /* la grille réelle garde 68 px en haut : le bandeau prend cette place */
+/* le ciel de l'accueil reste sombre dans les deux thèmes : le bandeau aussi (et il suit le zoom que l'accueil n'a pas) */
+html.clair #home .lm-bandeau{--panel:#322B28;--panel2:#3C342F;--gold-d:#B5751F;--cream:#F2E9DA;--gold2:#E8A94F;--bg:#252120}
+
+/* ——— la section du Profil (variante A) ——— */
+.lm-carte .ctt{margin-bottom:12px}
+.lm-carte .ctt .lm-m{width:28px;height:34px}
+.lm-carte .ctt h3{flex:1;min-width:0}
+.lm-sous{font-size:13px;color:var(--muted);margin:-4px 0 12px}
+.lm-ar{font-family:var(--ar);font-size:26px;line-height:1.5;color:var(--cream)}
+.lm-minis{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;margin:0 0 14px}
+.lm-mini{aspect-ratio:1;min-width:0;display:grid;place-items:center;padding:2px;border:1px dashed var(--line);border-color:color-mix(in srgb,var(--muted) 55%,transparent);border-radius:8px}
+.lm-mini.on{border:1px solid var(--gold-d);background:var(--panel2)}
+.lm-mini img{width:100%;height:100%;object-fit:contain}
+.lm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lm-btn,.lm-sec{min-height:46px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--cream);font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+.lm-btn small{margin-left:6px;color:var(--gold2);font-weight:900;font-size:14px}
+.lm-sec{display:block;width:100%;margin-top:10px}
+.lm-sec[disabled]{opacity:1;cursor:default}
+.lm-sec.lm-fait{border-color:var(--gold-d);background:transparent;color:var(--gold2)}
+.lm-ligne{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;min-height:50px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--cream);font:inherit;font-size:15px;font-weight:800;text-align:left;cursor:pointer}
+.lm-ligne > span:not(.lm-graine){flex:1;min-width:0}
+.lm-graine{flex:none;display:inline-flex}
+.lm-graine svg{stroke:var(--gold2);fill:none;width:22px;height:22px;display:block}
+
+/* ——— les pages du Profil : indices, collection, boutique ——— */
+.lm-back{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:0;padding:0;border:0;background:none;color:var(--gold2);font:inherit;font-size:15px;font-weight:900;cursor:pointer}
+.lm-back:before{content:'';width:9px;height:9px;margin:0 2px 0 3px;border-left:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg)}
+.lm-eyebrow{font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin:0}
+.lm-titre{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 6px}
+.lm-h1{font-size:25px;font-weight:900;line-height:1.2;color:var(--cream);margin:0}
+.lm-compte{flex:none;font-size:14px;font-weight:900;color:var(--gold2);padding:4px 10px;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
+.lm-tabs + .lm-ligne{margin:0 0 12px}
+.lm-chips{display:flex;gap:8px;margin:6px 0 4px;flex-wrap:wrap}
+.lm-chip{min-width:48px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--cream);font:inherit;font-size:16px;font-weight:900;cursor:pointer}
+.lm-chip[aria-pressed=true]{border-color:var(--gold2);background:var(--panel2);color:var(--gold2)}
+.lm-chip i{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:var(--gold2);vertical-align:middle}
+.lm-instr{font-size:14px;color:var(--muted);margin:10px 0 0;min-height:22px}
+.lm-cta{margin-top:14px}
+.lm-lien{display:block;margin:12px auto 0;padding:10px;min-height:44px;border:0;background:none;color:var(--gold2);font:inherit;font-size:14px;font-weight:800;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.lm-tabs{display:flex;gap:2px;padding:4px;margin:0 0 16px;background:var(--panel);border:1px solid var(--line);border-radius:13px}
+.lm-tabs button{flex:1;min-width:0;min-height:44px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.lm-tabs button[aria-current=page]{background:var(--gold);color:var(--bg);box-shadow:0 2px 0 var(--gold-d)}
+
+/* l'inventaire : neuf objets, une image chacun, aucun texte ; posé = pastille ✓, à gagner = pointillé */
+.lm-inv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0 12px}
+.lm-o{position:relative;min-width:0;height:80px;padding:3px;display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--cream);font:inherit;cursor:pointer}
+.lm-o img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.lm-o.dispo{border-color:var(--gold-d);background:radial-gradient(ellipse,var(--panel2),var(--panel))}
+.lm-o[aria-pressed=true]{box-shadow:0 0 0 3px var(--gold2)}
+.lm-o.pose{background:var(--panel2);cursor:default}
+.lm-o.pose img{opacity:.55}
+.lm-o.pose:after{content:'✓';position:absolute;right:6px;bottom:6px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--gold-d);background:var(--bg);color:var(--gold2);font-size:13px;font-weight:900;line-height:1}
+.lm-o.vide{border-style:dashed;border-color:var(--line);border-color:color-mix(in srgb,var(--muted) 55%,transparent);background:transparent;cursor:default}
+.lm-o.vide:before{content:'';width:18px;height:18px;transform:rotate(45deg);border:1px solid var(--line)}
+
+/* ——— la scène à compléter (illustration PROVISOIRE : sera faite sur Artlist) ——— */
+.lm-scene{--sky:#26384c;--star:#eedbb4;--wall:#8b705e;--mortar:#b49579;--wall-dark:#54483f;position:relative;isolation:isolate;aspect-ratio:1.12;min-height:240px;overflow:hidden;
+  border:1px solid var(--line);border-radius:17px;background:var(--sky);margin-bottom:12px;box-shadow:inset 0 0 75px #1c1a2466}
+.lm-page > .lm-scene{aspect-ratio:1.45;min-height:0;margin:6px 0 0}
+.lm-art-scene{position:absolute;inset:0;overflow:hidden;transform-origin:60% 56%;transition:transform 4s ease}
+.lm-sky{position:absolute;inset:0 0 35%;background:linear-gradient(#26384c,#41475a)}
+.lm-dawn{position:absolute;inset:0;background:linear-gradient(#5f667e,#d6a88b 62%,#eed0a0);opacity:0;transition:opacity 3s}
+.lm-stars{position:absolute;left:9%;top:12%;width:3px;height:3px;border-radius:50%;background:var(--star);box-shadow:30px 25px 0 -1px var(--star),78px 8px 0 -1px var(--star),140px 38px 0 var(--star),191px 2px 0 -1px var(--star),239px 26px 0 -1px var(--star)}
+.lm-ridge{position:absolute;left:-6%;right:-10%;height:48%;bottom:16%;background:var(--wall-dark);border-radius:55% 55% 0 0/12% 12% 0 0;transform:rotate(-6deg);opacity:.45}
+.lm-wall{position:absolute;left:-4%;right:-4%;bottom:0;height:65%;background:linear-gradient(110deg,var(--wall),var(--wall-dark));border-top:7px solid var(--mortar);box-shadow:0 -6px 0 #54483f99}
+.lm-wall:before{content:'';position:absolute;inset:0;opacity:.15;background:repeating-linear-gradient(0deg,transparent 0 39px,var(--mortar) 40px 41px)}
+.lm-window{position:absolute;right:10%;top:3%;width:21%;height:31%;border:6px solid #b49579;border-bottom-width:9px;border-radius:45px 45px 3px 3px;background:linear-gradient(145deg,#26384c,#555b6a);box-shadow:0 4px 0 #54483f;transition:background 3s,box-shadow 3s}
+.lm-ground{position:absolute;bottom:0;left:0;right:0;height:15%;background:linear-gradient(#8e765e,#5e5347);border-top:2px solid #b79a73}
+.lm-mat{position:absolute;right:5%;bottom:5%;width:43%;height:15%;transform:skewX(-17deg);background:repeating-linear-gradient(90deg,#8e6a55 0 6px,#a17d64 7px 9px);border:3px solid #c4a17b;border-radius:2px;box-shadow:0 4px 8px #1c1a2466}
+.lm-so{position:absolute;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 4px #1c1a2466);z-index:2;pointer-events:none}
+.lm-so.lm-obj-door{z-index:1}
+.lm-so img{display:block;width:100%;height:100%;object-fit:contain}
+.lm-cible{position:absolute;z-index:4;transform:translate(-50%,-50%);width:56px;height:56px;min-width:44px;min-height:44px;border:2px dashed #f2daa7;border-radius:50%;background:#1c1a24cc;box-shadow:0 0 28px #f8cc7866;cursor:pointer;padding:0}
+.lm-cible:after{content:'+';font-size:28px;font-weight:900;line-height:1;color:#fff4d6}
+.lm-rays{position:absolute;left:48%;top:25%;width:64%;height:65%;background:linear-gradient(125deg,transparent,#f9d88b42,transparent);opacity:0;transform:rotate(-8deg);transition:opacity 2s;pointer-events:none}
+.lm-flash{position:absolute;inset:0;z-index:6;background:radial-gradient(ellipse,#f8cc7855,transparent);opacity:0;pointer-events:none}
+.lm-scene.is-playing .lm-art-scene{transform:scale(1.04)}
+.lm-scene.is-playing .lm-flash{animation:lmFlash 1.7s both}
+.lm-scene.is-playing .lm-obj-bag{animation:lmBag 1.7s .3s ease both}
+.lm-scene.is-playing .lm-obj-lamp{animation:lmLamp 2s .7s ease both}
+.lm-scene.is-playing .lm-obj-pillow{animation:lmBag 2s 1.2s ease both}
+.lm-scene.is-playing .lm-obj-dawn{animation:lmArrival 1s both}
+.lm-scene[data-shot='2'] .lm-rays,.lm-scene[data-shot='3'] .lm-rays,.lm-scene.is-complete .lm-rays{opacity:1}
+.lm-scene[data-shot='3'] .lm-dawn,.lm-scene.is-complete .lm-dawn{opacity:1}
+.lm-scene[data-shot='2'] .lm-window,.lm-scene[data-shot='3'] .lm-window,.lm-scene.is-complete .lm-window{background:linear-gradient(145deg,#d8ac6d,#f3d6a1);box-shadow:0 0 35px #efc57d44}
+.lm-scene.is-paused *{animation-play-state:paused!important}
+@keyframes lmFlash{0%{opacity:0;transform:scale(.9)}45%{opacity:1}100%{opacity:0;transform:scale(1.3)}}
+@keyframes lmBag{0%,100%{transform:translate(-50%,-50%)}40%{transform:translate(-55%,-57%) rotate(-4deg)}75%{transform:translate(-48%,-52%) rotate(2deg)}}
+@keyframes lmLamp{0%,100%{transform:translate(-50%,-50%)}35%{transform:translate(-50%,-50%) rotate(9deg)}70%{transform:translate(-50%,-50%) rotate(-6deg)}}
+@keyframes lmArrival{from{opacity:0;transform:translate(-50%,-70%) scale(.8)}to{opacity:1;transform:translate(-50%,-50%)}}
+
+/* ——— la carte de collection : la même illustration + un sceau qui reprend un objet marquant ——— */
+.lm-fiche{padding:9px;margin:14px 0 6px;border:1px solid var(--gold-d);border-radius:18px;background:var(--panel)}
+.lm-fiche-img{position:relative}
+.lm-fiche-img .lm-scene{min-height:0;aspect-ratio:1.45;margin:0;border-radius:11px}
+.lm-sceau-w{position:absolute;right:12px;bottom:-22px;z-index:3;filter:drop-shadow(0 0 1.5px #2A1A0A) drop-shadow(0 3px 4px #0007)}
+.lm-sceau{width:48px;height:56px;display:grid;place-items:center;transform:rotate(8deg);
+  background:linear-gradient(140deg,#f2d48f,#a47228);clip-path:polygon(50% 0,90% 16%,100% 58%,50% 100%,0 58%,10% 16%)}
+.lm-sceau img{width:34px;height:34px;object-fit:contain}
+.lm-fiche-t{padding:12px 64px 4px 6px}
+.lm-fiche-t h3{font-size:20px;line-height:1.3;font-weight:900;margin:4px 0 2px;color:var(--cream)}
+.lm-fiche-t p{font-size:14px;color:var(--muted);margin:0}
+.lm-fiche-t p.lm-eyebrow{font-size:13px;color:var(--gold2)}
+.lm-source{display:flex;width:fit-content;align-items:center;min-height:44px;margin:0 auto;color:var(--gold2);font-size:13px;font-weight:800;text-underline-offset:3px}
+.lm-vide{padding:22px 16px;text-align:center;border:1px dashed var(--line);border-radius:17px}
+.lm-vide .lm-m{width:72px;height:86px;margin:0 auto}
+.lm-vide p{font-size:16px;line-height:1.5;margin:14px 0 6px;color:var(--cream)}
+.lm-ligne-u{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;min-height:52px;padding:10px 14px;border:1px solid var(--gold-d);border-radius:14px;background:var(--panel);color:var(--cream);font:inherit;font-size:15px;font-weight:800;text-align:left;cursor:pointer}
+.lm-ligne-u > span{flex:1;min-width:0}
+
+/* ——— la Boutique (prix d'exemple, payés en graines) ——— */
+.lm-solde{display:flex;align-items:center;gap:8px;margin:10px 0 2px;color:var(--gold2);font-size:23px;font-weight:900}
+.lm-solde svg{width:26px;height:26px;stroke:var(--gold2);fill:none}
+.lm-solde small{font-size:14px;font-weight:800;color:var(--muted)}
+.lm-note{font-size:13px;color:var(--muted);margin:0 0 4px}
+.lm-rub{font-size:17px;font-weight:900;margin:20px 0 12px;color:var(--cream)}
+.lm-grille2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lm-prod{min-width:0;padding:14px;text-align:center;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.lm-prod .lm-m{width:84px;height:100px;margin:0 auto 10px}
+.lm-prod h3{font-size:15px;font-weight:900;margin:0 0 10px;color:var(--cream)}
+.lm-prod .lm-sec{margin-top:0}
+.lm-prix{font-size:16px!important;letter-spacing:0!important;text-transform:none!important;padding:10px 6px!important;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px}
+.lm-prix svg{width:18px;height:18px;stroke:currentColor;fill:none}
+.lm-prix{white-space:nowrap}
+.lm-prix.arme{box-shadow:0 0 0 3px var(--cream),0 5px 0 var(--gold-d);text-transform:uppercase!important;letter-spacing:.03em!important;font-size:15px!important}
+.lm-recit{display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px 14px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+.lm-recit > .cta,.lm-recit > .lm-sec{grid-column:1 / -1;margin-top:0}
+.lm-recit .lm-livre{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--gold-d);border-radius:12px;background:var(--panel2)}
+.lm-recit .lm-livre svg{width:26px;height:26px;stroke:var(--gold2);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.lm-recit h3{font-size:18px;font-weight:900;margin:0 0 2px;color:var(--cream)}
+.lm-recit p{font-size:14px;color:var(--muted);margin:0}
+
+/* ——— les écrans plein cadre : « Un nouvel objet » (comme #badgeNeuf), le résumé, la récompense, l'histoire ——— */
+#lmObjetNeuf{z-index:90}
+#lmObjetNeuf .bn-img{border-radius:50%;border:2px solid var(--gold-d);background:radial-gradient(circle,var(--panel2),var(--panel))}
+#lmObjetNeuf .bn-img img{width:150px;height:150px;object-fit:contain}
+#lmObjetNeuf .lm-eyebrow{margin-bottom:12px}
+#lmObjetNeuf .lm-gros{font-size:64px;font-weight:900;line-height:1;color:var(--gold2);margin:0 0 4px}
+#lmObjetNeuf .lm-minis-resume{grid-template-columns:repeat(6,minmax(0,1fr));width:100%;max-width:330px;gap:8px;margin:14px auto 30px}
+#lmRecompense,#lmFilm{z-index:62}
+#lmRecompense h2{margin:6px 0 4px}
+#lmRecompense .lm-fiche{width:100%;max-width:340px;margin:12px auto 22px;text-align:left}
+#lmFilm{justify-content:flex-start;align-items:stretch;text-align:left;padding:calc(10px + env(safe-area-inset-top,0px) + var(--edge,0px)) 18px calc(22px + env(safe-area-inset-bottom,0px))}
+.lm-x{align-self:flex-end;width:44px;height:44px;border:0;background:none;color:var(--muted);font-size:24px;cursor:pointer}
+#lmFilm .lm-scene{margin:4px 0 0;flex:none;aspect-ratio:4/5;min-height:0}
+.lm-pas{font-size:13px;font-weight:800;color:var(--muted);margin:10px 0 0}
+.lm-legende{font-family:'SWS',var(--ui);font-size:20px;line-height:1.6;min-height:96px;margin:6px 0 12px;color:var(--cream)}
+.lm-prop{display:inline-block}   /* une proposition tient ensemble ; les espaces insécables (couche.js, soude) évitent le mot seul */
+#lmFilm .lm-film-actions{margin-top:auto;display:flex;gap:10px}
+.lm-film-actions .lm-sec{margin-top:0}
+
+/* ——— la porte « Boutique » du feuillet Plus (variante) ——— */
+.lm-plus-ic{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:50%;background:linear-gradient(135deg,#F2B960,#D0870D)}
+.plus-item .lm-plus-ic svg{width:22px;height:22px;stroke:#2A1A08;fill:none;stroke-width:2.4}
+
+.lm-o:focus-visible,.lm-btn:focus-visible,.lm-sec:focus-visible,.lm-prix:focus-visible,.lm-chip:focus-visible,.lm-ligne:focus-visible,.lm-ligne-u:focus-visible,.lm-back:focus-visible,.lm-bandeau:focus-visible,.lm-tabs button:focus-visible,.lm-cible:focus-visible,.lm-x:focus-visible,.lm-lien:focus-visible,.lm-source:focus-visible,#lmObjetNeuf .cta:focus-visible,#lmRecompense .cta:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
+.lm-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+@media(max-width:360px){.lm-inv{gap:7px}.lm-o{height:72px}.lm-bt{font-size:15px}.lm-h1{font-size:23px}.lm-tabs button{font-size:13px}}
+html.gtexte .lm-actions{grid-template-columns:1fr}
+html.gtexte .lm-prix.arme{font-size:13px!important;letter-spacing:0!important}
+html.gtexte .lm-page > .lm-scene{aspect-ratio:1.8}
+@media(prefers-reduced-motion:reduce){.lm-art-scene,.lm-dawn,.lm-window,.lm-rays{transition:none!important}.lm-scene *{animation:none!important}}
+
+/* ═══ v5 : le vrai décor, des emplacements en pointillé, l'histoire en images, la garde-robe de Diya ═══ */
+.lm5-bm{width:36px;height:38px}
+.lm-bandeau .lm5-bm{background:none;border-radius:0}
+.lm-m svg.diya{display:block;overflow:visible;margin:0}
+html.clair #home .lm-bandeau .dy-sil{filter:none}          /* le bandeau d'Apprendre reste sombre dans les deux thèmes : pas de contour clair dessus */
+
+/* la scène : un 4:5, le décor Artlist en fond */
+.lm-scene.lm5{aspect-ratio:4/5;min-height:0;background:#000;box-shadow:none;margin:6px 0 0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.lm-page > .lm-scene.lm5,html.gtexte .lm-page > .lm-scene.lm5{aspect-ratio:4/5}
+.lm5-decor,.lm5-couv{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;pointer-events:none}
+.lm5-obj{position:absolute;transform:translate(-50%,-50%);height:auto;pointer-events:none;animation:lm5Pose .45s cubic-bezier(.3,1.4,.5,1)}
+@keyframes lm5Pose{from{opacity:0;transform:translate(-50%,-50%) scale(.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+/* l'emplacement : la silhouette de l'objet en pointillé, là où il se posera */
+.lm5-slot{position:absolute;transform:translate(-50%,-50%);pointer-events:none;overflow:visible;filter:drop-shadow(0 0 1.5px rgba(0,0,0,.8))}
+.lm5-slot path{fill:rgba(255,255,255,.07);stroke:rgba(255,255,255,.95);stroke-width:1.7;stroke-dasharray:.1 3.4;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.lm5-slot.pret path{stroke:#ffd98a;fill:rgba(255,217,138,.14);animation:lm5Bat 1.2s ease-in-out infinite}
+.lm5-slot.cible path{stroke:#ffd98a;fill:rgba(255,217,138,.32);stroke-width:2.4;animation:none}
+@keyframes lm5Bat{50%{fill:rgba(255,217,138,.3)}}
+.lm5-glisse{position:fixed;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;z-index:200;height:auto;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55))}
+.lm5-glisse.vole{transition:left .2s ease,top .2s ease,width .2s ease,opacity .2s ease}
+
+/* le casier : seulement les objets à placer, rangés sur plusieurs lignes si besoin (jamais de bande qui défile : un geste en diagonale doit tirer l'objet, pas la page) */
+.lm-inv{display:flex;flex-wrap:wrap;justify-content:center;grid-template-columns:none;gap:8px;padding:2px;margin:10px 0 6px}
+.lm-o{flex:0 0 74px;height:78px}
+.lm-o.dispo{cursor:grab;touch-action:none}
+
+/* l'histoire : les images du récit (9:16), leurs légendes dessous */
+#lmFilm .lm5-film{position:relative;flex:1 1 0;min-height:0;aspect-ratio:9/16;max-width:100%;align-self:center;margin:4px 0 0;overflow:hidden;border-radius:16px;background:#000}
+.lm5-plan{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
+.lm5-plan.on{opacity:1}
+.lm5-film:not(.is-paused) .lm5-plan.on{animation:lm5Zoom 7s ease-out both}
+@keyframes lm5Zoom{from{transform:scale(1)}to{transform:scale(1.045)}}
+
+/* le Profil : la photo de profil = la Diya choisie dans la Boutique */
+.lm5-id{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.lm5-avatar{flex:none;width:66px;height:66px;border-radius:50%;overflow:hidden;display:block;border:2px solid var(--gold-d);background:radial-gradient(closest-side,rgba(242,233,218,.30),rgba(242,233,218,0))}
+.lm5-avatar svg{display:block;width:100%;height:auto;margin:0 auto}
+.lm5-idt{min-width:0}
+.lm5-idt h3{margin:0 0 2px}
+.lm5-tenue{margin:0;font-size:13px;color:var(--muted)}
+.lm5-carte .lm-minis{margin-top:4px}
+/* la carte de collection : le sceau est la Diya choisie */
+.lm5-sceau svg{display:block;width:38px;height:auto;margin:6px auto 0}
+.lm-fiche-img .lm-scene.lm5{aspect-ratio:4/5;margin:0;border-radius:11px}
+.lm5-src{margin-top:4px;font-size:12px!important;color:var(--muted)!important}
+.lm-vide .lm5-vm{width:88px;height:auto;margin:0 auto}
+/* la Boutique : la garde-robe */
+.lm-prod .lm5-vignette{width:92px;height:auto;margin:0 auto 8px}
+.lm-prod .lm5-vignette svg{display:block;width:100%;height:auto}
+.lm5-quand{margin:-6px 0 10px;font-size:12.5px;color:var(--muted);min-height:2.6em}
+/* les petites cases d'objets : l'image est posée DANS la case (la lanterne, haute et étroite, ne doit jamais l'étirer) */
+.lm-mini{position:relative;overflow:hidden}
+.lm-mini img{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);object-fit:contain}
+
+
+/* ═══ v7 : le bandeau à neuf carrés, le Profil (utilisateur, carte), les Indices, la Collection en images, la Boutique à fenêtre, l'histoire sous-titrée ═══ */
+.lm7-ic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* le bandeau d'Apprendre : le titre, puis les neuf petits carrés à contour pointillé, serrés */
+.lm-bandeau.lm7-ban{display:block;min-height:0;padding:8px 12px 11px}
+.lm7-ban-h{display:flex;align-items:center;gap:10px;min-height:46px}
+.lm7-neuf{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px}
+.lm7-ban .lm7-neuf{margin-top:4px}
+.lm7-c{position:relative;display:block;aspect-ratio:1;min-width:0;border:1.5px dotted var(--gold-d);border-color:color-mix(in srgb,var(--gold2) 75%,transparent);border-radius:6px;overflow:hidden}
+.lm7-c.on{border:1px solid var(--gold-d);background:var(--panel2)}
+.lm7-c img{position:absolute;inset:2px;width:calc(100% - 4px);height:calc(100% - 4px);object-fit:contain}
+
+/* le Profil : l'utilisateur (la mascotte, le surnom, le mail), puis la carte */
+.lm7-user{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin:0 0 14px}
+.lm7-avatar{position:relative;flex:none;width:88px;height:88px;padding:0;display:grid;place-items:center;border:2px solid var(--gold-d);border-radius:50%;background:radial-gradient(closest-side,rgba(242,233,218,.30),rgba(242,233,218,0)),var(--panel);cursor:pointer;overflow:visible}
+.lm7-av-img{display:block;width:60px;height:auto}
+.lm7-av-img svg{display:block;width:100%;height:auto;margin:0}
+.lm7-pen{position:absolute;right:-3px;bottom:-1px;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;border:2px solid var(--bg);background:var(--gold);color:var(--bg)}
+.lm7-champs{flex:1 1 190px;min-width:0;display:grid;gap:8px}
+.lm7-champ{display:flex;align-items:center;gap:8px;width:100%;min-height:52px;padding:6px 12px;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--cream);font:inherit;text-align:left;cursor:pointer}
+.lm7-champ-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.lm7-lib{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lm7-val{font-size:15px;font-weight:800;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lm7-champ .lm7-ic{color:var(--gold2)}
+/* la carte, comme une carte à collectionner */
+.lm7-carte{margin:0 0 14px;padding:12px;border-radius:20px;border:2px solid var(--gold-d);background:linear-gradient(155deg,var(--panel2),var(--panel) 58%,var(--panel2));box-shadow:0 0 0 1px var(--line),0 8px 22px rgba(0,0,0,.26)}
+.lm7-c-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 9px}
+.lm7-c-h h2{margin:0;min-width:0;font-size:20px;font-weight:900;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lm7-niv{flex:none;padding:4px 12px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:13.5px;font-weight:900}
+.lm7-c-art{display:grid;place-items:center;height:148px;border-radius:14px;border:1px solid var(--gold-d);background:radial-gradient(ellipse at 50% 44%,rgba(242,233,218,.34),rgba(242,233,218,.05) 64%),linear-gradient(var(--panel),var(--bg))}
+.lm7-c-art .lm-m{width:104px;height:auto}
+.lm7-c-art .lm-m svg{display:block;width:100%;height:auto;margin:0}
+.lm7-c-rang{display:flex;flex-direction:column;align-items:center;margin:9px 0 0}
+.lm7-rang-ar{font-family:var(--ar);font-size:26px;line-height:1.5;color:var(--gold2)}
+.lm7-rang-fr{font-size:13.5px;font-weight:800;color:var(--muted)}
+.lm7-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:11px 0 0}
+.lm7-s{padding:8px 4px 7px;text-align:center;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.lm7-s[role=button]{cursor:pointer}
+.lm7-s b{display:block;font-size:23px;font-weight:900;line-height:1.1;color:var(--gold2)}
+.lm7-s span{display:block;margin-top:2px;font-size:13px;font-weight:800;color:var(--muted)}
+.lm7-c-unite{margin:10px 0 0;padding:9px 8px;text-align:center;font-size:14.5px;font-weight:800;color:var(--cream);border-radius:12px;border:1px dashed var(--line);border-color:color-mix(in srgb,var(--muted) 55%,transparent)}
+
+/* l'onglet Indices : le mystère en cours, puis les mystères résolus par sourate */
+.lm7-sect{margin:0 0 24px}
+.lm7-indices .lm-titre{margin:0 0 4px}
+.lm7-h2{margin:0 0 6px;font-size:20px;font-weight:900;color:var(--cream)}
+.lm7-vide{margin:6px 0 0;font-size:14.5px;color:var(--muted)}
+.lm7-sourate{display:flex;align-items:baseline;gap:10px;margin:12px 0 8px;font-size:15.5px;font-weight:900;color:var(--gold2)}
+.lm7-sar{font-family:var(--ar);font-size:24px;line-height:1.4}
+.lm7-lignes{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.lm7-ligne{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:7px 12px 7px 8px;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--cream);font:inherit;cursor:pointer}
+.lm7-no{flex:none;width:30px;text-align:center;font-size:19px;font-weight:900;color:var(--gold2)}
+.lm7-ligne .lm7-neuf{flex:1;min-width:0}
+.lm7-tab33{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px auto 16px;max-width:300px}
+.lm7-case{position:relative;display:block;aspect-ratio:1;border:1px solid var(--gold-d);border-radius:14px;background:radial-gradient(ellipse,var(--panel2),var(--panel));overflow:hidden}
+.lm7-case img{position:absolute;inset:9px;width:calc(100% - 18px);height:calc(100% - 18px);object-fit:contain}
+
+/* la Collection : seulement des images */
+.lm7-vit{display:grid;gap:12px}
+.lm7-vit2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.lm7-vit3{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.lm7-tuile{position:relative;display:block;padding:0;aspect-ratio:4/5;border:1px solid var(--gold-d);border-radius:16px;overflow:hidden;background:var(--panel);cursor:pointer}
+.lm7-couv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.lm7-tuile .lm-sceau-w{right:8px;bottom:8px}
+.lm7-tuile .lm-sceau{width:42px;height:50px}
+.lm7-tuile .lm-sceau svg{width:30px;margin-top:5px}
+.lm7-tuile-livre{display:grid;place-items:center}
+
+/* la Boutique : des images ; la mascotte du Profil (les tenues achetées, les autres en sombre) */
+.lm7-t{position:relative;display:grid;place-items:center;min-width:0;aspect-ratio:1;padding:8px;border:1px solid var(--line);border-radius:16px;background:var(--panel);cursor:pointer;overflow:hidden}   /* le décor d'une tenue (étoiles, feuilles) ne sort jamais de sa case : il faisait défiler la page à 360 px */
+.lm7-t-img{display:block;width:78%;height:auto}
+.lm7-t-img svg{display:block;width:100%;height:auto;margin:0}
+.lm7-t.eq{border-color:var(--gold2);box-shadow:0 0 0 2px var(--gold2)}
+.lm7-t .lm-livre{width:52px;height:52px;display:grid;place-items:center;border:1px solid var(--gold-d);border-radius:14px;background:var(--panel2)}
+.lm7-t .lm-livre svg{width:30px;height:30px;stroke:var(--gold2);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.lm7-coche{position:absolute;right:6px;top:6px;width:20px;height:20px;border-radius:50%;background:var(--gold)}
+.lm7-coche:after{content:'';position:absolute;left:7px;top:3.5px;width:4px;height:8px;border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.lm7-t.sombre{cursor:default;background:var(--bg);border-style:dashed}
+.lm7-t.sombre .lm7-t-img{filter:brightness(0) opacity(.34)}
+.lm7-vit-p{margin:12px 0 14px}
+
+/* les fenêtres : une feuille qui monte du bas */
+.lm7-voile{position:fixed;inset:0;z-index:95;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.62)}
+.lm7-voile.on{display:flex}
+.lm7-feuille{position:relative;box-sizing:border-box;display:flex;flex-direction:column;width:100%;max-width:520px;max-height:90%;overflow:hidden;padding:0;border-radius:22px 22px 0 0;border:1px solid var(--gold-d);border-bottom:0;background:var(--bg);color:var(--cream);text-align:center;box-shadow:0 -12px 40px rgba(0,0,0,.5);animation:lm7Monte .22s ease-out}
+@keyframes lm7Monte{from{transform:translateY(26px);opacity:0}to{transform:none;opacity:1}}
+.lm7-fermer{position:absolute;right:4px;top:4px;width:48px;height:48px;border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer}
+.lm7-pop-img{display:block;width:150px;margin:2px auto 14px}
+.lm7-pop-img svg{display:block;width:100%;height:auto;margin:0}
+.lm7-pop-livre{display:grid;place-items:center;width:84px;height:84px;margin:2px auto 12px;border:1px solid var(--gold-d);border-radius:20px;background:var(--panel2)}
+.lm7-pop-livre .lm-livre svg{width:46px;height:46px;stroke:var(--gold2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lm7-pop-t{margin:0 0 4px;font-size:22px;font-weight:900;color:var(--cream)}
+.lm7-pop-d{margin:0 0 16px;font-size:15px;color:var(--muted)}
+.lm7-pop-ok{margin:0 0 12px;font-size:15px;font-weight:800;color:var(--gold2)}
+.lm7-pop-manque{margin:0 0 10px;font-size:14px;font-weight:800;color:var(--muted)}
+.lm7-feuille .lm7-pop-cta{display:block;max-width:320px;margin-left:auto;margin-right:auto}
+.lm7-feuille .lm-sec.lm7-pop-cta{margin-top:0}
+.lm7-achat{display:flex!important;align-items:center;justify-content:center;gap:8px}
+.lm7-achat svg{width:20px;height:20px;stroke:currentColor;fill:none}
+.lm7-achat b{font-weight:900}
+.lm7-fait,.lm7-fait[disabled]{opacity:1;background:transparent!important;color:var(--gold2)!important;border:1px solid var(--gold-d);box-shadow:none!important}
+.lm7-input{box-sizing:border-box;width:100%;min-height:54px;margin:10px 0 2px;padding:10px 14px;border:1px solid var(--gold-d);border-radius:13px;background:var(--panel);color:var(--cream);font:inherit;font-size:17px;text-align:left}
+.lm7-erreur{min-height:24px;margin:6px 0 10px;font-size:14px;font-weight:800;color:#E58C77}
+html.clair .lm7-erreur{color:#A9301B}
+
+/* l'histoire sous-titrée : l'arabe en grand, le français dessous ; la case FR cache la traduction (comme les haltes) */
+.lm7-fr-opt{position:absolute;top:calc(10px + env(safe-area-inset-top,0px) + var(--edge,0px));right:62px;z-index:3;display:flex;align-items:center;gap:7px;min-height:44px;padding:0 12px;border-radius:999px;color:var(--cream);font-size:13px;font-weight:800;cursor:pointer;user-select:none}
+.lm7-fr-opt input{appearance:none;-webkit-appearance:none;display:grid;place-content:center;width:18px;height:18px;margin:0;border:2px solid var(--cream);border-radius:4px;background:none;cursor:pointer}
+.lm7-fr-opt input:checked{background:#D0870D;border-color:#D0870D}
+.lm7-fr-opt input:checked::after{content:'';width:4px;height:8px;border:solid #241D14;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.lm7-fr-opt input:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
+.lm7-sub{flex:none;box-sizing:border-box;height:min(34vh,300px);min-height:132px;margin:6px 0 10px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;text-align:center}
+.lm7-ar{margin:0;direction:rtl;unicode-bidi:isolate;font-family:'SWS',var(--ar);color:var(--cream);line-height:1.95}
+.lm7-ar{font-size:25px}
+.lm7-fr{margin:6px 0 0;font-size:16px;line-height:1.5;color:var(--muted)}
+.lm7-fr-opt:focus-within{outline:0}
+.lm-bandeau:focus-visible,.lm7-champ:focus-visible,.lm7-avatar:focus-visible,.lm7-t:focus-visible,.lm7-ligne:focus-visible,.lm7-tuile:focus-visible,.lm7-fermer:focus-visible,.lm7-input:focus-visible,.lm7-s:focus-visible,.lm7-feuille .cta:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
+@media(max-width:360px){.lm7-avatar{width:78px;height:78px}.lm7-av-img{width:54px}.lm7-ar{font-size:23px}}
+html.gtexte .lm7-val{white-space:normal;overflow-wrap:anywhere}
+html.gtexte .lm7-fr{font-size:17.5px}
+@media(prefers-reduced-motion:reduce){.lm7-feuille{animation:none}}
+
+/* la fenêtre des tenues : le bouton Boutique reste visible en bas, la liste défile dessous */
+.lm7-pied{position:sticky;bottom:calc(-22px - env(safe-area-inset-bottom,0px));margin:0 -18px calc(-22px - env(safe-area-inset-bottom,0px));padding:12px 18px calc(22px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(0,0,0,0),var(--bg) 26%)}
+
+/* l'histoire : le compteur monte sur la ligne de la croix et de la case FR (l'image gagne la place) ; le titre « Mystère en cours » ne se coupe jamais : c'est la pastille « Unité n » qui passe dessous */
+#lmFilm .lm-pas{position:absolute;left:18px;top:calc(10px + env(safe-area-inset-top,0px) + var(--edge,0px));height:44px;margin:0;display:flex;align-items:center}
+.lm7-indices .lm-titre{flex-wrap:wrap;row-gap:6px}
+.lm7-indices .lm-h1{white-space:nowrap}
+
+/* ═══ v7 (suite de la relecture indépendante du 23/11, nuit) ═══ */
+/* le dessin de Diya suit sa case : diya.js écrit une largeur en pixels sur le <svg>, qui le faisait déborder de sa tuile (les pieds et l'accessoire rognés, surtout en grands caractères) */
+.lm7-t-img svg,.lm7-av-img svg,.lm7-pop-img svg,.lm7-c-art .lm-m svg{width:100%!important;height:auto!important}
+/* la fenêtre : la croix reste en haut, le contenu défile dessous ; en grands caractères elle grossit comme les écrans de l'app (.view, .finish : zoom 1,22) */
+.lm7-defile{flex:1 1 auto;min-height:0;overflow:auto;padding:26px 18px calc(22px + env(safe-area-inset-bottom,0px))}
+.lm7-fermer{z-index:4;border-radius:50%;background:var(--bg)}
+html.gtexte .lm7-feuille{zoom:1.22;max-height:calc(90% / 1.22)}
+.lm7-pop-q{margin:-2px 0 6px;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gold2)}
+.lm7-input{display:block;max-width:320px;margin-left:auto;margin-right:auto}
+.lm7-vit-p{max-width:320px;margin-left:auto;margin-right:auto}
+/* les tenues non achetées : une silhouette sombre sur une case plus claire en thème sombre (1,13:1 avant), grise sur le clair */
+html:not(.clair) .lm7-t.sombre{background:#4F4540;border-color:#6A5D54}
+html:not(.clair) .lm7-t.sombre .lm7-t-img{filter:brightness(0) opacity(.85)}
+/* les indices gardent leurs cases sombres dans les deux thèmes, comme le bandeau d'Apprendre (la lune et la bulle disparaissaient sur le crème) */
+html.clair .lm-o,html.clair .lm7-c.on,html.clair .lm7-case,html.clair .lm-mini.on{background:#322B28;border-color:#B5751F}
+html.clair .lm-o.dispo{background:radial-gradient(ellipse,#3C342F,#322B28)}
+/* l'emplacement choisi est le plus visible de la scène (il était le plus pâle) ; les autres s'estompent le temps du choix */
+.lm5-slot.pret path{stroke:#fff;stroke-width:2.6;fill:rgba(255,217,138,.38);animation:lm5Bat 1.2s ease-in-out infinite}
+.lm5-slot.pret{filter:drop-shadow(0 0 5px #ffd98a) drop-shadow(0 0 1.5px rgba(0,0,0,.8))}
+#lm5Scene:has(.lm5-slot.pret) .lm5-slot:not(.pret){opacity:.35}
+/* la carte de récompense : la place du sceau n'est réservée que sur la ligne « Unité n » */
+.lm-fiche-t{padding-right:6px}
+.lm-fiche-t .lm-eyebrow{padding-right:64px}
+/* le Profil : les chiffres sont des informations (pas de cadre) sauf les ghufrān, qui s'ouvrent ; le pied de la carte est une donnée, pas un « vide à gagner » */
+.lm7-s{border-color:transparent}
+.lm7-s[role=button]{position:relative;border:1.5px solid var(--gold-d)}
+.lm7-s[role=button]:after{content:'';position:absolute;right:8px;top:8px;width:7px;height:7px;border-right:2px solid var(--gold2);border-top:2px solid var(--gold2);transform:rotate(45deg)}
+.lm7-c-unite{border-style:solid;border-color:var(--line)}
+html.gtexte .lm7-user{justify-content:center}
+/* les Indices et la Collection : consignes centrées, deux titres de même taille, un écart régulier sous le titre */
+.lm7-indices .lm-instr,.lm7-vide{text-align:center}
+.lm7-indices .lm-h1,.lm7-h2{font-size:22px}
+.lm7-indices .lm-titre{margin-bottom:10px}
+.lm7-coll .lm-h1{margin-bottom:10px}
+.lm7-ligne{gap:8px;padding:7px 8px}
+.lm7-no{width:22px}
+.lm7-ligne .lm7-neuf{gap:3px}
+/* défaut de l'app, proposé ici pour validation : à 360 px en grands caractères, la 4ᵉ colonne des succès sortait de l'écran */
+@media(max-width:380px){html.gtexte .sgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* ═══ v7 (relecture, suite) ═══ */
+/* le bandeau d'Apprendre : compact et COLLANT juste sous le titre d'unité (il reste sous lui quand on défile et suit l'unité affichée) ; la pastille « Réviser » collante se cale en dessous */
+.lm-bandeau.lm7-ban{position:sticky;top:calc(var(--uh-top) + var(--uh-h,76px) + 8px);z-index:19;padding:6px 10px 8px;margin-bottom:10px}
+.lm7-ban-h{min-height:34px;gap:8px}
+.lm7-bm{display:inline-block;flex:none;width:28px;height:30px}
+.lm7-bm svg{display:block;width:100%;height:auto;margin:0}
+.lm7-ban .lm-bt{font-size:15px}
+.lm7-ban .lm7-neuf{margin-top:2px}
+.revpil-ancre{top:calc(var(--uh-top) + var(--uh-h,76px) + var(--lm-bh,0px) + 16px)}
+/* le Profil : la ligne du rang s'ouvre (comme le bloc rang de l'app) ; un surnom vide invite à le remplir */
+button.lm7-c-rang{width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+.lm7-val.vide{font-weight:700;font-style:italic;color:var(--muted)}
+/* les silhouettes des tenues non achetées s'ouvrent (la fenêtre d'achat) */
+.lm7-t.sombre{cursor:pointer}
+/* la fenêtre de saisie descend du HAUT de l'écran : le clavier de l'iPhone ne cache pas ENREGISTRER */
+.lm7-voile.haut{align-items:flex-start}
+.lm7-voile.haut .lm7-feuille{border-radius:0 0 22px 22px;border:1px solid var(--gold-d);border-top:0;animation:lm7Descend .22s ease-out}
+@keyframes lm7Descend{from{transform:translateY(-26px);opacity:0}to{transform:none;opacity:1}}
+/* l'histoire : un écran de cinéma, sombre dans les deux thèmes ; la carte de sous-titres est celle des haltes (fond sombre à coins arrondis, arabe crème, filet doré, français dessous) */
+#lmFilm{background:#161311;color:#F2E9DA;--cream:#F2E9DA;--muted:#D8CBB8;--gold2:#F0B75A;--panel:#252120;--panel2:#2c2623;--line:#493c32;--bg:#161311}
+.lm7-sub{background:rgba(24,19,16,.86);border-radius:18px;padding:8px 12px 12px;margin:6px 0 10px}
+.lm7-ar{font-size:32px;color:#F2E9DA}
+.lm7-fr{margin-top:6px;padding-top:6px;border-top:1px solid rgba(240,183,90,.28);font-size:15px;font-weight:700;color:#D8CBB8}
+html.gtexte .lm7-fr{font-size:17px}
+@media(max-width:360px){.lm7-ar{font-size:28px}}
+.lm7-prog{position:absolute;left:0;right:0;top:0;height:3px;z-index:8;background:rgba(242,233,218,.18)}
+.lm7-prog i{display:block;height:100%;background:#F0B75A;transition:width .4s ease}
+#lmFilm .lm-pas{color:#D8CBB8;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+#lmFilm .lm-x{color:#F2E9DA}
+/* …sur l'image, comme les haltes (le choix de l'atelier « Sous-titres sur l'image ») */
+#lmFilm.surimp{padding:0}
+#lmFilm.surimp:before{content:'';position:absolute;left:0;right:0;top:0;height:96px;z-index:6;pointer-events:none;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,0))}
+#lmFilm.surimp .lm5-film{position:absolute;inset:0;width:100%;height:100%;align-self:stretch;flex:none;max-width:none;aspect-ratio:auto;margin:0;border-radius:0}
+#lmFilm.surimp .lm5-plan{object-position:50% 30%}
+#lmFilm.surimp .lm-x{position:absolute;right:8px;top:calc(10px + env(safe-area-inset-top,0px) + var(--edge,0px));z-index:7}
+#lmFilm.surimp .lm7-fr-opt{z-index:7}
+#lmFilm.surimp .lm-pas{z-index:7}
+#lmFilm.surimp .lm7-sub{position:absolute;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:5;height:auto;max-height:50%;min-height:0;margin:0}
+#lmFilm.surimp .lm-film-actions{position:absolute;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6}
+#lmFilm.surimp .lm-film-actions .lm-sec{background:rgba(24,19,16,.78)}
+#lmFilm:focus{outline:0}
+/* la carte de récompense en grands caractères : l'image se tasse pour que CONTINUER et « Revoir l'histoire » restent à l'écran */
+html.gtexte #lmRecompense .lm-fiche-img .lm-scene.lm5{aspect-ratio:1}
+/* les commandes de l'histoire : discrètes (la halte n'en a pas : toucher l'image = pause) */
+#lmFilm.surimp .lm-film-actions .lm-sec{min-height:40px;font-size:14px;background:rgba(24,19,16,.55)}
+
+/* ——— v8 (24/11) : les carrés d'images sur fond MARRON FONCÉ, partout ; les indices dans la première boîte ; l'histoire (taille de l'arabe, place des sous-titres) ——— */
+html .lm7-neuf .lm7-c{background:#2A1A0C;border:1.5px dotted rgba(232,169,79,.7)}
+html .lm7-neuf .lm7-c.on,html.clair .lm7-neuf .lm7-c.on{background:#2A1A0C;border:1px solid #C58A2B}
+.unit-head.lm8-avec{flex-wrap:wrap;row-gap:0;padding-bottom:8px}
+.lm8-int{flex:0 0 100%;display:block;width:100%;min-height:45px;margin:0;padding:6px 0 0;border:0;background:none;cursor:pointer;position:relative;z-index:2;font:inherit}
+.lm8-int .lm7-neuf{gap:4px}
+.lm8-int:focus-visible{outline:3px solid #F2E9DA;outline-offset:2px;border-radius:8px}
+.lm8-reg{position:absolute;top:calc(10px + env(safe-area-inset-top,0px) + var(--edge,0px));z-index:7;height:44px;min-width:44px;padding:0 12px;border:1px solid rgba(242,233,218,.45);border-radius:999px;background:rgba(24,19,16,.6);color:#F2E9DA;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.lm8-reg-t{left:76px}.lm8-reg-p{left:146px;font-size:18px}
+.lm8-reg:focus-visible{outline:3px solid #F2E9DA;outline-offset:2px}
+#lmFilm[data-ar="18"] .lm7-ar{font-size:18px}
+#lmFilm[data-ar="22"] .lm7-ar{font-size:22px}
+#lmFilm[data-ar="26"] .lm7-ar{font-size:26px}
+#lmFilm[data-ar="32"] .lm7-ar{font-size:32px}
+@media(max-width:360px){#lmFilm[data-ar="32"] .lm7-ar{font-size:28px}#lmFilm[data-ar="26"] .lm7-ar{font-size:24px}}
+#lmFilm.surimp[data-pos="haut"] .lm7-sub{bottom:auto;top:calc(64px + env(safe-area-inset-top,0px) + var(--edge,0px))}
+
+/* ——— v9 (24/11, soir) ——— */
+/* les mots de l'arabe s'allument à la lecture : ceux à venir sont atténués, ceux lus clairs, le mot en cours doré */
+.lm9-w{color:rgba(216,203,184,.66);transition:color .15s}
+.lm9-w.lu{color:#F2E9DA}
+.lm9-w.ici{color:#F0B75A;text-shadow:0 0 10px rgba(240,183,90,.5)}
+@media(prefers-reduced-motion:reduce){.lm9-w{transition:none}}
+/* la halte (src/film) : même mise en page que l'histoire — l'arabe à 18 px, les sous-titres en haut (son illumination mot à mot existe déjà) */
+#film .fl-st{bottom:auto!important;top:calc(82px + env(safe-area-inset-top,0px) + var(--edge,0px))}
+/* PROVISOIRE (préview seulement) : le film place sa mascotte au-dessus du sous-titre ; avec le sous-titre en haut, il faudra la poser SOUS lui (poserMasc, src/film/index.js) */
+#film #fl-fm{top:50%!important}
+#film .fl-st-in,#film .fl-st-in span{font-size:18px!important}
+/* la Boutique : la carte d'une tenue est CRÈME en mode sombre, MARRON FONCÉ en mode clair ; le prix est une étiquette ; une tenue déjà achetée est grisée */
+html:not(.clair) .lm9-t{background:#F2E9DA;border-color:#D0870D}
+html.clair .lm9-t{background:#2A1A0C;border-color:#7E4808}
+.lm9-t .lm7-t-img{width:74%}
+.lm9-et{position:absolute;left:6px;top:6px;display:inline-flex;align-items:center;gap:3px;padding:4px 8px 4px 17px;font-size:13px;line-height:1;color:#F2E9DA;background:#3A2410;clip-path:polygon(11px 0,100% 0,100% 100%,11px 100%,0 50%)}
+.lm9-et:before{content:'';position:absolute;left:6px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:#F2E9DA}
+.lm9-et b{font-weight:900}
+.lm9-et svg{width:12px;height:12px;fill:none;stroke:#F0B75A;stroke-width:1.9}
+html.clair .lm9-et{background:#F2E9DA;color:#3A2410}
+html.clair .lm9-et:before{background:#2A1A0C}
+html.clair .lm9-et svg{stroke:#B5751F}
+.lm9-t.poss .lm7-t-img{filter:grayscale(1);opacity:.5}
+.lm9-deja{position:absolute;left:-6%;right:-6%;top:50%;transform:translateY(-50%) rotate(-12deg);text-align:center;padding:4px 0;font-size:12.5px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;background:#D0870D;color:#2A1A0C;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.lm9-t.eq{box-shadow:0 0 0 2px var(--gold2)}
+/* le Profil : la carte joueuse et son bouton de partage (crème en mode sombre, marron foncé en mode clair) */
+.lm9-carte-w{max-width:380px;margin:0 auto 12px}
+.lm9-carte-w .cw{width:100%}
+.lm9-partage,.lm9-creme{min-height:46px;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 20px;border-radius:999px;border:2px solid #D0870D;background:#F2E9DA;color:#4E3210;font:inherit;font-weight:900;font-size:15px;text-decoration:none;cursor:pointer}
+.lm9-partage{margin:14px auto 0}
+.lm9-partage svg{width:20px;height:20px}
+html.clair .lm9-partage,html.clair .lm9-creme{background:#2A1A0C;color:#F2E9DA}
+.lm9-partage:focus-visible,.lm9-creme:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
+.lm9-apercu{display:block;width:100%;max-width:280px;margin:6px auto 12px;border-radius:14px;border:1px solid var(--line);background:var(--panel);min-height:120px}
+.lm9-txt{font-size:14px;color:var(--muted);margin:0 0 12px;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
+.lm9-actions{display:flex;flex-direction:column;gap:10px}
+.lm9-msg{min-height:22px;font-size:14px;color:var(--muted);margin:10px 0 0}
+
+/* ——— v10 (24/11, soir) ——— */
+.lm10-gr{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.22em;object-fit:contain}
+.lm-solde .lm10-gr{width:30px;height:30px;vertical-align:middle;margin-right:6px}
+.lm-graine .lm10-gr{width:22px;height:22px}
+/* l'étiquette de prix (Artlist, vide) : plus courte qu'avant, posée en haut à gauche, le prix écrit dessus */
+.lm10-et{position:absolute;left:2px;top:2px;width:46px;height:35px;transform:rotate(-5deg);transform-origin:20% 40%}
+.lm10-et-i{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 1px 1.5px rgba(60,30,0,.45))}
+.lm10-et-p{position:absolute;left:30%;right:6%;top:36%;bottom:8%;display:flex;align-items:center;justify-content:center;gap:2px;color:#3A2410;font-size:11px;font-weight:900;line-height:1}
+.lm10-et-p .lm10-gr{width:10px;height:10px;vertical-align:baseline}
+html.clair .lm10-et-i{filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.55))}
+/* l'icône Boutique du feuillet « Plus » : celle d'Artlist, sans rond doré derrière */
+.lm-plus-ic.lm10-bt{background:none}
+.lm-plus-ic.lm10-bt img{display:block;width:34px;height:34px;object-fit:contain}
+
+/* ——— v12 (24/11, soir) : les arrière-plans ——— */
+/* le disque du Profil : crème en mode sombre, marron foncé en mode clair ; un arrière-plan choisi le remplace */
+html:not(.clair) .lm7-avatar[data-fond="uni"]{background:#F2E9DA}
+html.clair .lm7-avatar[data-fond="uni"]{background:#2A1A0C}
+.lm7-avatar[data-fond]:not([data-fond="uni"]){background:var(--fond) center/cover no-repeat}
+/* les cases d'arrière-plan : l'image remplit la case (Boutique, disque, carte) */
+.lm12-fimg{display:block;width:100%;height:100%;border-radius:11px;overflow:hidden}
+.lm12-fimg img{display:block;width:100%;height:100%;object-fit:cover}
+.lm12-f,.lm12-c{padding:6px}
+.lm9-t.poss .lm12-fimg{filter:grayscale(1);opacity:.5}
+.lm7-t.sombre .lm12-fimg{filter:brightness(.3)}
+.lm12-unie{display:block}
+html:not(.clair) .lm12-unie{background:#F2E9DA}
+html.clair .lm12-unie{background:#2A1A0C}
+.lm12-cap{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);padding:2px 9px;border-radius:99px;background:rgba(42,26,12,.78);color:#F2E9DA;font-size:12px;font-weight:900;letter-spacing:.03em;line-height:1.35;white-space:nowrap}
+.lm12-pop-fond{display:block;width:170px;aspect-ratio:1;margin:2px auto 14px;border-radius:18px;overflow:hidden;border:2px solid var(--gold-d)}
+.lm12-pop-fond img{display:block;width:100%;height:100%;object-fit:cover}
+.lm12-2{margin-top:10px}
+/* le disque : deux onglets, Tenue et Arrière-plan */
+.lm12-ong{display:flex;gap:4px;max-width:320px;margin:0 auto 4px;padding:4px;border-radius:99px;background:var(--panel2);border:1px solid var(--line)}
+.lm12-ong button{flex:1;min-height:44px;padding:0 10px;border:0;border-radius:99px;background:transparent;color:var(--cream);font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+.lm12-ong button.on{background:var(--gold);color:var(--bg)}
+.lm12-ong button:focus-visible{outline:3px solid var(--cream);outline-offset:2px}
+
+/* ——— v13 : la couleur de l'uni ——— */
+.lm12-st{margin:14px 0 8px;font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center}
+.lm12-sws{display:grid;grid-template-columns:repeat(5,44px);gap:10px 12px;justify-content:center;margin:0 0 16px}
+.lm12-sw{position:relative;box-sizing:border-box;width:44px;height:44px;padding:0;border-radius:50%;border:2px solid var(--line);cursor:pointer;overflow:hidden}
+.lm12-sw.on{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--gold2)}
+.lm12-sw:focus-visible,.lm12-sw:focus-within{outline:3px solid var(--cream);outline-offset:3px}
+.lm12-sw-def{background:linear-gradient(135deg,#F2E9DA 50%,#2A1A0C 50%)}
+.lm12-sw-autre{background:conic-gradient(#e66,#eb6,#8c6,#6cc,#68e,#c6c,#e66);display:block}
+.lm12-sw-autre input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+

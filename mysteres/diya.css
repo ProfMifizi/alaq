@@ -1,0 +1,50 @@
+/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v15/diya.css) — ne pas retoucher à la main */
+/* La mascotte Diya et ses tenues : les règles de app.css (« .masc »…) pour qu'elle se comporte pareil hors de l'app,
+   plus les petits mouvements des accessoires. Tout mouvement est coupé si l'appareil demande moins d'animation. */
+.masc{overflow:visible;display:block}
+.masc .mhalo,.masc .mcorps,.masc .mbassin,.masc .mjambe{transform-box:fill-box}
+.masc .mhalo{transform-origin:50% 50%;opacity:.55}
+.masc .mcorps{transform-origin:50% 100%}
+.masc .mbassin{transform-origin:50% 0%}
+.masc .mjambe{transform-origin:50% 0%}
+
+@keyframes diya-tw{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.18)}}
+@keyframes diya-chute{0%{transform:translateY(-10px);opacity:0}18%{opacity:1}100%{transform:translateY(26px);opacity:0}}
+@keyframes diya-neige{0%{transform:translateY(-4px)}100%{transform:translateY(8px)}}
+@keyframes diya-onde{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes diya-tourne{to{transform:rotate(360deg)}}
+@keyframes diya-tourne-inv{to{transform:rotate(-360deg)}}
+@keyframes diya-lettre{0%{opacity:0;transform:translateY(8px)}30%,70%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
+.diya.anime .tw{transform-box:fill-box;transform-origin:50% 50%;animation:diya-tw 2.6s ease-in-out infinite}
+.diya.anime .chute{animation:diya-chute 3.4s linear infinite}
+.diya.anime .neige{animation:diya-neige 3s ease-in-out infinite alternate}
+.diya.anime .onde{transform-box:fill-box;transform-origin:50% 50%;animation:diya-onde 4.2s ease-in-out infinite}
+.diya.anime .tourne{transform-box:view-box;transform-origin:100px 126px;animation:diya-tourne 46s linear infinite}
+.diya.anime .tourne2{transform-box:view-box;transform-origin:100px 126px;animation:diya-tourne-inv 46s linear infinite}
+.diya.anime .lettre{transform-box:fill-box;transform-origin:50% 50%;animation:diya-lettre 4.4s ease-in-out infinite}
+
+/* les petites réactions à la saison (déclenchées en touchant Diya : classe .reagit sur le <svg>) */
+@keyframes diya-frisson{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.6px)}75%{transform:translateX(1.6px)}}
+@keyframes diya-vent{0%,100%{transform:rotate(-9deg)}35%{transform:rotate(-19deg)}65%{transform:rotate(-4deg)}}
+@keyframes diya-pousse{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes diya-pan{0%,100%{transform:rotate(0)}50%{transform:rotate(7deg)}}
+.diya.reagit[data-tenue=hiver] .mcorps{animation:diya-frisson .16s linear 8}
+.diya.reagit[data-tenue=hiver] .pan{transform-box:fill-box;transform-origin:50% 0%;animation:diya-pan .5s ease-in-out 3}
+.diya.reagit[data-tenue=ete] .chapeau{transform-box:view-box;transform-origin:100px 50px;animation:diya-vent 1.8s ease-in-out 1}
+.diya.reagit[data-tenue=printemps] .pousse{transform-box:fill-box;transform-origin:50% 100%;animation:diya-pousse 1.4s cubic-bezier(.3,1.4,.5,1) 1 both}
+
+@media (prefers-reduced-motion:reduce){
+  .diya .tw,.diya .chute,.diya .neige,.diya .onde,.diya .tourne,.diya .tourne2,.diya .lettre{animation:none!important}
+  .diya.reagit .mcorps,.diya.reagit .pan,.diya.reagit .chapeau,.diya.reagit .pousse{animation:none!important}
+}
+
+
+/* ═══ Le thème CLAIR (fond parchemin #F7F1E4 ou blanc) — v2 : un FIN CONTOUR SOMBRE entoure le corps de Diya (demande de Myriam, 23/11) ═══
+   Le trait est dessiné par le filtre SVG « dct » (diya.js), seulement sur fond clair ; les palettes VALIDÉES par Myriam reviennent donc telles quelles (plus de métal recoloré).
+   Restent les petits éléments FLOTTANTS, hors du corps, donc sans contour : étincelles, flocons, lettres, confettis crème, fleur blanche. */
+html:not(.clair) .diya .dy-sil{filter:none}
+html.clair .diya .dy-e{fill:#C4800E}
+html.clair .diya .dy-neige path{stroke:#5E94BC}
+html.clair .diya .dy-lettre{fill:#B8760C;stroke:#FFF8E6}
+html.clair .diya [data-c=creme]{fill:#7A4A22}
+html.clair .diya [data-c=blanc]{fill:#F6B8CB}
