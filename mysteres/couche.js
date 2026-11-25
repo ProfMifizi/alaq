@@ -1,4 +1,4 @@
-/* Couche « Les Mystères de Diya » — dans l'app (build 279, 25/11/2026). GÉNÉRÉE par outils/preparer-mysteres-prod.py depuis la préview v17 : on corrige les préviews, puis on relance le script.
+/* Couche « Les Mystères de Diya » — dans l'app (build 280, 25/11/2026). GÉNÉRÉE par outils/preparer-mysteres-prod.py depuis la préview v17 : on corrige les préviews, puis on relance le script.
    Elle ENVELOPPE les vraies fonctions de rendu (renderHome, renderIslam, renderProg, showTab, setBanner) et ajoute ses écrans : les neuf indices d'une unité, la scène à compléter, l'histoire, la collection,
    le Profil en trois volets avec la carte joueuse, le disque qui change de tenue et d'arrière-plan. Script classique chargé À LA DEMANDE par mysteres-chargeur.js (interrupteur `?mysteres=1`).
    ÉTAT : ce qui se garde vit dans S.louma (créé au premier besoin, jamais dans DEF : doReset ne recharge pas la page), l'état d'écran vit ici. L'attribution des indices est DÉRIVÉE des disques faits
