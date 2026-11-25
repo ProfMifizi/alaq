@@ -1,4 +1,4 @@
-/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v15/couche.css) — ne pas retoucher à la main */
+/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v17/couche.css) — ne pas retoucher à la main */
 /* Couche « Les Mystères de Diya » — préview v7 (la v6 plus le bloc « v7 » tout en bas ; les rubriques de la v5 qui ne servent plus sont laissées, inertes). Posée par l'atelier dans la VRAIE app (iframe) : rien de ceci n'est dans src/.
    Jetons de l'app seulement (var(--bg), --panel, --line, --gold2…) pour suivre les deux thèmes ; seules les couleurs de la
    SCÈNE (illustration provisoire) et du sceau (un objet doré) sont fixes. Texte : 13 px au minimum. */
@@ -330,7 +330,10 @@ html.clair #home .lm-bandeau .dy-sil{filter:none}          /* le bandeau d'Appre
 .lm7-pop-t{margin:0 0 4px;font-size:22px;font-weight:900;color:var(--cream)}
 .lm7-pop-d{margin:0 0 16px;font-size:15px;color:var(--muted)}
 .lm7-pop-ok{margin:0 0 12px;font-size:15px;font-weight:800;color:var(--gold2)}
-.lm7-pop-manque{margin:0 0 10px;font-size:14px;font-weight:800;color:var(--muted)}
+.lm7-pop-manque{margin:0 0 10px;font-size:15px;font-weight:800;color:var(--cream)}
+#lmPopup:focus{outline:0}
+.lm-nb{white-space:nowrap}
+.lm7-achat[disabled] .lm10-gr{filter:grayscale(1);opacity:.55}
 .lm7-feuille .lm7-pop-cta{display:block;max-width:320px;margin-left:auto;margin-right:auto}
 .lm7-feuille .lm-sec.lm7-pop-cta{margin-top:0}
 .lm7-achat{display:flex!important;align-items:center;justify-content:center;gap:8px}
@@ -555,3 +558,29 @@ html.clair .lm12-unie{background:#2A1A0C}
 .lm12-sw-autre{background:conic-gradient(#e66,#eb6,#8c6,#6cc,#68e,#c6c,#e66);display:block}
 .lm12-sw-autre input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
 
+
+/* ——— v16 (25/11/2026) : les retours de Myriam sur la 276 ——— */
+/* le casier d'indices : UNE rangée de petites cases AU-DESSUS de la scène (jamais de bande qui défile : neuf cases tiennent dans la largeur) ; 42 px de haut = un doigt */
+.lm7-indices .lm-inv{display:flex;justify-content:center;gap:5px;margin:2px 0 10px}
+.lm7-indices .lm-o{flex:0 1 calc((100% - 8 * 5px) / 9);height:42px;min-width:0;padding:2px;border-radius:9px}
+.lm7-indices .lm-o[aria-pressed=true]{box-shadow:0 0 0 2px var(--gold2)}
+.lm7-indices .lm-instr{margin:8px 0 0}
+@media(max-width:360px){.lm7-indices .lm-inv{gap:4px}.lm7-indices .lm-o{flex-basis:calc((100% - 8 * 4px) / 9)}}
+/* « mystère à venir » : l'image seule (le titre de la page dit déjà de quoi il s'agit) */
+.lm-venir{position:relative;aspect-ratio:4/5;margin:6px 0 12px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#1a1230}
+.lm-venir-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+/* les tuiles de la collection : éteintes (assombries, filet neutre) à côté de la couverture gagnée, et non touchables */
+.lm7-tuile-venir{cursor:default;pointer-events:none;border-color:var(--line)}
+.lm7-tuile-venir .lm7-couv{filter:brightness(.6) saturate(.7)}
+.lm-venir-leg{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:0;padding:26px 6px 9px;text-align:center;background:linear-gradient(transparent,rgba(12,8,24,.86))}
+.lm-venir-leg b{font-size:26px;font-weight:900;line-height:1.05;color:#F2E9DA}
+.lm-venir-leg i{font-style:normal;font-size:14px;font-weight:800;color:#E8C27A}
+.lm-venir-seul{margin-top:14px}
+/* les carrés encore vides (le pointillé ne se voyait pas sur le fond doré de la boîte) */
+html .lm7-neuf .lm7-c:not(.on){border-color:rgba(242,233,218,.62)}
+/* la feuille « indices déjà à toi » : la rangée de vignettes est centrée comme le titre et le bouton */
+#lmObjetNeuf .lm-minis-resume{display:flex;justify-content:center;flex-wrap:wrap}
+#lmObjetNeuf .lm-minis-resume .lm-mini{flex:0 0 calc((100% - 5 * 8px) / 6)}
+/* l'en-tête « Mystère en cours » + « Unité 1x » tient sur une ligne à 360 en grands caractères (le jour où les unités 10 à 12 auront leur histoire) */
+.lm7-indices .lm-titre{gap:8px}
+.lm7-indices .lm-compte{padding:4px 8px}

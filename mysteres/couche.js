@@ -1,8 +1,8 @@
-/* Couche « Les Mystères de Diya » — dans l'app (build 275, 24/11/2026). GÉNÉRÉE par outils/preparer-mysteres-prod.py depuis la préview v15 : on corrige les préviews, puis on relance le script.
+/* Couche « Les Mystères de Diya » — dans l'app (build 279, 25/11/2026). GÉNÉRÉE par outils/preparer-mysteres-prod.py depuis la préview v17 : on corrige les préviews, puis on relance le script.
    Elle ENVELOPPE les vraies fonctions de rendu (renderHome, renderIslam, renderProg, showTab, setBanner) et ajoute ses écrans : les neuf indices d'une unité, la scène à compléter, l'histoire, la collection,
    le Profil en trois volets avec la carte joueuse, le disque qui change de tenue et d'arrière-plan. Script classique chargé À LA DEMANDE par mysteres-chargeur.js (interrupteur `?mysteres=1`).
    ÉTAT : ce qui se garde vit dans S.louma (créé au premier besoin, jamais dans DEF : doReset ne recharge pas la page), l'état d'écran vit ici. L'attribution des indices est DÉRIVÉE des disques faits
-   (S.done) : objet k de l'unité u = disque k ; seule l'unité 1 a son histoire (« Le visiteur de la nuit »). LA BOUTIQUE EST FERMÉE (BOUTIQUE_OUVERTE) : les graines se dépensent côté serveur. */
+   (S.done) : objet k de l'unité u = disque k ; seule l'unité 1 a son histoire (« Le visiteur de la nuit »), les autres montrent leurs neuf carrés vides et « Mystère à venir ». LA BOUTIQUE EST OUVERTE : l'achat se fait chez le SERVEUR (acheter_diya), jamais sur le téléphone. */
 (function(){
 'use strict';
 if(window.LM) return;
@@ -11,7 +11,6 @@ const DV = window.DV5, DY = window.DIYA;
 const $ = s => D.querySelector(s);
 const esc = v => String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const NB = 9;
-const BOUTIQUE_OUVERTE = false;      // ⛔ les graines se dépensent côté SERVEUR (migration SQL + RPC) : tant qu'elle n'existe pas, rien ne s'achète, rien ne s'affiche en « à acheter »
 /* l'état : ce qui se garde vit dans S.louma (réparé à chaque lecture), l'état d'écran dans UI, les choix de Myriam du 24/11 dans FIXE */
 const UI = {page:null, onglet:'carte', depuis:'prog', vue:null};
 const FIXE = {bandeau:'integre', filmAr:18, filmPos:'haut', coins:'epi', valo:3, retouches:true, nom:'Diya'};
@@ -57,6 +56,8 @@ const OBJ = [
 const objSrc = o => DV.base + (o.id === 'bulle' ? 'bulle-icone' : o.id) + '.webp';
 const objImg = i => '<img src="'+objSrc(OBJ[i])+'" alt="">';
 const IMG_CARTE = 'images-app-alaq/mysteres/carte/';
+const IMG_VENIR = () => 'images-app-alaq/mysteres/indices/venir.webp';
+const venirHTML = u => '<div class="lm-venir" role="img" aria-label="Mystère à venir, unité '+UNITS[u].no+'"><img class="lm-venir-img" src="'+IMG_VENIR()+'" alt=""></div>';
 CARTE.cfg.objBase = DV.base; CARTE.cfg.policesBase = 'polices/'; CARTE.cfg.images = IMG_CARTE; CARTE.cfg.cssUrl = 'mysteres/carte.css';       // la carte vit ici dans l'app : ses images et ses polices ont d'autres adresses que dans sa préview
 const IBULLE = 7;                               // la bulle est en DEUX couches : l'arc arrière SOUS la natte, le dôme et l'arc avant PAR-DESSUS
 
@@ -112,7 +113,7 @@ const masc = (W, portrait) => diya(tenue(), W, portrait);
 /* ——— l'état dérivé ——— */
 const poses = u => (P.poses[u] = P.poses[u] || Array(NB).fill(false));
 const vus = u => (P.vus[u] = P.vus[u] || Array(NB).fill(false));
-const rec = u => Array.from({length:NB}, (_, k) => !!S.done[dkey(u, k)]);
+const rec = u => RECIT[u] ? Array.from({length:NB}, (_, k) => !!S.done[dkey(u, k)]) : Array(NB).fill(false);      // v16 : une unité SANS histoire n'a aucun indice (les neuf objets sont ceux du mystère n° 1, pas les siens)
 const cnt = a => a.filter(Boolean).length;
 function uniteCourante(){ let der = 0; for(let u=0; u<UNITS.length; u++){ if(!UNITS[u].ready) continue; der = u; if(!unitValidated(u)) return u; } return der; }
 function unitesAvecObjets(){ const r = []; for(let u=0; u<UNITS.length; u++) if(UNITS[u].ready && RECIT[u] && cnt(rec(u)) > 0) r.push(u); return r; }
@@ -147,19 +148,18 @@ const cleBandeau = u => u + '|' + tenue() + '|' + cnt(rec(u)) + '|' + P.bandeau;
 function bandeauApprendre(u){
   if(P.bandeau === 'integre') return '';
   const n = cnt(rec(u));
-  return '<button class="lm-bandeau lm7-ban" id="lmBandeau" data-cle="'+esc(cleBandeau(u))+'" data-lm="indices-unite:'+u+'" aria-label="'+titre()+' : voir mes indices, '+n+' indices sur 9"><span class="lm7-ban-h"><span class="lm-m lm7-bm">'+masc(28, true)+'</span><span class="lm-bt">'+titre()+'</span>'+chev()+'</span>'+carres(u)+'</button>';
+  return '<button class="lm-bandeau lm7-ban" id="lmBandeau" data-cle="'+esc(cleBandeau(u))+'" data-lm="indices-unite:'+u+'" aria-label="'+titre()+(RECIT[u] ? ' : voir mes indices, '+n+' indices sur 9' : ' : mystère à venir')+'"><span class="lm7-ban-h"><span class="lm-m lm7-bm">'+masc(28, true)+'</span><span class="lm-bt">'+titre()+'</span>'+chev()+'</span>'+carres(u)+'</button>';
 }
 /* v8 : les neuf carrés DANS la boîte de l'unité (#unitBanner, la première boîte) : une seule boîte collante, sans titre */
 function integrerIndices(u){
   const ub = D.getElementById('unitBanner'); if(!ub) return;
   const ex = ub.querySelector('.lm8-int');
-  if(!RECIT[u]){ if(ex) ex.remove(); ub.classList.remove('lm8-avec'); return; }       // pas encore d'histoire pour cette unité : pas de carrés
   if(P.bandeau !== 'integre'){ if(ex) ex.remove(); ub.classList.remove('lm8-avec'); return; }
   const n = cnt(rec(u)), cle = u + '|' + n;
   if(ex && ex.dataset.cle === cle) return;
   if(ex) ex.remove();
   ub.classList.add('lm8-avec');
-  ub.insertAdjacentHTML('beforeend', '<button class="lm8-int" data-cle="'+cle+'" data-lm="indices-unite:'+u+'" aria-label="Mes indices : '+n+' sur 9. Voir mes indices">'+carres(u)+'</button>');
+  ub.insertAdjacentHTML('beforeend', '<button class="lm8-int" data-cle="'+cle+'" data-lm="indices-unite:'+u+'" aria-label="'+(RECIT[u] ? 'Mes indices : '+n+' sur 9. Voir mes indices' : 'Mystère à venir pour cette unité. Voir')+'">'+carres(u)+'</button>');
 }
 /* la hauteur du bandeau est donnée à l'app : la pastille « Réviser » collante se cale juste dessous */
 function hauteurBandeau(){
@@ -282,11 +282,14 @@ function profilB(){
 
 /* ——— l'onglet Indices : le mystère en cours, puis les mystères résolus par sourate ——— */
 function pageIndices(){
-  const u = uniteEnCours(), r = rec(u), p = poses(u), n = cnt(r), np = cnt(p), tout = np === NB;
+  const u = uniteEnCours();
+  const entete1 = '<div class="lm-page lm7-indices"><section class="lm7-sect" aria-labelledby="lm7H1"><div class="lm-titre"><h1 class="lm-h1" id="lm7H1">'+(RECIT[u] ? 'Mystère en cours' : 'Mystère à venir')+'</h1><span class="lm-compte">Unité '+UNITS[u].no+'</span></div>';
+  if(!RECIT[u]) return entete1 + venirHTML(u) + '<button class="lm-sec" data-lm="aller:home">Continuer mon unité</button></section>' + resolus() + '</div>';
+  const r = rec(u), p = poses(u), n = cnt(r), np = cnt(p), tout = np === NB;
   const dispo = r.some((x, k) => x && !p[k]);
   const instr = sel !== null ? 'Touche son emplacement en pointillé.' : dispo ? 'Glisse un indice sur sa silhouette.' : (n < NB ? 'D’autres indices arrivent.' : '');
-  let h = '<div class="lm-page lm7-indices"><section class="lm7-sect" aria-labelledby="lm7H1"><div class="lm-titre"><h1 class="lm-h1" id="lm7H1">Mystère en cours</h1><span class="lm-compte">Unité '+UNITS[u].no+'</span></div>'+
-    scene(u, 'assembly')+'<p class="lm-instr">'+instr+'</p>'+inventaire(u);
+  /* v16 : le casier est AU-DESSUS de la scène, en une rangée de petites cases : on glisse un indice sans faire défiler la page */
+  let h = entete1 + '<p class="lm-instr">'+instr+'</p>'+inventaire(u)+scene(u, 'assembly');
   if(tout) h += RECIT[u] ? '<button class="cta lm-cta" data-lm="film">VOIR L’HISTOIRE</button>' : '<p class="lm-instr">Pas encore de récit pour cette unité.</p>';
   if(n < NB) h += '<button class="lm-sec" data-lm="aller:home">Continuer mon unité</button>';
   return h + '</section>' + resolus() + '</div>';
@@ -309,12 +312,14 @@ function resolus(){
 /* ——— l'onglet Collection : uniquement les images ; un toucher ouvre l'histoire ——— */
 function pageCollection(){
   const cartes = []; for(let u=0; u<UNITS.length; u++) if(P.collectees[u] && RECIT[u]) cartes.push(u);
+  const venir = []; for(let u=0; u<UNITS.length; u++) if(UNITS[u].ready && !RECIT[u]) venir.push(u);
   let h = '<div class="lm-page lm7-coll"><h1 class="lm-h1">Ma collection</h1>';
   if(!cartes.length && !P.recitBonus){
-    return h + '<div class="lm-vide"><span class="lm-m lm5-vm">'+masc(88, true)+'</span><p>Ta scène deviendra ta première carte.</p><button class="lm-sec" data-lm="onglet:indices">Voir mes indices</button></div></div>';
+    h += '<div class="lm-vide"><span class="lm-m lm5-vm">'+masc(88, true)+'</span><p>Ta scène deviendra ta première carte.</p><button class="lm-sec" data-lm="onglet:indices">Voir mes indices</button></div>';
   }
-  h += '<div class="lm7-vit lm7-vit2">'+cartes.map(u => '<button class="lm7-tuile" data-lm="film-revoir:'+u+'" aria-label="Revoir l’histoire : '+esc(RECIT[u].titre)+'"><img class="lm7-couv" src="'+DV.base+'couverture-v3.webp" alt=""></button>').join('')+
-    (P.recitBonus ? '<button class="lm7-tuile lm7-tuile-livre" data-lm="bientot" aria-label="'+esc(BONUS.titre)+'">'+LIVRE+'</button>' : '')+'</div>';
+  h += '<div class="lm7-vit lm7-vit2'+(cartes.length || P.recitBonus ? '' : ' lm-venir-seul')+'">'+cartes.map(u => '<button class="lm7-tuile" data-lm="film-revoir:'+u+'" aria-label="Revoir l’histoire : '+esc(RECIT[u].titre)+'"><img class="lm7-couv" src="'+DV.base+'couverture-v3.webp" alt=""></button>').join('')+
+    (P.recitBonus ? '<button class="lm7-tuile lm7-tuile-livre" data-lm="bientot" aria-label="'+esc(BONUS.titre)+'">'+LIVRE+'</button>' : '')+
+    venir.map(u => '<div class="lm7-tuile lm7-tuile-venir" role="img" aria-label="Mystère à venir, unité '+UNITS[u].no+'"><img class="lm7-couv" src="'+IMG_VENIR()+'" alt=""><span class="lm-venir-leg"><b>'+UNITS[u].no+'</b><i>À venir</i></span></div>').join('')+'</div>';
   return h + '</div>';
 }
 
@@ -334,7 +339,7 @@ function tuileFond(f){
 function pageBoutique(){
   const groupe = g => '<h2 class="lm-rub">'+esc(GROUPES_COURTS[g.nom] || g.nom)+'</h2><div class="lm7-vit lm7-vit3">'+g.ids.map(id => tuile(HAB.find(x => x.id === id))).join('')+'</div>';
   return '<div class="lm-page">'+entete()+'<h1 class="lm-h1">Boutique</h1>'+
-    '<div class="lm-solde">'+grain()+P.graines+' <small>graines</small></div><p class="lm-note">Prix d’exemple, payés en graines.</p>'+
+    '<div class="lm-solde">'+grain()+P.graines+' <small>graines</small></div>'+
     DY.GROUPES.map(groupe).join('')+'<h2 class="lm-rub">Arrière-plans</h2><div class="lm7-vit lm7-vit3">'+CARTE.BOUTIQUE_FONDS.map(tuileFond).join('')+'</div></div>';                /* v9 : plus de récits ni d'indices à acheter pour le moment ; v12 : les arrière-plans */
 }
 function rendrePage(){
@@ -344,16 +349,26 @@ function rendrePage(){
 
 /* ——— les fenêtres (feuille qui monte du bas) : un produit, la mascotte, un champ à modifier, les neuf indices en 3 × 3 ——— */
 let pop = null;     // {type, id, opener}
+let erreurAchat = '', achatEnCours = false;      /* v17 : l'achat se fait chez le serveur ; ni l'un ni l'autre ne se garde */
+const compteOk = () => { try{ return !!(CLOUD && CLOUD.user && CLOUD.user.id && SB && typeof SB.rpc === 'function'); }catch(e){ return false; } };       /* une session vivante ET un client qui sait appeler le serveur (le mode vitrine n'en a pas) */
 function voile(){
   let e = D.getElementById('lmPopup');
   if(!e){ e = D.createElement('div'); e.id = 'lmPopup'; e.className = 'lm7-voile'; D.body.appendChild(e); }
   return e;
 }
 function bouton(prix){ return grain()+'<b>'+prix+'</b>'; }
+/* le bouton ACHETER, quand les graines suffisent : sans compte, ME CONNECTER à la place ; hors ligne, la phrase d'échec ; pendant l'achat, le bouton éteint */
+function boutonAchat(id, prix){
+  const b = (dis) => '<button class="cta lm7-pop-cta lm7-achat"'+(dis ? ' disabled' : ' data-lm="acheter:'+id+'"')+'>ACHETER '+bouton(prix)+'</button>';
+  if(!compteOk()) return '<button class="cta lm7-pop-cta" data-lm="se-connecter">ME CONNECTER</button>';       /* sans compte : UN bouton vif qui ouvre la connexion — ni phrase, ni bouton mort */
+  /* chaque phrase d'avertissement est insécable : à deux lignes, la coupe tombe ENTRE les phrases, jamais un mot seul (grands caractères, 360 et 390) */
+  const dit = erreurAchat.split(/(?<=\.) /).map(x => '<span class="lm-nb">'+esc(x)+'</span>').join(' ');
+  return (erreurAchat ? '<p class="lm7-pop-manque" role="alert">'+dit+'</p>' : '')+b(achatEnCours);
+}
 function casesFond(cible){
   const cur = cible === 'carte' ? fondCarteEff() : fondProfilEff();
   const uni = '<button class="lm7-t lm12-c lm12-uni'+(cur === 'uni' ? ' eq' : '')+'" data-lm="fond-choisir-'+cible+':uni" aria-pressed="'+(cur === 'uni')+'" aria-label="Uni : crème en mode sombre, marron foncé en mode clair"><span class="lm12-fimg lm12-unie"'+((cible === 'carte' ? coulCarteEff() : coulProfilEff()) ? ' style="background:'+(cible === 'carte' ? coulCarteEff() : coulProfilEff())+'"' : '')+'></span><span class="lm12-cap">Uni</span></button>';
-  return uni + CARTE.BOUTIQUE_FONDS.filter(f => BOUTIQUE_OUVERTE || aFond(f.id)).map(f => aFond(f.id)
+  return uni + CARTE.BOUTIQUE_FONDS.map(f => aFond(f.id)
     ? '<button class="lm7-t lm12-c'+(cur === f.id ? ' eq' : '')+'" data-lm="fond-choisir-'+cible+':'+f.id+'" aria-pressed="'+(cur === f.id)+'" aria-label="'+esc(f.nom)+(cur === f.id ? ', choisi' : '')+'"><span class="lm12-fimg"><img src="'+IMG_CARTE+'fond-'+f.id+'.webp" alt=""></span></button>'
     : '<button class="lm7-t sombre lm12-c" data-lm="produit:fond-'+f.id+'" aria-label="'+esc(f.nom)+', pas encore acheté : voir"><span class="lm12-fimg"><img src="'+IMG_CARTE+'fond-'+f.id+'.webp" alt=""></span></button>').join('');
 }
@@ -374,10 +389,10 @@ function contenuPopup(q){
       ? '<button class="cta lm7-pop-cta'+(sc ? ' lm7-fait' : '')+'" data-lm="fond-pour-carte:'+f.id+'"'+(sc ? ' disabled' : '')+'>'+(sc ? '✓ SUR MA CARTE' : 'POUR MA CARTE')+'</button>'+
         '<button class="cta lm7-pop-cta lm12-2'+(sp ? ' lm7-fait' : '')+'" data-lm="fond-pour-profil:'+f.id+'"'+(sp ? ' disabled' : '')+'>'+(sp ? '✓ SUR MON PROFIL' : 'POUR MON PROFIL')+'</button>'
       : manque ? '<p class="lm7-pop-manque">Il te manque '+(f.prix - P.graines)+' graines.</p><button class="cta lm7-pop-cta lm7-achat" disabled>ACHETER '+bouton(f.prix)+'</button>'
-      : '<button class="cta lm7-pop-cta lm7-achat" data-lm="acheter:fond-'+f.id+'">ACHETER '+bouton(f.prix)+'</button>';
+      : boutonAchat('fond-'+f.id, f.prix);
     return {label:f.nom, html:'<span class="lm12-pop-fond"><img src="'+IMG_CARTE+'fond-'+f.id+'.webp" alt=""></span><h2 class="lm7-pop-t">'+esc(f.nom)+'</h2>'+(f.quand ? '<p class="lm7-pop-q">'+esc(f.quand)+'</p>' : '')+'<p class="lm7-pop-d">'+esc(f.note || '')+'</p>'+act};
   }
-  if(q.type === 'fondcarte') return {label:'Arrière-plan de ma carte', html:'<h2 class="lm7-pop-t">Arrière-plan de ma carte</h2><div class="lm7-vit lm7-vit3 lm7-vit-p">'+casesFond('carte')+'</div>'+blocCouleurs('carte')+''+(BOUTIQUE_OUVERTE ? '<div class="lm7-pied"><button class="lm-sec lm7-pop-cta" data-lm="boutique-popup">Boutique</button></div>' : '')+''};
+  if(q.type === 'fondcarte') return {label:'Arrière-plan de ma carte', html:'<h2 class="lm7-pop-t">Arrière-plan de ma carte</h2><div class="lm7-vit lm7-vit3 lm7-vit-p">'+casesFond('carte')+'</div>'+blocCouleurs('carte')+'<div class="lm7-pied"><button class="lm-sec lm7-pop-cta" data-lm="boutique-popup">Boutique</button></div>'};
   if(q.type === 'produit'){
     const recit = q.id === 'recit', hb = recit ? null : tenueDe(q.id);
     if(!recit && !hb) return {label:'', html:''};
@@ -387,11 +402,11 @@ function contenuPopup(q){
     let act;
     if(recit) act = poss ? '<p class="lm7-pop-ok">Dans ta collection</p><button class="cta lm7-pop-cta" data-lm="onglet-collection">VOIR MA COLLECTION</button>'
       : P.graines < prix ? '<p class="lm7-pop-manque">Il te manque '+(prix - P.graines)+' graines.</p><button class="cta lm7-pop-cta lm7-achat" disabled>ACHETER '+bouton(prix)+'</button>'
-      : '<button class="cta lm7-pop-cta lm7-achat" data-lm="acheter:recit">ACHETER '+bouton(prix)+'</button>';
+      : boutonAchat('recit', prix);
     else if(eq) act = '<button class="cta lm7-pop-cta lm7-fait" disabled>✓ ÉQUIPÉE</button>';
     else if(poss) act = '<button class="cta lm7-pop-cta" data-lm="equiper:'+q.id+'">ÉQUIPER</button>';
     else if(P.graines < prix) act = '<p class="lm7-pop-manque">Il te manque '+(prix - P.graines)+' graines.</p><button class="cta lm7-pop-cta lm7-achat" disabled>ACHETER '+bouton(prix)+'</button>';
-    else act = '<button class="cta lm7-pop-cta lm7-achat" data-lm="acheter:'+q.id+'">ACHETER '+bouton(prix)+'</button>';
+    else act = boutonAchat(q.id, prix);
     return {label:nom, html: image+'<h2 class="lm7-pop-t">'+esc(nom)+'</h2>'+(quand ? '<p class="lm7-pop-q">'+esc(quand)+'</p>' : '')+'<p class="lm7-pop-d">'+esc(desc)+'</p>'+act};
   }
   if(q.type === 'avatar'){
@@ -401,13 +416,12 @@ function contenuPopup(q){
       return poss ? '<button class="lm7-t'+(eq ? ' eq' : '')+'" data-lm="equiper-ferme:'+hb.id+'" aria-pressed="'+eq+'" aria-label="'+esc(hb.nom)+(eq ? ', équipée' : '')+'"><span class="lm-m lm7-t-img">'+diya(hb.id, 70, true)+'</span></button>'
         : '<button class="lm7-t sombre" data-lm="produit:'+hb.id+'" aria-label="'+esc(hb.nom)+', pas encore achetée : voir"><span class="lm-m lm7-t-img">'+diya(hb.id, 70, true)+'</span></button>';
     };
-    const avecTenues = BOUTIQUE_OUVERTE || P.possedes.length > 1;     // une seule tenue (la Classique) : pas d'onglet « Tenue »
-    const onglet = (!avecTenues || q.onglet === 'fond') ? 'fond' : 'tenue';
-    const ong = !avecTenues ? '' : '<div class="lm12-ong" role="tablist" aria-label="Personnaliser mon disque">'+[['tenue','Tenue'],['fond','Arrière-plan']].map(([k, l]) => '<button role="tab" aria-selected="'+(onglet === k)+'" class="'+(onglet === k ? 'on' : '')+'" data-lm="avatar-onglet:'+k+'">'+l+'</button>').join('')+'</div>';
+    const onglet = q.onglet === 'fond' ? 'fond' : 'tenue';
+    const ong = '<div class="lm12-ong" role="tablist" aria-label="Personnaliser mon disque">'+[['tenue','Tenue'],['fond','Arrière-plan']].map(([k, l]) => '<button role="tab" aria-selected="'+(onglet === k)+'" class="'+(onglet === k ? 'on' : '')+'" data-lm="avatar-onglet:'+k+'">'+l+'</button>').join('')+'</div>';
     let corps;
-    if(onglet === 'tenue') corps = '<div class="lm7-vit lm7-vit3 lm7-vit-p">'+tous.filter(hb => BOUTIQUE_OUVERTE || hb.id === 'classique' || P.possedes.indexOf(hb.id) >= 0).map(case_).join('')+'</div>';
+    if(onglet === 'tenue') corps = '<div class="lm7-vit lm7-vit3 lm7-vit-p">'+tous.map(case_).join('')+'</div>';
     else corps = '<div class="lm7-vit lm7-vit3 lm7-vit-p">'+casesFond('profil')+'</div>'+blocCouleurs('profil');
-    return {label:'Mon disque', html:'<h2 class="lm7-pop-t">Mon disque</h2>'+ong+corps+''+(BOUTIQUE_OUVERTE ? '<div class="lm7-pied"><button class="lm-sec lm7-pop-cta" data-lm="boutique-popup">Boutique</button></div>' : '')+''};
+    return {label:'Mon disque', html:'<h2 class="lm7-pop-t">Mon disque</h2>'+ong+corps+'<div class="lm7-pied"><button class="lm-sec lm7-pop-cta" data-lm="boutique-popup">Boutique</button></div>'};
   }
   if(q.type === 'modifier'){
     const prenom = q.id === 'prenom', lib = prenom ? 'Surnom' : 'Mail', val = prenom ? (S.prenom || '') : P.mail;
@@ -447,10 +461,12 @@ function copierTexte(){
   (navigator.clipboard ? navigator.clipboard.writeText(CARTE.texte(derniereCarte)) : Promise.reject()).then(() => { partage.msg = 'Texte copié.'; majPartage(); }, () => { partage.msg = 'Copie impossible ici : sélectionne le texte ci-dessus.'; majPartage(); });
 }
 function ouvrirPopup(type, id){
+  erreurAchat = '';
   pop = {type, id, opener: D.activeElement};
   rendrePopup(); const e = voile(); e.classList.add('on');
-  let b = null; for(const q of (type === 'modifier' ? ['.lm7-input'] : []).concat(['.cta:not([disabled])', '.lm7-input', '.lm7-t:not(.sombre)', '.lm-sec', '.lm7-fermer'])){ b = e.querySelector(q); if(b) break; }      // la saisie : le champ ; sinon l'action principale d'abord, jamais la croix
-  if(b) try{ b.focus({preventScroll:true}); }catch(x){}
+  let b = null; for(const q of (type === 'modifier' ? ['.lm7-input'] : []).concat(['.cta:not([disabled])', '.lm7-input', '.lm7-t:not(.sombre)', '.lm-sec'])){ b = e.querySelector(q); if(b) break; }      // la saisie : le champ ; sinon l'action principale d'abord, jamais la croix
+  if(!b){ e.setAttribute('tabindex', '-1'); b = e; }       // rien d'actif : le focus va à la feuille elle-même (aucun anneau sur la croix)
+  try{ b.focus({preventScroll:true}); }catch(x){}
 }
 function fermerPopup(){
   const e = D.getElementById('lmPopup'); if(e){ e.classList.remove('on'); e.innerHTML = ''; }
@@ -498,7 +514,7 @@ window.showTab = function(name, sub){
 
 /* ——— navigation entre les pages ——— */
 function ouvrir(page, depuis){
-  if(page === 'boutique' && !BOUTIQUE_OUVERTE) return;      // aussi par l'aide de test : une seule porte, fermée
+  if(page === 'boutique') synchroAchats(true);                      // la Boutique s'ouvre sur les achats à jour
   P.depuis = depuis || 'prog';
   if(page === 'indices'){ P.vue = null; sel = null; }
   if(page === 'indices' || page === 'collection'){ P.onglet = page; P.page = null; } else P.page = page;
@@ -674,7 +690,7 @@ function conserver(u){
   ouvrir('collection', P.depuis);
 }
 
-/* ——— la Boutique (simulation : aucun solde certifié ici) : un achat est un seul toucher, dans la fenêtre du produit ——— */
+/* ——— la Boutique : un achat est un seul toucher, dans la fenêtre du produit ; il se fait chez le SERVEUR (acheter, plus bas) ——— */
 function choisirFond(cible, id, ferme){
   if(cible === 'carte'){ if(!(id === 'uni' || (fondConnu(id) && aFond(id)))) return; P.fondCarte = id; }
   else { if(!(id === 'uni' || (fondConnu(id) && aFond(id)))) return; P.fondProfil = id; }
@@ -690,23 +706,59 @@ function choisirCouleur(cible, v){
   rerendre(); majPopup();
   annonce(hex ? 'Couleur choisie.' : 'Couleur par défaut : crème en mode sombre, marron foncé en mode clair.');
 }
-function acheter(id){
-  if(!BOUTIQUE_OUVERTE) return;
-  if(/^fond-/.test(id)){
-    const f = CARTE.fondDeBoutique(id.slice(5)); if(!f || aFond(f.id) || P.graines < f.prix) return;
-    P.graines -= f.prix; S.graines = P.graines; P.fondsPoss.push(f.id);
+/* ——— l'achat se fait chez le SERVEUR (acheter_diya) : il certifie le solde, fixe le prix et ne vend qu'une fois chaque objet ; le téléphone demande, puis écrit ce que le serveur a répondu ——— */
+let achatsFait = false, achatsEnVol = false, achatsSeq = 0, achatsPour = '', achatsEssai = 0;
+async function synchroAchats(force){
+  if(!compteOk() || achatsEnVol) return;
+  const uid = CLOUD.user.id;
+  if(!force && (achatsFait && achatsPour === uid || Date.now() - achatsEssai < 30000)) return;       // sans réponse, on ne réessaie qu'une fois par demi-minute
+  achatsEnVol = true; achatsEssai = Date.now(); const seq = achatsSeq;
+  try{
+    try{ await _depiler(); }catch(e){}
+    const rep = await _rpcDe(uid, 'diya_mes_achats', {}, 12000, 'achats Diya');
+    if(!CLOUD.user || CLOUD.user.id !== uid || seq !== achatsSeq || achatEnCours || !rep || rep.error || !Array.isArray(rep.data)) return;     // un achat ou un autre compte est passé entre-temps : cette réponse est périmée
+    achatsFait = true; achatsPour = uid;
+    const tenues = ['classique'], fonds = ['nuit'];
+    rep.data.forEach(it => {
+      const m = /^(tenue|fond):([a-z0-9-]{1,40})$/.exec(String(it)); if(!m) return;
+      if(m[1] === 'tenue'){ if(tenues.indexOf(m[2]) < 0 && HAB.some(h => h.id === m[2])) tenues.push(m[2]); }
+      else if(fonds.indexOf(m[2]) < 0 && fondConnu(m[2])) fonds.push(m[2]);
+    });
+    const l = L(), memes = (a, b) => a.length === b.length && a.every(x => b.indexOf(x) >= 0);
+    if(memes(tenues, l.possedes) && memes(fonds, l.fondsPoss)) return;
+    l.possedes = tenues; l.fondsPoss = fonds;                                   // le serveur fait foi : ce qui a été payé, rien d'autre
+    if(l.possedes.indexOf(l.habillage) < 0) l.habillage = 'classique';
     try{ saveLocal(); }catch(e){}
-    rerendre(); majPopup(); annonce('Arrière-plan acheté : ' + f.nom + '. Choisis-le pour ta carte ou ton disque.'); return;
+    rerendre(); majPopup();
+  }catch(e){ /* hors ligne : on garde ce qu'on sait */ }
+  finally{ achatsEnVol = false; }
+}
+async function acheter(id){
+  if(achatEnCours || !compteOk()) return;
+  const fond = /^fond-/.test(id), obj = fond ? CARTE.fondDeBoutique(id.slice(5)) : HAB.find(x => x.id === id);
+  if(!obj || (fond ? aFond(obj.id) : P.possedes.indexOf(id) >= 0) || P.graines < obj.prix) return;
+  const uid = CLOUD.user.id;
+  achatEnCours = true; erreurAchat = ''; achatsSeq++; majPopup();
+  let msg = '', ok = false;
+  try{
+    try{ await _depiler(); }catch(e){}                                          // les graines gagnées partent d'abord : le serveur compte ce qu'il a reçu
+    const rep = await _rpcDe(uid, 'acheter_diya', {p_item: (fond ? 'fond:' + obj.id : 'tenue:' + id), p_prix_vu: obj.prix}, 12000, 'achat Diya');
+    if(!CLOUD.user || CLOUD.user.id !== uid) return;                            // un autre compte est arrivé pendant l'attente : on ne touche à rien
+    if(rep && rep.error) throw rep.error;
+    const d = rep && rep.data;
+    if(!d || typeof d !== 'object') throw new Error('réponse illisible');
+    if(typeof d.solde === 'number' && isFinite(d.solde)) S.graines = d.solde;     // le solde du serveur fait foi
+    if(d.ok){ ok = true; if(fond){ if(!aFond(obj.id)) P.fondsPoss.push(obj.id); } else if(P.possedes.indexOf(id) < 0) P.possedes.push(id); }
+    else if(d.motif === 'prix' && typeof d.prix === 'number'){ obj.prix = d.prix; }              // le prix du serveur a changé : l'écran se redessine avec le bon
+    else if(d.motif !== 'solde') msg = 'Achat impossible pour le moment.';                       // « solde » : l'écran dit déjà « Il te manque N graines. » avec le solde certifié
+  }catch(e){ msg = 'Pas de réseau. Réessaie dans un instant.'; }
+  finally{
+    achatEnCours = false; erreurAchat = msg; achatsSeq++;
+    try{ saveLocal(); }catch(e){}
+    rerendre(); majPopup();
+    if(ok) annonce(fond ? 'Arrière-plan acheté : ' + obj.nom + '. Choisis-le pour ta carte ou ton disque.' : 'Tenue achetée : ' + tenueDe(id).nom + '. Touche Équiper pour la mettre.');
+    else if(msg) annonce(msg);
   }
-  if(id === 'recit'){
-    if(P.recitBonus || P.graines < BONUS.prix) return;
-    P.graines -= BONUS.prix; S.graines = P.graines; P.recitBonus = true;
-  } else {
-    const h = HAB.find(x => x.id === id); if(!h || P.possedes.indexOf(id) >= 0 || P.graines < h.prix) return;
-    P.graines -= h.prix; S.graines = P.graines; P.possedes.push(id);
-  }
-  try{ saveLocal(); }catch(e){}
-  rerendre(); majPopup(); annonce(id === 'recit' ? 'Récit acheté.' : 'Tenue achetée : ' + tenueDe(id).nom + '. Touche Équiper pour la mettre.');
 }
 function equiper(id){
   try{ saveLocal(); }catch(er){}
@@ -729,6 +781,7 @@ function gene(){
   return !!D.querySelector('.rq-voile, #revPopVoile, .disc-tip') || popupOuvert();
 }
 function guet(){
+  if(!achatsFait && compteOk()) synchroAchats();                    // les achats de ce compte, relus une fois connecté
   const o = D.getElementById('lmObjetNeuf'); if(o && o.classList.contains('on')) return;
   if(gene()) return;
   const d = dus(); if(!d.length) return;
@@ -746,7 +799,7 @@ function guet(){
 /* ——— les gestes ——— */
 function agir(a, x, y){
   switch(a){
-    case 'ouvrir': if(x === 'boutique' && !BOUTIQUE_OUVERTE) return; return ouvrir(x, y);
+    case 'ouvrir': return ouvrir(x, y);
     case 'indices-unite': P.vue = +x; ouvrir('indices', 'home'); P.vue = +x; rerendre(); if(P.collectees[+x]) ouvrirPopup('zoom', +x); return;
     case 'retour': return retour();
     case 'choisir': sel = (sel === +x) ? null : +x; rerendre(); annonce(sel === null ? 'Indice reposé.' : 'Indice choisi. Touche son emplacement en pointillé.'); return;
@@ -759,7 +812,7 @@ function agir(a, x, y){
     case 'pause': return pause();
     case 'suite': return avancer();
     case 'conserver': return conserver(+x);
-    case 'produit': if(!BOUTIQUE_OUVERTE) return; return ouvrirPopup('produit', x);
+    case 'produit': return ouvrirPopup('produit', x);
     case 'acheter': return acheter(x);
     case 'equiper': return equiper(x);
     case 'equiper-ferme': equiper(x); return fermerPopup();
@@ -772,7 +825,8 @@ function agir(a, x, y){
     case 'fond-choisir-profil': return choisirFond('profil', x, true);
     case 'fond-pour-carte': return choisirFond('carte', x, false);
     case 'fond-pour-profil': return choisirFond('profil', x, false);
-    case 'boutique-popup': if(!BOUTIQUE_OUVERTE) return; fermerPopup(); return ouvrir('boutique', 'prog');
+    case 'boutique-popup': fermerPopup(); return ouvrir('boutique', 'prog');
+    case 'se-connecter': fermerPopup(); try{ obLoginOpen(); }catch(e){} return;
     case 'modifier': return ouvrirPopup('modifier', x);
     case 'enregistrer': return enregistrer(x);
     case 'zoom': return ouvrirPopup('zoom', +x);
@@ -814,7 +868,6 @@ D.addEventListener('keydown', e => {
 
 /* ——— la porte « Boutique » du feuillet Plus (décidée : le Profil ET le feuillet Plus) ——— */
 function appliquerPortes(){
-  if(!BOUTIQUE_OUVERTE) return;
   const f = $('#plusFeuille'); if(!f) return;
   const ex = f.querySelector('[data-porte]'); if(ex) ex.remove();
   const b = D.createElement('button'); b.className = 'plus-item'; b.setAttribute('role', 'menuitem'); b.dataset.porte = '1'; b.dataset.lm = 'ouvrir:boutique:prog';

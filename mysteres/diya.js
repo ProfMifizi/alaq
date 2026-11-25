@@ -1,4 +1,4 @@
-/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v15/diya.js) — ne pas retoucher à la main */
+/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v17/diya.js) — ne pas retoucher à la main */
 /* Diya — la garde-robe de la mascotte (préview v4 : un fin contour sombre sur fond clair, demandé par Myriam le 23/11 ; en v4 « 0,5 » (sa réponse) devient le réglage par défaut ; les v1, v2 et v3 ne sont plus touchées ; rien n'est dans src/).
    Script classique : window.DIYA = { svg(id, {taille, anime}), TENUES, GROUPES, tenue(id) }.
    Le corps est celui de la mascotte de l'app (src/web/squelette.js, #masc) : mêmes formes, même viewBox 0 0 200 236, mêmes

@@ -25,7 +25,7 @@ function nomSourate(){
 function phaseDe(U){ return U.ph || 'LECTURE'; }
 function refaireBandeaux(){
   var B=window._homeBanners; if(!B||!B.length) return;
-  var titre='CHAPITRE 1 : SOURATE '+nomSourate();
+  var titre='CHAPITRE 1 : SOURATE <span class="uh-nobr">'+nomSourate()+'</span>';      /* le nom ne se coupe jamais au trait d'union (Myriam, 25/11) */
   for(var u=0;u<B.length;u++){
     var U=UNITS[u]; if(!U) continue;
     var lettres=(U.letters||[]).join(' ');
