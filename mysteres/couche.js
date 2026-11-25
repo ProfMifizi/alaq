@@ -63,7 +63,34 @@ const IBULLE = 7;                               // la bulle est en DEUX couches 
 /* ——— le récit : des DIAPOS (une image, l'arabe du hadith, sa traduction), coupées ENTRE deux phrases du hadith ; les images retouchées (ombre plus petite, porte en arche) sont les par défaut ——— */
 const RECIT = { 0: DV.recit };
 const IMAGES_RECIT = () => 'images-app-alaq/mysteres/recit-1/';
-const DUREE_DIAPO = d => 4500 + d.ar.length * 28;                 // le temps de lire : 6 s pour une courte phrase, 9 s pour la plus longue
+const DUREE_DIAPO = d => d.voix ? Math.round(d.voix.duree * 1000) + 1400 : 4500 + d.ar.length * 28;     // avec la voix : sa durée + 1,4 s de souffle ; sans : le temps de lire (6 à 9 s)
+/* la voix de Myriam : une prise = une clé de SONS (son.js) ; rien n'est assemblé à la lecture */
+Object.keys(RECIT).forEach(u => RECIT[u].slides.forEach(d => { if(d.voix && typeof inscrireLeSon === 'function') inscrireLeSon('mystere:' + u + ':' + d.n, d.voix.src); }));
+let VOIX = null, voixDe = null;                                     // l'élément audio (un seul) et la diapo dont il porte la voix
+const voixUrl = d => { try{ return typeof urlDe === 'function' ? urlDe('mystere:' + filmU + ':' + d.n) : null; }catch(x){ return null; } };
+function voixDemarrer(d, depuisMs){
+  if(!d || !d.voix) return;
+  const url = voixUrl(d); if(!url) return;                          // son introuvable : silence, l'horloge de la diapo continue
+  try{
+    if(!VOIX){ VOIX = new Audio(); VOIX.preload = 'auto'; VOIX.addEventListener('playing', voixPartie); }
+    VOIX.pause(); voixDe = d;
+    if(VOIX.getAttribute('data-url') !== url){ VOIX.src = url; VOIX.setAttribute('data-url', url); }
+    try{ VOIX.currentTime = Math.max(0, (depuisMs || 0) / 1000); }catch(x){}
+    const p = VOIX.play(); if(p && p.catch) p.catch(() => {});      // refus (réseau, iOS) : silence
+    const s = RECIT[filmU].slides[shot + 1]; const u2 = s && s.voix && voixUrl(s);
+    if(u2){ const a = new Audio(); a.preload = 'auto'; a.src = u2; }   // la suivante se charge d'avance
+  }catch(x){}
+}
+/* la voix démarre vraiment (après le chargement) : l'horloge de la diapo se cale sur elle, la diapo ne finit jamais AVANT sa voix */
+function voixPartie(){
+  if(!VOIX || !voixDe || !playing || RECIT[filmU].slides[shot] !== voixDe) return;
+  restant = Math.max(300, DUREE_DIAPO(voixDe) - Math.round(VOIX.currentTime * 1000)); planifier();
+}
+function voixArreter(){ try{ if(VOIX) VOIX.pause(); }catch(x){} }
+const voixEnCours = d => !!(VOIX && voixDe === d && !VOIX.paused && !VOIX.ended && VOIX.currentTime > 0);
+/* l'heure de la diapo, en secondes : celle de la voix quand elle est lancée, sinon celle de l'horloge (les mêmes horaires, sans le son) */
+function heureDiapo(d, reste, total){ return VOIX && voixDe === d && VOIX.currentTime > 0 ? VOIX.currentTime : (total - reste) / 1000; }
+function finDiapo(){ const d = RECIT[filmU] && RECIT[filmU].slides[shot]; if(d && voixEnCours(d) && d.voix && VOIX.currentTime < d.voix.duree + 0.3){ timer = setTimeout(finDiapo, 300); return; } avancer(); }
 /* les soudures (espaces insécables, typographie française, jamais un mot seul en bout de diapo) sont faites UNE FOIS dans les données (outils/preparer-secrets-diya-v7.py (copie fidèle de _apercu-secrets-diya-v7/donnees.js)) ; ici : seulement la mise en page */
 const typo = t => String(t).replace(/\bal-/g, 'al\u2011').replace(/n° /g, 'n°\u00a0').replace(/Sharḥ as-sunna/g, 'Sharḥ\u00a0as\u2011sunna');    // le trait d'union insécable : « al-/Baghawī » ne se coupe plus
 
@@ -577,11 +604,13 @@ function boucleMots(){
   if(ws.length){
     const d = RECIT[filmU].slides[shot], total = DUREE_DIAPO(d), reste = playing ? Math.max(0, restant - (Date.now() - debut)) : restant;
     const p = Math.min(1, Math.max(0, (1 - reste / total) / 0.8));        // la lecture occupe les 80 % premiers du temps de la diapo
+    const t = d.voix ? heureDiapo(d, reste, total) : 0;
     let tot = 0; ws.forEach(w => { tot += w.textContent.length + 1; });
     let cum = 0;
-    ws.forEach(w => {
+    ws.forEach((w, i) => {
       const deb = cum / tot; cum += w.textContent.length + 1; const fin = cum / tot;
-      const lu = p >= fin, ici = !lu && p >= deb && p > 0;
+      const h = d.voix && d.voix.mots[i];
+      const lu = h ? t >= h[1] : p >= fin, ici = h ? (!lu && t >= h[0] && t > 0) : (!lu && p >= deb && p > 0);
       if(w.classList.contains('lu') !== lu) w.classList.toggle('lu', lu);
       if(w.classList.contains('ici') !== ici) w.classList.toggle('ici', ici);
     });
@@ -604,13 +633,13 @@ function filmHTML(u){
     '<p class="lm-pas" id="lmPas">'+(shot+1)+'/'+R.slides.length+'</p><div class="lm7-sub" id="lmLegende" aria-live="polite">'+sousTitres(d)+'</div>'+
     '<div class="lm-film-actions"><button class="lm-sec" id="lmPause" data-lm="pause">'+(playing ? 'Pause' : 'Reprendre')+'</button><button class="lm-sec" data-lm="suite">Suite</button></div>';
 }
-function planifier(){ clearTimeout(timer); debut = Date.now(); timer = setTimeout(avancer, restant); }
+function planifier(){ clearTimeout(timer); debut = Date.now(); timer = setTimeout(finDiapo, restant); }
 function lancerFilm(u){
   const r = D.getElementById('lmRecompense'); if(r) r.classList.remove('on');
   if(pop) fermerPopup();
   filmU = u; shot = 0; restant = DUREE_DIAPO(RECIT[u].slides[0]);
   playing = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);    // « réduire les animations » : l'histoire démarre en pause
-  const e = ecran('lmFilm', 'finish'); e.classList.add('surimp'); e.innerHTML = filmHTML(u); e.dataset.ar = String(P.filmAr); e.dataset.pos = P.filmPos; montre(e); e.setAttribute('tabindex', '-1'); try{ e.focus({preventScroll:true}); }catch(x){} ajusterSous(); boucleMots(); if(playing) planifier();      // le focus va à l'écran lui-même : aucun anneau sur Pause
+  const e = ecran('lmFilm', 'finish'); e.classList.add('surimp'); e.innerHTML = filmHTML(u); e.dataset.ar = String(P.filmAr); e.dataset.pos = P.filmPos; montre(e); e.setAttribute('tabindex', '-1'); try{ e.focus({preventScroll:true}); }catch(x){} ajusterSous(); boucleMots(); if(playing){ planifier(); voixDemarrer(RECIT[u].slides[0]); }      // le focus va à l'écran lui-même : aucun anneau sur Pause ; la voix part dans le geste du toucher
 }
 function avancer(){
   clearTimeout(timer);
@@ -619,17 +648,23 @@ function avancer(){
   shot++; const d = R.slides[shot]; restant = DUREE_DIAPO(d);
   e.querySelectorAll('.lm5-plan').forEach(i => i.classList.toggle('on', i.dataset.img === d.img));
   sousTitresMaj(d); $('#lmPas').textContent = (shot+1)+'/'+R.slides.length; const pg = $('#lmProg'); if(pg) pg.style.width = Math.round((shot+1)/R.slides.length*100)+'%';
-  if(playing) planifier();
+  if(playing){ planifier(); voixDemarrer(d); } else voixArreter();
 }
 function pause(){
   const f = $('#lm5Film');
-  if(playing){ restant = Math.max(1, restant - (Date.now() - debut)); clearTimeout(timer); playing = false; } else { playing = true; planifier(); }
+  if(playing){ restant = Math.max(1, restant - (Date.now() - debut)); clearTimeout(timer); playing = false; voixArreter(); }
+  else{
+    playing = true; planifier();
+    const d = RECIT[filmU].slides[shot];
+    if(VOIX && voixDe === d){ try{ const q = VOIX.play(); if(q && q.catch) q.catch(() => {}); }catch(x){} }     // la même diapo : la voix reprend où elle s'est arrêtée
+    else voixDemarrer(d, DUREE_DIAPO(d) - restant);                  // une autre diapo (Suite en pause, ou démarrage en pause) : la voix part de l'heure de l'horloge
+  }
   if(f) f.classList.toggle('is-paused', !playing);
   const b = $('#lmPause'); if(b) b.textContent = playing ? 'Pause' : 'Reprendre';
 }
-function fermerFilm(){ clearTimeout(timer); const e = D.getElementById('lmFilm'); if(e) e.classList.remove('on'); rerendre(); }
+function fermerFilm(){ clearTimeout(timer); voixArreter(); const e = D.getElementById('lmFilm'); if(e) e.classList.remove('on'); rerendre(); }
 function ecranRecompense(u){
-  clearTimeout(timer); const f = D.getElementById('lmFilm'); if(f) f.classList.remove('on');
+  clearTimeout(timer); voixArreter(); const f = D.getElementById('lmFilm'); if(f) f.classList.remove('on');
   const e = ecran('lmRecompense', 'finish');
   e.innerHTML = '<p class="lm-eyebrow">'+titre()+'</p><h2>Ta nouvelle carte</h2>'+ficheHTML(u)+'<button class="cta" style="max-width:300px" data-lm="conserver:'+u+'">CONSERVER</button><button class="lm-lien" data-lm="film-revoir:'+u+'">Revoir l’histoire</button>';
   montre(e); try{ confettiBurst(); }catch(x){}
