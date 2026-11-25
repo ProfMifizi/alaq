@@ -584,3 +584,7 @@ html .lm7-neuf .lm7-c:not(.on){border-color:rgba(242,233,218,.62)}
 /* l'en-tête « Mystère en cours » + « Unité 1x » tient sur une ligne à 360 en grands caractères (le jour où les unités 10 à 12 auront leur histoire) */
 .lm7-indices .lm-titre{gap:8px}
 .lm7-indices .lm-compte{padding:4px 8px}
+
+/* LA MASCOTTE du film (comme dans la halte) : posée au sol de l'image, sous le sous-titre et au-dessus des boutons ; elle glisse d'une image à l'autre */
+#lmFilm .lm-masc{position:absolute;left:50%;top:84%;width:calc(var(--s,.34) * 52%);transform:translate(-50%,-100%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;z-index:2;pointer-events:none}
+#lmFilm .lm-masc svg{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
