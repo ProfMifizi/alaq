@@ -6,7 +6,8 @@
 
    Script CLASSIQUE, ni defer ni module, posé APRÈS serie-mots.js : RIEN n'agit au chargement (ni S lu, ni réseau, ni écouteur).
    Il s'allume par deux accroches de coque.js — returnFromPlayer (la carte, le plan) et le démarrage (rappelDemarrer) —,
-   par fillFinishCases (constance.js : rappelNoterFin) et par la carte de Paramètres (ui/parametres.js). Chacune le
+   par fillFinishCases (constance.js : rappelNoterFin), par la carte de Paramètres (ui/parametres.js) et par les deux
+   sorties de comptes.js (cloudLogout : rappelAvantDeconnexion puis rappelRendre ; obPasMoi : rappelRendre). Chacune le
    résout À L'APPEL, sous typeof : sans ce fichier, l'app ne change en rien.
    À L'APPEL : S, CLOUD, SB, SYNC, _syncPret, _rpcDe (progression.js — « UN COMPTE PAR PAGE » : les quatre RPC passent
    sous un jeton vérifié puis épinglé, jamais SB.rpc en direct) · today, _addDays (constance.js) · allReviewWords,
@@ -154,6 +155,7 @@ async function _rpReabonner(uid,reg){
 function rappelDemarrer(){
   if(_rpDemarre)return; _rpDemarre=true;
   try{
+    if(_rpLire().rendre){ _rpFinirRendu(); return; }   // l'appareil a été rendu juste avant le dernier rechargement : on finit
     if(!_rpLire().on)return;   // personne n'est abonné ici : rien à écouter, rien à planifier (un abonnement neuf rouvre l'écoute)
     document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible')rappelSynchro(false); });
     var n=0, t=setInterval(function(){
@@ -259,7 +261,7 @@ function rappelInstallerFermer(quand){ _rpRetirer('rappelInstaller'); _rpApres(q
 async function rappelActiver(heure,quand){
   if(_rpOccupe)return 'occupe';
   heure=_rpHeureValide(heure);
-  var e=_rpLire(); e.h=heure; e.off=0;
+  var e=_rpLire(); e.h=heure; e.off=0; delete e.rendre;   // un abonnement neuf n'est pas à rendre
   var dispo=rappelsDispo();
   if(dispo==='non'){ _rpRetirer('rappelDemande'); _rpApres(quand); return 'non'; }
   /* le serveur exige un compte : « oui » est gardé, la carte reviendra dès que le compte existe */
@@ -322,6 +324,44 @@ async function rappelDesactiver(){
            await _rpcDe(CLOUD.user.id,'push_supprimer',{p_endpoint:ep},8000,'désabonnement aux rappels'); }catch(x){}
   }finally{ _rpOccupe=false; }
   return true;
+}
+
+/* ── L'APPAREIL EST RENDU : « se déconnecter » et « Ce n'est pas moi » ──
+   ⛔ Se déconnecter désabonne l'appareil (Myriam, 25/11) : sinon le serveur enverrait encore, jusqu'à 7 jours sans visite, un
+   rappel au nom du compte parti. Trois filets, du plus propre au plus sûr :
+   ① rappelAvantDeconnexion — AVANT signOut, tant que le jeton vit : push_supprimer efface la ligne du serveur ;
+   ② rappelRendre — la déconnexion actée : désabonne le navigateur (le service de push répond 404/410 au prochain envoi, le
+      serveur supprime la ligne de lui-même) et défait l'état d'appareil (on, uid, h, attente — jamais off, vu, n : un
+      rappel éteint à la main reste éteint pour la carte d'après-leçon) ;
+   ③ le marqueur `rendre`, écrit D'ABORD et de façon synchrone, effacé quand ② a fini : « Ce n'est pas moi » recharge sur-le-champ,
+      rappelDemarrer termine alors le travail au démarrage suivant. (journal : rappels.js · se déconnecter désabonne) */
+function _rpRegistration(){
+  try{
+    if(!(typeof navigator!=='undefined'&&navigator.serviceWorker&&navigator.serviceWorker.ready))return Promise.resolve(null);
+    /* ready ne se résout jamais sans enregistrement : une borne, sinon la déconnexion attendrait sans fin */
+    return Promise.race([navigator.serviceWorker.ready,new Promise(function(r){ setTimeout(function(){ r(null); },2000); })]).catch(function(){ return null; });
+  }catch(e){ return Promise.resolve(null); }
+}
+async function rappelAvantDeconnexion(){
+  try{
+    if(!(typeof SB!=='undefined'&&SB&&typeof CLOUD!=='undefined'&&CLOUD.user))return false;
+    var reg=await _rpRegistration(), sub=(reg&&reg.pushManager)?await reg.pushManager.getSubscription():null;
+    if(!sub)return false;
+    await _rpcDe(CLOUD.user.id,'push_supprimer',{p_endpoint:sub.endpoint},2500,'désabonnement aux rappels');
+    return true;
+  }catch(x){ return false; }
+}
+function rappelRendre(){
+  try{ var e=_rpLire(); e.rendre=1; _rpEcrire(e); }catch(x){}
+  return _rpFinirRendu();
+}
+async function _rpFinirRendu(){
+  try{
+    var reg=await _rpRegistration(), sub=(reg&&reg.pushManager)?await reg.pushManager.getSubscription():null;
+    if(sub)await sub.unsubscribe();
+    var e=_rpLire(); e.on=0; delete e.uid; delete e.h; delete e.attente; delete e.rendre; _rpEcrire(e);
+    return true;
+  }catch(x){ return false; }   // le marqueur reste : le prochain démarrage reprend
 }
 
 /* ── PARAMÈTRES : la carte « Rappel quotidien », après « Objectif quotidien » (rendue par renderParams) ── */

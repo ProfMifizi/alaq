@@ -34,7 +34,7 @@
    S, DEF, save, SB, CLOUD, SYNC, _syncT, cloudPull, _avecGarde, _sessionMienne (progression.js)
    · maybeGhufranPrompt (constance.js) · renderHome
    (ui/accueil.js) · showTab (ui/navigation.js) · renderProg (ui/parametres.js)
-   · startDisque (src/player, module) · toast, returnFromPlayer, lecteurPret,
+   · rappelAvantDeconnexion, rappelRendre (rappels.js) · startDisque (src/player, module) · toast, returnFromPlayer, lecteurPret,
    currentLesson, escHTML, ONB, obAccountPending (index.html).
    ⚠️ Entre ce fichier et le grand script, le navigateur rend la main une fois : ces fonctions
    existent, les let d'index.html pas encore. Sans conséquence tant que les calques #onb, #obLogin,
@@ -149,6 +149,9 @@ async function cloudLogout(){
      bornée à 1,5 s, et hors ligne la main est rendue tout de suite. ⚠️ Dette : le signOut lui-même n'a aucun délai de garde
      (journal : comptes.js · signOut sans délai). */
   try{ if(typeof SYNC!=='undefined'&&SYNC&&SYNC.avantDeconnexion)await SYNC.avantDeconnexion(); }catch(e){}
+  /* Se déconnecter désabonne l'appareil (Myriam, 25/11) : la ligne du serveur part d'abord, tant que le jeton vit — et AVANT
+     les deux gardes qui suivent, parce que signOut relit la session « sans attente entre les deux ». (journal : rappels.js · se déconnecter désabonne) */
+  try{ if(typeof rappelAvantDeconnexion==='function')await rappelAvantDeconnexion(); }catch(e){}
   try{ if(SYNC.redemarre()){ location.reload(); return; } }catch(e){}
   /* signOut relit lui-même la session dans le stockage : on la relit juste avant, sans attente entre les deux */
   try{ if(typeof SYNC.ailleurs==='function'&&SYNC.ailleurs()){ location.reload(); return; } }catch(e){}
@@ -156,6 +159,8 @@ async function cloudLogout(){
   /* Hors ligne, jeton expiré : signOut échoue SANS retirer la session (2.116.0). Vider l'appareil la laisserait revenir
      au retour du réseau, et la personne suivante jouerait chez ce compte : on le dit, on ne touche à rien. */
   try{ if(typeof SYNC.sessionPresente==='function'&&SYNC.sessionPresente()&&!SYNC.redemarre()){ toast('Connexion indisponible hors ligne'); return; } }catch(e){}
+  /* La déconnexion est actée : le navigateur se désabonne (le marqueur est posé tout de suite, le reste court pendant la suite). */
+  var _rendu=null; try{ if(typeof rappelRendre==='function')_rendu=rappelRendre(); }catch(e){}
   CLOUD.user=null;
   try{ clearTimeout(_syncT); }catch(e){}
   // appareil marqué « vierge » : au prochain login, le nuage fait foi. ⚠️ Sauf page condamnée PENDANT signOut : le disque est déjà celui du compte suivant.
@@ -163,6 +168,7 @@ async function cloudLogout(){
   // ⛔ Rien ne s'efface en silence (Myriam, 30/09) : ce que la file n'a pas encore livré passe aussi par l'unique mise de côté.
   try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre())&&typeof SYNC.mettreDeCote==='function')SYNC.mettreDeCote(); }catch(e){}
   try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre()))localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){}
+  try{ if(_rendu)await Promise.race([_rendu,new Promise(function(r){ setTimeout(r,2500); })]); }catch(e){}
   location.reload();
 }
 function cloudCardHTML(mode){
@@ -276,7 +282,9 @@ function verrouLibere(){
    mise de côté si la place est libre) jusqu'à son retour sur cet appareil (SYNC.pasMoi, progression.js). Seulement sous le verrou. */
 function obPasMoi(){
   if(!VERROU_CONNEXION)return;
-  try{ if(typeof SYNC.pasMoi==='function'){ SYNC.pasMoi(); return; } }catch(e){}
+  /* L'appareil rendu ne garde aucun rappel au nom du compte parti : le marqueur est posé tout de suite (la page recharge), le
+     désabonnement se termine au démarrage suivant. Rien si la session est revenue (pasMoi rend false : rien n'a été rendu). */
+  try{ if(typeof SYNC.pasMoi==='function'){ if(SYNC.pasMoi()){ try{ if(typeof rappelRendre==='function')rappelRendre(); }catch(e){} } return; } }catch(e){}
   try{ location.reload(); }catch(e){}
 }
 function obLoginOpen(){
