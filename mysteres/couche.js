@@ -1,6 +1,6 @@
 /* Couche « Les Mystères de Diya » — dans l'app (build 280, 25/11/2026). GÉNÉRÉE par outils/preparer-mysteres-prod.py depuis la préview v17 : on corrige les préviews, puis on relance le script.
    Elle ENVELOPPE les vraies fonctions de rendu (renderHome, renderIslam, renderProg, showTab, setBanner) et ajoute ses écrans : les neuf indices d'une unité, la scène à compléter, l'histoire, la collection,
-   le Profil en trois volets avec la carte joueuse, le disque qui change de tenue et d'arrière-plan. Script classique chargé À LA DEMANDE par mysteres-chargeur.js (ouvert à tous ; `?mysteres=0` l'éteint).
+   le Profil en trois volets avec la carte joueuse, le disque qui change de tenue et d'arrière-plan. Script classique chargé À LA DEMANDE par mysteres-chargeur.js (chez tout le monde).
    ÉTAT : ce qui se garde vit dans S.louma (créé au premier besoin, jamais dans DEF : doReset ne recharge pas la page), l'état d'écran vit ici. L'attribution des indices est DÉRIVÉE des disques faits
    (S.done) : objet k de l'unité u = disque k ; seule l'unité 1 a son histoire (« Le visiteur de la nuit »), les autres montrent leurs neuf carrés vides et « Mystère à venir ». LA BOUTIQUE EST OUVERTE : l'achat se fait chez le SERVEUR (acheter_diya), jamais sur le téléphone. */
 (function(){
@@ -411,7 +411,7 @@ function boutonAchat(id, prix){
   const b = (dis) => '<button class="cta lm7-pop-cta lm7-achat"'+(dis ? ' disabled' : ' data-lm="acheter:'+id+'"')+'>ACHETER '+bouton(prix)+'</button>';
   if(!compteOk()) return '<button class="cta lm7-pop-cta" data-lm="se-connecter">ME CONNECTER</button>';       /* sans compte : UN bouton vif qui ouvre la connexion — ni phrase, ni bouton mort */
   /* chaque phrase d'avertissement est insécable : à deux lignes, la coupe tombe ENTRE les phrases, jamais un mot seul (grands caractères, 360 et 390) */
-  const dit = erreurAchat.split(/(?<=\.) /).map(x => '<span class="lm-nb">'+esc(x)+'</span>').join(' ');
+  const dit = erreurAchat.split('. ').map((x, i, t) => i < t.length - 1 ? x + '.' : x).map(x => '<span class="lm-nb">'+esc(x)+'</span>').join(' ');
   return (erreurAchat ? '<p class="lm7-pop-manque" role="alert">'+dit+'</p>' : '')+b(achatEnCours);
 }
 function casesFond(cible){
