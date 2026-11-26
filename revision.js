@@ -1515,7 +1515,7 @@ function vwSaisie(){
   if(K){
     if(M.claviePour!==M.wi){
       M.claviePour=M.wi; K.poserCSSClavier();
-      box.innerHTML=K.clavierPourMot(M.words[M.wi],{id:'vw',commandes:true});
+      box.innerHTML=K.clavierPourMot(M.words[M.wi],{id:'vw',commandes:true,melanger:shuffle,permises:lettresEnseignees()}); // mêmes règles que asmSaisie (25/11) : lettres mélangées, leurres enseignés
       K.brancherClavier(box,{taper:vwTaperCle,effacer:vwUndo,recommencer:vwResetMot,id:'vw'});
     }
     return;

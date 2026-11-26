@@ -63,15 +63,15 @@ const NONATTACH=['ا','د','ذ','ر','ز','و'];
 function buildAlphabet(U){
   // Le titre est l'instruction, jamais lu : seul l'arabe sonne. (journal : generateurs.js · leçon 1 v2)
   const q=[
-   {type:'tapset',title:'Touche 3 des 28 lettres de l\u2019alphabet',items:[],alphabet:true,cols:4},
+   {type:'tapset',title:'Touche 3 des 28 lettres',items:[],alphabet:true,cols:4},   /* une ligne à 360 px, grille compacte (25/11) */
    {type:'harakat3',title:'Révèle les harakat'},
    {type:'fuse',title:'Associe lettres et harakat',L:'م',jeux:[
      {chip:'\u064E',fus:'مَ',son:'mim-fatha-son-court.mp3'},
      {chip:'\u0650',fus:'مِ',son:'mim-kasra-son-court.mp3'},
      {chip:'\u064F',fus:'مُ',son:'mim-damma-son-court.mp3'}]},
-   {type:'tapset',title:'Touche les 3 lettres de prolongation',items:[['ا'],['و'],['ي']],cols:3,nolabel:true},
+   {type:'tapset',title:'Touche les 3 prolongations',items:[['ا'],['و'],['ي']],cols:3,nolabel:true},
    {type:'findset',title:'Retrouve les 3 prolongations',targets:['ا','و','ي'],highlight:false},
-   {type:'fuse',title:'Associe lettres et prolongations',L:'م',jeux:[
+   {type:'fuse',title:'Associe les prolongations',L:'م',jeux:[
      {chip:'ا',fus:'مَا',son:'mim-alif-son-prolonge.mp3'},
      {chip:'ي',fus:'مِي',son:'mim-ya-son-prolonge.mp3'},
      {chip:'و',fus:'مُو',son:'mim-waw-son-prolonge.mp3'}]},
@@ -85,13 +85,13 @@ function buildAlphabet(U){
    {type:'read',word:'مَدْرَسَةٌ',lang:'ar',dir:'rtl',title:'Révèle le mot'},
    mcq({prompt:'L\u2019alphabet arabe comporte :',mute:true,graded:true,grid:'grid3',answer:'28',explain:'L\u2019alphabet arabe compte 28 lettres.',
      options:shuffle([{txt:'26 lettres',key:'26'},{txt:'28 lettres',key:'28'},{txt:'30 lettres',key:'30'}])}),
-   mcq({prompt:'Comment s\u2019appellent ces signes ?',mute:true,signes:true,graded:true,answer:'h',explain:'Les harakat sont les petits signes au-dessus ou en dessous de la lettre : fatḥa « a », kasra « i », ḍamma « ou ».',
+   mcq({prompt:'Comment s\u2019appellent ces signes ?',mute:true,signes:true,graded:true,grid:'grid3',answer:'h',explain:'Les harakat sont les petits signes au-dessus ou en dessous de la lettre : fatḥa « a », kasra « i », ḍamma « ou ».',
      options:shuffle([{txt:'Les harakat',key:'h'},{txt:'Des lettres spéciales',key:'l'},{txt:'Des accents',key:'a'}])}),
    mcq({prompt:'Combien de lettres de prolongation ?',mute:true,graded:true,grid:'grid3',answer:'3',explain:'Il y a 3 lettres de prolongation, qui prolongent le son.',
      options:shuffle([{txt:'3',key:'3'},{txt:'2',key:'2'},{txt:'4',key:'4'}])}),
-   mcq({prompt:'Quelles sont les prolongations ?',mute:true,graded:true,answer:'awy',explain:'L\u2019alif <span class="ar">ا</span>, le wāw <span class="ar">و</span> et le yā\u2019 <span class="ar">ي</span> étirent la voyelle qui précède.',
+   mcq({prompt:'Quelles sont les prolongations ?',mute:true,graded:true,grid:'grid3',answer:'awy',explain:'L\u2019alif <span class="ar">ا</span>, le wāw <span class="ar">و</span> et le yā\u2019 <span class="ar">ي</span> étirent la voyelle qui précède.',
      options:shuffle([{ar:'ا و ي',key:'awy'},{ar:'م ل ن',key:'mln'},{ar:'ب ت ث',key:'btt'}])}),
-   mcq({prompt:'Comment lit-on l\u2019arabe ?',mute:true,graded:true,answer:'rtl',explain:'L\u2019arabe se lit et s\u2019écrit de droite à gauche, à l\u2019inverse du français.',
+   mcq({prompt:'Comment lit-on l\u2019arabe ?',mute:true,graded:true,grid:'grid3',answer:'rtl',explain:'L\u2019arabe se lit et s\u2019écrit de droite à gauche, à l\u2019inverse du français.',
      options:shuffle([{txt:'De droite à gauche',key:'rtl'},{txt:'De gauche à droite',key:'ltr'}])}),
   ];
   return q;
@@ -119,9 +119,13 @@ function buildMemo(U){
 }
 
 function buildSpot(U){
+  /* UN écran par VERSET : les lettres de l'unité qu'il porte se cherchent l'une après l'autre, le titre passe tout seul de م à ل puis à ن
+     (Myriam, 25/11, préview du testeur : 19 écrans identiques → 7 pour l'unité 1). `L` reste la 1re lettre, pour qui lit encore st.L.
+     (journal : generateurs.js · buildSpot · un écran par verset) */
   const q=[];
   FATIHA.forEach((v,vi)=>{
-    U.letters.forEach(L=>{ if([...strip(v)].some(ch=>sameLetter(ch,L))) q.push({type:'spot',vi,L,mute:true}); });
+    const Ls=U.letters.filter(L=>[...strip(v)].some(ch=>sameLetter(ch,L)));
+    if(Ls.length)q.push({type:'spot',vi,Ls,L:Ls[0],mute:true});
   });
   return q;
 }
@@ -132,7 +136,8 @@ function buildForms(U){
   const q=[];
   U.letters.forEach(L=>{
     q.push({type:'formslide',L,title:'Fais glisser la lettre\u00A0'+letAr(L)});
-    q.push({type:'trace',L});
+    /* La lettre ISOLÉE n'est plus écrite ici : « Mémoriser » l'écrit déjà (Myriam, 25/11, préview du testeur : 22 écrans → 19).
+       La ة de ت, elle, n'y est écrite nulle part ailleurs : son tracé isolé reste plus bas. (journal : generateurs.js · buildForms · le tracé isolé retiré) */
     /* Lettres qui ne s'attachent qu'à droite (أ و ر د ذ…) : début = isolée, milieu = fin ;
        seules les formes distinctes s'écrivent (pas de tracé début/milieu pour elles). */
     (joinsL(L)?[1,2,3]:[3]).forEach(p=>q.push({type:'trace',L,pos:p}));
@@ -190,9 +195,10 @@ function leconSyllabes(U,paires,fabrique,titreFuse){
 }
 function sylHKG(L,h){ return (L==='أ'&&h==='\u0650')?'إِ':L+h; }    // la kasra porte la hamza dessous : أِ n'existe pas — partagée leçon 5 + bilan
 function sylMDG(L,m){ if(L==='أ'&&m==='ا')return 'آ'; if(L==='أ'&&m==='ي')return 'إِي'; return maddSyl(L,m); } // hamza : آ (jamais أَا) et إِي (jamais أِي) — partagée leçon 6 + bilan
-function buildHarakat(U){ return leconSyllabes(U,HK,sylHKG,'Glisse les harakat sur la lettre'); }
+/* « sur la lettre » devient « sur » (25/11) : la consigne tient sur une ligne à 360 px, et les deux disques jumeaux se ressemblent */
+function buildHarakat(U){ return leconSyllabes(U,HK,sylHKG,'Glisse les harakat sur'); }
 
-function buildMadd(U){ return leconSyllabes(U,MD,sylMDG,'Glisse les prolongations sur la lettre'); }
+function buildMadd(U){ return leconSyllabes(U,MD,sylMDG,'Glisse les prolongations sur'); }
 function buildMaddANCIEN(U){ // plus appelé — à jeter avec l'accord de Myriam
   const q=[];
   U.letters.forEach(L=>{

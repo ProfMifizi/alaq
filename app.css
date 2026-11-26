@@ -231,7 +231,10 @@
     display:none;flex-direction:column}
   .player.on{display:flex}
   .p-top{display:flex;align-items:center;gap:14px;padding:calc(14px + env(safe-area-inset-top,0px) + var(--edge,0px)) 16px 14px}
-  .p-close{background:none;border:none;color:var(--muted);font-size:26px;font-weight:700;line-height:1;padding:0 4px}
+  /* Zone de toucher de 44 × 44 px (Myriam, 25/11, « les gros doigts »), glyphe IMMOBILE : le surplus est repris par des marges
+     négatives, l'empreinte dans la barre reste celle d'avant. (journal : app.css · les zones de toucher de la croix et du drapeau) */
+  .p-close{background:none;border:none;color:var(--muted);font-size:26px;font-weight:700;line-height:1;padding:0;
+    display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:-9px -8px}
   .pbar{flex:1;height:16px;background:var(--panel2);border-radius:10px;overflow:hidden}
   .pbar i{display:block;height:100%;width:0;background:var(--gold);border-radius:10px;transition:width .35s}
   .hearts{display:flex;align-items:center;gap:4px;color:var(--info);font-weight:900;font-size:18px} /* 05/09 : la goutte est révision, pas cœur — bleu, jamais rouge (Myriam) */
@@ -302,6 +305,84 @@
   .opt[disabled]:not(.ok){opacity:.55}
   .opt .sopt{font-size:34px;line-height:1.2}
 
+  /* ══ CARTES DE QCM ET TOUCHES DU LECTEUR (Myriam, 25/11, préview du testeur de leçons) ═══════════════════════════════
+     ① UNE SEULE HAUTEUR, --carte-h, pour toute carte de QCM du lecteur (français, arabe, haut-parleur ; deux ou trois choix), l'arabe à --carte-ar.
+     ② CRÈME EN SOMBRE, MARRON FONCÉ EN CLAIR : les couleurs sont les variables --cle-*, posées sur #player SEULEMENT (le film, hors du
+        lecteur, garde ses cartes) ; les touches de _clavier.js les lisent aussi. Chaque valeur a un contraste MESURÉ : texte ≥ 4,5:1, contour ≥ 3:1.
+     ⚠️ Jamais d'or sur crème : l'arabe est brun sur crème, or clair sur marron. La carte CHOISIE ne se reconnaît pas à sa seule teinte : anneau
+        épais + fond doré pâle (la crème est devenue la couleur du repos). Les règles d'avant (.opt, .opts.grid3 .opt:has(> .ar)…) restent, elles
+        servent encore le film : celles-ci passent par-dessus, grâce à l'ID de #p-body.
+        PORTÉE : les cartes du lecteur seulement (#p-body > .opts) — pas le film (#film), ni l'histoire du disque 6 (.opts imbriqué dans .d6-feuille), dont les
+        mises en page sont validées. (journal : app.css · les cartes crème, 25/11) */
+  /* Trois paliers de hauteur d'écran (mesuré sur 170 QCM des unités 1, 4 et 7 : la 3ᵉ carte doit rester visible avant la réponse, règle du 1/11) :
+     ≥ 721 px (les trois téléphones de Myriam) 104 px et 56 px · ≤ 720 px (375×667 : 43 px cachés à 104) 88 px et 46 px · ≤ 640 px (320×568 : 10 px cachés à 72) 68 px et 36 px.
+     À chaque palier le mot le plus haut garde de l'air : 6 px à 104, 5,7 px à 88, 3,6 px à 68. Grands caractères : 85 px et 46 px (le zoom 1,22 par-dessus : l'arabe
+     y est plus gros qu'avant) ; la 3ᵉ carte y peut être cachée sur un petit écran (dette écrite dans previews/_verif_cartes_colonne.html). */
+  :root{--carte-h:104px;--carte-ar:56px}
+  @media (max-height:720px){:root{--carte-h:88px;--carte-ar:46px}}
+  @media (max-height:640px){:root{--carte-h:68px;--carte-ar:36px}}
+  html.gtexte{--carte-h:85px;--carte-ar:46px}
+  #player{
+    --cle-fond:#F2E9DA;--cle-bord:#BFAE92;--cle-encre:#3A2410;--cle-ar:#3A2410;--cle-icone:#9A5A0B;--cle-signe:#12607F;--cle-doux:#6B5A48;--cle-appui:#E7DAC3;
+    --cle-sel-fond:#FBDB85;--cle-sel-bord:#AC6F0C;--cle-sel-encre:#2B1B0A;
+    --cle-on-fond:#FBE9C0;--cle-on-bord:#B5751F;--cle-on-lueur:rgba(181,117,31,.5);
+    --cle-ok-fond:#DFF0E5;--cle-ok-bord:#37905C;--cle-ok-encre:#124A2E;
+    --cle-ko-fond:#FAE3DC;--cle-ko-bord:#DA512F;--cle-ko-encre:#8C2F14;
+    --cle-eteint:.55}
+  html.clair #player{
+    --cle-fond:#4E3210;--cle-bord:#7A5A30;--cle-encre:#F2E9DA;--cle-ar:#F0C46A;--cle-icone:#F0C46A;--cle-signe:#86C8E8;--cle-doux:#D8C9AE;--cle-appui:#5E3E16;
+    --cle-sel-fond:#FBDB85;--cle-sel-bord:#AC6F0C;--cle-sel-encre:#2B1B0A;
+    --cle-on-fond:#4E3210;--cle-on-bord:#BA7A1F;--cle-on-lueur:rgba(186,122,31,.55);
+    --cle-ok-fond:#21362B;--cle-ok-bord:#389466;--cle-ok-encre:#A8E6C7;
+    --cle-ko-fond:#47251F;--cle-ko-bord:#CB624D;--cle-ko-encre:#EECBC4;
+    --cle-eteint:.7}
+  #p-body > .opts > .opt:not(.fopt){background:var(--cle-fond);border-color:var(--cle-bord);color:var(--cle-encre);min-height:var(--carte-h);padding:0 10px}
+  #p-body > .opts > .opt:not(.fopt) .ar{font-size:var(--carte-ar);color:var(--cle-ar)}
+  #p-body > .opts > .opt:not(.fopt) .spk{color:var(--cle-icone)}
+  #p-body > .opts > .opt:not(.fopt).on:not(.ok):not(.bad){background:var(--cle-on-fond);border-color:var(--cle-on-bord);box-shadow:0 0 16px var(--cle-on-lueur)}
+  #p-body > .opts > .opt:not(.fopt).sel:not(.ok):not(.bad){background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);box-shadow:inset 0 0 0 2px var(--cle-sel-bord)}
+  #p-body > .opts > .opt:not(.fopt).sel.on:not(.ok):not(.bad){box-shadow:inset 0 0 0 2px var(--cle-sel-bord),0 0 16px var(--cle-on-lueur)}
+  /* quatre sens en français passés en colonne : cartes basses, sinon la colonne ne tient pas et un mot reste seul sur sa ligne */
+  #p-body > .opts.sens4.colonne > .opt{min-height:62px}
+  /* le tracé en grands caractères : les boutons démo / recommencer restent au-dessus du pied */
+  html.gtexte #p-body #traceMsg{margin-top:0}
+  html.gtexte #p-body .tico{margin-top:-8px}
+  html.gtexte #p-foot.ok .p-flag,html.gtexte #p-foot.bad .p-flag{top:-3px}   /* le drapeau ne mord pas le texte */
+  html.gtexte #p-foot .p-flag{transform:translateX(2px)}
+  /* la carte de quiz CHOISIE : encre sombre sur le jaune */
+  #p-body > .opts > .opt:not(.fopt).sel:not(.ok):not(.bad),#p-body > .opts > .opt:not(.fopt).sel:not(.ok):not(.bad) :is(.ar,.spk){color:var(--cle-sel-encre)}
+  /* ── TOUTES LES BOÎTES À TOUCHER, dans tous les exercices (Myriam, 26/11) : crème en sombre, marron foncé en clair ; choisie jaune, juste verte,
+     fausse rouge. Les jetons de couleur sont redéfinis DANS la boîte : le texte des modules suit sans être réécrit un par un. Une famille neuve
+     de boîtes s'ajoute à cette liste (outils/inventaire-boites.mjs les relève). */
+  #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button){--cream:var(--cle-encre);--muted:var(--cle-doux);--gold:var(--cle-icone);--gold2:var(--cle-icone);--tach:var(--cle-signe);--info:var(--cle-signe);--line:var(--cle-bord);--panel:var(--cle-fond);--panel2:var(--cle-appui);
+    background:var(--cle-fond);border-color:var(--cle-bord);color:var(--cle-encre)}
+  #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button) .ar{color:var(--cle-ar)}
+  #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button) small{color:var(--cle-doux)}
+  /* les boîtes sont marron en mode clair : les couleurs des rôles (pensées pour un fond blanc) passent à leurs versions claires */
+  html.clair #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button){--role-mnt:#86C8E8;--role-nat:#E9A6C9;--role-pr:#A9D98A;--role-ind:#B9B3FF;--role-conj:#F2B56B;--role-fleche:#D5A6EA}
+  html.clair #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button) :is(.r-dore,.r-dore2){color:#3A2410}
+  #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button):is(.sel,.choisie){--cream:var(--cle-sel-encre);--muted:var(--cle-sel-encre);--gold:var(--cle-sel-encre);--gold2:var(--cle-sel-encre);--tach:var(--cle-sel-encre);--info:var(--cle-sel-encre);--cle-ar:var(--cle-sel-encre);background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);color:var(--cle-sel-encre)}
+  #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button):is(.ok,.juste,.trouve,.hit){--cream:var(--cle-ok-encre);--muted:var(--cle-ok-encre);--gold:var(--cle-ok-encre);--gold2:var(--cle-ok-encre);--tach:var(--cle-ok-encre);--info:var(--cle-ok-encre);--cle-ar:var(--cle-ok-encre);background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);color:var(--cle-ok-encre)}
+  #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button):is(.bad,.faux,.wrong,.miss){--cream:var(--cle-ko-encre);--muted:var(--cle-ko-encre);--gold:var(--cle-ko-encre);--gold2:var(--cle-ko-encre);--tach:var(--cle-ko-encre);--info:var(--cle-ko-encre);--cle-ar:var(--cle-ko-encre);background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre)}
+  #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button):is(.sel,.choisie,.ok,.juste,.trouve,.hit,.bad,.faux,.wrong,.miss) .ar{color:var(--cle-ar)}
+  #p-body > .opts > .opt:not(.fopt).ok{background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);color:var(--cle-ok-encre);box-shadow:inset 0 0 0 2px var(--cle-ok-bord)}
+  #p-body > .opts > .opt:not(.fopt).ok .ar,#p-body > .opts > .opt:not(.fopt).ok .spk{color:var(--cle-ok-encre)}
+  #p-body > .opts > .opt:not(.fopt).bad{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre);box-shadow:inset 0 0 0 2px var(--cle-ko-bord);opacity:1}
+  #p-body > .opts > .opt:not(.fopt).bad .ar,#p-body > .opts > .opt:not(.fopt).bad .spk{color:var(--cle-ko-encre)}
+  /* après le verdict, les cartes ni justes ni touchées pâlissent ; la carte FAUSSE qu'on a touchée garde sa couleur (elle pâlissait avant : trouble en clair) */
+  #p-body > .opts > .opt:not(.fopt)[disabled]:not(.ok):not(.bad){opacity:var(--cle-eteint)}
+
+  /* ── LES 28 LETTRES EN GRILLE COMPACTE, QUI TIENT TOUJOURS (Myriam, 25/11 : « reprendre la grille compacte de Retrouve… ») ──
+     Une rangée fait 68 px quand la place existe et rétrécit jusqu'à 44 px (la zone de toucher) quand l'écran est court : le corps de l'écran
+     devient une colonne, la grille prend ce qui reste entre la consigne et le compteur. À 360×780 plus rien ne défile (mesuré : 58 px avant).
+     La grille d'un écran à deux rôles (.agrid-rl) garde ses rangées. (journal : app.css · la grille compacte, 25/11) */
+  #p-body:has(> .agrid:not(.agrid-rl)),#p-body:has(> .tapset.compact){display:flex;flex-direction:column}
+  .agrid:not(.agrid-rl),.tapset.compact{flex:0 1 auto;min-height:0;grid-auto-rows:minmax(44px,68px)}
+  .agrid:not(.agrid-rl) .ag{padding:0 8px;line-height:1.1}
+  .tapset.compact{grid-template-columns:repeat(4,1fr);gap:9px;justify-items:center}
+  .tapset.compact .ts-card{min-width:min(58px,100%);padding:0 8px;border-radius:12px;gap:0}   /* min(…,100%) : aux grands caractères à 320 px, 4 × 58 px sortaient de 19 px (harnais des quiz en colonne, ④) */
+  .tapset.compact .ts-card .ar{font-size:34px;font-weight:400;line-height:1.1}
+
   .learn{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;text-align:center}
   .learn .nm{font-size:22px;font-weight:900;margin-top:8px}
   .learn .son{display:inline-block;margin-top:8px;background:#3a312b;color:var(--gold2);border-radius:20px;
@@ -349,12 +430,12 @@
     box-shadow:inset -6px -8px 14px rgba(0,0,0,.22), inset 6px 8px 12px rgba(255,255,255,.10);
     font-family:var(--ar);font-size:32px;color:var(--gold2);will-change:transform;
     transform:translate(var(--x,0px),var(--y,0px))}
-  .bul.frm{width:54px;height:54px;font-size:24px}
+  .bul.frm{width:64px;height:64px;font-size:32px}   /* 25/11 (Myriam) : 64 px, la forme à 32 px, comme dans « Mémoriser » ; une seule bulle par forme */
   /* 14/08 (correctifs 4) — Myriam, leçon 6 « Éclate les bulles » : « double la taille de la
      police et des bulles ». BUL.R (la physique des chocs, plus bas) double avec elle — sinon
      les bulles se chevauchent au double de leur taille visuelle sans jamais se toucher pour
      de vrai. */
-  .bul.syl{width:120px;height:120px;font-size:52px} /* 18 bulles-syllabes (leçons 5/6) */
+  .bul.syl{width:88px;height:88px;font-size:40px} /* 9 bulles-syllabes (leçons 5/6), une par syllabe ; 88 px au lieu de 120 : trois de front, plus en colonne (Myriam, 25/11) */
   .bul.pop{animation:bulpop .17s cubic-bezier(.3,1.8,.5,1) forwards;pointer-events:none}
   /* ⚠️ la translation DOIT être reprise dans CHAQUE étape : une @keyframes qui déclare
      `transform` remplace celui de l'élément — sans ça la bulle éclate en haut à gauche. */
@@ -451,9 +532,18 @@
   .vl-madd{font-size:36px;font-weight:400}
   /* leçon 4 v3 (validée 10/08) : haut-parleur dessiné + nom du récitateur SANS boîte (le toucher OUVRE le sélecteur) */
   .vtools{display:flex;align-items:center;justify-content:center;gap:8px;margin:-8px 0 10px}
-  .vspk{background:none;border:none;padding:2px;display:flex;align-items:center;gap:7px;color:var(--gold)}
+  .vspk{background:none;border:none;padding:2px 8px;display:flex;align-items:center;justify-content:center;gap:7px;color:var(--gold);min-height:44px}   /* 44 px de haut (Myriam, 25/11) : le dessin ne bouge pas */
   .vspk .spk{width:44px;height:29px}
   .qari-nom{font-size:13px;color:var(--muted);font-weight:700}
+  /* « Dans la Fātiḥa » (Myriam, 25/11) : l'arabe du verset à 44 px (36 avant : le ل ne faisait que 8 px de large) ; la lettre cherchée du titre
+     « se pose » quand elle change ; après trois faux touchers de suite la lettre cherchée PULSE, sans texte. */
+  .verse.spot{font-size:var(--spot-px,44px)}
+  .verse.spot .vl-madd{font-size:var(--spot-px,44px)}
+  #spot-L{display:inline-block}
+  #spot-L.swap{animation:spotswap .42s cubic-bezier(.3,1.7,.5,1)}
+  @keyframes spotswap{0%{transform:scale(.5);opacity:.2}100%{transform:scale(1);opacity:1}}
+  .vl.pulse{animation:vlpulse .9s ease-in-out infinite}
+  @keyframes vlpulse{0%,100%{text-shadow:0 0 0 rgba(255,224,174,0)}50%{color:#FFE0AE;text-shadow:0 0 20px rgba(232,169,79,.95),0 0 7px rgba(232,169,79,.85)}}
   .vl.hit{color:var(--gold);text-shadow:0 0 14px rgba(208,135,13,.45)}
   .vl.miss{animation:vlmiss .38s ease-out}
   @keyframes vlmiss{
@@ -572,11 +662,11 @@
   #p-body.p-examfr{display:flex;flex-direction:column}
   .exam-fr{flex:1;display:grid;place-items:center;text-align:center;font-size:22px;font-weight:700;color:var(--cream);padding:10px 0}
   .exam-fr img{display:block;max-width:160px;max-height:160px;margin:0 auto 10px;object-fit:contain}
-  /* Le test « Avancer ici » (#player.exam, posée par renderStep) mêle des écrans des unités 9, 10 et 11 : un même rôle y garde UNE taille, d'où que vienne l'écran
-     (le français à corriger en doré 22 px, les blocs français 18 px) ; un titre ne laisse jamais un mot seul sur sa dernière ligne. */
+  /* Les tailles « une par rôle » valent pour le test, qui mêle des unités ; en leçon chaque unité garde son échelle (unité 10 : 18/16/13).
+     Partout en revanche : un titre ne laisse jamais un mot seul sur sa dernière ligne (Myriam, 26/11). */
   #player.exam #p-body .clv-enonce.dore{font-size:22px;line-height:1.35}
   #player.exam #p-body .odb-bloc.fr{font-size:18px}
-  #player.exam #p-body .q-title{text-wrap:balance}
+  #player #p-body .q-title{text-wrap:balance}
   .undo{display:block;margin:14px auto 0;background:none;border:none;color:var(--muted);font-weight:800;font-size:14px}
 
   .trow{display:flex;gap:10px;justify-content:center;margin-top:14px}
@@ -904,12 +994,14 @@
   /* ===== ⚑ Signalements (08/08) — préview validée : drapeau en haut à droite du bandeau bas ===== */
   /* top NÉGATIF : le drapeau flotte AU-DESSUS du bandeau (il recouvrait le coin de
      CONTINUER/VALIDER — Myriam 10/08, tâche leçon 4) */
-  .p-flag{position:absolute;top:-42px;right:8px;background:none;border:none;color:var(--coral);
-    opacity:1;font-size:29px;line-height:1;padding:4px 8px;cursor:pointer;z-index:3}
+  /* 25/11 : zone de toucher de 44 × 44 px, centre du glyphe inchangé (top −42 → −45,5 ; right 8 → 3) */
+  .p-flag{position:absolute;top:-45.5px;right:3px;background:none;border:none;color:var(--coral);
+    opacity:1;font-size:29px;line-height:1;padding:0;cursor:pointer;z-index:3;
+    display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px}
   /* DYNAMIQUE (10/08 soir) : dès que le pied porte un verdict ou l'éloge (.ok/.bad), il est
      grand — le drapeau RENTRE à son coin haut-droit (position validée le 08/08) au lieu de
      monter sur la leçon ; au repos il flotte au-dessus du bandeau (position validée le 10/08). */
-  #p-foot.ok .p-flag,#p-foot.bad .p-flag{top:2px}
+  #p-foot.ok .p-flag,#p-foot.bad .p-flag{top:-1.5px}
   /* le drapeau rentré mord sur la 1re ligne d'un verdict long : la place lui est laissée (QA 19/09) */
   #p-foot.ok .fb,#p-foot.bad .fb{padding-right:24px}
   #player.vfmode .p-flag{display:none}
@@ -2601,6 +2693,9 @@ html.clair .drag-ghost{ box-shadow:0 8px 20px rgba(90,70,40,.3) }
 html.gros .fuserow{ gap:10px;margin-top:22px }
 html.gros .mimC{ width:124px;height:124px;border-radius:22px;font-size:74px;border-width:3px }
 html.gros .fchip{ width:104px;height:104px;font-size:60px;border-width:3px }
+/* le SIGNE du jeton ≈ 20 × 33 px d'encre (Myriam, 25/11 : « grossir l'arabe de ces écrans ») : 60 → 84 px, le cercle ne bouge pas. Sur .tach seulement : une
+   LETTRE (ا و ي des prolongations) garde son rendu validé, à 84 px elle sortirait du cercle (mesuré). */
+html.gros .fchip .tach{ font-size:84px }
 html.gros .farr{ font-size:34px }
 
 /* ── place : le signe qu'on traîne, et les groupes أَم أَن أَل ──────────── */
@@ -2635,6 +2730,7 @@ html.gros .da-tile{ width:100px;height:100px;font-size:58px;border-radius:22px;b
    on ne peut pas être plus grand que large. */
 html.gtexte.gros .mimC{ width:102px;height:102px;font-size:61px }
 html.gtexte.gros .fchip{ width:85px;height:85px;font-size:49px }
+html.gtexte.gros .fchip .tach{ font-size:69px }
 html.gtexte.gros .sigchip{ width:108px;height:108px;font-size:64px;margin:6px auto 14px }
 html.gtexte.gros .grps{ gap:10px }
 html.gtexte.gros .grp{ min-width:205px;padding:8px 20px;font-size:43px }

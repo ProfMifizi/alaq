@@ -116,6 +116,9 @@ function setupTrace(L,u,posN){
     x.moveTo(ex,ey);x.lineTo(ex-ah*Math.cos(ang+.5),ey-ah*Math.sin(ang+.5));x.stroke();
     x.beginPath();x.arc(a[0],a[1],8,0,7);x.fill();
   }
+  /* Le MODÈLE à suivre : crème clair à 40 % en sombre, brun foncé à 55 % en clair (Myriam, 25/11 : 1,27:1 de contraste avant, ≥ 3:1 maintenant sur
+     le fond du cadre, #322B28 puis #FFFFFF) ; le tracé doré de l'élève, posé par-dessus, reste plus chaud. (journal : trace-lettres.js · le modèle éclairci) */
+  const MODELE=(function(){try{return document.documentElement.classList.contains('clair');}catch(e){return false;}})()?'rgba(78,50,16,.55)':'rgba(242,233,218,.4)';
   function paint(st8,showGuides){
     x.clearRect(0,0,W,W);
     // Réglure de cahier : la lettre repose sur la ligne de base (y=215) ;
@@ -126,7 +129,7 @@ function setupTrace(L,u,posN){
     });
     x.strokeStyle='rgba(208,135,13,.45)';x.lineWidth=1.6;
     x.beginPath();x.moveTo(14,215);x.lineTo(W-14,215);x.stroke();
-    letterStyle(x);x.fillStyle='rgba(208,135,13,.16)';x.fillText(GL,W/2,215);
+    letterStyle(x);x.fillStyle=MODELE;x.fillText(GL,W/2,215);
     goldLayer(st8);
     x.drawImage(off,0,0,W,W);
     if(!showGuides)return;

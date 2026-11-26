@@ -48,12 +48,12 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   var sac=[];
   if(mots){ // leçon 7 : une bulle par MOT — seules les cibles éclatent, un leurre secoue et reste
     mots.forEach(function(m){ sac.push({L:m.w,g:m.w,cible:!!m.cible}); });
-  }else if(syllabes){ // leçons 5/6 : chaque syllabe deux fois — le son d'une bulle est SA syllabe
-    syllabes.forEach(function(s){ sac.push({L:s,g:s}); sac.push({L:s,g:s}); });
-  }else if(formes){ // leçon 3 : chaque forme DISTINCTE deux fois (24 bulles pour م ل ن)
+  }else if(syllabes){ // leçons 5/6 : chaque syllabe UNE fois (Myriam, 25/11 : 18 bulles → 9) — le son d'une bulle est SA syllabe
+    syllabes.forEach(function(s){ sac.push({L:s,g:s}); });
+  }else if(formes){ // leçon 3 : chaque forme DISTINCTE UNE fois (Myriam, 25/11 : 24 bulles → 12 pour م ل ن)
     lettres.forEach(function(L){
       (joinsL(L)?[0,1,2,3]:[0,3]).forEach(function(p){
-        sac.push({L:L,g:formGlyph(L,p)});sac.push({L:L,g:formGlyph(L,p)});
+        sac.push({L:L,g:formGlyph(L,p)});
       });
     });
   }else{
@@ -62,7 +62,7 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   shuffle(sac);
   BUL.reste=mots?sac.filter(function(x){return x.cible;}).length:sac.length;
   /* le rayon vit dans BUL.R : la physique et l'éclat le lisent, jamais un 32 en dur */
-  BUL.R=mots?56:(syllabes?60:(formes?27:32));   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot) ; 60 = .bul.syl doublée (14/08)
+  BUL.R=mots?56:(syllabes?44:32);   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot) ; formes et lettres : 64 px, comme « Mémoriser » ; syllabes : 88 px — à 120 px (14/08) elles tenaient à deux de front, en colonne (Myriam, 25/11)
   var R=BUL.R;
   /* ⚠️ colonnes et pas des rangées se calculent sur le rayon réel : fixes, les bulles de R=60
      débordaient de l'aire. (journal : index.html · les bulles débordaient) */

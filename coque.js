@@ -81,7 +81,7 @@ window.__alaqHoteU8 = {
      à plusieurs manches, et river le bouton sur goNoHearts figerait une décision périmée. À 0 qatra,
      ecranRate arrête lui-même l'exercice (repos puis goNoHearts) ; objectifAtteint ne décide que la
      cible de CONTINUER sur un écran réussi. */
-  coeur(){ ecranRate(); },
+  coeur(partie){ ecranRate(partie); },   /* `partie` : l'indice de la partie fautive, pour le rattrapage partiel (src/player · les parties fautives) */
 };
 
 /* L'enregistrement, appelé par src/entree.js à l'arrivée du module : les mots viennent de U8.mots
@@ -220,12 +220,12 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='u12-correctifs-26nov';
+const BUILD='tous-les-exercices-26nov';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-11-26T15:02';
+const BUILD_DATE='2026-11-26T16:00';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
@@ -233,7 +233,7 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
 const VERSION='3.32';
-const BUILD_NUM=293;
+const BUILD_NUM=294;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
@@ -369,6 +369,16 @@ function tachCalque(s){
 function toast(m){const t=document.getElementById('toast');t.innerHTML=m;t.classList.add('on'); // innerHTML : le cœur du registre ICONES peut s'y afficher (tous les appels sont nos littéraux)
   setTimeout(()=>t.classList.remove('on'),2600);}
 
+/* Les lettres qu'on peut OFFRIR comme leurres au clavier d'écriture (Myriam, 25/11, préview du testeur de leçons : « limiter les
+   leurres aux lettres déjà enseignées : م ل ن et ا و ي ») : celles des unités 1 à curU — l'unité en cours COMPRISE, on y écrit ce qu'on
+   y apprend —, celles que l'élève a déjà mémorisées, et les trois lettres de prolongation ا و ي, enseignées dès l'unité 1. Des lettres
+   NUES (letterKey), rendues en tableau. (journal : coque.js · lettresEnseignees) */
+function lettresEnseignees(){
+  const s=new Set(['ا','و','ي']);
+  for(let i=0;i<=Math.min(typeof curU==='number'?curU:0,6);i++)((UNITS[i]&&UNITS[i].letters)||[]).forEach(L=>s.add(letterKey(L)));
+  try{ knownLetterSet().forEach(L=>s.add(L)); }catch(e){}
+  return [...s];
+}
 /* ===== Carte de la Fātiḥa : les mots lisibles s'illuminent ===== */
 function knownLetterSet(){ // lettres des unités dont le disque « Mémoriser » est terminé
   const set=new Set();
