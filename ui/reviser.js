@@ -383,35 +383,22 @@ function grammaireHubHTML(){
   /* ⚠️ Le badge compte les notions PAS ENCORE RÉVISÉES AUJOURD'HUI (g.maj, posé par finishReview) :
      il descend comme celui du vocabulaire, que le tutoriel décrit ainsi. La séance, elle, reste
      gramFile(null). (journal : ui/reviser.js · grammaireHubHTML, le badge qui mentait) */
-  var nb=notionsGram().filter(function(x){
-    var g=S.revGram&&S.revGram[x.u];
-    return !g||g.maj!==today();
-  }).length;
+  /* une seule révision du jour (le « 1 » du bouton), puis « Par thème » en cartes qui se touchent (préview validée le 27/11) */
+  var nb=gramJourDue()?1:0;
   var lignes=N.map(function(x){
     var m=gramMaitrise(x.u), pc=Math.round(Math.max(0,m)*100);
-    /* sans séance jouée, pas de « 0 % » (il se lirait « tu ne sais rien ») */
-    var jauge=(m<0)
-      ? '<div class="wfr" style="margin-top:5px">pas encore révisée</div>'
-      : '<div class="ubar" title="'+pc+' % de réussite"><i style="width:'+pc+'%"></i></div>';
-    return '<div class="wrow">'+
+    return '<button type="button" class="gcarte" onclick="startGrammarTargeted('+x.u+')">'+
       '<span class="gnum">'+toAr(UNITS[x.u].no)+'</span>'+
-      '<div class="wtx"><div class="gtt">'+x.titre+'</div>'+
-        /* ⚠️ « % de réussite », jamais un pourcentage nu : c'est un taux sur les écrans vus, pas une
-           couverture de la notion (journal : ui/reviser.js · grammaireHubHTML, « % de réussite ») */
-        '<div class="wfr">'+x.sous+(m<0?'':' \u00b7 '+pc+' % de réussite')+'</div>'+jauge+'</div>'+
-      '<button class="wpen" onclick="startGrammarTargeted('+x.u+')" '+
-        'aria-label="S\u2019entraîner sur cette notion">'+icoImg('tab-crayon','wpen-ic')+'</button>'+
-    '</div>';
+      '<span class="gc-tx"><span class="gtt">'+x.titre+'</span>'+
+        '<span class="gc-sous">'+(m<0?'pas encore révisée':pc+' % de réussite')+'</span>'+
+        '<span class="ubar"><i style="width:'+pc+'%"></i></span></span>'+
+      '<span class="gc-va" aria-hidden="true">›</span></button>';
   }).join('');
 
-  return '<div class="ccard">'+
-    '<div style="display:flex;gap:10px;align-items:center;max-width:340px;margin:0 auto">'+
-        '<button class="cbtn revbtn" style="flex:1;margin:0" onclick="startGrammarReview()">'+
-          (nb?'<span>Réviser</span><span class="revcount"><i>'+nb+'</i></span>':'S\u2019entraîner')+'</button>'+
-    '</div>'+
-    '<p style="color:var(--muted);font-family:var(--ui);font-size:12.5px;text-align:center;margin:9px 0 2px">'+
-      'Une séance qui mêle toutes tes notions</p>'+
-    '<div class="wlist">'+lignes+'</div></div>';
+  return '<div class="ghub">'+
+    '<button class="cbtn revbtn gjour" onclick="startGrammarReview()"><span class="gj-t"><span>Révision du jour</span>'+(nb?'<span class="revcount"><i>1</i></span>':'')+'</span>'+
+      '<span class="gj-s">Toutes les notions, au hasard · change chaque jour</span></button>'+
+    '<h3 class="gtheme">Par thème</h3>'+lignes+'</div>';
 }
 
 function renderReviser(sub){

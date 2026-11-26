@@ -477,6 +477,7 @@ function reviewSessionWords(){ return dueReviewWords().slice(0,REVIEW_CAP); }
    l'unité 8 ayant encore l'ancienne grille (journal : revision.js · révision de grammaire). */
 const GRAM_CAP=15;                 /* la taille d'une session, comme REVIEW_CAP au vocabulaire */
 let GRAMSES=null;                  /* les fautes de LA session en cours, par notion */
+let GRAMJOUR=false;                /* la session en cours est-elle LA révision du jour (toutes notions) ? */
 
 /* Une notion n'apparaît que si son unité est ouverte ET qu'elle fournit des écrans : vide
    (module non chargé), elle promettrait un écran blanc. */
@@ -490,6 +491,7 @@ const NOTIONS_GRAM=[
      c'est quoi l'annexion ») — l'exemple fait le travail, on comprend sans le mot. */
   { u:9, titre:'L\u2019annexion <span class="ar">الإِضَافَة</span>',
     sous:'Deux noms li\u00e9s : la porte de la maison', ecrans:gramEcransU10 },
+  { u:10, titre:'Les pronoms et les accords', sous:'Mon, ton, notre \u2026 et le mot qui d\u00e9crit', ecrans:gramEcransU11 },
 ];
 function notionsGram(){ return NOTIONS_GRAM.filter(function(N){ return unitUnlocked(N.u); }); }
 
@@ -552,6 +554,26 @@ function gramEcransUnite(api,nom,retirer){
 }
 function gramEcransU9(){ return gramEcransUnite(window.__alaqU9,'u9',{9:['bilan']}); }
 function gramEcransU10(){ return gramEcransUnite(window.__alaqU10,'u10',{9:['fin']}); }
+/* L'unité 11 (Myriam, 27/11) : les écrans que l'évaluation « Avancer ici » a retenus (parcours.js, VAR11 : disque, rang) — un seul tri, déjà
+   validé ; la tachkīl au clavier reste facultative, comme dans le test. */
+const GRAM_U11=[[9,0],[1,13],[1,14],[3,10],[9,1],[2,6],[1,9],[1,10],[1,12],[1,15],[9,6],[5,5],[5,6],[5,7],[5,8],[5,9],[9,14],[9,13],[8,0],[8,18],[8,19],
+  [9,15],[8,22],[8,7],[8,4],[8,23],[3,16],[3,17],[9,21],[2,9],[3,8],[9,9],[9,4],[4,9],[4,13],[3,6],[3,7],[3,13]];
+function gramEcransU11(){
+  var api=window.__alaqU11, qs=[], cache={};
+  if(!api)return [];
+  GRAM_U11.forEach(function(d){
+    try{
+      var l=cache[d[0]]||(cache[d[0]]=api['disque'+d[0]]()), st=l[d[1]];
+      if(!st)return;
+      var c=gramClone(st,'u11:D'+d[0]+'#'+(d[1]+1)); if(c.type==='clavier-arabe')c.tachkilFacultatif=true;
+      qs.push(c);
+    }catch(e){}
+  });
+  return qs;
+}
+/* UNE seule révision de grammaire par jour (Myriam, 27/11 : « une seule révision sur le bouton, pas 3 ») : toutes les notions mêlées ;
+   les révisions par thème, en dessous, ne la remplacent pas. S.gramJour = le jour où elle a été finie. */
+function gramJourDue(){ try{ return notionsGram().length>0&&S.gramJour!==today(); }catch(e){ return false; } }
 
 /* ⚠️ On clone : les objets des disques peuvent être partagés avec la leçon, un graded posé
    chez eux suivrait l'élève jusque dans son disque. */
@@ -624,6 +646,7 @@ function lancerGrammaire(unites){
   if(!qs.length){ toast('La grammaire se charge — réessaie dans un instant'); return; }
   gramVuNoter(qs);         /* noté au départ : une séance quittée tôt ne ressert pas ses écrans */
   GRAMSES={};
+  GRAMJOUR=!unites;
   QCTX=null;               /* sinon un « Verset suivant » fantôme s'invite à la fin */
   launchQuranReview(qs);   /* le lanceur générique de session : il sert déjà les lettres */
 }
@@ -649,7 +672,7 @@ let _revPopEssais=0, _revPopT=null, _revPopVue=false, _revPopParti=0;
 function revisionDuJour(){
   var mots=0, notions=0;
   try{ mots=dueReviewWords().length; }catch(e){}
-  try{ notions=notionsGram().filter(function(x){ var g=S.revGram&&S.revGram[x.u]; return !g||g.maj!==today(); }).length; }catch(e){}
+  try{ notions=gramJourDue()?1:0; }catch(e){}
   return {mots:mots, notions:notions, total:mots+notions};
 }
 /* ⚠️ Jamais par-dessus un autre écran : un badge, le Ghufrān, la série, un verrou (tous .finish.on),
@@ -673,7 +696,7 @@ function revPopEssayer(){
 function revPopCompte(r){
   var c='';
   if(r.mots)c+='<span>'+icoImg('tab-cartes')+r.mots+' mot'+(r.mots>1?'s':'')+'</span>';
-  if(r.notions)c+='<span>'+icoImg('tab-parchemin')+r.notions+' notion'+(r.notions>1?'s':'')+'</span>';
+  if(r.notions)c+='<span>'+icoImg('tab-parchemin')+'grammaire</span>';
   return c;
 }
 function revPopMontrer(){
@@ -1708,6 +1731,7 @@ function finishReview(){
       var g=S.revGram[u]||{n:0,ko:0};
       S.revGram[u]={n:g.n+vus[u], ko:g.ko+(GRAMSES[u]||0), maj:today()};
     });
+    if(GRAMJOUR)S.gramJour=today();
     GRAMSES=null;
   }
   /* On ne paie que si la file demandait autre chose qu'écouter : recite est le seul écran passif.
