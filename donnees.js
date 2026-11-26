@@ -162,7 +162,7 @@ const UNITS=(function(){
    court:'Les pronoms et les accords',
    sub:'Mon, ton, notre, leur — ce qui décrit s’accorde · 9 leçons' },
  /* Unité 12 : ouverte (3.32). u12Ouverte() ne sert plus qu'au poste de test local : qatarāt illimitées (window.__alaqDevCoeurs). */
- { no:12, ready:true, ph:'MÉMORISATION', u12:true, letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
+ { no:12, ready:true, ph:'MÉMORISATION', u12:true, court:'Mémorisation', letters:[], sub:'La veillée — mémoriser la Fātiḥa entière' },
 ]);
 })();
 
