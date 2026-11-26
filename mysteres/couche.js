@@ -1,6 +1,6 @@
 /* Couche « Les Mystères de Diya » — dans l'app (build 280, 25/11/2026). GÉNÉRÉE par outils/preparer-mysteres-prod.py depuis la préview v17 : on corrige les préviews, puis on relance le script.
    Elle ENVELOPPE les vraies fonctions de rendu (renderHome, renderIslam, renderProg, showTab, setBanner) et ajoute ses écrans : les neuf indices d'une unité, la scène à compléter, l'histoire, la collection,
-   le Profil en trois volets avec la carte joueuse, le disque qui change de tenue et d'arrière-plan. Script classique chargé À LA DEMANDE par mysteres-chargeur.js (interrupteur `?mysteres=1`).
+   le Profil en trois volets avec la carte joueuse, le disque qui change de tenue et d'arrière-plan. Script classique chargé À LA DEMANDE par mysteres-chargeur.js (ouvert à tous ; `?mysteres=0` l'éteint).
    ÉTAT : ce qui se garde vit dans S.louma (créé au premier besoin, jamais dans DEF : doReset ne recharge pas la page), l'état d'écran vit ici. L'attribution des indices est DÉRIVÉE des disques faits
    (S.done) : objet k de l'unité u = disque k ; seule l'unité 1 a son histoire (« Le visiteur de la nuit »), les autres montrent leurs neuf carrés vides et « Mystère à venir ». LA BOUTIQUE EST OUVERTE : l'achat se fait chez le SERVEUR (acheter_diya), jamais sur le téléphone. */
 (function(){
@@ -332,7 +332,7 @@ function profilB(){
 /* ——— l'onglet Indices : le mystère en cours, puis les mystères résolus par sourate ——— */
 function pageIndices(){
   const u = uniteEnCours();
-  const entete1 = '<div class="lm-page lm7-indices"><section class="lm7-sect" aria-labelledby="lm7H1"><div class="lm-titre"><h1 class="lm-h1" id="lm7H1">'+(RECIT[u] ? 'Mystère en cours' : 'Mystère à venir')+'</h1><span class="lm-compte">Unité '+UNITS[u].no+'</span></div>';
+  const entete1 = '<div class="lm-page lm7-indices"><section class="lm7-sect" aria-labelledby="lm7H1"><div class="lm-titre"><h1 class="lm-h1" id="lm7H1">'+(RECIT[u] ? 'Mystère en cours' : 'Mystère à venir')+'</h1><span class="lmy-compte">Unité '+UNITS[u].no+'</span></div>';
   if(!RECIT[u]) return entete1 + venirHTML(u) + '<button class="lm-sec" data-lm="aller:home">Continuer mon unité</button></section>' + resolus() + '</div>';
   const r = rec(u), p = poses(u), n = cnt(r), np = cnt(p), tout = np === NB;
   const dispo = r.some((x, k) => x && !p[k]);

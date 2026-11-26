@@ -37,8 +37,6 @@ html.clair #home .lm-bandeau{--panel:#322B28;--panel2:#3C342F;--gold-d:#B5751F;-
 .lm-sec{display:block;width:100%;margin-top:10px}
 .lm-sec[disabled]{opacity:1;cursor:default}
 .lm-sec.lm-fait{border-color:var(--gold-d);background:transparent;color:var(--gold2)}
-.lm-ligne{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;min-height:50px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--cream);font:inherit;font-size:15px;font-weight:800;text-align:left;cursor:pointer}
-.lm-ligne > span:not(.lm-graine){flex:1;min-width:0}
 .lm-graine{flex:none;display:inline-flex}
 .lm-graine svg{stroke:var(--gold2);fill:none;width:22px;height:22px;display:block}
 
@@ -48,8 +46,7 @@ html.clair #home .lm-bandeau{--panel:#322B28;--panel2:#3C342F;--gold-d:#B5751F;-
 .lm-eyebrow{font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gold2);margin:0}
 .lm-titre{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 6px}
 .lm-h1{font-size:25px;font-weight:900;line-height:1.2;color:var(--cream);margin:0}
-.lm-compte{flex:none;font-size:14px;font-weight:900;color:var(--gold2);padding:4px 10px;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
-.lm-tabs + .lm-ligne{margin:0 0 12px}
+.lmy-compte{flex:none;font-size:14px;font-weight:900;color:var(--gold2);padding:4px 10px;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
 .lm-chips{display:flex;gap:8px;margin:6px 0 4px;flex-wrap:wrap}
 .lm-chip{min-width:48px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--cream);font:inherit;font-size:16px;font-weight:900;cursor:pointer}
 .lm-chip[aria-pressed=true]{border-color:var(--gold2);background:var(--panel2);color:var(--gold2)}
@@ -173,7 +170,7 @@ html.clair #home .lm-bandeau{--panel:#322B28;--panel2:#3C342F;--gold-d:#B5751F;-
 .lm-plus-ic{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:50%;background:linear-gradient(135deg,#F2B960,#D0870D)}
 .plus-item .lm-plus-ic svg{width:22px;height:22px;stroke:#2A1A08;fill:none;stroke-width:2.4}
 
-.lm-o:focus-visible,.lm-btn:focus-visible,.lm-sec:focus-visible,.lm-prix:focus-visible,.lm-chip:focus-visible,.lm-ligne:focus-visible,.lm-ligne-u:focus-visible,.lm-back:focus-visible,.lm-bandeau:focus-visible,.lm-tabs button:focus-visible,.lm-cible:focus-visible,.lm-x:focus-visible,.lm-lien:focus-visible,.lm-source:focus-visible,#lmObjetNeuf .cta:focus-visible,#lmRecompense .cta:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
+.lm-o:focus-visible,.lm-btn:focus-visible,.lm-sec:focus-visible,.lm-prix:focus-visible,.lm-chip:focus-visible,.lm-ligne-u:focus-visible,.lm-back:focus-visible,.lm-bandeau:focus-visible,.lm-tabs button:focus-visible,.lm-cible:focus-visible,.lm-x:focus-visible,.lm-lien:focus-visible,.lm-source:focus-visible,#lmObjetNeuf .cta:focus-visible,#lmRecompense .cta:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
 .lm-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 @media(max-width:360px){.lm-inv{gap:7px}.lm-o{height:72px}.lm-bt{font-size:15px}.lm-h1{font-size:23px}.lm-tabs button{font-size:13px}}
 html.gtexte .lm-actions{grid-template-columns:1fr}
@@ -478,11 +475,6 @@ html .lm7-neuf .lm7-c.on,html.clair .lm7-neuf .lm7-c.on{background:#2A1A0C;borde
 .lm9-w.lu{color:#F2E9DA}
 .lm9-w.ici{color:#F0B75A;text-shadow:0 0 10px rgba(240,183,90,.5)}
 @media(prefers-reduced-motion:reduce){.lm9-w{transition:none}}
-/* la halte (src/film) : même mise en page que l'histoire — l'arabe à 18 px, les sous-titres en haut (son illumination mot à mot existe déjà) */
-#film .fl-st{bottom:auto!important;top:calc(82px + env(safe-area-inset-top,0px) + var(--edge,0px))}
-/* PROVISOIRE (préview seulement) : le film place sa mascotte au-dessus du sous-titre ; avec le sous-titre en haut, il faudra la poser SOUS lui (poserMasc, src/film/index.js) */
-#film #fl-fm{top:50%!important}
-#film .fl-st-in,#film .fl-st-in span{font-size:18px!important}
 /* la Boutique : la carte d'une tenue est CRÈME en mode sombre, MARRON FONCÉ en mode clair ; le prix est une étiquette ; une tenue déjà achetée est grisée */
 html:not(.clair) .lm9-t{background:#F2E9DA;border-color:#D0870D}
 html.clair .lm9-t{background:#2A1A0C;border-color:#7E4808}
@@ -583,7 +575,7 @@ html .lm7-neuf .lm7-c:not(.on){border-color:rgba(242,233,218,.62)}
 #lmObjetNeuf .lm-minis-resume .lm-mini{flex:0 0 calc((100% - 5 * 8px) / 6)}
 /* l'en-tête « Mystère en cours » + « Unité 1x » tient sur une ligne à 360 en grands caractères (le jour où les unités 10 à 12 auront leur histoire) */
 .lm7-indices .lm-titre{gap:8px}
-.lm7-indices .lm-compte{padding:4px 8px}
+.lm7-indices .lmy-compte{padding:4px 8px}
 
 /* LA MASCOTTE du film (comme dans la halte) : posée au sol de l'image, sous le sous-titre et au-dessus des boutons ; elle glisse d'une image à l'autre */
 #lmFilm .lm-masc{position:absolute;left:50%;top:84%;width:calc(var(--s,.34) * 52%);transform:translate(-50%,-100%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;z-index:2;pointer-events:none}
