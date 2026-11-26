@@ -71,9 +71,14 @@ let _homeFocusPending=true;
    fait » ne dit pas « unité en cours » (une unité à un disque est alors finie) : ce n'est que le
    repli quand tout est fini, pour montrer la dernière unité bouclée plutôt que le sommet.
    (journal : ui/accueil.js · focusCurrentDisc) */
+/* une unité à montrer au prochain retour à l'accueil (la page d'échec du test « Reprends à l'unité N ») ; -1 : le disque courant */
+let _homeFocusUnite=-1;
 function focusCurrentDisc(){
   const L=currentLesson();
   let u=L?L.u:-1;
+  /* ⚠️ consommée APRÈS la tâche, pas tout de suite : la couche des Mystères enveloppe renderHome et rappelle ce recentrage dans la foulée —
+     vidée au premier appel, le second renvoyait l'accueil sur le disque courant (26/11) */
+  if(_homeFocusUnite>=0){ u=_homeFocusUnite; setTimeout(function(){ _homeFocusUnite=-1; },0); }
   if(u<0) for(let k=0;k<UNITS.length;k++){ if(S.done&&S.done[dkey(k,0)])u=k; }
   if(u<0)return; // rien commencé : l'écran reste au sommet, sur l'unité 1
   const sec=document.querySelector('#home .unit-sec[data-u="'+u+'"]');

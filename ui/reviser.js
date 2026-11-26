@@ -307,7 +307,7 @@ function resumeGramU10(){
   /* 5 · DANS LA FATIHA */
   var s5=gramSection(
     'Dans la Fātiḥa',
-    '<div class="sgn-chips">'+gramChip('\u062d\u064e\u0645\u0652\u062f\u064f \u0627\u0644\u0644\u0651\u064e\u0670\u0647\u0650','la louange d’Allah')
+    '<div class="sgn-chips">'+gramChip('\u062d\u064e\u0645\u0652\u062f\u064f \u0627\u0644\u0644\u0651\u064e\u0647\u0650','la louange d’Allah')
       +gramChip('\u0631\u064e\u0628\u0651\u064f \u0627\u0644\u0652\u0639\u064e\u0627\u0644\u064e\u0645\u0650\u064a\u0646\u064e','le Seigneur des mondes')+'</div>'+
     '<div class="sgn-chips">'+gramChip('\u0645\u064e\u0627\u0644\u0650\u0643\u064f \u0627\u0644\u0652\u064a\u064e\u0648\u0652\u0645\u0650','le Maître du jour')
       +gramChip('\u064a\u064e\u0648\u0652\u0645\u064f \u0627\u0644\u062f\u0651\u0650\u064a\u0646\u0650','le Jour de la Rétribution')+'</div>',

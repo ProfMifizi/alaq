@@ -182,7 +182,7 @@ const SOURATES=[
     ['la louange','est à Allah','Seigneur','des mondes'],
     ['le Tout-Miséricordieux','le Très-Miséricordieux'],
     ['Souverain','du Jour','de la Rétribution'],
-    ['c\u2019est Toi que','nous adorons','et c\u2019est Toi que','nous implorons l\u2019aide'],
+    ['c\u2019est Toi que','nous adorons','et c\u2019est à Toi que','nous demandons le secours'],
     ['guide-nous','sur le chemin','droit'],
     ['le chemin','de ceux que','Tu as comblés de bienfaits','envers eux','non pas','celui qui a encouru la colère','envers eux','ni','les égarés'],
    ] },

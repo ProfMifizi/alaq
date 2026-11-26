@@ -2,7 +2,8 @@
    son.js — le son d'Alaq : une table, une porte.
    Porte : SND/toggleSound, la translittération (LTRANS, sylBase), la table SONS (semée
    par règles, écrite, composée) avec inscrireLeSon/aLeSon/aUnSon, l'état (_curAudio,
-   _sndGen, stopAudio, quandSonFini), le pool iOS (audioBeni), la porte jouer/jouerFichier
+   _sndGen, _ecranGen, stopAudio — voix, pool et tampon ; {ecran:true} coupe aussi les tons —,
+   quandSonFini), le pool iOS (audioBeni), la porte jouer/jouerFichier
    et ses raccourcis (speak, sayLetterName…), le haut-parleur (spkSVG/spkOn/spkOff), la
    marque sonore (playSfx, comboBonneReponse, okBeep, errorBeep, toc, chime, reveilAudio).
    ⛔ Aucun nom de fichier ne s'assemble au moment de jouer : la table est bâtie au
@@ -327,12 +328,21 @@ function aUnSon(L){ const k='son:'+letterKey(L); return !!SONS[k] && !SANS_SON[k
 
 /* ═══ 4. L'ÉTAT — _sndGen est le jeton de génération : un nouveau son annule les replis
    et minuteries de l'ancien. Il reste dans ce script classique (voir l'en-tête). */
-let _curAudio=null,_sndGen=0;
-function stopAudio(){ // un seul son à la fois : coupe le fichier ET le tampon WebAudio, et invalide les replis en attente
+let _curAudio=null,_sndGen=0,_ecranGen=0;
+/* _ecranGen est le jeton d'ÉCRAN : il avance quand le lecteur change d'écran (stopAudio({ecran:true})), jamais pour un simple son.
+   L'hôte des exercices l'expose (coque.js) : jouerSonPuis ne rappelle pas le `fin` d'un écran mort (journal : son.js · le son qui survivait à CONTINUER). */
+function stopAudio(o){ // un seul son à la fois : coupe le fichier ET le tampon WebAudio, et invalide les replis en attente
   _sndGen++;
   try{ if(typeof suivreArret==='function')suivreArret(); }catch(e){}   // et l'illumination du verset s'éteint avec lui
   try{ if(_curSrc){ _curSrc.stop(); _curSrc=null; } }catch(e){}
   try{ if(_curAudio){ _curAudio.pause(); _curAudio=null; } }catch(e){}
+  /* ⚠️ Le pool béni ENTIER et le lecteur de secours, en pause (jamais détruits : la bénédiction d'iOS tient à l'élément). Un exercice du
+     registre joue par audioBeni()+play() (jouerSon, jouerSonPuis) sans poserSonCourant() : son élément n'est ni _curAudio ni _curSrc. */
+  try{ _POOL.forEach(function(p){ try{p.pause();}catch(e){} }); }catch(e){}
+  try{ if(_secours)_secours.pause(); }catch(e){}
+  /* Le passage à l'écran suivant coupe AUSSI les tons générés et date l'écran. Un son ordinaire n'y touche pas : la marque sonore
+     se superpose au mot de SON écran, c'est voulu (okBeep, errorBeep, toc, chime ne se coupent qu'en quittant l'écran). */
+  if(o&&o.ecran){ _ecranGen++; _coupeTons(); }
 }
 function quandSonFini(cb){ // rappelle cb à la fin du son EN COURS (filet 2,5 s : silence)
   const gen=_sndGen;let done=false;
@@ -472,6 +482,11 @@ function spkOff(){
    ② un mot de félicitation toutes les COMBO_TOUS bonnes réponses d'affilée ; ③ la clôture
    de leçon (sfx-fin-lecon) (journal : son.js · la marque sonore). */
 const _SFXB={};let _sfxCtx=null,_curSrc=null;
+/* Les tons générés (okBeep, errorBeep, chime, le repli de toc) : leurs oscillateurs sont suivis pour pouvoir être coupés au passage à
+   l'écran suivant — stopAudio({ecran:true}) seulement, jamais par un son ordinaire. */
+const _TONS=new Set();
+function _ton(o){ _TONS.add(o); o.onended=function(){ _TONS.delete(o); }; return o; }
+function _coupeTons(){ _TONS.forEach(function(o){ try{ o.stop(); }catch(e){} }); _TONS.clear(); }
 function chargerSfx(){ // réveille le moteur à chaque geste, décode les sons courts une seule fois
   try{
     _sfxCtx=_sfxCtx||new (window.AudioContext||window.webkitAudioContext)();
@@ -549,7 +564,7 @@ function okBeep(kind){ // sons de réussite (WebAudio, aucun fichier nécessaire
     const t=ac.currentTime;
     const notes=kind==='final'?[[523,0],[659,.09],[784,.18]]:kind==='dot'?[[880,0]]:[[587,0],[880,.08]];
     notes.forEach(n=>{
-      const o=ac.createOscillator(),g=ac.createGain();
+      const o=_ton(ac.createOscillator()),g=ac.createGain();
       o.type='sine';o.frequency.setValueAtTime(n[0],t+n[1]);
       g.gain.setValueAtTime(0.0001,t+n[1]);
       g.gain.exponentialRampToValueAtTime(0.13,t+n[1]+0.02);
@@ -564,7 +579,7 @@ function errorBeep(){
     const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
     const ac=window._ac||(window._ac=new Ctx());
     if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
-    const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+    const t=ac.currentTime, o=_ton(ac.createOscillator()), g=ac.createGain();
     o.type='square'; o.frequency.setValueAtTime(200,t);
     o.frequency.exponentialRampToValueAtTime(110,t+0.18);
     g.gain.setValueAtTime(0.0001,t);
@@ -580,7 +595,7 @@ function toc(){ // l'erreur : deux frappes du timbre Bayātī, +1,5 puis −1,5 
   try{
     _tocCtx=_tocCtx||new (window.AudioContext||window.webkitAudioContext)();
     if(_tocCtx.state!=='running')_tocCtx.resume(); // iOS : couvre aussi l'état « interrupted »
-    const o=_tocCtx.createOscillator(),g=_tocCtx.createGain();
+    const o=_ton(_tocCtx.createOscillator()),g=_tocCtx.createGain();
     o.frequency.setValueAtTime(170,_tocCtx.currentTime);
     o.frequency.exponentialRampToValueAtTime(110,_tocCtx.currentTime+.12);
     g.gain.setValueAtTime(.22,_tocCtx.currentTime);
@@ -595,7 +610,7 @@ function chime(){ // petit carillon doux (arpège A5·D6·G6) — Web Audio, san
     var ac=chime._ac||(chime._ac=new AC()); if(ac.state!=='running')ac.resume(); // iOS : couvre aussi l'état « interrupted »
     var t=ac.currentTime;
     [[880,0],[1174.66,0.09],[1567.98,0.18]].forEach(function(p){
-      var o=ac.createOscillator(), g=ac.createGain();
+      var o=_ton(ac.createOscillator()), g=ac.createGain();
       o.type='sine'; o.frequency.value=p[0]; var s=t+p[1];
       g.gain.setValueAtTime(0.0001,s);
       g.gain.exponentialRampToValueAtTime(0.16,s+0.02);

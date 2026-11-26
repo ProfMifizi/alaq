@@ -257,6 +257,9 @@
   .opts.grid3,.opts.grid2.colonne{grid-template-columns:minmax(0,1fr);gap:10px}
   .opts.grid3 .opt:has(> .ar),.opts.grid2.colonne .opt:has(> .ar){padding:15px 10px 1px;min-height:0}
   .opts.grid3 .opt:has(> .spk){padding:14px 10px;min-height:0}
+  /* Le test « Avancer ici », quatre sens : 2 × 2 (validé le 18/11), deux rangées de même hauteur (sauf en grands caractères et sur écran court, où l'écran défile déjà) ;
+     en colonne quand un sens laisse un mot seul sur sa 2ᵉ ligne et que la colonne tient sans défiler (deux-cartes.js). */
+  @media (min-height:641px){ html:not(.gtexte) .opts.grid2.sens4:not(.colonne){grid-auto-rows:1fr} }
   /* Écran court : la 3ᵉ carte tient si le haut de page se serre (quiz à trois cartes, lettre-soeur et sg-choix compris). Ni le texte ni la carte de mot ne rétrécissent ; le haut-parleur, si. */
   @media (max-height:640px){
     #p-body:has(.opts.grid3,.lsr-choix,.sg-choix){padding-top:0}
@@ -569,6 +572,11 @@
   #p-body.p-examfr{display:flex;flex-direction:column}
   .exam-fr{flex:1;display:grid;place-items:center;text-align:center;font-size:22px;font-weight:700;color:var(--cream);padding:10px 0}
   .exam-fr img{display:block;max-width:160px;max-height:160px;margin:0 auto 10px;object-fit:contain}
+  /* Le test « Avancer ici » (#player.exam, posée par renderStep) mêle des écrans des unités 9, 10 et 11 : un même rôle y garde UNE taille, d'où que vienne l'écran
+     (le français à corriger en doré 22 px, les blocs français 18 px) ; un titre ne laisse jamais un mot seul sur sa dernière ligne. */
+  #player.exam #p-body .clv-enonce.dore{font-size:22px;line-height:1.35}
+  #player.exam #p-body .odb-bloc.fr{font-size:18px}
+  #player.exam #p-body .q-title{text-wrap:balance}
   .undo{display:block;margin:14px auto 0;background:none;border:none;color:var(--muted);font-weight:800;font-size:14px}
 
   .trow{display:flex;gap:10px;justify-content:center;margin-top:14px}
@@ -1695,6 +1703,11 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
 .fin-score{margin:6px 0 18px}
 .fin-score .fs-v{display:block;font-size:42px;font-weight:900;color:var(--gold2);line-height:1}
 .fin-score .fs-l{color:var(--muted);font-size:13px;font-weight:700}
+/* la page d'échec du test « AVANCER ICI ? » : le compte, l'unité où reprendre, puis « Refaire le test » en lien (18/11) */
+.fin-rates{color:var(--muted);font-size:15px;font-weight:700;margin:-14px 0 22px}
+.fin-reprends{color:var(--cream);font-size:20px;font-weight:800;margin:0 0 16px}
+.fin-lien{background:none;border:none;padding:10px 14px;color:var(--gold2);font:800 16px Nunito,sans-serif;cursor:pointer;
+  text-decoration:underline;text-underline-offset:4px;-webkit-tap-highlight-color:transparent}
 .rbar-dots i{cursor:pointer}
 .rk-big{font-family:var(--quran);font-size:64px;color:var(--gold);line-height:1.15;margin-top:6px}
 .rk-stats{font-family:var(--ui);font-size:12.5px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:10px;line-height:1.6}

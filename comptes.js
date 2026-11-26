@@ -440,6 +440,8 @@ async function doReset(){
      que le garde du diff ne la prenne pas pour une réaffectation inconnue. */
   try{ SYNC.reset(); }catch(e){}
   try{localStorage.removeItem('alaq2');}catch(e){}
+  try{localStorage.removeItem('alaq_exam_vus');}catch(e){}   // la mémoire des tirages des tests « Avancer ici » est une clé d'appareil (parcours.js · les reprises du test) : elle part avec la progression
+  try{localStorage.removeItem('alaq_clavier_invite');}catch(e){}   // l'invite du clavier (« touche le texte ») est une clé d'appareil (exercices/_clavier-edition.js) : elle revient avec une progression neuve
   /* Le tampon _refonte survit à l'effacement : il décrit ce que cet appareil sait du serveur, pas la
      progression. Sans lui, un cloudPull joué avant la purge distante adopterait le blob du nuage et
      rendrait la progression effacée (journal : comptes.js · le tampon de refonte survit). */

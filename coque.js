@@ -70,6 +70,7 @@ window.__alaqHoteU8 = {
   get S(){ return S; },  get QUEUE(){ return QUEUE; },  get qi(){ return qi; },
   get MISSED(){ return MISSED; },  get curU(){ return curU; },
   get _sndGen(){ return _sndGen; },
+  get _ecranGen(){ return _ecranGen; },   // le jeton d'écran : un rappel armé sur l'écran d'avant ne revient pas sur le suivant (jouerSonPuis)
   get REVIEW(){ return REVIEW; },  get RECHARGE(){ return RECHARGE; },
   get EXAM(){ return EXAM; },      get inRetry(){ return inRetry; },
   /* les deux écritures */
@@ -202,6 +203,7 @@ function noHeartsRedo(){
   if(L&&lecteurPret())startDisque(L.u,L.i,true);
 }
 function goNoHearts(){
+  stopAudio({ecran:true});   // CONTINUER à 0 qatra quitte l'écran : sa voix ne le suit pas
   /* la leçon qu'on quitte : c'est ELLE qu'on reprendra. L'évaluation n'a pas de rang : sans ça RECOMMENCER levait, et la leçon suivante finissait en évaluation */
   _repriseL=EXAM?null:{u:curU,i:curD};
   EXAM=false;
@@ -218,12 +220,12 @@ function escHTML(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;'; }); }
 
 /* ⚠️ BUILD, BUILD_DATE, VERSION et BUILD_NUM restent dans ce fichier : outils/verifier-version.mjs les y lit. */
-const BUILD='mysteres-ouverts-26nov';
+const BUILD='evaluations-avancer-ici-26nov';
 window.BUILD=BUILD; // lisible par la page de diagnostic (le mouchard affiche quelle version tourne VRAIMENT)
 /* Date et heure de la livraison, affichées dans Paramètres › « Version de l’app » (journal : index.html · la date et l'heure de livraison) : ISO AAAA-MM-JJTHH:MM,
    heure de Paris (dateHeureFr la met en français). ⚠️ posée au moment de livrer, et sa date est celle
    du cache de sw.js (alaq-vNNN-AAAA-MM-JJ) : le portillon l'exige. */
-const BUILD_DATE='2026-11-26T06:13';
+const BUILD_DATE='2026-11-26T07:50';
 window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les harnais et le diagnostic
 /* VERSION est pour l'élève, décidée par Myriam au GO (mineur : du nouveau ou une étape de structure ;
    correctif : une réparation ; majeur : une autre app). BUILD_NUM est pour nous : le compteur du cache
@@ -231,7 +233,7 @@ window.BUILD_DATE=BUILD_DATE; // même raison que window.BUILD : lisible par les
    3.23 : la grammaire de l’annexion entre dans Réviser et dans le Cours, la première vidéo
    arrive, et la main qui montre le geste passe à 5 s partout (GO de Myriam, 26/09). */
 const VERSION='3.32';
-const BUILD_NUM=289;
+const BUILD_NUM=290;
 window.VERSION=VERSION; window.BUILD_NUM=BUILD_NUM; // lisibles par les harnais et le diagnostic
 
 /* ================= JOUEUR ================= */
