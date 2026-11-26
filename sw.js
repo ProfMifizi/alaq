@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v295-2026-11-26';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v296-2026-11-26';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -27,12 +27,27 @@ const IMGCACHE='alaq-images-v'+IMGV;
    ⛔ Hors de CORE : addAll est atomique, le CDN ferait échouer toute l'installation.
    (journal : sw.js · le bundle supabase pré-caché) */
 const SUPABASE_JS='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js';
-const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','vitrine.js','squelette.js','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','coque.js','rail-ordinateur.js','ciel-v1.js','ciel-v2.js','coran.js','serie-mots.js','rappels.js','mysteres-chargeur.js','content/unites.js','confidentialite.html','conditions.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png','icone-alaq-192.png','icone-alaq-512.png','icone-alaq-apple-180.png','polices/scheherazade-new-sws-v1.woff2'];
+const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','vitrine.js','squelette.js','assets.js','trace-lettres.js','donnees.js','generateurs.js','son.js','progression.js','parcours.js','ui/accueil.js','ui/navigation.js','ui/parametres.js','ui/reviser.js','revision.js','signalements.js','constance.js','comptes.js','bulles-tutoriels.js','coque.js','rail-ordinateur.js','ciel-v1.js','ciel-v2.js','coran.js','serie-mots.js','rappels.js','mysteres-chargeur.js','mysteres/diya.css','mysteres/carte.css','mysteres/couche.css','mysteres/diya.js','mysteres/carte-donnees.js','mysteres/carte.js','mysteres/donnees.js','mysteres/couche.js','content/unites.js','confidentialite.html','conditions.html','polices/polices.css','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png','icone-alaq-192.png','icone-alaq-512.png','icone-alaq-apple-180.png','polices/scheherazade-new-sws-v1.woff2'];
 /* Chemins du cœur résolus contre l'URL du sw (racine en prod, sous-dossier en local), dérivés
    à l'exécution : ce que le build ajoute à CORE (le paquet u8) y entre tout seul. */
 const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
 const RACINE_SW=new URL('.',self.location.href).pathname;   // '/' en prod, '/dist/' ou '/alaq-vercel-static/' en local
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
+/* les indices des Mystères de Diya (Myriam, 26/11 : disparus de l'accueil avec un réseau faible) */
+"images-app-alaq/mysteres/indices/bulle-avant-forte.webp",
+"images-app-alaq/mysteres/indices/bulle-dos-forte.webp",
+"images-app-alaq/mysteres/indices/bulle-icone.webp",
+"images-app-alaq/mysteres/indices/couverture-v3.webp",
+"images-app-alaq/mysteres/indices/decor.webp",
+"images-app-alaq/mysteres/indices/feuillet.webp",
+"images-app-alaq/mysteres/indices/jarres.webp",
+"images-app-alaq/mysteres/indices/lanterne.webp",
+"images-app-alaq/mysteres/indices/lune.webp",
+"images-app-alaq/mysteres/indices/natte.webp",
+"images-app-alaq/mysteres/indices/porte.webp",
+"images-app-alaq/mysteres/indices/sacs.webp",
+"images-app-alaq/mysteres/indices/sandales.webp",
+"images-app-alaq/mysteres/indices/venir.webp",
 "images-app-alaq/icone-isl-pilier-v1.png",
 "images-app-alaq/icone-isl-plus-v1.png",
 "images-app-alaq/icone-isl-coran-v1.png",
