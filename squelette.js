@@ -312,8 +312,8 @@
 <div class="finish" id="obAccount">
   <!-- ⚠️ .ic2 à deux fichiers (nuit / -clair), comme les autres icônes d'écran : sinon l'icône crème
        s'efface sur le parchemin du mode clair. (journal : index.html · icône du compte en mode clair) -->
-  <span class="ic2"><img class="o-nuit" data-ico="ecran-compte" src="images-app-alaq/icone-ecran-compte.png" alt="" style="width:88px;height:auto"><img class="o-jour" src="images-app-alaq/icone-ecran-compte-clair.png" alt="" style="width:88px;height:auto"></span>
-  <h2 id="obAccountTitle">Sauvegarde ta progression</h2>
+  <span class="ic2 cx-film"><picture class="o-nuit"><source media="(prefers-reduced-motion: reduce)" srcset="images-app-alaq/connexion-mascotte-fixe-nuit.png"><img src="images-app-alaq/connexion-mascotte-nuit.gif" alt="" width="230" height="230"></picture><picture class="o-jour"><source media="(prefers-reduced-motion: reduce)" srcset="images-app-alaq/connexion-mascotte-fixe-jour.png"><img src="images-app-alaq/connexion-mascotte-jour.gif" alt="" width="230" height="230"></picture></span>
+  <h2 id="obAccountTitle">Inscris-toi !</h2>
   <p id="obQuote" style="max-width:330px;color:var(--muted);font-size:12px;margin:0 0 16px;font-style:italic">« Les actes les plus aimés d'Allah sont les plus constants, même s'ils sont peu » — Bukhari &amp; Muslim</p>
   <div id="obAccountCard" style="width:100%;max-width:320px"></div>
   <!-- 30/09 : même bouton et même taille que « Recevoir mon code » (.cbtn) — il était plus GROS (.cta, 24 px) et poussait à ne pas s'inscrire ; seul le contour le met en second -->
@@ -327,30 +327,11 @@
     /* « Content de te revoir ! » : la connexion à un compte existant (comptes.js) */
     `
 <div class="finish" id="obLogin">
-  <svg viewBox="0 0 200 236" style="width:96px;height:auto" aria-hidden="true">
-    <defs><radialGradient id="obgl"><stop offset="0" stop-color="#FFD98A" stop-opacity=".95"/><stop offset="52%" stop-color="#F0A73C" stop-opacity=".33"/><stop offset="100%" stop-color="#F0A73C" stop-opacity="0"/></radialGradient></defs>
-    <ellipse cx="100" cy="126" rx="98" ry="102" fill="url(#obgl)"/>
-    <circle cx="100" cy="22" r="14" fill="none" stroke="#B9B2AC" stroke-width="7"/>
-    <rect x="92" y="32" width="16" height="18" rx="8" fill="#EFA63C"/>
-    <path d="M60 80 Q24 88 24 130 L24 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
-    <path d="M140 80 Q176 88 176 130 L176 186" fill="none" stroke="#EFA63C" stroke-width="14" stroke-linecap="round"/>
-    <path d="M54 76 Q56 44 100 44 Q144 44 146 76 Z" fill="#EFA63C"/>
-    <ellipse cx="80" cy="60" rx="8" ry="11" fill="#FFD98A" opacity=".7" transform="rotate(-25 80 60)"/>
-    <rect x="48" y="74" width="104" height="13" rx="6.5" fill="#E39B2E"/>
-    <path d="M60 90 H140 Q148 134 134 172 H66 Q52 134 60 90 Z" fill="#F7EBC0"/>
-    <path d="M70 100 Q66 128 72 152" fill="none" stroke="#FFF8E0" stroke-width="6" stroke-linecap="round" opacity=".75"/>
-    <ellipse cx="82" cy="120" rx="13" ry="16" fill="#fff"/><ellipse cx="118" cy="120" rx="13" ry="16" fill="#fff"/>
-    <ellipse cx="84" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/><ellipse cx="120" cy="122" rx="7.5" ry="10" fill="#1B2A3A"/>
-    <circle cx="81" cy="117" r="2.8" fill="#fff"/><circle cx="117" cy="117" r="2.8" fill="#fff"/>
-    <path d="M88 142 Q100 152 112 142" fill="none" stroke="#E2622A" stroke-width="5.5" stroke-linecap="round"/>
-    <path d="M64 172 H136 L142 194 H58 Z" fill="#EFA63C"/>
-    <rect x="46" y="193" width="108" height="14" rx="7" fill="#E8A94F"/>
-    <rect x="70" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(12 79 203)"/>
-    <rect x="112" y="203" width="18" height="30" rx="9" fill="#F58A22" transform="rotate(-12 121 203)"/>
-  </svg>
-  <h2 style="margin:10px 0 14px">Content de te revoir !</h2>
+  <span class="ic2 cx-film"><picture class="o-nuit"><source media="(prefers-reduced-motion: reduce)" srcset="images-app-alaq/connexion-mascotte-fixe-nuit.png"><img src="images-app-alaq/connexion-mascotte-nuit.gif" alt="" width="230" height="230"></picture><picture class="o-jour"><source media="(prefers-reduced-motion: reduce)" srcset="images-app-alaq/connexion-mascotte-fixe-jour.png"><img src="images-app-alaq/connexion-mascotte-jour.gif" alt="" width="230" height="230"></picture></span>
+  <h2 id="obLoginTitle" style="margin:10px 0 4px">Ah enfin te voilà !</h2>
+  <p class="cx-sous" id="obLoginSous">Je commençais à m’ennuyer…</p>
   <div id="obLoginCard" style="width:100%;max-width:320px"></div>
-  <button class="cbtn" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:14px" id="obLoginBack" onclick="obLoginClose()">Retour</button>
+  <button class="cbtn" style="max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:14px" id="obLoginBack" onclick="obInscrire()">S’inscrire</button>
   <button class="cbtn" id="obLoginPasMoi" style="display:none;max-width:320px;background:none;color:var(--cream);border:2px solid var(--line);margin-top:14px" onclick="obPasMoi()">Ce n’est pas moi</button>
 </div>
 `,

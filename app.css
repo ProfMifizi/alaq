@@ -3046,3 +3046,11 @@ html.clair .cor-voile{background:rgba(36,29,20,.35)}
 .cor-ok{background:var(--gold);border:none;color:var(--on-gold,#2A1A05)}
 .cor-suppr{background:none;border:1.5px solid #E2483D;color:#E2483D}
 html.clair .cor-suppr{border-color:#B3261E;color:#B3261E}
+
+/* Les deux écrans de compte (connexion « Ah enfin te voilà ! » et inscription « Inscris-toi ! ») : le film de la mascotte, fond de la page, bord fondu par un masque,
+   plafonné à la hauteur de l'écran (journal : comptes.js · les deux écrans de compte). .ic2 donne la paire nuit / jour. */
+.cx-film{display:block;margin:0 0 4px;line-height:0}
+.cx-film picture,.cx-film img{width:min(230px,28vh);height:min(230px,28vh)}
+.cx-film img{display:block;-webkit-mask-image:radial-gradient(closest-side,#000 80%,transparent 100%);mask-image:radial-gradient(closest-side,#000 80%,transparent 100%)}
+.cx-code .cx-film picture,.cx-code .cx-film img{width:min(230px,16vh);height:min(230px,16vh)}   /* le code est demandé : plus petit (390×700 tient sans défilement) */
+.cx-sous{margin:0 0 14px;color:var(--muted);font-family:var(--ui);font-size:15px;line-height:1.4;text-align:center}

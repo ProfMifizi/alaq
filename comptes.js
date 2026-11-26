@@ -2,7 +2,8 @@
    · le compte (Supabase, code par e-mail) : cloudCardHTML, cloudMailInput / cloudCodeInput,
      cloudSendCode (la sonde « compte existant ? », mémorisée dans window._cloudProbe),
      cloudApplyVerdict, cloudVerify, cloudLogout ;
-   · le verrou de déconnexion : VERROU_CONNEXION, verrouConnexion, verrouLibere, obLoginOpen / obLoginClose, obPasMoi ;
+   · le verrou de déconnexion : VERROU_CONNEXION, verrouConnexion, verrouLibere, obLoginOpen / obLoginClose / obInscrire, obPasMoi ;
+     et la connexion laissée en plan (« J'ai déjà un compte » sans se connecter : le repère d'appareil alaq_cnx rouvre la page de connexion) ;
    · l'onboarding : onbStart, onbShow, onbNext, onbBack, onbExistingAccount, onbLaunchLesson, la
      délégation des clics sur #onb .ob-opt, onbPrenomInput, et l'écran « Sauvegarde ta progression » :
      obAccTitle, showObAccount, obAccountClose, obLaterWarn, obLaterCancel, obLaterConfirm ;
@@ -68,8 +69,16 @@ async function cloudSendCode(btn){
       if(r&&r.error)throw r.error;
     }else{
       const probe=await SB.auth.signInWithOtp({email:em,options:{shouldCreateUser:false}});
-      known=!(probe&&probe.error);
-      if(!known){ const r=await SB.auth.signInWithOtp({email:em}); if(r&&r.error)throw r.error; }
+      const pe=probe&&probe.error; known=!pe;
+      if(!known){
+        /* la page de connexion (pas de case de consentement) ne crée JAMAIS un compte en silence : un e-mail inconnu mène au parcours d'inscription, l'adresse gardée
+           pour l'écran d'inscription (Myriam, 25/11). */
+        var lg=document.getElementById('obLogin');
+        if(!document.getElementById('cloudRgpd')&&lg&&lg.classList.contains('on')){
+          /* « Signups not allowed for otp » (422) = aucun compte pour cette adresse ; toute autre erreur (réseau, limite de débit) n'est PAS un compte inconnu : on la remonte */
+          if(!(pe&&(pe.status===422||/signups? not allowed|otp_disabled/i.test(String(pe.message||'')+String(pe.code||'')))))throw pe;
+          window._cnxEmail=em; if(btn)btn.disabled=false; obInscrire(); return; }
+        const r=await SB.auth.signInWithOtp({email:em}); if(r&&r.error)throw r.error; }
       window._cloudProbe={em:em,known:known};
     }
     window._cloudEmail=em;
@@ -84,6 +93,7 @@ async function cloudSendCode(btn){
    l'écran devient « Tu as déjà un compte » et il ne reste que l'e-mail et le code.
    Fonction séparée : outils/verifier-comptes.mjs la rejoue. */
 function cloudApplyVerdict(known,em){
+  var lgx=document.getElementById('obLogin'); if(lgx)lgx.classList.add('cx-code');   // le code est demandé : le film de la mascotte rapetisse (le champ du code s'ajoute, le clavier s'ouvre)
   const k=document.getElementById('cloudKnown'); if(k)k.style.display=known?'block':'none';
   const nw=document.getElementById('cloudNew'); if(nw)nw.style.display=known?'none':'block';
   const ec=document.getElementById('cloudMailEcho'); if(ec)ec.textContent=em||'';
@@ -167,7 +177,7 @@ async function cloudLogout(){
   // ⚠️ typeof : devant un progression.js de la 3.18 (course d'activation du service worker), le disque est vidé comme en 3.18.
   // ⛔ Rien ne s'efface en silence (Myriam, 30/09) : ce que la file n'a pas encore livré passe aussi par l'unique mise de côté.
   try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre())&&typeof SYNC.mettreDeCote==='function')SYNC.mettreDeCote(); }catch(e){}
-  try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre()))localStorage.setItem('alaq2','{"_fresh":1}'); }catch(e){}
+  try{ if(!(typeof SYNC.redemarre==='function'&&SYNC.redemarre())){ localStorage.setItem('alaq2','{"_fresh":1}'); localStorage.setItem('alaq_cnx','1'); } }catch(e){}   // déconnectée : au prochain démarrage, la page de connexion (alaq_cnx), pas l'onboarding
   try{ if(_rendu)await Promise.race([_rendu,new Promise(function(r){ setTimeout(r,2500); })]); }catch(e){}
   location.reload();
 }
@@ -228,6 +238,9 @@ function onbExistingAccount(){ // élève existante sur un appareil neuf : le nu
   S.onboarded=1; S.tutHome=1; S._fresh=1; save();
   document.getElementById('onb').classList.remove('on');
   if(CLOUD.user){ cloudPull(); showTab('home'); toast('Bon retour'); return; } // session encore vivante : AUCUNE reconnexion à saisir
+  /* « J'ai déjà un compte » dit, connexion pas finie : le repère d'APPAREIL (jamais dans S) fait rouvrir la page de connexion
+     au prochain démarrage, au lieu de l'accueil d'un appareil sans compte. (journal : comptes.js · la connexion laissée en plan) */
+  try{ localStorage.setItem('alaq_cnx','1'); }catch(e){}
   obLoginOpen();
 }
 /* Se reconnecter : un écran à part, e-mail puis code, rien d'autre (sur l'onglet Progrès, l'élève
@@ -246,7 +259,14 @@ function verrouConnexion(){
   try{
     if(!SB)return;              // ① on ne peut pas savoir → on n'enferme pas
     if(CLOUD.user)return;       // connectée : rien à faire
-    if(!S._uid&&!S._uidVu)return;          // ② appareil qui n'a jamais eu de compte (ni lu, ni REVENDIQUÉ) : inscription libre
+    if(!S._uid&&!S._uidVu){                // ② appareil qui n'a jamais eu de compte (ni lu, ni REVENDIQUÉ) : inscription libre
+      /* … sauf « J'ai déjà un compte » dit puis laissé en plan (alaq_cnx) : la page de connexion se rouvre. Ce n'est PAS le verrou :
+         « Retour » reste permis. Jamais si une session dort dans le stockage, ni si la page est déjà ouverte (obLoginOpen refait la
+         carte : un e-mail en cours de frappe serait perdu). */
+      try{ if(localStorage.getItem('alaq_cnx')==='1'&&!(typeof SYNC.sessionPresente==='function'&&SYNC.sessionPresente())){
+        var lg=document.getElementById('obLogin'); if(lg&&!lg.classList.contains('on'))obLoginOpen(); } }catch(e){}
+      return;
+    }
     /* ①bis une session dort encore dans le stockage, illisible (hors ligne, jeton expiré : getSession rend null) : on ne
        sait pas → on n'enferme pas. Le verrou viendra si le serveur la refuse au retour du réseau. */
     try{ if(typeof SYNC.sessionPresente==='function'&&SYNC.sessionPresente())return; }catch(e){}
@@ -259,6 +279,7 @@ function verrouConnexion(){
     var pn=String(S.prenom||'').trim();
     if(t)t.textContent=(pn&&pn.length<=24&&!/\S{16,}/.test(pn))?'Reconnecte-toi, '+pn:'Reconnecte-toi pour continuer';
     var b=document.getElementById('obLoginBack'); if(b)b.style.display='none';
+    var so=document.getElementById('obLoginSous'); if(so)so.style.display='none';   // « Reconnecte-toi, … » n'a pas de sous-titre
     var pm=document.getElementById('obLoginPasMoi'); if(pm)pm.style.display='';
     obLoginOpen();
     titreQuiTient(t); try{ document.fonts.ready.then(function(){ titreQuiTient(t); }); }catch(e){}   // re-mesuré quand les polices sont là
@@ -274,7 +295,8 @@ function titreQuiTient(t){
 }
 function verrouLibere(){
   VERROU_CONNEXION=false;
-  var t=document.querySelector('#obLogin h2'); if(t)t.textContent='Content de te revoir !';
+  try{ localStorage.removeItem('alaq_cnx'); }catch(e){}   // une session existe : la connexion annoncée est faite
+  var t=document.querySelector('#obLogin h2'); if(t)t.textContent='Ah enfin te voilà\u202f!'; var so=document.getElementById('obLoginSous'); if(so)so.style.display='';
   var b=document.getElementById('obLoginBack'); if(b)b.style.display='';
   var pm=document.getElementById('obLoginPasMoi'); if(pm)pm.style.display='none';
 }
@@ -294,14 +316,25 @@ function obLoginOpen(){
   ['cloudEmail','cloudRgpd','cloudCode','cloudStep2','cloudSendBtn','cloudVerifyBtn','cloudKnown','cloudNew','cloudMailEcho']
     .forEach(function(id){ var o=document.getElementById(id); if(o&&(!mien||!mien.contains(o))){ var c=o.closest('#obAccountCard,.ccard'); if(c)c.innerHTML=''; } });
   var c=document.getElementById('obLoginCard'); if(c)c.innerHTML=cloudCardHTML('login');
-  document.getElementById('obLogin').classList.add('on');
+  document.getElementById('obLogin').classList.add('on'); document.getElementById('obLogin').classList.remove('cx-code');
   var i=document.getElementById('cloudEmail'); if(i)setTimeout(function(){try{i.focus();}catch(_){}} ,120);
 }
 function obLoginClose(){
   if(VERROU_CONNEXION)return;   // 17/08 : déconnectée, on ne sort pas de la page de connexion
   document.getElementById('obLogin').classList.remove('on');
   var c=document.getElementById('obLoginCard'); if(c)c.innerHTML=''; // pas de #cloudEmail en double avec Progrès
+  /* « Retour » après « J'ai déjà un compte », sans compte : on revient à l'onboarding d'où l'on vient, jamais à l'accueil d'un
+     appareil sans compte (onbExistingAccount avait marqué l'onboarding fait : on le défait, et le repère s'efface). */
+  try{ var cnx=localStorage.getItem('alaq_cnx')==='1'; localStorage.removeItem('alaq_cnx');
+    if(cnx&&!CLOUD.user){ S.onboarded=0; delete S.tutHome; save(); } }catch(e){}
   if(!S.onboarded){ try{onbStart();}catch(_){} } else { try{showTab('home');}catch(_){} }
+}
+/* « S'inscrire » (premier écran, déconnectée) : le parcours d'inscription — l'onboarding, repère alaq_cnx défait ; sur un appareil d'invité qui a déjà fait
+   son onboarding, l'écran d'inscription. Jamais sous le verrou (« Reconnecte-toi » n'a pas ce bouton). */
+function obInscrire(){
+  if(VERROU_CONNEXION)return;
+  var avait=S.onboarded; obLoginClose();
+  if(avait&&S.onboarded){ try{ showObAccount(); }catch(e){} }
 }
 /* « Plus tard » : dire ce qu'on perd. Sans compte, la progression ne vit que dans
    le localStorage de CET appareil — et cloudLogout() le vide (voir sa note). */
@@ -342,7 +375,7 @@ document.addEventListener('click',function(e){
     b.classList.add('sel');
   }
 });
-function obAccTitle(){ return S.prenom?S.prenom+', sauvegarde ta progression.':'Sauvegarde ta progression'; }
+function obAccTitle(){ return 'Inscris-toi\u202f!'; }   // l'écran d'inscription, après la 1re leçon (Myriam, 25/11)
 function onbPrenomInput(v){ S.prenom=(v||'').trim(); save(); var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle(); }
 
 /* Le nom choisi, affiché et modifiable dans la bande du compte : s'il manque, « Choisis ta kunya »
@@ -373,6 +406,7 @@ function savePrenom(){
 }
 function showObAccount(){
   var card=document.getElementById('obAccountCard'); if(card)card.innerHTML=cloudCardHTML();
+  var ci=document.getElementById('cloudEmail'); if(ci&&window._cnxEmail){ ci.value=window._cnxEmail; try{ cloudMailInput(); }catch(e){} }   // l'e-mail tapé sur la page de connexion
   var q=document.getElementById('obQuote'); if(q)q.style.display='';
   var t=document.getElementById('obAccountTitle'); if(t)t.textContent=obAccTitle();
   var lb=document.getElementById('obLaterBtn'); if(lb)lb.style.display='';
