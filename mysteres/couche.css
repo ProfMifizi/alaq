@@ -1,4 +1,4 @@
-/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v17/couche.css) — ne pas retoucher à la main */
+/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v18/couche.css) — ne pas retoucher à la main */
 /* Couche « Les Mystères de Diya » — préview v7 (la v6 plus le bloc « v7 » tout en bas ; les rubriques de la v5 qui ne servent plus sont laissées, inertes). Posée par l'atelier dans la VRAIE app (iframe) : rien de ceci n'est dans src/.
    Jetons de l'app seulement (var(--bg), --panel, --line, --gold2…) pour suivre les deux thèmes ; seules les couleurs de la
    SCÈNE (illustration provisoire) et du sceau (un objet doré) sont fixes. Texte : 13 px au minimum. */
@@ -576,6 +576,12 @@ html .lm7-neuf .lm7-c:not(.on){border-color:rgba(242,233,218,.62)}
 /* l'en-tête « Mystère en cours » + « Unité 1x » tient sur une ligne à 360 en grands caractères (le jour où les unités 10 à 12 auront leur histoire) */
 .lm7-indices .lm-titre{gap:8px}
 .lm7-indices .lmy-compte{padding:4px 8px}
+
+/* 26/11 : « Unité N » et l'instruction sur une ligne ; le titre de chaque image de la collection, sur le cartouche sombre des sous-titres */
+.lm7-indices .lm-titre.lm7-ligne-instr{flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:8px;margin-bottom:10px}
+.lm7-ligne-instr>span{flex:none}
+.lm7-indices .lm7-ligne-instr .lm-instr{flex:1;min-width:0;margin:0;min-height:0;text-align:center}
+.lm7-titre-img{position:absolute;left:6px;right:6px;bottom:6px;background:rgba(24,19,16,.86);border-radius:12px;padding:6px 8px;color:#F2E9DA;font-size:13.5px;font-weight:900;line-height:1.25;text-align:center;text-wrap:balance}
 
 /* LA MASCOTTE du film (comme dans la halte) : posée au sol de l'image, sous le sous-titre et au-dessus des boutons ; elle glisse d'une image à l'autre */
 #lmFilm .lm-masc{position:absolute;left:50%;top:84%;width:calc(var(--s,.34) * 52%);transform:translate(-50%,-100%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;z-index:2;pointer-events:none}

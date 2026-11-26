@@ -293,8 +293,8 @@
   .opt .ar{font-family:var(--ar);font-size:42px;color:var(--gold);line-height:1.55;font-weight:700}
   .opt.sel{border-color:var(--gold);background:#3a312b;box-shadow:inset 0 0 0 1px var(--gold)}
   /* ⛔ en SOMBRE seulement (Myriam, 21/11 : « la sélection sur fond clair, généralisée sur tous les exercices ») : la carte CHOISIE passe en crème,
-     contour doré, texte brun — la préview v6 du film. La bonne réponse validée reste verte, la mauvaise rouge ; la carte retournée (.fopt) garde
-     son rendu ; en clair rien ne change. Garde : previews/_verif_selection_sombre.html */
+     contour doré, texte brun — la préview v6 du film. La bonne réponse validée reste verte, la mauvaise rouge ; la carte retournée (.fopt) a ses
+     propres règles (ses deux faces, crème en sombre, plus bas) ; en clair rien ne change. Garde : previews/_verif_selection_sombre.html */
   html:not(.clair) .opt.sel:not(.fopt):not(.ok):not(.bad){background:#F2E9DA;border-color:#D0870D;box-shadow:inset 0 0 0 1px #D0870D;color:#3A2410}
   html:not(.clair) .opt.sel:not(.fopt):not(.ok):not(.bad) .ar{color:#3A2410}
   .opt.ok{border-color:var(--green);background:var(--green-bg);color:var(--green)}
@@ -1650,6 +1650,30 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
 .opt.fopt.sel .fdevant{border-color:var(--gold);background:#3d3120}
 .opt.fopt.ok .fdevant{border-color:#35a468;background:#26302a}
 .opt.fopt.bad .fdevant{border-color:#d8463a}
+/* en SOMBRE, les cartes à retourner de la révision sont crème comme les autres cartes du lecteur (Myriam, 26/11) : le dos « ؟ » et la face,
+   jaune quand elle est choisie, verte ou rouge au verdict */
+html:not(.clair) #player #p-body .opt.fopt .fface{background:var(--cle-fond);border-color:var(--cle-bord);color:var(--cle-encre)}
+html:not(.clair) #player #p-body .opt.fopt .fface .ar{color:var(--cle-ar)}
+html:not(.clair) #player #p-body .opt.fopt .fdos{color:var(--cle-icone)}
+html:not(.clair) #player #p-body .opt.fopt .fdevant .spk{color:var(--cle-icone)}
+html:not(.clair) #player #p-body .opt.fopt.sel:not(.ok):not(.bad) .fdevant{background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);box-shadow:inset 0 0 0 2px var(--cle-sel-bord);color:var(--cle-sel-encre)}
+html:not(.clair) #player #p-body .opt.fopt.ok .fdevant{background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);box-shadow:inset 0 0 0 2px var(--cle-ok-bord);color:var(--cle-ok-encre)}
+html:not(.clair) #player #p-body .opt.fopt.bad .fdevant{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);box-shadow:inset 0 0 0 2px var(--cle-ko-bord);color:var(--cle-ko-encre)}
+html:not(.clair) #player #p-body .opt.fopt.sel:not(.ok):not(.bad) .fdevant :is(.ar,.spk){color:var(--cle-sel-encre)}
+html:not(.clair) #player #p-body .opt.fopt.ok .fdevant :is(.ar,.spk){color:var(--cle-ok-encre)}
+html:not(.clair) #player #p-body .opt.fopt.bad .fdevant :is(.ar,.spk){color:var(--cle-ko-encre)}
+html:not(.clair) #player #p-body .opt.fopt:is(.ok,.bad){opacity:1}   /* le verdict reste vif, comme les autres cartes */
+/* bilan d'écriture : « Tu as écrit / Il fallait » au pied (Myriam, 26/11) */
+#fb .d9-err{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:10px;row-gap:0;font-size:13px;font-weight:800;flex:1}
+#fb .d9-err em{font-style:normal}
+#fb .d9-err b{font-family:var(--ar);font-size:24px;font-weight:700;line-height:1.5;justify-self:end}
+#fb .d9-err b.ko{color:var(--coral)}
+#fb .d9-err b.ok{color:var(--green)}
+#fb .d9-err i{grid-column:1/-1;font-style:normal;font-size:12px;opacity:.85}
+/* les récompenses « sourate » (la mascotte danse) et « halte » */
+#badgeNeuf .masc-wrap{margin:0 auto}
+#badgeNeuf .bn-halte{width:180px;height:180px;overflow:hidden;border-radius:24px;flex:none}
+#badgeNeuf .bn-halte img{width:180px!important;height:180px!important;max-width:none;max-height:none;margin:0;object-fit:cover;object-position:center 62%;display:block}
 .wtile{background:var(--panel);border:2px solid var(--line);border-radius:14px;
   /* 🔴 LA HAUTEUR SUIT LA POLICE (01/09). La boite etait calee sur 24px ;
      a 36px une ligne de Naskh mesure environ 65px et le mot chevaucherait

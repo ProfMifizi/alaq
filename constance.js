@@ -217,6 +217,7 @@ function badgeSuivant(){
   if(m0&&m0.classList.contains('on'))return;
   if(!file.length){ clearInterval(_badgesMinuteur); _badgesMinuteur=null; return; }
   if(_badgeGene())return;
+  if(file[0].indexOf('fete:')===0){ peindreFete(m0,file[0],file.length-1); return; }
   const b=BADGES.find(x=>x[0]===file[0]);
   if(!b){ file.shift(); save(); return; }
   let m=m0;
@@ -229,13 +230,39 @@ function badgeSuivant(){
   m.classList.add('on');
   confettiBurst(); try{chime();}catch(e){}
 }
+/* les deux récompenses de fin de sourate (Myriam, 26/11) : la mascotte DANSE (pas une image) ; puis la halte débloquée. Chacune une
+   seule fois (S.fetes), dans la file des badges (après les écrans de fin), sans case de succès au Profil. Plus tard : une danse par sourate */
+function peindreFete(m0,id,reste){
+  let m=m0;
+  if(!m){ m=document.createElement('div'); m.className='finish'; m.id='badgeNeuf'; document.body.appendChild(m); }
+  const danse=id==='fete:fatiha', modele=document.querySelector('#finish .masc-wrap');
+  m.innerHTML='<div class="bn-lab">'+(danse?'Sourate terminée':'Halte débloquée')+'</div>'+
+    (danse ? '<div class="masc-wrap">'+(modele?modele.innerHTML.replace(/ id="masc"/,''):'')+'</div>'
+           : '<div class="succ-big bn-img bn-halte pop"><img src="images-app-alaq/recit-naissance/0.1.jpg" alt=""></div>')+
+    '<h2 class="bn-titre">'+(danse?'Al-Fātiḥa':'La porte de la naissance')+'</h2>'+
+    '<button class="cta bn-cta" onclick="badgeVu()">'+(reste?'BADGE SUIVANT':'CONTINUER')+'</button>';
+  m.classList.add('on');
+  confettiBurst();
+  try{ if(danse){ playSfx('fin-lecon'); mascotteDanse(m); } else chime(); }catch(e){}
+}
+function sourateFinie(){
+  try{ return unitValidated(11) && UNITS.every((U,u)=>!U||!U.ready||!U.letters||!U.letters.length||unitValidated(u)); }catch(e){ return false; }
+}
+function feter(){
+  if(!sourateFinie())return;
+  S.fetes=S.fetes||{};
+  ['fatiha','halte'].forEach(id=>{ if(S.fetes[id])return; S.fetes[id]=1; (S.badgesAVoir=S.badgesAVoir||[]).push('fete:'+id); save(); });
+  if((S.badgesAVoir||[]).length) badgesAttendre();
+}
 function badgeVu(){
+  try{ mascotteStop(); }catch(e){}
   const m=document.getElementById('badgeNeuf'); if(m)m.classList.remove('on');
   (S.badgesAVoir||[]).shift(); save();
   if((S.badgesAVoir||[]).length){ setTimeout(badgeSuivant,250); badgesAttendre(); }
 }
 function checkBadges(ctx){
   ctx=ctx||{};
+  feter();
   const nLecons=Object.keys(S.done||{}).length;          // chaque leçon est un pas vers Allah
   [1,2,3,10,20,50,100,200,500,1000].forEach(function(n){ if(nLecons>=n)award('lecons'+n); });
   /* 30/09 : plus de badge « Première leçon terminée » (disque1) — il doublait « 1 leçon terminée » (Myriam) */

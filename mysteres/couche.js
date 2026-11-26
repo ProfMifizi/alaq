@@ -308,7 +308,7 @@ function carteJoueuse(st){
   return '<section class="lm9-carte-w" aria-label="Ma carte joueuse">'+CARTE.html(derniereCarte)+'<button class="lm9-partage" data-lm="partager">'+ICO_PARTAGE+'Partager ma carte</button></section>';
 }
 function tabs(o){
-  return '<nav class="lm-tabs" aria-label="Rubriques du profil">'+[['carte','Profil'],['indices','Indices'],['collection','Collection']].map(([id, lab]) => '<button'+(o===id ? ' aria-current="page"' : '')+' data-lm="onglet:'+id+'">'+lab+'</button>').join('')+'</nav>';
+  return '<nav class="lm-tabs" aria-label="Rubriques du profil">'+[['carte','Profil'],['indices','Mes indices'],['collection','Mes collections']].map(([id, lab]) => '<button'+(o===id ? ' aria-current="page"' : '')+' data-lm="onglet:'+id+'">'+lab+'</button>').join('')+'</nav>';
 }
 /* le Profil est la variante B (décidée par Myriam) : trois volets. Le premier : l'utilisateur, la carte, puis les VRAIS succès ; les blocs que la carte remplace (rang, objectif, parcours, statistiques, compte) sont retirés */
 function profilB(){
@@ -332,13 +332,14 @@ function profilB(){
 /* ——— l'onglet Indices : le mystère en cours, puis les mystères résolus par sourate ——— */
 function pageIndices(){
   const u = uniteEnCours();
-  const entete1 = '<div class="lm-page lm7-indices"><section class="lm7-sect" aria-labelledby="lm7H1"><div class="lm-titre"><h1 class="lm-h1" id="lm7H1">'+(RECIT[u] ? 'Mystère en cours' : 'Mystère à venir')+'</h1><span class="lmy-compte">Unité '+UNITS[u].no+'</span></div>';
-  if(!RECIT[u]) return entete1 + venirHTML(u) + '<button class="lm-sec" data-lm="aller:home">Continuer mon unité</button></section>' + resolus() + '</div>';
+  /* Myriam, 26/11 : plus de titre (l'onglet le dit) ; « Unité N » sur la même ligne que l'instruction */
+  const tete = instr => '<div class="lm-page lm7-indices"><section class="lm7-sect" aria-label="Mystère de l’unité '+UNITS[u].no+'"><div class="lm-titre lm7-ligne-instr"><span class="lmy-compte">Unité '+UNITS[u].no+'</span><p class="lm-instr">'+instr+'</p></div>';
+  if(!RECIT[u]) return tete('') + venirHTML(u) + '<button class="lm-sec" data-lm="aller:home">Continuer mon unité</button></section>' + resolus() + '</div>';
   const r = rec(u), p = poses(u), n = cnt(r), np = cnt(p), tout = np === NB;
   const dispo = r.some((x, k) => x && !p[k]);
   const instr = sel !== null ? 'Touche son emplacement en pointillé.' : dispo ? 'Glisse un indice sur sa silhouette.' : (n < NB ? 'D’autres indices arrivent.' : '');
   /* v16 : le casier est AU-DESSUS de la scène, en une rangée de petites cases : on glisse un indice sans faire défiler la page */
-  let h = entete1 + '<p class="lm-instr">'+instr+'</p>'+inventaire(u)+scene(u, 'assembly');
+  let h = tete(instr)+inventaire(u)+scene(u, 'assembly');
   if(tout) h += RECIT[u] ? '<button class="cta lm-cta" data-lm="film">VOIR L’HISTOIRE</button>' : '<p class="lm-instr">Pas encore de récit pour cette unité.</p>';
   if(n < NB) h += '<button class="lm-sec" data-lm="aller:home">Continuer mon unité</button>';
   return h + '</section>' + resolus() + '</div>';
@@ -362,11 +363,15 @@ function resolus(){
 function pageCollection(){
   const cartes = []; for(let u=0; u<UNITS.length; u++) if(P.collectees[u] && RECIT[u]) cartes.push(u);
   const venir = []; for(let u=0; u<UNITS.length; u++) if(UNITS[u].ready && !RECIT[u]) venir.push(u);
-  let h = '<div class="lm-page lm7-coll"><h1 class="lm-h1">Ma collection</h1>';
-  if(!cartes.length && !P.recitBonus){
+  let h = '<div class="lm-page lm7-coll">';
+  /* la halte rejoint la collection dès que la sourate est finie (Myriam, 26/11) ; chaque image porte son titre, sur un cartouche sombre */
+  const halte = typeof sourateFinie === 'function' && sourateFinie();
+  const titreSur = t => '<span class="lm7-titre-img">'+esc(t)+'</span>';
+  if(!cartes.length && !P.recitBonus && !halte){
     h += '<div class="lm-vide"><span class="lm-m lm5-vm">'+masc(88, true)+'</span><p>Ta scène deviendra ta première carte.</p><button class="lm-sec" data-lm="onglet:indices">Voir mes indices</button></div>';
   }
-  h += '<div class="lm7-vit lm7-vit2'+(cartes.length || P.recitBonus ? '' : ' lm-venir-seul')+'">'+cartes.map(u => '<button class="lm7-tuile" data-lm="film-revoir:'+u+'" aria-label="Revoir l’histoire : '+esc(RECIT[u].titre)+'"><img class="lm7-couv" src="'+DV.base+'couverture-v3.webp" alt=""></button>').join('')+
+  h += '<div class="lm7-vit lm7-vit2'+(cartes.length || P.recitBonus || halte ? '' : ' lm-venir-seul')+'">'+cartes.map(u => '<button class="lm7-tuile" data-lm="film-revoir:'+u+'" aria-label="Revoir l’histoire : '+esc(RECIT[u].titre)+'"><img class="lm7-couv" src="'+DV.base+'couverture-v3.webp" alt="">'+titreSur(RECIT[u].titre)+'</button>').join('')+
+    (halte ? '<button class="lm7-tuile" data-lm="halte" aria-label="Revoir la halte : La porte de la naissance"><img class="lm7-couv" src="images-app-alaq/recit-naissance/0.1.jpg" alt="">'+titreSur('La porte de la naissance')+'</button>' : '')+
     (P.recitBonus ? '<button class="lm7-tuile lm7-tuile-livre" data-lm="bientot" aria-label="'+esc(BONUS.titre)+'">'+LIVRE+'</button>' : '')+
     venir.map(u => '<div class="lm7-tuile lm7-tuile-venir" role="img" aria-label="Mystère à venir, unité '+UNITS[u].no+'"><img class="lm7-couv" src="'+IMG_VENIR()+'" alt=""><span class="lm-venir-leg"><b>'+UNITS[u].no+'</b><i>À venir</i></span></div>').join('')+'</div>';
   return h + '</div>';
@@ -858,6 +863,7 @@ function agir(a, x, y){
     case 'onglet-collection': fermerPopup(); P.onglet = 'collection'; P.page = null; _interne = true; try{ showTab('prog'); } finally { _interne = false; } return;
     case 'film': return lancerFilm(uniteEnCours());
     case 'film-revoir': return lancerFilm(+x);
+    case 'halte': return window.__alaqRecit ? window.__alaqRecit.ouvrir({quandFerme:function(){}}) : undefined;
     case 'fermer-film': return fermerFilm();
     case 'pause': return pause();
     case 'suite': return avancer();
