@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v296-2026-11-26';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v297-2026-11-26';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -33,6 +33,22 @@ const CORE=['.','index.html','u8/u8.js','u8/u8.css','app.css','vitrine.js','sque
 const COEUR=new Set(CORE.filter(u=>u!=='.'&&u!=='index.html').map(u=>new URL(u,self.location.href).pathname));
 const RACINE_SW=new URL('.',self.location.href).pathname;   // '/' en prod, '/dist/' ou '/alaq-vercel-static/' en local
 const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques sont vides
+/* la carte du profil et la Boutique (Myriam, 26/11 : « range les images ») */
+"images-app-alaq/mysteres/carte/coin-epi.webp",
+"images-app-alaq/mysteres/carte/etiquette-vide.webp",
+"images-app-alaq/mysteres/carte/fond-aube.webp",
+"images-app-alaq/mysteres/carte/fond-automne.webp",
+"images-app-alaq/mysteres/carte/fond-ete.webp",
+"images-app-alaq/mysteres/carte/fond-hiver.webp",
+"images-app-alaq/mysteres/carte/fond-mecque.webp",
+"images-app-alaq/mysteres/carte/fond-nuit.webp",
+"images-app-alaq/mysteres/carte/fond-printemps.webp",
+"images-app-alaq/mysteres/carte/fond-ramadan.webp",
+"images-app-alaq/mysteres/carte/icone-boutique.webp",
+"images-app-alaq/mysteres/carte/icone-cadenas.webp",
+"images-app-alaq/mysteres/carte/icone-epi.png",
+"images-app-alaq/mysteres/carte/icone-graine.webp",
+"images-app-alaq/mysteres/carte/icone-livre.webp",
 /* les indices des Mystères de Diya (Myriam, 26/11 : disparus de l'accueil avec un réseau faible) */
 "images-app-alaq/mysteres/indices/bulle-avant-forte.webp",
 "images-app-alaq/mysteres/indices/bulle-dos-forte.webp",
