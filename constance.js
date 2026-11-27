@@ -286,17 +286,18 @@ function yesterday(){ return _addDays(today(),-1); } // la veille DANS LE MÊME 
 /* ===== Rang de constance : 50% constance · 30% révision · 20% apprentissage ===== */
 const RANKS=[
  {ar:'النية',    tr:'An-Niyya',    fr:'l’intention', min:0,   epi:0,  desc:'Tout commence par l’intention. Tu t’es lancée sur le chemin — bismillah.'},
- {ar:'الهمّة',   tr:'Al-Himma',    fr:'l’élan',      min:10,  epi:2,  desc:'L’élan du cœur : l’envie sincère qui te met en mouvement.'},
- {ar:'الاجتهاد', tr:'Al-Ijtihād',  fr:'l’effort',    min:25,  epi:4,  desc:'L’effort régulier. Tu t’exerces, jour après jour.'},
- {ar:'المثابرة', tr:'Al-Muthābara',fr:'l’assiduité', min:50,  epi:7,  desc:'L’assiduité : tu reviens fidèlement, même un peu chaque jour.'},
- {ar:'الصبر',    tr:'Aṣ-Ṣabr',     fr:'la patience', min:100, epi:14, desc:'La patience dans la durée, malgré la fatigue. On tient bon.'},
- {ar:'الاستقامة',tr:'Al-Istiqāma', fr:'la constance',min:200, epi:30, desc:'La constance ancrée : la régularité est devenue une habitude.'},
- {ar:'النور',    tr:'An-Nūr',      fr:'la lumière',  min:300, epi:60, desc:'La lumière : la lecture du Livre t’illumine. Garde cette station en restant constante — entretiens par la révision.'},
+ {ar:'الهمّة',   tr:'Al-Himma',    fr:'l’élan',      min:10,  epi:7,  desc:'L’élan du cœur : l’envie sincère qui te met en mouvement.'},
+ {ar:'الاجتهاد', tr:'Al-Ijtihād',  fr:'l’effort',    min:25,  epi:14, desc:'L’effort régulier. Tu t’exerces, jour après jour.'},
+ {ar:'المثابرة', tr:'Al-Muthābara',fr:'l’assiduité', min:50,  epi:21, desc:'L’assiduité : tu reviens fidèlement, même un peu chaque jour.'},
+ {ar:'الصبر',    tr:'Aṣ-Ṣabr',     fr:'la patience', min:100, epi:28, desc:'La patience dans la durée, malgré la fatigue. On tient bon.'},
+ {ar:'الاستقامة',tr:'Al-Istiqāma', fr:'la constance',min:200, epi:56, desc:'La constance ancrée : la régularité est devenue une habitude.'},
+ {ar:'النور',    tr:'An-Nūr',      fr:'la lumière',  min:300, epi:84, desc:'La lumière : la lecture du Livre t’illumine. Garde cette station en restant constante — entretiens par la révision.'},
 ];
 /* Un rang demande des points ET un nombre d'épis (Myriam, 24/11 : « points ET épi minimum »). C'est le MEILLEUR épi qui compte,
    jamais l'épi du jour : une absence retire déjà 15 % des points (ABSENCE_TAUX) — si l'épi en cours comptait aussi, un seul jour
    manqué ferait redescendre deux fois. Les élèves d'avant n'ont pas de record écrit : il se déduit de l'épi du jour, de celui d'avant
-   une absence en attente et des badges de série. (journal : constance.js · le rang demande des épis) */
+   une absence en attente et des badges de série. Barème relevé le 27/11 et appliqué à TOUS : aucun rang n'est mémorisé comme acquis.
+   (journal : constance.js · le rang demande des épis) */
 const SERIE_BADGES=[[360,'serie360'],[120,'serie120'],[30,'serie30'],[7,'serie7'],[3,'serie3']];
 function meilleureSerie(){
   var m=Math.max(S.serieMax||0, S.streak||0, S._streakAvantMiss||0), b=S.badges||{};
