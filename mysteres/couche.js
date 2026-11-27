@@ -639,7 +639,7 @@ D.addEventListener('pointerup', e => finDrag(e, false));
 D.addEventListener('pointercancel', e => finDrag(e, true));
 
 /* ——— l'histoire : les images du récit, sous-titrées en arabe (grand) et en français (la traduction) ——— */
-const NOMS_ECRANS = {lmObjetNeuf:'Nouvel indice', lmRecompense:'Ta nouvelle carte', lmFilm:'Histoire'};
+const NOMS_ECRANS = {lmIndices:'Mes indices', lmObjetNeuf:'Nouvel indice', lmRecompense:'Ta nouvelle carte', lmFilm:'Histoire'};
 function ecran(id, cls){
   let e = D.getElementById(id);
   if(!e){ e = D.createElement('div'); e.id = id; e.className = cls; e.setAttribute('role', 'dialog'); e.setAttribute('aria-modal', 'true'); e.setAttribute('aria-label', NOMS_ECRANS[id] || ''); D.body.appendChild(e); }
@@ -829,6 +829,19 @@ function enregistrer(champ){
   fermerPopup(); rerendre(); annonce('Enregistré.');
 }
 
+/* ——— les neuf carrés de l'accueil (Myriam, 27/11) : l'écran « N indices déjà à toi » PAR-DESSUS l'accueil, avec une croix — plus de saut dans « Mes indices » ——— */
+function ouvrirIndices(u){
+  const e = ecran('lmIndices', 'finish'), a = rec(u), n = cnt(a);
+  let h = '<button class="lm7-fermer" data-lm="indices-fermer" aria-label="Fermer">✕</button><p class="lm-eyebrow">'+titre()+'</p>';
+  if(!RECIT[u]) h += '<h2 class="bn-titre">Mystère à venir</h2>' + venirHTML(u);
+  else h += '<div class="lm-gros">'+n+'</div><h2 class="bn-titre" style="margin-top:0!important">'+(n > 1 ? 'indices' : 'indice')+' déjà à toi</h2><div class="lm-minis lm-minis-resume" aria-hidden="true">'+a.map((on, k) => '<span class="lm-mini'+(on ? ' on' : '')+'">'+(on ? objImg(k) : '')+'</span>').join('')+'</div>'
+    + (P.collectees[u] ? '<button class="cta bn-cta" data-lm="indices-film:'+u+'">VOIR L’HISTOIRE</button>' : n ? '<button class="cta bn-cta" data-lm="indices-placer:'+u+'">LES PLACER</button>' : '');
+  e.innerHTML = h; e.classList.add('on');
+  let b = e.querySelector('.cta'); if(!b){ e.setAttribute('tabindex', '-1'); b = e; }      // sans bouton d'action, le focus va à l'écran : aucun anneau sur la croix
+  try{ b.focus({preventScroll:true}); }catch(x){}
+}
+function fermerIndices(){ const e = D.getElementById('lmIndices'); if(e) e.classList.remove('on'); }
+
 /* ——— « Un nouvel indice » : un écran à part, comme les badges (il attend que rien d'autre ne soit ouvert) ——— */
 function gene(){
   if(D.querySelector('.finish.on:not(#lmObjetNeuf)')) return true;     // y compris un badge : le premier arrivé passe, l'autre attend
@@ -855,7 +868,10 @@ function guet(){
 function agir(a, x, y){
   switch(a){
     case 'ouvrir': return ouvrir(x, y);
-    case 'indices-unite': P.vue = +x; ouvrir('indices', 'home'); P.vue = +x; rerendre(); if(P.collectees[+x]) ouvrirPopup('zoom', +x); return;
+    case 'indices-unite': return ouvrirIndices(+x);
+    case 'indices-fermer': return fermerIndices();
+    case 'indices-film': fermerIndices(); return lancerFilm(+x);
+    case 'indices-placer': fermerIndices(); P.vue = +x; ouvrir('indices', 'home'); P.vue = +x; return rerendre();
     case 'retour': return retour();
     case 'choisir': sel = (sel === +x) ? null : +x; rerendre(); annonce(sel === null ? 'Indice reposé.' : 'Indice choisi. Touche son emplacement en pointillé.'); return;
     case 'poser': return poser(+x);
@@ -916,7 +932,7 @@ D.addEventListener('click', e => {
 D.addEventListener('change', e => { if(e.target && e.target.type === 'color' && e.target.dataset && e.target.dataset.cible){ choisirCouleur(e.target.dataset.cible, e.target.value); return; } if(e.target && e.target.id === 'lmFr'){ P.frSous = !!e.target.checked; if(RECIT[filmU]) sousTitresMaj(RECIT[filmU].slides[shot]); } });
 window.addEventListener('resize', hauteurBandeau);
 D.addEventListener('keydown', e => {
-  if(e.key === 'Escape'){ if(pop){ fermerPopup(); return; } const f = D.getElementById('lmFilm'); if(f && f.classList.contains('on')) fermerFilm(); }
+  if(e.key === 'Escape'){ if(pop){ fermerPopup(); return; } const g = D.getElementById('lmIndices'); if(g && g.classList.contains('on')){ fermerIndices(); return; } const f = D.getElementById('lmFilm'); if(f && f.classList.contains('on')) fermerFilm(); }
   if(e.key === 'Enter' && e.target && e.target.id === 'lmChamp'){ e.preventDefault(); enregistrer(e.target.dataset.champ); }
   if((e.key === 'Enter' || e.key === ' ') && e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button' && e.target.dataset && e.target.dataset.lm === 'ghufran'){ e.preventDefault(); agir('ghufran'); }
   if((e.key === 'Enter' || e.key === ' ') && e.target && e.target.getAttribute && e.target.getAttribute('role') === 'button' && e.target.dataset && e.target.dataset.lm === 'fond-carte'){ e.preventDefault(); agir('fond-carte'); }

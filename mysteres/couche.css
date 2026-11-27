@@ -1,4 +1,4 @@
-/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v18/couche.css) — ne pas retoucher à la main */
+/* GÉNÉRÉ par outils/preparer-mysteres-prod.py (source : _apercu-secrets-diya-v19/couche.css) — ne pas retoucher à la main */
 /* Couche « Les Mystères de Diya » — préview v7 (la v6 plus le bloc « v7 » tout en bas ; les rubriques de la v5 qui ne servent plus sont laissées, inertes). Posée par l'atelier dans la VRAIE app (iframe) : rien de ceci n'est dans src/.
    Jetons de l'app seulement (var(--bg), --panel, --line, --gold2…) pour suivre les deux thèmes ; seules les couleurs de la
    SCÈNE (illustration provisoire) et du sceau (un objet doré) sont fixes. Texte : 13 px au minimum. */
@@ -582,6 +582,16 @@ html .lm7-neuf .lm7-c:not(.on){border-color:rgba(242,233,218,.62)}
 .lm7-ligne-instr>span{flex:none}
 .lm7-indices .lm7-ligne-instr .lm-instr{flex:1;min-width:0;margin:0;min-height:0;text-align:center}
 .lm7-titre-img{position:absolute;left:6px;right:6px;bottom:6px;background:rgba(24,19,16,.86);border-radius:12px;padding:6px 8px;color:#F2E9DA;font-size:13.5px;font-weight:900;line-height:1.25;text-align:center;text-wrap:balance}
+
+/* les carrés de l'accueil : le même écran que « N indices déjà à toi », avec une croix (Myriam, 27/11) */
+#lmIndices{z-index:90}
+#lmIndices:focus{outline:none}
+#lmIndices .lm-eyebrow{margin-bottom:12px}
+#lmIndices .lm-gros{font-size:64px;font-weight:900;line-height:1;color:var(--gold2);margin:0 0 4px}
+#lmIndices .lm-minis-resume{display:flex;justify-content:center;flex-wrap:wrap;width:100%;max-width:330px;gap:8px;margin:14px auto 30px}
+#lmIndices .lm-minis-resume .lm-mini{flex:0 0 calc((100% - 5 * 8px) / 6)}
+#lmIndices .lm7-fermer{top:calc(8px + var(--edge,0px));right:10px}
+#lmIndices .lm-venir{flex:0 0 auto;width:min(270px,70vw);margin:16px auto 0}
 
 /* LA MASCOTTE du film (comme dans la halte) : posée au sol de l'image, sous le sous-titre et au-dessus des boutons ; elle glisse d'une image à l'autre */
 #lmFilm .lm-masc{position:absolute;left:50%;top:84%;width:calc(var(--s,.34) * 52%);transform:translate(-50%,-100%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;z-index:2;pointer-events:none}

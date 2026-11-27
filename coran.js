@@ -48,7 +48,7 @@ var EA={'ar.aymanswoaid':'Ayman_Sowaid_64kbps','ar.ibrahimakhbar':'Ibrahim_Akhda
    signe seul (pause, ۞) rejoint son mot, et les 4 autres se recollent sur nos mots (aligneMots). La police : KFGQPC Uthmanic
    Hafs v18, embarquée (polices/). ⛔ Leur HTML est une donnée étrangère : seules leurs balises de couleur sont relues, le
    reste est échappé (tjMots). */
-var K_ECRITURE='alaq_coran_ecriture', K_ERREURS='alaq_coran_erreurs', K_JOUR='alaq_coran_jour', K_TJ='alaq_coran_tj';
+var K_ECRITURE='alaq_coran_ecriture', K_JOUR='alaq_coran_jour', K_TJ='alaq_coran_tj';
 var TJ_CL=/^(ham_wasl|laam_shamsiyah|slnt|idgham_wo_ghunnah|idgham_mutajanisayn|idgham_mutaqaribayn|ghunnah|ikhafa|ikhafa_shafawi|idgham_ghunnah|idgham_shafawi|iqlab|madda_normal|madda_permissible|madda_obligatory|madda_necessary|qalaqah)$/;
 var LETTRE=/[ء-يٱ-ۓۺ-ۿ]/, MARQUE=/[ً-ٰٟۖ-ۭ]/, LOURDE=/[خصضغطقظ]/;
 /* LA LECTURE COMPTE POUR LA SÉRIE (Myriam, 17/11) : le TEXTE lu, 2 s par mot, une fois par passage, jamais plus vite que la
@@ -56,7 +56,10 @@ var LETTRE=/[ء-يٱ-ۓۺ-ۿ]/, MARQUE=/[ً-ٰٟۖ-ۭ]/, LOURDE=/[خصضغطقظ
    (GRAINES.lecon), une fois par jour, déclarées « REV-CORAN » — le serveur ne verse que par leçon et par jour, et son solde
    remplace celui du téléphone : un autre montant serait effacé à la synchro suivante. */
 var SEC_MOT=2, SEUIL_JOUR=180, CERCLE=119.4;
-var NOTES=['amincir','épaissir','prolonger','ne pas prolonger','ghunna','qalqala','mal prononcé','oublié'];
+var NOTES=['amincir','épaissir','prolonger','ne pas prolonger','chedda','pas de chedda','mauvaise tachkīl','ghunna','qalqala','mal prononcé','oublié'];
+/* la précision, facultative, de deux notes (Myriam, 27/11) : la durée d'une prolongation, la voyelle attendue */
+var PRECISIONS={'prolonger':['2 temps','4 temps','6 temps'],'mauvaise tachkīl':['fatha','damma','kasra','fathatayn','dammatayn','kasratayn','soukoun']};
+var SIGNE_DE={fatha:'\u064E',damma:'\u064F',kasra:'\u0650',fathatayn:'\u064B',dammatayn:'\u064C',kasratayn:'\u064D',soukoun:'\u0652'};
 var CODE_TJ=[['#64655e','Gris','Ne se prononce pas : l’alif de liaison, le lām solaire, l’idghām.'],
   ['#2b6228','Vert','Le son du nez (ghunna), deux temps : ikhfāʾ, idghām avec ghunna, iqlāb.'],
   ['#f77e00','Orange','Prolongation naturelle : deux temps.'],['#e12013','Rouge vif','Prolongation permise : deux, quatre ou six temps.'],
@@ -417,7 +420,7 @@ function monte(){
     if(l){ e.stopPropagation(); e.preventDefault(); ouvreErreur(null,l.dataset.e); return; }
     if(MEMO&&!e.target.closest('button')&&e.target.closest('.cor-carte')){ e.stopPropagation(); return; }
     var w=e.target.closest('.cor-mot'); if(!w||!CRAYON)return;
-    e.stopPropagation(); e.preventDefault(); crayon(false); ouvreErreur(w,null);
+    e.stopPropagation(); e.preventDefault(); ouvreErreur(w,null);   // le stylo reste levé jusqu'à ce qu'on le retouche (Myriam, 27/11)
   },true);
   corps.addEventListener('click',function(e){
     if(!MEMO||e.target.closest('button, .rv-ligne'))return;
@@ -540,20 +543,27 @@ function crayon(on){
   b.classList.toggle('on',CRAYON); b.setAttribute('aria-pressed',CRAYON?'true':'false'); T.classList.toggle('cor-crayonne',CRAYON);
 }
 var EQUIV={'ا':'ٱ','ٱ':'ا','ي':'ى','ى':'ي'};   // une lettre notée dans une écriture, retrouvée dans l'autre
-/* surligne la DERNIÈRE occurrence de la lettre (et ses signes) dans le mot, à travers les couleurs du tajwīd */
-function surligner(mot,l){
-  [l,EQUIV[l]].some(function(x){
-    if(!x)return false;
-    var tw=document.createTreeWalker(mot,4), n, ns=[]; while((n=tw.nextNode()))ns.push(n);
-    for(var a=ns.length-1;a>=0;a--){
-      var t=ns[a], i=t.nodeValue.lastIndexOf(x); if(i<0)continue;
-      var j=i+1; while(j<t.nodeValue.length&&(MARQUE.test(t.nodeValue[j])||t.nodeValue[j]===PETIT_ALIF))j++;   // jamais un ٲ coupé de sa lettre
-      var mi=t.splitText(i); mi.splitText(j-i);
-      var s=document.createElement('span'); s.className='rv-l'; mi.parentNode.insertBefore(s,mi); s.appendChild(mi);
-      return true;
-    }
-    return false;
-  });
+/* surligne la r-ième occurrence de la lettre (et ses signes) dans le mot, à travers les couleurs du tajwīd ; sans r (erreurs d'avant le 27/11) : la dernière */
+function surligner(mot,l,r){
+  var tw=document.createTreeWalker(mot,4), n, pos=[], ex=[]; while((n=tw.nextNode()))for(var k=0;k<n.nodeValue.length;k++){
+    var ch=n.nodeValue[k]; if(ch===l||(EQUIV[l]&&ch===EQUIV[l])){ pos.push({t:n,i:k}); if(ch===l)ex.push(pos.length-1); } }
+  if(!pos.length)return false;
+  var p=(r>=0&&r<pos.length)?pos[r]:pos[ex.length?ex[ex.length-1]:pos.length-1];
+  var t=p.t, i=p.i, j=i+1; while(j<t.nodeValue.length&&(MARQUE.test(t.nodeValue[j])||t.nodeValue[j]===PETIT_ALIF||t.nodeValue[j]==='\u0640'))j++;   // jamais un ٲ coupé de sa lettre
+  var mi=t.splitText(i); mi.splitText(j-i);
+  var sp=document.createElement('span'); sp.className='rv-l'; mi.parentNode.insertBefore(sp,mi); sp.appendChild(mi);
+  return true;
+}
+/* les lettres d'un mot, TOUTES, répétées comprises : la lettre avec ses signes, et son rang parmi les mêmes */
+function lettresDe(t){
+  var ls=[], vu={};
+  for(var i=0;i<t.length;i++){
+    if(!LETTRE.test(t[i])||t[i]==='\u0640'||t[i]===PETIT_ALIF)continue;
+    var j=i+1; while(j<t.length&&(MARQUE.test(t[j])||t[j]===PETIT_ALIF||t[j]==='\u0640'))j++;
+    var cle=EQUIV[t[i]]&&EQUIV[t[i]]<t[i]?EQUIV[t[i]]:t[i], r=vu[cle]||0; vu[cle]=r+1;
+    ls.push({l:t[i],r:r,a:t.slice(i,j)});
+  }
+  return ls;
 }
 function peindreErreurs(){
   if(!T)return;
@@ -561,46 +571,55 @@ function peindreErreurs(){
   T.querySelectorAll('.rv-ligne').forEach(function(x){ x.remove(); });
   T.querySelectorAll('.rv-carte').forEach(function(c){ c.classList.remove('rv-carte'); });
   T.querySelectorAll('.rv-mot').forEach(function(c){ c.classList.remove('rv-mot'); });
+  ERR=erreursCoran().l;   // relues : la progression a pu arriver du nuage
   ERR.forEach(function(e){
     if(e.s!==E.sur)return;
     var c=T.querySelector('.cor-carte[data-k="'+e.k+'"]'), m=c&&c.querySelector('.cor-mot[data-j="'+e.j+'"]'); if(!m)return;
-    if(e.m)m.classList.add('rv-mot'); else surligner(m,e.l);
+    if(e.m)m.classList.add('rv-mot'); else surligner(m,e.l,e.r);
     c.classList.add('rv-carte');
     c.insertAdjacentHTML('beforeend','<div class="rv-ligne" data-e="'+esc(e.id)+'"><b>À revoir</b><span class="ar" lang="ar" dir="rtl">'+esc(m.textContent)+'</span>'+
-      '<span>'+esc(e.n)+(e.m?'':' <span class="ar" lang="ar">'+esc(e.l)+'</span>')+'</span><span class="ed" aria-label="Modifier">'+STYLO+'</span></div>');
+      '<span>'+esc(e.n)+(e.p?' · '+esc(e.p):'')+(e.m?'':' <span class="ar" lang="ar">'+esc(e.a||e.l)+'</span>')+'</span><span class="ed" aria-label="Modifier">'+STYLO+'</span></div>');
   });
 }
 function ouvreErreur(mot,id){
   var e=id?ERR.filter(function(x){ return x.id===id; })[0]:null;
   if(e)mot=T.querySelector('.cor-carte[data-k="'+e.k+'"] .cor-mot[data-j="'+e.j+'"]');
   if(!mot)return;
-  var t=mot.textContent, ls=[];
-  for(var i=0;i<t.length;i++)if(LETTRE.test(t[i])&&ls.indexOf(t[i])<0)ls.push(t[i]);
+  var t=mot.textContent, ls=lettresDe(t);
   if(!ls.length)return;
-  ERR_ED={e:e,k:+mot.dataset.k,j:+mot.dataset.j,t:t,m:!!(e&&e.m),l:e&&!e.m&&ls.indexOf(e.l)>=0?e.l:ls[ls.length-1],n:e?e.n:''};
+  var choisie=null;   // à la réouverture : la même occurrence ; sans rang (erreur ancienne), la dernière de cette lettre
+  if(e&&!e.m)ls.forEach(function(x){ if(x.l===e.l&&(e.r===undefined||x.r===e.r))choisie=x; });
+  if(!choisie)choisie=ls[ls.length-1];
+  ERR_ED={e:e,k:+mot.dataset.k,j:+mot.dataset.j,t:t,m:!!(e&&e.m),l:choisie.l,r:choisie.r,a:choisie.a,n:e?e.n:'',p:e&&e.p||''};
   /* « Une lettre » ou « Tout le mot » (Myriam, 18/11, choix C de _apercu-coran-v19) : le mot entier cache les lettres */
   T.querySelector('.cor-er').innerHTML='<p class="cor-motgd" lang="ar" dir="rtl"></p>'+
     '<div class="cor-tm"><button data-tm="lettre">Une lettre</button><button data-tm="mot">Tout le mot</button></div>'+
-    '<div class="cor-lettres" dir="rtl">'+ls.map(function(x){ return '<button data-l="'+esc(x)+'">'+esc(x)+'</button>'; }).join('')+'</div>'+
+    '<div class="cor-lettres" dir="rtl">'+ls.map(function(x){ return '<button data-l="'+esc(x.l)+'" data-r="'+x.r+'" data-a-lettre="'+esc(x.a)+'">'+esc(x.a)+'</button>'; }).join('')+'</div>'+
     '<div class="cor-notes">'+NOTES.map(function(x){ return '<button data-n="'+esc(x)+'">'+esc(x)+'</button>'; }).join('')+'</div>'+
+    '<div class="cor-prec" hidden></div>'+
     '<div class="cor-act">'+(e?'<button class="cor-suppr" data-a="err-x">Je ne fais plus cette erreur</button>':'')+'<button class="cor-ok" data-a="err-ok">'+(e?'Enregistrer':'Marquer')+'</button></div>';
   peindreChoixErreur(); ouvreFeuille('erreur');
 }
 function peindreChoixErreur(){
   var x=ERR_ED, g=T.querySelector('.cor-motgd');
   g.textContent=x.t;   /* le grand mot montre en jaune ce qui sera marqué */
-  if(x.m){ var s=document.createElement('span'); s.className='rv-l'; s.textContent=x.t; g.textContent=''; g.appendChild(s); } else surligner(g,x.l);
+  if(x.m){ var s=document.createElement('span'); s.className='rv-l'; s.textContent=x.t; g.textContent=''; g.appendChild(s); } else surligner(g,x.l,x.r);
   T.querySelectorAll('.cor-tm button').forEach(function(b){ b.classList.toggle('on',(b.dataset.tm==='mot')===x.m); });
   T.querySelector('.cor-lettres').hidden=x.m;
-  T.querySelectorAll('.cor-lettres button').forEach(function(b){ b.classList.toggle('on',!x.m&&b.dataset.l===x.l); });
+  T.querySelectorAll('.cor-lettres button').forEach(function(b){ b.classList.toggle('on',!x.m&&b.dataset.l===x.l&&+b.dataset.r===x.r); });
   T.querySelectorAll('.cor-notes button').forEach(function(b){ b.classList.toggle('on',b.dataset.n===ERR_ED.n); });
+  var pr=T.querySelector('.cor-prec'), choix=PRECISIONS[x.n];
+  pr.hidden=!choix;
+  pr.innerHTML=choix?choix.map(function(v){ return '<button data-p="'+esc(v)+'" class="'+(SIGNE_DE[v]?'sg':'')+(v===x.p?' on':'')+'">'+(SIGNE_DE[v]?'<i class="ar" lang="ar">\u0640'+SIGNE_DE[v]+'</i>':'')+esc(v)+'</button>'; }).join(''):'';
 }
 function garderErreur(supprimer){
   var x=ERR_ED; if(!x)return; ERR_ED=null;
-  if(supprimer)ERR=ERR.filter(function(e){ return e!==x.e; });
-  else if(x.e){ x.e.l=x.m?'':x.l; x.e.m=x.m?1:0; x.e.n=x.n||'à revoir'; }
-  else ERR.push({id:'e'+Date.now().toString(36)+ERR.length,s:E.sur,k:x.k,j:x.j,l:x.m?'':x.l,m:x.m?1:0,n:x.n||'à revoir'});
-  ecrire(K_ERREURS,ERR); fermeFeuilles(); peindreErreurs();
+  var c=erreursCoran(), maintenant=Date.now(), precise=PRECISIONS[x.n]&&PRECISIONS[x.n].indexOf(x.p)>=0?x.p:'';
+  var neuf={s:E.sur,k:x.k,j:x.j,l:x.m?'':x.l,r:x.m?0:x.r,a:x.m?'':x.a,m:x.m?1:0,n:x.n||'à revoir',p:precise,t:maintenant};
+  if(supprimer){ if(x.e){ c.x[x.e.id]=maintenant; c.l=c.l.filter(function(e){ return e.id!==x.e.id; }); } }
+  else if(x.e){ neuf.s=x.e.s; c.l=c.l.map(function(e){ return e.id===x.e.id?Object.assign({},e,neuf):e; }); }
+  else c.l.push(Object.assign({id:'e'+maintenant.toString(36)+c.l.length},neuf));
+  ERR=c.l; save(); fermeFeuilles(); peindreErreurs();   // save() : ces notes partent au nuage
 }
 
 /* ── mémoriser (mot à mot, choix B de Myriam) : l'œil barré cache le texte ; chaque toucher sur un verset montre le mot suivant ;
@@ -834,8 +853,9 @@ function clic(e){
   if(e.target.closest('.cor-reseaux button')){ reseau(e.target.closest('.cor-reseaux button').dataset.r); return; }
   if((b=e.target.closest('.cor-opt'))){ choisirEcriture(b.dataset.ecr); return; }
   if((b=e.target.closest('.cor-tm button'))&&ERR_ED){ ERR_ED.m=b.dataset.tm==='mot'; if(ERR_ED.m&&!ERR_ED.n)ERR_ED.n='oublié'; peindreChoixErreur(); return; }
-  if((b=e.target.closest('.cor-lettres button'))&&ERR_ED){ ERR_ED.m=false; ERR_ED.l=b.dataset.l; peindreChoixErreur(); return; }
+  if((b=e.target.closest('.cor-lettres button'))&&ERR_ED){ ERR_ED.m=false; ERR_ED.l=b.dataset.l; ERR_ED.r=+b.dataset.r; ERR_ED.a=b.dataset.aLettre; peindreChoixErreur(); return; }
   if((b=e.target.closest('.cor-notes button'))&&ERR_ED){ ERR_ED.n=b.dataset.n; peindreChoixErreur(); return; }
+  if((b=e.target.closest('.cor-prec button'))&&ERR_ED){ ERR_ED.p=ERR_ED.p===b.dataset.p?'':b.dataset.p; peindreChoixErreur(); return; }
   if(e.target.closest('.cor-seg button')){ E.mode=e.target.closest('.cor-seg button').dataset.m; panneau(); return; }
   if(e.target.closest('.cor-pas button')){ var p=e.target.closest('.cor-pas'), kk=p.dataset.k; E[kk]=borne(kk,E[kk]+(+e.target.closest('.cor-pas button').dataset.d)); p.querySelector('input').value=E[kk]; etiquette(); return; }
   var s=e.target.closest('.cor-srow, .cor-mrow, .cor-reprendre');
@@ -899,7 +919,7 @@ function saisie(e){
 
 /* ── l'entrée et la sortie ── */
 window.coranOuvrir=function(){
-  monte(); ECR=lire(K_ECRITURE,null)||{m:'simple',c:1}; ERR=lire(K_ERREURS,[]); T.classList.toggle('cor-tjc',!!ECR.c);   // relus à chaque ouverture
+  monte(); ECR=lire(K_ECRITURE,null)||{m:'simple',c:1}; ERR=erreursCoran().l; T.classList.toggle('cor-tjc',!!ECR.c);   // relus à chaque ouverture
   entretienHors(); montreListe(); T.classList.add('on'); fermeFeuilles(); texteAuto();
   SES.gain=0; CPT.dernier=Date.now(); clearInterval(MINUT); MINUT=setInterval(tic,1000);
 };

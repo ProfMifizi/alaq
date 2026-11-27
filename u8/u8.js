@@ -3849,11 +3849,15 @@ html.gtexte .p-dtm .dtm-zone .clv-clavier{zoom:.8197;width:calc(100% + 18px);mar
 /* le clavier : celui d'Alaq (_clavier.js) ; ici le refus rougit la bordure, et il reste gelé pendant la récitation d'ouverture */
 .dtm-zone{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%}
 /* le clavier réel et son fantôme (le plus haut clavier de l'écran, invisible) partagent la même case : la zone a toujours la même hauteur */
-.dtm-tachkil{position:relative;display:flex;align-items:center;gap:8px;width:max-content;margin:0 auto 10px;padding:7px 14px;background:none;
-  border:2px solid var(--line,#3a312b);border-radius:999px;color:var(--cream,#f5ecdc);font:800 13px/1 Nunito,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.dtm-tachkil::after{content:"";position:absolute;left:0;right:0;top:-8px;bottom:-8px}
-.dtm-tachkil i{width:10px;height:10px;border-radius:50%;border:2px solid var(--muted,#B9A99A)}
-.dtm-tachkil[aria-pressed="true"] i{background:var(--gold,#D0870D);border-color:var(--gold,#D0870D)}
+.dtm-tachkil{position:relative;display:flex;align-items:center;gap:14px;width:max-content;min-height:48px;margin:0 auto 10px;padding:0 8px;background:none;
+  border:0;border-radius:12px;color:var(--cream,#f5ecdc);font:800 17px/1 Nunito,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dtm-tachkil::after{content:"";position:absolute;left:-6px;right:-6px;top:-6px;bottom:-6px}
+.dtm-tachkil:focus-visible{outline:3px solid var(--gold,#D0870D);outline-offset:2px}
+/* une glissiere de la taille de celles des reglages d'un telephone (Myriam, 27/11) ; couleurs ecrites : --cream devient sombre en clair */
+.dtm-tachkil i{position:relative;flex:none;width:64px;height:36px;border-radius:999px;background:#7A7068;transition:background .18s}
+.dtm-tachkil i::after{content:"";position:absolute;top:3px;left:3px;width:30px;height:30px;border-radius:50%;background:#FFF8EC;box-shadow:0 2px 5px rgba(0,0,0,.35);transition:left .18s}
+.dtm-tachkil[aria-pressed="true"] i{background:var(--gold,#D0870D)}
+.dtm-tachkil[aria-pressed="true"] i::after{left:31px}
 .dtm-clv{display:grid;width:100%}
 .dtm-clv > *{grid-area:1/1;display:flex;justify-content:center;align-items:flex-start;width:100%}
 .dtm-clv-fant{visibility:hidden;pointer-events:none}

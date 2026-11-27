@@ -36,15 +36,155 @@
 /* ═══ LES BULLES ═══
    Elles montent, dérivent au hasard et se cognent. La non-superposition n'est pas une
    contrainte de placement, c'est la conséquence des chocs. */
-var BUL={raf:0,items:[],W:0,H:0,reste:0,R:32,v:40,bruit:70,chocs:0};   // v et bruit relevés le 09/08 : plus vif, plus désordonné
+var BUL={raf:0,items:[],W:0,H:0,reste:0,R:32,v:48,chocs:0,calmeMouvement:false};
+/* Les bulles (Myriam, 27/11) : TOUJOURS la même vitesse, un choc ne change que la DIRECTION ; l'écrasement et l'ondulation sont un habit
+   qui ne touche ni la position ni la vitesse. Une bulle = {el, peau, lettre, id, x, y (coin haut gauche), cap, L, cible, pop, def, td, ang}. */
 function bulStop(){ if(BUL.raf)cancelAnimationFrame(BUL.raf); BUL.raf=0; BUL.items=[]; }
-function bulPose(b){
-  b.el.style.setProperty('--x',b.x.toFixed(1)+'px');
-  b.el.style.setProperty('--y',b.y.toFixed(1)+'px');
+function bulAngle(a){ return Math.atan2(Math.sin(a),Math.cos(a)); }
+
+/* vrai si le cap th ne rentre dans aucun des contacts (ns = directions unitaires vers ce qui touche) */
+function bulLibre(th,ns){
+  var x=Math.cos(th), y=Math.sin(th);
+  for(var i=0;i<ns.length;i++) if(x*ns[i][0]+y*ns[i][1]>0.001) return false;
+  return true;
+}
+
+/* l'habit du choc : la peau s'écrase vers ce qui la touche puis ondule. force = 0 à 1 */
+function bulChoc(m,b,angle,force){
+  if(m.calmeMouvement) return;
+  if(b.def&&b.td<0.16) return;               // une ondulation qui commence ne repart pas : ce serait un tremblement
+  b.def=(0.09+0.12*Math.min(1,force))*Math.sqrt(44/m.R); b.ang=angle; b.td=0;   // plus la bulle est grosse, moins elle plie
+}
+
+/* le rebond : un miroir sur le cap. La norme de la vitesse n'est même pas calculée : elle vaut toujours m.v */
+function bulRebond(m,b,ns){
+  var vx=Math.cos(b.cap), vy=Math.sin(b.cap), ax=0, ay=0, sx=0, sy=0, force=0;
+  for(var i=0;i<ns.length;i++){
+    var e=vx*ns[i][0]+vy*ns[i][1];
+    sx+=ns[i][0]; sy+=ns[i][1];
+    if(e>0.001){ ax+=ns[i][0]; ay+=ns[i][1]; if(e>force)force=e; }
+  }
+  if(!force) return;                          // elle s'éloigne déjà : rien à faire
+  var n=Math.hypot(ax,ay);
+  if(n<0.001){ ax=vx; ay=vy; n=1; }
+  ax/=n; ay/=n;
+  var p=vx*ax+vy*ay, th=Math.atan2(vy-2*p*ay, vx-2*p*ax);
+  if(!bulLibre(th,ns)){                       // coincée entre plusieurs : le cap libre le plus proche du miroir
+    var trouve=null;
+    for(var k=1;k<=36&&trouve===null;k++){
+      var d=k*Math.PI/36;
+      if(bulLibre(th+d,ns)) trouve=th+d; else if(bulLibre(th-d,ns)) trouve=th-d;
+    }
+    if(trouve===null) trouve=(sx*sx+sy*sy>0.04)?Math.atan2(-sy,-sx):(ax>0?Math.atan2(-ax,ay):Math.atan2(ax,-ay));
+    th=trouve;
+  }
+  b.cap=bulAngle(th);
+  if(force>0.12){                             // un vrai choc (pas un frôlement)
+    m.chocs++;
+    b.calme=0.35;                             // le rebond se voit : pas de rappel vers le haut tout de suite
+    b.cote=ax>0.1?-1:(ax<-0.1?1:(vx>0?1:-1)); // puis elle CONTOURNE ce qui l'a arrêtée, au lieu d'y revenir
+    b.detour=1.7;
+  }
+}
+
+/* retour par le bas, sur une place libre (jamais posée sur une autre) */
+function bulEntre(m,b){
+  var D=2*m.R, xmax=m.W-D, alea=m.alea||Math.random, x=0, y=m.H+4, ok=false, bas=-1e9;
+  m.items.forEach(function(o){ if(o!==b&&!o.pop&&o.y>bas) bas=o.y; });
+  var depart=Math.max(m.H+4,Math.min(m.H+4+3*D,bas+(m.ecart||0)));   // elles reviennent une à une, pas en paquet
+  for(var k=0;k<10&&!ok;k++){
+    y=depart+k*D*0.5;
+    for(var i=0;i<10&&!ok;i++){
+      x=alea()*xmax;
+      ok=m.items.every(function(o){ return o===b||o.pop||Math.hypot(o.x-x,o.y-y)>=D*1.45; });
+    }
+  }
+  b.x=x; b.y=y; b.cap=-Math.PI/2+(alea()-0.5)*0.9; b.calme=0; b.detour=0; b.def=0; b.tour=(b.tour||0)+1;
+}
+
+/* un pas de physique (1/120 s au plus) */
+function bulPas(m,h){
+  var D=2*m.R, xmax=m.W-D, v=m.v;
+  var vivantes=m.items.filter(function(b){return !b.pop;});
+  vivantes.forEach(function(b){
+    if(b.def){ b.td+=h; if(b.td>1)b.def=0; }
+    b.t+=h;
+    if(b.detour>0) b.detour-=h;
+    if(b.calme>0) b.calme-=h;
+    else{                                     // le cap revient VERS LE HAUT en tournant, avec un balancement : la norme ne bouge pas
+      var cible=-Math.PI/2+(b.detour>0?0.9*b.cote:0.65*Math.sin(b.t*b.rythme+b.phase));
+      var descend=Math.sin(b.cap)>0;          // si elle descend, elle se retourne plus vite
+      var vers=bulAngle(cible-b.cap)*(descend?3:1.2), maxi=descend?3:2;
+      b.cap=bulAngle(b.cap+Math.max(-maxi,Math.min(maxi,vers))*h);
+    }
+    b.x+=Math.cos(b.cap)*v*h; b.y+=Math.sin(b.cap)*v*h;
+    b.ns=[];
+    var mur=0;
+    if(b.x<=0){ b.x=Math.min(xmax,-b.x); b.ns.push([-1,0]); mur=-1; }
+    if(b.x>=xmax){ b.x=Math.max(0,2*xmax-b.x); b.ns.push([1,0]); mur=1; }
+    if(mur&&mur*Math.cos(b.cap)>0.2) bulChoc(m,b,mur>0?0:Math.PI,Math.abs(Math.cos(b.cap)));
+    if(b.y<-D) bulEntre(m,b);                 // sortie par le haut
+    else if(b.y>m.H&&Math.sin(b.cap)>0) b.cap=-b.cap;   // sous l'aire, invisible : elle repart aussitôt
+  });
+  var touche={};
+  for(var i=0;i<vivantes.length;i++)for(var j=i+1;j<vivantes.length;j++){
+    var a=vivantes[i], c=vivantes[j];
+    var dx=c.x-a.x, dy=c.y-a.y, d=Math.hypot(dx,dy);
+    if(d>=D) continue;
+    var nx=d?dx/d:1, ny=d?dy/d:0;
+    a.ns.push([nx,ny]); c.ns.push([-nx,-ny]);
+    var cle=a.id+'-'+c.id; touche[cle]=1;
+    if(!(m.touche&&m.touche[cle])){           // l'instant du contact : les DEUX s'écrasent, même celle qui se faisait rattraper
+      var choc=(Math.cos(a.cap)*nx+Math.sin(a.cap)*ny-Math.cos(c.cap)*nx-Math.sin(c.cap)*ny)/2;
+      if(choc>0.08){ var angle=Math.atan2(ny,nx); bulChoc(m,a,angle,choc); bulChoc(m,c,angle+Math.PI,choc); }
+    }
+    if(D-d>1.5){                              // posées l'une sur l'autre (rare) : écartées à 0,12 px par pas au plus, sans saut
+      var pousse=Math.min((D-d-1.5)/2,14*h);
+      a.x=Math.max(0,Math.min(xmax,a.x-nx*pousse)); a.y-=ny*pousse;
+      c.x=Math.max(0,Math.min(xmax,c.x+nx*pousse)); c.y+=ny*pousse;
+    }
+  }
+  m.touche=touche;
+  vivantes.forEach(function(b){ if(b.ns.length) bulRebond(m,b,b.ns); });
+}
+
+/* dessine : la bulle se DÉPLACE (le bouton), la peau SEULE se déforme, la lettre la suit sans se déformer */
+function bulPose(m,b){
+  b.el.style.transform='translate3d('+b.x.toFixed(2)+'px,'+b.y.toFixed(2)+'px,0)';
+  var s=b.def?b.def*Math.exp(-4.5*b.td)*Math.sin(14*b.td):0;
+  if(!s){ if(b.deforme){ b.peau.style.transform=''; b.lettre.style.transform=''; b.deforme=false; } return; }
+  var a=b.ang.toFixed(3), g=m.R*s*0.8, tx=(Math.cos(b.ang)*g).toFixed(2), ty=(Math.sin(b.ang)*g).toFixed(2);   // g : la face qui touche reste collée
+  b.peau.style.transform='translate('+tx+'px,'+ty+'px) rotate('+a+'rad) scale('+(1-s).toFixed(4)+','+(1+s*0.85).toFixed(4)+') rotate('+(-a)+'rad)';
+  b.lettre.style.transform='translate('+tx+'px,'+ty+'px)';
+  b.deforme=true;
+}
+/* la mise en place : en rangées, sans se chevaucher, chacune son cap, toutes la même vitesse */
+function bulPlace(m,sac){
+  var R=m.R, D=2*R, alea=m.alea||Math.random;
+  /* trois colonnes seulement s'il reste du jeu pour se croiser (112 px × 3 = 336 sur 346 : elles tremblaient) */
+  var cols=(D*3+24<=m.W)?3:((D*2<=m.W)?2:1), lignes=Math.ceil(sac.length/cols);
+  /* de l'AIR : les bulles ne couvrent pas plus de 28 % de ce qu'elles traversent (tassées, elles tremblaient) ; les autres attendent sous l'aire */
+  var pasY=Math.max((m.H+90)/lignes,D*(R<=32?1.9:1.35),0.785*D*D*cols/(0.30*m.W)), jeuX=cols>1?(m.W-D)/(cols-1)-D:m.W-D;
+  var bouge=Math.max(0,Math.min(10,jeuX/2-1));
+  m.ecart=pasY/cols;
+  m.items=sac.map(function(it,i){
+    var col=i%cols, rang=Math.floor(i/cols);
+    var x=(cols>1?col*(m.W-D)/(cols-1):(m.W-D)/2)+(alea()-0.5)*2*bouge;
+    return {it:it,id:i,x:Math.max(0,Math.min(m.W-D,x)),y:-R/2+rang*pasY+(cols===2&&col?pasY/2:0)+(alea()-0.5)*8,
+      cap:-Math.PI/2+(alea()-0.5)*1.4,t:0,phase:alea()*6.283,rythme:0.55+alea()*0.6,calme:0,detour:0,cote:1,def:0,td:0,ang:0,pop:false};
+  });
+}
+/* « réduire les animations » : toutes les bulles tiennent dans l'aire, posées, sans se couvrir (un peu plus petites s'il le faut) */
+function poseImmobile(m){
+  var n=m.items.length, D=2*m.R, mieux=0, cols=1;
+  for(var k=1;k<=6;k++){ var d=Math.min(D,Math.floor(m.W/k),Math.floor(m.H/Math.ceil(n/k))); if(d>mieux){ mieux=d; cols=k; } }
+  m.R=mieux/2;
+  var gx=(m.W-cols*mieux)/(cols+1), pasY=Math.min(mieux+14,(m.H-mieux)/Math.max(1,Math.ceil(n/cols)-1));
+  m.items.forEach(function(b,i){ b.x=gx+(i%cols)*(mieux+gx); b.y=Math.floor(i/cols)*pasY; b.el.style.setProperty('--d',mieux+'px'); });
 }
 function bulStart(lettres,parLettre,formes,syllabes,mots){
   var z=document.getElementById('bulzone'); if(!z)return;
-  BUL.W=z.clientWidth; BUL.H=z.clientHeight; BUL.items=[]; BUL.chocs=0;
+  BUL.W=z.clientWidth; BUL.H=z.clientHeight; BUL.items=[]; BUL.chocs=0; BUL.touche=null;
   var sac=[];
   if(mots){ // leçon 7 : une bulle par MOT — seules les cibles éclatent, un leurre secoue et reste
     mots.forEach(function(m){ sac.push({L:m.w,g:m.w,cible:!!m.cible}); });
@@ -61,29 +201,29 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   }
   shuffle(sac);
   BUL.reste=mots?sac.filter(function(x){return x.cible;}).length:sac.length;
+  var cpt=document.getElementById('bul-c'); if(cpt)cpt.textContent=BUL.reste;   // le compteur dit le nombre de bulles posées (il disait 18 pour 9 bulles)
   /* le rayon vit dans BUL.R : la physique et l'éclat le lisent, jamais un 32 en dur */
   BUL.R=mots?56:(syllabes?44:32);   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot) ; formes et lettres : 64 px, comme « Mémoriser » ; syllabes : 88 px — à 120 px (14/08) elles tenaient à deux de front, en colonne (Myriam, 25/11)
-  var R=BUL.R;
-  /* ⚠️ colonnes et pas des rangées se calculent sur le rayon réel : fixes, les bulles de R=60
-     débordaient de l'aire. (journal : index.html · les bulles débordaient) */
-  var cols=(2*R*3<=BUL.W)?3:((2*R*2<=BUL.W)?2:1);
-  var lignes=Math.ceil(sac.length/cols);
-  var pitchY=Math.max((BUL.H+90)/lignes,2*R+8);
-  sac.forEach(function(it,i){
-    var L=it.L;
+  var reduit=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  BUL.calmeMouvement=reduit;
+  bulPlace(BUL,sac);
+  BUL.items.forEach(function(b,i){
+    b.L=b.it.L; b.cible=(b.it.cible!==false);
     var el=document.createElement('button');
-    el.className='bul'+(formes?' frm':'')+(syllabes?' syl':'')+(mots?' mot':''); el.textContent=it.g; el.setAttribute('aria-label',L);
-    var col=i%cols, rang=Math.floor(i/cols);
-    var b={el:el,L:L,cible:(it.cible!==false),
-      x:(cols>1?col*(BUL.W-2*R)/(cols-1)*0.98:(BUL.W-2*R)/2)+(Math.random()-0.5)*16,
-      y:-R+rang*pitchY+(Math.random()-0.5)*20,
-      vx:(Math.random()-0.5)*40,
-      vy:-BUL.v*(0.70+Math.random()*0.60),   // chacune sa vitesse : le flux n'est pas un bloc
-      pop:false};
-    b.x=Math.max(0,Math.min(BUL.W-2*R,b.x));
-    el.onclick=function(){ bulPop(b); };
-    bulPose(b); z.appendChild(el); BUL.items.push(b);
+    el.className='bul savon'+(formes?' frm':'')+(syllabes?' syl':'')+(mots?' mot':''); el.setAttribute('aria-label',b.L);
+    el.style.setProperty('--dec',(-(i*2.37%11)).toFixed(2)+'s');       // chaque bulle a son moment : les reflets ne battent pas ensemble
+    var peau=document.createElement('i'); peau.className='bpeau';
+    var lettre=document.createElement('span'); lettre.className='blettre'; lettre.textContent=b.it.g;
+    el.appendChild(peau); el.appendChild(lettre);
+    b.el=el; b.peau=peau; b.lettre=lettre;
+    /* ce qui bouge se touche à l'APPUI ; le clavier passe par click (detail 0) */
+    el.onpointerdown=function(e){ if(e&&e.preventDefault)e.preventDefault(); bulPop(b); };
+    el.onclick=function(e){ if(!e||!e.detail)bulPop(b); };
+    z.appendChild(el);
   });
+  if(reduit)poseImmobile(BUL);
+  BUL.items.forEach(function(b){ bulPose(BUL,b); });
+  if(reduit)return;
   var last=null;
   function frame(ts){
     if(!document.getElementById('bulzone')){ BUL.raf=0; return; }
@@ -93,44 +233,15 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   }
   BUL.raf=requestAnimationFrame(frame);
 }
-/* ⚠️ dt est PLAFONNÉ : un onglet revenu d'arrière-plan rend un dt énorme, et une bulle
-   traverserait sa voisine sans que le choc soit détecté. */
-function bulTick(dt){
-  dt=Math.min(dt,0.05);
-  var R=BUL.R, D=2*R, xmax=BUL.W-D;
-  var vivantes=BUL.items.filter(function(b){return !b.pop;});
-  vivantes.forEach(function(b){
-    b.vx+=(Math.random()-0.5)*BUL.bruit*dt;
-    b.vy+=(-BUL.v-b.vy)*0.45*dt;                // rappel PLUS MOU : un choc se voit plus longtemps
-    b.vx=Math.max(-46,Math.min(46,b.vx));
-    b.x+=b.vx*dt; b.y+=b.vy*dt;
-    if(b.x<0){b.x=0;b.vx=Math.abs(b.vx);}
-    if(b.x>xmax){b.x=xmax;b.vx=-Math.abs(b.vx);}
-    if(b.y<-D){                                  // sortie par le haut → retour par le bas
-      b.y=BUL.H+6; b.x=Math.random()*xmax;
-      b.vx=(Math.random()-0.5)*40; b.vy=-BUL.v*(0.70+Math.random()*0.60);
-    }
-  });
-  // dix passes, et on décolle 2 % au-delà du contact : séparer A de B peut renfoncer A dans C,
-  // le rappel aux parois aussi, et à 40 px/s six passes laissaient ~0,8 px de chevauchement.
-  for(var pass=0;pass<10;pass++){
-    for(var i=0;i<vivantes.length;i++)for(var j=i+1;j<vivantes.length;j++){
-      var a=vivantes[i], c=vivantes[j];
-      var dx=c.x-a.x, dy=c.y-a.y, d=Math.hypot(dx,dy);
-      if(d>=D||d===0)continue;
-      if(pass===0)BUL.chocs++;
-      var nx=dx/d, ny=dy/d, ov=(D-d)/2*1.02;
-      a.x-=nx*ov; a.y-=ny*ov; c.x+=nx*ov; c.y+=ny*ov;
-      var vrel=(c.vx-a.vx)*nx+(c.vy-a.vy)*ny;
-      if(vrel<0&&pass===0){                      // choc élastique, masses égales
-        a.vx+=vrel*nx; a.vy+=vrel*ny;
-        c.vx-=vrel*nx; c.vy-=vrel*ny;
-      }
-      a.x=Math.max(0,Math.min(xmax,a.x)); c.x=Math.max(0,Math.min(xmax,c.x));
-    }
-  }
-  vivantes.forEach(bulPose);
+/* LA FONCTION appelée à chaque image (dt en secondes). Dans l'app : bulTick(dt), avec m=BUL */
+function bulTick(dt,m){
+  m=m||BUL;
+  dt=Math.min(dt,0.05);                       // un onglet revenu d'arrière-plan ne fait pas traverser les bulles
+  var pas=Math.max(1,Math.ceil(dt*120)), h=dt/pas;
+  while(pas--) bulPas(m,h);
+  m.items.forEach(function(b){ if(!b.pop) bulPose(m,b); });
 }
+
 /* Le « plop » : un claquement de bruit très court (la membrane cède) puis une petite montée
    résonante (l'air s'échappe). WebAudio, donc il ne compte pas comme « le son en cours » :
    il se superpose au nom de la lettre au lieu de le couper. */
@@ -164,11 +275,15 @@ function bulEclat(x,y){
   var cx=x+BUL.R, cy=y+BUL.R;
   var o=document.createElement('i'); o.className='onde';
   o.style.left=cx+'px'; o.style.top=cy+'px';
+  var D=2*BUL.R;
+  o.style.width=o.style.height=D+'px'; o.style.margin=(-D/2)+'px 0 0 '+(-D/2)+'px'; o.style.borderColor='rgba(235,240,255,.9)';
+  var teintes=['#E0589A','#1D9BD1','#E8A21C','#6E5AC8','#B08BE0'];
   z.appendChild(o);
   setTimeout(function(){ if(o.parentNode)o.parentNode.removeChild(o); },420);
   for(var i=0;i<10;i++){
     var d=document.createElement('i');
     d.className='goutte';
+    d.style.background=teintes[i%teintes.length]; d.style.boxShadow='none';
     var a=(i/10)*6.283+(Math.random()-0.5)*0.55, r=30+Math.random()*30, t=3+Math.random()*6;
     d.style.width=d.style.height=t.toFixed(1)+'px';
     d.style.margin=(-t/2).toFixed(1)+'px 0 0 '+(-t/2).toFixed(1)+'px';

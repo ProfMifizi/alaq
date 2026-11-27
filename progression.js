@@ -76,6 +76,37 @@ let S=load();
 /* window.S : un accesseur, jamais une capture (voir l'en-tête). */
 Object.defineProperty(window,'S',{configurable:true,get(){return S;},set(v){S=v;}});
 
+/* Les erreurs « à revoir » du Coran (Myriam, 27/11 : notées sur l'ordinateur, absentes du téléphone) vivent dans S.coranErr = { l:[erreurs], x:{id:date de suppression} }.
+   Elles se fusionnent entre appareils : union par identifiant, la version la plus récente gagne, une suppression l'emporte sur ce qui la précède. */
+function erreursCoran(){
+  if(!S.coranErr||!Array.isArray(S.coranErr.l))S.coranErr={l:[],x:{}};
+  if(!S.coranErr.x)S.coranErr.x={};
+  return S.coranErr;
+}
+function fusionErreurs(a,b){
+  const x={}, par={};
+  [a,b].forEach(function(c){ if(c&&c.x)Object.keys(c.x).forEach(function(id){ x[id]=Math.max(x[id]||0,c.x[id]); }); });
+  [a,b].forEach(function(c){ if(c&&Array.isArray(c.l))c.l.forEach(function(e){ if(e&&e.id&&(!par[e.id]||(e.t||0)>(par[e.id].t||0)))par[e.id]=e; }); });
+  return { l:Object.keys(par).map(function(id){ return par[id]; }).filter(function(e){ return !(x[e.id]&&x[e.id]>=(e.t||0)); }), x:x };
+}
+/* rend true si S a changé */
+function reprendreErreurs(autre){
+  if(!autre)return false;
+  const avant=JSON.stringify(erreursCoran()), f=fusionErreurs(S.coranErr,autre);
+  if(JSON.stringify(f)===avant)return false;
+  S.coranErr=f; return true;
+}
+/* les erreurs notées avant le 27/11 dormaient dans le seul appareil : elles rejoignent la progression (saveLocal : un ménage ne date pas S) */
+(function(){
+  try{
+    const v=JSON.parse(localStorage.getItem('alaq_coran_erreurs'));
+    if(!Array.isArray(v)||S._fresh)return;
+    reprendreErreurs({l:v.map(function(e){ return Object.assign({t:1},e); }),x:{}});
+    saveLocal();
+    if(localStorage.getItem('alaq2')&&localStorage.getItem('alaq2').indexOf('coranErr')>=0)localStorage.removeItem('alaq_coran_erreurs');   // retirée seulement une fois écrite ailleurs
+  }catch(e){}
+})();
+
 function dkey(u,i){return 'U'+UNITS[u].no+'-D'+i;}
 
 /* Migration du 02/08 : « Les formes » est passée AVANT « Dans la Fātiḥa », et la progression est
@@ -246,6 +277,7 @@ async function cloudSaveNow(){
     if(!CLOUD.user||CLOUD.user.id!==uid||_autreCompte)return;   // le compte a changé, ou la page a été condamnée, pendant l'attente
     const remote=r&&r.data&&r.data.state;
     if(remote&&(remote._ts||0)>(S._ts||0))return;
+    if(remote&&reprendreErreurs(remote.coranErr))saveLocal();   // ce qu'un autre appareil a noté ne s'écrase pas
     const w=await _avecGarde(SB.from('profiles').upsert({user_id:uid, prenom:S.prenom||null, state:S, updated_at:new Date().toISOString()}),
                              8000, 'envoi du profil');
     /* supabase-js ne lève pas, il résout avec {error} : on lève nous-mêmes, sinon un refus de
@@ -321,6 +353,8 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
        (« ne me fais pas confiance ») ne se livre pas plus qu'il ne se compare. */
     var _avantS=S, _vuDistant=remote, _vuMeme=memeCompte, _vuPris=takeRemote, _vuFresh=!!S._fresh;
     delete S._fresh;
+    /* les erreurs du Coran du PERDANT rejoignent le gagnant — jamais celles d'un autre compte, d'un état _fresh ou d'avant un effacement */
+    const _errAilleurs = ((memeCompte && !_reveille) || (!S._uid && !_etranger && !_vuFresh)) ? (takeRemote ? S.coranErr : remote && remote.coranErr) : null;
     if(takeRemote){
       /* Remote périmé : on repart de DEF (voir _remotePerime), et S._ts prend _refonteServeur.
          ⛔ Ne pas retirer ce _ts : au cloudPull suivant, _reveille est consommé, et un S._ts
@@ -342,6 +376,8 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
       S.revGram=S.revGram||{};
       fixOrdreFormes(); // l'état du nuage peut venir d'un appareil resté sur l'ancien ordre
       fixNomsDUnite();  // … ou sur les anciennes écritures des cinq mots (3.27)
+      const _errChange = reprendreErreurs(_errAilleurs);
+      if(_errChange)S._ts=Date.now();
       /* _marqueVue suit toute écriture d'alaq2 faite par une page VIVANTE (ici et dans _ecrireS) : c'est
          l'invariant sur lequel s'appuie la garde ②. Seule exception, le disque vierge d'_autreCompteArrive :
          la page est déjà condamnée, plus rien ne relit _marqueVue.
@@ -351,12 +387,14 @@ async function cloudPull(){ // arbitre entre l'état local et le nuage du compte
       if(S.onboarded){try{document.getElementById('onb').classList.remove('on');}catch(e){}}
       _homeFocusPending=true; // et on recentre sur son disque courant
       try{refreshStats();renderHome();}catch(e){}
+      if(_errChange)cloudSaveNow();
     } else {
       /* Cas où le local part au nuage : ① même compte, local le plus récent (la vraie fusion) ;
          ② aucune ligne dans le nuage, local à ce compte ou à personne ; ③ fenêtre de migration,
          local sans _uid plus riche. (journal : progression.js · la fusion détruisait la progression) */
       if(CLOUD.user){ S._uid=CLOUD.user.id; delete S._uidVu; }
       S._refonte=Math.max(_refonteConnue,_refonteServeur);  // même tampon que dans l'autre branche
+      reprendreErreurs(_errAilleurs);
       try{localStorage.setItem('alaq2',JSON.stringify(S)); _marqueVue=_marque(S);}catch(e){}
       cloudSaveNow();
     }

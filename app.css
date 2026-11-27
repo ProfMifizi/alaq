@@ -859,6 +859,17 @@
   .hk3.mini{transform:scale(.6);transform-origin:top center;margin:-6px 0 -52px;flex-wrap:nowrap}
   .hk3.mini .hkcirc{pointer-events:none}
   .fuserow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px}
+  /* carrés de lettres et ronds de prolongation en crème, en sombre (Myriam, 27/11) ; couleurs écrites en clair : la copie qu'on glisse
+     (.drag-clone) vit hors de #player, là où les jetons --cle-* n'existent pas */
+  html:not(.clair) :is(.mimC,.dm-target,.da-cell){background:#F2E9DA;border-color:#BFAE92;color:#3A2410;--tach:#12607F}
+  html:not(.clair) :is(.fchip,.dm-tile,.da-tile){background:#F2E9DA;border-color:#BFAE92;color:#3A2410;--gold:#3A2410;--tach:#12607F;--info:#12607F;
+    box-shadow:inset -4px -6px 10px rgba(154,90,11,.18),inset 4px 5px 8px rgba(255,255,255,.7)}
+  html:not(.clair) .drag-clone:is(.fchip,.dm-tile,.da-tile){box-shadow:0 12px 26px rgba(0,0,0,.45)}
+  html:not(.clair) :is(.dm-tile,.da-tile):is(.drag,.hint){border-color:#D0870D}
+  html:not(.clair) .mimC.done{border-style:solid;border-color:#D0870D;box-shadow:inset 0 0 0 1px #D0870D}
+  html:not(.clair) :is(.dm-target,.da-cell).over{background:#FBDB85;border-color:#AC6F0C}
+  html:not(.clair) :is(.dm-target,.da-cell).done{background:#DFF0E5;border-style:solid;border-color:#37905C;color:#124A2E}
+  html:not(.clair) .dm-target .dm-res,html:not(.clair) .da-cell .da-long{color:#124A2E}
   .mimC{width:84px;height:84px;border-radius:16px;background:var(--panel);border:2px dashed var(--line);
     display:grid;place-items:center;font-size:36px;color:var(--gold);flex:none;font-weight:400}
   .mimC.done{border-style:solid;border-color:var(--gold);background:#3a312b}
@@ -971,6 +982,46 @@
   @keyframes bulshk{0%,100%{transform:translate(var(--x),var(--y))}
     25%{transform:translate(calc(var(--x) - 6px),var(--y))}
     60%{transform:translate(calc(var(--x) + 6px),var(--y))}}
+  /* ═══ LES BULLES DE SAVON (Myriam, 27/11 : crème à 100 %, « fais en sorte que le reflet bouge sur la bulle ») ═══
+     Le bouton se déplace ; la PEAU seule s'écrase et ondule ; la lettre reste droite. Les ombres sont en em : elles suivent la taille. */
+  .bul.savon{--d:64px;width:var(--d);height:var(--d);padding:0;border:0;box-shadow:none;background:none;color:#3A2410;line-height:1;transform:none}
+  .bul.savon.syl{--d:88px}
+  .bul.savon.mot{--d:112px}
+  .bul.savon .bpeau{position:absolute;inset:0;border-radius:50%;pointer-events:none;font-size:var(--d);will-change:transform;
+    background:radial-gradient(ellipse 23% 6.5% at 60% 89.5%,#fff,rgba(255,255,255,0) 100%),
+      radial-gradient(circle .034em at 20.5% 37%,#fff 0 35%,rgba(255,255,255,0) 100%),
+      radial-gradient(circle,rgba(255,255,255,.12) 0 22%,rgba(255,255,255,.06) 47%,rgba(236,172,200,.17) 59%,rgba(150,160,232,.30) 68%,rgba(120,126,205,.34) 70%,rgba(255,255,255,0) 71%),
+      radial-gradient(circle,#F3E9D6 0 48%,#EDE0C8 66%,#E0CDAB 100%);
+    box-shadow:inset 0 0 0 1px rgba(126,102,150,.36),
+      inset .09em 0 .15em -.055em rgba(236,56,150,.46),inset -.09em -.025em .16em -.055em rgba(0,158,222,.46),
+      inset 0 .095em .15em -.065em rgba(240,162,10,.52),inset 0 -.085em .15em -.065em rgba(22,178,128,.38),
+      0 .08em .14em -.05em rgba(0,0,0,.45)}
+  .bul.savon .bpeau::before,.bul.savon .bpeau::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none}
+  /* le moiré : un anneau de couleurs près du bord, qui tourne */
+  .bul.savon .bpeau::before{background:conic-gradient(rgba(240,60,150,0),rgba(240,60,150,.46) 42deg,rgba(240,165,0,.42) 88deg,
+      rgba(40,190,130,.22) 132deg,rgba(0,160,225,0) 170deg,rgba(0,160,225,.44) 220deg,rgba(120,80,225,.42) 264deg,rgba(240,60,150,.1) 312deg,rgba(240,60,150,0));
+    -webkit-mask:radial-gradient(circle closest-side,transparent 0 62%,rgba(0,0,0,.45) 80%,#000 93%,#000 98%,transparent 100%);
+            mask:radial-gradient(circle closest-side,transparent 0 62%,rgba(0,0,0,.45) 80%,#000 93%,#000 98%,transparent 100%);
+    animation:bulmoire 7s linear infinite;animation-delay:var(--dec,0s)}
+  /* le grand reflet BALAIE le haut de la bulle, d'un côté à l'autre */
+  .bul.savon .bpeau::after{background:radial-gradient(ellipse 17% 8% at 50% 13%,#fff 0 40%,rgba(255,255,255,.6) 66%,rgba(255,255,255,0) 100%);
+    animation:bulreflet 2.8s ease-in-out infinite alternate;animation-delay:var(--dec,0s)}
+  /* un disque crème de la couleur du cœur sous la lettre : invisible, il dit au contraste sur quel fond elle se lit */
+  .bul.savon .blettre{position:relative;display:flex;align-items:center;justify-content:center;width:54%;height:54%;border-radius:50%;
+    background-color:#F4EBD9;white-space:nowrap;pointer-events:none}
+  .bul.savon.pop{animation:none;pointer-events:none}
+  .bul.savon.pop .bpeau{animation:bulsaute .16s ease-out forwards}
+  .bul.savon.pop .blettre{animation:bullettre .34s ease-out forwards}
+  .bul.savon.shk{animation:none}
+  .bul.savon.shk .blettre{animation:bulsecoue .35s ease}
+  @keyframes bulmoire{to{transform:rotate(360deg)}}
+  @keyframes bulreflet{from{transform:rotate(-62deg)}to{transform:rotate(42deg)}}
+  @keyframes bulsaute{0%{transform:scale(1);opacity:1}60%{transform:scale(1.2);opacity:.9;filter:brightness(1.7)}100%{transform:scale(1.34);opacity:0}}
+  @keyframes bullettre{0%{transform:scale(1);opacity:1}35%{transform:scale(1.14);opacity:1}100%{transform:scale(1.2);opacity:0}}
+  @keyframes bulsecoue{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}60%{transform:translateX(6px)}}
+  @media (prefers-reduced-motion:reduce){
+    .bul.savon .bpeau::before,.bul.savon .bpeau::after,.bul.savon.pop .bpeau,.bul.savon.pop .blettre,.bul.savon.shk .blettre{animation:none}
+    .bul.savon.pop{visibility:hidden}}
   .trirow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;direction:rtl;margin-bottom:22px}
   /* 14/08 (correctifs 4) — Myriam, jeu de tri (écran 10 leçon 3 ET leçon 7, même moteur) :
      « augmente la taille de la police des mots à trier, et la hauteur des box pointillées ». */
@@ -1343,6 +1394,24 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
 .rq-boite.lock{opacity:.5;cursor:default}
 .rq-boite.lock:active{transform:none}
 .rq-boite img{width:40%;max-width:44px;height:auto;display:block}
+/* le hub Reviser en creme, en sombre, avec des icones BRUNES (Myriam, 27/11) : aucun filtre de theme ne suffisait, le creme virait a l'olive */
+html:not(.clair) #view-reviser :is(.itab:not(.active),.rq-boite,.lg-cell.avail,.lg-hamza .hz:not(.locked),.lg-help,.lg-qa button,.wrow){background:#F2E9DA;border-color:#BFAE92;color:#3A2410}
+html:not(.clair) #view-reviser :is(.itab:not(.active) .itab-ic,.rq-boite img){filter:brightness(.35) sepia(1) saturate(4) hue-rotate(-6deg) brightness(.7)}
+html:not(.clair) #view-reviser .rq-lab{color:#3A2410}
+html:not(.clair) #view-reviser .rq-boite.ouverte{border-color:#D0870D;box-shadow:inset 0 0 0 1px #D0870D}
+html:not(.clair) #view-reviser :is(.lg-help,.lg-qa button){color:#8A4A00}
+html:not(.clair) #view-reviser :is(.lg-cell.sel,.lg-hamza .hz.lit){background:#FBDB85;border-color:#AC6F0C;color:#2B1B0A;box-shadow:0 0 0 1px #AC6F0C}
+html:not(.clair) #view-reviser .lg-cell :is(.sm,.bd) img,html:not(.clair) #view-reviser .lg-cell .rep-sl img{filter:saturate(2.4) brightness(.78)}
+html:not(.clair) #view-reviser .lg-cell .ck{color:#8A4A00}
+html:not(.clair) #view-reviser .spick .sbtn{background:#F2E9DA;color:#3A2410}
+html:not(.clair) #view-reviser .spick .sbtn *{color:#3A2410}
+html:not(.clair) #view-reviser .spick .sbtn .pct{color:#8A4A00}
+html:not(.clair) #view-reviser .spick .sbtn span[style]{color:#8A4A00!important}   /* le nom arabe et la fleche portent leur couleur en ligne */
+html:not(.clair) #view-reviser .wrow{padding-left:8px;padding-right:8px}
+html:not(.clair) #view-reviser .wrow :is(.ww,.wfr){color:#3A2410}
+/* le haut-parleur et le crayon : disque fonce, icone claire (Myriam, 27/11) */
+html:not(.clair) #view-reviser :is(.wspk,.wpen){background:#3A2410;border-color:#3A2410}
+html:not(.clair) #view-reviser .wspk .spk{color:#F2E9DA}
 .rq-boite{gap:14px}   /* plus d'air entre l'icône et le mot (Myriam, 03/11) */
 .rq-lab{font-family:var(--ui);font-size:9.5px;font-weight:900;letter-spacing:.04em;
   text-transform:uppercase;color:var(--muted);text-align:center;line-height:1.15}
@@ -3174,6 +3243,13 @@ html.clair .cor-voile{background:rgba(36,29,20,.35)}
 .cor-notes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
 .cor-notes button{border:1.5px solid var(--line);background:none;color:var(--cream);border-radius:20px;padding:7px 12px;font-family:var(--ui);font-weight:800;font-size:13.5px;cursor:pointer}
 .cor-notes button.on{border-color:#E2483D;background:rgba(226,72,61,.15)}
+/* la précision d'une prolongation (2, 4, 6 temps) ou de la tachkīl attendue (27/11) */
+.cor-prec{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:-4px 0 14px;padding:10px 0 0;border-top:1px solid var(--line)}
+.cor-prec[hidden]{display:none}
+.cor-prec button{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--panel2);color:var(--cream);border-radius:12px;padding:6px 10px;min-height:40px;font-family:var(--ui);font-weight:800;font-size:13.5px;cursor:pointer}
+.cor-prec button.on{border-color:#E2483D;background:rgba(226,72,61,.15)}
+.cor-prec button.sg{flex:0 0 calc(25% - 5px);flex-direction:column;justify-content:flex-end;gap:0;padding:0 1px 5px;font-size:12.5px;min-width:0}
+.cor-prec i{font-style:normal;font-family:var(--ar);font-size:34px;line-height:1;height:38px;display:flex;align-items:center;color:var(--gold2)}
 .cor-act{display:flex;gap:10px}
 .cor-act button{flex:1;height:46px;border-radius:14px;font-family:var(--ui);font-weight:900;font-size:14px;cursor:pointer}
 .cor-ok{background:var(--gold);border:none;color:var(--on-gold,#2A1A05)}
