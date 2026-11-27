@@ -112,13 +112,12 @@ const UNITS=(function(){
   {w:'الْمَاءُ',fr:'l’eau',say:'al-māʾ'},
   {w:'التُّرَابُ',fr:'la terre, la poussière propre',say:'at-turāb'},
   /* les verbes, présentés par la SCÈNE au disque 2 (décision de Myriam, 21/10 : « tous les mots
-     présentés, dont les verbes » — la spec §1.4 les gardait hors du vocabulaire), puis اِسْمٌ (disque 8).
-     ⚠️ يَتَيَمَّمُ et تَتَسَلَّقُ n’ont pas encore de prise isolée : pas de `snd`, donc pas de haut-parleur. */
+     présentés, dont les verbes » — la spec §1.4 les gardait hors du vocabulaire), puis اِسْمٌ (disque 8). */
   {w:'أَكْتُبُ',fr:'j’écris',say:'aktubu',snd:'mot-aktub'},
   {w:'يَكْتُبُ',fr:'il écrit',say:'yaktubu',snd:'mot-yaktubu'},
   {w:'يَتَوَضَّأُ',fr:'il fait ses ablutions',say:'yatawaḍḍaʾu',snd:'mot-yatawaddau'},
-  {w:'يَتَيَمَّمُ',fr:'il fait le tayammum',say:'yatayammamu'},
-  {w:'تَتَسَلَّقُ',fr:'elle grimpe',say:'tatasallaqu'},
+  {w:'يَتَيَمَّمُ',fr:'il fait le tayammum',say:'yatayammamu',snd:'mot-yatayammamu'},
+  {w:'تَتَسَلَّقُ',fr:'elle grimpe',say:'tatasallaqu',snd:'mot-tatasallaqu'},
   {w:'اِسْمٌ',fr:'un nom',say:'ism',snd:'mot-ismoun'},
    ],
    /* court : seule source du bandeau du ciel, du Cours › Résumé et du hub de grammaire.
