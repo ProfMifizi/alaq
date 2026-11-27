@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v307-2026-11-27';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v309-2026-11-27';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -935,7 +935,7 @@ self.addEventListener('activate',e=>{
     // liste (ou changer de nom), et CACHE monter pour la rejouer. Complétée par outils/installer-prises.js.
     // (journal : sw.js · la purge ciblée de MEDIA)
     const m=await caches.open(MEDIA);
-    await Promise.all(['lettre-alif-nom-f.mp3','lettre-alif-nom-h.mp3',
+    await Promise.all(['recit-m04-v1.mp3','recit-m06-v1.mp3','recit-m11-v1.mp3','lettre-alif-nom-f.mp3','lettre-alif-nom-h.mp3',
       'lettre-fa-nom-f.mp3','lettre-fa-nom-h.mp3','mot-madrasatoun.mp3',
       'sfx-bonne-reponse.mp3','sfx-fin-lecon.mp3',
       /* 17/08 : noms de lettres en voix IA retirés */
