@@ -357,6 +357,7 @@ function hamzaRailHTML(){
 function hamzaTap(el,s){
   try{ document.querySelectorAll('.lg-hamza .hz.lit').forEach(function(x){x.classList.remove('lit');}); }catch(e){}
   el.classList.add('lit');
+  try{ if(window.bxGrande&&!el.classList.contains('vide')&&!el.classList.contains('locked'))window.bxGrande(el); }catch(e){}
   var t=HAMZA_SON[s]||s;
   if(s==='ء')sayLetterName('ء'); else speak(t);
 }

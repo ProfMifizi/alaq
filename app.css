@@ -3308,3 +3308,111 @@ html.clair .ghub .gcarte .gtt{color:#F2E9DA}
 html.clair .ghub .gc-sous{color:#D8C9AE}
 html.clair .ghub .gcarte .ubar{background:#6B4E24}
 html.clair .ghub .gc-va{color:#F0C46A}
+
+/* ═══ BOÎTES — couleurs et états rendus (27/11). ⛔ Reste APRÈS le bloc « toutes les boîtes », à la fin du fichier.
+   « #player.on #p-body X.etat » vaut au moins (2,2,0), le poids du bloc crème : placé après, il gagne.
+   Rien ici ne repeint les états validés : choisie jaune, juste verte, fausse rouge. ═══ */
+
+/* 1 · les 28 lettres : même écart (8 px) entre colonnes et entre lignes */
+#player.on #p-body .tapset.compact,#player.on #p-body .agrid:not(.agrid-rl){grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;justify-items:stretch}
+#player.on #p-body .tapset.compact .ts-card,#player.on #p-body .agrid:not(.agrid-rl) .ag{min-width:0;padding-left:0;padding-right:0}
+#player.on #p-body .tapset.compact .ts-card .ar{font-size:40px;font-weight:500}
+@media (max-height:720px){#player.on #p-body .tapset.compact .ts-card .ar{font-size:34px}}
+
+/* 2 · les deux boîtes restées sombres du disque 1 et 2 passent en crème */
+#player.on #p-body .learn,#player.on #p-body .srcL{--cream:var(--cle-encre);--muted:var(--cle-doux);--gold:var(--cle-icone);--gold2:var(--cle-icone);--tach:var(--cle-signe);--info:var(--cle-signe);--line:var(--cle-bord);--panel:var(--cle-fond);--panel2:var(--cle-appui);
+  background:var(--cle-fond);border:2px solid var(--cle-bord);color:var(--cle-encre)}
+#player.on #p-body .srcL{border-color:#D0870D;color:var(--enc)}
+#player.on #p-body .learn .ar-tap{color:var(--enc)}
+#player.on #p-body .learn .ar-tap:active{background:transparent}
+
+/* 3 · les lettres sont colorées (--enc, réglée par l'habillage) ; --sur = la lettre posée sur la couleur */
+#player{--enc:#8A4F06;--sur:#FFF8EA}
+html.clair #player{--enc:#F0C46A;--sur:#2B1B0A}
+/* poids volontairement égal à celui du bloc crème : la carte choisie, juste ou fausse garde SA couleur de texte */
+#player.on #p-body :is(.ts-card,.ag,.hz,.mimC,.fchip,.b6,.chipmot,.tile,.tra-bloc:where(:not(.fixe))){color:var(--enc)}
+#player.on #p-body :is(.ts-card,.ag,.hz,.mimC,.fchip,.b6,.chipmot,.tile,.tra-bloc:where(:not(.fixe))) .ar{color:var(--enc)}
+/* en clair, les carrés et ronds de fusion ne sont PAS marron : lettre foncée */
+html.clair #player.on #p-body :is(.mimC,.fchip){--enc:#8A4A00;--sur:#FFF8EA}
+#player.on #p-body .ga-rep:not(.sel,.ok,.bad,.choisie) .ar{color:var(--cle-icone)}
+#player.on #p-body .tico button{color:var(--cle-icone)}
+
+/* 4 · les repères qu'on ne voyait plus */
+/* la lettre à trouver (aide) et les trois lettres à toucher de « 2 rôles » */
+#player.on #p-body .ag:is(.hl,.faible):not(.hit,.miss,.lit){background:#FBE3AE;border:3px solid #AC6F0C;color:#2B1B0A;box-shadow:0 0 14px rgba(208,135,13,.55)}
+html.clair #player.on #p-body .ag:is(.hl,.faible):not(.hit,.miss,.lit){background:#4E3210;border-color:#F0C46A;color:#F0C46A}
+#player.on #p-body .tile.hint:not(.ok,.bad){border:3px solid #D0870D;background:#FBE3AE;color:#2B1B0A}
+#player.on #p-body .tile.hint:not(.ok,.bad) *{color:#2B1B0A}
+/* la touche qui efface */
+#player.on #p-body .tile.tdel{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre)}
+#player.on #p-body .tile.tdel *{color:var(--cle-ko-encre)}
+/* le reste s'estompe : la case se vide, la lettre RESTE lisible (6:1) */
+#player.on #p-body :is(.ts-card.dim:not(.seen),.b6.dim,.ag.dim,.ag:disabled:not(.hit,.faible,.hl,.lit),.hz.locked,.chcard[disabled]:not(.ok,.bad,.sel),.chspk[disabled]:not(.ok,.bad,.sel),.checrit[disabled]:not(.ok,.bad,.sel)){opacity:1;background:rgba(242,233,218,.06);border-color:rgba(242,233,218,.18);color:#B9A99A;box-shadow:none}
+#player.on #p-body :is(.ts-card.dim:not(.seen),.b6.dim,.ag.dim,.ag:disabled:not(.hit,.faible,.hl,.lit),.hz.locked,.chcard[disabled]:not(.ok,.bad,.sel),.chspk[disabled]:not(.ok,.bad,.sel),.checrit[disabled]:not(.ok,.bad,.sel)) *{color:#B9A99A}
+html.clair #player.on #p-body :is(.ts-card.dim:not(.seen),.b6.dim,.ag.dim,.ag:disabled:not(.hit,.faible,.hl,.lit),.hz.locked,.chcard[disabled]:not(.ok,.bad,.sel),.chspk[disabled]:not(.ok,.bad,.sel),.checrit[disabled]:not(.ok,.bad,.sel)){background:rgba(78,50,16,.05);border-color:rgba(78,50,16,.26);color:#63543F}
+html.clair #player.on #p-body :is(.ts-card.dim:not(.seen),.b6.dim,.ag.dim,.ag:disabled:not(.hit,.faible,.hl,.lit),.hz.locked,.chcard[disabled]:not(.ok,.bad,.sel),.chspk[disabled]:not(.ok,.bad,.sel),.checrit[disabled]:not(.ok,.bad,.sel)) *{color:#63543F}
+/* la place pas encore découverte d'un siège */
+#player.on #p-body .hz.vide{background:transparent;border-style:dashed;border-color:var(--cle-doux);color:#B9A99A}
+#player.on #p-body .hz.vide *{color:#B9A99A}
+html.clair #player.on #p-body .hz.vide,html.clair #player.on #p-body .hz.vide *{color:#63543F}
+/* le bloc posé, la carte retournée, le mot-signe, le mot lié, la case faite, le bloc secoué */
+#player.on #p-body .odb-bloc.pose:not(.ok,.bad){background:var(--cle-appui)}
+#player.on #p-body .ae-carte.verso:not(.ok,.bad,.sel,.miss){background:#FBE9C0;border:2px solid #B5751F}
+html.clair #player.on #p-body .ae-carte.verso:not(.ok,.bad,.sel,.miss){background:#6B470F;border-color:#F0C46A}
+#player.on #p-body :is(.fa-tuile.signe,.ext-banque .ext-bloc.lien):not(.ok,.bad,.sel){color:var(--cle-signe)}
+#player.on #p-body .rpi-case.fait:not(.ok,.bad){border-color:var(--cle-ok-bord)}
+#player.on #p-body :is(.tra-bloc,.tra-prop).bad-shk{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord)}
+
+/* 5 · la boîte s'enfonce sous le doigt (« scale » seul : les transform des exercices et du glisser restent intacts) */
+#player.on #p-body :is(.ts-card,.ag,.hz,.b6,.chipmot,.fchip,.tile,.srcL,.chcard,.chspk,.checrit,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-bloc,.odb-bloc,.scp-choix,.scr-candidat,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-etq,.ga-lab,.ga-boite,.scb-carte,.scb-cart,.ae-carte,.rpi-case):not([disabled],.locked,.vide):active,
+#player.on #p-body > .opts > .opt:not([disabled]):active{scale:.93}
+#player.on #p-body :is(.lvp-row,.learn):active{scale:.975}
+#player.on #p-body :is(.ts-card,.ag,.hz,.learn,.lvp-row){-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+
+/* ═══ 6 · LE RESTE DES ÉCRANS (toutes unités) ═══ */
+/* la grille « 2 rôles » : même écart partout (6 px) */
+#player.on #p-body .agrid.agrid-rl{gap:6px;justify-items:stretch}
+#player.on #p-body .agrid.agrid-rl .ag{min-width:0;padding-left:0;padding-right:0}
+/* fusion et prolongations : lettres colorées comme ailleurs */
+#player.on #p-body :is(.dm-tile,.da-tile,.dm-target,.da-cell){color:var(--enc)}
+html.clair #player.on #p-body :is(.dm-tile,.da-tile,.dm-target,.da-cell){--enc:#8A4A00}
+/* les mots et signes à saisir restés sombres : crème, comme les autres */
+#player.on #p-body :is(.sigchip,.clh-jeton,.asp-jeton,.chk-disque,.ga-mot[role=button],.lnc-projectile,.d4-projectile){--cream:var(--cle-encre);--muted:var(--cle-doux);--gold:var(--cle-icone);--gold2:var(--cle-icone);--tach:var(--cle-signe);--info:var(--cle-signe);--line:var(--cle-bord);--panel:var(--cle-fond);--panel2:var(--cle-appui);
+  background:var(--cle-fond);border-color:var(--cle-bord);color:var(--cle-encre)}
+#player.on #p-body :is(.clh-jeton,.chk-disque).pose{background:var(--cle-appui)}
+#player.on #p-body .chk-disque.aide{background:#FBE3AE;border-color:#AC6F0C;color:#2B1B0A}
+#player.on #p-body .ga-mot.juste{background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);color:var(--cle-ok-encre)}
+#player.on #p-body :is(.lnc-projectile,.d4-projectile).miss,#player.on #p-body .asp-jeton.faux-retour{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre)}
+#player.on #p-body :is(.lnc-projectile,.d4-projectile).miss *,#player.on #p-body .asp-jeton.faux-retour *{color:var(--cle-ko-encre)}
+/* unité 8 : les lettres éteintes de la grille restent lisibles */
+#player.on #p-body .acase.off{opacity:1;background:rgba(242,233,218,.06);border-color:rgba(242,233,218,.18);color:#B9A99A}
+#player.on #p-body .acase.off *{color:#B9A99A}
+html.clair #player.on #p-body .acase.off,html.clair #player.on #p-body .acase.off *{color:#63543F}
+/* tout ce qui se prend ou se tape s'enfonce sous le doigt : claviers, jetons à glisser, vrai/faux, effacer */
+#player.on #p-body :is(.clv-touche,.clv-btn,.sigchip,.dm-tile,.da-tile,.clh-jeton,.asp-jeton,.chk-disque,.glc-item,.pzm-piece,.lnc-projectile,.d4-projectile,.ga-mot,.ga-col,.cna-slot,.scb-atoi,.scb-tout,.vfj-b,.d9-effacer,.d9-sens,.d9-bascule,.lvp-flip):not([disabled]):active,
+#player.on #p-body .tico button:not([disabled]):active{scale:.9}
+/* ═══ HABILLAGE C — L'OR : des lettres d'or ; la boîte touchée se remplit d'or ; en écoute, la lettre sort en grand ═══
+   ⛔ pas la case de fusion (.mimC.done) : sa voyelle doit rester bleue sur son fond (Myriam, 17/08), illisible sur l'or. */
+#player.on #p-body :is(.ts-card.seen,.ag.seen:not(.hit,.miss),.ag.faible.lit,.hz.lit,.lvp-row.lit,.learn:has(.ar-tap.pop),.zz.zz.zz){background:#D0870D;border-color:#D0870D;color:#2B1B0A;box-shadow:0 0 16px rgba(208,135,13,.6)}
+#player.on #p-body :is(.ts-card.seen,.ag.seen:not(.hit,.miss),.ag.faible.lit,.hz.lit,.lvp-row.lit,.learn:has(.ar-tap.pop),.zz.zz.zz) *{color:#2B1B0A}
+html.clair #player.on #p-body :is(.ts-card.seen,.ag.seen:not(.hit,.miss),.ag.faible.lit,.hz.lit,.lvp-row.lit,.learn:has(.ar-tap.pop),.zz.zz.zz){box-shadow:0 0 0 2px #7A4A06}
+#player.on #p-body :is(.ts-card,.ag,.hz,.mimC,.fchip,.b6,.chipmot,.tile,.srcL).pop,
+#player.on #p-body :is(.ag.hit,.hz.lit,.ag.faible.lit),
+#player.on #p-body :is(.b6,.chipmot,.tile,.chcard,.chspk,.checrit,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-bloc,.odb-bloc,.scp-choix,.scr-candidat,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-etq,.ga-lab,.ga-boite,.scb-carte,.scb-cart,.ae-carte,.rpi-case):is(.sel,.choisie):not(.ok,.bad,.miss,.bad-shk),
+#player.on #p-body > .opts > .opt:not(.fopt).sel:not(.ok,.bad){animation:bxEnfonce .42s ease-out}
+#player.on #p-body :is(.lvp-row.lit,.learn:has(.ar-tap.pop)){animation:bxEnfonceLarge .45s ease-out}
+@keyframes bxEnfonce{0%{transform:scale(.86)}45%{transform:scale(1.13)}72%{transform:scale(.97)}100%{transform:none}}
+@keyframes bxEnfonceLarge{0%{transform:scale(.96)}50%{transform:scale(1.03)}100%{transform:none}}
+/* la grande lettre, accrochée à sa boîte */
+.ts-grande{position:fixed;z-index:70;width:124px;height:124px;pointer-events:none;border-radius:30px;display:flex;align-items:center;justify-content:center;background:#F2E9DA;border:4px solid #D0870D;
+  filter:drop-shadow(0 10px 18px rgba(0,0,0,.45));transform-origin:var(--ox,50%) var(--oy,130%);animation:bxSort .42s cubic-bezier(.25,1.5,.45,1) both}
+html.clair .ts-grande{background:#4E3210}
+.ts-grande .ar{font-family:var(--ar);font-size:78px;font-weight:500;line-height:1;color:#3A2410;position:relative;z-index:1;direction:rtl}
+html.clair .ts-grande .ar{color:#F0C46A}
+.ts-grande::after{content:'';position:absolute;left:calc(var(--bec,50%) - 11px);bottom:-13px;width:18px;height:18px;background:inherit;border:4px solid #D0870D;transform:rotate(45deg);clip-path:polygon(98% 0,100% 0,100% 100%,0 100%,0 98%)}
+.ts-grande.dessous::after{bottom:auto;top:-13px;clip-path:polygon(0 0,100% 0,100% 2%,2% 100%,0 100%)}
+.ts-grande.part{animation:bxRentre .28s ease-in both}
+@keyframes bxSort{0%{opacity:0;transform:scale(.25)}100%{opacity:1;transform:scale(1)}}
+@keyframes bxRentre{100%{opacity:0;transform:scale(.25)}}
+@media (prefers-reduced-motion:reduce){@keyframes bxEnfonce{to{transform:none}}@keyframes bxEnfonceLarge{to{transform:none}}@keyframes bxSort{from{opacity:1}}@keyframes bxRentre{to{opacity:0}}
+  #player.on #p-body *:active{scale:none}}
