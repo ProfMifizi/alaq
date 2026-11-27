@@ -59,6 +59,12 @@ function repereSL(solaire,cls){
     '<img class="o-jour" src="images-app-alaq/u8/'+n+'-clair.png" alt="">'+
     '</span>';
 }
+/* Les icônes sur fond crème (Myriam, 27/11) : trois images, le CSS choisit. i-nuit = l'originale ; i-creme (marron, traits dorés)
+   sur une boîte crème ; i-or (marron, traits crème) sur l'onglet actif. Leurs toiles ont 12 px de marge pour le contour. */
+function icoCreme(n,cls){
+  var f=ico(n), c=cls?cls+' ':'';
+  return '<img class="'+c+'i-nuit" src="'+f+'" alt=""><img class="'+c+'i-creme" src="'+f.replace('.png','-creme.png')+'" alt=""><img class="'+c+'i-or" src="'+f.replace('.png','-or.png')+'" alt="">';
+}
 function icoImg(n,cls,st){ return '<img'+(cls?' class="'+cls+'"':'')+(st?' style="'+st+'"':'')+' src="'+ico(n)+'" alt="">'; }
 (function(){ /* resynchronise le HTML statique sur le registre, dès le chargement */
   try{

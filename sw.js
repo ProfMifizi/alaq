@@ -9,7 +9,7 @@
    en commentaire, jamais u8/u8.js entre apostrophes, ni un nom de son entre guillemets
    doubles, ni de crochet fermant suivi d'un point-virgule dans l'en-tête d'AUDIOS.
    (journal : sw.js · en-tête historique) */
-const CACHE='alaq-v300-2026-11-27';  // L'APP : versionné, purgé à chaque livraison
+const CACHE='alaq-v301-2026-11-27';  // L'APP : versionné, purgé à chaque livraison
 /* MEDIA : cache à part, jamais purgé — un mp3 ne change pas de contenu, on ne le
    retélécharge pas à chaque livraison. */
 const MEDIA='alaq-medias';
@@ -92,6 +92,26 @@ const IMAGES=[ // icônes des disques de l'accueil — sans elles les disques so
 "images-app-alaq/icone-tab2-lire.png",
 "images-app-alaq/icone-tab2-qoran.png",
 "images-app-alaq/icone-tab2-ecrire.png",
+"images-app-alaq/icone-tab-video-creme.png",
+"images-app-alaq/icone-tab-video-or.png",
+"images-app-alaq/icone-tab2-lire-creme.png",
+"images-app-alaq/icone-tab2-lire-or.png",
+"images-app-alaq/icone-tab-cartes-creme.png",
+"images-app-alaq/icone-tab-cartes-or.png",
+"images-app-alaq/icone-tab-crayon-creme.png",
+"images-app-alaq/icone-tab-crayon-or.png",
+"images-app-alaq/icone-tab2-qoran-creme.png",
+"images-app-alaq/icone-tab2-qoran-or.png",
+"images-app-alaq/icone-tab-parchemin-creme.png",
+"images-app-alaq/icone-tab-parchemin-or.png",
+"images-app-alaq/icone-tab-puzzle-creme.png",
+"images-app-alaq/icone-tab-puzzle-or.png",
+"images-app-alaq/icone-tab2-ecrire-creme.png",
+"images-app-alaq/icone-tab2-ecrire-or.png",
+"images-app-alaq/icone-tab-micro-creme.png",
+"images-app-alaq/icone-tab-micro-or.png",
+"images-app-alaq/icone-menu-cours-creme.png",
+"images-app-alaq/icone-menu-cours-or.png",
 "badges/disque1.png",
 "badges/unite1.png",
 "badges/sourate1.png",

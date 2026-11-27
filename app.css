@@ -1396,7 +1396,6 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
 .rq-boite img{width:40%;max-width:44px;height:auto;display:block}
 /* le hub Reviser en creme, en sombre, avec des icones BRUNES (Myriam, 27/11) : aucun filtre de theme ne suffisait, le creme virait a l'olive */
 html:not(.clair) #view-reviser :is(.itab:not(.active),.rq-boite,.lg-cell.avail,.lg-hamza .hz:not(.locked),.lg-help,.lg-qa button,.wrow){background:#F2E9DA;border-color:#BFAE92;color:#3A2410}
-html:not(.clair) #view-reviser :is(.itab:not(.active) .itab-ic,.rq-boite img){filter:brightness(.35) sepia(1) saturate(4) hue-rotate(-6deg) brightness(.7)}
 html:not(.clair) #view-reviser .rq-lab{color:#3A2410}
 html:not(.clair) #view-reviser .rq-boite.ouverte{border-color:#D0870D;box-shadow:inset 0 0 0 1px #D0870D}
 html:not(.clair) #view-reviser :is(.lg-help,.lg-qa button){color:#8A4A00}
@@ -1462,6 +1461,7 @@ html:not(.clair) #view-reviser .wspk .spk{color:#F2E9DA}
 .revpil{--revpop-or:#D0870D;--revpop-encre:#3A2410}
 .rq-pop.revpop{--accent:var(--revpop-or);max-width:320px;padding:22px 18px 18px}
 .revpop .dt-t,.revpop .dt-x-btn{color:#fff}
+.revpop .dt-x-btn{opacity:1;font-size:26px;-webkit-text-stroke:.7px #fff;top:5px;right:7px;padding:9px 11px;min-width:44px;min-height:44px}   /* a .85 elle tombait sous 3:1 sur l'or */
 .revpop .dt-go{color:var(--revpop-encre)}
 .revpop-puits{width:78px;height:78px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;
   margin:2px auto 10px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
@@ -1470,6 +1470,7 @@ html:not(.clair) #view-reviser .wspk .spk{color:#F2E9DA}
 .revpop-compte span{display:flex;align-items:center;gap:7px;background:#F6E6C4;color:var(--revpop-encre);
   border-radius:12px;padding:7px 12px;font-family:var(--ui);font-weight:900;font-size:15px}
 .revpop-compte img{width:26px;height:26px;object-fit:contain}
+.revpop-compte img{width:30px;height:30px}   /* pastilles claires dans les deux themes : les images -creme (toile avec marge) */
 .revpil-ancre{position:sticky;height:0;z-index:19;top:calc(var(--uh-top) + var(--uh-h,76px) + 12px)}   /* sous le bandeau (z 20), au-dessus du chemin ; --uh-h : sa hauteur, tenue par revPilule */
 /* un ROND au bord droit (preview v3, variante 1) : à droite de tous les disques, même sur un petit iPhone.
    ⚠️ right:-8px : l'ancre a la largeur de la COLONNE de l'accueil (marge de 16 px de chaque côté), pas de
@@ -2015,6 +2016,31 @@ html:not(.clair) #player #p-body .opt.fopt:is(.ok,.bad){opacity:1}   /* le verdi
 .acc.open .acc-b{display:block}
 .acc-all{display:block;margin:0 0 12px auto;background:none;border:1px solid var(--line);color:var(--gold2);border-radius:999px;
   padding:7px 15px;font-family:var(--ui);font-weight:800;font-size:12px;cursor:pointer}
+
+/* ═══ LES ICÔNES SUR FOND CRÈME (Myriam, 27/11, choix « marron, traits dorés ») ═══
+   En sombre, dans Réviser et le Cours : -creme sur une boîte crème, -or sur l'onglet actif. Le thème clair garde ses icônes. */
+.i-creme,.i-or{display:none!important}
+html:not(.clair) :is(#view-reviser,#view-cours) :is(.itab,.rq-boite,.acc-h,.vsoon) .i-nuit{display:none!important}
+html:not(.clair) :is(#view-reviser,#view-cours) :is(.itab:not(.active),.rq-boite,.acc-h,.vsoon) .i-creme{display:inline-block!important;filter:none}
+html:not(.clair) :is(#view-reviser,#view-cours) .itab.active .i-or{display:block!important;filter:none}
+html:not(.clair) :is(#view-reviser,#view-cours) .itab :is(.i-creme,.i-or){height:32px;width:auto;margin:-2px auto}   /* la taille seule : l affichage se decide au-dessus */
+html:not(.clair) #view-reviser .rq-boite .i-creme{width:46%;max-width:50px;height:auto}
+html:not(.clair) #view-cours .acc-h .prm-ic.i-creme{height:26px}
+html:not(.clair) #view-cours .vsoon .vic .i-creme{height:46px}
+
+/* le Cours en crème : les onglets, le « ? », « Tout déplier », les cartes d'unité (l'en-tête seulement quand elle est ouverte :
+   son contenu garde le fond sombre pour lequel il est dessiné) */
+html:not(.clair) #view-cours :is(.itab:not(.active),.lg-help,.acc-all){background:#F2E9DA;border-color:#BFAE92;color:#8A4A00}
+html:not(.clair) #view-cours .ccard.acc{padding:0;overflow:hidden;border-color:#BFAE92}
+html:not(.clair) #view-cours .ccard.acc .acc-h{background:#F2E9DA;padding:16px}
+html:not(.clair) #view-cours .ccard.acc .acc-b{padding:0 16px 16px}
+html:not(.clair) #view-cours .acc-h :is(.acc-tt,.acc-tt *){color:#3A2410}
+html:not(.clair) #view-cours .acc-h :is(.clet,.clet *){color:#8A4A00}
+html:not(.clair) #view-cours .acc-h .acc-chev{color:#6B5A48}
+html:not(.clair) #view-cours .ccard:not(.acc){background:#F2E9DA;border-color:#BFAE92}
+html:not(.clair) #view-cours .ccard:not(.acc) .ctt h3{color:#3A2410}
+html:not(.clair) #view-cours .ccard:not(.acc) .ctt :is(.clet,.clet *){color:#8A4A00}
+html:not(.clair) #view-cours .vsoon{background:#E7DAC3;border-color:#BFAE92;color:#4E3210}
 /* ============================================================
    MODE ORDINATEUR ET TABLETTE — 3 colonnes plein écran
    Le basculement se lit en LARGEUR DE FENÊTRE, jamais en type d'appareil :

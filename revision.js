@@ -695,8 +695,8 @@ function revPopEssayer(){
 }
 function revPopCompte(r){
   var c='';
-  if(r.mots)c+='<span>'+icoImg('tab-cartes')+r.mots+' mot'+(r.mots>1?'s':'')+'</span>';
-  if(r.notions)c+='<span>'+icoImg('tab-parchemin')+'grammaire</span>';
+  if(r.mots)c+='<span>'+'<img src="'+ico('tab-cartes').replace('.png','-creme.png')+'" alt="">'+r.mots+' mot'+(r.mots>1?'s':'')+'</span>';
+  if(r.notions)c+='<span>'+'<img src="'+ico('tab-parchemin').replace('.png','-creme.png')+'" alt="">grammaire</span>';
   return c;
 }
 function revPopMontrer(){

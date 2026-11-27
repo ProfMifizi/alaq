@@ -82,7 +82,7 @@ function coursSignsHTML(){
   return '<div class="ccard acc'+(tachkilOpen?' open':'')+'">'+
     '<button class="acc-h" onclick="tachkilToggle()">'+
       '<span style="flex:1;display:flex;align-items:center;gap:10px;min-width:0">'+
-        '<img class="prm-ic" src="'+ico('menu-cours')+'" alt=""> <span class="acc-tt">'+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</span>'+
+        icoCreme('menu-cours','prm-ic')+' <span class="acc-tt">'+arReveal('Tachkīl','تَشْكِيل')+' · les signes de lecture</span>'+
       '</span><span class="acc-chev">'+(tachkilOpen?'▾':'▸')+'</span></button>'+
     '<div class="acc-b">'+SIGNS.map(function(g){
       return '<div class="sgn-card"><div class="sgn-head">'+g.t+'</div>'+
@@ -319,7 +319,7 @@ function resumeGramU10(){
 
 function renderCours(sub){
   sub=sub||'video';
-  const tabs=[['video','<img class="itab-ic" src="'+ico('tab-video')+'" alt="">','Vidéos'],['resume','<img class="itab-ic" src="'+ico('tab2-lire')+'" alt="">','Résumé'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Vocabulaire']];
+  const tabs=[['video',icoCreme('tab-video','itab-ic'),'Vidéos'],['resume',icoCreme('tab2-lire','itab-ic'),'Résumé'],['vocab',icoCreme('tab-cartes','itab-ic'),'Vocabulaire']];
   const unlocked=UNITS.map((U,i)=>i).filter(i=>unitUnlocked(i));
   let h='<div style="display:flex;justify-content:flex-end;margin:0 0 4px">'+'<button class="lg-help" onclick="coursTut()" aria-label="À quoi servent ces onglets ?">?</button></div>';h+='<div class="icontabs">'+tabs.map(t=>'<button class="itab'+(t[0]===sub?' active':'')+'" onclick="coursTabTap(\''+t[0]+'\')">'+t[1]+'<span class="tip">'+t[2]+'</span></button>').join('')+'</div>';
   if(!unlocked.length){ h+='<div class="cempty">Commence l\u2019unité 1 pour débloquer du contenu ici.</div>'; document.getElementById('view-cours').innerHTML=h; return; }
@@ -330,7 +330,7 @@ function renderCours(sub){
     h+=unlocked.map(i=>{ const U=UNITS[i]; const emb=ytEmbed(UNIT_VIDEOS[U.no]);
       return '<div class="ccard">'+head(U)+(emb
         ?'<div class="vembed"><iframe src="'+emb+'" allowfullscreen loading="lazy"></iframe></div>'
-        :'<div class="vsoon"><div class="vic">'+icoImg('tab-video')+'</div>Vidéo bientôt disponible</div>')+'</div>'; }).join('');
+        :'<div class="vsoon"><div class="vic">'+icoCreme('tab-video')+'</div>Vidéo bientôt disponible</div>')+'</div>'; }).join('');
   }
   else if(sub==='resume'){
     h+=accAllBtn('resume')+coursSignsHTML();
@@ -403,7 +403,7 @@ function grammaireHubHTML(){
 
 function renderReviser(sub){
   sub=sub||curReviserTab||'quran';curReviserTab=sub;
-  const tabs=[['quran','<img class="itab-ic" src="'+ico('tab2-qoran')+'" alt="">','Le Qorān'],['lettres','<img class="itab-ic" src="'+ico('tab-crayon')+'" alt="">','Les lettres'],['vocab','<img class="itab-ic" src="'+ico('tab-cartes')+'" alt="">','Le vocabulaire'],['grammaire','<img class="itab-ic" src="'+ico('tab-parchemin')+'" alt="">','La grammaire']];
+  const tabs=[['quran',icoCreme('tab2-qoran','itab-ic'),'Le Qorān'],['lettres',icoCreme('tab-crayon','itab-ic'),'Les lettres'],['vocab',icoCreme('tab-cartes','itab-ic'),'Le vocabulaire'],['grammaire',icoCreme('tab-parchemin','itab-ic'),'La grammaire']];
   const SR=SOURATES[curSourate]||SOURATES[0];
   const set=knownLetterSet(), pc=fatihaPct();
   let h='<div class="icontabs">'+tabs.map(function(t){
@@ -427,7 +427,7 @@ function renderReviser(sub){
       '<div class="rq-grille" id="rqGrille">'+BOITES.map(function(b,i){
         if(b.k==='lire'||b.k==='noms')return '';   /* partis dans l'onglet Islam (Le Coran, Les noms) */
         return '<button class="rq-boite" id="rqBx'+i+'" onclick="boiteTap('+i+')" aria-label="'+b.t+'">'+
-          '<img src="'+ico(b.ic)+'" alt=""><span class="rq-lab">'+b.lab+'</span></button>';
+          icoCreme(b.ic)+'<span class="rq-lab">'+b.lab+'</span></button>';
       }).join('')+'</div>';
   }
   else if(sub==='lettres'){
