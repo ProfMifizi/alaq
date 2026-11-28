@@ -937,11 +937,6 @@
   .readbox.reveal .rc{color:#57493e}
   .readbox.reveal .rc.on{color:var(--gold)}
   .readbox{position:relative}
-  /* la main qui montre le geste (Artlist, Myriam 10/08) : elle balaie le MOT, du début à la
-     fin — --hx0/--hx1 sont mesurés par setupRead sur les vraies lettres, pas sur le cadre */
-  .readhand{position:absolute;top:44%;width:52px;height:auto;pointer-events:none;z-index:2;
-    filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));animation:readhand 2.6s ease-in-out infinite}
-  @keyframes readhand{0%{left:var(--hx0,70%);opacity:0}14%,78%{opacity:1}100%{left:var(--hx1,6%);opacity:0}}
   .hkcirc .hbar{display:block;width:44px;height:10px;border-radius:6px;background:currentColor;transform:rotate(-18deg)}
   .hkcirc .hdam{font-family:var(--ar);font-style:normal;font-weight:700;font-size:36px;line-height:.8;display:block}
   .hkcirc .sign.top{top:5px}
@@ -1186,11 +1181,6 @@ html.clair .rep-sl img.o-jour{filter:saturate(2.4) brightness(.82)}
   .fourc.lit{border-style:solid;border-color:var(--gold);background:#3a312b}
   .fourc .ar{font-family:var(--ar);font-size:36px;line-height:1.4;min-height:46px;direction:rtl;font-weight:400}
   .fourc .fl{font-size:16px;font-weight:700;color:var(--muted)}
-  /* l'invitation après 10 s d'inactivité (Myriam 10/08) : la source SAUTE doucement,
-     les cases restantes pulsent — 3 fois, puis on se tait et on ré-arme */
-  .srcL.invite{animation:penhint 1.1s ease-in-out 3, srcsaute 1.1s ease-in-out 3}
-  .fourc.invite{animation:penhint 1.1s ease-in-out 3;border-color:var(--gold-d)}
-  @keyframes srcsaute{0%,100%{transform:translateY(0)}45%{transform:translateY(-8px)}}
   /* Lettres vs prolongations — slides interactives */
   .lvp{display:flex;flex-direction:column;gap:12px;margin-top:8px}
   .lvp-cards{display:flex;gap:10px;justify-content:center;align-items:stretch}
@@ -1691,7 +1681,7 @@ html:not(.clair) #view-reviser .wspk .spk{color:#F2E9DA}
 .pen-t.hint{animation:penhint 1.1s ease-in-out infinite;border-color:var(--gold-d)}
 @keyframes penshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 @keyframes penhint{0%,100%{box-shadow:0 0 0 0 rgba(232,169,79,0)}50%{box-shadow:0 0 0 7px rgba(232,169,79,.26)}}
-@media (prefers-reduced-motion:reduce){.pen-t.shake,.pen-t.hint,.srcL.invite,.fourc.invite{animation:none}}
+@media (prefers-reduced-motion:reduce){.pen-t.shake,.pen-t.hint{animation:none}}
 .pen-btns{display:flex;gap:9px;margin-top:16px}
 .pen-btns button{flex:1;border:2px solid var(--line);background:var(--panel2);
   border-radius:13px;padding:12px 8px;font-weight:900;font-size:13.5px;font-family:var(--ui);color:var(--cream);cursor:pointer}
@@ -1734,12 +1724,19 @@ html:not(.clair) #player #p-body .opt.fopt.ok .fdevant :is(.ar,.spk){color:var(-
 html:not(.clair) #player #p-body .opt.fopt.bad .fdevant :is(.ar,.spk){color:var(--cle-ko-encre)}
 html:not(.clair) #player #p-body .opt.fopt:is(.ok,.bad){opacity:1}   /* le verdict reste vif, comme les autres cartes */
 /* bilan d'écriture : « Tu as écrit / Il fallait » au pied (Myriam, 26/11) */
-#fb .d9-err{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:10px;row-gap:0;font-size:13px;font-weight:800;flex:1}
-#fb .d9-err em{font-style:normal}
-#fb .d9-err b{font-family:var(--ar);font-size:24px;font-weight:700;line-height:1.5;justify-self:end}
+/* une ligne par mot, tout en ligne (le pied .fb : un seul bloc) : le libellé à gauche, le mot arabe aligné à droite (journal : app.css · le pied du bilan) */
+#fb .d9-err{font-size:13px;font-weight:800}
+#fb .d9-err p{margin:0;line-height:27px;text-align:right}
+#fb .d9-err em{font-style:normal;float:left}
+#fb .d9-err b{font-family:var(--ar);font-size:24px;font-weight:700;line-height:1;vertical-align:-1px}
+/* de l'air entre deux mots corrigés (le libellé « Tu as écrit » ouvre chaque paire) */
+#fb .d9-err p:nth-of-type(2n+3){margin-top:10px}
 #fb .d9-err b.ko{color:var(--coral)}
 #fb .d9-err b.ok{color:var(--green)}
-#fb .d9-err i{grid-column:1/-1;font-style:normal;font-size:12px;opacity:.85}
+#fb .d9-err i{display:block;font-style:normal;font-size:13px;opacity:.85}
+html.gtexte #fb .d9-err,html.gtexte #fb .d9-err i{font-size:15px}
+html.gtexte #fb .d9-err p{line-height:34px}
+html.gtexte #fb .d9-err b{font-size:30px}
 /* les récompenses « sourate » (la mascotte danse) et « halte » */
 #badgeNeuf .masc-wrap{margin:0 auto}
 #badgeNeuf .bn-halte{width:180px;height:180px;overflow:hidden;border-radius:24px;flex:none}
@@ -3416,3 +3413,44 @@ html.clair .ts-grande .ar{color:#F0C46A}
 @keyframes bxRentre{100%{opacity:0;transform:scale(.25)}}
 @media (prefers-reduced-motion:reduce){@keyframes bxEnfonce{to{transform:none}}@keyframes bxEnfonceLarge{to{transform:none}}@keyframes bxSort{from{opacity:1}}@keyframes bxRentre{to{opacity:0}}
   #player.on #p-body *:active{scale:none}}
+
+/* ═══ LES AIDES AU BLOCAGE (src/player/aide.js — Myriam, 27/11, choix « B » : le flou réduit de moitié) ═══
+   Une BOÎTE s'éclaire d'un halo ; un MOT jamais (les lettres s'y noyaient, 3:1) : surlignage plein. !important : les états des
+   unités (#player #p-body …) écraseraient la classe. */
+#player .aide-lueur{filter:drop-shadow(0 0 2.5px rgba(255,206,120,.95)) drop-shadow(0 0 6px rgba(233,172,82,.7)) brightness(1.08) !important;
+  transition:filter .35s}
+html.clair #player .aide-lueur{filter:drop-shadow(0 0 1.5px #D0870D) drop-shadow(0 0 4.5px rgba(208,135,13,.95)) !important}
+#player .aide-mot{background:#FBE3AE !important;box-shadow:0 0 0 2px #AC6F0C !important;color:#2B1B0A !important;border-radius:6px;
+  transition:background .35s,box-shadow .35s}
+html.clair #player .aide-mot{background:#F0C46A !important;box-shadow:0 0 0 3px #D0870D !important;color:#2B1B0A !important}
+/* une bulle est translucide : un halo en filtre viendrait sur la lettre ; l'anneau seul */
+#player .bul.aide-lueur,#player .blt-b.aide-lueur{filter:none !important;box-shadow:0 0 0 2px #FFCE78,0 0 11px 3px rgba(233,172,82,.85) !important}
+html.clair #player .bul.aide-lueur,html.clair #player .blt-b.aide-lueur{box-shadow:0 0 0 2px #D0870D,0 0 9px 3px rgba(208,135,13,.9) !important}
+
+/* ═══ LE MOT BIEN PLACÉ (Myriam, 27/11, aperçu v4 « A » ; précisé le 28/11) : le vert foncé (lettre crème, sans liseré) SEULEMENT quand
+   la pièce posée prend la forme de sa case : le harf sur sa scène, la carte et le prénom des scènes, les places des annexions. Une lettre
+   qui n'occupe qu'une partie de sa case, une prolongation qui se soude à une autre, des mots rangés dans un tableau ou un panier, le
+   verset qui descend, un mot tapé au clavier (#faSaisie) : jamais de vert foncé. La case qui ne reçoit qu'une pièce passe vert pâle bordé (les deux thèmes) ; les tableaux
+   restent tels quels. Hors règle aussi : la case de fusion (.mimC), les mots traduits et les phrases assemblées (01/11). Gardé par
+   outils/verifier-aide.mjs. (journal : app.css · le mot bien placé) ═══ */
+#player{--pose-f:#1F5A3C;--pose-e:#F2E9DA;--scene-f:#DCEFE3;--scene-b:#3F8F66}
+/* la pièce qui épouse sa case : ni débord ni autre arrondi que ceux de la case */
+#player .clh-pose:not(:empty),#player .scb-depot.plein,#player .scb-nom.pose,#player .fa-slot.ok:not(#faSaisie),#player .cna-slot.ok{
+  background:var(--pose-f) !important;color:var(--pose-e) !important;border-color:var(--pose-f) !important}
+#player .scb-depot.plein .ar{color:var(--pose-e) !important}
+#player .scb-nomtrou,#player .scb-nom.pose{min-width:78px;text-align:center}   /* la place et le prénom posé : la même largeur */
+/* une fin colorée ou un rôle de grammaire : la même teinte, éclaircie et franche (4,5:1 au moins sur ce vert). !important : le thème
+   clair redéfinit les rôles. */
+#player :is(.clh-pose,.scb-depot.plein,.scb-nom.pose,.fa-slot.ok:not(#faSaisie),.cna-slot.ok) :is(.hl,.hkm,.hkc){color:#7AD9FF !important}
+#player #p-body :is(.scb-depot.plein,.scb-nom.pose,.fa-slot.ok:not(#faSaisie),.cna-slot.ok){
+  --role-mnt:#6FD6FF !important;--role-nat:#FFA8D6 !important;--role-pr:#B6F255 !important;--role-ind:#C6BCFF !important;--role-conj:#FFB85C !important}
+#player #p-body :is(.scb-depot.plein,.fa-slot.ok:not(#faSaisie),.cna-slot.ok) .hl2{color:#B6F255 !important}
+/* la case juste, vert pâle dans les deux thèmes ; ce qui s'y écrit passe en vert très foncé */
+#player .fourc.lit,#player .grp.done,#player .da-cell.done,#player .dm-target.done,#player .clh-scene:has(.clh-pose:not(:empty)){
+  background:var(--scene-f) !important;border:2px solid var(--scene-b) !important;border-radius:14px}
+#player .fourc.lit > .ar,#player .fourc.lit .fl,#player .grp.done .gpre,#player .grp.done .gcib,#player .da-cell.done .da-long,
+#player .dm-target.done .dm-res{color:#14472F !important}
+#player .grp.done .gpre{opacity:.55}   /* la porteuse reste grisée, à 3:1 sur le vert pâle comme avant sur le fond */
+/* un harf posé sur sa scène : une place à la taille du jeton qu'on a glissé */
+#player .clh-pose:not(:empty){display:inline-flex;align-items:center;justify-content:center;min-width:64px;min-height:56px;
+  padding:0 6px;font-size:36px;border-radius:14px}

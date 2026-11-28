@@ -1738,14 +1738,15 @@ function finishReview(){
      ⚠️ Pas « total > 0 » : les écrans trace ne sont pas graded, et tracer est du travail
      (journal : revision.js · paiement de la récitation). */
   var _aTravaille = QUEUE.some(function(st){ return st && st.type!=='recite'; });
+  var _aidee = !!(window.__alaqAide&&window.__alaqAide.aidee());   // la lueur a servi : pas de sans-faute (src/player/aide.js)
   _grainesSession = _aTravaille
-    ? gagnerGraines(GRAINES.lecon+(wrongCount?0:GRAINES.sansFaute))   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
+    ? gagnerGraines(GRAINES.lecon+(wrongCount||_aidee?0:GRAINES.sansFaute))   // §3.5 : entraînement libre — cœurs, XP, série et badges oui ; paliers intacts
     : 0;
   /* On ne déclare que ce qui a été versé. Le type vient de SYNC.poseKind : sans lui, toutes les
      révisions porteraient le même lesson_id et le serveur n'en paierait qu'une par jour
      (claim_reward, garde v_deja_lecon). */
   if(_grainesSession){ try{
-    SYNC.graines('REV-'+String(SYNC._kind||'mixte').toUpperCase(), !wrongCount, false);
+    SYNC.graines('REV-'+String(SYNC._kind||'mixte').toUpperCase(), !wrongCount&&!_aidee, false);
   }catch(_){} }
   if(REVSES){ // répétition espacée : chaque mot touché par un écran noté reçoit sa prochaine date
     const t=today();

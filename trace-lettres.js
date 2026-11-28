@@ -201,6 +201,31 @@ function setupTrace(L,u,posN){
   window._traceFin=finishAll;          // le harnais force la fin : on ne trace pas au doigt en test
   window._traceState=()=>({cur,prog:(paths[cur]&&paths[cur].pts)?paths[cur].prog:-1,
     total:(paths[cur]&&paths[cur].pts)?paths[cur].pts.length:0,doneAll});
+  /* Les aides au blocage (src/player/aide.js) : le reste du trait courant en coordonnées de page, pour la main, et sa lueur
+     en pointillé fin, effacée par draw. */
+  window._traceTrajet=()=>{
+    const p=paths[cur]; if(doneAll||demoOn||!p||!document.body.contains(c))return null;
+    const r=c.getBoundingClientRect(), page=q=>({x:r.left+q[0]*r.width/W,y:r.top+q[1]*r.height/W});
+    if(p.dots){ const d=p.dots.find((_,k)=>!p.hit[k]); return d?{points:[page(d)]}:null; }
+    const pts=[]; for(let k=p.prog;k<p.pts.length-1;k+=6)pts.push(page(p.pts[k]));
+    pts.push(page(p.pts[p.pts.length-1])); return {points:pts};
+  };
+  window._traceLueur=()=>{
+    const p=paths[cur]; if(doneAll||demoOn||!p)return null;
+    const clair=document.documentElement.classList.contains('clair');
+    draw(); x.save();
+    x.strokeStyle=x.fillStyle=clair?'#D0870D':'#FFCE78'; x.shadowColor=clair?'rgba(208,135,13,.95)':'rgba(255,206,120,.95)'; x.shadowBlur=6;
+    if(p.dots)p.dots.forEach((d,k)=>{ if(!p.hit[k]){ x.beginPath();x.arc(d[0],d[1],10,0,7);x.fill(); } });
+    else{
+      x.lineWidth=4.5; x.lineCap='round'; x.setLineDash([1,10]);
+      x.beginPath(); x.moveTo(p.pts[p.prog][0],p.pts[p.prog][1]);
+      for(let k=p.prog+1;k<p.pts.length;k++)x.lineTo(p.pts[k][0],p.pts[k][1]);
+      x.stroke(); x.setLineDash([]);
+      x.beginPath(); x.arc(p.pts[p.prog][0],p.pts[p.prog][1],8,0,7); x.fill();
+    }
+    x.restore();
+    return draw;
+  };
   window._traceClear=()=>{
     if(demoOn||doneAll)return;
     paths.forEach(p=>{if(p.pts)p.prog=0;if(p.hit)p.hit=p.hit.map(()=>false);});
