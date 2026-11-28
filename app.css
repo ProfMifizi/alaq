@@ -324,14 +324,14 @@
   html.gtexte{--carte-h:85px;--carte-ar:46px}
   #player{
     --cle-fond:#F2E9DA;--cle-bord:#BFAE92;--cle-encre:#3A2410;--cle-ar:#3A2410;--cle-icone:#9A5A0B;--cle-signe:#12607F;--cle-doux:#6B5A48;--cle-appui:#E7DAC3;
-    --cle-sel-fond:#FBDB85;--cle-sel-bord:#AC6F0C;--cle-sel-encre:#2B1B0A;
+    --cle-sel-fond:#E9A92E;--cle-sel-bord:#835305;--cle-sel-encre:#2B1B0A;   /* or ambré (Myriam, 28/11) : le jaune pâle ne se voyait pas */
     --cle-on-fond:#FBE9C0;--cle-on-bord:#B5751F;--cle-on-lueur:rgba(181,117,31,.5);
     --cle-ok-fond:#DFF0E5;--cle-ok-bord:#37905C;--cle-ok-encre:#124A2E;
     --cle-ko-fond:#FAE3DC;--cle-ko-bord:#DA512F;--cle-ko-encre:#8C2F14;
     --cle-eteint:.55}
   html.clair #player{
     --cle-fond:#4E3210;--cle-bord:#7A5A30;--cle-encre:#F2E9DA;--cle-ar:#F0C46A;--cle-icone:#F0C46A;--cle-signe:#86C8E8;--cle-doux:#D8C9AE;--cle-appui:#5E3E16;
-    --cle-sel-fond:#FBDB85;--cle-sel-bord:#AC6F0C;--cle-sel-encre:#2B1B0A;
+    --cle-sel-fond:#E9A92E;--cle-sel-bord:#835305;--cle-sel-encre:#2B1B0A;
     --cle-on-fond:#4E3210;--cle-on-bord:#BA7A1F;--cle-on-lueur:rgba(186,122,31,.55);
     --cle-ok-fond:#21362B;--cle-ok-bord:#389466;--cle-ok-encre:#A8E6C7;
     --cle-ko-fond:#47251F;--cle-ko-bord:#CB624D;--cle-ko-encre:#EECBC4;
@@ -339,9 +339,9 @@
   #p-body > .opts > .opt:not(.fopt){background:var(--cle-fond);border-color:var(--cle-bord);color:var(--cle-encre);min-height:var(--carte-h);padding:0 10px}
   #p-body > .opts > .opt:not(.fopt) .ar{font-size:var(--carte-ar);color:var(--cle-ar)}
   #p-body > .opts > .opt:not(.fopt) .spk{color:var(--cle-icone)}
-  #p-body > .opts > .opt:not(.fopt).on:not(.ok):not(.bad){background:var(--cle-on-fond);border-color:var(--cle-on-bord);box-shadow:0 0 16px var(--cle-on-lueur)}
-  #p-body > .opts > .opt:not(.fopt).sel:not(.ok):not(.bad){background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);box-shadow:inset 0 0 0 2px var(--cle-sel-bord)}
-  #p-body > .opts > .opt:not(.fopt).sel.on:not(.ok):not(.bad){box-shadow:inset 0 0 0 2px var(--cle-sel-bord),0 0 16px var(--cle-on-lueur)}
+  #p-body > .opts > .opt:not(.fopt).on:not(.ok):not(.bad){background:var(--cle-on-fond);border-color:var(--cle-on-bord);box-shadow:2px 2px 0 var(--filet-c),0 0 16px var(--cle-on-lueur)}
+  #p-body > .opts > .opt:not(.fopt).sel:not(.ok):not(.bad){background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);box-shadow:inset 0 0 0 2px var(--cle-sel-bord),2px 2px 0 var(--filet-c)}
+  #p-body > .opts > .opt:not(.fopt).sel.on:not(.ok):not(.bad){box-shadow:inset 0 0 0 2px var(--cle-sel-bord),2px 2px 0 var(--filet-c),0 0 16px var(--cle-on-lueur)}
   /* quatre sens en français passés en colonne : cartes basses, sinon la colonne ne tient pas et un mot reste seul sur sa ligne */
   #p-body > .opts.sens4.colonne > .opt{min-height:62px}
   /* le tracé en grands caractères : les boutons démo / recommencer restent au-dessus du pied */
@@ -365,9 +365,9 @@
   #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button):is(.ok,.juste,.trouve,.hit){--cream:var(--cle-ok-encre);--muted:var(--cle-ok-encre);--gold:var(--cle-ok-encre);--gold2:var(--cle-ok-encre);--tach:var(--cle-ok-encre);--info:var(--cle-ok-encre);--cle-ar:var(--cle-ok-encre);background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);color:var(--cle-ok-encre)}
   #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button):is(.bad,.faux,.wrong,.miss){--cream:var(--cle-ko-encre);--muted:var(--cle-ko-encre);--gold:var(--cle-ko-encre);--gold2:var(--cle-ko-encre);--tach:var(--cle-ko-encre);--info:var(--cle-ko-encre);--cle-ar:var(--cle-ko-encre);background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre)}
   #player #p-body :is(.ag,.ts-card,.b6,.hz,.lvp-row,.scp-choix,.chipmot,.tile,.chcard,.checrit,.acase,.qzopt,.asm2-choix,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.rpi-case,.scb-carte,.scb-cart,.ae-carte,.chspk,.ga-etq,.ga-lab,.ga-boite,.tico button):is(.sel,.choisie,.ok,.juste,.trouve,.hit,.bad,.faux,.wrong,.miss) .ar{color:var(--cle-ar)}
-  #p-body > .opts > .opt:not(.fopt).ok{background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);color:var(--cle-ok-encre);box-shadow:inset 0 0 0 2px var(--cle-ok-bord)}
+  #p-body > .opts > .opt:not(.fopt).ok{background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);color:var(--cle-ok-encre);box-shadow:inset 0 0 0 2px var(--cle-ok-bord),2px 2px 0 var(--filet-c)}
   #p-body > .opts > .opt:not(.fopt).ok .ar,#p-body > .opts > .opt:not(.fopt).ok .spk{color:var(--cle-ok-encre)}
-  #p-body > .opts > .opt:not(.fopt).bad{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre);box-shadow:inset 0 0 0 2px var(--cle-ko-bord);opacity:1}
+  #p-body > .opts > .opt:not(.fopt).bad{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre);box-shadow:inset 0 0 0 2px var(--cle-ko-bord),2px 2px 0 var(--filet-c);opacity:1}
   #p-body > .opts > .opt:not(.fopt).bad .ar,#p-body > .opts > .opt:not(.fopt).bad .spk{color:var(--cle-ko-encre)}
   /* après le verdict, les cartes ni justes ni touchées pâlissent ; la carte FAUSSE qu'on a touchée garde sa couleur (elle pâlissait avant : trouble en clair) */
   #p-body > .opts > .opt:not(.fopt)[disabled]:not(.ok):not(.bad){opacity:var(--cle-eteint)}
@@ -453,14 +453,14 @@
     100%{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
   .spkbtn{background:none;border:none;padding:0;margin:6px auto 18px;display:block;cursor:pointer;color:var(--gold)}
   .spkbtn svg{width:112px;height:78px;display:block}
-  .spk .w{fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;opacity:.22}
-  .spk .cone{fill:currentColor}
-  .spk.on .w1{animation:spkw .78s ease-out infinite}
-  .spk.on .w2{animation:spkw .78s ease-out .13s infinite}
-  .spk.on .w3{animation:spkw .78s ease-out .26s infinite}
-  @keyframes spkw{0%{opacity:.15}38%{opacity:1}100%{opacity:.15}}
-  .spkbtn.on{animation:spkbob .78s ease-out infinite}
-  @keyframes spkbob{0%,100%{transform:scale(1)}38%{transform:scale(1.06)}}
+  /* le haut-parleur : cinq barres arrondies qui dansent pendant l'écoute (Myriam, 27/11, « B ») — dessin : spkSVG (son.js) */
+  .spk{overflow:visible}
+  .spk .hpb{fill:none;stroke:currentColor;stroke-width:4.6;stroke-linecap:round;transform-box:fill-box;transform-origin:center}
+  .spk.on .hpb{animation:spkvoix .52s ease-in-out infinite alternate}
+  .spk.on .hpb:nth-of-type(2){animation-delay:-.31s}.spk.on .hpb:nth-of-type(3){animation-delay:-.12s}
+  .spk.on .hpb:nth-of-type(4){animation-delay:-.44s}.spk.on .hpb:nth-of-type(5){animation-delay:-.22s}
+  @keyframes spkvoix{from{transform:scaleY(.35)}to{transform:scaleY(1.1)}}
+  @media (prefers-reduced-motion:reduce){.spk.on .hpb{animation:none;stroke-width:5.8}}
   .opts.rtl3{direction:rtl}
   .opt .spk{width:56px;height:40px;color:var(--gold)}
   .opt.ok .spk{color:var(--green)} .opt.bad .spk{color:var(--coral)}
@@ -588,7 +588,7 @@
   .lire-tout svg{height:19px;width:19px;fill:currentColor}
   .mushaf-sous{text-align:center;font-size:12px;color:var(--muted);margin:0 0 12px}
   .spk-mini{width:20px;height:13px;vertical-align:-2px}
-  .spk-mini .cone{fill:currentColor} .spk-mini .w{fill:none;stroke:currentColor;stroke-width:3.4;stroke-linecap:round;opacity:.5}
+  .spk-mini .hpb{stroke-width:5.6}   /* tout petit : les barres gardent du corps */
   .zoom-btn{display:block;margin:0 auto 12px;background:var(--panel);border:1px solid var(--line);
     color:var(--gold2);font-weight:800;font-size:14px;border-radius:12px;padding:8px 16px}
 
@@ -863,7 +863,7 @@
      (.drag-clone) vit hors de #player, là où les jetons --cle-* n'existent pas */
   html:not(.clair) :is(.mimC,.dm-target,.da-cell){background:#F2E9DA;border-color:#BFAE92;color:#3A2410;--tach:#12607F}
   html:not(.clair) :is(.fchip,.dm-tile,.da-tile){background:#F2E9DA;border-color:#BFAE92;color:#3A2410;--gold:#3A2410;--tach:#12607F;--info:#12607F;
-    box-shadow:inset -4px -6px 10px rgba(154,90,11,.18),inset 4px 5px 8px rgba(255,255,255,.7)}
+    box-shadow:inset -4px -6px 10px rgba(154,90,11,.18),inset 4px 5px 8px rgba(255,255,255,.7),2px 2px 0 var(--filet-c,rgba(208,135,13,.7))}
   html:not(.clair) .drag-clone:is(.fchip,.dm-tile,.da-tile){box-shadow:0 12px 26px rgba(0,0,0,.45)}
   html:not(.clair) :is(.dm-tile,.da-tile):is(.drag,.hint){border-color:#D0870D}
   html:not(.clair) .mimC.done{border-style:solid;border-color:#D0870D;box-shadow:inset 0 0 0 1px #D0870D}
@@ -1389,9 +1389,9 @@ html:not(.clair) #view-reviser :is(.itab:not(.active),.rq-boite,.lg-cell.avail,.
 html:not(.clair) #view-reviser .rq-lab{color:#3A2410}
 html:not(.clair) #view-reviser .rq-boite.ouverte{border-color:#D0870D;box-shadow:inset 0 0 0 1px #D0870D}
 html:not(.clair) #view-reviser :is(.lg-help,.lg-qa button){color:#8A4A00}
-html:not(.clair) #view-reviser :is(.lg-cell.sel,.lg-hamza .hz.lit){background:#FBDB85;border-color:#AC6F0C;color:#2B1B0A;box-shadow:0 0 0 1px #AC6F0C}
+html:not(.clair) #view-reviser :is(.lg-cell.sel,.lg-hamza .hz.lit){background:#E9A92E;border-color:#835305;color:#2B1B0A;box-shadow:0 0 0 1px #835305}
 html:not(.clair) #view-reviser .lg-cell :is(.sm,.bd) img,html:not(.clair) #view-reviser .lg-cell .rep-sl img{filter:saturate(2.4) brightness(.78)}
-html:not(.clair) #view-reviser .lg-cell .ck{color:#8A4A00}
+html:not(.clair) #view-reviser .lg-cell .ck{color:#2B1B0A}   /* sur l'or ambré de la case choisie : 8:1 */
 html:not(.clair) #view-reviser .spick .sbtn{background:#F2E9DA;color:#3A2410}
 html:not(.clair) #view-reviser .spick .sbtn *{color:#3A2410}
 html:not(.clair) #view-reviser .spick .sbtn .pct{color:#8A4A00}
@@ -1716,9 +1716,9 @@ html:not(.clair) #player #p-body .opt.fopt .fface{background:var(--cle-fond);bor
 html:not(.clair) #player #p-body .opt.fopt .fface .ar{color:var(--cle-ar)}
 html:not(.clair) #player #p-body .opt.fopt .fdos{color:var(--cle-icone)}
 html:not(.clair) #player #p-body .opt.fopt .fdevant .spk{color:var(--cle-icone)}
-html:not(.clair) #player #p-body .opt.fopt.sel:not(.ok):not(.bad) .fdevant{background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);box-shadow:inset 0 0 0 2px var(--cle-sel-bord);color:var(--cle-sel-encre)}
-html:not(.clair) #player #p-body .opt.fopt.ok .fdevant{background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);box-shadow:inset 0 0 0 2px var(--cle-ok-bord);color:var(--cle-ok-encre)}
-html:not(.clair) #player #p-body .opt.fopt.bad .fdevant{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);box-shadow:inset 0 0 0 2px var(--cle-ko-bord);color:var(--cle-ko-encre)}
+html:not(.clair) #player #p-body .opt.fopt.sel:not(.ok):not(.bad) .fdevant{background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);box-shadow:inset 0 0 0 2px var(--cle-sel-bord),2px 2px 0 var(--filet-c);color:var(--cle-sel-encre)}
+html:not(.clair) #player #p-body .opt.fopt.ok .fdevant{background:var(--cle-ok-fond);border-color:var(--cle-ok-bord);box-shadow:inset 0 0 0 2px var(--cle-ok-bord),2px 2px 0 var(--filet-c);color:var(--cle-ok-encre)}
+html:not(.clair) #player #p-body .opt.fopt.bad .fdevant{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);box-shadow:inset 0 0 0 2px var(--cle-ko-bord),2px 2px 0 var(--filet-c);color:var(--cle-ko-encre)}
 html:not(.clair) #player #p-body .opt.fopt.sel:not(.ok):not(.bad) .fdevant :is(.ar,.spk){color:var(--cle-sel-encre)}
 html:not(.clair) #player #p-body .opt.fopt.ok .fdevant :is(.ar,.spk){color:var(--cle-ok-encre)}
 html:not(.clair) #player #p-body .opt.fopt.bad .fdevant :is(.ar,.spk){color:var(--cle-ko-encre)}
@@ -1996,6 +1996,7 @@ html.gtexte #fb .d9-err b{font-size:30px}
   color:var(--cream);font-family:var(--ui);font-weight:800;font-size:15px;height:74px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2}
 .m-col .m-arc{font-family:var(--ar);font-size:30px;color:var(--gold);direction:rtl}
 .m-cell.sel{border-color:var(--gold);background:rgba(208,135,13,.16);transform:translateY(-1px)}
+#player .m-cell.sel{background:var(--cle-sel-fond);border-color:var(--cle-sel-bord);color:var(--cle-sel-encre)}
 .m-cell.bad{border-color:var(--coral);background:var(--coral-bg);animation:mshake .35s}
 @keyframes mshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 /* ===== Cours : sections déroulantes (accordéon) ===== */
@@ -3311,7 +3312,7 @@ html.clair .ghub .gc-va{color:#F0C46A}
    Rien ici ne repeint les états validés : choisie jaune, juste verte, fausse rouge. ═══ */
 
 /* 1 · les 28 lettres : même écart (8 px) entre colonnes et entre lignes */
-#player.on #p-body .tapset.compact,#player.on #p-body .agrid:not(.agrid-rl){grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;justify-items:stretch}
+#player.on #p-body .tapset.compact,#player.on #p-body .agrid:not(.agrid-rl){grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;justify-items:stretch}
 #player.on #p-body .tapset.compact .ts-card,#player.on #p-body .agrid:not(.agrid-rl) .ag{min-width:0;padding-left:0;padding-right:0}
 #player.on #p-body .tapset.compact .ts-card .ar{font-size:40px;font-weight:500}
 @media (max-height:720px){#player.on #p-body .tapset.compact .ts-card .ar{font-size:34px}}
@@ -3382,7 +3383,7 @@ html.clair #player.on #p-body :is(.dm-tile,.da-tile,.dm-target,.da-cell){--enc:#
 #player.on #p-body :is(.lnc-projectile,.d4-projectile).miss,#player.on #p-body .asp-jeton.faux-retour{background:var(--cle-ko-fond);border-color:var(--cle-ko-bord);color:var(--cle-ko-encre)}
 #player.on #p-body :is(.lnc-projectile,.d4-projectile).miss *,#player.on #p-body .asp-jeton.faux-retour *{color:var(--cle-ko-encre)}
 /* unité 8 : les lettres éteintes de la grille restent lisibles */
-#player.on #p-body .acase.off{opacity:1;background:rgba(242,233,218,.06);border-color:rgba(242,233,218,.18);color:#B9A99A}
+#player.on #p-body .acase.off{opacity:1;background:rgba(242,233,218,.06);border-color:rgba(242,233,218,.18);color:#B9A99A;box-shadow:none}
 #player.on #p-body .acase.off *{color:#B9A99A}
 html.clair #player.on #p-body .acase.off,html.clair #player.on #p-body .acase.off *{color:#63543F}
 /* tout ce qui se prend ou se tape s'enfonce sous le doigt : claviers, jetons à glisser, vrai/faux, effacer */
@@ -3390,7 +3391,7 @@ html.clair #player.on #p-body .acase.off,html.clair #player.on #p-body .acase.of
 #player.on #p-body .tico button:not([disabled]):active{scale:.9}
 /* ═══ HABILLAGE C — L'OR : des lettres d'or ; la boîte touchée se remplit d'or ; en écoute, la lettre sort en grand ═══
    ⛔ pas la case de fusion (.mimC.done) : sa voyelle doit rester bleue sur son fond (Myriam, 17/08), illisible sur l'or. */
-#player.on #p-body :is(.ts-card.seen,.ag.seen:not(.hit,.miss),.ag.faible.lit,.hz.lit,.lvp-row.lit,.learn:has(.ar-tap.pop),.zz.zz.zz){background:#D0870D;border-color:#D0870D;color:#2B1B0A;box-shadow:0 0 16px rgba(208,135,13,.6)}
+#player.on #p-body :is(.ts-card.seen,.ag.seen:not(.hit,.miss),.ag.faible.lit,.hz.lit,.lvp-row.lit,.learn:has(.ar-tap.pop),.zz.zz.zz){background:#D0870D;border-color:#D0870D;color:#2B1B0A;box-shadow:2px 2px 0 var(--filet-c),0 0 16px rgba(208,135,13,.6)}
 #player.on #p-body :is(.ts-card.seen,.ag.seen:not(.hit,.miss),.ag.faible.lit,.hz.lit,.lvp-row.lit,.learn:has(.ar-tap.pop),.zz.zz.zz) *{color:#2B1B0A}
 html.clair #player.on #p-body :is(.ts-card.seen,.ag.seen:not(.hit,.miss),.ag.faible.lit,.hz.lit,.lvp-row.lit,.learn:has(.ar-tap.pop),.zz.zz.zz){box-shadow:0 0 0 2px #7A4A06}
 #player.on #p-body :is(.ts-card,.ag,.hz,.mimC,.fchip,.b6,.chipmot,.tile,.srcL).pop,
@@ -3414,12 +3415,45 @@ html.clair .ts-grande .ar{color:#F0C46A}
 @media (prefers-reduced-motion:reduce){@keyframes bxEnfonce{to{transform:none}}@keyframes bxEnfonceLarge{to{transform:none}}@keyframes bxSort{from{opacity:1}}@keyframes bxRentre{to{opacity:0}}
   #player.on #p-body *:active{scale:none}}
 
+/* « Écouter tout » en crème comme les autres boîtes (Myriam, 28/11) ; pendant l'écoute, un contour doré (les barres dansent) */
+#player.on #p-body .scb-tout{background:var(--cle-fond);border-color:var(--cle-bord);color:var(--cle-encre)}
+#player.on #p-body .scb-tout .spk{color:var(--cle-icone)}
+#player.on #p-body .scb-tout.on{border-color:var(--cle-sel-bord);box-shadow:0 0 0 2px var(--cle-sel-bord)}
+
+/* ═══ LE RELIEF « B » (Myriam, 27/11, préview v3b) : bord fin et un filet or de 2 px décalé en bas et à droite — plus d'ombre épaisse.
+   ⛔ Le filet est posé à la priorité ZÉRO (:where partout) : un état qui a son anneau ou son halo le remplace, jamais l'inverse ; les
+   cartes de QCM, elles, composent anneau + filet. Une famille de boîtes neuve s'ajoute aux DEUX listes (la même, écrite deux fois).
+   Ni les places à remplir (pointillés), ni les bulles, ni CONTINUER, ni les boîtes encore sombres (cartes-images, cartes à
+   retourner, « Voir le sens ») : leur bord affiné disparaît dans la page (relecture du 28/11) ; elles attendent d'être crème. ═══ */
+#player{--filet-c:rgba(208,135,13,.7)}
+#player.on #p-body :where(.opt:not(.fopt),.fopt .fface,.tile,.htile,.clv-touche,.clv-btn,.ov-t,.wtile,.sttile,.m-cell,.ag,.ts-card,.hz,.acase,.b6,.chipmot,.sigchip,.chk-disque,.fchip,.dm-tile,.da-tile,.asm2-choix,.scb-carte,.scb-cart,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.ga-etq,.ga-lab,.ga-boite,.ga-mot[role=button],.rpi-case,.ae-carte,.chcard,.checrit,.chspk,.qzopt,.scp-choix,.clh-jeton,.asp-jeton,.ov-carte,.tico button,.lvp-row,.learn,.srcL,.exp-card,.assoc-c,.fcell,.cmp-row,.speak,.scb-tout,.lnc-projectile,.d4-projectile):not(.vide){border-width:1.5px}
+:where(#player) :where(.opt:not(.fopt),.fopt .fface,.tile,.htile,.clv-touche,.clv-btn,.ov-t,.wtile,.sttile,.m-cell,.ag,.ts-card,.hz,.acase,.b6,.chipmot,.sigchip,.chk-disque,.fchip,.dm-tile,.da-tile,.asm2-choix,.scb-carte,.scb-cart,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.ga-etq,.ga-lab,.ga-boite,.ga-mot[role=button],.rpi-case,.ae-carte,.chcard,.checrit,.chspk,.qzopt,.scp-choix,.clh-jeton,.asp-jeton,.ov-carte,.tico button,.lvp-row,.learn,.srcL,.exp-card,.assoc-c,.fcell,.cmp-row,.speak,.scb-tout,.lnc-projectile,.d4-projectile):where(:not(.vide)){box-shadow:2px 2px 0 var(--filet-c)}
+:where(#player) :where(.opt:not(.fopt),.fopt .fface,.tile,.htile,.clv-touche,.clv-btn,.ov-t,.wtile,.sttile,.m-cell,.ag,.ts-card,.hz,.acase,.b6,.chipmot,.sigchip,.chk-disque,.fchip,.dm-tile,.da-tile,.asm2-choix,.scb-carte,.scb-cart,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.ga-etq,.ga-lab,.ga-boite,.ga-mot[role=button],.rpi-case,.ae-carte,.chcard,.checrit,.chspk,.qzopt,.scp-choix,.clh-jeton,.asp-jeton,.ov-carte,.tico button,.lvp-row,.learn,.srcL,.exp-card,.assoc-c,.fcell,.cmp-row,.speak,.scb-tout):active{box-shadow:none}
+/* un état qui ne se lit qu'à son bord : un anneau intérieur lui rend de l'épaisseur, sans changer la taille de la boîte */
+:where(#player) :where(.opt:not(.fopt),.fopt .fface,.tile,.htile,.clv-touche,.clv-btn,.ov-t,.wtile,.sttile,.m-cell,.ag,.ts-card,.hz,.acase,.b6,.chipmot,.sigchip,.chk-disque,.fchip,.dm-tile,.da-tile,.asm2-choix,.scb-carte,.scb-cart,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.ga-etq,.ga-lab,.ga-boite,.ga-mot[role=button],.rpi-case,.ae-carte,.chcard,.checrit,.chspk,.qzopt,.scp-choix,.clh-jeton,.asp-jeton,.ov-carte,.tico button,.lvp-row,.learn,.srcL,.exp-card,.assoc-c,.fcell,.cmp-row,.speak,.scb-tout,.lnc-projectile,.d4-projectile):where(.sel,.choisie,.tenu,.vise,.hint,.aide,.ok,.juste,.trouve,.hit,.fait,.bad,.faux,.wrong,.miss){box-shadow:inset 0 0 0 1.5px var(--filet-c),2px 2px 0 var(--filet-c)}
+/* verrouillé ou éteint : plus de filet, la boîte n'a plus l'air de se toucher */
+:where(#player) :where(.opt:not(.fopt),.fopt .fface,.tile,.htile,.clv-touche,.clv-btn,.ov-t,.wtile,.sttile,.m-cell,.ag,.ts-card,.hz,.acase,.b6,.chipmot,.sigchip,.chk-disque,.fchip,.dm-tile,.da-tile,.asm2-choix,.scb-carte,.scb-cart,.apf-carte,.trc-carte,.qrg-rep,.ext-banque .ext-bloc,.odb-bloc,.scr-candidat,.scr-motile,.tra-prop,.tra-bloc,.cna-tuile,.fa-tuile,.fa-choix-mot,.ga-rep,.ga-bloc.touche,.ga-etq,.ga-lab,.ga-boite,.ga-mot[role=button],.rpi-case,.ae-carte,.chcard,.checrit,.chspk,.qzopt,.scp-choix,.clh-jeton,.asp-jeton,.ov-carte,.tico button,.lvp-row,.learn,.srcL,.exp-card,.assoc-c,.fcell,.cmp-row,.speak,.scb-tout,.lnc-projectile,.d4-projectile)[disabled]:where(:not(.ok,.juste,.trouve,.hit,.bad,.faux,.wrong,.miss)){box-shadow:none}
+#player :where(.sel,.choisie,.tenu,.vise,.hint,.aide){--filet-c:var(--cle-sel-bord)}
+#player :where(.ok,.juste,.trouve,.hit,.fait){--filet-c:var(--cle-ok-bord)}
+#player :where(.bad,.faux,.wrong,.miss,.tdel){--filet-c:var(--cle-ko-bord)}
+/* le filet mange 2 px d'air : la grille des lettres les lui rend (8 px visibles, Myriam, 27/11). Pas le clavier : à 8 px entre les touches,
+   une touche passait à la ligne et l'écran défilait (unité 11, disque 9, 375 de large). */
+
 /* ═══ LES AIDES AU BLOCAGE (src/player/aide.js — Myriam, 27/11, choix « B » : le flou réduit de moitié) ═══
    Une BOÎTE s'éclaire d'un halo ; un MOT jamais (les lettres s'y noyaient, 3:1) : surlignage plein. !important : les états des
    unités (#player #p-body …) écraseraient la classe. */
 #player .aide-lueur{filter:drop-shadow(0 0 2.5px rgba(255,206,120,.95)) drop-shadow(0 0 6px rgba(233,172,82,.7)) brightness(1.08) !important;
   transition:filter .35s}
 html.clair #player .aide-lueur{filter:drop-shadow(0 0 1.5px #D0870D) drop-shadow(0 0 4.5px rgba(208,135,13,.95)) !important}
+/* Myriam, 28/11 : au milieu des cases crème, le halo seul ne se voyait pas → un contour doré foncé qui bat, et les autres cases à 50 %
+   (src/player/aide.js). Les bulles gardent leur anneau ; « aide-fixe » : une boîte placée par transform bat sans grossir. */
+#player .aide-lueur:not(.bul,.blt-b){outline:3px solid #A8690A !important;outline-offset:1px;animation:aide-bat 1.1s ease-in-out infinite !important}
+html.clair #player .aide-lueur:not(.bul,.blt-b){outline-color:#E9A92E !important}
+#player .aide-lueur.aide-fixe:not(.bul,.blt-b){animation-name:aide-bat-fixe !important}
+@keyframes aide-bat{0%,100%{scale:1;outline-offset:1px}50%{scale:1.08;outline-offset:3px}}
+@keyframes aide-bat-fixe{0%,100%{outline-offset:1px}50%{outline-offset:4px}}
+#player .aide-ecartee{opacity:.5 !important;transition:opacity .35s}
+@media (prefers-reduced-motion:reduce){#player .aide-lueur{animation:none !important}}
 #player .aide-mot{background:#FBE3AE !important;box-shadow:0 0 0 2px #AC6F0C !important;color:#2B1B0A !important;border-radius:6px;
   transition:background .35s,box-shadow .35s}
 html.clair #player .aide-mot{background:#F0C46A !important;box-shadow:0 0 0 3px #D0870D !important;color:#2B1B0A !important}

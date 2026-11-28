@@ -201,7 +201,9 @@ function bulStart(lettres,parLettre,formes,syllabes,mots){
   }
   shuffle(sac);
   BUL.reste=mots?sac.filter(function(x){return x.cible;}).length:sac.length;
-  var cpt=document.getElementById('bul-c'); if(cpt)cpt.textContent=BUL.reste;   // le compteur dit le nombre de bulles posées (il disait 18 pour 9 bulles)
+  BUL.total=BUL.reste;
+  var cpt=document.getElementById('bul-c');   // le compteur dit le nombre de bulles posées (il disait 18 pour 9 bulles)
+  if(cpt){ if(window.__alaqPlaces)window.__alaqPlaces.peindre(cpt,BUL.reste,0,BUL.total); else cpt.textContent=BUL.reste; }
   /* le rayon vit dans BUL.R : la physique et l'éclat le lisent, jamais un 32 en dur */
   BUL.R=mots?56:(syllabes?44:32);   // un mot entier tient dans la bulle (56 = la moitié de .bul.mot) ; formes et lettres : 64 px, comme « Mémoriser » ; syllabes : 88 px — à 120 px (14/08) elles tenaient à deux de front, en colonne (Myriam, 25/11)
   var reduit=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -308,12 +310,13 @@ function bulPop(b){
   BUL.reste--;
   var c=document.getElementById('bul-c');
   var tot=BUL.items.length;
-  if(c){c.textContent=BUL.reste;c.classList.remove('tick');void c.offsetWidth;c.classList.add('tick');} // décompte, animation réarmée à chaque éclat
+  if(c){ if(window.__alaqPlaces)window.__alaqPlaces.peindre(c,BUL.reste||'✓',BUL.total-BUL.reste,BUL.total);   // une place de plus par éclat
+         else {c.textContent=BUL.reste;c.classList.remove('tick');void c.offsetWidth;c.classList.add('tick');} }
   setTimeout(function(){ if(b.el.parentNode)b.el.parentNode.removeChild(b.el); },360);
   var derniere=(BUL.reste<=0);
   setTimeout(function(){                          // le plop d'abord, le nom juste après
     sayLetterName(b.L, derniere?objectifAtteint:null);
-    if(derniere){ if(c)c.textContent='✓'; objectifFilet(); }
+    if(derniere){ if(c&&!window.__alaqPlaces)c.textContent='✓'; objectifFilet(); }
   },80);
 }
 

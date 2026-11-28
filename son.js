@@ -458,13 +458,12 @@ function spkSequence(st,k){
                fin:function(){ setTimeout(function(){ spkSequence(st,k+1); },260); }});
 }
 
-/* ═══ 7. LE HAUT-PARLEUR DESSINÉ — trois ondes animées en cascade pendant le son. */
+/* ═══ 7. LE HAUT-PARLEUR DESSINÉ — la voix en cinq barres, sans disque ; à l'écoute elles dansent (Myriam, 27/11, « B »).
+   Même cadre 52×34 que l'ancien cône : aucune taille ne change. Deux copies à tenir égales : _haut-parleur.js et unit-8/noyau/outils.js. */
 function spkSVG(cls){
   return '<svg class="spk'+(cls?' '+cls:'')+'" viewBox="0 0 52 34" aria-hidden="true">'+
-    '<path class="cone" d="M5 12.5h7l9-7.5a1.6 1.6 0 012.6 1.2v21.6a1.6 1.6 0 01-2.6 1.2l-9-7.5H5a2 2 0 01-2-2v-5a2 2 0 012-2z"/>'+
-    '<path class="w w1" d="M30 12.5a7 7 0 010 9"/>'+
-    '<path class="w w2" d="M35.5 8a13 13 0 010 18"/>'+
-    '<path class="w w3" d="M41 3.5a19 19 0 010 27"/></svg>';
+    '<path class="hpb" d="M9 12.5v9"/><path class="hpb" d="M17.5 7v20"/><path class="hpb" d="M26 2.5v29"/>'+
+    '<path class="hpb" d="M34.5 9v16"/><path class="hpb" d="M43 13.5v7"/></svg>';
 }
 function spkOn(el){
   if(!el)return;
