@@ -126,7 +126,9 @@ async function cloudVerify(){
     /* la session vient de CETTE page : seule cette origine autorise la revendication persistante (progression.js) */
     try{ if(typeof _sessionMienne==='function')_sessionMienne(); }catch(_){}
   }catch(e){ toast('Code invalide ou expiré'); return; }
-  var _mk=null; try{var _me=document.getElementById('cloudMkt'); if(_me)_mk=_me.checked?1:0;}catch(_){}
+  /* « nouveautés » : cochée = oui ; laissée vide = non pour un compte NEUF seulement. Un compte connu se reconnecte avec la case
+     masquée ou vide : la réponse déjà donnée reste (journal : comptes.js · la case des nouveautés à la reconnexion) */
+  var _mk=null; try{var _me=document.getElementById('cloudMkt'), _connu=!!(window._cloudProbe&&window._cloudProbe.known); if(_me&&(_me.checked||!_connu))_mk=_me.checked?1:0;}catch(_){}
   toast('Connectée, ماشاء الله');
   try{ await cloudPull(); }catch(_){}          // une erreur ici ne doit PAS faire croire que le code est faux
   if(_mk!==null){ S.mktOk=_mk; S.mktTs=Date.now(); save(); }  // consentement newsletter, HORODATÉ (preuve RGPD)
